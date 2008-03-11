@@ -1,3 +1,11 @@
+Tue Mar 11 14:53:12 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtkexport.c, gtkgame.c, gtktoolbar.c, xpm/dice.xpm,
+	xpm/leftarrow.xpm, xpm/rightarrow.xpm, xpm/stock_export.xpm,
+	xpm/stock_import.xpm, xpm/stock_stop_16.xpm, xpm/stock_undo_16.xpm,
+	xpm/tb_redouble.xpm: cleanup in the help menu and delete some unused
+	xpms
+
 Mon Mar 10 09:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gtkfile.c: Remove export button/menu item (use save instead)

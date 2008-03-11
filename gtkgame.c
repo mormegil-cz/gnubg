@@ -3621,8 +3621,6 @@ GtkItemFactoryEntry aife[] = {
 	{ N_("/_Analyse/M_atch equity table"), NULL, Command,
 	  CMD_SHOW_MATCHEQUITYTABLE, NULL, NULL },
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>", NULL },
-	{ N_("/_Analyse/Evaluation engine"), NULL, Command,
-	  CMD_SHOW_ENGINE, NULL, NULL },
 	{ N_("/_Analyse/Evaluation speed"), NULL, Command,
 	  CMD_SHOW_CALIBRATION, NULL, NULL },
 	{ N_("/_Settings"), NULL, NULL, 0, "<Branch>", NULL },
@@ -3676,15 +3674,11 @@ GtkItemFactoryEntry aife[] = {
 	},
 	{ N_("/_Help"), NULL, NULL, 0, "<Branch>", NULL },
 	{ N_("/_Help/_Commands"), NULL, Command, CMD_HELP, NULL, NULL },
+	{ N_("/_Help/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ N_("/_Help/gnubg M_anual (all about)"), NULL, Command, 
           CMD_SHOW_MANUAL_ABOUT, NULL, NULL },
 	{ N_("/_Help/gnubg _Manual (web)"), NULL, Command, 
           CMD_SHOW_MANUAL_WEB, NULL, NULL },
-	{ N_("/_Help/Co_pying gnubg"), NULL, Command, CMD_SHOW_COPYING, NULL, NULL },
-	{ N_("/_Help/gnubg _Warranty"), NULL, Command, CMD_SHOW_WARRANTY,
-	  NULL, NULL },
-	{ N_("/_Help/-"), NULL, NULL, 0, "<Separator>", NULL },
-	{ N_("/_Help/_Report bug"), NULL, ReportBug, 0, NULL, NULL },
 	{ N_("/_Help/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ N_("/_Help/_About gnubg"), NULL, Command, CMD_SHOW_VERSION,
 		"<StockItem>", GTK_STOCK_ABOUT
@@ -5955,6 +5949,14 @@ static void GtkShowWarranty(GtkWidget *pwWidget)
 	ShowList( aszWarranty, _("Warranty"), pwWidget );
 }
 
+static void GtkShowEngine(GtkWidget * pwWidget)
+{
+    char **szBuffer = g_new0(char*, 2);
+    szBuffer[0] = g_new0(char, 4096);
+    EvalStatus(szBuffer[0]);
+    ShowList(szBuffer, _("Evaluation engine"), pwWidget);
+}
+
 extern void GTKShowVersion( void )
 {
 #include "xpm/gnubg-big.xpm"
@@ -5991,6 +5993,18 @@ extern void GTKShowVersion( void )
 	FALSE, FALSE, 8 );
 	g_signal_connect( G_OBJECT( pwButton ), "clicked",
 		G_CALLBACK( GtkShowWarranty ), NULL );
+
+	gtk_box_pack_start( GTK_BOX( pwButtonBox ), 
+	pwButton = gtk_button_new_with_label(_("Report Bug") ),
+	FALSE, FALSE, 8 );
+	g_signal_connect( G_OBJECT( pwButton ), "clicked",
+		G_CALLBACK( ReportBug ), NULL );
+
+	gtk_box_pack_start( GTK_BOX( pwButtonBox ), 
+	pwButton = gtk_button_new_with_label(_("Evaluation Engine") ),
+	FALSE, FALSE, 8 );
+	g_signal_connect( G_OBJECT( pwButton ), "clicked",
+		G_CALLBACK( GtkShowEngine ), NULL );
 
 	gtk_widget_show_all( pwDialog );
 	gtk_main();
@@ -6535,8 +6549,6 @@ extern void GTKSet( void *p ) {
 	    pif, CMD_SHOW_MATCHEQUITYTABLE ), TRUE );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SHOW_CALIBRATION ), TRUE );
-	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
-	    pif, CMD_SHOW_ENGINE ), TRUE );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SWAP_PLAYERS ), !ListEmpty( &lMatch ) );
 

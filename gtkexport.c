@@ -451,7 +451,7 @@ SizeChanged ( GtkAdjustment *adj, GtkWidget *pwSize ) {
 
 }
 
-static void ExportHTMLImages()
+static void ExportHTMLImages(void)
 {
 	GtkWidget *fc;
 	gchar *message, *expfolder, *folder, *command;

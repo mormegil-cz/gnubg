@@ -308,7 +308,6 @@ ToolbarNew ( void ) {
 #include "xpm/stock_new.xpm"
 #include "xpm/stock_open.xpm"
 #include "xpm/stock_save.xpm"
-#include "xpm/stock_export.xpm"
 #include "xpm/stock_ok.xpm"
 #include "xpm/stock_cancel.xpm"
 #include "xpm/stock_undo.xpm"
