@@ -241,9 +241,9 @@ extern int ExternalRead( int h, char *pch, size_t cch ) {
     psighandler sh;
 #endif
     
-    while( cch ) {
-	if( fAction )
-	    fnAction();
+    while( cch )
+	{
+		ProcessGtkEvents();
 
 	if( fInterrupt )
 	    return -1;
@@ -302,12 +302,12 @@ extern int ExternalWrite( int h, char *pch, size_t cch ) {
     psighandler sh;
 #endif
 
-    while( cch ) {
-	if( fAction )
-	    fnAction();
+    while( cch )
+	{
+		ProcessGtkEvents();
 
-	if( fInterrupt )
-	    return -1;
+		if( fInterrupt )
+			return -1;
 
 #ifndef WIN32
 	PortableSignal( SIGPIPE, SIG_IGN, &sh, FALSE );
@@ -626,10 +626,11 @@ listenloop:
 
       /* Must set length when using windows */
       saLen = sizeof(struct sockaddr);
-      while( ( hPeer = accept( h, (struct sockaddr*)&saRemote, &saLen ) ) < 0 ) {
-	if( errno == EINTR ) {
-          if( fAction )
-            fnAction();
+      while( ( hPeer = accept( h, (struct sockaddr*)&saRemote, &saLen ) ) < 0 )
+	  {
+		if( errno == EINTR )
+		{
+			ProcessGtkEvents();
 
           if( fInterrupt ) {
             closesocket( h );

@@ -2873,52 +2873,55 @@ unsigned int convert_point( int i, int player )
 
 static gint board_blink_timeout( gpointer p )
 {
-
     Board *board = p;
     BoardData *pbd = board->board_data;
     int src, dest, src_cheq = 0, dest_cheq = 0, colour;
     static int blink_move, blink_count;
 
-    if( blink_move >= 8 || animate_move_list[ blink_move ] < 0 ||
-	fInterrupt ) {
-	blink_move = 0;
-	animation_finished = TRUE;
-	return FALSE;
+    if( blink_move >= 8 || animate_move_list[ blink_move ] < 0 || fInterrupt )
+	{
+		blink_move = 0;
+		animation_finished = TRUE;
+		return FALSE;
     }
 
     src = convert_point( animate_move_list[ blink_move ], animate_player );
-    dest = convert_point( animate_move_list[ blink_move + 1 ],
-			  animate_player );
+    dest = convert_point( animate_move_list[ blink_move + 1 ], animate_player );
     colour = animate_player ? 1 : -1;
 
-    if( !( blink_count & 1 ) ) {
-	src_cheq = pbd->points[ src ];
-	dest_cheq = pbd->points[ dest ];
+    if( !( blink_count & 1 ) )
+	{
+		src_cheq = pbd->points[ src ];
+		dest_cheq = pbd->points[ dest ];
 
-	if( pbd->points[ dest ] == -colour ) {
-	    pbd->points[ dest ] = 0;
-	    
-	    if( blink_count == 4 ) {
-		pbd->points[ animate_player ? 0 : 25 ] -= colour;
-		board_invalidate_point( pbd, animate_player ? 0 : 25 );
-	    }
-	}
-	
-    	pbd->points[ src ] -= colour;
-	pbd->points[ dest ] += colour;
+		if( pbd->points[ dest ] == -colour )
+		{
+			pbd->points[ dest ] = 0;
+		    
+			if( blink_count == 4 )
+			{
+				pbd->points[ animate_player ? 0 : 25 ] -= colour;
+				board_invalidate_point( pbd, animate_player ? 0 : 25 );
+			}
+		}
+		
+   		pbd->points[ src ] -= colour;
+		pbd->points[ dest ] += colour;
     }
 
     board_invalidate_point( pbd, src );
     board_invalidate_point( pbd, dest );
 
-    if( !( blink_count & 1 ) && blink_count < 4 ) {
-	pbd->points[ src ] = src_cheq;
-	pbd->points[ dest ] = dest_cheq;
+    if( !( blink_count & 1 ) && blink_count < 4 )
+	{
+		pbd->points[ src ] = src_cheq;
+		pbd->points[ dest ] = dest_cheq;
     }
     
-    if( blink_count++ >= 4 ) {
-	blink_count = 0;	
-	blink_move += 2;	
+    if( blink_count++ >= 4 )
+	{
+		blink_count = 0;	
+		blink_move += 2;	
     }
     
     gdk_window_process_updates( pbd->drawing_area->window, FALSE );
@@ -2928,27 +2931,26 @@ static gint board_blink_timeout( gpointer p )
 
 static gint board_slide_timeout( gpointer p )
 {
-
     Board *board = p;
     BoardData *bd = board->board_data;
     int src, dest, colour;
     static int slide_move, slide_phase, x, y, x_mid, x_dest, y_dest, y_lift;
     
-    if( fInterrupt && bd->drag_point >= 0 ) {
-	board_end_drag( bd->drawing_area, bd );
-	bd->drag_point = -1;
+    if( fInterrupt && bd->drag_point >= 0 )
+	{
+		board_end_drag( bd->drawing_area, bd );
+		bd->drag_point = -1;
     }
 
-    if( slide_move >= 8 || animate_move_list[ slide_move ] < 0 ||
-	fInterrupt ) {
-	slide_move = slide_phase = 0;
-	animation_finished = TRUE;
-	return FALSE;
+    if( slide_move >= 8 || animate_move_list[ slide_move ] < 0 || fInterrupt )
+	{
+		slide_move = slide_phase = 0;
+		animation_finished = TRUE;
+		return FALSE;
     }
     
     src = convert_point( animate_move_list[ slide_move ], animate_player );
-    dest = convert_point( animate_move_list[ slide_move + 1 ],
-			  animate_player );
+    dest = convert_point( animate_move_list[ slide_move + 1 ], animate_player );
     colour = animate_player ? 1 : -1;
 
     switch( slide_phase ) {
@@ -3060,17 +3062,12 @@ static gint board_slide_timeout( gpointer p )
 
 extern void board_animate( Board *board, int move[ 8 ], int player )
 {
-
     int n;
-#if USE_BOARD3D
-    BoardData *bd = board->board_data;
-#endif
 	
 	if (animGUI == ANIMATE_NONE || ms.fResigned)
 	{
 #if USE_BOARD3D
-		if (animGUI == ANIMATE_NONE)
-			RestrictiveRedraw();
+		RestrictiveRedraw();
 #endif
 		return;
 	}
@@ -3081,27 +3078,27 @@ extern void board_animate( Board *board, int move[ 8 ], int player )
     animation_finished = FALSE;
 
 #if USE_BOARD3D
+{
+    BoardData *bd = board->board_data;
 	if (display_is_3d(bd->rd))
 	{
 		BoardData *bd = board->board_data;
 		AnimateMove3d(bd, bd->bd3d);
+		return;
 	}
-	else
-#endif
-{    
-    if( animGUI == ANIMATE_BLINK )
-	n = g_timeout_add( 0x300 >> nGUIAnimSpeed, board_blink_timeout,
-			     board );
-    else /* ANIMATE_SLIDE */
-	n = g_timeout_add( 0x100 >> nGUIAnimSpeed, board_slide_timeout,
-			     board );
-
-    while( !animation_finished ) {
-	SuspendInput();
-	gtk_main_iteration();
-	ResumeInput();
-    }
 }
+#endif
+	if( animGUI == ANIMATE_BLINK )
+		n = g_timeout_add( 0x300 >> nGUIAnimSpeed, board_blink_timeout, board );
+	else /* ANIMATE_SLIDE */
+		n = g_timeout_add( 0x100 >> nGUIAnimSpeed, board_slide_timeout, board );
+
+    while( !animation_finished )
+	{
+		GTKSuspendInput();
+		gtk_main_iteration();
+		GTKResumeInput();
+    }
 }
 
 extern void board_set_playing( Board *board, gboolean f )

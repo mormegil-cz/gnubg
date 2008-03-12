@@ -234,8 +234,7 @@ static evalCache cEval;
 static evalCache cpEval;
 #endif
 static unsigned int cCache;
-volatile int fInterrupt = FALSE, fAction = FALSE;
-void ( *fnAction )( void ) = NULL, ( *fnTick )( void ) = NULL;
+int fInterrupt = FALSE;
 
 /* variation of backgammon used by gnubg */
 
@@ -2803,9 +2802,6 @@ EvaluatePositionFull( NNState *nnStates, const TanBoard anBoard, float arOutput[
         anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
       }
 
-      if( fAction )
-        fnAction();
-
       if( fInterrupt ) {
         errno = EINTR;
         return -1;
@@ -3010,10 +3006,10 @@ EvaluatePositionCache( NNState *nnStates, const TanBoard anBoard, float arOutput
 #if !USE_MULTITHREAD
 {
 	static int iTick;
-    if( ++iTick >= 0x400 ) {
-	iTick = 0;
-	if( fnTick )
-	    fnTick();
+    if( ++iTick >= 0x400 )
+	{
+		iTick = 0;
+		CallbackProgress();
     }
 }
 #endif
@@ -5596,9 +5592,6 @@ EvaluatePositionCubeful4( NNState *nnStates, const TanBoard anBoard,
         anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
         anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
       }
-
-      if( fAction )
-        fnAction();
 
       if( fInterrupt ) {
         errno = EINTR;

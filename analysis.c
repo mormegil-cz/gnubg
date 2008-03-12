@@ -997,11 +997,6 @@ static int AnalyzeGame ( listOLD *plGame )
 	unsigned int numMoves = NumberMovesGame(plGame);
 	AnalyseMoveTask *pt = NULL, *pParentTask = NULL;
 
-#if !USE_MULTITHREAD
-	void ( *fnOld )( void ) = fnTick;
-	fnTick = NULL;
-#endif
-
 	/* Analyse first move record (gameinfo) */
 	g_assert( pmr->mt == MOVE_GAMEINFO );
 	if	(AnalyzeMove(pmr, &msAnalyse, plGame, psc,
@@ -1061,9 +1056,6 @@ static int AnalyzeGame ( listOLD *plGame )
 	multi_debug("wait for all task: analysis");
 	result = MT_WaitForTasks(UpdateProgressBar, 250);
 
-#if !USE_MULTITHREAD
-	fnTick = fnOld;
-#endif
 	if (result == -1)
 		IniStatcontext( psc );
 

@@ -421,10 +421,6 @@ extern command acTop[];
 extern command cFilename;
 extern command cOnOff;
 
-/* Temporarily ignore TTY/GUI input. */
-extern void SuspendInput(void);
-/* Resume input (must match a previous SuspendInput). */
-extern void ResumeInput(void);
 /* Write a string to stdout/status bar/popup window */
 extern void output(const char *sz);
 /* Write a string to stdout/status bar/popup window, and append \n */
@@ -1016,4 +1012,9 @@ extern void CommandTake(char *);
 
 extern int getGameNumber(const listOLD * plGame);
 extern int getMoveNumber(const listOLD * plGame, const void *p);
+
+extern void ProcessGtkEvents();
+#if !USE_MULTITHREAD
+extern void CallbackProgress( void );
+#endif
 #endif

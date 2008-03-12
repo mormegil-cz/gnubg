@@ -1236,12 +1236,9 @@ static void DoTestPerformance(GtkWidget *pw, GtkWidget* board)
 
 	BoardPrefsOK(pw, board);
 
-	while (gtk_events_pending())
-	    gtk_main_iteration();
+	ProcessGtkEvents();
 
-	SuspendInput();
 	fps = TestPerformance3d(bd);
-	ResumeInput();
 
 	if (fps >= 30)
 		msg = _("3d Performance is very fast.\n");
@@ -2080,13 +2077,10 @@ DesignAddTitle ( boarddesign *pbde ) {
   /* show dialog */
 
   gtk_widget_grab_focus( pwDesignAddTitle );
-  gtk_widget_show_all( pwDialog );
 
   DesignAddChanged ( NULL, pwDialog );
   
-  GTKDisallowStdin();
-  gtk_main();
-  GTKAllowStdin();
+  GTKRunDialog(pwDialog);
 }
 
 static void WriteDesignString(boarddesign *pbde, renderdata *prd)
@@ -3079,8 +3073,6 @@ extern void BoardPreferences(GtkWidget *pwBoard)
 
 	SetTitle();
 
-    gtk_widget_show_all( pwDialog );
-
 #if USE_BOARD3D
 	DisplayCorrectBoardType(bd, bd->bd3d, bd->rd);
 	redrawChange = FALSE;
@@ -3090,7 +3082,7 @@ extern void BoardPreferences(GtkWidget *pwBoard)
 	gtk_notebook_set_page(GTK_NOTEBOOK(pwNotebook), NUM_NONPREVIEW_PAGES);
 
 	fUpdate = TRUE;
-    gtk_main();
+	GTKRunDialog(pwDialog);
 }
 
 extern void BoardPreferencesStart( GtkWidget *pwBoard ) {

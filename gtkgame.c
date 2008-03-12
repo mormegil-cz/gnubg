@@ -322,7 +322,7 @@ int showingPanels, showingIDs, maximised;
 
 static int grabIdSignal;
 static int suspendCount = 0;
-static GtkWidget* grabbedWidget;	/* for testing */
+static GtkWidget* grabbedWidget;
 
 /* Language selection code */
 static GtkWidget *curSel;
@@ -338,6 +338,8 @@ static int panelSize = 325;
 
 extern void GTKSuspendInput(void)
 {
+	if (!fX)
+		return;
 	if (suspendCount == 0)
 	{	/* Grab events so that the board window knows this is a re-entrant
 		call, and won't allow commands like roll, move or double. */
@@ -354,6 +356,8 @@ extern void GTKSuspendInput(void)
 
 extern void GTKResumeInput(void)
 {
+	if (!fX)
+		return;
 	g_assert(suspendCount > 0);
 	suspendCount--;
 	if (suspendCount == 0)
@@ -443,34 +447,14 @@ int fEndDelay;
 
 extern void GTKDelay( void ) {
 
-    SuspendInput();
+    GTKSuspendInput();
     
     while( !fInterrupt && !fEndDelay )
 	gtk_main_iteration();
     
     fEndDelay = FALSE;
     
-    ResumeInput();
-}
-
-extern void HandleXAction( void ) {
-
-    /* It is safe to execute this function with SIGIO unblocked, because
-       if a SIGIO occurs before fAction is reset, then the I/O it alerts
-       us to will be processed anyway.  If one occurs after fAction is reset,
-       that will cause this function to be executed again, so we will
-       still process its I/O. */
-    fAction = FALSE;
-
-    SuspendInput();
-    
-    /* Process incoming X events.  It's important to handle all of them,
-       because we won't get another SIGIO for events that are buffered
-       but not processed. */
-    while( gtk_events_pending() )
-	gtk_main_iteration();
-
-    ResumeInput();
+    GTKResumeInput();
 }
 
 /* TRUE if gnubg is automatically setting the state of a menu item. */
@@ -531,11 +515,7 @@ extern int GTKGetManualDice( unsigned int an[ 2 ] ) {
     g_signal_connect( G_OBJECT( pwDice ), "destroy",
 			G_CALLBACK( DestroySetDice ), pwDialog );
     
-    gtk_widget_show_all( pwDialog );
-
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
+	GTKRunDialog(pwDialog);
 
     return an[ 0 ] ? 0 : -1;
 }
@@ -574,11 +554,7 @@ extern void GTKSetCube( gpointer p, guint n, GtkWidget *pw ) {
     g_signal_connect( G_OBJECT( pwCube ), "destroy",
 			G_CALLBACK( DestroySetCube ), pwDialog );
     
-    gtk_widget_show_all( pwDialog );
-
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
+	GTKRunDialog(pwDialog);
 
     if( an[ 0 ] < 0 )
 	return;
@@ -1287,8 +1263,7 @@ extern void SwapBoardToPanel(int ToPanel)
 	{
 		gtk_widget_reparent(pwEventBox, pwPanelGameBox);
 		gtk_widget_show(hpaned);
-		while(gtk_events_pending())
-			gtk_main_iteration();
+		ProcessGtkEvents();
 		gtk_widget_hide(pwGameBox);
 		gtk_paned_set_position(GTK_PANED(hpaned), pwMain->allocation.width - panelSize);
 
@@ -1308,8 +1283,7 @@ extern void SwapBoardToPanel(int ToPanel)
 
 		gtk_widget_reparent(pwEventBox, pwGameBox);
 		gtk_widget_show(pwGameBox);
-		while(gtk_events_pending())
-			gtk_main_iteration();
+		ProcessGtkEvents();
 		if (GTK_WIDGET_VISIBLE(hpaned))
 		{
 			panelSize = GetPanelSize();
@@ -1576,7 +1550,7 @@ static void PythonShell(gpointer p, guint n, GtkWidget * pw)
 		   "sys.argv=['','-n'];"
 		   "import idlelib.PyShell;" "idlelib.PyShell.main()");
 	UserCommand(pch);
-	free(pch);
+	g_free(pch);
 }
 
 extern void Undo(void)
@@ -2411,11 +2385,7 @@ SetEvaluation ( gpointer p, guint n, GtkWidget *pw )
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
                        pwhbox );
 
-    gtk_widget_show_all( pwDialog );
-
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
+	GTKRunDialog(pwDialog);
 
     if( fOK ) {
 
@@ -2714,11 +2684,10 @@ static void SetAnalysis(gpointer p, guint n, GtkWidget * pw)
 
 	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)),
 			  AnalysisPage(&aw));
-	gtk_widget_show_all(pwDialog);
 
 	AnalysisSet(&aw);
 
-	gtk_main();
+	GTKRunDialog(pwDialog);
 }
 
 typedef struct _playerswidget {
@@ -2887,11 +2856,7 @@ static void SetPlayers(gpointer p, guint n, GtkWidget * pw)
 				 PlayersPage(&plw, 1),
 				 gtk_label_new(_("Player 1")));
 
-	gtk_widget_show_all(pwDialog);
-
-	GTKDisallowStdin();
-	gtk_main();
-	GTKAllowStdin();
+	GTKRunDialog(pwDialog);
 
 	if (fOK) {
 		outputpostpone();
@@ -3204,9 +3169,8 @@ static void SetLanguage( gpointer p, guint n, GtkWidget *pw )
 	newLang = NULL;
 
 	AddLangWidgets(DialogArea(pwLangDialog, DA_MAIN));
-	gtk_widget_show_all(pwLangDialog);
 
-	gtk_main();
+	GTKRunDialog(pwLangDialog);
 
 	if (newLang)
 		CommandSetLang(newLang);	/* Set new language (after dialog has closed) */
@@ -3719,9 +3683,6 @@ extern void InitGTK(int *argc, char ***argv)
 	InitGTK3d(argc, argv);
 #endif
 
-	/*function pointer to IO handler*/
-	fnAction = HandleXAction;
-
 	/*add two xpm based icons*/
 	pif = gtk_icon_factory_new();
 	gtk_icon_factory_add_default(pif);
@@ -3919,8 +3880,7 @@ extern void ShowList( char *psz[], char *szTitle, GtkWidget *parent)
     
 	gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 560, 400 );
 
-    gtk_widget_show_all( pwDialog );
-	gtk_main();
+	GTKRunDialog(pwDialog);
 }
 
 extern void OK( GtkWidget *pw, int *pf ) {
@@ -4006,16 +3966,13 @@ extern int GtkTutor ( char *sz )
 		       pwPrompt );
     
     gtk_window_set_resizable( GTK_WINDOW( pwTutorDialog ), FALSE);
-    gtk_widget_show_all( pwTutorDialog );
     
     /* This dialog should be REALLY modal -- disable "next turn" idle
        processing and stdin handler, to avoid reentrancy problems. */
     if( nNextTurn ) 
       g_source_remove( nNextTurn );
     
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
+	GTKRunDialog(pwTutorDialog);
     
     if( nNextTurn ) 
       nNextTurn = g_idle_add( NextTurnNotify, NULL );
@@ -4383,13 +4340,10 @@ extern void GTKNew( void )
  		        pwPage = NewWidget(&nw));
 
   gtk_widget_grab_focus(DialogArea(pwDialog, DA_OK));
-  gtk_widget_show_all( pwDialog );
 
   NewSet( &nw );
  
-  GTKDisallowStdin();
-  gtk_main();
-  GTKAllowStdin();
+  GTKRunDialog(pwDialog);
 
 }
 
@@ -5160,10 +5114,6 @@ extern void SetRollouts( gpointer p, guint n, GtkWidget *pwIgnore )
                             RolloutPage (rw.prpwTrunc, FALSE ),
                             gtk_label_new ( _("Truncation Pt.") ) );
 
-  gtk_widget_show_all( pwDialog );
-   
-  GTKDisallowStdin();
-
   /* cheap and nasty way to get things set correctly */
   LateEvalToggled (NULL, &rw);
   STDStopToggled (NULL, &rw);
@@ -5173,9 +5123,7 @@ extern void SetRollouts( gpointer p, guint n, GtkWidget *pwIgnore )
   PlayersSameToggled (NULL, &rw);
   CubefulToggled (NULL, &rw);
   
-  gtk_main();
-
-  GTKAllowStdin();
+  GTKRunDialog(pwDialog);
 
   if( fOK || saveAs ) {
     int fCubeful;
@@ -5428,11 +5376,8 @@ GTKTextWindow (const char *szOutput, const char *title, const int type)
   gtk_window_set_transient_for (GTK_WINDOW (pwDialog), GTK_WINDOW (pwMain));
   g_signal_connect(G_OBJECT (pwDialog), "destroy",
 		      G_CALLBACK (gtk_main_quit), NULL);
-  gtk_widget_show_all (pwDialog);
 
-  GTKDisallowStdin ();
-  gtk_main ();
-  GTKAllowStdin ();
+  GTKRunDialog(pwDialog);
 }
 
 extern void GTKEval( char *szOutput ) {
@@ -5564,11 +5509,7 @@ GTKResignHint( float arOutput[], float rEqBefore, float rEqAfter,
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
 		       pwTable );
 
-    gtk_widget_show_all( pwDialog );
-
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
+	GTKRunDialog(pwDialog);
 }
 
 extern void 
@@ -5628,18 +5569,20 @@ static void SetMouseCursor(GdkCursorType cursorType)
 
 extern void GTKProgressStart( const char *sz )
 {
-    if( sz )
+	GTKSuspendInput();
+
+	if( sz )
 		gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idProgress, sz );
 
 	SetMouseCursor(GDK_WATCH);
 }
 
-
-extern void
-GTKProgressStartValue( char *sz, int iMax )
+extern void GTKProgressStartValue( char *sz, int iMax )
 {
-  if( sz )
-    gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idProgress, sz );
+	GTKSuspendInput();
+
+	if( sz )
+		gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idProgress, sz );
 
 	SetMouseCursor(GDK_WATCH);
 }
@@ -5653,31 +5596,23 @@ extern void GTKProgressValue ( int iValue, int iMax )
     gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( pwProgress ), frac);
     g_free(gsz);
 
-    SuspendInput();
-
-    while( gtk_events_pending() )
-	gtk_main_iteration();
-
-    ResumeInput();
+	ProcessGtkEvents();
 }
-
 
 extern void GTKProgress( void )
 {
     gtk_progress_bar_pulse( GTK_PROGRESS_BAR( pwProgress ) );
 
-    SuspendInput();
-
-    while( gtk_events_pending() )
-        gtk_main_iteration();
-
-    ResumeInput();
+	ProcessGtkEvents();
 }
 
 extern void GTKProgressEnd( void )
 {
+    GTKResumeInput();
+
 	if (!pwProgress) /*safe guard on language change*/
 		return;
+
     gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( pwProgress ), 0.0 );
     gtk_progress_bar_set_text( GTK_PROGRESS_BAR( pwProgress ), " " );
     gtk_statusbar_pop( GTK_STATUSBAR( pwStatus ), idProgress );
@@ -5818,8 +5753,7 @@ extern void GTKShowScoreSheet( void )
 	g_signal_connect(G_OBJECT(pwList), "realize",
 			G_CALLBACK(MoveListIntoView), &numRows );
 
-	gtk_widget_show_all(pwDialog);
-	gtk_main();
+	GTKRunDialog(pwDialog);
 }
 
 static void GtkShowCopying(GtkWidget *pwWidget)
@@ -5936,8 +5870,7 @@ extern void GTKShowBuildInfo(GtkWidget *pw, GtkWidget *pwParent)
 	"absolutely no warranty for GNU Backgammon.") ), FALSE, FALSE, 4 );
 	gtk_label_set_line_wrap( GTK_LABEL( pwPrompt ), TRUE );
 	
-	gtk_widget_show_all(pwDialog);
-	gtk_main();
+	GTKRunDialog(pwDialog);
 }
 
 /* Stores names in credits so not duplicated in list at bottom */
@@ -6052,12 +5985,8 @@ extern void GTKCommandShowCredits(GtkWidget *pw, GtkWidget *pwParent)
 	while(names.plNext->p)
 		ListDelete(names.plNext );
 
-	gtk_widget_show_all(pwDialog);
-	gtk_main();
+	GTKRunDialog(pwDialog);
 }
-
-
-
 
 static void GTKHelpAdd( GtkTreeStore *pts, GtkTreeIter *ptiParent,
 			command *pc ) {
@@ -6294,8 +6223,7 @@ extern void GTKBearoffProgress( int i ) {
 	gtk_widget_destroy( pwDialog );
     }
 
-    while( gtk_events_pending() )
-	gtk_main_iteration();
+    ProcessGtkEvents();
 }
 
 static void enable_sub_menu( GtkWidget *pw, int f ); /* for recursion */
@@ -7020,14 +6948,10 @@ extern void GTKDumpStatcontext( int game )
 
 	g_signal_connect( G_OBJECT( pwNotebook ), "button-press-event", G_CALLBACK( ContextCopyMenu ), copyMenu );
 
-	gtk_widget_show_all( pwStatDialog );
-
 	StatsSelectGame(0, game);
 	toggle_fGUIUseStatsPanel(pwUsePanels, 0);
 
-	GTKDisallowStdin();
-	gtk_main();
-	GTKAllowStdin();
+	GTKRunDialog(pwStatDialog);
 
 #if USE_BOARD3D
 	TidyGraphData(gd);
@@ -7376,11 +7300,8 @@ extern void GTKRecordShow( FILE *pfIn, char *szFile, char *szPlayer ) {
 	gtk_clist_sort( GTK_CLIST( pwList ) );
 	
 	gtk_window_set_default_size( GTK_WINDOW( pw ), 600, 400 );
-	gtk_widget_show_all( pw );
-	
-	GTKDisallowStdin();
-	gtk_main();
-	GTKAllowStdin();
+
+	GTKRunDialog(pw);
     }
 }
 
@@ -7535,11 +7456,8 @@ extern void GTKMatchInfo( void )
     gtk_table_attach_defaults( GTK_TABLE( pwTable ), pwComment, 2, 5, 1, 7 );
 
     gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 500, 0 );
-    gtk_widget_show_all( pwDialog );
 
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
+	GTKRunDialog(pwDialog);
 }
 
 static void CalibrationOK( GtkWidget *pw, GtkWidget *ppw ) {
@@ -7622,11 +7540,7 @@ extern void GTKShowCalibration( void )
     g_signal_connect( G_OBJECT( pwenable ), "toggled",
 			G_CALLBACK( CalibrationEnable ), pwspin );
     
-    gtk_widget_show_all( pwDialog );
-
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
+	GTKRunDialog(pwDialog);
 }
 
 static gboolean CalibrationCancel( GtkObject *po, gpointer p ) {
@@ -7660,10 +7574,7 @@ extern void *GTKCalibrationStart( void ) {
     
     gtk_widget_show_all( pwDialog );
 
-    GTKDisallowStdin();
-    while( gtk_events_pending() )
-        gtk_main_iteration();
-    GTKAllowStdin();
+	ProcessGtkEvents();
 
     gtk_widget_ref( pwResult );
     
@@ -7677,10 +7588,7 @@ extern void GTKCalibrationUpdate( void *context, float rEvalsPerSec ) {
     sprintf( sz, "%.0f", rEvalsPerSec );
     gtk_label_set_text( GTK_LABEL( context ), sz );
     
-    GTKDisallowStdin();
-    while( gtk_events_pending() )
-        gtk_main_iteration();
-    GTKAllowStdin();
+	ProcessGtkEvents();
 }
 
 extern void GTKCalibrationEnd( void *context ) {
@@ -7736,8 +7644,7 @@ extern void GTKResign( gpointer p, guint n, GtkWidget *pw )
     }
 
     gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), pwVbox);
-    gtk_widget_show_all(pwDialog);
-    
-    gtk_main();
+
+	GTKRunDialog(pwDialog);
 }
 

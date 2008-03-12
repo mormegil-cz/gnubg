@@ -390,13 +390,8 @@ GTKShowRace ( TanBoard anBoard ) {
 
   /* show dialog */
 
-  gtk_widget_show_all( pwDialog );
-
   PerformOSR ( NULL, prw );
-  
   gtk_notebook_set_page ( GTK_NOTEBOOK ( pwNotebook ), 0 );
 
-  GTKDisallowStdin();
-  gtk_main();
-  GTKAllowStdin();
+  GTKRunDialog(pwDialog);
 }

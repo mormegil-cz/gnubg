@@ -285,9 +285,7 @@ typedef struct {
 } move;
 
 
-extern volatile int fInterrupt, fAction;
-extern void ( *fnAction )( void );
-extern void ( *fnTick )( void );
+extern int fInterrupt;
 extern cubeinfo ciCubeless;
 extern const char *aszEvalType[ (int)EVAL_ROLLOUT + 1 ];
 extern int fEgyptian;

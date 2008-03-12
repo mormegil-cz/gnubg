@@ -138,7 +138,6 @@ extern void GTKTextWindow(const char *szOutput, const char *title,
 			  const int type);
 extern void GTKThaw(void);
 extern void GTKUpdateAnnotations(void);
-extern void HandleXAction(void);
 extern void HideAllPanels(gpointer p, guint n, GtkWidget * pw);
 extern void HintDoubleClick(GtkTreeView * treeview, GtkTreePath * path,
 			    GtkTreeViewColumn * col, hintdata * phd);

@@ -1362,26 +1362,25 @@ extern void CommandSetPlayerExternal( char *sz ) {
 	return;
     }
 
-    while( connect( h, psa, cb ) < 0 ) {
-	if( errno == EINTR ) {
-	    if( fAction )
-		fnAction();
-
-	    if( fInterrupt ) {
+    while( connect( h, psa, cb ) < 0 )
+	{
+		if( errno == EINTR )
+		{
+			if( fInterrupt ) 
+			{
+				closesocket( h );
+				free( psa );
+				free( pch );
+				return;
+			}
+			continue;
+		}
+			
+		SockErr( pch );
 		closesocket( h );
 		free( psa );
 		free( pch );
 		return;
-	    }
-	    
-	    continue;
-	}
-	
-	SockErr( pch );
-	closesocket( h );
-	free( psa );
-	free( pch );
-	return;
     }
     
     ap[ iPlayerSet ].pt = PLAYER_EXTERNAL;

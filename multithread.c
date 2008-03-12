@@ -24,6 +24,7 @@
 #include <glib/gthread.h>
 #if USE_GTK
 #include <gtk/gtk.h>
+#include <gtkgame.h>
 #endif
 
 #include "multithread.h"
@@ -580,10 +581,10 @@ int MT_WaitForTasks(void (*pCallback)(void), int callbackTime)
 #if USE_GTK
 		else
 		{
-			SuspendInput();
+			GTKSuspendInput();
 			while(gtk_events_pending())
 				gtk_main_iteration();
-			ResumeInput();
+			GTKResumeInput();
 		}
 #endif
     }

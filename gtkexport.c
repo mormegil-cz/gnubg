@@ -893,10 +893,7 @@ extern void GTKShowExport ( exportsetup *pexs )
 
   /* show dialog */
 
-  gtk_widget_show_all( pwDialog );
   ExportSet ( pew );
 
-  GTKDisallowStdin();
-  gtk_main();
-  GTKAllowStdin();
+  GTKRunDialog(pwDialog);
 }

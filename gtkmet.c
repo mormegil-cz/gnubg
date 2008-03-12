@@ -275,9 +275,5 @@ extern void GTKShowMatchEquityTable( const int nMatchTo,
 
   UpdateAllTables ( &mw );
     
-  gtk_widget_show_all( pwDialog );
-
-  GTKDisallowStdin();
-  gtk_main();
-  GTKAllowStdin();
+  GTKRunDialog(pwDialog);
 }

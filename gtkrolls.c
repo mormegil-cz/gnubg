@@ -405,11 +405,8 @@ GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
   }
   
   gtk_window_set_default_size( GTK_WINDOW( prw->pDialog ), 560, 400 ); 
-  gtk_widget_show_all( prw->pDialog );
   g_signal_connect( G_OBJECT( prw->pDialog ), "delete_event",
                       G_CALLBACK(RollsClose), prw );	/* In case closed mid calculation */
 
-  GTKDisallowStdin();
-  gtk_main();
-  GTKAllowStdin();
+  GTKRunDialog(prw->pDialog);
 }

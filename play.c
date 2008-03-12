@@ -870,9 +870,6 @@ static int ComputerTurn( void ) {
   TanBoard anBoardTemp;
 #endif
 
-  if( fAction )
-      fnAction();
-
   if( fInterrupt || ms.gs != GAME_PLAYING )
       return -1;
 
@@ -1599,21 +1596,22 @@ extern int NextTurn( int fPlayNext ) {
     fComputing = TRUE;
     
 #if USE_GTK
-    if( fX && fDisplay ) {
-	if( nDelay && nTimeout ) {
-	    fDelaying = TRUE;
-	    GTKDelay();
-	    fDelaying = FALSE;
-	    ResetDelayTimer();
-	}
-	
-	if( fLastMove ) {
-	    GTKDisallowStdin();
-	    board_animate( BOARD( pwBoard ), anLastMove, fLastPlayer );
-	    playSound ( SOUND_MOVE );
-	    GTKAllowStdin();
-	    fLastMove = FALSE;
-	}
+    if( fX && fDisplay )
+	{
+		if( nDelay && nTimeout )
+		{
+			fDelaying = TRUE;
+			GTKDelay();
+			fDelaying = FALSE;
+			ResetDelayTimer();
+		}
+		
+		if( fLastMove )
+		{
+			board_animate( BOARD( pwBoard ), anLastMove, fLastPlayer );
+			playSound ( SOUND_MOVE );
+			fLastMove = FALSE;
+		}
     }
 #endif
 
@@ -1714,9 +1712,6 @@ extern int NextTurn( int fPlayNext ) {
 	ShowBoard();
     /* We have reached a safe point to check for interrupts.  Until now,
        the board could have been in an inconsistent state. */
-    if( fAction )
-	fnAction();
-	
     if( fInterrupt || !fPlayNext ) {
 	fComputing = FALSE;
 	return -1;
@@ -2170,14 +2165,12 @@ static skilltype GoodDouble (int fisRedouble, moverecord *pmr )
   }
 
   /* Give hint on cube action */
-  SuspendInput();
 
   dd.pboard = msBoard();
   dd.pci = &ci;
 
   if (RunAsyncProcess((AsyncFun)asyncCubeDecisionE, &dd, _("Considering cube action...")) != ASR_OK)
   {
-	ResumeInput();
 	fAnalyseCube = fAnalyseCubeSave;
 	return (SKILL_NONE);
   }
@@ -2187,8 +2180,6 @@ static skilltype GoodDouble (int fisRedouble, moverecord *pmr )
   ec2es ( &es, dd.pec );
   UpdateStoredCube ( aarOutput, aarOutput /* whatever */, &es, &ms );
 
-  ResumeInput();
-	    
   /* store cube decision for annotation */
 
   ec2es ( &pmr->CubeDecPtr->esDouble, dd.pec );
@@ -2360,13 +2351,11 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr)
 	}
 
 	/* Give hint on cube action */
-	SuspendInput();
 
 	dd.pboard = msBoard();
 	dd.pci = &ci;
 	if (RunAsyncProcess((AsyncFun)asyncCubeDecisionE, &dd, _("Considering cube action...")) != ASR_OK)
 	{
-		ResumeInput();
 		fAnalyseCube = fAnalyseCubeSave;
 		return (SKILL_NONE);
 	}
@@ -2377,8 +2366,6 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr)
         UpdateStoredCube ( aarOutput,
                            aarOutput, /* whatever */
                            &es, &ms );
-
-        ResumeInput();
 	    
         /* store cube decision for annotation */
 
@@ -2625,8 +2612,6 @@ static skilltype GoodMove (moverecord *pmr)
     pesChequer = &esEvalChequer;
   }
 
-  SuspendInput();
-
   md.pmr = pmr;
   md.pms = &msx;
   md.pesChequer = pesChequer;
@@ -2635,7 +2620,6 @@ static skilltype GoodMove (moverecord *pmr)
   if (RunAsyncProcess((AsyncFun)asyncAnalyzeMove, &md, _("Considering move...")) != ASR_OK)
   {
     fAnalyseMove = fAnalyseMoveSaved;
-    ResumeInput();
     return SKILL_NONE;
   }
 
@@ -2644,9 +2628,6 @@ static skilltype GoodMove (moverecord *pmr)
   /* update move list for hint */
 
   UpdateStoredMoves ( &pmr->ml, &ms );
-
-  ProgressEnd ();
-  ResumeInput();
 
   return pmr->n.stMove;
 }

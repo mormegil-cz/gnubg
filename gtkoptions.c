@@ -1800,11 +1800,9 @@ extern void GTKSetOptions( void )
  		        pwOptions = OptionsPages( &ow ) );
   g_signal_connect(G_OBJECT(pwOptions), "switch-page", G_CALLBACK(OptionsPageChange), NULL);
 
-  gtk_widget_show_all( pwDialog );
-
   OptionsSet ( &ow );
  
-  gtk_main();
+  GTKRunDialog(pwDialog);
 }
 
 static void SoundOK(GtkWidget *pw, void *dummy)
@@ -1821,6 +1819,5 @@ extern void GTKSound(void)
 
 	AddSoundWidgets(DialogArea(pwDialog, DA_MAIN));
 
-	gtk_widget_show_all(pwDialog);
-	gtk_main();
+	GTKRunDialog(pwDialog);
 }

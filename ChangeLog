@@ -1,3 +1,7 @@
+Thu Mar 13 22:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtk files: Tidy up some common gtk functions and remove SIG_IO signal.
+
 Wed Mar 12 23:06:32 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtkgame.c, gtkpanels.c, gtkpanels.h: update game selection menu to

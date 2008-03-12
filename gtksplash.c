@@ -97,8 +97,7 @@ CreateSplash (void) {
 
   gtk_widget_show_all ( GTK_WIDGET ( pgs->pwWindow ) );
 
-  while( gtk_events_pending() )
-    gtk_main_iteration();
+  ProcessGtkEvents();
 
   return pgs->pwWindow;
 
@@ -137,8 +136,7 @@ PushSplash ( GtkWidget *pwSplash,
   gtk_label_set_text ( GTK_LABEL ( pgs->apwStatus[ 0 ] ), szText0 );
   gtk_label_set_text ( GTK_LABEL ( pgs->apwStatus[ 1 ] ), szText1 );
 
-  while( gtk_events_pending() )
-    gtk_main_iteration();
+  ProcessGtkEvents();
 
 #ifndef WIN32
   /* Don't bother with these pauses on windows? */

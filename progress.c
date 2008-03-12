@@ -740,28 +740,16 @@ GTKViewRolloutStatistics(GtkWidget *widget, gpointer data){
 		GTKRolloutStatPage ( &prs[ i * 2 ], cGames ), gtk_label_new ( sz ) );
   }
 
-  gtk_widget_show_all( pwDialog );
-  gtk_main();
+  GTKRunDialog(pwDialog);
 }
 
-static void RolloutCancel( GtkObject *po, rolloutprogress *prp ) {
-
+static void RolloutCancel( GtkObject *po, rolloutprogress *prp )
+{
     pwGrab = pwOldGrab;
     prp->pwRolloutDialog = NULL;
     prp->pwRolloutResult = NULL;
     prp->pwRolloutProgress = NULL;
     fInterrupt = TRUE;
-    /* FIXME: we have a small problem here:
-     *
-     * rollout.c: calls fnAction, which calls
-     *            GTKSuspendInput
-     *            then the rollout dialog is canceled, which leads
-     *            to pwGrab being reset to pwOldGrab
-     *            GTKResumeInput, which tries to remove signal from
-     *            pwGrab, but pwGrab has just be replaced...
-     */
-
-
 }
 
 static void RolloutStop( GtkObject *po, gpointer p ) {
@@ -906,13 +894,6 @@ GTKRolloutProgressStart( const cubeinfo *pci, const int n,
   /* record start time */
   time( &prp->tStart );
 
-#if 0
-  GTKDisallowStdin();
-  while( gtk_events_pending() )
-    gtk_main_iteration();
-  GTKAllowStdin();
-#endif
-
 }
 
 static void
@@ -1032,13 +1013,6 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 
     }
       
-
-#if 0
-    GTKDisallowStdin();
-    while( gtk_events_pending() )
-      gtk_main_iteration();
-    GTKAllowStdin();
-#endif
     return;
 }
 
@@ -1075,9 +1049,7 @@ static void GTKRolloutProgressEnd( void **pp ) {
     g_signal_connect( G_OBJECT( prp->pwRolloutDialog ), "destroy",
                         G_CALLBACK( gtk_main_quit ), NULL );
 
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
+	gtk_main();
 
     prp->pwRolloutProgress = NULL;
 

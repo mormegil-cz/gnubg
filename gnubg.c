@@ -164,10 +164,6 @@ int fReadingCommand;
 #endif
 #endif
 
-#if !defined(SIGIO) && defined(SIGPOLL)
-#define SIGIO SIGPOLL /* The System V equivalent */
-#endif
-
 char *szLang=NULL;
 
 char szDefaultPrompt[] = "(\\p) ",
@@ -2647,15 +2643,7 @@ extern void HandleCommand( char *sz, command *ac )
           while ( isspace( *sz ) )
             ++sz;
 
-#if USE_GTK
-		if( fX )
-			GTKDisallowStdin();
-#endif
 		PythonRun(sz);
-#if USE_GTK
-		if( fX )
-			GTKAllowStdin();
-#endif
 		return;
         }
 
@@ -3804,12 +3792,7 @@ extern void PromptForExit( void )
 	if (fX && display_is_3d(bd->rd) && bd->rd->closeBoardOnExit && bd->rd->fHinges3d)
 		CloseBoard3d(bd, bd->bd3d, bd->rd);
 #endif
-#if USE_GTK
-    if( fX ) {
-	while( gtk_events_pending() )
-	    gtk_main_iteration();
-    }
-#endif
+	ProcessGtkEvents();
 
 	SoundWait();    /* Wait for sound to finish before final close */
 
@@ -4104,9 +4087,6 @@ static void LoadCommands( FILE *pf, char *szFile )
 	    return;
 	}
 	
-	if( fAction )
-	    fnAction();
-	
 	if( feof( pf ) || fInterrupt ) {
 	    outputresume();
 	    return;
@@ -4131,17 +4111,7 @@ static void LoadCommands( FILE *pf, char *szFile )
            * but so far we only handle the latter...
            */
 
-#  if USE_GTK
-          if( fX )
-            GTKDisallowStdin();
-#  endif
-
           g_assert( FALSE ); /* FIXME... */
-
-#if USE_GTK
-          if( fX )
-            GTKAllowStdin();
-#endif
           
           continue;
 
@@ -5605,26 +5575,6 @@ extern void outputresume( void )
     }
 }
 
-/* Temporarily ignore TTY/GUI input. */
-extern void SuspendInput(void)
-{
-
-#if USE_GTK
-    if ( fX )
-       GTKSuspendInput();
-#endif
-}
-
-/* Resume input (must match a previous SuspendInput). */
-extern void ResumeInput(void)
-{
-
-#if USE_GTK
-    if ( fX )
-       GTKResumeInput();
-#endif
-}
-
 static GTimeVal tvProgress;
 
 static int ProgressThrottle( void ) {
@@ -5751,20 +5701,21 @@ static void Progress( void )
     fflush( stdout );
 }
 
-static void CallbackProgress( void )
+#if !USE_MULTITHREAD
+extern void CallbackProgress( void )
 {
 #if USE_GTK
 	if( fX )
 	{
 		GTKDisallowStdin();
 		if (fInProgress)
-			SuspendInput();
+			GTKSuspendInput();
 
 		while( gtk_events_pending() )
 			gtk_main_iteration();
 
 		if (fInProgress)
-			ResumeInput();
+			GTKResumeInput();
 		GTKAllowStdin();
 	}
 #endif
@@ -5772,6 +5723,7 @@ static void CallbackProgress( void )
     if( fInProgress && !iProgressMax )
 	Progress();
 }
+#endif
 
 extern void ProgressEnd( void )
 {
@@ -5860,15 +5812,6 @@ extern RETSIGTYPE HandleInterrupt( int idSignal )
        atomically, because it is only used to hold a binary value. */
     fInterrupt = TRUE;
 }
-
-#if USE_GTK  && defined(SIGIO)
-static RETSIGTYPE HandleIO( int idSignal ) {
-    /* NB: It is safe to write to fAction even if it cannot be read
-       atomically, because it is only used to hold a binary value. */
-    if( fX )
-	fAction = TRUE;
-}
-#endif
 
 static void BearoffProgress( unsigned int i )
 {
@@ -6423,9 +6366,6 @@ int main(int argc, char *argv[])
                 fInteractive = fShowProgress = TRUE;
                 if (fSplash)
                         pwSplash = CreateSplash();
-#if defined(SIGIO)
-                PortableSignal(SIGIO, HandleIO, NULL, TRUE);
-#endif
 	} else
 #endif
 	{
@@ -6438,7 +6378,6 @@ int main(int argc, char *argv[])
                                 &shInterruptOld, FALSE);
                 setup_readline();
         }
-	fnTick = CallbackProgress;
 
 	PushSplash(pwSplash, _("Initialising"), _("Random number generator"), 250);
         init_rng();
@@ -7241,4 +7180,15 @@ int RunAsyncProcess(AsyncFun fn, void *data, const char *msg)
 	ProgressEnd();
 
 	return ret;
+}
+
+extern void ProcessGtkEvents()
+{
+#if USE_GTK
+	if (fX)
+	{
+		while(gtk_events_pending())
+			gtk_main_iteration();
+	}
+#endif
 }

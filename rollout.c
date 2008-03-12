@@ -731,9 +731,6 @@ BasicCubefulRollout ( unsigned int aanBoard[][ 2 ][ 25 ],
 
         }
 
-        if( fAction )
-          fnAction();
-    
         if( fInterrupt )
           return -1;
 
@@ -1319,10 +1316,6 @@ RolloutGeneral( ConstTanBoard *apBoard,
   int nIsCubeful = 0;
   int fOutputMWCSave = fOutputMWC;
 
-#if !USE_MULTITHREAD
-	void ( *fnOld )( void ) = fnTick;
-	fnTick = NULL;
-#endif
   show_jsds = 1;
 
 	ajiJSD = g_alloca ( alternatives * sizeof ( jsdinfo ));
@@ -1493,10 +1486,6 @@ RolloutGeneral( ConstTanBoard *apBoard,
 
 	/* Make sure final output is upto date */
 	UpdateProgress();
-
-#if !USE_MULTITHREAD
-fnTick = fnOld;
-#endif
 
   if (log_rollouts && log_name) {
     free (log_name);

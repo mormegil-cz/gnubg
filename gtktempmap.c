@@ -792,6 +792,5 @@ GTKShowTempMap( const matchstate ams[], const int n,
   gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 400, 500 ); 
   gtk_object_weakref( GTK_OBJECT( pwDialog ), DestroyDialog, ptmw );
 
-  gtk_widget_show_all( pwDialog );
-	gtk_main();
+  GTKRunDialog(pwDialog);
 }

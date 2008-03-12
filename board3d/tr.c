@@ -2,6 +2,9 @@
 
 /*
  * $Log$
+ * Revision 1.2  2008/03/12 22:56:35  Superfly_Jon
+ * Tidy up some common gtk functions and remove SIG_IO signal
+ *
  * Revision 1.1  2008/03/05 19:16:33  Superfly_Jon
  * Fix 3d png export, replace render to pixmap code
  *
@@ -465,12 +468,12 @@ void trRasterPos3f(TRcontext *tr, GLfloat x, GLfloat y, GLfloat z)
          glLoadIdentity();
          glOrtho(0.0, tr->CurrentTileWidth,
                  0.0, tr->CurrentTileHeight, 0.0, 1.0);
-         glRasterPos3f(0.0, 0.0, -winZ);
+         glRasterPos3f(0.0, 0.0, -(GLfloat)winZ);
 
          /* Now use empty bitmap to adjust raster position to (winX,winY) */
          {
             GLubyte bitmap[1] = {0};
-            glBitmap(1, 1, 0.0, 0.0, winX, winY, bitmap);
+            glBitmap(1, 1, 0.0, 0.0, (GLfloat)winX, (GLfloat)winY, bitmap);
          }
 
          /* restore original matrices */

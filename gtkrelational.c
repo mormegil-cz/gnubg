@@ -941,11 +941,7 @@ extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw)
 
 	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), pwn);
 
-	gtk_widget_show_all(pwDialog);
-
-	GTKDisallowStdin();
-	gtk_main();
-	GTKAllowStdin();
+	GTKRunDialog(pwDialog);
 }
 
 extern void GtkShowQuery(RowSet * pRow)
@@ -959,9 +955,5 @@ extern void GtkShowQuery(RowSet * pRow)
 	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)),
 			  GetRelList(pRow));
 
-	gtk_widget_show_all(pwDialog);
-
-	GTKDisallowStdin();
-	gtk_main();
-	GTKAllowStdin();
+	GTKRunDialog(pwDialog);
 }

@@ -996,15 +996,11 @@ GTKShowTheory ( const int fActivePage ) {
 
   /* show dialog */
 
-  gtk_widget_show_all( pwDialog );
-
   ResetTheory ( NULL, ptw );
   TheoryUpdated ( NULL, ptw );
   
   gtk_notebook_set_page ( GTK_NOTEBOOK ( pwNotebook ), fActivePage ? 2 /* prices */ : 0 /* market */ );
 
-  GTKDisallowStdin();
-  gtk_main();
-  GTKAllowStdin();
+  GTKRunDialog(pwDialog);
 }
 

@@ -496,11 +496,7 @@ ClickButton ( GtkWidget *pw, movefilterwidget *pmfw ) {
   gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
                      pwMoveFilterSetup );
   
-  gtk_widget_show_all( pwDialog );
-  
-  GTKDisallowStdin();
-  gtk_main();
-  GTKAllowStdin();
+  GTKRunDialog(pwDialog);
 
   if( fOK ) {
     memcpy ( pmfw->pmf, aamf, sizeof ( aamf ) );

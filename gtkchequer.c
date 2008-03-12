@@ -80,9 +80,6 @@ static void MoveListRolloutClicked(GtkWidget *pw, hintdata *phd)
 	GTKSetCurrentParent(pw);
   RolloutProgressStart( &ci, c, NULL, &rcRollout, asz, &p );
 
-  if ( fAction )
-    HandleXAction();
-
   res = ScoreMoveRollout ( ppm, (const cubeinfo**)ppci, c, RolloutProgress, p );
 
   RolloutProgressEnd( &p );
