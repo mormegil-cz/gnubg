@@ -1,3 +1,7 @@
+Wed Mar 12 20:36:40 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtkgame.c: cleanup the Go menu
+
 Tue Mar 11 14:53:12 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtkexport.c, gtkgame.c, gtktoolbar.c, xpm/dice.xpm,

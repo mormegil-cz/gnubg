@@ -3640,6 +3640,10 @@ GtkItemFactoryEntry aife[] = {
 	{ N_("/_Settings/Save settings"), 
           NULL, Command, CMD_SAVE_SETTINGS, NULL, NULL },
 	{ N_("/_Go"), NULL, NULL, 0, "<Branch>", NULL },
+	{ N_("/_Go/Pre_vious game"), "<control>Page_Up", 
+          Command, CMD_PREV_GAME,
+		"<StockItem>", GTK_STOCK_GOTO_FIRST
+	},
 	{ N_("/_Go/Previous rol_l"), "Page_Up", 
           Command, CMD_PREV_ROLL,
 		"<StockItem>", GTK_STOCK_GO_BACK
@@ -3648,30 +3652,15 @@ GtkItemFactoryEntry aife[] = {
 	  Command, CMD_NEXT_ROLL, 
 		"<StockItem>", GTK_STOCK_GO_FORWARD
 	},
-	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>", NULL },
-	{ N_("/_Go/_Previous move"), "<shift>Page_Up", 
-          Command, CMD_PREV, NULL, NULL },
-	{ N_("/_Go/Next _move"), "<shift>Page_Down", 
-          Command, CMD_NEXT, NULL, NULL },
-	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>", NULL },
-	{ N_("/_Go/Previous chequer _play"), "<alt>Page_Up",
-	  Command, CMD_PREV_ROLLED, NULL, NULL },
-	{ N_("/_Go/Next _chequer play"), "<alt>Page_Down",
-	  Command, CMD_NEXT_ROLLED, NULL, NULL },
+	{ N_("/_Go/Next _game"), "<control>Page_Down",
+	  Command, CMD_NEXT_GAME,
+		"<StockItem>", GTK_STOCK_GOTO_LAST
+	},
 	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ N_("/_Go/Previous marke_d move"), "<control><shift>Page_Up", 
           Command, CMD_PREV_MARKED, NULL, NULL },
 	{ N_("/_Go/Next mar_ked move"), "<control><shift>Page_Down", 
           Command, CMD_NEXT_MARKED, NULL, NULL },
-	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>", NULL },
-	{ N_("/_Go/Pre_vious game"), "<control>Page_Up", 
-          Command, CMD_PREV_GAME,
-		"<StockItem>", GTK_STOCK_GOTO_FIRST
-	},
-	{ N_("/_Go/Next _game"), "<control>Page_Down",
-	  Command, CMD_NEXT_GAME,
-		"<StockItem>", GTK_STOCK_GOTO_LAST
-	},
 	{ N_("/_Help"), NULL, NULL, 0, "<Branch>", NULL },
 	{ N_("/_Help/_Commands"), NULL, Command, CMD_HELP, NULL, NULL },
 	{ N_("/_Help/-"), NULL, NULL, 0, "<Separator>", NULL },
@@ -6486,14 +6475,6 @@ extern void GTKSet( void *p ) {
 	    pif, CMD_NEXT_ROLL ), plGame != NULL );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_PREV_ROLL ), plGame != NULL );
-	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
-	    pif, CMD_NEXT ), plGame != NULL );
-	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
-	    pif, CMD_PREV ), plGame != NULL );
-	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
-	    pif, CMD_NEXT_ROLLED ), plGame != NULL );
-	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
-	    pif, CMD_PREV_ROLLED ), plGame != NULL );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_NEXT_MARKED ), plGame != NULL );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
