@@ -297,7 +297,6 @@ GtkWidget *pwMain = NULL;
 GtkWidget *pwMenuBar;
 GtkWidget *pwToolbar;
 
-GtkWidget *pom = 0;
 static GtkWidget *pwStatus;
 static GtkWidget *pwProgress;
 GtkWidget *pwMessageText;
@@ -1207,111 +1206,6 @@ extern void SetAnnotation( moverecord *pmr ) {
 
 
     }
-}
-
-static void MenuDelete( GtkWidget *pwChild, GtkWidget *pwMenu ) {
-
-    gtk_container_remove( GTK_CONTAINER( pwMenu ), pwChild );
-}
-
-static void SelectGame( GtkWidget *pw, void *p ) {
-
-    int i = GPOINTER_TO_INT( p );
-    listOLD *pl;
-    
-    g_assert( plGame );
-
-    for( pl = lMatch.plNext; i && pl->plNext->p; i--, pl = pl->plNext )
-	;
-
-    if( pl->p == plGame )
-	return;
-
-    ChangeGame( pl->p );    
-}
-
-static int fGameMenuUsed;
-
-extern void GTKAddGame( moverecord *pmr ) {
-
-    GtkWidget *pw,
-	*pwMenu = gtk_option_menu_get_menu( GTK_OPTION_MENU( pom ) );
-    GList *pl;
-    int c;
-    char sz[ 128 ];
-    
-    if( !fGameMenuUsed ) {
-	/* Delete the "(no game)" item. */
-	gtk_container_foreach( GTK_CONTAINER( pwMenu ),
-			       (GtkCallback) MenuDelete, pwMenu );
-	fGameMenuUsed = TRUE;
-    }
-    
-    sprintf( sz, _("Game %d: %s %d, %s %d"), pmr->g.i + 1, ap[ 0 ].szName,
-	     pmr->g.anScore[ 0 ], ap[ 1 ].szName, pmr->g.anScore[ 1 ] );
-    pw = gtk_menu_item_new_with_label( sz );
-	
-    pl = gtk_container_get_children( GTK_CONTAINER( pwMenu ) );
-
-    g_signal_connect( G_OBJECT( pw ), "activate",
-			G_CALLBACK( SelectGame ),
-			GINT_TO_POINTER( c = g_list_length( pl ) ) );
-
-    g_list_free( pl );
-    
-    gtk_widget_show( pw );
-    gtk_menu_append( GTK_MENU( pwMenu ), pw );
-    
-    GTKSetGame( c );
-}
-
-/* Delete i and subsequent games. */
-extern void GTKPopGame( int i ) {
-
-    GtkWidget *pwMenu = gtk_option_menu_get_menu( GTK_OPTION_MENU( pom ) );
-    GList *pl, *plOrig;
-
-    plOrig = pl = gtk_container_get_children( GTK_CONTAINER( pwMenu ) );
-
-    while( i-- )
-	pl = pl->next;
-
-    while( pl ) {
-	gtk_container_remove( GTK_CONTAINER( pwMenu ), pl->data );
-	pl = pl->next;
-    }
-
-    g_list_free( plOrig );
-}
-
-extern void GTKSetGame( int i ) {
-
-    gtk_option_menu_set_history( GTK_OPTION_MENU( pom ), i );
-}
-
-/* Recompute the option menu in the game record window (used when the
-   player names change, or the score a game was started at is modified). */
-extern void GTKRegenerateGames( void ) {
-
-    listOLD *pl, *plGame;
-    int i = gtk_option_menu_get_history( GTK_OPTION_MENU( pom ) );
-
-    if( !fGameMenuUsed )
-	return;
-
-    /* update player names */
-    GL_SetNames();
-
-    /* add games */
-
-    GTKPopGame( 0 );
-
-    for( pl = lMatch.plNext; pl->p; pl = pl->plNext ) {
-	plGame = pl->p;
-	GTKAddGame( plGame->plNext->p );
-    }
-
-    GTKSetGame( i );
 }
 
 /* The annotation for one or more moves has been modified.  We refresh
@@ -3997,7 +3891,7 @@ extern void GtkChangeLanguage(void)
 		ClosePanels();
 		getWindowGeometry(WINDOW_MAIN);
 		DestroyPanel(WINDOW_MAIN);
-		pom = NULL;
+		GTKGameSelectDestroy();
 		pwProgress = NULL;
 
 	}

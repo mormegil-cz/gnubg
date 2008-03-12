@@ -56,6 +56,7 @@ static CommandEntryData_T cedPanel = {
 };
 
 
+static GtkWidget *game_select_combo = NULL;
 
 typedef gboolean (*panelFun)(void);
 
@@ -716,6 +717,72 @@ static GtkWidget *PixmapButton( GdkColormap *pcmap, char **xpm,
     return pwButton;
 }
 
+extern void GTKGameSelectDestroy(void)
+{
+	game_select_combo = NULL;
+}
+
+extern void GTKPopGame(int i)
+{
+    GtkTreeIter iter;
+    GtkTreeModel *model;
+
+    model = gtk_combo_box_get_model(GTK_COMBO_BOX(game_select_combo));
+    while (gtk_tree_model_iter_nth_child(model, &iter, NULL, i))
+	gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
+}
+
+extern void GTKAddGame(moverecord * pmr)
+{
+    char sz[128];
+    GtkTreeModel *model;
+    gint last_game;
+
+    sprintf(sz, _("Game %d: %d, %d"), pmr->g.i + 1, pmr->g.anScore[0],
+	    pmr->g.anScore[1]);
+    gtk_combo_box_append_text(GTK_COMBO_BOX(game_select_combo), sz);
+    model = gtk_combo_box_get_model(GTK_COMBO_BOX(game_select_combo));
+    last_game = gtk_tree_model_iter_n_children(model, NULL);
+    GTKSetGame(last_game - 1);
+}
+
+extern void GTKRegenerateGames(void)
+{
+    listOLD *pl, *plGame;
+    int i = gtk_combo_box_get_active(GTK_COMBO_BOX(game_select_combo));
+
+    GL_SetNames();
+    GTKPopGame(0);
+    for (pl = lMatch.plNext; pl->p; pl = pl->plNext) {
+	plGame = pl->p;
+	GTKAddGame(plGame->plNext->p);
+    }
+
+    GTKSetGame(i);
+}
+
+extern void GTKSetGame(int i)
+{
+    gtk_combo_box_set_active(GTK_COMBO_BOX(game_select_combo), i);
+}
+
+static void SelectGame(GtkWidget * pw, void *p)
+{
+    listOLD *pl;
+    int i = 0;
+
+    if (!plGame)
+	return;
+
+    i = gtk_combo_box_get_active(GTK_COMBO_BOX(pw));
+    for (pl = lMatch.plNext; i && pl->plNext->p; i--, pl = pl->plNext);
+
+    if (pl->p == plGame)
+	return;
+
+    ChangeGame(pl->p);
+}
+
 static void CreateGameWindow( void ) {
 
     GtkWidget *psw = gtk_scrolled_window_new( NULL, NULL ),
@@ -787,10 +854,10 @@ static void CreateGameWindow( void ) {
     gtk_menu_append( GTK_MENU( pm ), gtk_menu_item_new_with_label(
 	_("(no game)") ) );
     gtk_widget_show_all( pm );
-    gtk_option_menu_set_menu( GTK_OPTION_MENU( pom = gtk_option_menu_new() ),
-			      pm );
-    gtk_option_menu_set_history( GTK_OPTION_MENU( pom ), 0 );
-    gtk_box_pack_start( GTK_BOX( phbox ), pom, TRUE, TRUE, 4 );
+    game_select_combo = gtk_combo_box_new_text();
+    g_signal_connect (G_OBJECT (game_select_combo), "changed",
+		    G_CALLBACK (SelectGame), NULL);
+    gtk_box_pack_start( GTK_BOX( phbox ), game_select_combo, TRUE, TRUE, 4 );
     
     gtk_container_add( GTK_CONTAINER( pvbox ), psw );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
@@ -985,8 +1052,8 @@ void DockPanels(void)
 	if(!fX)
 	  return;
 
-	if (pom)
-		currentSelectedGame = gtk_option_menu_get_history( GTK_OPTION_MENU( pom ) );
+	if (game_select_combo)
+		currentSelectedGame = gtk_combo_box_get_active(GTK_COMBO_BOX(game_select_combo));
 
 	if (fDockPanels)
 	{

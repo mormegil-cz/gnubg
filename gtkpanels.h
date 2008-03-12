@@ -42,5 +42,6 @@ extern void ClosePanels(void);
 
 extern int GetPanelSize(void);
 extern void SetPanelWidth(int size);
+extern void GTKGameSelectDestroy(void);
 
 #endif
