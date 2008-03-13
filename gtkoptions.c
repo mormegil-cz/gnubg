@@ -451,7 +451,7 @@ static GtkWidget *OptionsPages( optionswidget *pow )
     };
 
     char **ppch, **ppchTip;
-    GtkWidget *pw, *pwn, *pwp, *pwvbox, *pwhbox, *pwev, *pwm, *pwf, *pwb,
+    GtkWidget *pw, *pwn, *pwp, *pwvbox, *pwhbox, *pwev, *pwf, *pwb,
 	*pwAnimBox, *pwFrame, *pwBox, *pwSpeed, *pwScale, *pwhoriz,
 	*pwLabelFile, *table, *label;
     unsigned int i, cCache;
@@ -1095,18 +1095,12 @@ static GtkWidget *OptionsPages( optionswidget *pow )
     pwhbox = gtk_hbox_new (FALSE, 4);
     gtk_box_pack_start (GTK_BOX (pwvbox), pwhbox, TRUE, TRUE, 0);
 
-    pow->pwPRNGMenu = gtk_option_menu_new ();
+    pow->pwPRNGMenu = gtk_combo_box_new_text();
     gtk_box_pack_start (GTK_BOX (pwhbox), pow->pwPRNGMenu, FALSE, FALSE, 0);
-    gtk_container_set_border_width (GTK_CONTAINER (pow->pwPRNGMenu), 1);
-    pwm = gtk_menu_new ();
     for( ppch = aszRNG, ppchTip = aszRNGTip; *ppch; ppch++, ppchTip++ ) {
-	gtk_menu_append( GTK_MENU( pwm ),
-			 pw = gtk_menu_item_new_with_label(
-			     gettext( *ppch ) ) );
-	gtk_tooltips_set_tip( ptt, pw, gettext( *ppchTip ), NULL );
+		gtk_combo_box_append_text(GTK_COMBO_BOX(pow->pwPRNGMenu), gettext( *ppch));
+		gtk_tooltips_set_tip( ptt, pw, gettext( *ppchTip ), NULL );
     }
-    gtk_widget_show_all( pwm );
-    gtk_option_menu_set_menu (GTK_OPTION_MENU (pow->pwPRNGMenu), pwm );
 
     pow->pwSeed = gtk_hbox_new(FALSE, 0);
     gtk_box_pack_start (GTK_BOX (pwhbox), pow->pwSeed, TRUE,TRUE, 0);
@@ -1162,21 +1156,14 @@ static GtkWidget *OptionsPages( optionswidget *pow )
                           gtk_label_new( _("Always roll the ") ),
                           FALSE, FALSE, 0);
 
-      pow->apwCheatRoll[ i ] = gtk_option_menu_new ();
+      pow->apwCheatRoll[ i ] = gtk_combo_box_new_text ();
       gtk_box_pack_start( GTK_BOX ( pwhbox ), pow->apwCheatRoll[ i ], 
                           FALSE, FALSE, 0);
       gtk_container_set_border_width( GTK_CONTAINER ( pow->apwCheatRoll[ i ]), 
                                       1);
 
-      pwm = gtk_menu_new ();
       for( ppch = aszCheatRoll; *ppch; ++ppch )
-	gtk_menu_append( GTK_MENU( pwm ),
-			 pw = gtk_menu_item_new_with_label(
-			     gettext( *ppch ) ) );
-      gtk_widget_show_all( pwm );
-
-      gtk_option_menu_set_menu( GTK_OPTION_MENU ( pow->apwCheatRoll[ i ] ), 
-                                pwm );
+		  gtk_combo_box_append_text( GTK_COMBO_BOX(pow->apwCheatRoll[i]), gettext( *ppch ));
 
       sz = g_strdup_printf( _("roll for player %s."), ap[ i ].szName );
 
@@ -1506,7 +1493,7 @@ static void OptionsOK(GtkWidget *pw, optionswidget *pow)
       UserCommand("set rng manual");  
   } else {
 
-    n = gtk_option_menu_get_history(GTK_OPTION_MENU( pow->pwPRNGMenu ));
+    n = gtk_combo_box_get_active(GTK_COMBO_BOX( pow->pwPRNGMenu ));
 
     switch ( n ) {
     case 0:
@@ -1641,8 +1628,7 @@ static void OptionsOK(GtkWidget *pw, optionswidget *pow)
   }
 
   for ( i = 0; i < 2; ++i ) {
-    n = 
-      gtk_option_menu_get_history(GTK_OPTION_MENU( pow->apwCheatRoll[ i ] ));
+    n = gtk_combo_box_get_active(GTK_COMBO_BOX( pow->apwCheatRoll[ i ] ));
     if ( n != afCheatRoll[ i ] ) {
       sprintf( sz, "set cheat player %d roll %d", i, n + 1 );
       UserCommand( sz );
@@ -1748,17 +1734,14 @@ OptionsSet( optionswidget *pow) {
      gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwDiceManual ),
                                 TRUE );
   else
-     gtk_option_menu_set_history(GTK_OPTION_MENU( pow->pwPRNGMenu ), 
-                                (rngCurrent > RNG_MANUAL) ? rngCurrent - 1 :
-                                 rngCurrent );
+     gtk_combo_box_set_active(GTK_COMBO_BOX( pow->pwPRNGMenu ), (rngCurrent > RNG_MANUAL) ? rngCurrent - 1 : rngCurrent );
  
   /* dice manipulation */
 
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwCheat ), fCheat );
 
   for ( i = 0; i< 2; ++i )
-    gtk_option_menu_set_history( GTK_OPTION_MENU( pow->apwCheatRoll[ i ] ),
-                                 afCheatRoll[ i ] );
+    gtk_combo_box_set_active( GTK_COMBO_BOX( pow->apwCheatRoll[ i ] ), afCheatRoll[ i ] );
 
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwOutputMWC ),
                                 fOutputMWC );
