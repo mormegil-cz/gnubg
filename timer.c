@@ -33,7 +33,7 @@
 
 static double perFreq = 0;
 
-int setup_timer()
+static int setup_timer()
 {
 	LARGE_INTEGER freq;
 	if (!QueryPerformanceFrequency(&freq))

@@ -661,12 +661,6 @@ GenerateImage (renderimages * pri, renderdata * prd,
 
 extern void CommandExportPositionPNG (char *sz)
 {
-
-  renderimages ri;
-  renderdata rd;
-
-  CopyAppearance(&rd);
-
   sz = NextToken (&sz);
 
   if (ms.gs == GAME_NONE)
@@ -688,13 +682,17 @@ extern void CommandExportPositionPNG (char *sz)
   /* generate PNG image */
 
 #if USE_BOARD3D
-	if (rd.fDisplayType == DT_3D)
+	if (GetMainAppearance()->fDisplayType == DT_3D)
 	{
-		GenerateImage3d( &rd, sz, exsExport.nPNGSize, BOARD_WIDTH, BOARD_HEIGHT );
+		GenerateImage3d(sz, exsExport.nPNGSize, BOARD_WIDTH, BOARD_HEIGHT);
 	}
 	else
 #endif
 	{
+		renderimages ri;
+		renderdata rd;
+
+		CopyAppearance(&rd);
 		rd.nSize = exsExport.nPNGSize;
 
 		g_assert (rd.nSize >= 1);

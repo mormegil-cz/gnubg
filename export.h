@@ -99,9 +99,7 @@ extern int WritePNG(const char *sz, unsigned char *puch,
 		    unsigned int nSizeY);
 
 #if USE_BOARD3D
-void GenerateImage3d(renderdata * prd, const char *szName,
-		     unsigned int nSize, unsigned int nSizeX,
-		     unsigned int nSizeY);
+void GenerateImage3d(const char *szName, unsigned int nSize, unsigned int nSizeX, unsigned int nSizeY);
 #endif
 
 extern void TextAnalysis(GString * gsz, const matchstate * pms,

@@ -77,11 +77,11 @@ extern void MT_Exclusive(void);
   #define MT_SafeDec(x) g_atomic_int_add(x, -1)
   #define MT_SafeDecCheck(x) g_atomic_int_dec_and_test(x)
 #else
-  #define MT_SafeInc(x) InterlockedIncrement((long*)x)
+  #define MT_SafeInc(x) (void)InterlockedIncrement((long*)x)
   #define MT_SafeIncValue(x) InterlockedIncrement((long*)x)
   #define MT_SafeIncCheck(x) (InterlockedIncrement((long*)x) > 1)
   #define MT_SafeAdd(x, y) InterlockedExchangeAdd((long*)x, y)
-  #define MT_SafeDec(x) InterlockedDecrement((long*)x)
+  #define MT_SafeDec(x) (void)InterlockedDecrement((long*)x)
   #define MT_SafeDecCheck(x) (InterlockedDecrement((long*)x) == 0)
 #endif
 
