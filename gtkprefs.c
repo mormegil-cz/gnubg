@@ -3008,6 +3008,15 @@ static void ChangePage(GtkNotebook *notebook, GtkNotebookPage *page,
 #endif
 }
 
+static void pref_dialog_map(GtkWidget *window, BoardData *bd)
+{
+#if USE_BOARD3D
+	DisplayCorrectBoardType(bd, bd->bd3d, bd->rd);
+	redrawChange = FALSE;
+	bd->rd->quickDraw = FALSE;
+#endif
+}
+
 extern void BoardPreferences(GtkWidget *pwBoard)
 {
 	GtkWidget *pwDialog, *pwHbox;
@@ -3070,13 +3079,9 @@ extern void BoardPreferences(GtkWidget *pwBoard)
 
 	SetTitle();
 
-#if USE_BOARD3D
-	DisplayCorrectBoardType(bd, bd->bd3d, bd->rd);
-	redrawChange = FALSE;
-	bd->rd->quickDraw = FALSE;
-#endif
-
 	gtk_notebook_set_page(GTK_NOTEBOOK(pwNotebook), NUM_NONPREVIEW_PAGES);
+
+	g_signal_connect(pwDialog, "map", G_CALLBACK(pref_dialog_map), bd);
 
 	fUpdate = TRUE;
 	GTKRunDialog(pwDialog);
