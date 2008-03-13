@@ -66,7 +66,7 @@ static GtkAdjustment *apadj[ 2 ], *paAzimuth, *paElevation,
     *apadjBoard[ 4 ], *padjRound;
 static GtkAdjustment *apadjDiceExponent[ 2 ], *apadjDiceCoefficient[ 2 ];
 static GtkWidget *apwColour[ 2 ], *apwBoard[ 4 ],
-    *pwWood, *pwWoodType, *pwWoodMenu, *pwHinges, *pwLightTable, *pwMoveIndicator,
+    *pwWood, *pwWoodType, *pwHinges, *pwLightTable, *pwMoveIndicator,
     *pwWoodF, *pwNotebook, *pwLabels, *pwDynamicLabels;
 #if HAVE_LIBXML2
 static GList *plBoardDesigns = NULL;
@@ -973,19 +973,16 @@ static GtkWidget *BorderPage( BoardData *bd ) {
 								  _("Wooden") ),
 			FALSE, FALSE, 0 );
 
-    gtk_box_pack_start( GTK_BOX( pw ), pwWoodType = gtk_option_menu_new(),
+    gtk_box_pack_start( GTK_BOX( pw ), pwWoodType = gtk_combo_box_new_text(),
 			FALSE, FALSE, 4 );
 
-    pwWoodMenu = gtk_menu_new();
-    for( bw = 0; bw < WOOD_PAINT; bw++ ) 
-	gtk_menu_shell_append( GTK_MENU_SHELL( pwWoodMenu ),
-			       gtk_menu_item_new_with_label( 
-                                  gettext ( aszWood[ bw ] ) ) );
+	for (bw = 0; bw < WOOD_PAINT; bw++)
+		gtk_combo_box_append_text(GTK_COMBO_BOX(pwWoodType), gettext(aszWood[bw]));
 
-    gtk_option_menu_set_menu( GTK_OPTION_MENU( pwWoodType ), pwWoodMenu );
-    if( bd->rd->wt != WOOD_PAINT )
-	gtk_option_menu_set_history( GTK_OPTION_MENU( pwWoodType ),
-				     bd->rd->wt );
+	if (bd->rd->wt == WOOD_PAINT)
+		gtk_combo_box_set_active(GTK_COMBO_BOX(pwWoodType), 0 );
+	else
+		gtk_combo_box_set_active(GTK_COMBO_BOX(pwWoodType), bd->rd->wt );
 
     g_signal_connect( G_OBJECT( pwWoodType ), "changed",
 			       G_CALLBACK( UpdatePreview ), NULL);
@@ -1843,7 +1840,7 @@ UseDesign ( void ) {
 
 		/* board, border, and points */
 
-		gtk_option_menu_set_history( GTK_OPTION_MENU( pwWoodType ), newPrefs.wt );
+		gtk_combo_box_set_active(GTK_COMBO_BOX(pwWoodType), newPrefs.wt );
 		gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( newPrefs.wt != WOOD_PAINT ?
 														pwWood : pwWoodF ),
 										TRUE );
@@ -2886,7 +2883,7 @@ static void GetPrefs ( renderdata* prd ) {
     prd->aSpeckle[ 3 ] = (int)(apadjBoard[ 3 ]->value * 0x80);
     
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pwWood ) ))
-	    prd->wt = gtk_option_menu_get_history( GTK_OPTION_MENU(pwWoodType ) );
+	    prd->wt = gtk_combo_box_get_active(GTK_COMBO_BOX(pwWoodType));
 	else
 		prd->wt = WOOD_PAINT;
 
