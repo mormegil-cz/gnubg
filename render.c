@@ -2125,7 +2125,7 @@ static void RenderResignFaces( renderdata *prd, unsigned char *puch,
     
     file = BuildFilename(FONT_VERA_SERIF_BOLD);
     if( !FT_New_Face( ftl, file, 0, &ftf ) &&
-	!FT_Set_Pixel_Sizes( ftf, 0, 5 * prd->nSize ) ) {
+	!FT_Set_Pixel_Sizes( ftf, 0, 4 * prd->nSize ) ) {
 	fFreetype = TRUE;
 	
 	for( i = 0; i < 10; i++ ) {
@@ -2133,7 +2133,7 @@ static void RenderResignFaces( renderdata *prd, unsigned char *puch,
 	    FT_Get_Glyph( ftf->glyph, aftg + i );
 	}
 	
-	FT_Set_Pixel_Sizes( ftf, 0, 21 * prd->nSize / 8 );
+	FT_Set_Pixel_Sizes( ftf, 0, 3 * prd->nSize );
 	
 	for( i = 0; i < 10; i++ ) {
 	    FT_Load_Char( ftf, '0' + i, FT_LOAD_RENDER );
@@ -2156,8 +2156,8 @@ static void RenderResignFaces( renderdata *prd, unsigned char *puch,
 #if HAVE_FREETYPE
 	if( fFreetype )
             RenderNumber( puch, nStride, aftg, i + 1,
-                          3 * prd->nSize,
-			  78 * prd->nSize / 16, 0, 0, 0x80 );
+                          2 * prd->nSize,
+			  3.5 * prd->nSize, 0, 0, 0x80 );
 	else
 #endif
             RenderBasicNumber( puch, nStride, 4 * prd->nSize, 
