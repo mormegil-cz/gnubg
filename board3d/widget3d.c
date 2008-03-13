@@ -273,7 +273,7 @@ int DoAcceleratedCheck(const BoardData3d* bd3d, GtkWidget* pwParent)
 		return 1;
 }
 
-void RenderToBuffer3d(const BoardData* bd, BoardData3d* bd3d, int width, int height, unsigned char* buf)
+void RenderToBuffer3d(const BoardData* bd, BoardData3d* bd3d, unsigned int width, unsigned int height, unsigned char* buf)
 {
 	TRcontext *tr;
 	GtkWidget *widget = bd3d->drawing_area3d;
@@ -290,7 +290,7 @@ void RenderToBuffer3d(const BoardData* bd, BoardData3d* bd3d, int width, int hei
 	trImageBuffer(tr, GL_RGB, GL_UNSIGNED_BYTE, buf);
 
 	/* Sort out viewing perspective */
-	glViewport(0, 0, width, height);
+	glViewport(0, 0, (int)width, (int)height);
 	SetupViewingVolume3d(bd, bd3d, bd->rd);
 
 	if (bd->rd->planView)

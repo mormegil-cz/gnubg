@@ -2,6 +2,9 @@
 
 /*
  * $Log$
+ * Revision 1.2  2008/03/13 18:15:09  Superfly_Jon
+ * Minor comipler grumbles
+ *
  * Revision 1.1  2008/03/05 19:16:34  Superfly_Jon
  * Fix 3d png export, replace render to pixmap code
  *
@@ -72,8 +75,6 @@
 #define TR_H
 
 
-#include <GL/gl.h>
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -118,7 +119,7 @@ extern void trTileBuffer(TRcontext *tr, GLenum format, GLenum type,
 			 GLvoid *image);
 
 
-extern void trImageSize(TRcontext *tr, GLint width, GLint height);
+extern void trImageSize(TRcontext *tr, GLuint width, GLuint height);
 
 extern void trImageBuffer(TRcontext *tr, GLenum format, GLenum type,
 			  GLvoid *image);
@@ -127,7 +128,7 @@ extern void trImageBuffer(TRcontext *tr, GLenum format, GLenum type,
 extern void trRowOrder(TRcontext *tr, TRenum order);
 
 
-extern GLint trGet(TRcontext *tr, TRenum param);
+extern GLint trGet(const TRcontext *tr, TRenum param);
 
 
 extern void trOrtho(TRcontext *tr,
@@ -150,7 +151,7 @@ extern void trBeginTile(TRcontext *tr);
 extern int trEndTile(TRcontext *tr);
 
 
-extern void trRasterPos3f(TRcontext *tr, GLfloat x, GLfloat y, GLfloat z);
+extern void trRasterPos3d(const TRcontext *tr, GLdouble x, GLdouble y, GLdouble z);
 
 
 

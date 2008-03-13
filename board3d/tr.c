@@ -2,8 +2,8 @@
 
 /*
  * $Log$
- * Revision 1.2  2008/03/12 22:56:35  Superfly_Jon
- * Tidy up some common gtk functions and remove SIG_IO signal
+ * Revision 1.3  2008/03/13 18:15:09  Superfly_Jon
+ * Minor comipler grumbles
  *
  * Revision 1.1  2008/03/05 19:16:33  Superfly_Jon
  * Fix 3d png export, replace render to pixmap code
@@ -123,9 +123,10 @@ TRcontext *trNew(void)
       tr->TileBorder = DEFAULT_TILE_BORDER;
       tr->RowOrder = TR_BOTTOM_TO_TOP;
       tr->CurrentTile = -1;
+
+      /* Save user's viewport, will be restored after last tile rendered */
+      glGetIntegerv(GL_VIEWPORT, tr->ViewportSave);
    }
-   /* Save user's viewport, will be restored after last tile rendered */
-   glGetIntegerv(GL_VIEWPORT, tr->ViewportSave);
 
    return (TRcontext *) tr;
 }
@@ -172,13 +173,13 @@ void trTileBuffer(TRcontext *tr, GLenum format, GLenum type, GLvoid *image)
 
 
 
-void trImageSize(TRcontext *tr, GLint width, GLint height)
+void trImageSize(TRcontext *tr, GLuint width, GLuint height)
 {
    if (!tr)
       return;
 
-   tr->ImageWidth = width;
-   tr->ImageHeight = height;
+   tr->ImageWidth = (int)width;
+   tr->ImageHeight = (int)height;
    Setup(tr);
 }
 
@@ -194,7 +195,7 @@ void trImageBuffer(TRcontext *tr, GLenum format, GLenum type, GLvoid *image)
 }
 
 
-GLint trGet(TRcontext *tr, TRenum param)
+GLint trGet(const TRcontext *tr, TRenum param)
 {
    if (!tr)
       return 0;
@@ -230,6 +231,10 @@ GLint trGet(TRcontext *tr, TRenum param)
          return tr->CurrentTileHeight;
       case TR_ROW_ORDER:
          return (GLint) tr->RowOrder;
+	  case TR_TOP_TO_BOTTOM:
+		  return tr->RowOrder == TR_TOP_TO_BOTTOM;
+	  case TR_BOTTOM_TO_TOP:
+		  return tr->RowOrder == TR_BOTTOM_TO_TOP;
       default:
          return 0;
    }
@@ -314,7 +319,7 @@ void trBeginTile(TRcontext *tr)
       tr->CurrentColumn = tr->CurrentTile % tr->Columns;
    }
    else if (tr->RowOrder==TR_TOP_TO_BOTTOM) {
-      tr->CurrentRow = tr->Rows - (tr->CurrentTile / tr->Columns) - 1;
+      tr->CurrentRow = (tr->Rows - (tr->CurrentTile / tr->Columns)) - 1;
       tr->CurrentColumn = tr->CurrentTile % tr->Columns;
    }
    else {
@@ -330,12 +335,12 @@ void trBeginTile(TRcontext *tr)
    if (tr->CurrentRow < tr->Rows-1)
       tileHeight = tr->TileHeight;
    else
-      tileHeight = tr->ImageHeight - (tr->Rows-1) * (tr->TileHeightNB) + 2 * border;
+      tileHeight = (tr->ImageHeight - (tr->Rows-1) * (tr->TileHeightNB)) + (2 * border);
 
    if (tr->CurrentColumn < tr->Columns-1)
       tileWidth = tr->TileWidth;
    else
-      tileWidth = tr->ImageWidth - (tr->Columns-1) * (tr->TileWidthNB) + 2 * border;
+      tileWidth = (tr->ImageWidth - (tr->Columns-1) * (tr->TileWidthNB)) + 2 * border;
 
    /* Save tile size, with border */
    tr->CurrentTileWidth = tileWidth;
@@ -350,10 +355,10 @@ void trBeginTile(TRcontext *tr)
 
    /* compute projection parameters */
    left = tr->Left + (tr->Right - tr->Left)
-        * (tr->CurrentColumn * tr->TileWidthNB - border) / tr->ImageWidth;
+        * (int)(tr->CurrentColumn * tr->TileWidthNB - border) / tr->ImageWidth;
    right = left + (tr->Right - tr->Left) * tileWidth / tr->ImageWidth;
    bottom = tr->Bottom + (tr->Top - tr->Bottom)
-          * (tr->CurrentRow * tr->TileHeightNB - border) / tr->ImageHeight;
+          * (int)(tr->CurrentRow * tr->TileHeightNB - border) / tr->ImageHeight;
    top = bottom + (tr->Top - tr->Bottom) * tileHeight / tr->ImageHeight;
 
    if (tr->Perspective)
@@ -362,7 +367,7 @@ void trBeginTile(TRcontext *tr)
       glOrtho(left, right, bottom, top, tr->Near, tr->Far);
 
    /* restore user's matrix mode */
-   glMatrixMode(matrixMode);
+   glMatrixMode((GLenum)matrixMode);
 }
 
 
@@ -437,11 +442,11 @@ int trEndTile(TRcontext *tr)
  * Replacement for glRastePos3f() which avoids the problem with invalid
  * raster pos.
  */
-void trRasterPos3f(TRcontext *tr, GLfloat x, GLfloat y, GLfloat z)
+void trRasterPos3d(const TRcontext *tr, GLdouble x, GLdouble y, GLdouble z)
 {
    if (tr->CurrentTile<0) {
       /* not doing tile rendering right now.  Let OpenGL do this. */
-      glRasterPos3f(x, y, z);
+      glRasterPos3d(x, y, z);
    }
    else {
       GLdouble modelview[16], proj[16];
@@ -466,14 +471,14 @@ void trRasterPos3f(TRcontext *tr, GLfloat x, GLfloat y, GLfloat z)
          glMatrixMode(GL_PROJECTION);
          glPushMatrix();
          glLoadIdentity();
-         glOrtho(0.0, tr->CurrentTileWidth,
-                 0.0, tr->CurrentTileHeight, 0.0, 1.0);
-         glRasterPos3f(0.0, 0.0, -(GLfloat)winZ);
+         glOrtho(0.0, (double)tr->CurrentTileWidth,
+                 0.0, (double)tr->CurrentTileHeight, 0.0, 1.0);
+         glRasterPos3d(0.0, 0.0, -winZ);
 
          /* Now use empty bitmap to adjust raster position to (winX,winY) */
          {
             GLubyte bitmap[1] = {0};
-            glBitmap(1, 1, 0.0, 0.0, (GLfloat)winX, (GLfloat)winY, bitmap);
+            glBitmap(1, 1, 0.0f, 0.0f, (GLfloat)winX, (GLfloat)winY, bitmap);
          }
 
          /* restore original matrices */

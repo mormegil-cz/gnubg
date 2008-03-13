@@ -175,7 +175,7 @@ static void preDrawPiece0(const renderdata* prd, int display)
 	}
 	else
 	{
-		circleSloped(radius, 0, PIECE_DEPTH, prd->curveAccuracy);
+		circleSloped(radius, 0.f, PIECE_DEPTH, prd->curveAccuracy);
 		return;
 	}
 	/* Draw side of piece */
@@ -282,7 +282,7 @@ static void preDrawPiece1(const renderdata* prd, int display)
 	}
 	else
 	{
-		circleSloped(pieceRad, 0, PIECE_DEPTH, prd->curveAccuracy);
+		circleSloped(pieceRad, 0.f, PIECE_DEPTH, prd->curveAccuracy);
 		return;
 	}
 

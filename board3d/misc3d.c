@@ -2122,7 +2122,8 @@ void RollDice3d(BoardData *bd, BoardData3d* bd3d, const renderdata *prd)
 	{
 		/* Show dice on board */
 		gtk_widget_queue_draw(bd3d->drawing_area3d);
-		ProcessGtkEvents();
+		while(gtk_events_pending())
+			gtk_main_iteration();
 	}
 	GTKResumeInput();
 }
@@ -2394,16 +2395,16 @@ void InitBoard3d(BoardData *bd, BoardData3d *bd3d)
 
 #if HAVE_LIBPNG
 
-void GenerateImage3d(renderdata *prd, const char* szName,
+void GenerateImage3d(const char* szName,
 	unsigned int nSize, unsigned int nSizeX, unsigned int nSizeY)
 {
 	unsigned char *puch;
 	BoardData *bd = BOARD(pwBoard)->board_data;
 	GdkPixbuf *pixbuf;
 	GError *error = NULL;
-	int line;
-	int width = nSize * nSizeX;
-	int height = nSize * nSizeY;
+	unsigned int line;
+	unsigned int width = nSize * nSizeX;
+	unsigned int height = nSize * nSizeY;
 
 	/* Allocate buffer for image, height + 1 as extra line needed to invert image (opengl renders 'upside down') */
 	if ((puch = (unsigned char *) malloc(width * (height + 1) * 3)) == NULL)
@@ -2417,15 +2418,15 @@ void GenerateImage3d(renderdata *prd, const char* szName,
 	/* invert image (y axis) */
 	for( line = 0; line < height/2; line++ )
 	{
-		int lineSize = width * 3;
+		unsigned int lineSize = width * 3;
 		/* Swap two lines at a time */
 		memcpy(puch + height * lineSize, puch + line * lineSize, lineSize);
-		memcpy(puch + line * lineSize, puch + (height - line - 1) * lineSize, lineSize);
-		memcpy(puch + (height - line - 1) * lineSize, puch + height * lineSize, lineSize);
+		memcpy(puch + line * lineSize, puch + ((height - line) - 1) * lineSize, lineSize);
+		memcpy(puch + ((height - line) - 1) * lineSize, puch + height * lineSize, lineSize);
 	}
 
     pixbuf = gdk_pixbuf_new_from_data( puch, GDK_COLORSPACE_RGB, FALSE, 8,
-				    width, height, width * 3, NULL, NULL );
+				    (int)width, (int)height, (int)width * 3, NULL, NULL );
 
 	gdk_pixbuf_save(pixbuf, szName, "png", &error, NULL);
 	if (error) {

@@ -84,7 +84,7 @@ extern void preDraw3d(const BoardData *bd, BoardData3d *bd3d, renderdata *prd);
 extern void CloseBoard3d(BoardData* bd, BoardData3d* bd3d, renderdata* prd);
 extern int BoardPoint3d(const BoardData* bd, const BoardData3d* bd3d, const renderdata* prd, int x, int y, int point);
 extern int MouseMove3d(const BoardData *bd, BoardData3d *bd3d, const renderdata* prd, int x, int y);
-extern void RenderToBuffer3d(const BoardData* bd, BoardData3d* bd3d, int width, int height, unsigned char* buf);
+extern void RenderToBuffer3d(const BoardData* bd, BoardData3d* bd3d, unsigned int width, unsigned int height, unsigned char* buf);
 extern void Tidy3dObjects(BoardData3d* bd3d, const renderdata *prd);
 extern float TestPerformance3d(BoardData* bd);
 extern void Set3dSettings(renderdata *prdnew, const renderdata *prd);
