@@ -184,9 +184,9 @@ ExportGetValues ( exportwidget *pew, exportsetup *pexs ) {
   pexs->szHTMLPictureURL = 
     g_strdup ( gtk_entry_get_text( GTK_ENTRY( pew->pwHTMLPictureURL ) ) );
 
-  pexs->het = (htmlexporttype)gtk_option_menu_get_history (GTK_OPTION_MENU (pew->pwHTMLType));
+  pexs->het = (htmlexporttype)gtk_combo_box_get_active (GTK_COMBO_BOX (pew->pwHTMLType));
 
-  pexs->hecss = (htmlexportcss)gtk_option_menu_get_history (GTK_OPTION_MENU (pew->pwHTMLCSS));
+  pexs->hecss = (htmlexportcss)gtk_combo_box_get_active (GTK_COMBO_BOX (pew->pwHTMLCSS));
 
   /* sizes */
   pexs->nPNGSize = (int)pew->adjPNGSize->value;
@@ -423,10 +423,10 @@ ExportSet ( exportwidget *pew ) {
     gtk_entry_set_text( GTK_ENTRY( pew->pwHTMLPictureURL ), 
                         pexs->szHTMLPictureURL );
 
-  gtk_option_menu_set_history ( GTK_OPTION_MENU (pew->pwHTMLType), 
+  gtk_combo_box_set_active ( GTK_COMBO_BOX (pew->pwHTMLType), 
                                 pexs->het );
 
-  gtk_option_menu_set_history ( GTK_OPTION_MENU (pew->pwHTMLCSS), 
+  gtk_combo_box_set_active ( GTK_COMBO_BOX (pew->pwHTMLCSS), 
                                 pexs->hecss );
 
   /* Sizes */
@@ -531,8 +531,6 @@ extern void GTKShowExport ( exportsetup *pexs )
   GtkWidget *pwFrame;
   GtkWidget *pwTable;
   GtkWidget *pwTableX;
-  GtkWidget *pwType_menu;
-  GtkWidget *glade_menuitem;
   GtkWidget *pwHBox;
   GtkWidget *pwHScale;
   GtkWidget *genHtml;
@@ -784,20 +782,12 @@ extern void GTKShowExport ( exportsetup *pexs )
                        gtk_label_new ( _("HTML board type:") ),
                        TRUE, TRUE, 0 );
   
-  pew->pwHTMLType = gtk_option_menu_new ();
+  pew->pwHTMLType = gtk_combo_box_new_text ();
   gtk_box_pack_start (GTK_BOX (pwHBox), pew->pwHTMLType, FALSE, FALSE, 0);
-  pwType_menu = gtk_menu_new ();
-  glade_menuitem = gtk_menu_item_new_with_label (_("GNU Backgammon"));
-  gtk_widget_show (glade_menuitem);
-  gtk_menu_append (GTK_MENU (pwType_menu), glade_menuitem);
-  glade_menuitem = gtk_menu_item_new_with_label (_("BBS"));
-  gtk_widget_show (glade_menuitem);
-  gtk_menu_append (GTK_MENU (pwType_menu), glade_menuitem);
-  glade_menuitem = gtk_menu_item_new_with_label (_("fibs2html"));
-  gtk_widget_show (glade_menuitem);
-  gtk_menu_append (GTK_MENU (pwType_menu), glade_menuitem);
-  gtk_option_menu_set_menu (GTK_OPTION_MENU (pew->pwHTMLType), pwType_menu);
-  gtk_option_menu_set_history (GTK_OPTION_MENU (pew->pwHTMLType), 0);
+  gtk_combo_box_append_text(GTK_COMBO_BOX(pew->pwHTMLType), _("GNU Backgammon"));
+  gtk_combo_box_append_text(GTK_COMBO_BOX(pew->pwHTMLType), _("BBS"));
+  gtk_combo_box_append_text(GTK_COMBO_BOX(pew->pwHTMLType), _("fibs2html"));
+  gtk_combo_box_set_active(GTK_COMBO_BOX (pew->pwHTMLType), 0);
 
   gtk_container_set_border_width (GTK_CONTAINER (pwHBox), 4);
   gtk_box_pack_start (GTK_BOX (pwVBox), pwHBox, FALSE, FALSE, 0);
@@ -809,20 +799,12 @@ extern void GTKShowExport ( exportsetup *pexs )
                        gtk_label_new ( _("CSS Style sheet:") ),
                        TRUE, TRUE, 0 );
   
-  pew->pwHTMLCSS = gtk_option_menu_new ();
+  pew->pwHTMLCSS = gtk_combo_box_new_text();
   gtk_box_pack_start (GTK_BOX (pwHBox), pew->pwHTMLCSS, FALSE, FALSE, 0);
-  pwType_menu = gtk_menu_new ();
-  glade_menuitem = gtk_menu_item_new_with_label (_("In <head>"));
-  gtk_widget_show (glade_menuitem);
-  gtk_menu_append (GTK_MENU (pwType_menu), glade_menuitem);
-  glade_menuitem = gtk_menu_item_new_with_label (_("Inline (in tags)"));
-  gtk_widget_show (glade_menuitem);
-  gtk_menu_append (GTK_MENU (pwType_menu), glade_menuitem);
-  glade_menuitem = gtk_menu_item_new_with_label (_("External file"));
-  gtk_widget_show (glade_menuitem);
-  gtk_menu_append (GTK_MENU (pwType_menu), glade_menuitem);
-  gtk_option_menu_set_menu (GTK_OPTION_MENU (pew->pwHTMLCSS), pwType_menu);
-  gtk_option_menu_set_history (GTK_OPTION_MENU (pew->pwHTMLCSS), 0);
+  gtk_combo_box_append_text(GTK_COMBO_BOX(pew->pwHTMLCSS), _("In <head>"));
+  gtk_combo_box_append_text(GTK_COMBO_BOX(pew->pwHTMLCSS), _("Inline (in tags)"));
+  gtk_combo_box_append_text(GTK_COMBO_BOX(pew->pwHTMLCSS), _("External file"));
+  gtk_combo_box_set_active(GTK_COMBO_BOX (pew->pwHTMLCSS), 0);
 
   gtk_container_set_border_width (GTK_CONTAINER (pwHBox), 4);
   gtk_box_pack_start (GTK_BOX (pwVBox), pwHBox, FALSE, FALSE, 0);
