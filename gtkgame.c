@@ -83,6 +83,8 @@
 #include "fun3d.h"
 #endif
 
+#include "xpm/stock_stop_16.xpm"
+
 #define KEY_ESCAPE -229
 
 /* Offset action to avoid predefined values */
@@ -119,13 +121,15 @@ char* warningStrings[WARN_NUM_WARNINGS] =
 	N_("This option will speed up the 3d drawing, but may not work correctly on all machines"),
 	N_("Drawing shadows is only supported on the latest graphics cards\n"
 		"Disable this option if performance is poor"),
-	N_("No hardware accelerated graphics card found, performance may be slow")
+	N_("No hardware accelerated graphics card found, performance may be slow"),
+	N_("Interupt the current process?")
 };
 
 char* warningNames[WARN_NUM_WARNINGS] =
-{"fullscreenexit", "quickdraw", "shadows", "unaccelerated"};
+{"fullscreenexit", "quickdraw", "shadows", "unaccelerated", "stop"};
 
-int warningEnabled[WARN_NUM_WARNINGS] = {TRUE, TRUE, TRUE, TRUE};
+int warningEnabled[WARN_NUM_WARNINGS] = {TRUE, TRUE, TRUE, TRUE, TRUE};
+int warningQuestion[WARN_NUM_WARNINGS] = {FALSE, FALSE, FALSE, FALSE, TRUE};
 
 /* Enumeration to be used as index to the table of command strings below
    (since GTK will only let us put integers into a GtkItemFactoryEntry,
@@ -335,15 +339,19 @@ static GtkWidget *pwGameBox;
 static GtkWidget *pwPanelGameBox;
 static GtkWidget *pwEventBox;
 static int panelSize = 325;
+static GtkWidget *pwStopTest;
 
 extern void GTKSuspendInput(void)
 {
 	if (!fX)
 		return;
+
 	if (suspendCount == 0)
 	{	/* Grab events so that the board window knows this is a re-entrant
 		call, and won't allow commands like roll, move or double. */
 		grabbedWidget = pwGrab;
+		if (pwGrab == pwStopTest)
+			gtk_widget_set_sensitive(pwStopTest, TRUE);
 		gtk_grab_add(pwGrab);
 		grabIdSignal = g_signal_connect_after(G_OBJECT(pwGrab),
 				"key-press-event", G_CALLBACK(gtk_true), NULL);
@@ -368,6 +376,8 @@ extern void GTKResumeInput(void)
 				g_signal_handler_disconnect (G_OBJECT(grabbedWidget), grabIdSignal);
 			gtk_grab_remove(grabbedWidget);
 		}
+		if (pwGrab == pwStopTest)
+			gtk_widget_set_sensitive(pwStopTest, FALSE);
 	}
 
 	GTKAllowStdin();
@@ -3497,27 +3507,27 @@ GtkItemFactoryEntry aife[] = {
 	{ N_("/_Settings/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ N_("/_Settings/Save settings"), 
           NULL, Command, CMD_SAVE_SETTINGS, NULL, NULL },
-	{ N_("/_Go"), NULL, NULL, 0, "<Branch>", NULL },
-	{ N_("/_Go/Pre_vious game"), "<control>Page_Up", 
+	{ N_("/G_o"), NULL, NULL, 0, "<Branch>", NULL },
+	{ N_("/G_o/Pre_vious game"), "<control>Page_Up", 
           Command, CMD_PREV_GAME,
 		"<StockItem>", GTK_STOCK_GOTO_FIRST
 	},
-	{ N_("/_Go/Previous rol_l"), "Page_Up", 
+	{ N_("/G_o/Previous rol_l"), "Page_Up", 
           Command, CMD_PREV_ROLL,
 		"<StockItem>", GTK_STOCK_GO_BACK
 	},
-	{ N_("/_Go/Next _roll"), "Page_Down",
+	{ N_("/G_o/Next _roll"), "Page_Down",
 	  Command, CMD_NEXT_ROLL, 
 		"<StockItem>", GTK_STOCK_GO_FORWARD
 	},
-	{ N_("/_Go/Next _game"), "<control>Page_Down",
+	{ N_("/G_o/Next _game"), "<control>Page_Down",
 	  Command, CMD_NEXT_GAME,
 		"<StockItem>", GTK_STOCK_GOTO_LAST
 	},
-	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>", NULL },
-	{ N_("/_Go/Previous marke_d move"), "<control><shift>Page_Up", 
+	{ N_("/G_o/-"), NULL, NULL, 0, "<Separator>", NULL },
+	{ N_("/G_o/Previous marke_d move"), "<control><shift>Page_Up", 
           Command, CMD_PREV_MARKED, NULL, NULL },
-	{ N_("/_Go/Next mar_ked move"), "<control><shift>Page_Down", 
+	{ N_("/G_o/Next mar_ked move"), "<control><shift>Page_Down", 
           Command, CMD_NEXT_MARKED, NULL, NULL },
 	{ N_("/_Help"), NULL, NULL, 0, "<Branch>", NULL },
 	{ N_("/_Help/_Commands"), NULL, Command, CMD_HELP, NULL, NULL },
@@ -3531,6 +3541,24 @@ GtkItemFactoryEntry aife[] = {
 		"<StockItem>", GTK_STOCK_ABOUT
 	}
 };
+
+static void Stop( GtkWidget *pw, gpointer unused )
+{
+	if (!GTKShowWarning(WARN_STOP, pw))
+		return;
+
+	fInterrupt = TRUE;
+#if USE_BOARD3D
+{
+	BoardData *bd = BOARD( pwBoard )->board_data;
+	if (display_is_3d(bd->rd))
+	{
+		StopIdle3d(bd, bd->bd3d);
+		RestrictiveRedraw();
+	}
+}
+#endif
+}
 
 static void CreateMainWindow(void)
 {
@@ -3576,8 +3604,6 @@ static void CreateMainWindow(void)
    gtk_container_add( GTK_CONTAINER( pwHandle ),
                        pwToolbar = ToolbarNew() );
     
-   pwGrab = GTK_WIDGET( ToolbarGetStopParent( pwToolbar ) );
-
    gtk_box_pack_start( GTK_BOX( pwVbox ),
 			pwGameBox = gtk_hbox_new(FALSE, 0),
 			TRUE, TRUE, 0 );
@@ -3601,12 +3627,12 @@ static void CreateMainWindow(void)
 
    /* Status bar */
 					
-   gtk_box_pack_end( GTK_BOX( pwVbox ), pwHbox = gtk_hbox_new( FALSE, 0 ),
-		      FALSE, FALSE, 0 );
-    
+   gtk_box_pack_end( GTK_BOX( pwVbox ), pwHbox = gtk_hbox_new( FALSE, 0 ), FALSE, FALSE, 0 );
+
     gtk_box_pack_start( GTK_BOX( pwHbox ), pwStatus = gtk_statusbar_new(),
 		      TRUE, TRUE, 0 );
-    gtk_statusbar_set_has_resize_grip( GTK_STATUSBAR( pwStatus ), TRUE );
+
+    gtk_statusbar_set_has_resize_grip( GTK_STATUSBAR( pwStatus ), FALSE );
     /* It's a bit naughty to access pwStatus->label, but its default alignment
        is ugly, and GTK gives us no other way to change it. */
     gtk_misc_set_alignment( GTK_MISC( GTK_STATUSBAR( pwStatus )->label ),
@@ -3617,7 +3643,14 @@ static void CreateMainWindow(void)
 					       "progress" );
     g_signal_connect( G_OBJECT( pwStatus ), "text-popped",
 			G_CALLBACK( TextPopped ), NULL );
-    
+
+	pwStopTest = gtk_button_new();
+	gtk_container_add(GTK_CONTAINER(pwStopTest), image_from_xpm_d (stock_stop_16_xpm, pwStopTest));
+	gtk_widget_set_sensitive(pwStopTest, FALSE);
+	gtk_box_pack_start( GTK_BOX( pwHbox ), pwStopTest, FALSE, FALSE, 0 );
+	g_signal_connect(G_OBJECT(pwStopTest), "clicked", G_CALLBACK( Stop ), NULL );
+	pwGrab = pwStopTest;
+
     gtk_box_pack_start( GTK_BOX( pwHbox ),
 			pwProgress = gtk_progress_bar_new(),
 			FALSE, FALSE, 0 );
@@ -5822,9 +5855,7 @@ extern void GTKShowVersion( void )
 	FALSE, FALSE, 8 );
 	g_signal_connect( G_OBJECT( pwButton ), "clicked",
 		G_CALLBACK( GtkShowEngine ), NULL );
-
-	gtk_widget_show_all( pwDialog );
-	gtk_main();
+	GTKRunDialog(pwDialog);
 }
 
 static GtkWidget* SelectableLabel(GtkWidget* reference, char* text)

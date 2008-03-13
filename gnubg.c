@@ -5122,8 +5122,6 @@ extern void Prompt( void )
 	return;
 #endif
 
-    ProgressEnd();
-    
     g_print( FormatPrompt() );
     fflush( stdout );    
 }

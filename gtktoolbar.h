@@ -34,9 +34,6 @@ typedef enum _toolbarcontrol {
 extern GtkWidget *
 ToolbarNew ( void );
 
-extern GtkWidget *
-ToolbarGetStopParent ( GtkWidget *pwToolbar );
-
 extern toolbarcontrol
 ToolbarUpdate ( GtkWidget *pwToolbar,
                 const matchstate *pms,

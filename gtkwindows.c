@@ -320,6 +320,8 @@ extern char* GTKGetInput(char* title, char* prompt, GtkWidget *parent)
 
 GtkWidget *pwTick;
 
+int warningResult;
+
 static void
 WarningOK ( GtkWidget *pw, warnings warning )
 {
@@ -329,30 +331,43 @@ WarningOK ( GtkWidget *pw, warnings warning )
 		sprintf(cmd, "set warning %s off", warningNames[warning]);
 		UserCommand(cmd);
 	}
+	warningResult = TRUE;
 	gtk_widget_destroy(gtk_widget_get_toplevel(pw));
 }
 
-extern void GTKShowWarning(warnings warning, GtkWidget *pwParent)
+extern int GTKShowWarning(warnings warning, GtkWidget *pwParent)
 {
 	if (warningEnabled[warning])
 	{
-		GtkWidget *pwDialog, *pwMsg, *pwv;
+		char *buf;
+		GtkWidget *pwDialog, *pwMsg, *pwv, *label;
 		
-		pwDialog = GTKCreateDialog( _("GNU Backgammon - Warning"), DT_WARNING,
+		pwDialog = GTKCreateDialog( _("GNU Backgammon - Warning"), warningQuestion[warning] ? DT_AREYOUSURE : DT_WARNING,
 			pwParent, DIALOG_FLAG_MODAL, G_CALLBACK ( WarningOK ), (void*)warning );
 
-		pwv = gtk_vbox_new ( FALSE, 8 );
+		pwv = gtk_vbox_new ( FALSE, 0 );
 		gtk_container_add ( GTK_CONTAINER (DialogArea( pwDialog, DA_MAIN ) ), pwv );
 
-                pwMsg = gtk_label_new( gettext( warningStrings[warning] ) );
+		pwMsg = gtk_label_new( gettext( warningStrings[warning] ) );
+		gtk_misc_set_padding(GTK_MISC(pwMsg), 8, 8);
 		gtk_box_pack_start( GTK_BOX( pwv ), pwMsg, TRUE, TRUE, 0 );
 
-		pwTick = gtk_check_button_new_with_label (_("Don't show this again"));
+		buf = g_strdup_printf("<small>%s</small>", _("Don't show this again"));
+		label = gtk_label_new("");
+		gtk_label_set_markup (GTK_LABEL(label), buf);
+		g_free(buf);
+		pwTick = gtk_check_button_new();
+		gtk_container_add(GTK_CONTAINER(pwTick), label);
 		gtk_tooltips_set_tip(ptt, pwTick, _("If set, this message won't appear again"), 0);
 		gtk_box_pack_start( GTK_BOX( pwv ), pwTick, TRUE, TRUE, 0 );
+		gtk_widget_grab_focus(DialogArea(pwDialog, DA_OK));
 
+		warningResult = FALSE;
 		GTKRunDialog(pwDialog);
+		return warningResult;
 	}
+	else
+		return TRUE;
 }
 
 extern void GTKRunDialog(GtkWidget *dialog)

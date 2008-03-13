@@ -55,8 +55,6 @@ typedef struct _toolbarwidget {
   GtkWidget *pwResign;       /* button for "Play" */
   GtkWidget *pwHint;      /* button for "Reset" */
   GtkWidget *pwReset;      /* button for "Reset" */
-  GtkWidget *pwStop;       /* button for "Stop" */
-  GtkWidget *pwStopParent; /* parent for pwStop */
   GtkWidget *pwEdit;       /* button for "Edit" */
   GtkWidget *pwHideShowPanel; /* button hide/show panel */
   GtkWidget *pwButtonClockwise; /* button for clockwise */
@@ -198,34 +196,6 @@ ToolbarIsEditing( GtkWidget *pwToolbar ) {
   return editing;
 }
 
-static void 
-ToolbarStop( GtkWidget *pw, gpointer unused ) {
-
-	fInterrupt = TRUE;
-#if USE_BOARD3D
-{
-	BoardData *bd = BOARD( pwBoard )->board_data;
-	if (display_is_3d(bd->rd))
-	{
-		StopIdle3d(bd, bd->bd3d);
-		RestrictiveRedraw();
-	}
-}
-#endif
-}
-
-
-extern GtkWidget *
-ToolbarGetStopParent ( GtkWidget *pwToolbar ) {
-	
-  toolbarwidget *ptw = g_object_get_data ( G_OBJECT ( pwToolbar ),
-		  "toolbarwidget" );
-
-  g_assert ( ptw );
-
-  return ptw->pwStopParent;
-}
-
 extern toolbarcontrol
 ToolbarUpdate ( GtkWidget *pwToolbar,
                 const matchstate *pms,
@@ -312,13 +282,6 @@ ToolbarNew ( void ) {
 #include "xpm/stock_cancel.xpm"
 #include "xpm/stock_undo.xpm"
 #include "xpm/stock_edit.xpm"
-#include "xpm/stock_stop.xpm"
-#if 0
-#include "xpm/tb_no.xpm"
-#include "xpm/tb_yes.xpm"
-#include "xpm/tb_stop.xpm"
-#include "xpm/tb_undo.xpm"
-#endif
     
   /* 
    * Create tool bar 
@@ -459,27 +422,6 @@ ToolbarNew ( void ) {
 
   gtk_toolbar_append_space(GTK_TOOLBAR(pwToolbar));
   
-  /* stop button */
-  
-  ptw->pwStopParent = gtk_event_box_new();
-	gtk_event_box_set_visible_window(GTK_EVENT_BOX(ptw->pwStopParent), FALSE);
-  ptw->pwStop = gtk_button_new(),
-  gtk_container_add( GTK_CONTAINER( ptw->pwStopParent ), ptw->pwStop );
-
-  pwvbox = gtk_vbox_new(FALSE, 0); 
-  gtk_container_add(GTK_CONTAINER(pwvbox), 
-		  image_from_xpm_d (stock_stop_xpm, pwToolbar)); 
-  gtk_container_add(GTK_CONTAINER(pwvbox), 
-		  gtk_label_new(_("Stop")));
-  gtk_container_add(GTK_CONTAINER(ptw->pwStop), pwvbox); 
-  g_signal_connect(G_OBJECT(ptw->pwStop), "clicked", 
-		  G_CALLBACK( ToolbarStop ), NULL );
-  gtk_toolbar_append_widget( GTK_TOOLBAR ( pwToolbar ), 
-			    ptw->pwStopParent, _("Stop the current operation"),
-			    NULL);
-  gtk_button_set_relief( GTK_BUTTON(ptw->pwStop), 
-		  GTK_RELIEF_NONE);
-
 #undef TB_TOGGLE_BUTTON_ADD
 #undef TB_BUTTON_ADD
   
