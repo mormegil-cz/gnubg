@@ -2622,26 +2622,10 @@ extern void CommandSetPostCrawford( char *sz ) {
 }
 
 #if USE_GTK
-static warnings ParseWarning(char* str)
-{
-	int i;
-
-	while(*str == ' ')
-		str++;
-
-	for (i = 0; i < WARN_NUM_WARNINGS; i++)
-	{
-		if (!StrCaseCmp(str, warningNames[i]))
-			return i;
-	}
-
-	return -1;
-}
-
 extern void CommandSetWarning( char *sz )
 {
 	char buf[100];
-	warnings warning;
+	warningType warning;
 	char* pValue = strchr(sz, ' ');
 
 	if (!pValue)
@@ -2664,11 +2648,11 @@ extern void CommandSetWarning( char *sz )
 
 	if (!StrCaseCmp(pValue, "on"))
 	{
-		warningEnabled[warning] = TRUE;
+		SetWarningEnabled(warning, TRUE);
 	}
 	else if (!StrCaseCmp(pValue, "off"))
 	{
-		warningEnabled[warning] = FALSE;
+		SetWarningEnabled(warning, FALSE);
 	}
 	else
 	{
@@ -2680,17 +2664,9 @@ extern void CommandSetWarning( char *sz )
 	outputl(buf);
 }
 
-static void PrintWarning(int warning)
-{
-	char buf[1024];
-	sprintf(buf, _("Warning %s (%s) is %s"), warningNames[warning], warningStrings[warning],
-		warningEnabled[warning] ? "on" : "off");
-	outputl(buf);
-}
-
 extern void CommandShowWarning( char *sz )
 {
-	warnings warning;
+	warningType warning;
 
 	while(*sz == ' ')
 		sz++;

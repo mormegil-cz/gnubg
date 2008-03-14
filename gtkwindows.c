@@ -33,6 +33,39 @@
 #include "gtktoolbar.h"
 typedef void (*dialog_func_ty)(GtkWidget *, void*);
 
+typedef struct _Warning
+{
+	char* warningString;
+	char* warningName;
+	int warningEnabled;
+	int isWarningQuestion;
+} Warning;
+
+Warning warnings[WARN_NUM_WARNINGS] =
+{
+	{
+		N_("Press escape to exit full screen mode"),
+		"fullscreenexit", TRUE, FALSE
+	},
+	{
+		N_("This option will speed up the 3d drawing, but may not work correctly on all machines"),
+		"quickdraw", TRUE, FALSE
+	},
+	{
+		N_("Drawing shadows is only supported on the latest graphics cards\n"
+			"Disable this option if performance is poor"),
+		"shadows", TRUE, FALSE
+	},
+	{
+		N_("No hardware accelerated graphics card found, performance may be slow"),
+		"unaccelerated", TRUE, FALSE
+	},
+	{
+		N_("Interupt the current process?"),
+		"stop", TRUE, TRUE
+	}
+};
+
 static char *aszStockItem[ NUM_DIALOG_TYPES ] =
 {
 	GTK_STOCK_DIALOG_INFO,
@@ -323,32 +356,32 @@ GtkWidget *pwTick;
 int warningResult;
 
 static void
-WarningOK ( GtkWidget *pw, warnings warning )
+WarningOK ( GtkWidget *pw, warningType warning )
 {
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pwTick)))
 	{	/* if tick set, disable warning */
 		char cmd[200];
-		sprintf(cmd, "set warning %s off", warningNames[warning]);
+		sprintf(cmd, "set warning %s off", warnings[warning].warningName);
 		UserCommand(cmd);
 	}
 	warningResult = TRUE;
 	gtk_widget_destroy(gtk_widget_get_toplevel(pw));
 }
 
-extern int GTKShowWarning(warnings warning, GtkWidget *pwParent)
+extern int GTKShowWarning(warningType warning, GtkWidget *pwParent)
 {
-	if (warningEnabled[warning])
+	if (warnings[warning].warningEnabled)
 	{
 		char *buf;
 		GtkWidget *pwDialog, *pwMsg, *pwv, *label;
 		
-		pwDialog = GTKCreateDialog( _("GNU Backgammon - Warning"), warningQuestion[warning] ? DT_AREYOUSURE : DT_WARNING,
+		pwDialog = GTKCreateDialog( _("GNU Backgammon - Warning"), warnings[warning].isWarningQuestion ? DT_AREYOUSURE : DT_WARNING,
 			pwParent, DIALOG_FLAG_MODAL, G_CALLBACK ( WarningOK ), (void*)warning );
 
 		pwv = gtk_vbox_new ( FALSE, 0 );
 		gtk_container_add ( GTK_CONTAINER (DialogArea( pwDialog, DA_MAIN ) ), pwv );
 
-		pwMsg = gtk_label_new( gettext( warningStrings[warning] ) );
+		pwMsg = gtk_label_new( gettext( warnings[warning].warningString ) );
 		gtk_misc_set_padding(GTK_MISC(pwMsg), 8, 8);
 		gtk_box_pack_start( GTK_BOX( pwv ), pwMsg, TRUE, TRUE, 0 );
 
@@ -368,6 +401,45 @@ extern int GTKShowWarning(warnings warning, GtkWidget *pwParent)
 	}
 	else
 		return TRUE;
+}
+
+extern warningType ParseWarning(char* str)
+{
+	int i;
+
+	while(*str == ' ')
+		str++;
+
+	for (i = 0; i < WARN_NUM_WARNINGS; i++)
+	{
+		if (!StrCaseCmp(str, warnings[i].warningName))
+			return i;
+	}
+
+	return -1;
+}
+
+extern void SetWarningEnabled(warningType warning, int value)
+{
+	warnings[warning].warningEnabled = value;
+}
+
+extern void PrintWarning(warningType warning)
+{
+	char buf[1024];
+	sprintf(buf, _("Warning %s (%s) is %s"), warnings[warning].warningName, warnings[warning].warningString,
+		warnings[warning].warningEnabled ? "on" : "off");
+	outputl(buf);
+}
+
+extern void WriteWarnings(FILE *pf)
+{
+	int i;
+	for (i = 0; i < WARN_NUM_WARNINGS; i++)
+	{
+		if (!warnings[i].warningEnabled)
+			fprintf(pf, "set warning %s off\n", warnings[i].warningName);
+	}
 }
 
 extern void GTKRunDialog(GtkWidget *dialog)

@@ -58,15 +58,15 @@ extern int GTKMessage( char *sz, dialogtype dt );
 extern void GTKSetCurrentParent(GtkWidget *parent);
 extern GtkWidget *GTKGetCurrentParent(void);
 
-typedef enum _warnings { 
+typedef enum _warningType { 
   WARN_FULLSCREEN_EXIT=0, WARN_QUICKDRAW_MODE, WARN_SET_SHADOWS, 
 	  WARN_UNACCELERATED, WARN_STOP, WARN_NUM_WARNINGS
-} warnings;
+} warningType;
 
-extern int GTKShowWarning(warnings warning, GtkWidget *pwParent);
-extern char* warningStrings[WARN_NUM_WARNINGS];
-extern char* warningNames[WARN_NUM_WARNINGS];
-extern int warningEnabled[WARN_NUM_WARNINGS];
-extern int warningQuestion[WARN_NUM_WARNINGS];
+extern int GTKShowWarning(warningType warning, GtkWidget *pwParent);
+extern warningType ParseWarning(char* str);
+extern void SetWarningEnabled(warningType warning, int value);
+extern void PrintWarning(warningType warning);
+extern void WriteWarnings(FILE *pf);
 
 #endif

@@ -4853,11 +4853,7 @@ extern void CommandSaveSettings( char *szParam )
        g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%f", rRatingOffset ));
 	/* warnings */
 #if USE_GTK
-	for (i = 0; i < WARN_NUM_WARNINGS; i++)
-	{
-		if (!warningEnabled[i])
-			fprintf(pf, "set warning %s off\n", warningNames[i]);
-	}
+	WriteWarnings(pf);
 #endif
 	/* Save toolbar style */
 	fprintf(pf, "set toolbar %d\n", nToolbarStyle);
