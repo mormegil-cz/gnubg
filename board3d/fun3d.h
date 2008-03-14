@@ -31,6 +31,7 @@ void calculateBackgroundSize(BoardData3d *bd3d, const int viewport[4]);
 
 void RestrictiveRender(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd);
 void RestrictiveDrawFrame(const float pos[3], float width, float height, float depth);
+void RestrictiveDrawFrameWindow(int x, int y, int width, int height);
 void RestrictiveDraw(ClipBox* pCb, const float pos[3], float width, float height, float depth);
 void EnlargeCurrentToBox(const ClipBox* pOtherCb);
 void RestrictiveDrawFlag(const BoardData* bd);

@@ -275,10 +275,6 @@ static void CreateDotTexture(unsigned int *pDotTexture)
 	free(data);
 }
 
-#ifdef WIN32
-static int UseBufferRegions = -1;
-#endif
-
 void InitGL(const BoardData *bd)
 {
 	float gal[4];
@@ -327,13 +323,16 @@ void InitGL(const BoardData *bd)
 #endif
 		CreateDotTexture(&bd3d->dotTexture);
 #ifdef WIN32
-		if (UseBufferRegions == -1)
-			UseBufferRegions = wglBufferInitialize();
-
-		if (UseBufferRegions == 1)
 		{
-			bd3d->wglBuffer = CreateBufferRegion(WGL_BACK_COLOR_BUFFER_BIT_ARB | WGL_DEPTH_BUFFER_BIT_ARB);
-			bd3d->fBuffers = (bd->bd3d->wglBuffer != NULL);
+			static int UseBufferRegions = -1;
+			if (UseBufferRegions == -1)
+				UseBufferRegions = wglBufferInitialize();
+
+			if (UseBufferRegions == 1)
+			{
+				bd3d->wglBuffer = CreateBufferRegion(WGL_BACK_COLOR_BUFFER_BIT_ARB | WGL_DEPTH_BUFFER_BIT_ARB);
+				bd3d->fBuffers = (bd->bd3d->wglBuffer != NULL);
+			}
 		}
 #endif
 	}
@@ -1806,6 +1805,23 @@ void RestrictiveDrawFrame(const float pos[3], float width, float height, float d
 	}
 }
 
+void RestrictiveDrawFrameWindow(int x, int y, int width, int height)
+{
+	if (numRestrictFrames != -1)
+	{
+		numRestrictFrames++;
+		if (numRestrictFrames == MAX_FRAMES)
+		{	/* Too many drawing requests - just redraw whole screen */
+			RestrictiveRedraw();
+			return;
+		}
+		cb[numRestrictFrames].x = (float)x;
+		cb[numRestrictFrames].y = (float)y;
+		cb[numRestrictFrames].xx = (float)x + width;
+		cb[numRestrictFrames].yy = (float)y + height;
+	}
+}
+
 void RestrictiveRender(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd)
 {
 	GLint viewport[4];
@@ -2484,18 +2500,8 @@ extern gboolean display_is_2d (const renderdata *prd)
 
 extern void Draw3d(const BoardData* bd)
 {	/* Render board: quick drawing, standard or 2 passes for shadows */
-	if (bd->rd->quickDraw)
-	{	/* Quick drawing mode */
-		if (numRestrictFrames >= 0)
-		{
-			if (numRestrictFrames > 0)
-				RestrictiveRender(bd, bd->bd3d, bd->rd);
-			return;
-		}
-		numRestrictFrames = 0;
-	}
 #ifdef WIN32
-	else if (bd->bd3d->fBuffers)
+	if (bd->bd3d->fBuffers)
 	{
 		if (bd->bd3d->fBasePreRendered)
 			RestoreBufferRegion(bd->bd3d->wglBuffer, 0, 0, bd->bd3d->drawing_area3d->allocation.width, bd->bd3d->drawing_area3d->allocation.height);
@@ -2510,8 +2516,8 @@ extern void Draw3d(const BoardData* bd)
 		else
 			drawBoardTop(bd, bd->bd3d, bd->rd);
 	}
-#endif
 	else
+#endif
 	{
 		if (bd->rd->showShadows)
 			shadowDisplay(drawBoard, bd, bd->bd3d, bd->rd);

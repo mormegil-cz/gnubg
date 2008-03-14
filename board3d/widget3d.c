@@ -103,7 +103,7 @@ void MakeCurrent3d(const BoardData3d *bd3d)
 		g_print("gdk_gl_drawable_make_current failed!\n");
 }
 
-static gboolean expose_event_3d(GtkWidget *widget, GdkEventExpose *notused, const BoardData* bd)
+static gboolean expose_event_3d(GtkWidget *widget, GdkEventExpose *exposeEvent, const BoardData* bd)
 {
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
 	if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(widget)))
@@ -111,10 +111,39 @@ static gboolean expose_event_3d(GtkWidget *widget, GdkEventExpose *notused, cons
 
 	CheckOpenglError();
 
-#ifndef TEST_HARNESS
-	Draw3d(bd);
-#else
+#ifdef TEST_HARNESS
 	TestHarnessDraw(bd);
+#else
+	if (bd->rd->quickDraw)
+	{	/* Quick drawing mode */
+		if (numRestrictFrames >= 0)
+		{
+			if (numRestrictFrames == 0)
+			{	/* Redraw obscured part of window */
+				RestrictiveDrawFrameWindow(exposeEvent->area.x, widget->allocation.height - exposeEvent->area.y - exposeEvent->area.height, exposeEvent->area.width, exposeEvent->area.height);
+			}
+
+			if (numRestrictFrames > 0)
+			{	/* Draw updated region directly to screen */
+				glDrawBuffer(GL_FRONT);
+				RestrictiveRender(bd, bd->bd3d, bd->rd);
+				glFlush();
+			}
+		}
+		else
+		{	/* Full screen redraw (to back buffer and then swap) */
+			glDrawBuffer(GL_BACK);
+			numRestrictFrames = 0;
+			drawBoard(bd, bd->bd3d, bd->rd);
+			gdk_gl_drawable_swap_buffers(gldrawable);
+		}
+
+		gdk_gl_drawable_gl_end(gldrawable);
+
+		return TRUE;
+	}
+
+	Draw3d(bd);
 #endif
 
 	gdk_gl_drawable_swap_buffers(gldrawable);
