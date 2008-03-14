@@ -254,7 +254,6 @@ EvalMoves ( hintdata *phd, evalcontext *pec )
 
   MoveListUpdate ( phd );
 
-  ProgressEnd ();
 }
 
 static void

@@ -1013,7 +1013,7 @@ extern void CommandTake(char *);
 extern int getGameNumber(const listOLD * plGame);
 extern int getMoveNumber(const listOLD * plGame, const void *p);
 
-extern void ProcessGtkEvents();
+extern void ProcessGtkEvents(void);
 #if !USE_MULTITHREAD
 extern void CallbackProgress( void );
 #endif
