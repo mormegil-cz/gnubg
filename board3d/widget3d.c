@@ -123,12 +123,10 @@ static gboolean expose_event_3d(GtkWidget *widget, GdkEventExpose *exposeEvent, 
 				RestrictiveDrawFrameWindow(exposeEvent->area.x, widget->allocation.height - exposeEvent->area.y - exposeEvent->area.height, exposeEvent->area.width, exposeEvent->area.height);
 			}
 
-			if (numRestrictFrames > 0)
-			{	/* Draw updated region directly to screen */
-				glDrawBuffer(GL_FRONT);
-				RestrictiveRender(bd, bd->bd3d, bd->rd);
-				glFlush();
-			}
+			/* Draw updated regions directly to screen */
+			glDrawBuffer(GL_FRONT);
+			RestrictiveRender(bd, bd->bd3d, bd->rd);
+			glFlush();
 		}
 		else
 		{	/* Full screen redraw (to back buffer and then swap) */
