@@ -623,6 +623,8 @@ listenloop:
 	return;
       }
       outputf( _("Waiting for a connection from %s...\n"), sz);
+      outputx();
+      ProcessGtkEvents();
 
       /* Must set length when using windows */
       saLen = sizeof(struct sockaddr);
@@ -654,6 +656,8 @@ listenloop:
 
       outputf( _("Accepted connection from %s.\n"), 
                  inet_ntoa( saRemote.sin_addr ) );
+      outputx();
+      ProcessGtkEvents();
 
       while( !ExternalRead( hPeer, szCommand, sizeof( szCommand ) ) ) {
 
