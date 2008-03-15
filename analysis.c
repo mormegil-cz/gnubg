@@ -1586,19 +1586,14 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * pl, const
                asz[ 0 ], asz[ 1 ], asz[ 2 ] );
       
     }
-    
-    strcat( szOutput, "\n\n" );
-    
+
+	strcat( szOutput, "\n\n" );
     freeGS( list );
-
   }
-
 }
 
-
-extern void
-CommandShowStatisticsMatch ( char *sz ) {
-
+extern void CommandShowStatisticsMatch ( char *sz )
+{
     char szOutput[4096];
 
     updateStatisticsMatch ( &lMatch );

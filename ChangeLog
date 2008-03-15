@@ -1,3 +1,7 @@
+Sat Mar 15 13:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c: Merge match/session analysis menu items.
+
 Thu Mar 13 22:27:26 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtkexport.c: change html export type and style sheet to combo_box

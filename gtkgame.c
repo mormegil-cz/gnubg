@@ -127,7 +127,6 @@ typedef enum _gnubgcommand {
     CMD_ANALYSE_MOVE,
     CMD_ANALYSE_GAME,
     CMD_ANALYSE_MATCH,
-    CMD_ANALYSE_SESSION,
     CMD_DECLINE,
     CMD_DOUBLE,
     CMD_DROP,
@@ -177,9 +176,7 @@ typedef enum _gnubgcommand {
     CMD_SHOW_MANUAL_ABOUT,
     CMD_SHOW_MANUAL_WEB,
     CMD_SHOW_ROLLS,
-    CMD_SHOW_STATISTICS_GAME,
     CMD_SHOW_STATISTICS_MATCH,
-    CMD_SHOW_STATISTICS_SESSION,
     CMD_SHOW_TEMPERATURE_MAP,
     CMD_SHOW_TEMPERATURE_MAP_CUBE,
     CMD_SHOW_VERSION,
@@ -188,7 +185,6 @@ typedef enum _gnubgcommand {
     CMD_TAKE,
     NUM_CMDS
 } gnubgcommand;
-   
 
 static char *aszCommands[ NUM_CMDS ] = {
     "agree",
@@ -199,7 +195,6 @@ static char *aszCommands[ NUM_CMDS ] = {
     "analyse move",
     "analyse game",
     "analyse match",
-    "analyse session",
     "decline",
     "double",
     "drop",
@@ -249,9 +244,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     "show manual about",
     "show manual web",
     "show rolls",
-    "show statistics game",
     "show statistics match",
-    "show statistics session",
     "show temperaturemap",
     "show temperaturemap =cube",
     "show version",
@@ -3414,10 +3407,8 @@ GtkItemFactoryEntry aife[] = {
           NULL, Command, CMD_ANALYSE_MOVE, NULL, NULL },
 	{ N_("/_Analyse/Analyse game"), 
           NULL, Command, CMD_ANALYSE_GAME, NULL, NULL },
-	{ N_("/_Analyse/Analyse match"), 
+	{ N_("/_Analyse/Analyse match\\\\session"), 
           NULL, Command, CMD_ANALYSE_MATCH, NULL, NULL },
-	{ N_("/_Analyse/Analyse session"), 
-          NULL, Command, CMD_ANALYSE_SESSION, NULL, NULL },
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ N_("/_Analyse/Batch analyse..."), NULL, GTKBatchAnalyse, 0, NULL,
 		NULL },
@@ -3440,12 +3431,8 @@ GtkItemFactoryEntry aife[] = {
 		"<StockItem>", GTK_STOCK_CLEAR
 	},
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>", NULL },
-	{ N_("/_Analyse/Game statistics"), NULL, Command,
-          CMD_SHOW_STATISTICS_GAME, NULL, NULL },
-	{ N_("/_Analyse/Match statistics"), NULL, Command,
+	{ N_("/_Analyse/Match\\\\session statistics"), NULL, Command,
           CMD_SHOW_STATISTICS_MATCH, NULL, NULL },
-	{ N_("/_Analyse/Session statistics"), NULL, Command,
-          CMD_SHOW_STATISTICS_SESSION, NULL, NULL },
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ N_("/_Analyse/Player records"), NULL, Command,
 	  CMD_RECORD_SHOW, NULL, NULL },
@@ -6347,8 +6334,6 @@ extern void GTKSet( void *p ) {
 	    pif, CMD_ANALYSE_GAME ), plGame != NULL );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_ANALYSE_MATCH ), !ListEmpty( &lMatch ) );
-	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
-	    pif, CMD_ANALYSE_SESSION ), !ListEmpty( &lMatch ) );
 
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
             pif, CMD_ANALYSE_CLEAR_MOVE ), 
@@ -6360,11 +6345,7 @@ extern void GTKSet( void *p ) {
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_ANALYSE_CLEAR_SESSION ), !ListEmpty( &lMatch ) );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
-	    pif, CMD_SHOW_STATISTICS_GAME ), plGame != NULL );
-	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SHOW_STATISTICS_MATCH ), !ListEmpty ( &lMatch ) );
-	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
-	    pif, CMD_SHOW_STATISTICS_SESSION ), !ListEmpty ( &lMatch ) );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_RECORD_SHOW ), TRUE );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
@@ -6461,7 +6442,6 @@ static int numStatGames, curStatGame;
 static GtkWidget* statPom;
 GtkWidget *pwStatDialog;
 int fGUIUseStatsPanel = TRUE;
-GtkWidget *pwUsePanels;
 GtkWidget *pswList;
 GtkWidget *pwNotebook;
 
@@ -6858,10 +6838,14 @@ static GtkWidget *CreateList(void)
 	return pwList;
 }
 
+static void stat_dialog_map(GtkWidget *window, GtkWidget *pwUsePanels)
+{
+	toggle_fGUIUseStatsPanel(pwUsePanels, 0);
+}
 
 extern void GTKDumpStatcontext( int game )
 {
-	GtkWidget *copyMenu, *menu_item, *pvbox;
+	GtkWidget *copyMenu, *menu_item, *pvbox, *pwUsePanels;
 #if USE_BOARD3D
 	int i;
 	GtkWidget *pw;
@@ -6974,7 +6958,8 @@ extern void GTKDumpStatcontext( int game )
 	g_signal_connect( G_OBJECT( pwNotebook ), "button-press-event", G_CALLBACK( ContextCopyMenu ), copyMenu );
 
 	StatsSelectGame(0, game);
-	toggle_fGUIUseStatsPanel(pwUsePanels, 0);
+
+	g_signal_connect(pwStatDialog, "map", G_CALLBACK(stat_dialog_map), pwUsePanels);
 
 	GTKRunDialog(pwStatDialog);
 
