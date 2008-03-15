@@ -166,7 +166,7 @@ extern void ShowList(char *asz[], char *szTitle, GtkWidget * pwParent);
 extern void ShowMove(hintdata * phd, const int f);
 extern void SwapBoardToPanel(int ToPanel);
 extern void ToggleDockPanels(gpointer p, guint n, GtkWidget * pw);
-extern void Undo(void);
+extern void GTKUndo(void);
 extern void UserCommand(char *sz);
 
 #if HAVE_LIBREADLINE

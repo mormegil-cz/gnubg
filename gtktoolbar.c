@@ -183,7 +183,7 @@ static void ToolbarToggleEdit(GtkWidget * pw, toolbarwidget * ptw)
 		if (ms.gs == GAME_NONE)
 			edit_new(nDefaultLength);
 		/* Undo any partial move that may have been made when entering edit mode */
-		Undo();
+		GTKUndo();
 	} else
 		editing = FALSE;
 
@@ -389,7 +389,7 @@ ToolbarNew ( void ) {
   gtk_toolbar_append_space(GTK_TOOLBAR(pwToolbar));
   
   /* reset button */
-  TB_BUTTON_ADD(ptw->pwReset, stock_undo_xpm, _("Undo"), Undo,
+  TB_BUTTON_ADD(ptw->pwReset, stock_undo_xpm, _("Undo"), GTKUndo,
 		  NULL, 
                   _("Undo moves"),
 		  NULL) ;

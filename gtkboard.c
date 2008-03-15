@@ -1763,7 +1763,7 @@ static void ShowBoardPopup(GdkEventButton* event)
 		menu_item = gtk_menu_item_new_with_label ("Undo Move");
 		gtk_menu_shell_append(GTK_MENU_SHELL(boardMenu), menu_item);
 		gtk_widget_show(menu_item);
-		g_signal_connect(G_OBJECT(menu_item), "activate", G_CALLBACK(Undo), NULL);
+		g_signal_connect(G_OBJECT(menu_item), "activate", G_CALLBACK(GTKUndo), NULL);
 
 		menu_item = gtk_menu_item_new();
 		gtk_menu_shell_append(GTK_MENU_SHELL(boardMenu), menu_item);
