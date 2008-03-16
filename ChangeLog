@@ -1,3 +1,7 @@
+Sun Mar 16 22:01:07 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* set.c, gtkgame.c: fix minor problems with the hide/show ids
+
 Sun Mar 16 21:56:59 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* credits.sh, gnubg.c, non-src/credits.c, non-src/external_l.c,

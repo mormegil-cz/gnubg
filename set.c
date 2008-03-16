@@ -1163,13 +1163,11 @@ extern void CommandSetGUIIllegal( char *sz ) {
 	       _("Chequers may not be dragged to illegal points.") );
 }
 
-extern void CommandSetGUIShowIDs( char *sz ) {
-
-    if( SetToggle( "gui showids", &GetMainAppearance()->fShowIDs, sz,
-		   _("The position and match IDs will be shown above the "
-		     "board."),
-		   _("The position and match IDs will not be shown.") ) )
-	UpdateSetting( &GetMainAppearance()->fShowIDs );
+extern void CommandSetGUIShowIDs(char *sz)
+{
+    SetToggle("gui showids", &GetMainAppearance()->fShowIDs, sz,
+	      _("The position and match IDs will be shown above the board."),
+	      _("The position and match IDs will not be shown."));
 }
 
 extern void CommandSetGUIDragTargetHelp( char *sz ) {

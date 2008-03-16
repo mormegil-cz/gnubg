@@ -1602,10 +1602,13 @@ SwitchDisplayMode( gpointer p, guint n, GtkWidget *pw )
 
 #endif
 
-extern void ToggleShowingIDs( gpointer p, guint n, GtkWidget *pw )
+static void ToggleShowingIDs( gpointer p, guint n, GtkWidget *pw )
 {
 	int newValue = GTK_CHECK_MENU_ITEM( pw )->active;
-	CommandSetGUIShowIDs(newValue ? "on" : "off");
+	char *sz = g_strdup_printf("set gui showids %s", newValue ? "on" :
+			"off");
+	UserCommand(sz);
+	g_free(sz);
 }
 
 int fToolbarShowing = TRUE;
@@ -3796,6 +3799,7 @@ extern void RunGTK( GtkWidget *pwSplash, char *commands, char *python_script, ch
 		GTKSet( ap );
 		GTKSet( &ms.fTurn );
 		GTKSet( &ms.gs );
+		GTKSet( &GetMainAppearance()->fShowIDs);
 	    
 		PushSplash ( pwSplash, 
 					_("Rendering"), _("Board"), 0 );
