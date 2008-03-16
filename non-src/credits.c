@@ -18,7 +18,7 @@
 #include <glib/gi18n.h>
 #include "credits.h"
 
-char aszCOPYRIGHT[] = N_("Copyright, 1999-2004 by Gary Wong, 2004-2007 GNU Backgammon is the legal property of its authors.");
+char aszCOPYRIGHT[] = N_("Copyright, 1999-2004 by Gary Wong, 2004-2007 GNU Backgammon is the legal\nproperty of its authors.");
 
 credEntry ceAuthors[] = {
   {"Joseph Heled", 0},

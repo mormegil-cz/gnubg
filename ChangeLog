@@ -1,3 +1,10 @@
+Sun Mar 16 21:56:59 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* credits.sh, gnubg.c, non-src/credits.c, non-src/external_l.c,
+	non-src/external_y.c, non-src/sgf_l.c, non-src/sgf_y.c,
+	non-src/sgf_y.h: minor updates to version printing and to non-src
+	files
+
 Sun Mar 16 10:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gtktoolbar.c: Change menus:

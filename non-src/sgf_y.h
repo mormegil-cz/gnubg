@@ -52,7 +52,7 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 92 "sgf_y.y"
+#line 93 "sgf_y.y"
 {
     char ach[ 2 ]; /* property identifier */
     char *pch; /* property value */
