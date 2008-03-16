@@ -4857,6 +4857,8 @@ extern void CommandSaveSettings( char *szParam )
 #endif
 	/* Save toolbar style */
 	fprintf(pf, "set toolbar %d\n", nToolbarStyle);
+	if (!fToolbarShowing)
+		fputs("set toolbar off\n", pf);
 
 	/* Save gamelist style on/off (if not set - default is set) */
 	if (!fStyledGamelist)

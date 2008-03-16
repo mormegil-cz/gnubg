@@ -1609,6 +1609,39 @@ SwitchDisplayMode( gpointer p, guint n, GtkWidget *pw )
 }
 
 #endif
+
+int fToolbarShowing = TRUE;
+
+extern void ShowToolbar(void)
+{
+	GtkWidget *pwHandle = gtk_widget_get_parent(pwToolbar);
+	gtk_widget_show(pwToolbar);
+	gtk_widget_show(pwHandle);
+
+	gtk_widget_show(gtk_item_factory_get_widget(pif, "/View/Toolbar/Hide Toolbar"));
+	gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Toolbar/Show Toolbar"));
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Toolbar/Text only"), TRUE);
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Toolbar/Icons only"), TRUE);
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Toolbar/Both"), TRUE);
+
+	fToolbarShowing = TRUE;
+}
+
+extern void HideToolbar(void)
+{
+	GtkWidget *pwHandle = gtk_widget_get_parent(pwToolbar);
+	gtk_widget_hide(pwToolbar);
+	gtk_widget_hide(pwHandle);
+
+	gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Toolbar/Hide Toolbar"));
+	gtk_widget_show(gtk_item_factory_get_widget(pif, "/View/Toolbar/Show Toolbar"));
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Toolbar/Text only"), FALSE);
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Toolbar/Icons only"), FALSE);
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Toolbar/Both"), FALSE);
+
+	fToolbarShowing = FALSE;
+}
+
 static gboolean EndFullScreen(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
 {
 	short k = event->keyval;
@@ -1629,18 +1662,15 @@ static void SetFullscreenWindowSettings(int panels, int ids, int maxed)
 static void DoFullScreenMode(gpointer p, guint n, GtkWidget * pw)
 {
 	BoardData *bd = BOARD(pwBoard)->board_data;
-	GtkWindow *ptl =
-	    GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(bd->table)));
+	GtkWindow *ptl = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(bd->table)));
 	GtkWidget *pwHandle = gtk_widget_get_parent(pwToolbar);
 	int showingPanels;
 	int maximised;
 	static gulong id;
 	static int changedRP, changedDP;
 
-	GtkWidget *pmiRP =
-	    gtk_item_factory_get_widget(pif, "/View/Restore panels");
-	GtkWidget *pmiDP =
-	    gtk_item_factory_get_widget(pif, "/View/Dock panels");
+	GtkWidget *pmiRP = gtk_item_factory_get_widget(pif, "/View/Restore panels");
+	GtkWidget *pmiDP = gtk_item_factory_get_widget(pif, "/View/Dock panels");
 
 #if USE_BOARD3D
     if (display_is_3d(bd->rd))
@@ -1649,11 +1679,10 @@ static void DoFullScreenMode(gpointer p, guint n, GtkWidget * pw)
 	}
 #endif
 
-	fFullScreen =
-	    GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget
-				(pif, "/View/Full screen"))->active;
+	fFullScreen = GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/View/Full screen"))->active;
 
-	if (fFullScreen) {
+	if (fFullScreen)
+	{
 		if (!fullScreenOnStartup)
 			GTKShowWarning(WARN_FULLSCREEN_EXIT, NULL);
 		else
@@ -1708,8 +1737,11 @@ static void DoFullScreenMode(gpointer p, guint n, GtkWidget * pw)
 	} else {
 		bd->rd->fShowGameInfo = TRUE;
 		gtk_widget_show(pwMenuBar);
-		gtk_widget_show(pwToolbar);
-		gtk_widget_show(pwHandle);
+		if (fToolbarShowing)
+		{
+			gtk_widget_show(pwToolbar);
+			gtk_widget_show(pwHandle);
+		}
 		gtk_widget_show(GTK_WIDGET(bd->table));
 #if USE_BOARD3D
 		/* Only show 2d dice below board if in 2d */
@@ -3347,11 +3379,14 @@ GtkItemFactoryEntry aife[] = {
 	{ N_("/_View/Hide panels"), NULL, HideAllPanels, 0, NULL, NULL },
 	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ N_("/_View/_Toolbar"), NULL, NULL, 0, "<Branch>", NULL},
-	{ N_("/_View/_Toolbar/Text only"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_TEXT,
+	{ N_("/_View/_Toolbar/_Hide Toolbar"), NULL, HideToolbar, 0, NULL, NULL },
+	{ N_("/_View/_Toolbar/_Show Toolbar"), NULL, ShowToolbar, 0, NULL, NULL },
+	{ N_("/_View/_Toolbar/-"), NULL, NULL, 0, "<Separator>", NULL },
+	{ N_("/_View/_Toolbar/_Text only"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_TEXT,
 	  "<RadioItem>", NULL },
-	{ N_("/_View/_Toolbar/Icons only"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_ICONS,
+	{ N_("/_View/_Toolbar/_Icons only"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_ICONS,
 	  "/View/Toolbar/Text only", NULL },
-	{ N_("/_View/_Toolbar/Both"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_BOTH,
+	{ N_("/_View/_Toolbar/_Both"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_BOTH,
 	  "/View/Toolbar/Text only", NULL },
 	{ N_("/_View/Full screen"), NULL, DoFullScreenMode, 0, "<CheckItem>", NULL },
 	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>", NULL },
@@ -3821,36 +3856,41 @@ extern void RunGTK( GtkWidget *pwSplash, char *commands, char *python_script, ch
 			has special settings, e.g., clockwise or nackgammon */
 		ShowBoard();
 
+		if (fToolbarShowing)
+			gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Toolbar/Show Toolbar"));
+
 		if (fFullScreen)
 		{	/* Change to full screen (but hide warning) */
 			fullScreenOnStartup = TRUE;
 			FullScreenMode(TRUE);
 		}
+		else if (!fToolbarShowing)
+			HideToolbar();
 
-                if (match)
-                {
-                        CommandLoadMatch(match);
-                        g_free(match);
-                        match = NULL;
-                }
+        if (match)
+        {
+                CommandLoadMatch(match);
+                g_free(match);
+                match = NULL;
+        }
 
-                if (commands)
-                {
-                        CommandLoadCommands(commands);
-                        g_free(commands);
-                        commands = NULL;
-                }
+        if (commands)
+        {
+                CommandLoadCommands(commands);
+                g_free(commands);
+                commands = NULL;
+        }
 
-                if (python_script)
-                {
+        if (python_script)
+        {
 #ifdef WIN32
-                        outputerrf(_("The windows gtk interface doesn't support the '-p' option. Use the cl interface instead"));
+			outputerrf(_("The windows gtk interface doesn't support the '-p' option. Use the cl interface instead"));
 #else
-                        g_idle_add( python_run_file, g_strdup(python_script) );
+			g_idle_add( python_run_file, g_strdup(python_script) );
 #endif
-                        g_free(python_script);
-                        python_script = NULL;
-                }
+			g_free(python_script);
+			python_script = NULL;
+		}
 
 		gtk_main();
 

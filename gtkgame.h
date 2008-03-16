@@ -46,6 +46,7 @@ extern int fNeedPrompt;
 extern int frozen;
 extern int fTTY;
 extern int fX;
+extern int fToolbarShowing;
 extern unsigned int nDelay;
 extern GtkWidget *hpaned;
 extern GtkWidget *pom;
@@ -168,6 +169,8 @@ extern void SwapBoardToPanel(int ToPanel);
 extern void ToggleDockPanels(gpointer p, guint n, GtkWidget * pw);
 extern void GTKUndo(void);
 extern void UserCommand(char *sz);
+extern void ShowToolbar(void);
+extern void HideToolbar(void);
 
 #if HAVE_LIBREADLINE
 extern int fReadingCommand;

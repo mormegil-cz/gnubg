@@ -2460,25 +2460,42 @@ extern void CommandSetScore( char *sz ) {
 #endif /* USE_GTK */
 }
 
-extern void CommandSetSeed( char *sz ) {
-
+extern void CommandSetSeed( char *sz )
+{
     SetSeed ( rngCurrent, rngctxCurrent, sz );
-
 }
 
 extern void CommandSetToolbar( char *sz )
 {
-	int n = ParseNumber( &sz );
-
-	if (n != 0 && n != 1 && n != 2)
+    if (!StrCaseCmp( "on", sz ) || !StrCaseCmp( "off", sz ))
 	{
-		outputl(_("You must specify either 0, 1 or 2"));
-		return;
-	}
 #if USE_GTK
-	if (fX)
-	  SetToolbarStyle(n);
+		if (!StrCaseCmp( "on", sz ))
+		{
+			if (!fToolbarShowing)
+				ShowToolbar();
+		}
+		else
+		{
+			if (fToolbarShowing)
+				HideToolbar();
+		}
 #endif
+	}
+	else
+	{
+		int n = ParseNumber( &sz );
+
+		if (n != 0 && n != 1 && n != 2)
+		{
+			outputl(_("You must specify either 0, 1 or 2"));
+			return;
+		}
+#if USE_GTK
+		if (fX)
+		  SetToolbarStyle(n);
+#endif
+	}
 }
 
 extern void CommandSetTurn( char *sz ) {

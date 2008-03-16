@@ -2,6 +2,7 @@ Sun Mar 16 10:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gtktoolbar.c: Add menu items for edit position and swap
 		direction toolbar commands.
+		Add option to hide toolbar.
 
 Sat Mar 15 13:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
