@@ -3320,8 +3320,12 @@ GtkItemFactoryEntry aife[] = {
 	  CopyAsIDs, 0, NULL, NULL },
 
 	{ N_("/_Edit/_Paste"), "<control>V", PasteText, 0,
-		"<StockItem>", GTK_STOCK_PASTE
-	},
+		"<StockItem>", GTK_STOCK_PASTE},
+
+	{ N_("/_Edit/-"), NULL, NULL, 0, "<Separator>", NULL },
+	{ N_("/_Edit/_Edit Position"), NULL, click_edit, 0,
+		"<CheckItem>", NULL},
+
 	{ N_("/_View"), NULL, NULL, 0, "<Branch>", NULL },
 	{ N_("/_View/_Game record"), NULL, TogglePanel, TOGGLE_GAMELIST,
 	  "<CheckItem>", NULL },
@@ -3350,6 +3354,8 @@ GtkItemFactoryEntry aife[] = {
 	{ N_("/_View/_Toolbar/Both"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_BOTH,
 	  "/View/Toolbar/Text only", NULL },
 	{ N_("/_View/Full screen"), NULL, DoFullScreenMode, 0, "<CheckItem>", NULL },
+	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>", NULL },
+	{ N_("/_View/Play _Clockwise"), NULL, click_swapdirection, 0, "<CheckItem>", NULL },
 #if USE_BOARD3D
 	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ N_("/_View/Switch to xD view"), NULL, SwitchDisplayMode, TOOLBAR_ACTION_OFFSET + MENU_OFFSET, NULL, NULL },

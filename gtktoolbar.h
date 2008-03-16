@@ -57,5 +57,6 @@ extern GtkWidget *
 image_from_xpm_d ( char **xpm, GtkWidget *pw );
 
 extern void click_edit(void);
+extern void click_swapdirection(void);
 
 #endif /* _GTKTOOLBAR_H_ */

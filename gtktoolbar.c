@@ -61,6 +61,8 @@ typedef struct _toolbarwidget {
 
 } toolbarwidget;
 
+/* Hack this for now to stop re-entering - should be fixed when menu switched to actions */
+static int inCallback = FALSE;
 
 static void ButtonClicked( GtkWidget *pw, char *sz ) {
 
@@ -148,34 +150,48 @@ ToolbarSetClockwise( GtkWidget *pwToolbar, const int f ) {
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( ptw->pwButtonClockwise ), f );
 
 }
-  
-static void
-ToolbarToggleClockwise( GtkWidget *pw, toolbarwidget *ptw ) {
-  GtkWidget **aapw = 
-    (GtkWidget **) g_object_get_data( G_OBJECT( pw ), "toggle_images" );
+
+extern void click_swapdirection(void)
+{
+	if (!inCallback)
+	{
+		toolbarwidget *ptw = g_object_get_data ( G_OBJECT ( pwToolbar ), "toolbarwidget" );
+		gtk_button_clicked( GTK_BUTTON( ptw->pwButtonClockwise ));
+	}
+}
+
+static void ToolbarToggleClockwise( GtkWidget *pw, toolbarwidget *ptw )
+{
+  GtkWidget **aapw = (GtkWidget **) g_object_get_data( G_OBJECT( pw ), "toggle_images" );
   int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) );
   
   gtk_multiview_set_current( GTK_MULTIVIEW( aapw[ 2 ] ), aapw[ f ] );
 
-  if ( fClockwise != f ) {
+  inCallback = TRUE;
+  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/View/Play Clockwise" )), f);
+  inCallback = FALSE;
+
+  if ( fClockwise != f )
+  {
     gchar *sz = g_strdup_printf( "set clockwise %s", f ? "on" : "off" );
     UserCommand( sz );
     g_free( sz );
   }
-
-}
-
-extern void click_edit(void)
-{
-        toolbarwidget *ptw = g_object_get_data ( G_OBJECT ( pwToolbar ), "toolbarwidget" );
-        gtk_button_clicked( GTK_BUTTON( ptw->pwEdit ));
 }
 
 int editing = FALSE;
 
+extern void click_edit(void)
+{
+	if (!inCallback)
+	{
+		toolbarwidget *ptw = g_object_get_data ( G_OBJECT ( pwToolbar ), "toolbarwidget" );
+        gtk_button_clicked( GTK_BUTTON( ptw->pwEdit ));
+	}
+}
+
 static void ToolbarToggleEdit(GtkWidget * pw, toolbarwidget * ptw)
 {
-
 	BoardData *pbd = BOARD(pwBoard)->board_data;
 
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ptw->pwEdit))) {
@@ -186,6 +202,10 @@ static void ToolbarToggleEdit(GtkWidget * pw, toolbarwidget * ptw)
 		GTKUndo();
 	} else
 		editing = FALSE;
+
+	inCallback = TRUE;
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/Edit/Edit Position" )), editing);
+	inCallback = FALSE;
 
 	board_edit(pbd);
 }
