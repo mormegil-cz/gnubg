@@ -173,14 +173,14 @@ extern gboolean ShowGameWindow( void )
 {
 	ShowPanel(WINDOW_GAME);
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
-			  "/View/Game record")), TRUE);
+			  "/View/Panels/Game record")), TRUE);
 	return TRUE;
 }
 
 static gboolean ShowAnnotation( void )
 {
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
-			  "/View/Commentary")), TRUE);
+			  "/View/Panels/Commentary")), TRUE);
 
 	woPanel[WINDOW_ANNOTATION].showing = TRUE;
 	/* Avoid showing before main window */
@@ -193,7 +193,7 @@ static gboolean ShowMessage( void )
 {
 	ShowPanel(WINDOW_MESSAGE);
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
-			  "/View/Message")), TRUE);
+			  "/View/Panels/Message")), TRUE);
 	return TRUE;
 }
 
@@ -201,7 +201,7 @@ static gboolean ShowAnalysis( void )
 {
 	ShowPanel(WINDOW_ANALYSIS);
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
-		"/View/Analysis")), TRUE);
+		"/View/Panels/Analysis")), TRUE);
 	return TRUE;
 }
 
@@ -209,7 +209,7 @@ static gboolean ShowTheoryWindow( void )
 {
 	ShowPanel(WINDOW_THEORY);
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
-			  "/View/Theory")), TRUE);
+			  "/View/Panels/Theory")), TRUE);
 	return TRUE;
 }
 
@@ -217,7 +217,7 @@ static gboolean ShowCommandWindow( void )
 {
 	ShowPanel(WINDOW_COMMAND);
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
-			  "/View/Command")), TRUE);
+			  "/View/Panels/Command")), TRUE);
 	return TRUE;
 }
 
@@ -915,7 +915,7 @@ static gboolean DeleteMessage ( void )
 {
 	HidePanel(WINDOW_MESSAGE);
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
-			  "/View/Message")), FALSE);
+			  "/View/Panels/Message")), FALSE);
 	return TRUE;
 }
 
@@ -923,7 +923,7 @@ static gboolean DeleteAnalysis( void )
 {
 	HidePanel(WINDOW_ANALYSIS);
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
-			  "/View/Analysis")), FALSE);
+			  "/View/Panels/Analysis")), FALSE);
 	return TRUE;
 }
 
@@ -931,7 +931,7 @@ static gboolean DeleteAnnotation( void )
 {
 	HidePanel(WINDOW_ANNOTATION);
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
-			  "/View/Commentary")), FALSE);
+			  "/View/Panels/Commentary")), FALSE);
 	return TRUE;
 }
 
@@ -939,7 +939,7 @@ static gboolean DeleteGame( void )
 {
 	HidePanel(WINDOW_GAME);
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
-			  "/View/Game record")), FALSE);
+			  "/View/Panels/Game record")), FALSE);
 	return TRUE;
 }
 
@@ -947,7 +947,7 @@ static gboolean DeleteTheoryWindow ( void )
 {
 	HidePanel(WINDOW_THEORY);
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
-			  "/View/Theory")), FALSE);
+			  "/View/Panels/Theory")), FALSE);
 	return TRUE;
 }
 
@@ -955,7 +955,7 @@ static gboolean DeleteCommandWindow ( void )
 {
 	HidePanel(WINDOW_COMMAND);
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
-			  "/View/Command")), FALSE);
+			  "/View/Panels/Command")), FALSE);
 	return TRUE;
 }
 
@@ -1059,9 +1059,17 @@ void DockPanels(void)
 	{
 		RefreshGeometries();	/* Get the current window positions */
 
-		gtk_widget_show(gtk_item_factory_get_widget(pif, "/View/Commentary"));
-		gtk_widget_show(gtk_item_factory_get_widget(pif, "/View/Hide panels"));
-		gtk_widget_show(gtk_item_factory_get_widget(pif, "/View/Restore panels"));
+		gtk_widget_show(gtk_item_factory_get_widget(pif, "/View/Panels/Commentary"));
+		if (fDisplayPanels)
+		{
+			gtk_widget_show(gtk_item_factory_get_widget(pif, "/View/Hide panels"));
+			gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Restore panels"));
+		}
+		else
+		{
+			gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Hide panels"));
+			gtk_widget_show(gtk_item_factory_get_widget(pif, "/View/Restore panels"));
+		}
 
 		for (i = 0; i < NUM_WINDOWS; i++)
 		{
@@ -1080,7 +1088,7 @@ void DockPanels(void)
 		if (fDisplayPanels)
 			SwapBoardToPanel(FALSE);
 
-		gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Commentary"));
+		gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Panels/Commentary"));
 		gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Hide panels"));
 		gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Restore panels"));
 
@@ -1099,12 +1107,12 @@ void DockPanels(void)
 		CreateTheoryWindow();
 		CreateCommandWindow();
 	}
-	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Message"), !fDockPanels || fDisplayPanels);
-	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Game record"), !fDockPanels || fDisplayPanels);
-	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Commentary"), !fDockPanels || fDisplayPanels);
-	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Analysis"), !fDockPanels || fDisplayPanels);
-	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Command"), !fDockPanels || fDisplayPanels);
-	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Theory"), !fDockPanels || fDisplayPanels);
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Panels/Message"), !fDockPanels || fDisplayPanels);
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Panels/Game record"), !fDockPanels || fDisplayPanels);
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Panels/Commentary"), !fDockPanels || fDisplayPanels);
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Panels/Analysis"), !fDockPanels || fDisplayPanels);
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Panels/Command"), !fDockPanels || fDisplayPanels);
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Panels/Theory"), !fDockPanels || fDisplayPanels);
 
 	if (!fDockPanels || fDisplayPanels)
 	{
@@ -1127,9 +1135,7 @@ void DockPanels(void)
 	SetMainWindowSize();
 }
 
-
-extern void
-ShowAllPanels ( gpointer p, guint n, GtkWidget *pw )
+extern void ShowAllPanels ( gpointer p, guint n, GtkWidget *pw )
 {
 	BoardData *bd = BOARD( pwBoard )->board_data;
 	int i;
@@ -1153,15 +1159,15 @@ ShowAllPanels ( gpointer p, guint n, GtkWidget *pw )
 			woPanel[i].showFun();
 	}
 
-	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Hide panels"), TRUE);
-	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Restore panels"), FALSE);
+	gtk_widget_show(gtk_item_factory_get_widget(pif, "/View/Hide panels"));
+	gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Restore panels"));
 
-	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Message"), TRUE);
-	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Game record"), TRUE);
-	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Commentary"), TRUE);
-	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Analysis"), TRUE);
-	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Command"), TRUE);
-	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Theory"), TRUE);
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Panels/Message"), TRUE);
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Panels/Game record"), TRUE);
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Panels/Commentary"), TRUE);
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Panels/Analysis"), TRUE);
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Panels/Command"), TRUE);
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Panels/Theory"), TRUE);
 
 	SwapBoardToPanel(TRUE);
 
@@ -1173,8 +1179,7 @@ ShowAllPanels ( gpointer p, guint n, GtkWidget *pw )
 		gtk_widget_show(bd->drawing_area);
 }
 
-extern void
-HideAllPanels ( gpointer p, guint n, GtkWidget *pw )
+extern void HideAllPanels ( gpointer p, guint n, GtkWidget *pw )
 {
 	BoardData *bd = BOARD( pwBoard )->board_data;
 	int i;
@@ -1201,15 +1206,15 @@ HideAllPanels ( gpointer p, guint n, GtkWidget *pw )
 		}
 	}
 
-	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Restore panels"), TRUE);
-	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Hide panels"), FALSE);
+	gtk_widget_show(gtk_item_factory_get_widget(pif, "/View/Restore panels"));
+	gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Hide panels"));
 
-	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Message"), FALSE);
-	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Game record"), FALSE);
-	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Commentary"), FALSE);
-	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Analysis"), FALSE);
-	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Theory"), FALSE);
-	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Command"), FALSE);
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Panels/Message"), FALSE);
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Panels/Game record"), FALSE);
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Panels/Commentary"), FALSE);
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Panels/Analysis"), FALSE);
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Panels/Theory"), FALSE);
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Panels/Command"), FALSE);
 
 	SwapBoardToPanel(FALSE);
 

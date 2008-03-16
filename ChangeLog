@@ -4,6 +4,8 @@ Sun Mar 16 10:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 		Add menu items for edit position and swap direction toolbar commands.
 		Add option to hide toolbar.
 		Add option to show/hide ids.
+		Remove Python shell item.
+		Put panel items in a sub menu.
 
 Sat Mar 15 13:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 

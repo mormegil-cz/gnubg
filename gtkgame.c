@@ -1269,7 +1269,8 @@ extern void SwapBoardToPanel(int ToPanel)
 	{
 		/* Need to hide these, as handle box seems to be buggy and gets confused */
 		gtk_widget_hide(gtk_widget_get_parent(pwMenuBar));
-		gtk_widget_hide(gtk_widget_get_parent(pwToolbar));
+		if (fToolbarShowing)
+			gtk_widget_hide(gtk_widget_get_parent(pwToolbar));
 
 		gtk_widget_reparent(pwEventBox, pwGameBox);
 		gtk_widget_show(pwGameBox);
@@ -1280,7 +1281,8 @@ extern void SwapBoardToPanel(int ToPanel)
 			gtk_widget_hide(hpaned);
 		}
 		gtk_widget_show(gtk_widget_get_parent(pwMenuBar));
-		gtk_widget_show(gtk_widget_get_parent(pwToolbar));
+		if (fToolbarShowing)
+			gtk_widget_show(gtk_widget_get_parent(pwToolbar));
 	}
 }
 
@@ -1528,19 +1530,6 @@ static void TogglePanel(gpointer p, guint n, GtkWidget * pw)
 
 	/* Resize screen */
 	SetMainWindowSize();
-}
-
-/* PyShell expects sys.argv to be defined. '-n' makes PyShell run without a
- * subshell, which is needed because of some conflict with the gnubg module. */
-static void PythonShell(gpointer p, guint n, GtkWidget * pw)
-{
-	char *pch;
-	pch =
-	    g_strdup(">import sys;"
-		   "sys.argv=['','-n'];"
-		   "import idlelib.PyShell;" "idlelib.PyShell.main()");
-	UserCommand(pch);
-	g_free(pch);
 }
 
 extern void GTKUndo(void)
@@ -3368,26 +3357,23 @@ GtkItemFactoryEntry aife[] = {
 		"<CheckItem>", NULL},
 
 	{ N_("/_View"), NULL, NULL, 0, "<Branch>", NULL },
-	{ N_("/_View/_Game record"), NULL, TogglePanel, TOGGLE_GAMELIST,
+	{ N_("/_View/_Panels"), NULL, NULL, 0, "<Branch>", NULL },
+	{ N_("/_View/_Panels/_Game record"), NULL, TogglePanel, TOGGLE_GAMELIST,
 	  "<CheckItem>", NULL },
-	{ N_("/_View/_Analysis"), NULL, TogglePanel, TOGGLE_ANALYSIS,
+	{ N_("/_View/_Panels/_Analysis"), NULL, TogglePanel, TOGGLE_ANALYSIS,
 	  "<CheckItem>", NULL },
-	{ N_("/_View/_Commentary"), NULL, TogglePanel, TOGGLE_COMMENTARY,
+	{ N_("/_View/_Panels/_Commentary"), NULL, TogglePanel, TOGGLE_COMMENTARY,
 	  "<CheckItem>", NULL },
-	{ N_("/_View/_Message"), NULL, TogglePanel, TOGGLE_MESSAGE,
+	{ N_("/_View/_Panels/_Message"), NULL, TogglePanel, TOGGLE_MESSAGE,
 	  "<CheckItem>", NULL },
-	{ N_("/_View/_Theory"), NULL, TogglePanel, TOGGLE_THEORY,
+	{ N_("/_View/_Panels/_Theory"), NULL, TogglePanel, TOGGLE_THEORY,
 	  "<CheckItem>", NULL },
-	{ N_("/_View/_Command"), NULL, TogglePanel, TOGGLE_COMMAND,
+	{ N_("/_View/_Panels/_Command"), NULL, TogglePanel, TOGGLE_COMMAND,
 	  "<CheckItem>", NULL },
-        { N_("/_View/_Python shell (IDLE)..."),  
-                           NULL, PythonShell, 0, NULL, NULL },
-	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ N_("/_View/_Dock panels"), NULL, ToggleDockPanels, 0, "<CheckItem>", NULL },
 	{ N_("/_View/Restore panels"), NULL, ShowAllPanels, 0, NULL, NULL },
 	{ N_("/_View/Hide panels"), NULL, HideAllPanels, 0, NULL, NULL },
 	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>", NULL },
-
 	{ N_("/_View/Show _IDs above board"), NULL, ToggleShowingIDs, 0, "<CheckItem>", NULL },
 	{ N_("/_View/_Toolbar"), NULL, NULL, 0, "<Branch>", NULL},
 	{ N_("/_View/_Toolbar/_Hide Toolbar"), NULL, HideToolbar, 0, NULL, NULL },
@@ -3853,12 +3839,20 @@ extern void RunGTK( GtkWidget *pwSplash, char *commands, char *python_script, ch
 		if (!ArePanelsDocked())
 		{
 			gtk_widget_hide(hpaned);
-			gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Commentary"));
+			gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Panels/Commentary"));
 			gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Hide panels"));
 			gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Restore panels"));
 		}
-		else if (ArePanelsShowing())
-			gtk_widget_hide(pwGameBox);
+		else 
+		{
+			if (ArePanelsShowing())
+			{
+				gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Restore panels"));
+				gtk_widget_hide(pwGameBox);
+			}
+			else
+				gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Hide panels"));
+		}
 
 		/* Make sure main window is on top */
 		gdk_window_raise(pwMain->window);
