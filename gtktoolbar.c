@@ -61,9 +61,6 @@ typedef struct _toolbarwidget {
 
 } toolbarwidget;
 
-/* Hack this for now to stop re-entering - should be fixed when menu switched to actions */
-static int inCallback = FALSE;
-
 static void ButtonClicked( GtkWidget *pw, char *sz ) {
 
     UserCommand( sz );

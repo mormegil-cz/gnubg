@@ -93,6 +93,9 @@
 
 char *newLang;
 
+/* Hack this for now to stop re-entering - should be fixed when menu switched to actions */
+int inCallback = FALSE;
+
 #if !HAVE_GTK_OPTION_MENU_GET_HISTORY
 extern gint gtk_option_menu_get_history (GtkOptionMenu *option_menu) {
     
@@ -1609,6 +1612,12 @@ SwitchDisplayMode( gpointer p, guint n, GtkWidget *pw )
 }
 
 #endif
+
+extern void ToggleShowingIDs( gpointer p, guint n, GtkWidget *pw )
+{
+	int newValue = GTK_CHECK_MENU_ITEM( pw )->active;
+	CommandSetGUIShowIDs(newValue ? "on" : "off");
+}
 
 int fToolbarShowing = TRUE;
 
@@ -3378,6 +3387,8 @@ GtkItemFactoryEntry aife[] = {
 	{ N_("/_View/Restore panels"), NULL, ShowAllPanels, 0, NULL, NULL },
 	{ N_("/_View/Hide panels"), NULL, HideAllPanels, 0, NULL, NULL },
 	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>", NULL },
+
+	{ N_("/_View/Show _IDs above board"), NULL, ToggleShowingIDs, 0, "<CheckItem>", NULL },
 	{ N_("/_View/_Toolbar"), NULL, NULL, 0, "<Branch>", NULL},
 	{ N_("/_View/_Toolbar/_Hide Toolbar"), NULL, HideToolbar, 0, NULL, NULL },
 	{ N_("/_View/_Toolbar/_Show Toolbar"), NULL, ShowToolbar, 0, NULL, NULL },
@@ -6452,17 +6463,24 @@ extern void GTKSet( void *p ) {
 				gtk_widget_show_all( bd->dice_area );
 			}
 		}}
-    } else if( p == &bd->rd->fShowIDs ) {
+    }
+	else if( p == &bd->rd->fShowIDs )
+	{
+		inCallback = TRUE;
+		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/View/Show IDs above board" )), bd->rd->fShowIDs);
+		inCallback = FALSE;
 
-	if( GTK_WIDGET_REALIZED( pwBoard ) ) {
-	    if( GTK_WIDGET_VISIBLE( bd->vbox_ids ) && !bd->rd->fShowIDs )
-		gtk_widget_hide( bd->vbox_ids );
-	    else if( !GTK_WIDGET_VISIBLE( bd->vbox_ids ) && bd->rd->fShowIDs )
-		gtk_widget_show_all( bd->vbox_ids );
-		gtk_widget_queue_resize(pwBoard);
+		if( GTK_WIDGET_REALIZED( pwBoard ) )
+		{
+			if( GTK_WIDGET_VISIBLE( bd->vbox_ids ) && !bd->rd->fShowIDs )
+				gtk_widget_hide( bd->vbox_ids );
+			else if( !GTK_WIDGET_VISIBLE( bd->vbox_ids ) && bd->rd->fShowIDs )
+				gtk_widget_show_all( bd->vbox_ids );
+			gtk_widget_queue_resize(pwBoard);
+		}
 	}
-    } else if( p == &fGUIShowPips )
-	ShowBoard(); /* this is overkill, but it works */
+	else if( p == &fGUIShowPips )
+		ShowBoard(); /* this is overkill, but it works */
 	else if (p == &fOutputWinPC)
 	{
 		MoveListRefreshSize();
