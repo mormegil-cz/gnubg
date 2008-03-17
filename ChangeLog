@@ -17,6 +17,7 @@ Sun Mar 16 10:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 		Add option to show/hide ids.
 		Remove Python shell item.
 		Put panel items in a sub menu.
+		Move match info to file menu.
 
 Sat Mar 15 13:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
