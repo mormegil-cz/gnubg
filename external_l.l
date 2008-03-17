@@ -131,6 +131,7 @@ void escapes(const char *cp, char *tp)
     *tp = '\0';
 }
 
+extern void ExtStartParse(const char* szCommand);
 void ExtStartParse(const char* szCommand)
 {
 	YY_BUFFER_STATE buf_state;
