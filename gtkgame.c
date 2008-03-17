@@ -3326,6 +3326,9 @@ GtkItemFactoryEntry aife[] = {
 		"<StockItem>", GTK_STOCK_SAVE
 	},
 	{ N_("/_File/-"), NULL, NULL, 0, "<Separator>", NULL },
+	{ N_("/_File/Match information..."), NULL, GTKMatchInfo, 0, NULL,
+		NULL },
+	{ N_("/_File/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ 
 #ifdef WIN32
 		N_("/_File/E_xit"),
@@ -3431,15 +3434,10 @@ GtkItemFactoryEntry aife[] = {
           NULL, Command, CMD_SET_TURN_0, "<RadioItem>", NULL },
 	{ N_("/_Game/Set turn/1"), NULL, Command, CMD_SET_TURN_1,
 	  "/Game/Set turn/0", NULL },
-	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>", NULL },
-	{ N_("/_Game/Match information..."), NULL, GTKMatchInfo, 0, NULL,
-		NULL },
 	{ N_("/_Analyse"), NULL, NULL, 0, "<Branch>", NULL },
-	{ N_("/_Analyse/_Evaluate"), "<control>E", Command, CMD_EVAL, NULL,
-		NULL },
+	{ N_("/_Analyse/_Evaluate"), "<control>E", Command, CMD_EVAL, NULL, NULL },
 	{ N_("/_Analyse/_Hint"), "<control>H", Command, CMD_HINT,
-		"<StockItem>", GTK_STOCK_DIALOG_INFO
-	},
+		"<StockItem>", GTK_STOCK_DIALOG_INFO},
 	{ N_("/_Analyse/_Rollout"), NULL, Command, CMD_ROLLOUT, NULL, NULL },
 	{ N_("/_Analyse/Rollout _cube decision"), 
           NULL, Command, CMD_ROLLOUT_CUBE, NULL, NULL },
@@ -6373,7 +6371,7 @@ extern void GTKSet( void *p ) {
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_PREV_GAME ), !ListEmpty( &lMatch ) );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget(
-				      pif, "/Game/Match information..." ),
+				      pif, "/File/Match information..." ),
 				  !ListEmpty( &lMatch ) );
 	
 	enable_sub_menu( gtk_item_factory_get_widget( pif, "/Analyse" ),

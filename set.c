@@ -3013,11 +3013,10 @@ extern void CommandSetAnalysisMoveFilter( char *sz ) {
 
   
 
-extern void 
-SetMatchInfo( char **ppch, char *sz, char *szMessage ) {
-
+extern void SetMatchInfo( char **ppch, char *sz, char *szMessage )
+{
     if( *ppch )
-	free( *ppch );
+	g_free( *ppch );
 
     if( sz && *sz ) {
 	*ppch = g_strdup( sz );
