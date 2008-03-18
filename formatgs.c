@@ -32,12 +32,12 @@
 #include "export.h"
 
 
-static char *total_emg(void)
+static char *total_text(int nMatchTo)
 {
     return nMatchTo ? _("EMG (MWC)") : _("EMG (Points)");
 }
 
-static char *rate_emg(void)
+static char *rate_text(int nMatchTo)
 {
     return nMatchTo ? _("mEMG (MWC)") : _("mEMG (Points)");
 }
@@ -169,7 +169,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
 
       aasz = g_malloc( 3 * sizeof ( *aasz ) );
 
-      aasz[ 0 ] = g_strdup_printf( _("Error total %s"), total_emg() );
+      aasz[ 0 ] = g_strdup_printf( _("Error total %s"), total_text(nMatchTo) );
 
       for ( i = 0; i < 2; ++i )
         aasz[ i + 1 ] = errorRate( 
@@ -183,7 +183,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
 
       aasz = g_malloc( 3 * sizeof ( *aasz ) );
 
-      aasz[ 0 ] = g_strdup_printf( _("Error rate %s"), rate_emg() );
+      aasz[ 0 ] = g_strdup_printf( _("Error rate %s"), rate_text(nMatchTo) );
 
       for ( i = 0; i < 2; ++i )
         aasz[ i + 1 ] = errorRateMP( 
@@ -269,7 +269,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
         aasz = g_malloc( 3 * sizeof ( *aasz ) );
 
         aasz[ 0 ] = g_strdup_printf( "%s (%s)", gettext( asz2[ i ] ),
-			total_emg() );
+			total_text(nMatchTo) );
 
         for ( j = 0; j < 2; ++j ) 
           aasz[ j + 1 ] = cubeEntry( ai2[ i ][ j ],
@@ -285,7 +285,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
 
       aasz = g_malloc( 3 * sizeof ( *aasz ) );
 
-      aasz[ 0 ] = g_strdup_printf( _("Error total %s"), total_emg() );
+      aasz[ 0 ] = g_strdup_printf( _("Error total %s"), total_text(nMatchTo) );
 
       for ( i = 0; i < 2; ++i )
         aasz[ i + 1 ] = errorRate( 
@@ -299,7 +299,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
 
       aasz = g_malloc( 3 * sizeof ( *aasz ) );
 
-      aasz[ 0 ] = g_strdup_printf( _("Error rate %s"), rate_emg() );
+      aasz[ 0 ] = g_strdup_printf( _("Error rate %s"), rate_text(nMatchTo) );
 
       for ( i = 0; i < 2; ++i )
         aasz[ i + 1 ] = errorRateMP( 
@@ -351,7 +351,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
 
       aasz = g_malloc( 3 * sizeof ( *aasz ) );
 
-      aasz[ 0 ] = g_strdup_printf( _("Luck total %s"), total_emg() );
+      aasz[ 0 ] = g_strdup_printf( _("Luck total %s"), total_text(nMatchTo) );
 
       for ( i = 0; i < 2; ++i )
         aasz[ i + 1 ] = errorRate( psc->arLuck[ i ][ 0 ],
@@ -363,7 +363,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
 
       aasz = g_malloc( 3 * sizeof ( *aasz ) );
 
-      aasz[ 0 ] = g_strdup_printf( _("Luck rate %s"), rate_emg() );
+      aasz[ 0 ] = g_strdup_printf( _("Luck rate %s"), rate_text(nMatchTo) );
 
       for ( i = 0; i < 2; ++i )
         if ( psc->anTotalMoves[ i ] ) 
@@ -406,7 +406,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
 
       if ( psc->fCube || psc->fMoves ) {
 
-        aasz[ 0 ] = g_strdup_printf( _("Error total %s"), total_emg() );
+        aasz[ 0 ] = g_strdup_printf( _("Error total %s"), total_text(nMatchTo) );
 
         for ( i = 0; i < 2; ++i )
           aasz[ i + 1 ] = errorRate( 
@@ -420,7 +420,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
 
         aasz = g_malloc( 3 * sizeof ( *aasz ) );
 
-        aasz[ 0 ] = g_strdup_printf( _("Error rate %s"), rate_emg() );
+        aasz[ 0 ] = g_strdup_printf( _("Error rate %s"), rate_text(nMatchTo) );
 
         for ( i = 0; i < 2; ++i )
           aasz[ i + 1 ] = errorRateMP( 
