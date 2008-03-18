@@ -31,6 +31,17 @@
 
 #include "export.h"
 
+
+static char *total_emg(void)
+{
+    return nMatchTo ? _("EMG (MWC)") : _("EMG (Points)");
+}
+
+static char *rate_emg(void)
+{
+    return nMatchTo ? _("mEMG (MWC)") : _("mEMG (Points)");
+}
+
 static char **
 numberEntry( const char *sz, const int n0, const int n1 ) {
 
@@ -46,47 +57,33 @@ numberEntry( const char *sz, const int n0, const int n1 ) {
 
 }
 
-static char *
-errorRate( const float rn, const float ru, const int nMatchTo) {
+static char *errorRate(const float rn, const float ru, const int nMatchTo)
+{
+    int n = fOutputDigits - (int) (log10(rErrorRateFactor) - 0.5);
+    n = MAX(n, 0);
 
-  if ( rn != 0.0f ) {
-
-    if ( nMatchTo ) 
-      return g_strdup_printf( "%+6.3f (%+7.3f%%)",
-                              rn, ru * 100.0f );
-    else
-      return g_strdup_printf( "%+6.3f (%+7.3f)",
-                              rn, ru );
-
-  }
-  else
-    return g_strdup_printf( "%+6.3f", 0.0f );
-
+    if (nMatchTo) {
+	return g_strdup_printf("     %+*.*f (%+7.3f%%)", n + 5, n + 2, rn,
+			       ru * 100.0f);
+    } else {
+	return g_strdup_printf("     %+*.*f (%+7.3f)", n + 5, n + 2, rn, ru);
+    }
 }
 
-static char *
-errorRateMP( const float rn, const float ru, const int nMatchTo ) {
+static char *errorRateMP(const float rn, const float ru,
+			 const int nMatchTo)
+{
 
-  int n = fOutputDigits - (int)( log10( rErrorRateFactor ) - 0.5 );
+    int n = fOutputDigits - (int) (log10(rErrorRateFactor) - 0.5);
+    n = MAX(n, 0);
 
-  if ( n < 0 )
-    n = 0;
-
-  if ( rn != 0.0f && ru != 0.0f ) {
-
-    if ( nMatchTo ) 
-      return g_strdup_printf( "%+*.*f (%+7.3f%%)",
-                              n + 5, n, 
-                              rErrorRateFactor * rn, ru * 100.0f );
-    else
-      return g_strdup_printf( "%+*.*f (%+7.3f)",
-                              n + 5, n, 
-                              rErrorRateFactor * rn, ru );
-
-  }
-  else
-    return g_strdup_printf( "%+*.*f", n + 5, n, rErrorRateFactor * rn );
-
+    if (nMatchTo) {
+	return g_strdup_printf("   %+*.*f   (%+7.3f%%)", n + 5, n,
+			       rErrorRateFactor * rn, ru * 100.0f);
+    } else {
+	return g_strdup_printf("   %+*.*f   (%+7.3f)", n + 5, n,
+			       rErrorRateFactor * rn, ru);
+    }
 }
 
 static char *
@@ -172,7 +169,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
 
       aasz = g_malloc( 3 * sizeof ( *aasz ) );
 
-      aasz[ 0 ] = g_strdup( _("Error rate (total)") );
+      aasz[ 0 ] = g_strdup_printf( _("Error total %s"), total_emg() );
 
       for ( i = 0; i < 2; ++i )
         aasz[ i + 1 ] = errorRate( 
@@ -186,7 +183,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
 
       aasz = g_malloc( 3 * sizeof ( *aasz ) );
 
-      aasz[ 0 ] = g_strdup( _("Error rate (per move)") );
+      aasz[ 0 ] = g_strdup_printf( _("Error rate %s"), rate_emg() );
 
       for ( i = 0; i < 2; ++i )
         aasz[ i + 1 ] = errorRateMP( 
@@ -225,10 +222,10 @@ formatGS( const statcontext *psc, const int nMatchTo,
         N_("Passes") };
 
       static char *asz2[] = {
-        N_("Missed doubles (below CP)"),
-        N_("Missed doubles (above CP)"),
-        N_("Wrong doubles (below DP)"),
-        N_("Wrong doubles (above TG)"),
+        N_("Missed doubles below CP"),
+        N_("Missed doubles above CP"),
+        N_("Wrong doubles below DP"),
+        N_("Wrong doubles above TG"),
         N_("Wrong takes"),
         N_("Wrong passes") };
 
@@ -271,7 +268,8 @@ formatGS( const statcontext *psc, const int nMatchTo,
       for ( i = 0; i < 6; ++i ) {
         aasz = g_malloc( 3 * sizeof ( *aasz ) );
 
-        aasz[ 0 ] = g_strdup( gettext( asz2[ i ] ) );
+        aasz[ 0 ] = g_strdup_printf( "%s (%s)", gettext( asz2[ i ] ),
+			total_emg() );
 
         for ( j = 0; j < 2; ++j ) 
           aasz[ j + 1 ] = cubeEntry( ai2[ i ][ j ],
@@ -287,7 +285,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
 
       aasz = g_malloc( 3 * sizeof ( *aasz ) );
 
-      aasz[ 0 ] = g_strdup( _("Error rate (total)") );
+      aasz[ 0 ] = g_strdup_printf( _("Error total %s"), total_emg() );
 
       for ( i = 0; i < 2; ++i )
         aasz[ i + 1 ] = errorRate( 
@@ -301,7 +299,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
 
       aasz = g_malloc( 3 * sizeof ( *aasz ) );
 
-      aasz[ 0 ] = g_strdup( _("Error rate (per cube decision)") );
+      aasz[ 0 ] = g_strdup_printf( _("Error rate %s"), rate_emg() );
 
       for ( i = 0; i < 2; ++i )
         aasz[ i + 1 ] = errorRateMP( 
@@ -353,7 +351,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
 
       aasz = g_malloc( 3 * sizeof ( *aasz ) );
 
-      aasz[ 0 ] = g_strdup( _("Luck rate (total)") );
+      aasz[ 0 ] = g_strdup_printf( _("Luck total %s"), total_emg() );
 
       for ( i = 0; i < 2; ++i )
         aasz[ i + 1 ] = errorRate( psc->arLuck[ i ][ 0 ],
@@ -365,7 +363,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
 
       aasz = g_malloc( 3 * sizeof ( *aasz ) );
 
-      aasz[ 0 ] = g_strdup( _("Luck rate (per move)") );
+      aasz[ 0 ] = g_strdup_printf( _("Luck rate %s"), rate_emg() );
 
       for ( i = 0; i < 2; ++i )
         if ( psc->anTotalMoves[ i ] ) 
@@ -408,7 +406,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
 
       if ( psc->fCube || psc->fMoves ) {
 
-        aasz[ 0 ] = g_strdup( _("Error rate (total)") );
+        aasz[ 0 ] = g_strdup_printf( _("Error total %s"), total_emg() );
 
         for ( i = 0; i < 2; ++i )
           aasz[ i + 1 ] = errorRate( 
@@ -422,7 +420,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
 
         aasz = g_malloc( 3 * sizeof ( *aasz ) );
 
-        aasz[ 0 ] = g_strdup( _("Error rate (per decision)") );
+        aasz[ 0 ] = g_strdup_printf( _("Error rate %s"), rate_emg() );
 
         for ( i = 0; i < 2; ++i )
           aasz[ i + 1 ] = errorRateMP( 
@@ -436,7 +434,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
 
         aasz = g_malloc( 3 * sizeof ( *aasz ) );
 
-        aasz[ 0 ] = g_strdup( _("Equiv. Snowie error rate") );
+        aasz[ 0 ] = g_strdup( _("Snowie error rate") );
 
         for ( i = 0; i < 2; ++i )
           if ( ( n = psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] ) )
@@ -649,5 +647,6 @@ freeGS( GList *list ) {
   g_list_foreach( list, _freeGS, NULL );
 
   g_list_free( list );
-
 }
+
+

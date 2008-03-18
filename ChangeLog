@@ -1,3 +1,7 @@
+Tue Mar 18 02:25:32 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* analysis.c, formatgs.c: edit the texts in the game analysis
+
 Tue Mar 18 01:54:21 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* po/*.po, po/gnubg.pot: update the translation files

@@ -1495,7 +1495,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * pl, const
 
   /* header */
 
-  sprintf( szOutput, "%-31s %-23s %-23s\n\n",
+  sprintf( szOutput, "%-40s %-23s %-23s\n\n",
            _("Player"), pl, op );
 
   if ( psc->fMoves ) {
@@ -1510,7 +1510,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * pl, const
       char **asz = pl->data;
 
       sprintf( strchr( szOutput, 0 ),
-               "%-31s %-23s %-23s\n",
+               "%-40s %-23s %-23s\n",
                asz[ 0 ], asz[ 1 ], asz[ 2 ] );
 
     }
@@ -1534,7 +1534,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * pl, const
       char **asz = pl->data;
 
       sprintf( strchr( szOutput, 0 ),
-               "%-31s %-23s %-23s\n",
+               "%-40s %-23s %-23s\n",
                asz[ 0 ], asz[ 1 ], asz[ 2 ] );
 
     }
@@ -1558,7 +1558,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * pl, const
       char **asz = pl->data;
 
       sprintf( strchr( szOutput, 0 ),
-               "%-31s %-23s %-23s\n",
+               "%-40s %-23s %-23s\n",
                asz[ 0 ], asz[ 1 ], asz[ 2 ] );
 
     }
@@ -1582,7 +1582,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * pl, const
       char **asz = pl->data;
       
       sprintf( strchr( szOutput, 0 ),
-               "%-31s %-23s %-23s\n",
+               "%-40s %-23s %-23s\n",
                asz[ 0 ], asz[ 1 ], asz[ 2 ] );
       
     }
