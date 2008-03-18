@@ -27,11 +27,10 @@
 #include <stdlib.h>
 #include "positionid.h"
 #include "bearoff.h"
+#include "multithread.h"
+#include "backgammon.h"
 
 #if USE_MULTITHREAD
-extern int MT_GetThreadID(void);
-extern void MT_Release(void);
-extern void MT_Exclusive(void);
 extern int MT_GetThreadID(void)
 {
   return (0);
@@ -43,6 +42,10 @@ extern void MT_Release(void)
 extern void MT_Exclusive(void)
 {
   return;
+}
+#else
+extern void CallbackProgress(void)
+{
 }
 #endif
 

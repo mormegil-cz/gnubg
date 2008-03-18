@@ -35,6 +35,7 @@
 #include "positionid.h"
 #include "bearoff.h"
 #include "util.h"
+#include "backgammon.h"
 #include "multithread.h"
 #include <glib/gi18n.h>
 
@@ -61,6 +62,10 @@ extern void MT_Release(void)
 extern void MT_Exclusive(void)
 {
   return;
+}
+#else
+extern void CallbackProgress(void)
+{
 }
 #endif
 

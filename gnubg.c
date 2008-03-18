@@ -4854,11 +4854,11 @@ extern void CommandSaveSettings( char *szParam )
 	/* warnings */
 #if USE_GTK
 	WriteWarnings(pf);
-#endif
 	/* Save toolbar style */
 	fprintf(pf, "set toolbar %d\n", nToolbarStyle);
 	if (!fToolbarShowing)
 		fputs("set toolbar off\n", pf);
+#endif
 
 	/* Save gamelist style on/off (if not set - default is set) */
 	if (!fStyledGamelist)

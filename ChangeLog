@@ -1,3 +1,8 @@
+Tue Mar 18 23:47:53 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* bearoffdump.c, gnubg.c, makebearoff.c, makehyper.c: minor compile
+	problems without threads
+
 Tue Mar 18 02:25:32 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* analysis.c, formatgs.c: edit the texts in the game analysis

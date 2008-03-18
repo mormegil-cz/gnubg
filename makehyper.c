@@ -28,6 +28,8 @@
 #include <time.h>
 #include <unistd.h>
 #include <math.h>
+#include <multithread.h>
+#include "backgammon.h"
 
 #include "eval.h"
 #include "positionid.h"
@@ -63,9 +65,6 @@ typedef struct _hyperequity {
 } hyperequity;
 
 #if USE_MULTITHREAD
-extern int MT_GetThreadID(void);
-extern void MT_Release(void);
-extern void MT_Exclusive(void);
 extern int MT_GetThreadID(void)
 {
   return (0);
@@ -78,7 +77,12 @@ extern void MT_Exclusive(void)
 {
   return;
 }
+#else
+extern void CallbackProgress(void)
+{
+}
 #endif
+
 
 int aiNorm[ 10 ];
 
