@@ -552,6 +552,7 @@ static void SQLiteCommit(void)
 }
 #endif
 
+#if NUM_PROVIDERS
 GList *SQLiteGetDatabaseList(const char *user, const char *password)
 {
 	GList *glist = NULL;
@@ -586,3 +587,4 @@ int SQLiteDeleteDatabase(const char *dbfilename, const char *user, const char *p
 	g_free(name), g_free(filename);
 	return (ret == 0);
 }
+#endif
