@@ -63,10 +63,10 @@ static RowSet *SQLiteSelect(const char* str);
 static int SQLiteUpdateCommand(const char* str);
 static void SQLiteCommit(void);
 #endif
-static int SQLiteDeleteDatabase(const char *dbfilename, const char *user, const char *password);
-static GList *SQLiteGetDatabaseList(const char *user, const char *password);
 
 #if NUM_PROVIDERS
+static int SQLiteDeleteDatabase(const char *dbfilename, const char *user, const char *password);
+static GList *SQLiteGetDatabaseList(const char *user, const char *password);
 DBProvider providers[NUM_PROVIDERS] =
 {
 #if HAVE_SQLITE

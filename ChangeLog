@@ -1,3 +1,7 @@
+Tue Mar 25 14:30:42 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* dbprovider.c: fix a compiler warning when without python and sqlite
+
 Tue Mar 18 23:47:53 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* bearoffdump.c, gnubg.c, makebearoff.c, makehyper.c: minor compile
