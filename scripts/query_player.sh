@@ -20,26 +20,35 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-DATABASE=/home/ace/.gnubg/ace.db
+DATABASE=/home/ace/.gnubg/gnubg.db
 PLAYER=$1
 
-NICK_ID_SEARCH="select nick_id from nick where name like '%$1%';"
+NAME_ID_SEARCH="select player_id from player where name like '%$1%';"
 
-NICK_NAME_SEARCH="select name from nick where name like '%$1%';"
+NAME_SEARCH="select name from player where name like '%$1%';"
 
-NICK_ID_RESULT=`sqlite3 $DATABASE <<EOF
-$NICK_ID_SEARCH
+NAME_ID_RESULT=`sqlite3 $DATABASE <<EOF
+$NAME_ID_SEARCH
 EOF`
 
-STATS_SEARCH="select a.match_id as No, count(b.game_id) as Games, a.actual_result as Result, a.luck_adjusted_result as Luck_Adjusted, a.snowie_error_rate_per_move*(1000) as Snowie, b.added as Date from matchstat a, game b, nick c where a.match_id = b.match_id and a.nick_id = c.nick_id and c.nick_id = '$NICK_ID_RESULT' group by a.match_id;" 
+STATS_SEARCH="select a.session_id as No, count(b.game_id) as Games, a.actual_result as Result, a.luck_adjusted_result as Luck_Adjusted, a.snowie_error_rate_per_move*(1000) as Snowie, c.added as Date from matchstat a, game b, session c, player d where a.matchstat_id = c.session_id and a.player_id = d.player_id and d.player_id = '$NAME_ID_RESULT' group by b.session_id;" 
 
 NICK_NAME_RESULT=`sqlite3 $DATABASE <<EOF
-$NICK_NAME_SEARCH
+$NAME_SEARCH
 EOF`
 
-POINTS_WON="select sum(a.actual_result) from matchstat a, nick c where a.nick_id = c.nick_id and c.nick_id = '$NICK_ID_RESULT';" 
+POINTS_WON="select sum(a.actual_result) from matchstat a, player c where a.player_id = c.player_id and c.player_id = '$NAME_ID_RESULT';"
 
-NUMBER_GAMES="select count(b.game_id) from game b, nick c where c.nick_id = b.nick_id0 and c.nick_id = '$NICK_ID_RESULT';" 
+# only for getting your number of games correctly, usually you have the id 1.
+if [ ${NAME_ID_RESULT} =  2 ]
+    then PLAYER_ID="b.player_id1"
+    else PLAYER_ID="b.player_id0"
+fi
+
+NUMBER_GAMES="select count(b.game_id) from game b, player c where c.player_id = "$PLAYER_ID" and c.player_id = '$NAME_ID_RESULT';" 
+
+## Still wrong
+#ERROR_AVR="select sum((a.total_moves*a.snowie_error_rate_per_move)*a.total_moves/sum(a.total_moves)) from matchstat a, nick c where a.nick_id = c.nick_id and c.nick_id = '$NICK_ID_RESULT';"
 
 TOTAL_RESULT=`sqlite3 $DATABASE <<EOF
 $POINTS_WON
@@ -62,10 +71,10 @@ EOF`
 
 echo
 cat tmp.file
-rm tmp.file
+# rm tmp.file
 
 echo
-echo "Result ${NICK_NAME_RESULT}: $TOTAL_RESULT Point(s) in $NUMBER_GAMES_RESULT games(s). Snowie error rate: $ERROR_AVR_RESULT"
+echo "Result ${NICK_NAME_RESULT} (${NAME_ID_RESULT}): $TOTAL_RESULT Point(s) in $NUMBER_GAMES_RESULT games(s). Snowie error rate: $ERROR_AVR_RESULT"
 echo
 
 exit 0
