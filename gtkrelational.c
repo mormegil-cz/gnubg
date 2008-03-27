@@ -305,7 +305,6 @@ static void ShowRelationalClicked(GtkTreeView *treeview, GtkTreePath *path,
 	if (!name)
 		return;
 
-	GTKSetCurrentParent(GTK_WIDGET(userdata));
 	CommandRelationalShowDetails(name);
 	g_free(name);
 }
@@ -773,8 +772,8 @@ extern GtkWidget *RelationalOptions(void)
 extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw)
 {
 	GtkWidget *pwRun, *pwDialog, *pwHbox2, *pwVbox2,
-	    *pwPlayerFrame, *pwUpdate, *pwHbox, *pwVbox, *pwErase, *pwOpen,
-	    *pwn, *pwLabel, *pwScrolled;
+	    *pwPlayerFrame, *pwUpdate, *pwPaned, *pwVbox, *pwErase, *pwOpen,
+	    *pwn, *pwLabel, *pwScrolled, *pwHbox;
 	DBProvider *pdb;
 	static GtkTextBuffer *query = NULL; /*remember query*/
 
@@ -791,6 +790,9 @@ extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw)
 	pwDialog = GTKCreateDialog(_("GNU Backgammon - Relational Database"),
 			    DT_INFO, NULL, DIALOG_FLAG_MODAL | DIALOG_FLAG_MINMAXBUTTONS, NULL, NULL);
 
+#define REL_DIALOG_HEIGHT 600
+	gtk_window_set_default_size( GTK_WINDOW( pwDialog ), -1, REL_DIALOG_HEIGHT );
+
 	pwn = gtk_notebook_new();
 	gtk_container_set_border_width(GTK_CONTAINER(pwn), 0);
 
@@ -798,17 +800,14 @@ extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw)
 ** Start of (left hand side) of player screen...
 *******************************************************/
 
-	pwHbox = gtk_hbox_new(FALSE, 0);
-	gtk_notebook_append_page(GTK_NOTEBOOK(pwn), pwHbox,
+	pwPaned = gtk_vpaned_new();
+	gtk_paned_set_position(GTK_PANED(pwPaned), REL_DIALOG_HEIGHT*0.6);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pwn), pwPaned,
 				 gtk_label_new(_("Players")));
-
 	pwVbox = gtk_vbox_new(FALSE, 0);
-
-	gtk_box_pack_start(GTK_BOX(pwVbox), GtkRelationalShowStats(), TRUE, TRUE, 0);
-
-	gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox, FALSE, FALSE, 0);
-	gtk_container_set_border_width(GTK_CONTAINER(pwVbox), INSIDE_FRAME_GAP);
-
+ 	gtk_container_set_border_width(GTK_CONTAINER(pwVbox), INSIDE_FRAME_GAP);
+	gtk_paned_add1(GTK_PANED(pwPaned), pwVbox);
+	gtk_box_pack_start(GTK_BOX(pwVbox),GtkRelationalShowStats(), TRUE, TRUE, 0); 
 	pwHbox2 = gtk_hbox_new(FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(pwVbox), pwHbox2, FALSE, FALSE, 0);
 
@@ -830,7 +829,7 @@ extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw)
 	pwPlayerFrame = gtk_frame_new("Player");
 	gtk_container_set_border_width(GTK_CONTAINER(pwPlayerFrame),
 				       OUTSIDE_FRAME_GAP);
-	gtk_box_pack_start(GTK_BOX(pwHbox), pwPlayerFrame, TRUE, TRUE, 0);
+	gtk_paned_add2(GTK_PANED(pwPaned), pwPlayerFrame);
 
 	pwVbox = gtk_vbox_new(FALSE, NAME_NOTES_VGAP);
 	gtk_container_set_border_width(GTK_CONTAINER(pwVbox),
