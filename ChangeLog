@@ -1,3 +1,8 @@
+Thu Mar 27 22:37:01 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* po/gnubg.pot, non-src/credits.c, po/it.po: update italian
+	translation
+
 Tue Mar 25 14:30:42 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* dbprovider.c: fix a compiler warning when without python and sqlite
