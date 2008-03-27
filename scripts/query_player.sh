@@ -31,21 +31,25 @@ NAME_ID_RESULT=`sqlite3 $DATABASE <<EOF
 $NAME_ID_SEARCH
 EOF`
 
-STATS_SEARCH="select a.session_id as No, count(b.game_id) as Games, a.actual_result as Result, a.luck_adjusted_result as Luck_Adjusted, a.snowie_error_rate_per_move*(1000) as Snowie, c.added as Date from matchstat a, game b, session c, player d where a.matchstat_id = c.session_id and a.player_id = d.player_id and d.player_id = '$NAME_ID_RESULT' group by b.session_id;" 
+# only for getting your number of games correctly, usually you have the id 1.
+if [ ${NAME_ID_RESULT} =  16 -o ${NAME_ID_RESULT} = 39 ] 
+    then PLAYER_ID="player_id1"
+    else PLAYER_ID="player_id0"
+fi
+
+
+
+
+STATS_SEARCH="select a.session_id as No, count(b.game_id) as Games, a.actual_result as Result, a.luck_adjusted_result as Luck_Adjusted, a.snowie_error_rate_per_move*(1000) as Snowie, c.added as Date from matchstat a, game b, session c where a.session_id = b.session_id and a.player_id = '${NAME_ID_RESULT}' and a.player_id = b.${PLAYER_ID} and a.session_id = c.session_id group by a.session_id ; "
 
 NICK_NAME_RESULT=`sqlite3 $DATABASE <<EOF
 $NAME_SEARCH
 EOF`
 
-POINTS_WON="select sum(a.actual_result) from matchstat a, player c where a.player_id = c.player_id and c.player_id = '$NAME_ID_RESULT';"
 
-# only for getting your number of games correctly, usually you have the id 1.
-if [ ${NAME_ID_RESULT} =  2 ]
-    then PLAYER_ID="b.player_id1"
-    else PLAYER_ID="b.player_id0"
-fi
+POINTS_WON="select sum(actual_result) from matchstat where player_id = '$NAME_ID_RESULT';"
 
-NUMBER_GAMES="select count(b.game_id) from game b, player c where c.player_id = "$PLAYER_ID" and c.player_id = '$NAME_ID_RESULT';" 
+NUMBER_GAMES="select count(game_id) from game where ${PLAYER_ID} = '${NAME_ID_RESULT}';" 
 
 ## Still wrong
 #ERROR_AVR="select sum((a.total_moves*a.snowie_error_rate_per_move)*a.total_moves/sum(a.total_moves)) from matchstat a, nick c where a.nick_id = c.nick_id and c.nick_id = '$NICK_ID_RESULT';"
