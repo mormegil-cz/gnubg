@@ -1,3 +1,7 @@
+Fri Mar 28 15:25:34 CET 2008 Achim Mueller <ace@gnubg.org>
+
+    * changed configure.in: new release number 0.9.0-1 
+
 Fri Mar 28 00:40:32 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtkrelational.c: rearrange player details and stats view
