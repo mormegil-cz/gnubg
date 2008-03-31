@@ -25,6 +25,10 @@
 #include "config.h"
 #if USE_PYTHON
 #include "gnubgmodule.h"
+#ifdef WIN32
+/* needed for mingw inclusion of Python.h */
+#include <stdint.h>
+#endif
 #include <Python.h>
 #endif
 #include <glib.h>
