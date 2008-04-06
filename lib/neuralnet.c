@@ -622,12 +622,14 @@ int SSE_Supported()
 
 #else
 
+#ifdef __APPLE__
+#include <sys/sysctl.h>
+#endif
+
 static int CheckSSE(void)
 {
         int result;
 #ifdef __APPLE__
-
-#include <sys/sysctl.h>
     size_t length = sizeof( result );
     int error = sysctlbyname("hw.optional.sse", &result, &length, NULL, 0);
     if ( 0 != error ) result = 0;
