@@ -18,15 +18,19 @@ GNU make
 
 and development libraries
 
-cairo
-esound
-glib (_Required_)
-gtk
-gtkglext
-png
-readline
-xml2
-python
+glib2 (_Required_)
+png (_Required_)
+xml2 (_Required_)
+freetype2 (_Required_)
+
+gtk2 (GUI)
+cairo2 (graphics)
+esound (sound)
+gtkglext (3d boards)
+readline (command line)
+python (extension)
+sqlite3 (database)
+gmp3 (better random numbers)
 
 In most cases, configure will automatically determine everything it needs to
 know in order to compile.  However, there are a few options to ``configure'' to
