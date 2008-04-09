@@ -2020,12 +2020,12 @@ char *aszBuildInfo[] = {
 #if HAVE_SOCKETS
     N_("External commands supported."),
 #endif
-#ifdef WIN32
+#if defined(WIN32)
     N_("Windows sound system supported."),
-#else
-#if HAVE_ESD
+#elif defined(__APPLE__)
+    N_("Apple QuickTime sound system supported."),
+#elif HAVE_ESD
     N_("ESD sound system supported."),
-#endif
 #endif
 #if USE_MULTITHREAD
     N_("Multiple threads supported."),

@@ -31,18 +31,126 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifdef WIN32
-
+#if defined(WIN32)
 /* for PlaySound */
 #include "windows.h"
 #include <mmsystem.h>
 
-#else
+#elif defined(__APPLE__)
+#include <QuickTime/QuickTime.h>
+#include <pthread.h>
+#include "lib/list.h"
 
-#if HAVE_ESD
+static int		fQTInitialised = FALSE;
+static int 		fQTPlaying = FALSE;
+listOLD			movielist;
+static pthread_mutex_t 	mutexQTAccess;
+
+
+void * Thread_PlaySound_QuickTime (void *data)
+{
+    int done = FALSE;
+    
+    fQTPlaying = TRUE;
+    
+    do {
+        listOLD	*pl; 
+        
+        pthread_mutex_lock (&mutexQTAccess);
+        
+        /* give CPU time to QT to process all running movies */
+        MoviesTask (NULL, 0);
+        
+        /* check if there are any running movie left */
+        pl = &movielist;
+        done = TRUE;
+        do {
+            listOLD *next = pl->plNext;
+            if (pl->p != NULL) {
+                Movie *movie = (Movie *) pl->p;
+                if (IsMovieDone (*movie)) {
+                    DisposeMovie (*movie);
+                    free (movie);
+                    ListDelete (pl);
+                }
+                else
+                    done = FALSE;
+            }
+            pl = next;
+        } while (pl != &movielist);
+        
+        pthread_mutex_unlock (&mutexQTAccess);
+    } while (!done && fQTPlaying);
+    
+    fQTPlaying = FALSE;
+    
+    return NULL;
+}
+
+
+void PlaySound_QuickTime (const char *cSoundFilename)
+{
+    int 	err;
+    Str255	pSoundFilename; 	/* file pathname in Pascal-string format */
+    FSSpec	fsSoundFile;		/* movie file location descriptor */
+    short	resRefNum;		/* open movie file reference */
+    
+    if (!fQTInitialised) {
+        pthread_mutex_init (&mutexQTAccess, NULL);
+        ListCreate (&movielist);
+        fQTInitialised = TRUE;
+    }
+    
+    /* QuickTime is NOT reentrant in Mac OS (it is in MS Windows!) */
+    pthread_mutex_lock (&mutexQTAccess);
+
+    EnterMovies ();	/* can be called multiple times */
+
+	err = NativePathNameToFSSpec(cSoundFilename, &fsSoundFile, 0);    
+    if (err != 0) {
+        fprintf (stderr, "PlaySound_QuickTime: error #%d, can't find %s.\n", err, cSoundFilename);
+    }
+    else {
+        /* open movie (WAV or whatever) file */
+        err = OpenMovieFile (&fsSoundFile, &resRefNum, fsRdPerm);
+        if (err != 0) {
+            fprintf (stderr, "PlaySound_QuickTime: error #%d opening %s.\n", err, cSoundFilename);
+        }
+        else {
+            /* create movie from movie file */
+            Movie	*movie = (Movie *) malloc (sizeof (Movie));
+            err = NewMovieFromFile (movie, resRefNum, NULL, NULL, 0, NULL);  
+            CloseMovieFile (resRefNum);
+            if (err != 0) {
+                fprintf (stderr, "PlaySound_QuickTime: error #%d reading %s.\n", err, cSoundFilename);
+            } 
+            else {
+                /* reset movie timebase */
+                TimeRecord t = { 0 };
+                t.base = GetMovieTimeBase (*movie);
+                SetMovieTime (*movie, &t);
+                /* add movie to list of running movies */
+                ListInsert (&movielist, movie);
+                /* run movie */
+                StartMovie (*movie);  
+            }
+        }
+    }
+
+    pthread_mutex_unlock (&mutexQTAccess);
+
+    if (!fQTPlaying) {
+        /* launch playing thread if necessary */
+        int err;
+        pthread_t qtthread;
+        fQTPlaying = TRUE;
+        err = pthread_create (&qtthread, 0L, Thread_PlaySound_QuickTime, NULL);
+        if (err == 0) pthread_detach (qtthread);
+        else fQTPlaying = FALSE;
+    }
+}
+#elif HAVE_ESD
 #include <esd.h>
-#endif
-
 #endif
 
 #include "sound.h"
@@ -117,7 +225,7 @@ playSoundFile (char *file)
 		return;
 	}
 
-#ifdef WIN32
+#if defined(WIN32)
     SetLastError (0);
     while (!PlaySound
 	   (file, NULL,
@@ -143,12 +251,10 @@ playSoundFile (char *file)
 	    }
 	  Sleep (1);		/* Wait (1ms) for current sound to finish */
       }
-#else
-
-#if HAVE_ESD
+#elif defined(__APPLE__)
+	PlaySound_QuickTime (file);
+#elif HAVE_ESD
     esd_play_file (NULL, file, 1);
-#endif
-
 #endif
 }
 

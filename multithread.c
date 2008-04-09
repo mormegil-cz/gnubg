@@ -390,7 +390,9 @@ static void
 #endif
 MT_WorkerThreadFunction(gpointer id)
 {    /* Align stack and call actual function */
+#ifdef HAVE_INTELX86_PROCESSOR
 	asm  __volatile__  ("andl $-16, %%esp" : : : "%esp");
+#endif
 	MT_ActualWorkerThreadFunction(id);
 #ifdef GLIB_THREADS
 return NULL;
