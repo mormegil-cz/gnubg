@@ -54,7 +54,7 @@ AC_MSG_RESULT([$host])
 
 AC_MSG_CHECKING([for target])
 case "$target" in
-  *i*86*-*-*)
+  *i*86*-*-* | *x86*-*-*)
     intelx86=yes
     ;;
 esac
