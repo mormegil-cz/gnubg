@@ -49,17 +49,11 @@ case "$host" in
     win32=yes
     CFLAGS="$CFLAGS -mms-bitfields"
     ;;
-esac
-AC_MSG_RESULT([$host])
-
-AC_MSG_CHECKING([for target])
-case "$target" in
   *i*86*-*-* | *x86*-*-*)
     intelx86=yes
     ;;
 esac
-AC_MSG_RESULT([$target])
-
+AC_MSG_RESULT([$host])
 
 dnl
 dnl Compiler setup
