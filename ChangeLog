@@ -1,3 +1,8 @@
+Thu Apr 10 21:33:59 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* configure.in, Makefile.am: cleanup and remove x86 host test
+	* multithread.c: only align stack when USE_SSE_VECTORIZE
+
 Wed Apr  9 21:21:58 UTC 2008 mdpetch <mpetch@capp-sysware.com> 
 	* gnubg.c, sound.c: Changed to Apple Quicktime for sound under OS/X rather than ESD
 	  This change may be revisted if it is decided to use another sound subsystem	

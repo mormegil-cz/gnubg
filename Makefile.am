@@ -12,7 +12,7 @@ bin_PROGRAMS = gnubg makebearoff makehyper bearoffdump makeweights
 INCLUDES = -I$(srcdir)/lib -I$(srcdir)/board3d @LIBXML2_CFLAGS@ \
 	   -DLOCALEDIR=\"$(localedir)\" @FREETYPE2_CFLAGS@ @PYTHON_CSPEC@ @GLIB_CFLAGS@ \
 	   @LIBPNG_CFLAGS@ @GTK_CFLAGS@ @CAIRO_CFLAGS@ @PANGOCAIRO_CFLAGS@ @GTHREAD_CFLAGS@ @ESD_CFLAGS@ \
-	   @WINMMSND_CFLAGS@ @GTKGLEXT_CFLAGS@ @SQLITE_CFLAGS@
+	   @GTKGLEXT_CFLAGS@ @SQLITE_CFLAGS@
 
 BUILT_SOURCES = sgf_y.c sgf_l.c copying.c credits.c external_l.c external_y.c
 
@@ -127,7 +127,7 @@ endif
 #
 gnubg_LDADD = -L$(srcdir)/lib lib/libevent.la @GTK_LIBS@ @LIBPNG_LIBS@ @CAIRO_LIBS@ @PANGOCAIRO_LIBS@ \
 	      @GTHREAD_LIBS@ @ESD_LIBS@ \
-	      @WINMMSND_LIBS@ @LTLIBOBJS@ @LTLIBINTL@ @LIBXML2_LIBS@ \
+	      @LTLIBOBJS@ @LTLIBINTL@ @LIBXML2_LIBS@ \
 	      @FREETYPE2_LIBS@ @PYTHON_LSPEC@ @GLIB_LIBS@ @LIBPNG_LIBS@ @SQLITE_LIBS@
 if USE_BOARD3D
 gnubg_LDADD += -L$(srcdir)/board3d board3d/libboard3d.la @GTKGLEXT_LIBS@

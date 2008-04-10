@@ -34,10 +34,6 @@
 
 #define UI_UPDATETIME 250
 
-#if __GNUC__
-#define GCC_ALIGN_HACK 1
-#endif
-
 #if TRY_COUNTING_PROCEESING_UNITS
 extern int GetLogicalProcssingUnitCount(void);
 #endif
@@ -380,50 +376,33 @@ AnalyzeDoubleDecison:
         return -1;
 }
 
-#if GCC_ALIGN_HACK
-
-static unsigned int MT_ActualWorkerThreadFunction(void *id);
 #ifdef GLIB_THREADS
-static gpointer
+static gpointer MT_WorkerThreadFunction(void *id)
 #else
-static void 
-#endif
-MT_WorkerThreadFunction(gpointer id)
-{    /* Align stack and call actual function */
-#ifdef HAVE_INTELX86_PROCESSOR
-	asm  __volatile__  ("andl $-16, %%esp" : : : "%esp");
-#endif
-	MT_ActualWorkerThreadFunction(id);
-#ifdef GLIB_THREADS
-return NULL;
-#endif
-}
-
-unsigned int MT_ActualWorkerThreadFunction(void *id)
-#else
-#ifdef GLIB_THREADS
-static gpointer
-#else
-static unsigned int
-#endif
-MT_WorkerThreadFunction(void *id)
+static unsigned int MT_WorkerThreadFunction(void *id)
 #endif
 {
-	int *pID = (int*)id;
-    TLSSetValue(td.tlsItem, *pID);
-    free(pID);
-	MT_SafeInc(&td.result);
-    MT_TaskDone(NULL);    /* Thread created */
-    do
-    {
-        WaitForManualEvent(td.activity);
-    } while (MT_DoTask());
+#if __GNUC__ && USE_SSE_VECTORIZE
+	asm  __volatile__  ("andl $-16, %%esp" : : : "%esp");
+#endif
+	{
+		int *pID = (int*)id;
+		TLSSetValue(td.tlsItem, *pID);
+		free(pID);
+		MT_SafeInc(&td.result);
+		MT_TaskDone(NULL);    /* Thread created */
+		do
+		{
+			WaitForManualEvent(td.activity);
+		} while (MT_DoTask());
 
 #ifdef GLIB_THREADS
-	g_usleep(0);	/* Avoid odd crash */
+		g_usleep(0);	/* Avoid odd crash */
+		return NULL;
+#else
+		return 0;
 #endif
-
-	return 0;
+	}
 }
 
 static gboolean WaitForAllTasks(int time)
