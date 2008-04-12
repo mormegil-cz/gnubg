@@ -47,6 +47,9 @@ case "$host" in
     CFLAGS="$CFLAGS -mms-bitfields"
     LDFLAGS="$LDFLAGS -lwinmm"
     ;;
+  *-*-darwin*)
+   LDFLAGS="$LDFLAGS -dylib_file /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib -framework QuickTime `/opt/local/bin/pkg-config --libs glib-2.0`"
+    ;;
 esac
 AC_MSG_RESULT([$host])
 
