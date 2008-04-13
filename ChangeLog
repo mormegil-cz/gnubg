@@ -1,3 +1,8 @@
+Sun Apr 13 22:38:55 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* sound.c, matchequity.c: deal more gracefully with people relocating
+	their program paths.
+
 Thu Apr 10 21:33:59 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* configure.in, Makefile.am: cleanup and remove x86 host test

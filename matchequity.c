@@ -1337,15 +1337,11 @@ static int readMET ( metdata *pmd, const char *szFileName ) {
 
   fError = 0;
 
+  if (!g_file_test(szFileName, G_FILE_TEST_EXISTS))
+	  return -1;
+
   /* parse document */
-  if (g_file_test(szFileName, G_FILE_TEST_EXISTS))
-	  doc = xmlParseFile( szFileName );
-  else
-  {
-	  char *tmp = BuildFilename(szFileName);
-	  doc = xmlParseFile( tmp );
-	  g_free(tmp);
-  }
+  doc = xmlParseFile( szFileName );
 
   /* check root */
 

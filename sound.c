@@ -321,10 +321,15 @@ extern char *GetSoundFile(gnubgsound sound)
 {
 	if (!sound_file[sound])
 		return GetDefaultSoundFile(sound);
+
 	if (!(*sound_file[sound]))
 		return g_strdup("");
-	if (g_path_is_absolute(sound_file[sound]))
+
+	if (g_file_test(sound_file[sound], G_FILE_TEST_EXISTS))
 		return g_strdup(sound_file[sound]);
+
+	if (g_path_is_absolute(sound_file[sound]))
+		return GetDefaultSoundFile(sound);
 
 	return BuildFilename(sound_file[sound]);
 }
