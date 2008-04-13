@@ -303,12 +303,18 @@ static int IsTXTFile(FileHelper * fh)
 
 static int IsJFPFile(FileHelper * fh)
 {
-	fhReset(fh);
-	if ((fhReadNextChar(fh) == 126) && (fhReadNextChar(fh) == '\0') &&
-	    (fhReadNextChar(fh) == '\0') && (fhReadNextChar(fh) == '\0'))
-		return TRUE;
+	char firstbyte;
 
-	return FALSE;
+       	fhReset(fh);
+
+	firstbyte = fhReadNextChar(fh);
+	if (firstbyte < 124 || firstbyte > 126)
+		return FALSE;
+
+	if ((fhReadNextChar(fh) == '\0'))
+		return TRUE;
+	else
+		return FALSE;
 }
 
 static int IsBKGFile(FileHelper * fh)

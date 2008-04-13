@@ -1,3 +1,7 @@
+Sun Apr 13 23:08:43 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* file.c: relax recognition of JF Pos files.
+
 Sun Apr 13 22:38:55 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* sound.c, matchequity.c: deal more gracefully with people relocating
