@@ -725,7 +725,11 @@ extern void CommandSetClockwise( char *sz ) {
                  "player 0 moves clockwise).") );
     
 #if USE_BOARD3D
+{
+	BoardData *bd = BOARD(pwBoard)->board_data;
 	RestrictiveRedraw();
+	RerenderBase(bd->bd3d);
+}
 #endif
 #if USE_GTK
     if( fX )
