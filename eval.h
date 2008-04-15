@@ -288,7 +288,6 @@ typedef struct {
 extern int fInterrupt;
 extern cubeinfo ciCubeless;
 extern const char *aszEvalType[ (int)EVAL_ROLLOUT + 1 ];
-extern int fEgyptian;
 
 extern bearoffcontext *pbc1;
 extern bearoffcontext *pbc2;
