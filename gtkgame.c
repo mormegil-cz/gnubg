@@ -1211,8 +1211,8 @@ static gboolean main_delete( GtkWidget *pw ) {
 
     getWindowGeometry(WINDOW_MAIN);
     
-    UserCommand( "quit" );
-    
+    PromptForExit();
+
     return TRUE;
 }
 

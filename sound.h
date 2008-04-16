@@ -60,7 +60,7 @@ extern void SoundFlushCache( const gnubgsound gs );
 extern void SoundWait( void );
 
 extern char *GetDefaultSoundFile(gnubgsound sound);
-extern void playSoundFile(char *file);
+extern void playSoundFile(char *file, gboolean sync);
 extern void SetSoundFile(const gnubgsound gs, const char *szFilename);
 extern char *GetSoundFile(gnubgsound sound);
 extern const char *sound_get_command(void);

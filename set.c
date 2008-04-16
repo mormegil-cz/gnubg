@@ -724,16 +724,16 @@ extern void CommandSetClockwise( char *sz ) {
                _("Player 1 moves anticlockwise (and "
                  "player 0 moves clockwise).") );
     
-#if USE_BOARD3D
-{
-	BoardData *bd = BOARD(pwBoard)->board_data;
-	RestrictiveRedraw();
-	RerenderBase(bd->bd3d);
-}
-#endif
 #if USE_GTK
     if( fX )
+    {
+	BoardData *bd = BOARD(pwBoard)->board_data;
 	ShowBoard();
+#if USE_BOARD3D
+	RestrictiveRedraw();
+	RerenderBase(bd->bd3d);
+#endif
+    }
 #endif /* USE_GTK */
 }
 

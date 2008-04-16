@@ -25,11 +25,15 @@
 
 #include "config.h"
 
-#include "backgammon.h"
 #include <glib.h>
 #include <glib/gi18n.h>
 #include <string.h>
 #include <stdlib.h>
+
+#include "backgammon.h"
+#if USE_GTK
+#include "gtkgame.h"
+#endif
 
 #if defined(WIN32)
 /* for PlaySound */
@@ -149,8 +153,72 @@ void PlaySound_QuickTime (const char *cSoundFilename)
         else fQTPlaying = FALSE;
     }
 }
-#elif HAVE_ESD
-#include <esd.h>
+#elif HAVE_GSTREAMER
+#include <gst/gst.h>
+static void print_gst_error(GstMessage *message, const char *sound)
+{
+	GError *err;
+	gchar *debug;
+
+	gst_message_parse_error(message, &err, &debug);
+	outputerrf(_("Error playing %s: %s\n"), sound, err->message);
+	g_error_free(err);
+	g_free(debug);
+}
+
+static gboolean bus_callback(GstBus * bus, GstMessage * message,
+				gpointer play)
+{
+	switch (GST_MESSAGE_TYPE(message)) {
+	case GST_MESSAGE_ERROR:
+		{
+			print_gst_error(message, _("sound"));
+			gst_element_set_state(play, GST_STATE_NULL);
+			gst_object_unref(GST_OBJECT(play));
+			return FALSE;
+		}
+	case GST_MESSAGE_EOS:
+		{
+			gst_element_set_state(play, GST_STATE_NULL);
+			gst_object_unref(GST_OBJECT(play));
+			return FALSE;
+		}
+	default:
+		return TRUE;
+	}
+
+}
+
+static void PlaySoundGst(const char *fn, gboolean sync)
+{
+	GstElement *play;
+	GstBus *bus;
+	gchar *uri;
+
+	g_return_if_fail(g_file_test(fn, G_FILE_TEST_EXISTS));
+	g_return_if_fail(g_path_is_absolute(fn));
+	uri = g_filename_to_uri(fn, NULL, NULL);
+	g_return_if_fail(uri);
+
+	play = gst_element_factory_make("playbin", "play");
+	g_object_set(G_OBJECT(play), "uri", uri, NULL);
+
+	gst_element_set_state(play, GST_STATE_PLAYING);
+
+	bus = gst_pipeline_get_bus (GST_PIPELINE (play));
+	if (sync)
+	{
+		GstMessage *msg;
+		msg = gst_bus_poll (bus, GST_MESSAGE_EOS | GST_MESSAGE_ERROR, -1);
+		if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_ERROR)
+			print_gst_error(msg, fn);
+		gst_element_set_state(play, GST_STATE_NULL);
+		gst_object_unref(GST_OBJECT(play));
+	}
+	else
+		gst_bus_add_watch (bus, bus_callback, play);
+	gst_object_unref (bus);
+}
 #endif
 
 #include "sound.h"
@@ -202,7 +270,7 @@ int fSound = TRUE;
 static char *sound_cmd = NULL;
 
 void
-playSoundFile (char *file)
+playSoundFile (char *file, gboolean sync)
 {
     GError *error = NULL;
     if (!g_file_test(file, G_FILE_TEST_EXISTS))
@@ -253,8 +321,8 @@ playSoundFile (char *file)
       }
 #elif defined(__APPLE__)
 	PlaySound_QuickTime (file);
-#elif HAVE_ESD
-    esd_play_file (NULL, file, 1);
+#elif HAVE_GSTREAMER
+	PlaySoundGst(file, sync);
 #endif
 }
 
@@ -267,8 +335,16 @@ extern void playSound ( const gnubgsound gs )
 		return;
 
 	sound = GetSoundFile(gs);
-	if ( *sound )
-		playSoundFile( sound );
+	if ( !*sound )
+	{
+		g_free(sound);
+		return;
+	}
+	if (!fX || gs == SOUND_EXIT)
+		playSoundFile( sound, TRUE );
+	else 
+		playSoundFile( sound, FALSE );
+
 	g_free(sound);
 }
 

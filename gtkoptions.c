@@ -277,7 +277,7 @@ static void SoundChangePathClicked(GtkWidget *widget, gpointer userdata)
 
 static void SoundPlayClicked(GtkWidget *widget, gpointer userdata)
 {
-        playSoundFile(soundDetails[selSound].Path);
+        playSoundFile(soundDetails[selSound].Path, FALSE);
 }
 
 static void

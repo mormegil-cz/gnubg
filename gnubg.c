@@ -47,6 +47,10 @@ static int fReadingOther;
 static char szCommandSeparators[] = " \t\n\r\v\f";
 #endif
 
+#if HAVE_GSTREAMER
+#include <gst/gst.h>
+#endif
+
 #include "analysis.h"
 #include "backgammon.h"
 #include "dice.h"
@@ -2024,8 +2028,8 @@ char *aszBuildInfo[] = {
     N_("Windows sound system supported."),
 #elif defined(__APPLE__)
     N_("Apple QuickTime sound system supported."),
-#elif HAVE_ESD
-    N_("ESD sound system supported."),
+#elif HAVE_GSTREAMER
+    N_("Gstreamer sound system supported."),
 #endif
 #if USE_MULTITHREAD
     N_("Multiple threads supported."),
@@ -3752,25 +3756,28 @@ Shutdown( void ) {
 extern void PromptForExit( void )
 {
 
-    static int fExiting = FALSE;
+	static int fExiting = FALSE;
 #if USE_GTK
 	BoardData* bd = NULL;
-	
-	if (fX)
-	  bd = BOARD(pwBoard)->board_data;
-#endif
 
-    if( !fExiting && fInteractive && fConfirm && ms.gs == GAME_PLAYING ) {
+	if (fX)
+		bd = BOARD(pwBoard)->board_data;
+#endif
+	if (fExiting)
+		return;
+
 	fExiting = TRUE;
-	fInterrupt = FALSE;
-	
-	if( !GetInputYN( _("Are you sure you want to exit and abort the game in "
-			 "progress? ") ) ) {
-	    fInterrupt = FALSE;
-	    fExiting = FALSE;
-	    return;
+
+	if( fInteractive && fConfirm && ms.gs == GAME_PLAYING ) {
+		fInterrupt = FALSE;
+
+		if( !GetInputYN( _("Are you sure you want to exit and abort the game in "
+						"progress? ") ) ) {
+			fInterrupt = FALSE;
+			fExiting = FALSE;
+			return;
+		}
 	}
-    }
 
 #if USE_BOARD3D
     if (fX && (display_is_3d(bd->rd)))
@@ -6290,7 +6297,10 @@ int main(int argc, char *argv[])
 	GError *error = NULL;
 	GOptionContext *context;
 
-        
+#if USE_MULTITHREAD
+	MT_InitThreads();
+#endif
+
 	/* set language */
         init_defaults();
 #if USE_GTK
@@ -6307,6 +6317,12 @@ int main(int argc, char *argv[])
 #if USE_GTK
 	g_option_context_add_group(context, gtk_get_option_group(FALSE));
 #endif
+
+#if HAVE_GSTREAMER
+	  g_option_context_add_group (context, gst_init_get_option_group ());
+#endif
+
+        
 	g_option_context_parse(context, &argc, &argv, &error);
 	g_option_context_free(context);
 	if (error) {
@@ -6378,10 +6394,6 @@ int main(int argc, char *argv[])
 	InitMatchEquity(met);
 	g_free(met);
 
-#if USE_MULTITHREAD
-	PushSplash(pwSplash, _("Initialising"), _("threads"), 250);
-	MT_InitThreads();
-#endif
 	PushSplash(pwSplash, _("Initialising"), _("neural nets"), 250);
         init_nets(nNewWeights, fNoBearoff);
 

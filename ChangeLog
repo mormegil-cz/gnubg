@@ -1,3 +1,9 @@
+Wed Apr 16 20:58:34 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, configure.in, gnubg.c, gtkgame.c, gtkoptions.c, set.c,
+	sound.c, sound.h:  Change sound system from esound to gstreamer. Fix
+	minor problems in PrompForExit and CommandSetClockwise.
+
 Sun Apr 13 23:08:43 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* file.c: relax recognition of JF Pos files.
