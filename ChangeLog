@@ -1,3 +1,8 @@
+Wed Apr 16 22:05:24 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* eval.c: in FindBestCubeDecision. Fix rare case where no double,
+	beaver was returned as doble, beaver.
+
 Wed Apr 16 20:58:34 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am, configure.in, gnubg.c, gtkgame.c, gtkoptions.c, set.c,
