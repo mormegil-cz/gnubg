@@ -4331,7 +4331,7 @@ FindBestCubeDecision ( float arDouble[],
            arDouble[ OUTPUT_TAKE ] >= -2.0 &&
            arDouble[ OUTPUT_TAKE ] <= 0.0 
            && pci->fBeavers ) {
-        if ( arDouble[ OUTPUT_TAKE ] * 2.0 >= arDouble[OUTPUT_NODOUBLE] ) {
+        if ( arDouble[ OUTPUT_TAKE ] * 2.0 < arDouble[OUTPUT_NODOUBLE] ) {
           /*not a double if we can beaver*/
           return NODOUBLE_BEAVER;
         }
