@@ -1206,6 +1206,14 @@ extern void CommandSetGUIShowPips( char *sz ) {
 	UpdateSetting( &fGUIShowPips );
 }
 
+extern void CommandSetGUIShowWastage(char *sz)
+{
+
+	if (SetToggle("gui showepcs", &fGUIShowWastage, sz,
+		      _("The effective pip counts (EPCs) will be shown below the board."),
+		      _ ("The effective pip counts (EPCs) will not be shown.")))
+		UpdateSetting(&fGUIShowWastage);
+}
 extern void CommandSetGUIShowEPCs( char *sz ) {
 
     if( SetToggle( "gui showepcs", &fGUIShowEPCs, sz,

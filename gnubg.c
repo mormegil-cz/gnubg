@@ -1129,6 +1129,9 @@ command cER = {
       N_("Show the higher die on the left"), szONOFF, NULL },
     { "illegal", CommandSetGUIIllegal,
       N_("Permit dragging chequers to illegal points"), szONOFF, NULL },
+    { "showwastage", CommandSetGUIShowWastage,
+      N_("Show the effective pip count wastage below the board"), 
+      szONOFF, NULL },
     { "showepcs", CommandSetGUIShowEPCs,
       N_("Show the effective pip counts (EPCs) below the board"), 
       szONOFF, NULL },
@@ -4660,6 +4663,7 @@ extern void CommandSaveSettings( char *szParam )
 	     "set gui showids %s\n"
 	     "set gui showpips %s\n"
 	     "set gui showepc %s\n"
+	     "set gui showwastage %s\n"
 	     "set gui dragtargethelp %s\n"
 		 "set gui usestatspanel %s\n"
 		 "set gui movelistdetail %s\n",
@@ -4671,6 +4675,7 @@ extern void CommandSaveSettings( char *szParam )
 	     GetMainAppearance()->fShowIDs ? "on" : "off",
 	     fGUIShowPips ? "on" : "off",
 	     fGUIShowEPCs ? "on" : "off",
+	     fGUIShowWastage ? "on" : "off",
 	     fGUIDragTargetHelp ? "on" : "off",
 		 fGUIUseStatsPanel ? "on" : "off",
 		 showMoveListDetail ? "on" : "off");

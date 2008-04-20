@@ -51,7 +51,7 @@ typedef enum _animation {
 extern animation animGUI;
 extern int fGUIBeep, fGUIHighDieFirst,
     fGUIIllegal, fGUIShowPips, fGUISetWindowPos,
-    fGUIDragTargetHelp, fGUIUseStatsPanel, fGUIShowEPCs;
+    fGUIDragTargetHelp, fGUIUseStatsPanel, fGUIShowEPCs, fGUIShowWastage;
 extern unsigned int nGUIAnimSpeed;
 
 struct _BoardData;      /* Forward declaration for use in Board */

@@ -801,6 +801,7 @@ extern void CommandSetGUIShowEPCs(char *);
 extern void CommandSetGUIShowIDs(char *);
 extern void CommandSetGUIShowPips(char *);
 extern void CommandSetGUIUseStatsPanel(char *);
+extern void CommandSetGUIShowWastage(char *);
 extern void CommandSetGUIWindowPositions(char *);
 extern void CommandSetImportFolder(char *);
 extern void CommandSetInvertMatchEquityTable(char *);

@@ -1,3 +1,8 @@
+Sun Apr 20 23:25:42 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, gnubg.c, gtkboard.c, gtkboard.h, gtkoptions.c, set.c:
+	make showing of epc wastage optional and fix minor sizing problems.
+
 Sun Apr 20 20:36:28 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* play.c: fix cube tutoring after changes to make the progress
