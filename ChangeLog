@@ -1,3 +1,8 @@
+Sun Apr 20 20:36:28 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* play.c: fix cube tutoring after changes to make the progress
+	indicator async.
+
 Wed Apr 16 22:05:24 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* eval.c: in FindBestCubeDecision. Fix rare case where no double,
