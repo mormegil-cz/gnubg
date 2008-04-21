@@ -344,12 +344,12 @@ extern void playSound ( const gnubgsound gs )
 	}
 #if USE_GTK
 	if (!fX || gs == SOUND_EXIT)
-#else
-	if (gs == SOUND_EXIT)
-#endif
 		playSoundFile( sound, TRUE );
 	else 
 		playSoundFile( sound, FALSE );
+#else
+	playSoundFile( sound, TRUE );
+#endif
 
 	g_free(sound);
 }

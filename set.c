@@ -1282,6 +1282,11 @@ extern void CommandSetGUIShowIDs( char *sz ) {
     NoGUI();
 }
 
+extern void CommandSetGUIShowWastage( char *sz ) {
+
+    NoGUI();
+}
+ 
 extern void CommandSetGUIShowEPCs( char *sz ) {
 
     NoGUI();

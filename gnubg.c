@@ -6324,6 +6324,9 @@ int main(int argc, char *argv[])
 #endif
 
 #if HAVE_GSTREAMER
+	/* gstreamer needs to init threads, regardless if we use them */
+	if (!g_thread_supported ())
+		g_thread_init (NULL);
 	  g_option_context_add_group (context, gst_init_get_option_group ());
 #endif
 

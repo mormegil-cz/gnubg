@@ -1,3 +1,10 @@
+Mon Apr 21 11:05:10 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c, sound.c: minor gstreamer issues when compiling without
+	threads or without gtk.
+	* set.c: CommandSetGUIShowWastage needs to be defined when compiling
+	without gtk
+
 Sun Apr 20 23:25:42 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, gnubg.c, gtkboard.c, gtkboard.h, gtkoptions.c, set.c:
