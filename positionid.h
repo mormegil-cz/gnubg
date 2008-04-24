@@ -24,6 +24,8 @@
 
 #include "gnubg-types.h"
 
+#define L_POSITIONID 14
+
 extern void PositionKey( const TanBoard anBoard, unsigned char auchKey[ 10 ] );
 extern char *PositionID( const TanBoard anBoard );
 extern char *PositionIDFromKey( const unsigned char auchKey[ 10 ] );

@@ -1431,13 +1431,10 @@ static void PasteText(void)
 	if (GTK_IS_ENTRY(pFocus))
 	{
 		BoardData *bd = BOARD(pwBoard)->board_data;
-		if (pFocus == bd->position_id || pFocus == bd->match_id)
+		if (pFocus == bd->gnubg_id)
 		{	/* Replace text in these boxes */
 			gtk_entry_set_text(GTK_ENTRY(pFocus), text);
-			if (pFocus == bd->position_id)
-				board_set_position(0, bd);
-			else
-				board_set_matchid(0, bd);
+			board_set_gnubg_id(0, bd);
 		}
 		else
 		{	/* Insert text */

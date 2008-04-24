@@ -65,6 +65,7 @@
 
 #include "matchequity.h"
 #include "positionid.h"
+#include "matchid.h"
 #include "renderprefs.h"
 #include "export.h"
 #include "drawboard.h"
@@ -3143,7 +3144,6 @@ CommandSetMatchID ( char *sz ) {
 
 }
 
-
 extern void
 CommandSetExportIncludeAnnotations ( char *sz ) {
 
@@ -4189,4 +4189,68 @@ extern void
 CommandSetSGFFolder (char *sz)
 {
   SetFolder (&default_sgf_folder, NextToken (&sz));
+}
+
+static char *get_base64(char *inp, char **next)
+{
+	char *first, *last;
+	int l = 0;
+
+	*next = NULL;
+	g_return_val_if_fail(inp, NULL);
+	g_return_val_if_fail(*inp, NULL);
+
+	for (first = inp; *first; first++) {
+		if (Base64(*first) != 255)
+			break;
+	}
+
+	if (!*first) {
+		*next = first;
+		return NULL;
+	}
+
+	for (last = first; *last; last++, l++) {
+		if (Base64(*last) == 255)
+			break;
+	}
+	*next = last;
+	return g_strndup(first, l);
+}
+
+extern void CommandSetGNUBgID(char *sz)
+{
+	char *out;
+	char *posid = NULL;
+	char *matchid = NULL;
+
+	while (sz && *sz) {
+		out = get_base64(sz, &sz);
+		if (out) {
+			if (strlen(out) == L_MATCHID) {
+				if (matchid)
+					continue;
+				matchid = g_strdup(out);
+				CommandSetMatchID(out);
+			} else if (strlen(out) == L_POSITIONID) {
+				if (posid)
+					continue;
+				posid = g_strdup(out);
+				CommandSetBoard(out);
+			}
+			g_free(out);
+		}
+	}
+	if (!posid && !matchid) {
+		outputerrf(_("No valid GNUBG id's found"));
+		return;
+	}
+	if (!posid && !matchid) {
+		outputerrf(_("No valid GNUBG id's found"));
+		return;
+	}
+	outputf(_("Setting GNUBG id %s:%s\n"), posid ? posid : "",
+		matchid ? matchid : "");
+	g_free(posid);
+	g_free(matchid);
 }

@@ -22,6 +22,7 @@
 #ifndef _MATCHID_H_
 #define _MATCHID_H_
 
+#define L_MATCHID 12
 extern int
 LogCube ( const int n );
 

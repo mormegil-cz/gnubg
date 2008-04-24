@@ -463,43 +463,32 @@ static int board_point( GtkWidget *board, BoardData *bd, int x0, int y0 )
     return -1;
 }
 
-static void update_match_id( BoardData *bd )
+extern void update_gnubg_id(BoardData * bd, const TanBoard points)
 {
-  
-  int anScore[ 2 ];
-  int fCubeOwner;
 
-  anScore[ 0 ] = bd->score_opponent;
-  anScore[ 1 ] = bd->score;
+	int anScore[2];
+	int fCubeOwner;
+	gchar *str;
 
-  if ( bd->can_double ) {
-    if ( bd->opponent_can_double )
-      fCubeOwner = -1;
-    else
-      fCubeOwner = 1;
-  }
-  else 
-    fCubeOwner = 0;
+	anScore[0] = bd->score_opponent;
+	anScore[1] = bd->score;
 
-  gtk_entry_set_text( GTK_ENTRY( bd->match_id ), 
-                      MatchID( bd->diceRoll,
-                               ms.fTurn,
-                               ms.fResigned,
-                               ms.fDoubled,
-                               ms.fMove,
-                               fCubeOwner,
-                               bd->crawford_game,
-                               bd->match_to,
-                               anScore,
-                               bd->cube,
-                               ms.gs ) );
-
-}
-
-
-extern void update_position_id( BoardData *bd, const TanBoard points )
-{
-    gtk_entry_set_text( GTK_ENTRY( bd->position_id ), PositionID( points ) );
+	if (bd->can_double) {
+		if (bd->opponent_can_double)
+			fCubeOwner = -1;
+		else
+			fCubeOwner = 1;
+	} else {
+		fCubeOwner = 0;
+	}
+	str = g_strdup_printf("%s:%s",
+			      PositionID(points),
+			      MatchID(bd->diceRoll, ms.fTurn, ms.fResigned,
+				      ms.fDoubled, ms.fMove, fCubeOwner,
+				      bd->crawford_game, bd->match_to,
+				      anScore, bd->cube, ms.gs));
+	gtk_entry_set_text(GTK_ENTRY(bd->gnubg_id), str);
+	g_free(str);
 }
 
 extern char * ReturnHits( TanBoard anBoard )
@@ -670,7 +659,7 @@ int update_move(BoardData *bd)
     int fIncomplete = TRUE, fIllegal = TRUE;
     
     read_board( bd, points );
-    update_position_id( bd, (ConstTanBoard)points );
+    update_gnubg_id( bd, (ConstTanBoard)points );
     update_pipcount ( bd, (ConstTanBoard)points );
 
     bd->valid_move = NULL;
@@ -1264,8 +1253,8 @@ gboolean place_chequer_or_revert(BoardData *bd, int dest )
                     }
             }
         } else {
-          if (ABS(source - dest2) == bd->diceRoll [ 0 ] + bd->diceRoll [ 1 ] || 
-			  (dest > 25 && ABS (source - dest2) > MAX(bd->diceRoll[ 0 ], bd->diceRoll[ 1 ]))
+          if ((unsigned int)ABS(source - dest2) == bd->diceRoll [ 0 ] + bd->diceRoll [ 1 ] || 
+			  (dest > 25 && (unsigned int)ABS (source - dest2) > MAX(bd->diceRoll[ 0 ], bd->diceRoll[ 1 ]))
               ) 
             for (i = 0; i < 2; i++) {
                     passpoint = source - bd->diceRoll[ i ] * bd->drag_colour;
@@ -1499,7 +1488,7 @@ static void updateBoard(GtkWidget *board, BoardData* bd)
 {
 	TanBoard points;
 	read_board(bd, points);
-	update_position_id(bd, (ConstTanBoard)points);
+	update_gnubg_id(bd, (ConstTanBoard)points);
 	update_pipcount(bd, (ConstTanBoard)points);
 
 #if USE_BOARD3D
@@ -2667,11 +2656,10 @@ static gint board_set( Board *board, const gchar *board_text, const gint
 	gtk_widget_set_sensitive( bd->crawford, bd->crawford_game);
 
 	read_board( bd, bd->old_board );
-	update_position_id( bd, (ConstTanBoard)bd->old_board );
 	update_pipcount ( bd, (ConstTanBoard)bd->old_board );
     }
 
-    update_match_id ( bd );
+    update_gnubg_id( bd, (ConstTanBoard)bd->old_board );
     update_move( bd );
 
     if (fGUIHighDieFirst && bd->diceRoll[ 0 ] < bd->diceRoll[ 1 ] )
@@ -3475,41 +3463,24 @@ static void board_realize( GtkWidget *board )
     board_create_pixmaps( board, bd );
 }
 
-extern void board_set_position(GtkWidget * pw, BoardData * bd)
+extern void board_set_gnubg_id(GtkWidget * pw, BoardData * bd)
 {
 	int editing;
 	char *sz;
-	const char *tmp;
+	char *tmp;
+	tmp = g_strdup(gtk_entry_get_text(GTK_ENTRY(bd->gnubg_id)));
 
 	if (ms.gs != GAME_PLAYING)
 		SetMatchID("cIkaAAAAAAAA");
 	editing = ToolbarIsEditing(pwToolbar);
 	if (editing)
 		click_edit();
-	tmp = gtk_entry_get_text(GTK_ENTRY(bd->position_id));
-	sz = g_strdup_printf("set board %s", tmp);
+	sz = g_strdup_printf("set gnubgid %s", tmp);
+	g_free(tmp);
 	UserCommand(sz);
 	g_free(sz);
 	if (editing)
 		click_edit();
-}
-
-extern void board_set_matchid(GtkWidget * pw, BoardData * bd)
-{
-	int editing;
-	char *sz;
-	const char *tmp;
-
-	editing = ToolbarIsEditing(pwToolbar);
-	if (editing)
-		click_edit();
-	tmp = gtk_entry_get_text(GTK_ENTRY(bd->match_id));
-	sz = g_strdup_printf("set matchid %s", tmp);
-	UserCommand(sz);
-	g_free(sz);
-	if (editing)
-		click_edit();
-
 }
 
 static void board_show_child( GtkWidget *pwChild, BoardData *pbd )
@@ -3854,27 +3825,12 @@ static void board_init( Board *board )
     gtk_box_pack_start( GTK_BOX( bd->vbox_ids ), pw, FALSE, FALSE, 0 );
 
     gtk_box_pack_start ( GTK_BOX ( pw ), 
-                         gtk_label_new ( _("Position ID: ") ),
+                         gtk_label_new ( _("GNUBg ID: ") ),
                          FALSE, FALSE, 4 );
 
     gtk_box_pack_start ( GTK_BOX ( pw ), 
-                         bd->position_id = gtk_entry_new(),
-                         FALSE, FALSE, 0 );
-    gtk_entry_set_max_length( GTK_ENTRY( bd->position_id ), 14 );
-
-    gtk_box_pack_start ( GTK_BOX ( pw ), 
-                         gtk_label_new ( _("Match ID: ") ),
-                         FALSE, FALSE, 8 );
-
-    gtk_box_pack_start ( GTK_BOX ( pw ), 
-                         bd->match_id = gtk_entry_new(),
-                         FALSE, FALSE, 0 );
-    gtk_entry_set_max_length( GTK_ENTRY( bd->match_id ), 12 );
-
-
-    pw = gtk_hseparator_new ();
-    gtk_box_pack_start( GTK_BOX( bd->vbox_ids ), pw, 
-                        FALSE, FALSE, 0 );
+                         bd->gnubg_id = gtk_entry_new(),
+                         TRUE, TRUE, 0 );
 
     /* the rest */
 
@@ -4082,14 +4038,10 @@ static void board_init( Board *board )
     gtk_widget_add_events( GTK_WIDGET( bd->dice_area ), GDK_EXPOSURE_MASK |
 			   GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK );
 
-    g_signal_connect( G_OBJECT( bd->position_id ), "activate",
-			G_CALLBACK( board_set_position ), bd );
-    g_signal_connect( G_OBJECT( bd->position_id ), "paste-clipboard",
-			G_CALLBACK( board_set_position ), bd );
-    g_signal_connect( G_OBJECT( bd->match_id ), "activate",
-			G_CALLBACK( board_set_matchid ), bd );
-    g_signal_connect( G_OBJECT( bd->match_id ), "paste-clipboard",
-			G_CALLBACK( board_set_matchid ), bd );
+    g_signal_connect( G_OBJECT( bd->gnubg_id ), "activate",
+			G_CALLBACK( board_set_gnubg_id ), bd );
+    g_signal_connect( G_OBJECT( bd->gnubg_id ), "paste-clipboard",
+			G_CALLBACK( board_set_gnubg_id ), bd );
 
     g_signal_connect( G_OBJECT( bd->drawing_area ), "expose_event",
 			G_CALLBACK( board_expose ), bd );    

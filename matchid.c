@@ -113,7 +113,7 @@ extern char
 *MatchIDFromKey( unsigned char auchKey[ 9 ] ) {
 
     unsigned char *puch = auchKey;
-    static char szID[ 13 ];
+    static char szID[ L_MATCHID + 1 ];
     char *pch = szID;
     static char aszBase64[] =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -249,13 +249,13 @@ MatchFromID ( int anDice[ 2 ],
 
   unsigned char auchKey[ 9 ];
   unsigned char *puch = auchKey;
-  unsigned char ach[ 13 ];
+  unsigned char ach[ L_MATCHID + 1 ];
   unsigned char *pch = ach;
   int i;
 
   memset(ach, 0, sizeof(ach));
   /* decode base64 into key */
-  for( i = 0; i < 12 && szMatchID[ i ]; i++ )
+  for( i = 0; i < L_MATCHID && szMatchID[ i ]; i++ )
     pch[ i ] = Base64( (unsigned char)szMatchID[ i ] );
 
   for( i = 0; i < 3; i++ ) {

@@ -786,6 +786,7 @@ extern void CommandSetGeometryPosX(char *);
 extern void CommandSetGeometryPosY(char *);
 extern void CommandSetGeometryTheory(char *);
 extern void CommandSetGeometryWidth(char *);
+extern void CommandSetGNUBgID(char *);
 extern void CommandSetGotoFirstGame(char *);
 extern void CommandSetGUIAnimationBlink(char *);
 extern void CommandSetGUIAnimationNone(char *);
