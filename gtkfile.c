@@ -52,7 +52,7 @@ static void FilterAdd (const char *fn, const char *pt, GtkFileChooser * fc)
 static GtkWidget * GnuBGFileDialog (gchar * prompt, gchar * folder, gchar * name,
 		 GtkFileChooserAction action)
 {
-#if WIN32
+#ifdef WIN32
 char *programdir, *pc, *tmp;
 #endif
   GtkWidget *fc;
@@ -88,7 +88,7 @@ char *programdir, *pc, *tmp;
   if (name && *name)
     gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fc), name);
 
-#if WIN32
+#ifdef WIN32
   programdir = g_strdup(getInstallDir());
   if ((pc = strrchr(programdir, G_DIR_SEPARATOR)) != NULL) {
           *pc = '\0';

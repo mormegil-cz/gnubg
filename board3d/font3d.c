@@ -398,7 +398,7 @@ static void PopulateContour(GArray *contour, const FT_Vector* points, const char
 
 /* Unfortunately the glu library doesn't define this callback type precisely
  so it may well cause problems on different platforms / opengl implementations */
-#if WIN32
+#ifdef WIN32
 /* Need to set the callback calling convention for windows */
 #define TESS_CALLBACK APIENTRY
 #else

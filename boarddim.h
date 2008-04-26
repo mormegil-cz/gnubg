@@ -136,6 +136,4 @@
 #define HINGE_TOP_Y ((BOARD_HEIGHT + CUBE_HEIGHT) / 2 + \
                      2 * CHEQUER_HEIGHT + 1)
 
-extern int positions[ 2 ][ 30 ][ 3 ];
-
 #endif /* _BOARDDIM_H_ */

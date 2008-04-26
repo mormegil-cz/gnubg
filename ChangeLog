@@ -1,3 +1,14 @@
+Sat Apr 26 19:09:00 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* bearoff.c, boarddim.h, eval.c, external_y.y, gnubg.c,
+	gnubgmodule.c, gtkfile.c, gtkgame.c, gtkmovelist.c,
+	gtktempmap.c, html.c, htmlimages.c, makebearoff.c, multithread.c,
+	play.c, set.c, sgf.c, sgf_y.y, simpleboard.c, util.c,
+	board3d/font3d.c, board3d/misc3d.c, lib/neuralnet.c,
+	non-src/external_l.c, non-src/external_y.c, non-src/sgf_l.c,
+	non-src/sgf_y.c: #if's to #ifdef for things not normally defined by
+	configure
+
 Fri Apr 25 17:33:11 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* configure.in: try to guess the right sse flag according to cpu type

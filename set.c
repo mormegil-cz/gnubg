@@ -83,7 +83,7 @@
 #endif
 #include "multithread.h"
 
-#if WIN32
+#ifdef WIN32
 /* Needed for thread priority defines */
 #include <windows.h>
 #endif

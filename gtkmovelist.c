@@ -54,8 +54,6 @@ enum
   ML_COL_DATA
 } ;
 
-void MoveListUpdate ( const hintdata *phd );
-
 extern void MoveListCreate(hintdata *phd)
 {
     static char *aszTitleDetails[] = {

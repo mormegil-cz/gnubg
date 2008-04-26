@@ -133,9 +133,6 @@ static int
 CheatDice ( unsigned int anDice[ 2 ], matchstate *pms, const int fBest );
 
 
-extern void EvaluateRoll ( float ar[ NUM_ROLLOUT_OUTPUTS ], int nDie1, int nDie2, const TanBoard anBoard, 
-                    const cubeinfo *pci, const evalcontext *pec);
-
 #if USE_GTK
 #include "gtkgame.h"
 

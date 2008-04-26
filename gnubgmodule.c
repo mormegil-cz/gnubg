@@ -2343,7 +2343,7 @@ extern void PythonInitialise(void)
 {
   char *working_dir = g_get_current_dir();
 
-#if WIN32
+#ifdef WIN32
 {	/* Setup python to look in the pythonlib directory if present */
 	char *python_dir;
 	python_dir = g_build_filename(working_dir, "/PythonLib", NULL);

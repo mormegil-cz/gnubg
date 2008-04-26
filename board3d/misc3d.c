@@ -23,7 +23,7 @@
 
 #include "config.h"
 #include "inc3d.h"
-#if WIN32
+#ifdef WIN32
 #include <io.h>
 #endif
 #include "renderprefs.h"

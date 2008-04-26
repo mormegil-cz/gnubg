@@ -1700,7 +1700,7 @@ extern listOLD *SGFParse( FILE *pf ) {
     return plCollection;
 }
 	
-#if SGFTEST
+#ifdef SGFTEST
 
 #include <mcheck.h>
 	

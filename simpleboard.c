@@ -534,7 +534,7 @@ extern SimpleBoard *simple_board_new_from_ids(gchar * position_id,
 	return (board);
 }
 
-#if SB_STAND_ALONE
+#ifdef SB_STAND_ALONE
 #include <cairo-svg.h>
 main(int argc, char *argv[])
 {

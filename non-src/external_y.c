@@ -1726,7 +1726,7 @@ reset_command(void) {
 }
 
 
-#if EXTERNAL_TEST
+#ifdef EXTERNAL_TEST
 
 extern int
 main( int argc, char *argv[] ) {

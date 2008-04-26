@@ -34,7 +34,7 @@
 
 #define UI_UPDATETIME 250
 
-#if TRY_COUNTING_PROCEESING_UNITS
+#ifdef TRY_COUNTING_PROCEESING_UNITS
 extern int GetLogicalProcssingUnitCount(void);
 #endif
 
@@ -487,7 +487,7 @@ extern void MT_StartThreads(void)
 {
     if (numThreads == 0)
 	{
-#if TRY_COUNTING_PROCEESING_UNITS
+#ifdef TRY_COUNTING_PROCEESING_UNITS
         numThreads = GetLogicalProcssingUnitCount();
 #else
         numThreads = 1;

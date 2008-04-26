@@ -47,7 +47,7 @@
 #include "erf.inc"	/* No erf on msdev so include code here... */
 #endif
 
-#if WIN32
+#ifdef WIN32
 #define BINARY O_BINARY
 #else
 #define BINARY 0
@@ -749,7 +749,7 @@ extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 
     if( ! fNoBearoff )
 	{
-#if USE_BUILTIN_BEAROFF
+#ifdef USE_BUILTIN_BEAROFF
 			/* read one-sided db from gnubg.bd */
 		pbc1 = BearoffInitBuiltin();
 #endif

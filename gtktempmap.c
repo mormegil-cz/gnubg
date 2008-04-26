@@ -570,17 +570,6 @@ GTKShowTempMap( const matchstate ams[], const int n,
       ptm->szTitle = ( aszTitle &&  aszTitle[ m ] && *aszTitle[ m ] ) ?
         g_strdup( aszTitle[ m ] ) : NULL;
 
-#if OLD_CODE
-      pw = gtk_aspect_frame_new( ptm->szTitle, 0.5, 0.5, 1.0, FALSE );
-
-      gtk_table_attach_defaults( GTK_TABLE( pwOuterTable ),
-                                 pw, l, l + 1, k, k + 1 );
-
-      gtk_container_add( GTK_CONTAINER( pw ), 
-                         pwTable = gtk_table_new( 7, 7, TRUE ) );
-
-#endif
-
       pw = gtk_frame_new( ptm->szTitle );
 
       gtk_table_attach_defaults( GTK_TABLE( pwOuterTable ),

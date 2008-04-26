@@ -35,7 +35,7 @@
 #include <sys/wait.h>
 #endif
 #include <ctype.h>
-#if WIN32
+#ifdef WIN32
 #include <io.h>
 #endif
 
@@ -2163,7 +2163,7 @@ NextTokenGeneral( char **ppch, const char *szTokens ) {
 		*pchSave++ = **ppch;
 	    break;
 
-#if NO_BACKSLASH_ESCAPES
+#ifdef NO_BACKSLASH_ESCAPES
 	case '%':
 #else
 	case '\\':
@@ -2180,7 +2180,7 @@ NextTokenGeneral( char **ppch, const char *szTokens ) {
 		    *pchSave++ = **ppch;
 		else {
 		    /* end of string -- the backlash doesn't quote anything */
-#if NO_BACKSLASH_ESCAPES
+#ifdef NO_BACKSLASH_ESCAPES
 		    *pchSave++ = '%';
 #else
 		    *pchSave++ = '\\';
@@ -5767,7 +5767,7 @@ move_rc_files (void)
   /* Move files to the new location. Remove this part when all users have had
    * their files moved.*/
   char *olddir, *oldfile, *newfile;
-#if WIN32
+#ifdef WIN32
   olddir = g_strdup (getInstallDir());
 #else
   olddir = g_build_filename (szHomeDirectory, "..", NULL);
@@ -6370,7 +6370,7 @@ int main(int argc, char *argv[])
 
 	RenderInitialise();
 
-#if WIN32
+#ifdef WIN32
         fNoTTY = TRUE;
 #endif
 #if USE_GTK

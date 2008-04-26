@@ -96,7 +96,7 @@ char *newLang;
 /* Hack this for now to stop re-entering - should be fixed when menu switched to actions */
 int inCallback = FALSE;
 
-#if !HAVE_GTK_OPTION_MENU_GET_HISTORY
+#ifndef HAVE_GTK_OPTION_MENU_GET_HISTORY
 extern gint gtk_option_menu_get_history (GtkOptionMenu *option_menu) {
     
     GtkWidget *active_widget;
@@ -3214,7 +3214,7 @@ static void ReportBug(gpointer p, guint n, GtkWidget * pwEvent)
 	char *pchOS = "109";
 	char sz[1024];
 
-#if WIN32
+#ifdef WIN32
 
 	OSVERSIONINFO VersionInfo;
 

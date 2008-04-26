@@ -24,7 +24,7 @@
 #include <glib.h>
 #include <stdlib.h>
 #include <string.h>
-#if WIN32
+#ifdef WIN32
 #include <windows.h>
 
 char *aszRNG[1]; 

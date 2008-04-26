@@ -41,7 +41,7 @@
 #include <glib/gi18n.h>
 #include <glib.h>
 #include <glib/gstdio.h>
-#if WIN32
+#ifdef WIN32
 #include <io.h>
 #endif
 #include "util.h"

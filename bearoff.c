@@ -45,7 +45,7 @@
 #include <sys/stat.h>
 #endif
 
-#if WIN32
+#ifdef WIN32
 #include <io.h>
 #else
 #define O_BINARY 0
