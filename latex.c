@@ -31,7 +31,7 @@
 #include "format.h"
 #include <glib/gi18n.h>
 
-static char*aszLuckTypeLaTeXAbbr[] = { "$--$", "$-$", "", "$+$", "$++$" };
+static const char*aszLuckTypeLaTeXAbbr[] = { "$--$", "$-$", "", "$+$", "$++$" };
 
 static void Points1_12( FILE *pf, int y ) {
 
@@ -370,7 +370,7 @@ PrintLaTeXCubeAnalysis( FILE *pf, const matchstate* pms, int fPlayer,
     fputs( "\\end{verbatim}\\end{quote}}\n", pf );    
 }
 
-static char *PlayerSymbol( int fPlayer ) {
+static const char *PlayerSymbol( int fPlayer ) {
 
     return fPlayer ? "\\textbullet{}" : "\\textopenbullet{}";
 }

@@ -143,7 +143,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
 
       static int ai[ 4 ] = { SKILL_NONE, SKILL_DOUBTFUL,
                              SKILL_BAD, SKILL_VERYBAD };
-      static char *asz[4] = {
+      static const char *asz[4] = {
         N_("Unmarked moves"),
         N_("Moves marked doubtful"),
         N_("Moves marked bad"),
@@ -214,14 +214,14 @@ formatGS( const statcontext *psc, const int nMatchTo,
 
   case FORMATGS_CUBE:
     {
-      static char *asz[] = {
+      static const char *asz[] = {
         N_("Total cube decisions"),
         N_("Close or actual cube decisions"),
         N_("Doubles"),
         N_("Takes"),
         N_("Passes") };
 
-      static char *asz2[] = {
+      static const char *asz2[] = {
         N_("Missed doubles below CP"),
         N_("Missed doubles above CP"),
         N_("Wrong doubles below DP"),
@@ -332,7 +332,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
   case FORMATGS_LUCK: 
     {
 
-      static char *asz[] = {
+      static const char *asz[] = {
         N_("Rolls marked very lucky"),
         N_("Rolls marked lucky"),
         N_("Rolls unmarked"),
@@ -563,7 +563,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
 
       if( psc->fDice && fIsMatch && !nMatchTo && psc->nGames > 1 ) {
 
-	static char *asz[ 2 ][ 2 ] = {
+	static const char *asz[ 2 ][ 2 ] = {
           { N_("Advantage (actual) in ppg"),
             /* xgettext: no-c-format */
             N_("95% confidence interval (ppg)") },

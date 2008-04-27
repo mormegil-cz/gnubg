@@ -78,7 +78,7 @@ typedef enum _stylesheetclass {
   NUM_CLASSES 
 } stylesheetclass;
 
-static char *aaszStyleSheetClasses[ NUM_CLASSES ][ 2 ] = {
+static const char *aaszStyleSheetClasses[ NUM_CLASSES ][ 2 ] = {
   { "movetable", "background-color: #ddddee" },
   { "moveheader", "background-color: #89d0e2; padding: 0.5em" },
   { "movenumber", "width: 2em; text-align: right" },
@@ -126,25 +126,25 @@ static char *aaszStyleSheetClasses[ NUM_CLASSES ][ 2 ] = {
 ( f ) * 100.0f
    
 
-char *aszHTMLExportType[ NUM_HTML_EXPORT_TYPES ] = {
+const char *aszHTMLExportType[ NUM_HTML_EXPORT_TYPES ] = {
   "gnu",
   "bbs",
   "fibs2html" };
 
-char *aszHTMLExportCSS[ NUM_HTML_EXPORT_CSS ] = {
+const char *aszHTMLExportCSS[ NUM_HTML_EXPORT_CSS ] = {
   N_("in <head>"),
   N_("inline (inside tags)"),
   N_("external file (\"gnubg.css\")")
 };
 
-char *aszHTMLExportCSSCommand[ NUM_HTML_EXPORT_CSS ] = {
+const char *aszHTMLExportCSSCommand[ NUM_HTML_EXPORT_CSS ] = {
   "head", "inline", "external" };
 
 
 
 /* text for links on html page */
 
-static char *aszLinkText[] = {
+static const char *aszLinkText[] = {
   N_ ("[First Game]"), 
   N_ ("[Previous Game]"), 
   N_ ("[Next Game]"), 
@@ -516,7 +516,7 @@ printPointBBS ( FILE *pf, const char *szImageDir, const char *szExtension,
 
   char sz[ 100 ];
   char szAlt[ 100 ];
-  char *aasz[ 2 ][ 2 ] = { { "dd", "dn" },
+  const char *aasz[ 2 ][ 2 ] = { { "dd", "dn" },
                            { "ud", "up" } };
 
   if ( iPoint0 ) {
@@ -801,9 +801,9 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
   int fColor;
   int i;
 
-  char *aszDieO[] = { "b-odie1", "b-odie2", "b-odie3",
+  const char *aszDieO[] = { "b-odie1", "b-odie2", "b-odie3",
                      "b-odie4", "b-odie5", "b-odie6" };
-  char *aszDieX[] = { "b-xdie1", "b-xdie2", "b-xdie3",
+  const char *aszDieX[] = { "b-xdie1", "b-xdie2", "b-xdie3",
                      "b-xdie4", "b-xdie5", "b-xdie6" };
 
   TanBoard anBoard;

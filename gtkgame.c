@@ -189,7 +189,7 @@ typedef enum _gnubgcommand {
     NUM_CMDS
 } gnubgcommand;
 
-static char *aszCommands[ NUM_CMDS ] = {
+static const char *aszCommands[ NUM_CMDS ] = {
     "agree",
     "analyse clear move",
     "analyse clear game",
@@ -610,7 +610,7 @@ extern void GTKThaw( void ) {
 
 static void SkillMenuActivate( GtkWidget *pw, skilltype st ) {
 
-    static char* aszSkillCmd[ N_SKILLS ] = {
+    static const char* aszSkillCmd[ N_SKILLS ] = {
       "verybad", "bad", "doubtful", "clear skill",
     };
     char sz[ 64 ];
@@ -754,7 +754,7 @@ ResignAnalysis ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
 
 static void LuckMenuActivate( GtkWidget *pw, lucktype lt ) {
 
-    static char *aszLuckCmd[ N_LUCKS ] = {
+    static const char *aszLuckCmd[ N_LUCKS ] = {
 	"veryunlucky", "unlucky", "clear luck", "lucky", "verylucky"
     };
     char sz[ 64 ];
@@ -2304,7 +2304,7 @@ static void EvalOK( GtkWidget *pw, void *p ) {
 	gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }
 
-static void SetEvalCommands( char *szPrefix, evalcontext *pec,
+static void SetEvalCommands( const char *szPrefix, evalcontext *pec,
 			     evalcontext *pecOrig ) {
 
     char sz[ 256 ];
@@ -2449,8 +2449,8 @@ static void AnalysisCheckToggled( GtkWidget *pw, analysiswidget *paw ) {
 
 static GtkWidget *AnalysisPage( analysiswidget *paw ) {
 
-  char *aszSkillLabel[3] = { N_("Doubtful:"), N_("Bad:"), N_("Very bad:") };
-  char *aszLuckLabel[4] = { N_("Very lucky:"), N_("Lucky:"),
+  const char *aszSkillLabel[3] = { N_("Doubtful:"), N_("Bad:"), N_("Very bad:") };
+  const char *aszLuckLabel[4] = { N_("Very lucky:"), N_("Lucky:"),
 	  N_("Unlucky:"), N_("Very unlucky:") };
   int i;
 
@@ -3048,7 +3048,7 @@ static gboolean FlagClicked(GtkWidget *pw, GdkEventButton *event, void* dummy)
 	return FALSE;
 }
 
-static GtkWidget *GetFlagWidget(char *language, char *langCode, char *flagfilename)
+static GtkWidget *GetFlagWidget(char *language, char *langCode, const char *flagfilename)
 {	/* Create a flag */
 	GtkWidget *eb, *eb2, *vbox, *lab1;
 	GtkWidget *frame;
@@ -3211,7 +3211,7 @@ static void SetLanguage( gpointer p, guint n, GtkWidget *pw )
 static void ReportBug(gpointer p, guint n, GtkWidget * pwEvent)
 {
 
-	char *pchOS = "109";
+	const char *pchOS = "109";
 	char sz[1024];
 
 #ifdef WIN32
@@ -3922,7 +3922,7 @@ extern void GtkChangeLanguage(void)
 	}
 }
 
-extern void ShowList( char *psz[], char *szTitle, GtkWidget *parent)
+extern void ShowList( char *psz[], const char *szTitle, GtkWidget *parent)
 {
     GtkWidget *pwDialog, *pwList, *pwScroll;
 
@@ -4187,7 +4187,7 @@ static void ToolButtonPressed( GtkWidget *pw, newwidget *pnw ) {
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
   UserCommand(sz);
 }
-static char *get_player_type (int i) {
+static const char *get_player_type (int i) {
 	switch( ap[ i ].pt ) {
 	case PLAYER_GNU:
             return("gnubg");
@@ -4202,7 +4202,7 @@ static char *get_player_type (int i) {
 extern int edit_new(unsigned int length)
 {
 	char sz[40];
-	char *pt[2];
+	const char *pt[2];
 	int i;
 	int err = 0;
 	int fDisplay_save;
@@ -5889,7 +5889,7 @@ extern void GTKShowVersion( void )
 	GTKRunDialog(pwDialog);
 }
 
-static GtkWidget* SelectableLabel(GtkWidget* reference, char* text)
+static GtkWidget* SelectableLabel(GtkWidget* reference, const char* text)
 {
 	GtkWidget* pwLabel = gtk_label_new(text);
 	gtk_label_set_selectable(GTK_LABEL(pwLabel), TRUE);
@@ -5899,7 +5899,7 @@ static GtkWidget* SelectableLabel(GtkWidget* reference, char* text)
 extern void GTKShowBuildInfo(GtkWidget *pw, GtkWidget *pwParent)
 {
 	GtkWidget *pwDialog, *pwBox, *pwPrompt;
-	char* pch;
+	const char* pch;
 
 	pwDialog = GTKCreateDialog( _("GNU Backgammon - Build Info"),
 		DT_INFO, pwParent, DIALOG_FLAG_MODAL, NULL, NULL );
@@ -5954,7 +5954,7 @@ static void AddTitle(GtkWidget* pwBox, char* Title)
 	gtk_box_pack_start(GTK_BOX(pwHBox), pwTitle, TRUE, FALSE, 0);
 }
 
-static void AddName(GtkWidget* pwBox, char* name, char* type)
+static void AddName(GtkWidget* pwBox, char* name, const char* type)
 {
 	char buf[255];
 	if (type)
@@ -5966,7 +5966,7 @@ static void AddName(GtkWidget* pwBox, char* name, char* type)
 	ListInsert(&names, name);
 }
 
-static int FindName(listOLD* pList, char* name)
+static int FindName(listOLD* pList, const char* name)
 {
 	listOLD *pl;
 	for (pl = pList->plNext; pl != pList; pl = pl->plNext )
@@ -7140,7 +7140,8 @@ extern void GTKRecordShow( FILE *pfIn, char *szFile, char *szPlayer ) {
 			    1, 1, 1, 1, 1 };
     static int axEnd[ 22 ] = { 5, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 2, 3, 4,
 			       5, 5, 5, 5, 5, 5 };
-    char *asz[ 22 ], sz[ 16 ];
+    char *asz[ 22 ];
+    char sz[ 16 ];
     int i, f = FALSE;
     playerrecord pr;
     recordwindowinfo rwi;
@@ -7372,9 +7373,10 @@ extern void GTKRecordShow( FILE *pfIn, char *szFile, char *szPlayer ) {
     }
 }
 
-static void UpdateMatchinfo( const char *pch, char *szParam, char **ppch ) {
+static void UpdateMatchinfo( const char *pch, const char *szParam, char **ppch ) {
 
-    char *szCommand, *pchOld = *ppch ? *ppch : "";
+    char *szCommand; 
+    const char *pchOld = *ppch ? *ppch : "";
     
     if( !strcmp( pch, pchOld ) )
 	/* no change */
@@ -7670,7 +7672,7 @@ extern void GTKCalibrationEnd( void *context ) {
 static void CallbackResign(GtkWidget *pw, gpointer data)
 {
     int i = GPOINTER_TO_INT(data);
-    char *asz[3]= { "normal", "gammon", "backgammon" };
+    const char *asz[3]= { "normal", "gammon", "backgammon" };
     char sz[20];
 
     sprintf(sz, "resign %s", asz[i]);
@@ -7685,7 +7687,7 @@ extern void GTKResign( gpointer p, guint n, GtkWidget *pw )
     GtkWidget *pwDialog, *pwVbox, *pwHbox, *pwButtons;
     int i;
     char **apXPM[3];
-    char *asz[3] = { N_("Resign normal"),
+    const char *asz[3] = { N_("Resign normal"),
 		 N_("Resign gammon"),
 		 N_("Resign backgammon") };
 		 

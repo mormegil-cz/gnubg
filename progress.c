@@ -102,7 +102,7 @@ static void FreeTextList(rolloutprogress *prp)
 	free(prp->pListText);
 }
 
-static void SetRolloutText(rolloutprogress *prp, int x, int y, char* sz)
+static void SetRolloutText(rolloutprogress *prp, int x, int y, const char* sz)
 {	/* Cache set text to reduce flicker (and speed things up a bit) */
 	if (!prp->pListText[x][y] || strcmp(prp->pListText[x][y - 1], sz))
 	{
@@ -763,7 +763,7 @@ GTKRolloutProgressStart( const cubeinfo *pci, const int n,
                          rolloutcontext *prc,
                          char asz[][ 40 ], void **pp ) {
     
-  static char *aszTitle[] = {
+  static const char *aszTitle[] = {
     NULL,
     N_("Win"), 
     N_("Win (g)"), 
@@ -773,7 +773,8 @@ GTKRolloutProgressStart( const cubeinfo *pci, const int n,
     N_("Cubeless"), 
     N_("Cubeful"),
 	N_("Rank/no. JSDs")
-  }, *aszEmpty[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+  }; 
+  char *aszEmpty[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
   char *aszTemp[ 9 ];
   gchar *sz;
   int i;

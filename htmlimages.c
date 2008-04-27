@@ -154,7 +154,7 @@ static void DrawPips(unsigned char *auchDest, int nStride,
 	}
 }
 
-static void WriteBorder(char* file, unsigned char *auchSrc, unsigned char *auchBoardSrc)
+static void WriteBorder(const char* file, unsigned char *auchSrc, unsigned char *auchBoardSrc)
 {
 	CopyArea(auchLabel, boardStride, auchBoardSrc, boardStride,
 				BOARD_WIDTH * s, BORDER_HEIGHT * s);

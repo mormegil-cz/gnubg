@@ -26,11 +26,11 @@
 #include "render.h"
 #endif
 
-extern char *aszWoodName[];
+extern const char *aszWoodName[];
 extern renderdata* GetMainAppearance(void);
 extern void CopyAppearance(renderdata* prd);
 
-extern void RenderPreferencesParam( renderdata *prd, char *szParam,
+extern void RenderPreferencesParam( renderdata *prd, const char *szParam,
 				   char *szValue );
 extern char *RenderPreferencesCommand( renderdata *prd, char *sz );
 

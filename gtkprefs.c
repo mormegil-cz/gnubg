@@ -882,7 +882,7 @@ static GtkWidget *BoardPage( BoardData *bd ) {
     gdouble ar[ 4 ];
     int i, j;
     GtkWidget *pwx;
-    static char *asz[ 4 ] = {
+    static const char *asz[ 4 ] = {
 	N_("Background colour:"),
 	NULL,
 	N_("First point colour:"),
@@ -945,7 +945,7 @@ static GtkWidget *BorderPage( BoardData *bd ) {
     GtkWidget *pw;
     gdouble ar[ 4 ];
     int i;
-    static char *aszWood[] = {
+    static const char *aszWood[] = {
 	N_ ("Alder"), 
         N_ ("Ash"), 
         N_ ("Basswood"), 

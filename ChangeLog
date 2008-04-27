@@ -1,3 +1,13 @@
+Sun Apr 27 22:15:13 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, credits.sh, dice.c, dice.h, drawboard.c, drawboard.h,
+	export.h, format.c, formatgs.c, gnubg.c, gnubgmodule.c, gtkboard.c,
+	gtkboard.h, gtkfile.c, gtkfile.h, gtkgame.c, gtkgame.h, gtkgamelist.c,
+	gtkprefs.c, html.c, htmlimages.c, import.c, latex.c, play.c,
+	progress.c, relational.c, renderprefs.c, renderprefs.h, set.c, sgf.c,
+	show.c, board3d/fun3d.h, board3d/misc3d.c: use const char* in a number
+	of places.
+
 Sat Apr 26 19:09:00 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* bearoff.c, boarddim.h, eval.c, external_y.y, gnubg.c,

@@ -91,7 +91,8 @@
 static int iPlayerSet, iPlayerLateSet;
 
 static evalcontext *pecSet;
-static char *szSet, *szSetCommand;
+static char *szSet;
+static const char *szSetCommand;
 static rolloutcontext *prcSet;
 
 static evalsetup *pesSet;
@@ -2326,7 +2327,8 @@ extern void CommandSetScore( char *sz ) {
     long int n0, n1;
     moverecord *pmr;
     xmovegameinfo *pmgi;
-    char *pch0, *pch1, *pchEnd0, *pchEnd1;
+    const char *pch0, *pch1;
+    char *pchEnd0, *pchEnd1;
     int fCrawford0, fCrawford1, fPostCrawford0, fPostCrawford1;
 
     if( !( pch0 = NextToken( &sz ) ) )
@@ -3031,7 +3033,7 @@ extern void CommandSetAnalysisMoveFilter( char *sz ) {
 
   
 
-extern void SetMatchInfo( char **ppch, char *sz, char *szMessage )
+extern void SetMatchInfo( char **ppch, const char *sz, char *szMessage )
 {
     if( *ppch )
 	g_free( *ppch );
@@ -3260,7 +3262,7 @@ CommandSetExportMovesProb ( char *sz ) {
 }
 
 static int *pParameter;
-static char *szParameter;
+static const char *szParameter;
 
 extern void
 CommandSetExportMovesParameters ( char *sz ) {
@@ -3887,7 +3889,7 @@ CommandSetCheatPlayer( char *sz ) {
 extern void
 PrintCheatRoll( const int fPlayer, const int n ) {
 
-  static char *aszNumber[ 21 ] = {
+  static const char *aszNumber[ 21 ] = {
     N_("best"), N_("second best"), N_("third best"), 
     N_("4th best"), N_("5th best"), N_("6th best"),
     N_("7th best"), N_("8th best"), N_("9th best"),

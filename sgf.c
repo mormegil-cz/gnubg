@@ -39,7 +39,7 @@
 #include "sgf.h"
 #include <glib/gi18n.h>
 
-static char *szFile;
+static const char *szFile;
 static int fError;
 
 static int CheckSGFVersion(const char **sz);
@@ -2133,7 +2133,7 @@ static void WriteStatContext(FILE * pf, statcontext * psc)
     }
 }
 
-static void WriteProperty(FILE * pf, char *szName, char *szValue)
+static void WriteProperty(FILE * pf, const char *szName, char *szValue)
 {
 
     if (!szValue || !*szValue)
@@ -2203,7 +2203,7 @@ static void SaveGame(FILE * pf, listOLD * plGame)
     if (pmr->g.fCrawford || pmr->g.fJacoby ||
 	pmr->g.bgv != VARIATION_STANDARD || !pmr->g.fCubeUse) {
 
-	static char *aszSGFVariation[NUM_VARIATIONS] =
+	static const char *aszSGFVariation[NUM_VARIATIONS] =
 	    { NULL, "Nackgammon", "Hypergammon1", "Hypergammon2",
 "Hypergammon3" };
 	int fFirst = TRUE;

@@ -404,7 +404,7 @@ void FindNamedTexture(TextureInfo** textureInfo, char* name)
 		g_print("Texture %s not in texture info file\n", name);
 }
 
-void FindTexture(TextureInfo** textureInfo, char* file)
+void FindTexture(TextureInfo** textureInfo, const char* file)
 {
 	GList *pl;
 	for (pl = textures; pl; pl = pl->next)

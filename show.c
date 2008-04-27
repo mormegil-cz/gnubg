@@ -458,7 +458,7 @@ extern void CommandShowAnalysis( char *sz ) {
 
 extern void CommandShowAutomatic( char *sz ) {
 
-    static char *szOn = N_("On"), *szOff = N_("Off");
+    static const char *szOn = N_("On"), *szOff = N_("Off");
     
     outputf( _( 
               "bearoff \t(Play certain non-contact bearoff moves):      \t%s\n"
@@ -599,7 +599,7 @@ extern void CommandShowClockwise( char *sz ) {
 		 "clockwise).") );
 }
 
-static void ShowCommands( command *pc, char *szPrefix ) {
+static void ShowCommands( command *pc, const char *szPrefix ) {
 
     char sz[ 128 ], *pch;
 
@@ -966,7 +966,7 @@ extern void CommandShowBrowser( char *sz )
 
 extern void CommandShowBuildInfo( char *sz )
 {
-    char *pch;
+    const char *pch;
 
 #if USE_GTK
 	if( fX )

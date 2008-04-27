@@ -59,7 +59,7 @@ void getProjectedPieceDragPos(int x, int y, float pos[3]);
 void updateMovingPieceOccPos(const BoardData* bd, BoardData3d* bd3d);
 void LoadTextureInfo(void);
 GList *GetTextureList(TextureType type);
-extern void FindTexture(TextureInfo** textureInfo, char* file);
+extern void FindTexture(TextureInfo** textureInfo, const char* file);
 extern void FindNamedTexture(TextureInfo** textureInfo, char* name);
 float Dist2d(float a, float b);
 float ***Alloc3d(unsigned int x, unsigned int y, unsigned int z);

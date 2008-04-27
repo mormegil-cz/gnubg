@@ -214,7 +214,7 @@ typedef struct _credEntry {
 } credEntry;
 
 typedef struct _credits {
-	char* Title;
+	const char* Title;
 	credEntry *Entry;
 } credits;
 
@@ -226,9 +226,9 @@ extern credEntry ceCredits[];
 
 extern credits creditList[];
 
-extern char aszAUTHORS[];
+extern const char aszAUTHORS[];
 
-extern char aszCOPYRIGHT[];
+extern const char aszCOPYRIGHT[];
 
 EOF
 
@@ -253,7 +253,7 @@ cat > credits.c <<EOF
 #include <glib/gi18n.h>
 #include "credits.h"
 
-char aszCOPYRIGHT[] = N_("Copyright, 1999-2004 by Gary Wong, 2004-2008 GNU Backgammon is the legal\nproperty of its authors.");
+const char aszCOPYRIGHT[] = N_("Copyright, 1999-2004 by Gary Wong, 2004-2008 GNU Backgammon is the legal\nproperty of its authors.");
 
 credEntry ceAuthors[] = {
 EOF
@@ -421,7 +421,7 @@ EOF
 # 
 
 cat >> credits.c <<EOF
-char aszAUTHORS[] =
+const char aszAUTHORS[] =
 EOF
 
 sed -e 's/"/\\"/g' AUTHORS | sed -e 's/.*/"&\\n"/g' >> credits.c

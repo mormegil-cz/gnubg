@@ -47,38 +47,39 @@
 #include "fun3d.h"
 #endif
 
-char *aszGameResult[] = { 
+const char *aszGameResult[] = { 
   N_ ("single game"), 
   N_ ("gammon"), 
   N_ ("backgammon") 
 };
-char *aszSkillType[] = { 
+const char *aszSkillType[] = { 
   N_("very bad"), 
   N_("bad"), 
   N_("doubtful"), 
   NULL,
 };
-char *aszSkillTypeCommand[] = { 
+const char *aszSkillTypeCommand[] = { 
   "verybad", 
   "bad", 
   "doubtful", 
   "none",
  };
-char* aszSkillTypeAbbr[] = { "??", "? ", "?!", "  ", "  "};
+const char* aszSkillTypeAbbr[] = { "??", "? ", "?!", "  ", "  "};
 
-char* aszLuckTypeCommand[] = { 
+const char* aszLuckTypeCommand[] = { 
   "veryunlucky", 
   "unlucky", 
   "none",
   "lucky",
   "verylucky" };
-char *aszLuckType[] = { 
+
+const char *aszLuckType[] = { 
   N_("very unlucky"), 
   N_("unlucky"), 
   NULL, 
   N_("lucky"),
   N_("very lucky") };
-char *aszLuckTypeAbbr[] = { "--", "-", "", "+", "++" };
+const char *aszLuckTypeAbbr[] = { "--", "-", "", "+", "++" };
 listOLD lMatch, *plGame, *plLastMove;
 statcontext scMatch;
 static int fComputerDecision = FALSE;
@@ -4348,11 +4349,11 @@ getFinalScore( int* anScore )
   return FALSE;
 }
 
-extern char* GetMoveString(moverecord *pmr, int* pPlayer)
+extern const char* GetMoveString(moverecord *pmr, int* pPlayer)
 {
     doubletype dt;
     static char sz[40];
-	char* pch = NULL;
+	const char* pch = NULL;
 	*pPlayer = 0;
 
 	switch( pmr->mt )
@@ -4399,13 +4400,15 @@ extern char* GetMoveString(moverecord *pmr, int* pPlayer)
 
 	case MOVE_TAKE:
 		*pPlayer = pmr->fPlayer;
-		strcpy( pch = sz, _("Take") );
+		strcpy( sz, _("Take") );
+		pch = sz;
 		strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
 	break;
 
 	case MOVE_DROP:
 		*pPlayer = pmr->fPlayer;
-		strcpy( pch = sz, _("Drop") );
+		strcpy( sz, _("Drop") );
+		pch = sz;
 		strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
 	break;
 
@@ -4416,14 +4419,16 @@ extern char* GetMoveString(moverecord *pmr, int* pPlayer)
 
 	case MOVE_SETDICE:
 		*pPlayer = pmr->fPlayer;
-		sprintf( pch = sz, _("Rolled %d%d"), pmr->anDice[ 0 ],
+		sprintf( sz, _("Rolled %d%d"), pmr->anDice[ 0 ],
 			pmr->anDice[ 1 ] );
+		pch = sz;
 	break;
 
 	case MOVE_SETBOARD:
 		*pPlayer = -1;
-		sprintf( pch = sz, " (set board %s)",
+		sprintf( sz, " (set board %s)",
 			PositionIDFromKey( pmr->sb.auchKey ) );
+		pch = sz;
 	break;
 
 	case MOVE_SETCUBEPOS:
@@ -4431,13 +4436,15 @@ extern char* GetMoveString(moverecord *pmr, int* pPlayer)
 		if( pmr->scp.fCubeOwner < 0 )
 			pch = " (set cube centre)";
 		else
-			sprintf( pch = sz, " (set cube owner %s)",
+			sprintf( sz, " (set cube owner %s)",
 				ap[ pmr->scp.fCubeOwner ].szName );
+		pch = sz;
 	break;
 
 	case MOVE_SETCUBEVAL:
 		*pPlayer = -1;
-		sprintf( pch = sz, " (set cube value %d)", pmr->scv.nCube );
+		sprintf( sz, " (set cube value %d)", pmr->scv.nCube );
+		pch = sz;
 	break;
 
 	default:
@@ -4485,7 +4492,7 @@ extern char *GetMatchCheckSum(void)
 			char playerStr[4] = ".AB";
 			int player;
 			moverecord* pmr = plMove->p;
-			char* moveString = GetMoveString(pmr, &player);
+			const char* moveString = GetMoveString(pmr, &player);
 			if (moveString)
 			{
 				sprintf(buf, " %d%c %s", move, playerStr[player + 1], moveString);

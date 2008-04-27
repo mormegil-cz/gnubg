@@ -72,7 +72,7 @@ extern void Copy3dDiceColour(renderdata* prd);
 extern GtkWidget *board_dice_widget( Board *board );
 extern void DestroySetDice(GtkObject *po, GtkWidget *pw);
 extern gint game_set( Board *board, TanBoard points, int roll,
-		      gchar *name, gchar *opp_name, gint match,
+		      const gchar *name, const gchar *opp_name, gint match,
 		      gint score, gint opp_score, gint die0, gint die1,
 		      gint computer_turn, gint nchequers );
 extern void board_set_playing( Board *board, gboolean f );

@@ -49,7 +49,7 @@ static void FilterAdd (const char *fn, const char *pt, GtkFileChooser * fc)
   gtk_file_chooser_add_filter (fc, aff);
 }
 
-static GtkWidget * GnuBGFileDialog (gchar * prompt, gchar * folder, gchar * name,
+static GtkWidget * GnuBGFileDialog (const gchar * prompt, const gchar * folder, const gchar * name,
 		 GtkFileChooserAction action)
 {
 #ifdef WIN32
@@ -118,8 +118,8 @@ char *programdir, *pc, *tmp;
   return fc;
 }
 
-extern char * GTKFileSelect (gchar * prompt, gchar * extension, gchar * folder,
-	       gchar * name, GtkFileChooserAction action)
+extern char * GTKFileSelect (const gchar * prompt, const gchar * extension, const gchar * folder,
+	       const gchar * name, GtkFileChooserAction action)
 {
   gchar *sz, *filename=NULL;
   GtkWidget *fc = GnuBGFileDialog (prompt, folder, name, action);
@@ -254,7 +254,8 @@ int autoOpen;
 
 static void update_preview_cb (GtkFileChooser *file_chooser, void *notused)
 {
-	char *label, *buf;
+	const char *label;
+	char *buf;
 	char *filename = gtk_file_chooser_get_preview_filename (file_chooser);
 	FilePreviewData *fpd = ReadFilePreview(filename);
 	int openable = FALSE;

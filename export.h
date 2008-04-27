@@ -45,9 +45,9 @@ typedef enum _htmlexportcss {
 	NUM_HTML_EXPORT_CSS
 } htmlexportcss;
 
-extern char *aszHTMLExportType[];
-extern char *aszHTMLExportCSS[];
-extern char *aszHTMLExportCSSCommand[];
+extern const char *aszHTMLExportType[];
+extern const char *aszHTMLExportCSS[];
+extern const char *aszHTMLExportCSSCommand[];
 
 typedef struct _exportsetup {
 

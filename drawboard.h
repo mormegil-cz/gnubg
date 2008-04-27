@@ -38,7 +38,7 @@ extern int ParseMove( char *pch, int an[ 8 ] );
 extern void CanonicalMoveOrder( int an[] );
 /* Fill the buffer pch with a FIBS "boardstyle 3" description of the game. */
 extern char *FIBSBoard( char *pch, TanBoard anBoard, int fRoll,
-			char *szPlayer, char *szOpp, int nMatchTo,
+			const char *szPlayer, const char *szOpp, int nMatchTo,
 			int nScore, int nOpponent, int nDice0, int nDice1,
 			int nCube, int fCubeOwner, int fDoubled, int fTurn,
 			int fCrawford, int nChequers );

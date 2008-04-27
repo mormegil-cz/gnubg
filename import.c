@@ -2031,7 +2031,7 @@ GetValue( const char *sz, char *szValue ) {
 static void
 ParseSGGDate ( const char *sz, unsigned int *pnDay, unsigned int *pnMonth, unsigned int *pnYear ) {
 
-  static char *aszMonths[] = {
+  static const char *aszMonths[] = {
     "January", "February", "March", "April", "May", "June", "July",
     "August", "September", "October", "November", "December" };
   int i;
@@ -2067,7 +2067,7 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
 
   char szTemp[ 80 ];
   int i;
-  static char *aszOptions[] = {
+  static const char *aszOptions[] = {
     "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
     "Saturday", "Sunday",
     "ELO:", "Jacoby:", "Automatic Doubles:", "Crawford:", "Beavers:",
@@ -2075,7 +2075,8 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
     "Variant:", NULL };
   double arRating[ 2 ];
   int anExp[ 2 ];
-  char *pc;
+  const char *pc;
+  char *pc2;
   
   for ( i = 0, pc = aszOptions[ i ]; pc; ++i, pc = aszOptions[ i ] ) 
     if ( ! strncmp ( sz, pc, strlen ( pc ) ) )
@@ -2197,8 +2198,8 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
       free ( pmi->pchPlace );
 
     pmi->pchPlace = g_strdup ( sz );
-    if ( ( pc = strchr ( sz, '\n' ) ) )
-      *pc = 0;
+    if ( ( pc2 = strchr ( sz, '\n' ) ) )
+      *pc2 = 0;
 
   }
 
@@ -2325,12 +2326,13 @@ ParseTMGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
 
   char szTemp[ 80 ];
   int i, j;
-  static char *aszOptions[] = {
+  static const char *aszOptions[] = {
     "MatchID:", "Player1:", "Player2:", "Stake:", "RakePct:",
     "MaxRakeAbs:", "Startdate:", "Jacoby:", "AutoDistrib:", "Beavers:", 
     "Raccoons:", "Crawford:", "Cube:", "MaxCube:", "Length:", "MaxGames:",
     "Variant:", "PlayMoney:", NULL };
-  char *pc;
+  const char *pc;
+  char *pc2;
   char szName[ 80 ];
 
   for ( i = 0, pc = aszOptions[ i ]; pc; ++i, pc = aszOptions[ i ] ) 
@@ -2341,8 +2343,8 @@ ParseTMGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
   case 0: /* MatchID */
     pc = strchr ( sz, ':' ) + 2;
     sprintf( szTemp, _("TMG MatchID: %s"), pc );
-    if ( ( pc = strchr ( szTemp, '\n' ) ) )
-      *pc = 0;
+    if ( ( pc2 = strchr ( szTemp, '\n' ) ) )
+      *pc2 = 0;
     pmi->pchComment = g_strdup ( szTemp );
     return 0;
     break;
@@ -3383,7 +3385,8 @@ static void WritePartyGame(FILE * fp, char *gameStr, int ns)
 	int side = -1;
 	while ((move = NextTokenGeneral(&data, "#")) != NULL)
 	{
-		char *roll, *moveStr, buf[100];
+		char *roll, buf[100];
+		char *moveStr = NULL;
 		side = (move[0] == '2');
 		if ((side == 0) || (moveNum == 1 && side == 1))
 		{
@@ -3428,10 +3431,7 @@ static void WritePartyGame(FILE * fp, char *gameStr, int ns)
 				}
 				*dest = '\0';
 			}
-			else
-				moveStr = "";
-
-			sprintf(buf, "%s: %s", roll, moveStr);
+			sprintf(buf, "%s: %s", roll, moveStr ? moveStr : "");
 		}
 		else
 			strcpy(buf, move);	/* Double/Take */
@@ -3825,7 +3825,7 @@ extern void CommandImportAuto(char *sz)
 #define BGR_STRING "BGF version"
 int moveNum;
 
-static void OutputMove(FILE *fpOut, int side, char *outBuf)
+static void OutputMove(FILE *fpOut, int side, const char *outBuf)
 {
 	if ((side == 0) || (moveNum == 1))
 	{

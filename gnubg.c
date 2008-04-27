@@ -170,7 +170,7 @@ int fReadingCommand;
 
 char *szLang=NULL;
 
-char szDefaultPrompt[] = "(\\p) ",
+const char szDefaultPrompt[] = "(\\p) ",
     *szPrompt = szDefaultPrompt;
 static int fInteractive, cOutputDisabled, cOutputPostponed;
 
@@ -2004,7 +2004,7 @@ char *default_sgf_folder = NULL;
 
 const char *szHomeDirectory;
 
-char *aszBuildInfo[] = {
+char const *aszBuildInfo[] = {
 #if USE_PYTHON
     N_ ("Python supported."),
 #endif
@@ -2042,9 +2042,9 @@ char *aszBuildInfo[] = {
     NULL,
 };
 
-extern char *GetBuildInfoString(void)
+extern const char *GetBuildInfoString(void)
 {
-	static char **ppch = aszBuildInfo;
+	static const char **ppch = aszBuildInfo;
 
 	if (!*ppch)
 	{
@@ -2519,7 +2519,7 @@ extern void UpdateSettings( void )
              1 setting is now on
     acceptable tokens are on/off yes/no true/false
  */
-extern int SetToggle( char *szName, int *pf, char *sz, char *szOn, char *szOff )
+extern int SetToggle( const char *szName, int *pf, char *sz, const char *szOn, const char *szOff )
 {
     char *pch = NextToken( &sz );
     int cch;
@@ -2982,7 +2982,8 @@ extern char *FormatPrompt( void )
 {
 
     static char sz[ 128 ]; /* FIXME check for overflow in rest of function */
-    char *pch = szPrompt, *pchDest = sz;
+    const char *pch = szPrompt;
+    char *pchDest = sz;
     unsigned int anPips[ 2 ];
 
     while( *pch )
@@ -4273,7 +4274,7 @@ static void LoadRCFiles(void)
 
 
 static void
-SaveRNGSettings ( FILE *pf, char *sz, rng rngCurrent, void *rngctx ) {
+SaveRNGSettings ( FILE *pf, const char *sz, rng rngCurrent, void *rngctx ) {
 
     switch( rngCurrent ) {
     case RNG_ANSI:
@@ -4337,7 +4338,7 @@ SaveMoveFilterSettings ( FILE *pf,
 
 
 static void 
-SaveEvalSettings( FILE *pf, char *sz, evalcontext *pec ) {
+SaveEvalSettings( FILE *pf, const char *sz, evalcontext *pec ) {
 
     gchar buf[G_ASCII_DTOSTR_BUF_SIZE];
     gchar *szNoise = g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.3f",  pec->rNoise);
@@ -4363,7 +4364,7 @@ SaveEvalSettings( FILE *pf, char *sz, evalcontext *pec ) {
 
 
 extern void
-SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
+SaveRolloutSettings ( FILE *pf, const char *sz, rolloutcontext *prc ) {
 
   char *pch;
   int i; /* flags and stuff */
@@ -4462,7 +4463,7 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
 }
 
 static void 
-SaveEvalSetupSettings( FILE *pf, char *sz, evalsetup *pes ) {
+SaveEvalSetupSettings( FILE *pf, const char *sz, evalsetup *pes ) {
 
   char szTemp[ 1024 ];
 
@@ -4493,7 +4494,7 @@ extern void CommandSaveSettings( char *szParam )
     char *szFile;
     char szTemp[ 4096 ];
 #if USE_GTK
-    char *aszAnimation[] = {"none", "blink", "slide"};
+    const char *aszAnimation[] = {"none", "blink", "slide"};
 #endif
     gchar buf[ G_ASCII_DTOSTR_BUF_SIZE ];
     gchar aszThr[7][ G_ASCII_DTOSTR_BUF_SIZE ];
@@ -4943,7 +4944,8 @@ static char *GenerateKeywords( const char *sz, int nState ) {
 static char *ERCompletion( const char *sz, int nState ) {
 
     static int i, cch;
-    char *pch, *szDup;
+    const char *pch;
+    char *szDup;
 
     if( !nState ) {
 	cch = strlen( sz );
@@ -4969,8 +4971,9 @@ static char *OnOffCompletion( const char *sz, int nState ) {
 
 	static unsigned int i;
     static int cch;
-    static char *asz[] = { "false", "no", "off", "on", "true", "yes" };
-    char *pch, *szDup;
+    static const char *asz[] = { "false", "no", "off", "on", "true", "yes" };
+    const char *pch;
+    char *szDup;
     
     if( !nState ) {
 	cch = strlen( sz );
@@ -4994,7 +4997,8 @@ static char *OnOffCompletion( const char *sz, int nState ) {
 static char *PlayerCompletionGen( const char *sz, int nState, int fBoth ) {
 
     static int i, cch;
-    char *pch, *szDup;
+    const char *pch;
+    char *szDup;
     
     if( !nState ) {
 	cch = strlen( sz );
@@ -5140,7 +5144,7 @@ extern void Prompt( void )
 
 #if USE_GTK
 #if HAVE_LIBREADLINE
-extern void ProcessInput( char *sz)
+extern void ProcessInput(char *sz)
 {
 
     char *pchExpanded;
@@ -5151,23 +5155,25 @@ extern void ProcessInput( char *sz)
     if( !sz ) {
 	outputc( '\n' );
 	PromptForExit();
-	sz = "";
     }
-    
-    fInterrupt = FALSE;
+    else
+    {
 
-    /* expand history */
+	    fInterrupt = FALSE;
 
-    history_expand( sz, &pchExpanded );
-    
-    if( *pchExpanded )
-	add_history( pchExpanded );
-	
-    if( fX )
-	GTKDisallowStdin();
+	    /* expand history */
 
-    HandleCommand( pchExpanded, acTop );
-    free( pchExpanded );
+	    history_expand( sz, &pchExpanded );
+
+	    if( *pchExpanded )
+		    add_history( pchExpanded );
+
+	    if( fX )
+		    GTKDisallowStdin();
+
+	    HandleCommand( pchExpanded, acTop );
+	    free( pchExpanded );
+    }
     
     if( fX )
 	GTKAllowStdin();
@@ -5193,7 +5199,7 @@ extern void ProcessInput( char *sz)
 #endif
 
 /* Handle a command as if it had been typed by the user. */
-extern void UserCommand( char *szCommand )
+extern void UserCommand( const char *szCommand )
 {
 
 #if HAVE_LIBREADLINE
@@ -5837,7 +5843,7 @@ static void BearoffProgress( unsigned int i )
 static void version(void)
 {
 
-	char *pch;
+	const char *pch;
 	g_print(_(VERSION_STRING));
 	g_print("\n\n%s\n\n", _(aszCOPYRIGHT));
 	g_print(_("GNU Backgammon is free software, covered by the GNU General Public License\n"
@@ -7056,7 +7062,7 @@ extern char *locale_to_utf8(const char *sz)
 }
 #ifdef WIN32 
 /* WIN32 setlocale must be manipulated through putenv to be gettext compatible */
-char * SetupLanguage (char *newLangCode)
+char * SetupLanguage (const char *newLangCode)
 {
 	static char *org_lang=NULL;
 	char *lang;
@@ -7071,7 +7077,7 @@ char * SetupLanguage (char *newLangCode)
 	return(setlocale(LC_ALL, ""));
 }
 #else
-char *SetupLanguage (char *newLangCode)
+char *SetupLanguage (const char *newLangCode)
 {
 	static char *org_lang=NULL;
 	char *result=NULL;
@@ -7079,7 +7085,7 @@ char *SetupLanguage (char *newLangCode)
 	if (!org_lang)
 	{
 		if (!(org_lang=g_strdup(setlocale(LC_ALL, ""))))
-			org_lang="C";
+			org_lang=g_strdup("C");
 	}
 
 	if (newLangCode && *newLangCode && strcmp (newLangCode, "system") != 0)

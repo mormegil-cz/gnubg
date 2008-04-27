@@ -28,7 +28,7 @@ typedef enum _rng {
     NUM_RNGS
 } rng;
 
-extern char *aszRNG[ NUM_RNGS ];
+extern const char *aszRNG[ NUM_RNGS ];
 
 extern char szDiceFilename[];
 
@@ -52,14 +52,14 @@ RollDice( unsigned int anDice[ 2 ], const rng rngx, void *rngctx );
 
 #if HAVE_LIBGMP
 extern int InitRNGSeedLong( char *sz, rng rng, void *rngctx );
-extern int InitRNGBBSModulus( char *sz, void *rngctx );
+extern int InitRNGBBSModulus( const char *sz, void *rngctx );
 extern int InitRNGBBSFactors( char *sz0, char *sz1, void *rngctx );
 #endif
 
 
 #if HAVE_LIBDL
 extern int
-UserRNGOpen( void *p, char *sz );
+UserRNGOpen( void *p, const char *sz );
 #endif /* HAVE_LIBDL */
 
 extern int

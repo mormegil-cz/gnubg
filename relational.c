@@ -736,7 +736,7 @@ extern void CommandRelationalShowDetails (char *sz)
 extern void CommandRelationalShowPlayers( char *sz )
 {
 	/* Use the Select command */
-	CommandRelationalSelect("name AS Player FROM player ORDER BY name");
+	UserCommand("relational select name AS Player FROM player ORDER BY name");
 }
 
 extern void CommandRelationalErase(char *sz)

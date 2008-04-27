@@ -1237,7 +1237,7 @@ DumpPosition(const TanBoard anBoard, char *szOutput,
 	int j;
 	cubedecision cd;
 	evalcontext ec;
-	static char *aszEvaluator[] = {
+	static const char *aszEvaluator[] = {
 		N_("OVER"),
 		N_("HYPERGAMMON-1"),
 		N_("HYPERGAMMON-2"),

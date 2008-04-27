@@ -39,7 +39,7 @@
 #include "fun3d.h"
 #endif
 
-char *aszWoodName[] = {
+const char *aszWoodName[] = {
   "alder", "ash", "basswood", "beech", "cedar", "ebony", "fir", "maple",
   "oak", "pine", "redwood", "walnut", "willow", "paint"
 };
@@ -75,7 +75,7 @@ HexDigit (char ch)
 }
 
 static int
-SetColour (char *sz, unsigned char anColour[])
+SetColour (const char *sz, unsigned char anColour[])
 {
 
   int i;
@@ -94,7 +94,7 @@ SetColour (char *sz, unsigned char anColour[])
 }
 
 static int
-SetColourSpeckle (char *sz, unsigned char anColour[], int *pnSpeckle)
+SetColourSpeckle (const char *sz, unsigned char anColour[], int *pnSpeckle)
 {
   gchar **strs = g_strsplit( sz, ";", 0);
 	  
@@ -115,7 +115,7 @@ SetColourSpeckle (char *sz, unsigned char anColour[], int *pnSpeckle)
 
 /* Set colour (with floats) */
 static int
-SetColourX (gdouble arColour[4], char *sz)
+SetColourX (gdouble arColour[4], const char *sz)
 {
 
   char *pch;
@@ -136,7 +136,7 @@ SetColourX (gdouble arColour[4], char *sz)
 
 #if USE_BOARD3D
 static int
-SetColourF (float arColour[4], char *sz)
+SetColourF (float arColour[4], const char *sz)
 {
 
   char *pch;
@@ -159,7 +159,7 @@ SetColourF (float arColour[4], char *sz)
 
 #if USE_BOARD3D
 static int
-SetMaterialCommon (Material * pMat, char *sz, char **arg)
+SetMaterialCommon (Material * pMat, const char *sz, const char **arg)
 {
   float opac;
   char *pch;
@@ -214,11 +214,11 @@ SetMaterialCommon (Material * pMat, char *sz, char **arg)
 }
 
 static int
-SetMaterial (Material * pMat, char *sz)
+SetMaterial (Material * pMat, const char *sz)
 {
   int ret = 0;
   if (fX) {
-    char *arg;
+    const char *arg;
     ret = SetMaterialCommon (pMat, sz, &arg);
     pMat->textureInfo = 0;
     pMat->pTexture = 0;
@@ -231,9 +231,9 @@ SetMaterial (Material * pMat, char *sz)
 }
 
 static int
-SetMaterialDice (Material * pMat, char *sz, int *flag)
+SetMaterialDice (Material * pMat, const char *sz, int *flag)
 {
-  char *arg;
+  const char *arg;
   int ret = SetMaterialCommon (pMat, sz, &arg);
   /* die colour same as chequer colour */
   *flag = TRUE;
@@ -358,7 +358,7 @@ SetColourSSF (gdouble aarColour[2][4],
 }
 
 static int
-SetWood (char *sz, woodtype * pbw)
+SetWood (const char *sz, woodtype * pbw)
 {
 
   woodtype bw;
@@ -385,16 +385,13 @@ static displaytype check_for_board3d (char *szValue)
 }
 #endif
 extern void
-RenderPreferencesParam (renderdata * prd, char *szParam, char *szValue)
+RenderPreferencesParam (renderdata * prd, const char *szParam, char *szValue)
 {
 #if USE_GTK
 int c, fValueError = FALSE;
 
   if (!szParam || !*szParam)
     return;
-
-  if (!szValue)
-    szValue = "";
 
   c = strlen (szParam);
 

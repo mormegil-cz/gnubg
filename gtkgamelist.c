@@ -361,7 +361,7 @@ extern void GTKAddMoveRecord( moverecord *pmr )
 {
     gamelistrow *pglr;
     int i, numRows, fPlayer;
-    char *pch = GetMoveString(pmr, &fPlayer);
+    const char *pch = GetMoveString(pmr, &fPlayer);
     if (!pch)
 		return;
 
