@@ -3262,13 +3262,11 @@ CommandSetExportMovesProb ( char *sz ) {
 }
 
 static int *pParameter;
-static const char *szParameter;
 
 extern void
 CommandSetExportMovesParameters ( char *sz ) {
 
   pParameter = exsExport.afMovesParameters;
-  szParameter = "moves";
   HandleCommand ( sz, acSetExportParameters );
 
 }
@@ -3287,7 +3285,6 @@ CommandSetExportCubeParameters ( char *sz ) {
 
 
   pParameter = exsExport.afCubeParameters;
-  szParameter = "cube";
   HandleCommand ( sz, acSetExportParameters );
 
 }
