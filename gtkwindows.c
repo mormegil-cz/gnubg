@@ -270,53 +270,59 @@ extern GtkWidget *GTKGetCurrentParent(void)
 		return pwMain;
 }
 
-extern int 
-GTKMessage( char *sz, dialogtype dt )
+extern int GTKMessage(char *sz, dialogtype dt)
 {
-    int f = FALSE;
-    static char *aszTitle[ NUM_DIALOG_TYPES - 1 ] = {
-	N_("GNU Backgammon - Message"),
-	N_("GNU Backgammon - Question"),
-	N_("GNU Backgammon - Warning"), /* are you sure */
-	N_("GNU Backgammon - Warning"),
-	N_("GNU Backgammon - Error"),
-	N_("GNU Backgammon - Question"),
-    };
-    GtkWidget *pwDialog = GTKCreateDialog( gettext( aszTitle[ dt ] ),
-					   dt, GTKGetCurrentParent(), DIALOG_FLAG_MODAL, NULL, &f );
-    GtkWidget *psw;
-    GtkWidget *pwPrompt = gtk_label_new( sz );
-    GtkRequisition req;
+#define MAXWINSIZE 400
+#define MAXSTRLEN 200
+	int answer = FALSE;
+	static char *aszTitle[NUM_DIALOG_TYPES - 1] = {
+		N_("GNU Backgammon - Message"),
+		N_("GNU Backgammon - Question"),
+		N_("GNU Backgammon - Warning"),	/* are you sure */
+		N_("GNU Backgammon - Warning"),
+		N_("GNU Backgammon - Error"),
+		N_("GNU Backgammon - Question"),
+	};
+	GtkWidget *pwDialog, *pwText, *sw, *frame;
+	GtkRequisition req;
+	GtkTextBuffer *buffer;
 
+	g_return_val_if_fail(sz, FALSE);
 
-    gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
-    gtk_label_set_justify( GTK_LABEL( pwPrompt ), GTK_JUSTIFY_LEFT );
-    gtk_label_set_line_wrap( GTK_LABEL( pwPrompt ), TRUE );
+	pwDialog = GTKCreateDialog(gettext(aszTitle[dt]),
+			dt, GTKGetCurrentParent(),
+			DIALOG_FLAG_MODAL, NULL, &answer);
 
-    gtk_widget_size_request( GTK_WIDGET( pwPrompt ), &req );
-	psw = gtk_scrolled_window_new( NULL, NULL );
-	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-			   psw );
-	gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW( psw ),
-					       pwPrompt );
-	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
-					GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
-	gtk_window_set_resizable( GTK_WINDOW( pwDialog ), FALSE);
+	pwText = gtk_text_view_new ();
+	gtk_text_view_set_editable(GTK_TEXT_VIEW(pwText), FALSE);
+	buffer = gtk_text_buffer_new (NULL);
+	gtk_text_buffer_set_text(buffer, sz, -1);
+	gtk_text_view_set_buffer (GTK_TEXT_VIEW (pwText), buffer);
 
-    gtk_window_set_default_size( GTK_WINDOW( pwDialog ), -1, MIN(400,
-                            req.height+50) );
+	sw = gtk_scrolled_window_new (NULL, NULL);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_container_add (GTK_CONTAINER (sw), pwText);
+	gtk_widget_size_request( GTK_WIDGET( pwText ), &req );
+	if (strlen(sz) > MAXSTRLEN || req.height > MAXWINSIZE)
+	{
+		int wz = MIN(MAXWINSIZE, req.height+100);
+		gtk_window_set_default_size( GTK_WINDOW( pwDialog ), -1, wz );
+	}
+	frame = gtk_frame_new(NULL);
+	gtk_container_add (GTK_CONTAINER(frame), sw);
+	gtk_container_add (GTK_CONTAINER (DialogArea (pwDialog, DA_MAIN)), frame);
 
-    /* This dialog should be REALLY modal -- disable "next turn" idle
-       processing and stdin handler, to avoid reentrancy problems. */
-    if( nNextTurn ) 
-      g_source_remove( nNextTurn );
-	    
+	/* This dialog should be REALLY modal -- disable "next turn" idle
+	   processing and stdin handler, to avoid reentrancy problems. */
+	if (nNextTurn)
+		g_source_remove(nNextTurn);
+
 	GTKRunDialog(pwDialog);
 
-    if( nNextTurn ) 
-      nNextTurn = g_idle_add( NextTurnNotify, NULL );
-    
-    return f;
+	if (nNextTurn)
+		nNextTurn = g_idle_add(NextTurnNotify, NULL);
+
+	return answer;
 }
 
 extern int GTKGetInputYN( char *szPrompt )

@@ -1,3 +1,8 @@
+Tue Apr 29 22:46:50 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtkwindows.c: change GTKMessage to use gtk_text_view and fix a
+	sizing problem on the way.
+
 Tue Apr 29 13:11:02 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* sound.c, gtkoptions.c: minor gstreamer changes. Use sync play of
