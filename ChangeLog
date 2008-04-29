@@ -1,3 +1,8 @@
+Tue Apr 29 13:11:02 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* sound.c, gtkoptions.c: minor gstreamer changes. Use sync play of
+	max 6 seconds in gtk sound options.
+
 Sun Apr 27 22:15:13 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, credits.sh, dice.c, dice.h, drawboard.c, drawboard.h,

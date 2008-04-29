@@ -193,6 +193,7 @@ static gboolean bus_callback(GstBus * bus, GstMessage * message,
 
 static void PlaySoundGst(const char *fn, gboolean sync)
 {
+#define MAX_PLAY_TIME 6*GST_SECOND
 	GstElement *play;
 	GstBus *bus;
 	gchar *uri;
@@ -205,21 +206,35 @@ static void PlaySoundGst(const char *fn, gboolean sync)
 	play = gst_element_factory_make("playbin", "play");
 	g_object_set(G_OBJECT(play), "uri", uri, NULL);
 
-	gst_element_set_state(play, GST_STATE_PLAYING);
+	if (gst_element_set_state(play, GST_STATE_PLAYING) == GST_STATE_CHANGE_FAILURE)
+	{
+		outputerrf("Failed to play sound file '%s'", fn);
+		gst_element_set_state(play, GST_STATE_NULL);
+		gst_object_unref(GST_OBJECT(play));
+		return;
+	}
+
 
 	bus = gst_pipeline_get_bus (GST_PIPELINE (play));
 	if (sync)
 	{
 		GstMessage *msg;
-		msg = gst_bus_poll (bus, GST_MESSAGE_EOS | GST_MESSAGE_ERROR, -1);
-		if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_ERROR)
-			print_gst_error(msg, fn);
+		msg = gst_bus_poll (bus, GST_MESSAGE_EOS | GST_MESSAGE_ERROR, MAX_PLAY_TIME);
+		if (msg)
+		{
+			if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_ERROR)
+				print_gst_error(msg, fn);
+			gst_message_unref(msg);
+		}
+		gst_object_unref (bus);
 		gst_element_set_state(play, GST_STATE_NULL);
 		gst_object_unref(GST_OBJECT(play));
 	}
 	else
+	{
 		gst_bus_add_watch (bus, bus_callback, play);
-	gst_object_unref (bus);
+		gst_object_unref (bus);
+	}
 }
 #endif
 
