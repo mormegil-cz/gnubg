@@ -1,3 +1,9 @@
+Sat May  3 00:07:21 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtkgame.c, play.c: allow double command to be used for beavers.
+	Merge double/beaver menu items. Merge take/pass with accept/reject
+	resignation menu items.
+
 Tue Apr 29 22:46:50 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtkwindows.c: change GTKMessage to use gtk_text_view and fix a

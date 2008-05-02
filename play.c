@@ -2241,14 +2241,11 @@ extern void CommandDouble( char *sz ) {
 	return;
     }
 
-    if( ms.fDoubled ) {
-	outputl( _("The `double' command is for offering the cube, not "
-		 "accepting it.  Use\n`redouble' to immediately offer the "
-		 "cube back at a higher value.") );
-
-	return;
+    if (ms.fDoubled) {
+	    UserCommand("redouble");
+	    return;
     }
-    
+
     if( ms.fTurn != ms.fMove ) {
 	outputl( _("You are only allowed to double if you are on roll.") );
 

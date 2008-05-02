@@ -122,7 +122,7 @@ extern gint gtk_option_menu_get_history (GtkOptionMenu *option_menu) {
    and that might not be big enough to hold a pointer).  Must be kept in
    sync with the string array! */
 typedef enum _gnubgcommand {
-    CMD_AGREE,
+	CMD_ACCEPT,
     CMD_ANALYSE_CLEAR_MOVE,
     CMD_ANALYSE_CLEAR_GAME,
     CMD_ANALYSE_CLEAR_MATCH,
@@ -132,7 +132,6 @@ typedef enum _gnubgcommand {
     CMD_ANALYSE_MATCH,
     CMD_DECLINE,
     CMD_DOUBLE,
-    CMD_DROP,
     CMD_EVAL,
     CMD_HELP,
     CMD_HINT,
@@ -155,8 +154,8 @@ typedef enum _gnubgcommand {
     CMD_RECORD_ADD_MATCH,
     CMD_RECORD_ADD_SESSION,
     CMD_RECORD_SHOW,
+    CMD_REJECT,
     CMD_RELATIONAL_ADD_MATCH,
-    CMD_REDOUBLE,
     CMD_RESIGN_N,
     CMD_RESIGN_G,
     CMD_RESIGN_B,
@@ -185,12 +184,11 @@ typedef enum _gnubgcommand {
     CMD_SHOW_VERSION,
     CMD_SHOW_WARRANTY,
     CMD_SWAP_PLAYERS,
-    CMD_TAKE,
     NUM_CMDS
 } gnubgcommand;
 
 static const char *aszCommands[ NUM_CMDS ] = {
-    "agree",
+	"accept",
     "analyse clear move",
     "analyse clear game",
     "analyse clear match",
@@ -200,7 +198,6 @@ static const char *aszCommands[ NUM_CMDS ] = {
     "analyse match",
     "decline",
     "double",
-    "drop",
     "eval",
     "help",
     "hint",
@@ -223,8 +220,8 @@ static const char *aszCommands[ NUM_CMDS ] = {
     "record add match",
     "record add session",
     "record show",
+    "reject",
     "relational add match",
-    "redouble",
     "resign normal",
     "resign gammon",
     "resign backgammon",
@@ -253,7 +250,6 @@ static const char *aszCommands[ NUM_CMDS ] = {
     "show version",
     "show warranty",
     "swap players",
-    "take",
 };
 enum { TOGGLE_GAMELIST = NUM_CMDS + 1, TOGGLE_ANALYSIS, TOGGLE_COMMENTARY, TOGGLE_MESSAGE, TOGGLE_THEORY, TOGGLE_COMMAND };
 
@@ -3401,22 +3397,10 @@ GtkItemFactoryEntry aife[] = {
 	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ N_("/_Game/_Double"), "<control>D", Command, CMD_DOUBLE, NULL,
 		NULL },
-	{ N_("/_Game/_Take"), "<control>T", Command, CMD_TAKE,
-		"<StockItem>", GTK_STOCK_APPLY
-	},
-	{ N_("/_Game/Dro_p"), "<control>P", Command, CMD_DROP,
-		"<StockItem>", GTK_STOCK_CANCEL
-	},
-	{ N_("/_Game/B_eaver"), NULL, Command, CMD_REDOUBLE, NULL, NULL },
-	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ N_("/_Game/Re_sign"), NULL, GTKResign, 0, NULL, NULL },
-        { N_("/_Game/_Agree to resignation"), NULL, Command, CMD_AGREE,
-		"<StockItem>", GTK_STOCK_APPLY
-	},
-	{ N_("/_Game/De_cline resignation"), 
-          NULL, Command, CMD_DECLINE,
-		"<StockItem>", GTK_STOCK_CANCEL
-	},
+	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>", NULL },
+	{ N_("/_Game/_Accept"), NULL, Command, CMD_ACCEPT, "<StockItem>", GTK_STOCK_OK },
+	{ N_("/_Game/Re_ject"), NULL, Command, CMD_REJECT, "<StockItem>", GTK_STOCK_CANCEL },
 	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ N_("/_Game/Play computer turn"), NULL, Command, CMD_PLAY, NULL,
 		NULL },
