@@ -126,7 +126,6 @@ typedef enum _gnubgcommand {
     CMD_ANALYSE_CLEAR_MOVE,
     CMD_ANALYSE_CLEAR_GAME,
     CMD_ANALYSE_CLEAR_MATCH,
-    CMD_ANALYSE_CLEAR_SESSION,
     CMD_ANALYSE_MOVE,
     CMD_ANALYSE_GAME,
     CMD_ANALYSE_MATCH,
@@ -137,7 +136,6 @@ typedef enum _gnubgcommand {
     CMD_HINT,
     CMD_LIST_GAME,
     CMD_NEW_GAME,
-    CMD_NEW_SESSION,
     CMD_NEXT,
     CMD_NEXT_GAME,
     CMD_NEXT_MARKED,
@@ -152,7 +150,6 @@ typedef enum _gnubgcommand {
     CMD_QUIT,
     CMD_RECORD_ADD_GAME,
     CMD_RECORD_ADD_MATCH,
-    CMD_RECORD_ADD_SESSION,
     CMD_RECORD_SHOW,
     CMD_REJECT,
     CMD_RELATIONAL_ADD_MATCH,
@@ -192,7 +189,6 @@ static const char *aszCommands[ NUM_CMDS ] = {
     "analyse clear move",
     "analyse clear game",
     "analyse clear match",
-    "analyse clear session",
     "analyse move",
     "analyse game",
     "analyse match",
@@ -203,7 +199,6 @@ static const char *aszCommands[ NUM_CMDS ] = {
     "hint",
     "list game",
     "new game",
-    "new session",
     "next",
     "next game",
     "next marked",
@@ -218,7 +213,6 @@ static const char *aszCommands[ NUM_CMDS ] = {
     "quit",
     "record add game",
     "record add match",
-    "record add session",
     "record show",
     "reject",
     "relational add match",
@@ -3427,7 +3421,7 @@ GtkItemFactoryEntry aife[] = {
           NULL, Command, CMD_ANALYSE_MOVE, NULL, NULL },
 	{ N_("/_Analyse/Analyse game"), 
           NULL, Command, CMD_ANALYSE_GAME, NULL, NULL },
-	{ N_("/_Analyse/Analyse match\\\\session"), 
+	{ N_("/_Analyse/Analyse match or session"), 
           NULL, Command, CMD_ANALYSE_MATCH, NULL, NULL },
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ N_("/_Analyse/Batch analyse..."), NULL, GTKBatchAnalyse, 0, NULL,
@@ -3442,16 +3436,12 @@ GtkItemFactoryEntry aife[] = {
           NULL, Command, CMD_ANALYSE_CLEAR_GAME,
 		"<StockItem>", GTK_STOCK_CLEAR
 	},
-        { N_("/_Analyse/Clear analysis/_Match"), 
+        { N_("/_Analyse/Clear analysis/_Match or session"), 
           NULL, Command, CMD_ANALYSE_CLEAR_MATCH,
 		"<StockItem>", GTK_STOCK_CLEAR
 	},
-        { N_("/_Analyse/Clear analysis/_Session"), 
-          NULL, Command, CMD_ANALYSE_CLEAR_SESSION,
-		"<StockItem>", GTK_STOCK_CLEAR
-	},
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>", NULL },
-	{ N_("/_Analyse/Match\\\\session statistics"), NULL, Command,
+	{ N_("/_Analyse/Match or session statistics"), NULL, Command,
           CMD_SHOW_STATISTICS_MATCH, NULL, NULL },
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ N_("/_Analyse/Player records"), NULL, Command,
@@ -3462,12 +3452,8 @@ GtkItemFactoryEntry aife[] = {
 	  CMD_RECORD_ADD_GAME,
 		"<StockItem>", GTK_STOCK_ADD
 	},
-	{ N_("/_Analyse/Add to player records/Match statistics"), NULL,
+	{ N_("/_Analyse/Add to player records/Match or session statistics"), NULL,
 	  Command, CMD_RECORD_ADD_MATCH,
-		"<StockItem>", GTK_STOCK_ADD
-	},
-	{ N_("/_Analyse/Add to player records/Session statistics"), NULL,
-	  Command, CMD_RECORD_ADD_SESSION,
 		"<StockItem>", GTK_STOCK_ADD
 	},
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>", NULL },
@@ -6377,8 +6363,6 @@ extern void GTKSet( void *p ) {
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_ANALYSE_CLEAR_MATCH ), !ListEmpty( &lMatch ) );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
-	    pif, CMD_ANALYSE_CLEAR_SESSION ), !ListEmpty( &lMatch ) );
-	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SHOW_STATISTICS_MATCH ), !ListEmpty ( &lMatch ) );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_RECORD_SHOW ), TRUE );
@@ -6386,8 +6370,6 @@ extern void GTKSet( void *p ) {
 	    pif, CMD_RECORD_ADD_GAME ), plGame != NULL );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_RECORD_ADD_MATCH ), TRUE );
-	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
-	    pif, CMD_RECORD_ADD_SESSION ), TRUE );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SHOW_MATCHEQUITYTABLE ), TRUE );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
