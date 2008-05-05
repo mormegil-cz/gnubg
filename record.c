@@ -239,7 +239,7 @@ static int RecordRead( FILE **ppfOut, char **ppchOut, playerrecord apr[ 2 ] )
 		}
 	}
     g_free(sz);
-	g_free(ppchOut);
+	g_free(*ppchOut);
     fclose( pfIn );
     
     return n < 0 ? -1 : 0;
