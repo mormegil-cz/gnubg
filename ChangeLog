@@ -1,3 +1,8 @@
+Mon May  5 16:29:51 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c, relational.c, play.c: cleanup of the UserCommand function.
+	Avoid using UserCommand outside gtk.
+
 Mon May  5 09:36:34 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* record.c: fix illegal g_free in RecordRead

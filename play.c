@@ -2242,7 +2242,7 @@ extern void CommandDouble( char *sz ) {
     }
 
     if (ms.fDoubled) {
-	    UserCommand("redouble");
+	    CommandRedouble(NULL);
 	    return;
     }
 
