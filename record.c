@@ -200,49 +200,47 @@ static int RecordWriteItem( FILE *pf, const char *pch, playerrecord *ppr ) {
     return 0;
 }
 
-static int RecordRead( FILE **ppfOut, char **ppchOut, playerrecord apr[ 2 ] )
+/* Reads the records and stores the ones for the current players in apr and
+ * the remaining ones in the tmpfile named *ppchOut. *ppchOut will be freed
+ * and *ppfOut will be closed by RecordWrite or RecordAbort */
+static int RecordRead(FILE ** ppfOut, char **ppchOut, playerrecord apr[2])
 {
-    int n;
-    playerrecord pr;
-    FILE *pfIn;
-    char *sz;
+	int n;
+	playerrecord pr;
+	FILE *pfIn;
+	char *sz;
 
 	*ppfOut = GetTemporaryFile("gnubgprXXXXXX", ppchOut);
-    if ( ppfOut == NULL )
+	if (ppfOut == NULL)
 		return -1;
 
-    if( fputs( "# %Version: 2 ($Revision$)\n", *ppfOut ) < 0 )
-	{
-		outputerr( *ppchOut );
-		g_free( *ppchOut );
+	if (fputs("# %Version: 2 ($Revision$)\n", *ppfOut) < 0) {
+		outputerr(*ppchOut);
+		g_free(*ppchOut);
 		return -1;
-    }
-    
+	}
+
 	sz = g_build_filename(szHomeDirectory, GNUBGPR, NULL);
-    if( ( pfIn = g_fopen( sz, "r" ) ) == NULL )
-	{
-        g_free(sz);
+	if ((pfIn = g_fopen(sz, "r")) == NULL) {
+		g_free(sz);
 		/* could not read existing records; assume empty */
 		return 0;
-    }
+	}
 
-    while( ( n = RecordReadItem( pfIn, sz, &pr ) ) == 0 )
-	{
-		if( !CompareNames( pr.szName, apr[ 0 ].szName ) )
-			apr[ 0 ] = pr;
-		else if( !CompareNames( pr.szName, apr[ 1 ].szName ) )
-			apr[ 1 ] = pr;
-		else if( RecordWriteItem( *ppfOut, *ppchOut, &pr ) < 0 )
-		{
+	while ((n = RecordReadItem(pfIn, sz, &pr)) == 0) {
+		if (!CompareNames(pr.szName, apr[0].szName))
+			apr[0] = pr;
+		else if (!CompareNames(pr.szName, apr[1].szName))
+			apr[1] = pr;
+		else if (RecordWriteItem(*ppfOut, *ppchOut, &pr) < 0) {
 			n = -1;
 			break;
 		}
 	}
-    g_free(sz);
-	g_free(*ppchOut);
-    fclose( pfIn );
-    
-    return n < 0 ? -1 : 0;
+	g_free(sz);
+	fclose(pfIn);
+
+	return n < 0 ? -1 : 0;
 }
 
 static int RecordWrite( FILE *pfOut, char *pchOut, playerrecord apr[ 2 ] ) {
@@ -251,7 +249,7 @@ static int RecordWrite( FILE *pfOut, char *pchOut, playerrecord apr[ 2 ] ) {
 
     if( RecordWriteItem( pfOut, pchOut, &apr[ 0 ] ) || RecordWriteItem( pfOut, pchOut, &apr[ 1 ] ) )
 	{
-		free( pchOut );
+		g_free( pchOut );
 		return -1;
     }
     
@@ -299,7 +297,7 @@ static int RecordWrite( FILE *pfOut, char *pchOut, playerrecord apr[ 2 ] ) {
 static void RecordAbort( char *pchOut )
 {
     g_unlink( pchOut );
-    free( pchOut );
+    g_free( pchOut );
 }
 
 static int RecordAddGame( const listOLD *plNewGame, playerrecord apr[ 2 ] )
