@@ -24,40 +24,40 @@
 
 
 typedef enum _gnubgsound {
-  /* start & exit of gnubg */
-  SOUND_START = 0,
-  SOUND_EXIT,
-  /* commands */
-  SOUND_AGREE,
-  SOUND_DOUBLE,
-  SOUND_DROP,
-  SOUND_CHEQUER,
-  SOUND_MOVE,
-  SOUND_REDOUBLE,
-  SOUND_RESIGN,
-  SOUND_ROLL,
-  SOUND_TAKE,
-  /* events */
-  SOUND_HUMAN_DANCE,
-  SOUND_HUMAN_WIN_GAME,
-  SOUND_HUMAN_WIN_MATCH,
-  SOUND_BOT_DANCE,
-  SOUND_BOT_WIN_GAME,
-  SOUND_BOT_WIN_MATCH,
-  SOUND_ANALYSIS_FINISHED,
-  /* number of sounds */
-  NUM_SOUNDS
+	/* start & exit of gnubg */
+	SOUND_START = 0,
+	SOUND_EXIT,
+	/* commands */
+	SOUND_AGREE,
+	SOUND_DOUBLE,
+	SOUND_DROP,
+	SOUND_CHEQUER,
+	SOUND_MOVE,
+	SOUND_REDOUBLE,
+	SOUND_RESIGN,
+	SOUND_ROLL,
+	SOUND_TAKE,
+	/* events */
+	SOUND_HUMAN_DANCE,
+	SOUND_HUMAN_WIN_GAME,
+	SOUND_HUMAN_WIN_MATCH,
+	SOUND_BOT_DANCE,
+	SOUND_BOT_WIN_GAME,
+	SOUND_BOT_WIN_MATCH,
+	SOUND_ANALYSIS_FINISHED,
+	/* number of sounds */
+	NUM_SOUNDS
 } gnubgsound;
 
-extern const char *sound_description[ NUM_SOUNDS ];
-extern const char *sound_command[ NUM_SOUNDS ];
+extern const char *sound_description[NUM_SOUNDS];
+extern const char *sound_command[NUM_SOUNDS];
 
 extern int fSound;
+extern int fQuiet;
 
-extern void
-playSound ( const gnubgsound gs );
-extern void SoundFlushCache( const gnubgsound gs );
-extern void SoundWait( void );
+extern void playSound(const gnubgsound gs);
+extern void SoundFlushCache(const gnubgsound gs);
+extern void SoundWait(void);
 
 extern char *GetDefaultSoundFile(gnubgsound sound);
 extern void playSoundFile(char *file, gboolean sync);

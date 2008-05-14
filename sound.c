@@ -284,6 +284,7 @@ const char *sound_command[ NUM_SOUNDS ] = {
 };
 
 int fSound = TRUE;
+int fQuiet = FALSE;
 static char *sound_cmd = NULL;
 
 void
@@ -343,27 +344,26 @@ playSoundFile (char *file, gboolean sync)
 #endif
 }
 
-extern void playSound ( const gnubgsound gs )
+extern void playSound(const gnubgsound gs)
 {
 	char *sound;
 
-	if ( ! fSound )
+	if (!fSound || fQuiet)
 		/* no sounds for this user */
 		return;
 
 	sound = GetSoundFile(gs);
-	if ( !*sound )
-	{
+	if (!*sound) {
 		g_free(sound);
 		return;
 	}
 #if USE_GTK
 	if (!fX || gs == SOUND_EXIT)
-		playSoundFile( sound, TRUE );
-	else 
-		playSoundFile( sound, FALSE );
+		playSoundFile(sound, TRUE);
+	else
+		playSoundFile(sound, FALSE);
 #else
-	playSoundFile( sound, TRUE );
+	playSoundFile(sound, TRUE);
 #endif
 
 	g_free(sound);

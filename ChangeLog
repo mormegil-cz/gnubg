@@ -1,3 +1,7 @@
+Wed May 14 10:19:43 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c, sound.c, sound.h: Make the quiet option work again.
+
 Mon May  5 16:29:51 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c, relational.c, play.c: cleanup of the UserCommand function.

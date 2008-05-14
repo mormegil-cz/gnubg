@@ -6263,16 +6263,14 @@ int main(int argc, char *argv[])
 #if USE_GTK
 	GtkWidget *pwSplash = NULL;
 #else
-        char *pwSplash = NULL;
+	char *pwSplash = NULL;
 #endif
 	char *pchMatch = NULL;
 	char *met = NULL;
 
 	static char *pchCommands = NULL, *pchPythonScript = NULL, *lang = NULL;
-	static int nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE, fQuiet =
-	    FALSE, fNoX = FALSE, fSplash = FALSE, fNoTTY =
+	static int nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE, fNoX = FALSE, fSplash = FALSE, fNoTTY =
 	    FALSE, show_version = FALSE, debug = FALSE;
-
 	GOptionEntry ao[] = {
 		{"no-bearoff", 'b', 0, G_OPTION_ARG_NONE, &fNoBearoff,
 		 N_("Do not use bearoff database"), NULL},
@@ -6309,7 +6307,7 @@ int main(int argc, char *argv[])
 #endif
 
 	/* set language */
-        init_defaults();
+	init_defaults();
 #if USE_GTK
 	gtk_disable_setlocale();
 #endif
@@ -6318,7 +6316,7 @@ int main(int argc, char *argv[])
 	textdomain(PACKAGE);
 	bind_textdomain_codeset(PACKAGE, GNUBG_CHARSET);
 
-        /* parse command line options*/
+	/* parse command line options */
 	context = g_option_context_new("[file.sgf]");
 	g_option_context_add_main_entries(context, ao, PACKAGE);
 #if USE_GTK
@@ -6327,12 +6325,12 @@ int main(int argc, char *argv[])
 
 #if HAVE_GSTREAMER
 	/* gstreamer needs to init threads, regardless if we use them */
-	if (!g_thread_supported ())
-		g_thread_init (NULL);
-	  g_option_context_add_group (context, gst_init_get_option_group ());
+	if (!g_thread_supported())
+		g_thread_init(NULL);
+	g_option_context_add_group(context, gst_init_get_option_group());
 #endif
 
-        
+
 	g_option_context_parse(context, &argc, &argv, &error);
 	g_option_context_free(context);
 	if (error) {
@@ -6348,22 +6346,18 @@ int main(int argc, char *argv[])
 #ifdef WIN32
 	/* data directory: initialise to the path where gnubg is installed */
 	{
-	const char *szDataDirectory = getInstallDir();
-	_chdir(szDataDirectory);
+		const char *szDataDirectory = getInstallDir();
+		_chdir(szDataDirectory);
 	}
 #if defined(_MSC_VER) && HAVE_LIBXML2
 	xmlMemSetup(g_free, g_malloc, g_realloc, g_strdup);
 #endif
 #endif
 
-       /* print version and exit if -v option given */
-        version();
+	/* print version and exit if -v option given */
+	version();
 	if (show_version)
 		exit(EXIT_SUCCESS);
-
-        /* -q option given */
-	if (fQuiet)
-		fSound = FALSE;
 
 	if (CreateGnubgDirectory())
 		exit(EXIT_FAILURE);
@@ -6371,18 +6365,17 @@ int main(int argc, char *argv[])
 	RenderInitialise();
 
 #ifdef WIN32
-        fNoTTY = TRUE;
+	fNoTTY = TRUE;
 #endif
 #if USE_GTK
-        /* -t option not given*/
+	/* -t option not given */
 	if (!fNoX)
 		InitGTK(&argc, &argv);
-        if (fX)
-        {
-                fTTY = !fNoTTY && isatty(STDIN_FILENO) && isatty(STDOUT_FILENO);
-                fInteractive = fShowProgress = TRUE;
-                if (fSplash)
-                        pwSplash = CreateSplash();
+	if (fX) {
+		fTTY = !fNoTTY && isatty(STDIN_FILENO) && isatty(STDOUT_FILENO);
+		fInteractive = fShowProgress = TRUE;
+		if (fSplash)
+			pwSplash = CreateSplash();
 	} else
 #endif
 	{
@@ -6390,14 +6383,13 @@ int main(int argc, char *argv[])
 		fShowProgress = isatty(STDOUT_FILENO);
 	}
 
-        if (fInteractive) {
-                PortableSignal(SIGINT, HandleInterrupt,
-                                &shInterruptOld, FALSE);
-                setup_readline();
-        }
+	if (fInteractive) {
+		PortableSignal(SIGINT, HandleInterrupt, &shInterruptOld, FALSE);
+		setup_readline();
+	}
 
 	PushSplash(pwSplash, _("Initialising"), _("Random number generator"), 250);
-        init_rng();
+	init_rng();
 
 	PushSplash(pwSplash, _("Initialising"), _("match equity table"), 250);
 	met = BuildFilename2("met", "g11.xml");
@@ -6405,11 +6397,11 @@ int main(int argc, char *argv[])
 	g_free(met);
 
 	PushSplash(pwSplash, _("Initialising"), _("neural nets"), 250);
-        init_nets(nNewWeights, fNoBearoff);
+	init_nets(nNewWeights, fNoBearoff);
 
 #if defined(WIN32) && HAVE_SOCKETS
 	PushSplash(pwSplash, _("Initialising"), _("Windows sockets"), 250);
-        init_winsock();
+	init_winsock();
 #endif
 
 #if USE_PYTHON
@@ -6419,12 +6411,11 @@ int main(int argc, char *argv[])
 
 	SetExitSoundOff();
 
-        /* -r option given */
-        if (!fNoRC)
-        {
-                PushSplash(pwSplash, _("Loading"), _("User Settings"), 250);
-                LoadRCFiles();
-        }
+	/* -r option given */
+	if (!fNoRC) {
+		PushSplash(pwSplash, _("Loading"), _("User Settings"), 250);
+		LoadRCFiles();
+	}
 
 	fflush(stdout);
 	fflush(stderr);
@@ -6438,23 +6429,21 @@ int main(int argc, char *argv[])
 	playSound(SOUND_START);
 
 #if USE_GTK
-	if (fX)
-        {
-		if (!fTTY)
-		{
+	if (fX) {
+		if (!fTTY) {
 			g_set_print_handler(&GTKOutput);
 			g_set_printerr_handler(&GTKOutputErr);
 		}
 		RunGTK(pwSplash, pchCommands, pchPythonScript, pchMatch);
-                Shutdown();
-                exit(EXIT_SUCCESS);
-        }
+		Shutdown();
+		exit(EXIT_SUCCESS);
+	}
 #endif
 
 	if (pchMatch)
 		CommandLoadMatch(pchMatch);
 
-        /* -c option given */
+	/* -c option given */
 	if (pchCommands) {
 		fInteractive = FALSE;
 		CommandLoadCommands(pchCommands);
@@ -6462,7 +6451,7 @@ int main(int argc, char *argv[])
 		exit(EXIT_SUCCESS);
 	}
 
-        /* -p option given */
+	/* -p option given */
 	if (pchPythonScript) {
 #if USE_PYTHON
 		fInteractive = FALSE;
