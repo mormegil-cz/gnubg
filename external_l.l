@@ -38,6 +38,7 @@ void escapes(const char *cp, char *tp);
 %option 7bit
 %option case-insensitive
 %option outfile="lex.yy.c"
+%option noinput
 
 NUMSTR -?[0-9]+
 
