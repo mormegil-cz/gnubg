@@ -2416,7 +2416,9 @@ static void RenderArrow(unsigned char* puch, double arColour[4], int nSize, int 
 
 	cairo_set_line_width (cr, AR_LINE_WIDTH);
 
-	cairo_set_source_rgba (cr, 1, 1, 1, 0);
+	/* clean the canvas */
+	cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+	cairo_set_source_rgba (cr, 0, 0, 0, 0);
 	cairo_rectangle(cr, 0, 0, 1, 1);
 	cairo_fill(cr);
 
