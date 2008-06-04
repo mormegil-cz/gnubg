@@ -347,7 +347,7 @@ RowSet* ConvertPythonToRowset(PyObject *v)
 
 		if (!e)
 		{
-			outputf(_("Error getting item no %d\n"), i);
+			outputf(_("Error getting item no %zu\n"), i);
 			continue;
 		}
 
@@ -361,7 +361,7 @@ RowSet* ConvertPythonToRowset(PyObject *v)
 				
 				if (!e2)
 				{
-					outputf(_("Error getting sub item no (%d, %d)\n"), i, j);
+					outputf(_("Error getting sub item no (%zu, %zu)\n"), i, j);
 					continue;
 				}
 				if (PyUnicode_Check(e2))
@@ -385,7 +385,7 @@ RowSet* ConvertPythonToRowset(PyObject *v)
 		}
 		else
 		{
-			outputf(_("Item no. %d is not a sequence\n"), i);
+			outputf(_("Item no. %zu is not a sequence\n"), i);
 		}
 
 		Py_DECREF(e);

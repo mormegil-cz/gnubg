@@ -1059,7 +1059,7 @@ extern void CommandShowScoreSheet( char *sz )
 		}
 		sprintf(data[0], "%d", score[0]);
 		sprintf(data[1], "%d", score[1]);
-		outputf("%*s | %s\n", width1, data[0], data[1]);
+		outputf("%*s | %s\n", (int)width1, data[0], data[1]);
 	}
 
 	free(data[0]);

@@ -615,7 +615,7 @@ extern int NeuralNetSaveBinary( const neuralnet *pnn, FILE *pf )
 
 #if defined(_MSC_VER) || defined(DISABLE_SSE_TEST)
 
-int SSE_Supported()
+int SSE_Supported(void)
 {
 	return 1;
 }
