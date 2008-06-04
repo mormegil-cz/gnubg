@@ -1,3 +1,8 @@
+Wed Jun  4 10:38:36 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, board3d/Makefile.am, configure.in: do "PKGDATADIR" the
+	recommended way
+
 Wed May 14 10:19:43 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c, sound.c, sound.h: Make the quiet option work again.

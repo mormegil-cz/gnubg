@@ -3,6 +3,8 @@
 ## a standalone library, it would be better for them to be installed.
 ##
 
+AM_CPPFLAGS = -DDATADIR='"$(datadir)"' -DPKGDATADIR='"$(datadir)/gnubg"'
+
 INCLUDES = -I$(srcdir)/.. $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) \
 	-I$(srcdir)/../lib @LIBXML2_CFLAGS@ \
 	-DLOCALEDIR=\"$(localedir)\" \

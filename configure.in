@@ -280,16 +280,6 @@ dnl *************
 dnl Misc. setings
 dnl *************
 
-dnl
-dnl Record installation paths.
-dnl
-
-AC_DEFINE_DIR([_DATADIR], [datadir],
-              [Installation directory (used to determine PKGDATADIR below).])
-AC_DEFINE([PKGDATADIR],[_DATADIR "/" PACKAGE],
-          [The directory where the weights and databases will be stored.])
-
-dnl
 dnl internationalization macros
 dnl
 AM_GNU_GETTEXT([external])
