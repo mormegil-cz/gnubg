@@ -2394,13 +2394,13 @@ static void Copy_RGB_to_RGBA( unsigned char *puchDest, int nDestStride,
 #if USE_GTK
 static void RenderArrow(unsigned char* puch, double arColour[4], int nSize, int left)
 {
-	cairo_surface_t* surface = cairo_image_surface_create_for_data (puch, CAIRO_FORMAT_RGB24,
+	cairo_surface_t* surface = cairo_image_surface_create_for_data (puch, CAIRO_FORMAT_ARGB32,
 												nSize * ARROW_WIDTH,
 												nSize * ARROW_HEIGHT,
 												nSize * ARROW_WIDTH * 4);
 	cairo_t* cr = cairo_create(surface);
 
-#define AR_LINE_WIDTH 0.02
+#define AR_LINE_WIDTH 0.06
 #define AR_WIDTH 0.4
 #define AR_HEAD_SIZE 0.35
 
@@ -2416,7 +2416,7 @@ static void RenderArrow(unsigned char* puch, double arColour[4], int nSize, int 
 
 	cairo_set_line_width (cr, AR_LINE_WIDTH);
 
-	cairo_set_source_rgba (cr, 0, 0, 0, 1);
+	cairo_set_source_rgba (cr, 1, 1, 1, 0);
 	cairo_rectangle(cr, 0, 0, 1, 1);
 	cairo_fill(cr);
 
@@ -2431,7 +2431,7 @@ static void RenderArrow(unsigned char* puch, double arColour[4], int nSize, int 
 
 	cairo_set_source_rgba (cr, arColour[2], arColour[1], arColour[0], 1);
 	cairo_fill_preserve (cr);
-	cairo_set_source_rgba (cr, 0, 0, 0, 1);
+	cairo_set_source_rgba (cr, 1, 1, 1, 1);
 	cairo_stroke(cr);
 
 	cairo_destroy (cr);
