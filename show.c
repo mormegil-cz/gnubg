@@ -2337,14 +2337,14 @@ CommandShowMatchResult( char *sz ) {
 
 extern void CommandShowManualWeb (char *sz)
 {
-	char *path = BuildFilename2("doc", "gnubg.html");
+	char *path = g_build_filename(DOCDIR, "gnubg.html", NULL);
 	OpenURL (path);
 	g_free(path);
 }
 
 extern void CommandShowManualAbout (char *sz)
 {
-	char *path = BuildFilename2("doc", "allabout.html");
+	char *path = g_build_filename(DOCDIR, "allabout.html", NULL);
 	OpenURL (path);
 	g_free(path);
 }

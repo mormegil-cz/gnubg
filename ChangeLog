@@ -1,3 +1,8 @@
+Fri Jun  6 17:42:04 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, show.c, doc/Makefile.am: install documentation in
+	DOCDIR
+
 Wed Jun  4 20:27:41 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* dbprovider.c, show.c, lib/neuralnet.c: minor compiler warnings

@@ -52,6 +52,14 @@ extern char * getInstallDir( void )
   return ret;
 }
 
+extern char *getDocDir(void)
+{
+	static char *docdir = NULL;
+	if (!docdir)
+		docdir = g_build_filename(getInstallDir(), "doc", NULL);
+	return docdir;
+}
+
 extern void PrintSystemError(const char* message)
 {
 	LPVOID lpMsgBuf;
