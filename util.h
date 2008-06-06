@@ -25,6 +25,7 @@
 #include "stdio.h"
 
 #ifdef WIN32
+#define DOCDIR getDocDir()
 #define BuildFilename(file) g_build_filename(getInstallDir(), file, NULL)
 #define BuildFilename2(file1, file2) g_build_filename(getInstallDir(), file1, file2, NULL)
 #else
@@ -34,6 +35,7 @@
 
 #ifdef WIN32
 extern char *getInstallDir( void );
+extern char *getDocDir( void );
 #endif
 
 extern void PrintSystemError(const char* message);
