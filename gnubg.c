@@ -1984,7 +1984,10 @@ command cER = {
       NULL },
     { "roll", CommandRoll, N_("Roll the dice"), NULL, NULL },
     { "rollout", CommandRollout, 
-      N_("Have gnubg perform rollouts of a position"),
+      N_("Have gnubg perform rollouts of a position. Accepted formats are\n"
+		      "rollout (rolls out the current position)\n"
+		      "rollout =1 =2 =3 (rolls out the first three choices from the hint list)\n"
+		      "rollout =cube (rolls out the cube action)"),
       szOPTPOSITION, NULL },
     { "save", NULL, N_("Write data to a file"), NULL, acSave },
     { "set", NULL, N_("Modify program parameters"), NULL, acSet },

@@ -1,3 +1,10 @@
+Sat Jun  7 22:41:53 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* rollout.c: fix a problem with too many trials done. Be a bit more
+	verbose when rolling out in the text interface.
+
+	* gnubg.c: extend the CommandRollout help
+
 Fri Jun  6 17:42:04 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am, show.c, doc/Makefile.am, util.c, util.h: install
