@@ -1038,6 +1038,7 @@ extern void RolloutLoopMT(void)
 			MT_Exclusive();
 			altGameCount[alt]++;
 			if (altGameCount[alt] > cGames || fNoMore[alt]) {
+				altGameCount[alt] = cGames;
 				multi_debug("exclusive release: alternative is already done");
 				MT_Release();
 				continue;
