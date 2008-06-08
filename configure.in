@@ -288,7 +288,7 @@ dnl
 dnl config files
 dnl
 
-AC_CONFIG_FILES([Makefile doc/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile m4/Makefile xpm/Makefile sounds/Makefile board3d/Makefile textures/Makefile scripts/Makefile flags/Makefile fonts/Makefile non-src/Makefile])
+AC_CONFIG_FILES([Makefile doc/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile m4/Makefile xpm/Makefile sounds/Makefile board3d/Makefile textures/Makefile scripts/Makefile flags/Makefile fonts/Makefile non-src/Makefile pixmaps/Makefile])
 
 dnl
 dnl

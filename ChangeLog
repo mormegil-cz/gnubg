@@ -1,3 +1,8 @@
+Mon Jun  9 00:14:45 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* pixmaps, gtkgame.c, Makefile.am, configure.in: add expected
+	directory structure for the icon. Make a windows .ico file
+
 Sat Jun  7 22:41:53 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* rollout.c: fix a problem with too many trials done. Be a bit more
