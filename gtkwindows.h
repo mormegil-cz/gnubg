@@ -22,11 +22,10 @@
 enum {	/* Dialog flags */
 	DIALOG_FLAG_NONE = 0,
 	DIALOG_FLAG_MODAL = 1,
-	DIALOG_FLAG_CUSTOM_PICKMAP = 2,
-	DIALOG_FLAG_NOOK = 4,
-	DIALOG_FLAG_CLOSEBUTTON = 8,
-	DIALOG_FLAG_NOTIDY = 16,
-	DIALOG_FLAG_MINMAXBUTTONS = 32
+	DIALOG_FLAG_NOOK = 2,
+	DIALOG_FLAG_CLOSEBUTTON = 4,
+	DIALOG_FLAG_NOTIDY = 8,
+	DIALOG_FLAG_MINMAXBUTTONS = 16
 };
 
 typedef enum _dialogarea {
@@ -36,14 +35,15 @@ typedef enum _dialogarea {
 } dialogarea;
 
 typedef enum _dialogtype {
-    DT_INFO,
-    DT_QUESTION,
-    DT_AREYOUSURE,
-    DT_WARNING,
-    DT_ERROR,
-    DT_GNU,
+	DT_INFO,
+	DT_QUESTION,
+	DT_AREYOUSURE,
+	DT_WARNING,
+	DT_ERROR,
+	DT_GNU,
 	DT_GNUQUESTION,
-    NUM_DIALOG_TYPES
+	DT_CUSTOM,
+	NUM_DIALOG_TYPES
 } dialogtype;
 
 extern GtkWidget *GTKCreateDialog( const char *szTitle, const dialogtype dt, 

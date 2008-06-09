@@ -1,3 +1,8 @@
+Mon Jun  9 17:56:00 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* M gtkgame.c, gtkwindows.c, gtkwindows.h, pixmaps/Makefile.am,
+	pixmaps/gnubg-big.png: move gnubg-big.png out of xpm
+
 Mon Jun  9 00:14:45 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* pixmaps, gtkgame.c, Makefile.am, configure.in: add expected
