@@ -27,6 +27,8 @@
 #ifndef _MM_MALLOC_H_INCLUDED
 #define _MM_MALLOC_H_INCLUDED
 
+#ifndef _MSC_VER
+
 #include <stdlib.h>
 #include <errno.h>
 
@@ -74,6 +76,6 @@ _mm_free (void * aligned_ptr)
     free (((void **) aligned_ptr) [-1]);
 }
 
+#endif
+
 #endif /* _MM_MALLOC_H_INCLUDED */
-
-

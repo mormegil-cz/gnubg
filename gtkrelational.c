@@ -801,7 +801,7 @@ extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw)
 *******************************************************/
 
 	pwPaned = gtk_vpaned_new();
-	gtk_paned_set_position(GTK_PANED(pwPaned), REL_DIALOG_HEIGHT*0.6);
+	gtk_paned_set_position(GTK_PANED(pwPaned), (int)(REL_DIALOG_HEIGHT*0.6));
 	gtk_notebook_append_page(GTK_NOTEBOOK(pwn), pwPaned,
 				 gtk_label_new(_("Players")));
 	pwVbox = gtk_vbox_new(FALSE, 0);

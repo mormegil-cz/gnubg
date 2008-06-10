@@ -50,8 +50,10 @@ typedef struct sigvec psighandler;
 typedef RETSIGTYPE(*psighandler) (int);
 #endif
 
+#ifndef _MSC_VER
 #define sqrtf(arg) (float)sqrt((double)(arg))
 #define fabsf(arg) (float)fabs((double)(arg))
+#endif
 
 /* Do we need to use g_utf8_casefold() for utf8 anywhere? */
 #define StrCaseCmp(s1, s2) g_ascii_strcasecmp(s1, s2)

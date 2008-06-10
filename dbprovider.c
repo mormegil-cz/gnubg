@@ -27,7 +27,9 @@
 #include "gnubgmodule.h"
 #ifdef WIN32
 /* needed for mingw inclusion of Python.h */
+#ifndef _MSC_VER
 #include <stdint.h>
+#endif
 #endif
 #include <Python.h>
 #endif

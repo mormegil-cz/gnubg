@@ -379,7 +379,7 @@ AnalyzeDoubleDecison:
 #ifdef GLIB_THREADS
 static gpointer MT_WorkerThreadFunction(void *id)
 #else
-static unsigned int MT_WorkerThreadFunction(void *id)
+static void MT_WorkerThreadFunction(void *id)
 #endif
 {
 #if __GNUC__ && USE_SSE_VECTORIZE
@@ -399,8 +399,6 @@ static unsigned int MT_WorkerThreadFunction(void *id)
 #ifdef GLIB_THREADS
 		g_usleep(0);	/* Avoid odd crash */
 		return NULL;
-#else
-		return 0;
 #endif
 	}
 }

@@ -1898,7 +1898,7 @@ MaxTurns( int id )
       return i;
   }
 
-  abort();
+  return -1;
 }
 
 extern void

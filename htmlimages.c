@@ -652,7 +652,7 @@ static char* GetFilenameBase(char* sz)
 		return 0;
 	}
 
-	if (access(sz, R_OK))
+	if (_access(sz, R_OK))
 	{
 		if( g_mkdir( sz, 0777) < 0 )
 		{

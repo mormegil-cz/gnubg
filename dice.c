@@ -672,9 +672,9 @@ RNGSystemSeed( const rng rngx, void *p, unsigned long *pnSeed ) {
     }
 #endif /* HAVE_LIBGMP */
     
-    if( ( h = open( "/dev/urandom", O_RDONLY ) ) >= 0 ) {
-	f = read( h, &n, sizeof n ) == sizeof n;
-	close( h );
+    if( ( h = _open( "/dev/urandom", O_RDONLY ) ) >= 0 ) {
+	f = _read( h, &n, sizeof n ) == sizeof n;
+	_close( h );
     }
 
     if( !f ) {
@@ -956,7 +956,7 @@ OpenDiceFile( void *p, const char *sz ) {
   g_free(rngctx->szDiceFilename); /*initialized to NULL*/
   rngctx->szDiceFilename = g_strdup(sz);
 
-  return ( rngctx->hDice = open(sz, O_RDONLY));
+  return ( rngctx->hDice = _open(sz, O_RDONLY));
 
 }
 
@@ -966,7 +966,7 @@ CloseDiceFile ( void *p ) {
   rngcontext *rngctx = (rngcontext *) p;
 
   if ( rngctx->hDice >= 0 )
-    close( rngctx->hDice );
+    _close( rngctx->hDice );
 
 }
 
@@ -980,12 +980,12 @@ ReadDiceFile( rngcontext *rngctx ) {
 uglyloop:
   {
   
-    n = read( rngctx->hDice, &uch, 1 );
+    n = _read( rngctx->hDice, &uch, 1 );
 
     if ( !n ) {
       /* end of file */
       g_print( _("Rewinding dice file (%s)\n"), rngctx->szDiceFilename );
-      lseek( rngctx->hDice, 0, SEEK_SET );
+      _lseek( rngctx->hDice, 0, SEEK_SET );
     }
     else if ( n < 0 ) {
       g_printerr(rngctx->szDiceFilename);

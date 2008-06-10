@@ -244,7 +244,7 @@ extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da )
 		return pwChild;
 	
     default:
-		abort();
+		return NULL;
     }
 }
 

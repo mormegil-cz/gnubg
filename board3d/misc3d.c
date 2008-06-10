@@ -418,7 +418,7 @@ void FindTexture(TextureInfo** textureInfo, const char* file)
 	}
 	{	/* Not in texture list, see if old texture on disc */
 		char *szFile = BuildFilename(file);
-		if (szFile && !access(szFile, R_OK))
+		if (szFile && !_access(szFile, R_OK))
 		{
 			/* Add entry for unknown texture */
 			TextureInfo text;

@@ -294,7 +294,7 @@ static void ReadBearoffFile(const bearoffcontext *pbc, unsigned int offset, unsi
 	MT_Exclusive();
 #endif
 
-	if ((lseek(pbc->h, (long)offset, SEEK_SET ) < 0) || (read(pbc->h, buf, nBytes) < (int)nBytes))
+	if ((_lseek(pbc->h, (long)offset, SEEK_SET ) < 0) || (_read(pbc->h, buf, nBytes) < (int)nBytes))
 	{
 		if (errno)
 			perror("OS bearoff database");
@@ -995,7 +995,7 @@ extern void BearoffClose(bearoffcontext *ppbc)
     return;
 
   if ( !ppbc->fInMemory )
-    close ( ppbc->h );
+    _close ( ppbc->h );
   else if ( ppbc->p && ppbc->fMalloc )
     free ( ppbc->p );
 
@@ -1005,7 +1005,7 @@ extern void BearoffClose(bearoffcontext *ppbc)
   if ( ppbc->ah ) {
     int i;
     for ( i = 0; i < ppbc->nFiles; ++i )
-      close( ppbc->ah[ i ] );
+      _close( ppbc->ah[ i ] );
     free( ppbc->ah );
   }
 
@@ -1031,12 +1031,12 @@ static int ReadIntoMemory ( bearoffcontext *pbc, const int iOffset, const unsign
       return -1;
     }
 
-    if ( lseek( pbc->h, iOffset, SEEK_SET ) == (off_t) -1 ) {
+    if ( _lseek( pbc->h, iOffset, SEEK_SET ) == (off_t) -1 ) {
       perror ( "lseek" );
       return -1;
     }
 
-    if ( (unsigned int)read ( pbc->h, pbc->p, nSize ) < nSize ) {
+    if ( (unsigned int)_read ( pbc->h, pbc->p, nSize ) < nSize ) {
       if ( errno )
         perror ( "read failed" );
       else
@@ -1176,7 +1176,7 @@ extern bearoffcontext *BearoffInit(const char *szFilename, const int bo, void (*
    * Open bearoff file
    */
 
-  if ( ( pbc->h = open(szFilename, O_RDONLY | O_BINARY ) ) < 0 ) {
+  if ( ( pbc->h = _open(szFilename, O_RDONLY | O_BINARY ) ) < 0 ) {
     /* open failed */
     free ( pbc );
     return NULL;
@@ -1189,12 +1189,12 @@ extern bearoffcontext *BearoffInit(const char *szFilename, const int bo, void (*
 
   /* read header */
 
-  if ( read ( pbc->h, sz, 40 ) < 40 ) {
+  if ( _read ( pbc->h, sz, 40 ) < 40 ) {
     if ( errno )
       perror ( szFilename );
     else {
       fprintf ( stderr, _("%s: incomplete bearoff database\n"), szFilename );
-      close ( pbc->h );
+      _close ( pbc->h );
     }
     free ( pbc );
     return NULL;
@@ -1228,7 +1228,7 @@ extern bearoffcontext *BearoffInit(const char *szFilename, const int bo, void (*
                 _("%s: incomplete bearoff database\n"
                   "(type is illegal: '%2s')\n"),
                 szFilename, sz + 6 );
-      close ( pbc->h );
+      _close ( pbc->h );
       free ( pbc );
       return NULL;
     }
@@ -1245,7 +1245,7 @@ extern bearoffcontext *BearoffInit(const char *szFilename, const int bo, void (*
                   _("%s: incomplete bearoff database\n"
                     "(illegal number of points is %d)"), 
                   szFilename, pbc->nPoints );
-        close ( pbc->h );
+        _close ( pbc->h );
         free ( pbc );
         return NULL;
       }
@@ -1258,7 +1258,7 @@ extern bearoffcontext *BearoffInit(const char *szFilename, const int bo, void (*
                   _("%s: incomplete bearoff database\n"
                     "(illegal number of chequers is %d)"), 
                   szFilename, pbc->nChequers );
-        close ( pbc->h );
+        _close ( pbc->h );
         free ( pbc );
         return NULL;
       }
@@ -1348,7 +1348,7 @@ extern bearoffcontext *BearoffInit(const char *szFilename, const int bo, void (*
     fprintf ( stderr,
               _("Unknown bearoff database\n" ) );
 
-    close ( pbc->h );
+    _close ( pbc->h );
     free ( pbc );
     return NULL;
 
@@ -1364,19 +1364,19 @@ extern bearoffcontext *BearoffInit(const char *szFilename, const int bo, void (*
     if ( fstat ( pbc->h, &st ) )
 	{
 		perror ( szFilename );
-		close ( pbc->h );
+		_close ( pbc->h );
 		free ( pbc );
 		return NULL;
     }
     
     if ( ReadIntoMemory ( pbc, iOffset, (unsigned int)st.st_size ) ) {
       
-      close ( pbc->h );
+      _close ( pbc->h );
       free ( pbc );
       return NULL;
 
     }
-    close ( pbc->h );
+    _close ( pbc->h );
     pbc->h = -1;
   }
   return pbc;
