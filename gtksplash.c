@@ -46,8 +46,8 @@ CreateSplash (void) {
   gtksplash *pgs;
   GtkWidget *pwvbox, *pwFrame, *pwb;
   GtkWidget *pwImage;
+  gchar *fn;
   int i;
-#include "xpm/gnubg-big.xpm"
 
   pgs = (gtksplash *) g_malloc ( sizeof ( gtksplash ) );
 
@@ -71,7 +71,9 @@ CreateSplash (void) {
 
   /* image */
 
-  pwImage = image_from_xpm_d ( gnubg_big_xpm, GTK_WIDGET ( pgs->pwWindow ) );
+  fn = g_build_filename(PKGDATADIR, "pixmaps", "gnubg-big.png", NULL);
+  pwImage = gtk_image_new_from_file(fn);
+  g_free(fn);
   gtk_box_pack_start ( GTK_BOX ( pwvbox ), pwImage, FALSE, FALSE, 0 );
 
   gtk_box_pack_start( GTK_BOX( pwvbox ),

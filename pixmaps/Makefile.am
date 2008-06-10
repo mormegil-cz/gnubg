@@ -29,4 +29,4 @@ nobase_dist_gnubgicons_DATA = \
 			      $(ICONS_32) \
 			      $(ICONS_48)
 
-gnubgpixmaps_DATA = $(PIXMAPS)
+dist_gnubgpixmaps_DATA = $(PIXMAPS)

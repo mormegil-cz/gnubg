@@ -83,8 +83,6 @@
 #include "fun3d.h"
 #endif
 
-#include "xpm/stock_stop_16.xpm"
-
 #define KEY_ESCAPE -229
 
 /* Offset action to avoid predefined values */
@@ -3634,7 +3632,7 @@ static void CreateMainWindow(void)
 			G_CALLBACK( TextPopped ), NULL );
 
 	pwStopTest = gtk_button_new();
-	gtk_container_add(GTK_CONTAINER(pwStopTest), image_from_xpm_d (stock_stop_16_xpm, pwStopTest));
+	gtk_container_add(GTK_CONTAINER(pwStopTest), gtk_image_new_from_stock(GTK_STOCK_STOP, GTK_ICON_SIZE_SMALL_TOOLBAR));
 	gtk_widget_set_sensitive(pwStopTest, FALSE);
 	gtk_box_pack_start( GTK_BOX( pwHbox ), pwStopTest, FALSE, FALSE, 0 );
 	g_signal_connect(G_OBJECT(pwStopTest), "clicked", G_CALLBACK( Stop ), NULL );

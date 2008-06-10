@@ -1,7 +1,12 @@
+Tue Jun 10 10:07:33 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtkame.c, xpm/Makefile.am: use GTK_STOCK_STOP rather than keeping
+	out own copy.
+
 Mon Jun  9 17:56:00 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* M gtkgame.c, gtkwindows.c, gtkwindows.h, pixmaps/Makefile.am,
-	pixmaps/gnubg-big.png: move gnubg-big.png out of xpm
+	pixmaps/gnubg-big.png, gtksplash.c: move gnubg-big.png out of xpm
 
 Mon Jun  9 00:14:45 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
