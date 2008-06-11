@@ -26,7 +26,6 @@
 
 typedef enum _bearoffcreator {
   BEAROFF_GNUBG,
-  BEAROFF_EXACT_BEAROFF,
   BEAROFF_UNKNOWN
 } bearoffcreator;
 
