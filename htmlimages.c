@@ -652,13 +652,16 @@ static char* GetFilenameBase(char* sz)
 		return 0;
 	}
 
-	if (_access(sz, R_OK))
+	if (g_file_test(sz, G_FILE_TEST_EXISTS))
 	{
-		if( g_mkdir( sz, 0777) < 0 )
-		{
-			outputerr ( sz );
-			return 0;
-		}
+		outputerrf(_("Cannot create htmlimages: %s already exists!"), sz);
+		return 0;
+	}
+
+	if( g_mkdir( sz, 0777) < 0 )
+	{
+		outputerr ( sz );
+		return 0;
 	}
 
 	szFile = malloc( strlen( sz ) + 32 );

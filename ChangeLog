@@ -1,3 +1,8 @@
+Wed Jun 11 15:06:45 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* html.c, htmlimages.c, board3d/misc3d.c: replace access by
+	g_file_test
+
 Tue Jun 10 10:07:33 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtkame.c, xpm/Makefile.am: use GTK_STOCK_STOP rather than keeping
