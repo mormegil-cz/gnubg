@@ -233,7 +233,7 @@ static void SetRNG( rng *prng, void **rngctx, rng rngNew, char *szSeed ) {
           return;
         }
 
-        if ( OpenDiceFile( *rngctx, sz ) < 0 ) {
+        if ( !OpenDiceFile( *rngctx, sz )) {
           outputf( _("File %s does not exist or is not readable"), sz );
           return;
         }

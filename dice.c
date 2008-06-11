@@ -45,6 +45,7 @@
 #include "mt19937ar.h"
 #include "isaac.h"
 #include <glib/gi18n.h>
+#include <glib/gstdio.h>
 
 #if USE_GTK
 #include "gtkgame.h"
@@ -84,7 +85,7 @@ typedef struct _rngcontext {
 #endif /* HAVE_LIBDL */
 
   /* RNG_FILE */
-  int hDice;
+  FILE *fDice;
   char *szDiceFilename;
 
   /* RNG_ISAAC */
@@ -643,12 +644,12 @@ CloseRNG( const rng rngx, void *p ) {
 extern int
 RNGSystemSeed( const rng rngx, void *p, unsigned long *pnSeed ) {
 
-  int h;
   int f = FALSE;
   rngcontext *rngctx = (rngcontext *) p;
   int n;
 
 #if HAVE_LIBGMP
+  int h;
     if( !pnSeed ) {
 	/* We can use long seeds and don't have to save the seed anywhere,
 	   so try 512 bits of state instead of 32. */
@@ -670,12 +671,13 @@ RNGSystemSeed( const rng rngx, void *p, unsigned long *pnSeed ) {
 		close( h );
 	}
     }
-#endif /* HAVE_LIBGMP */
-    
-    if( ( h = _open( "/dev/urandom", O_RDONLY ) ) >= 0 ) {
-	f = _read( h, &n, sizeof n ) == sizeof n;
-	_close( h );
+#elif !defined(WIN32)  /* HAVE_LIBGMP */
+  int h;
+    if( ( h = open( "/dev/urandom", O_RDONLY ) ) >= 0 ) {
+	f = read( h, &n, sizeof n ) == sizeof n;
+	close( h );
     }
+#endif
 
     if( !f ) {
 	    GTimeVal tv;
@@ -948,15 +950,14 @@ extern int UserRNGOpen( void *p, const char *sz ) {
 #endif /* HAVE_LIBDL */
 
 
-extern int
-OpenDiceFile( void *p, const char *sz ) {
+extern FILE *OpenDiceFile(void *p, const char *sz)
+{
+	rngcontext *rngctx = (rngcontext *) p;
 
-  rngcontext *rngctx = (rngcontext *) p;
+	g_free(rngctx->szDiceFilename);	/* initialized to NULL */
+	rngctx->szDiceFilename = g_strdup(sz);
 
-  g_free(rngctx->szDiceFilename); /*initialized to NULL*/
-  rngctx->szDiceFilename = g_strdup(sz);
-
-  return ( rngctx->hDice = _open(sz, O_RDONLY));
+	return (rngctx->fDice = g_fopen(sz, "r"));
 
 }
 
@@ -965,8 +966,8 @@ CloseDiceFile ( void *p ) {
 
   rngcontext *rngctx = (rngcontext *) p;
 
-  if ( rngctx->hDice >= 0 )
-    _close( rngctx->hDice );
+  if ( rngctx->fDice )
+    fclose( rngctx->fDice );
 
 }
 
@@ -980,14 +981,14 @@ ReadDiceFile( rngcontext *rngctx ) {
 uglyloop:
   {
   
-    n = _read( rngctx->hDice, &uch, 1 );
+    n = fread( &uch, 1, 1, rngctx->fDice );
 
-    if ( !n ) {
+    if ( feof(rngctx->fDice) ) {
       /* end of file */
       g_print( _("Rewinding dice file (%s)\n"), rngctx->szDiceFilename );
-      _lseek( rngctx->hDice, 0, SEEK_SET );
+      fseek( rngctx->fDice, 0, SEEK_SET );
     }
-    else if ( n < 0 ) {
+    else if ( n != 1 ) {
       g_printerr(rngctx->szDiceFilename);
       return -1;
     }

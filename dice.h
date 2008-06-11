@@ -22,6 +22,8 @@
 #ifndef _DICE_H_
 #define _DICE_H_
 
+#include <stdio.h>
+
 typedef enum _rng {
     RNG_ANSI, RNG_BBS, RNG_BSD, RNG_ISAAC, RNG_MANUAL, RNG_MD5, RNG_MERSENNE, 
     RNG_RANDOM_DOT_ORG, RNG_USER, RNG_FILE,
@@ -62,8 +64,7 @@ extern int
 UserRNGOpen( void *p, const char *sz );
 #endif /* HAVE_LIBDL */
 
-extern int
-OpenDiceFile( void *rngctx, const char *sz );
+extern FILE *OpenDiceFile( void *rngctx, const char *sz );
 
 extern void
 CloseDiceFile( void *rngctx );
