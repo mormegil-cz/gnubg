@@ -24,13 +24,6 @@
 
 #include "gnubg-types.h"
 
-typedef enum _bearoffcreator {
-  BEAROFF_GNUBG,
-  BEAROFF_UNKNOWN
-} bearoffcreator;
-
-#define N_BEAROFFS ((int)BEAROFF_UNKNOWN + 1)
-
 typedef enum _bearofftype {
   BEAROFF_ONESIDED,
   BEAROFF_TWOSIDED,
@@ -40,10 +33,7 @@ typedef enum _bearofftype {
 typedef struct _bearoffcontext
 {
   int h;          /* file handle */
-  int *ah;        /* list of file descriptors */
-  int nFiles;     /* number of file descriptors */
   bearofftype bt; /* type of bearoff database */
-  bearoffcreator bc; /* creator of database */
   unsigned int nPoints;    /* number of points covered by database */
   unsigned int nChequers;  /* number of chequers for one-sided database */
   int fInMemory;  /* Is database entirely read into memory? */

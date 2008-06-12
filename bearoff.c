@@ -51,11 +51,6 @@
 #define O_BINARY 0
 #endif
 
-const char *aszBearoffGenerator[N_BEAROFFS] = {
-  N_("GNU Backgammon"),
-  N_("Unknown program")
-};
-
 static int setGammonProb(const TanBoard anBoard, unsigned int bp0, unsigned int bp1, float* g0, float* g1)
 {
   int i;
@@ -340,27 +335,13 @@ static void ReadTwoSidedBearoff ( const bearoffcontext *pbc,
 	++((bearoffcontext *)pbc)->nReads;	/* nReads only used for stats info */
 }
 
-extern int
-BearoffCubeful ( const bearoffcontext *pbc,
-                 const unsigned int iPos,
-                 float ar[ 4 ], unsigned short int aus[ 4 ] ) {
+extern int BearoffCubeful(const bearoffcontext * pbc, const unsigned int iPos, float ar[4], unsigned short int aus[4])
+{
+	g_return_val_if_fail(pbc, -1);
+	g_return_val_if_fail(pbc->fCubeful, -1);
 
-  switch ( pbc->bc )
-  {
-  case BEAROFF_GNUBG:
-
-    if ( ! pbc->fCubeful )
-      return -1;
-    else {
-      ReadTwoSidedBearoff ( pbc, iPos, ar, aus );
-	  return 0;
-    }
-
-  case BEAROFF_UNKNOWN:
-  default:
-    g_assert_not_reached();
-    return -1;
-  }
+	ReadTwoSidedBearoff(pbc, iPos, ar, aus);
+	return 0;
 }
 
 
@@ -532,31 +513,20 @@ BearoffEvalHypergammon ( const bearoffcontext *pbc,
   return ReadHypergammon ( pbc, iPos, arOutput, NULL );
 }
 
-extern int BearoffEval ( const bearoffcontext *pbc, const TanBoard anBoard, float arOutput[] )
+extern int BearoffEval(const bearoffcontext * pbc, const TanBoard anBoard, float arOutput[])
 {
-  if (!pbc)
-    return 0;
+	g_return_val_if_fail(pbc, 0);
 
-  switch ( pbc->bc ) {
-  case BEAROFF_GNUBG:
+	switch (pbc->bt) {
+	case BEAROFF_TWOSIDED:
+		return BearoffEvalTwoSided(pbc, anBoard, arOutput);
+	case BEAROFF_ONESIDED:
+		return BearoffEvalOneSided(pbc, anBoard, arOutput);
+	case BEAROFF_HYPERGAMMON:
+		return BearoffEvalHypergammon(pbc, anBoard, arOutput);
+	}
 
-    switch ( pbc->bt ) {
-    case BEAROFF_TWOSIDED:
-      return BearoffEvalTwoSided ( pbc, anBoard, arOutput );
-    case BEAROFF_ONESIDED:
-      return BearoffEvalOneSided ( pbc, anBoard, arOutput );
-    case BEAROFF_HYPERGAMMON:
-      return BearoffEvalHypergammon ( pbc, anBoard, arOutput );
-    }
-
-    break;
-
-  case BEAROFF_UNKNOWN:
-  default:
-    g_assert_not_reached();
-  }
-
-  return 0;
+	return 0;
 }
 
 extern void
@@ -577,7 +547,7 @@ BearoffStatus ( const bearoffcontext *pbc, char *sz ) {
               pbc->fInMemory ?
               _("In memory 2-sided bearoff database evaluator") :
               _("On disk 2-sided bearoff database evaluator"),
-              gettext ( aszBearoffGenerator [ pbc->bc ] ),
+              _("GNU Backgammon"),
               pbc->nChequers, pbc->nPoints, 
               Combination ( pbc->nChequers + pbc->nPoints, pbc->nPoints ),
               pbc->fCubeful ?
@@ -599,7 +569,7 @@ BearoffStatus ( const bearoffcontext *pbc, char *sz ) {
               pbc->fInMemory ?
               _("In memory 1-sided bearoff database evaluator") :
               _("On disk 1-sided bearoff database evaluator"),
-              gettext ( aszBearoffGenerator [ pbc->bc ] ),
+              _("GNU Backgammon"),
               pbc->nChequers, pbc->nPoints, 
               Combination ( pbc->nChequers + pbc->nPoints, pbc->nPoints ),
               pbc->fND ?
@@ -628,7 +598,7 @@ BearoffStatus ( const bearoffcontext *pbc, char *sz ) {
 				"   - up to %d chequers on %d points (%d positions)"
 				" per player\n"
 				"   - number of reads: %lu\n"),
-				gettext ( aszBearoffGenerator [ pbc->bc ] ),
+				_("GNU Backgammon"),
 				pbc->nChequers, pbc->nPoints, 
 				Combination ( pbc->nChequers + pbc->nPoints, pbc->nPoints ),
 				pbc->nReads );
@@ -843,52 +813,35 @@ BearoffDumpHyper( const bearoffcontext *pbc, const TanBoard anBoard, char *sz )
 
 }
 
-extern int BearoffDump ( const bearoffcontext *pbc, const TanBoard anBoard, char *sz )
+extern int BearoffDump(const bearoffcontext * pbc, const TanBoard anBoard, char *sz)
 {
-  switch ( pbc->bc )
-  {
-  case BEAROFF_GNUBG:
+	g_return_val_if_fail(pbc, -1);
 
-    switch ( pbc->bt ) {
-    case BEAROFF_TWOSIDED:
-      return BearoffDumpTwoSided ( pbc, anBoard, sz );
-    case BEAROFF_ONESIDED:
-      return BearoffDumpOneSided ( pbc, anBoard, sz );
-    case BEAROFF_HYPERGAMMON:
-      return BearoffDumpHyper ( pbc, anBoard, sz );
-    }
-    break;
-
-  case BEAROFF_UNKNOWN:
-  default:
-    g_assert_not_reached();
-	  g_assert(FALSE);
-  }
-  /* code not reachable */
-  return -1;
+	switch (pbc->bt) {
+	case BEAROFF_TWOSIDED:
+		return BearoffDumpTwoSided(pbc, anBoard, sz);
+	case BEAROFF_ONESIDED:
+		return BearoffDumpOneSided(pbc, anBoard, sz);
+	case BEAROFF_HYPERGAMMON:
+		return BearoffDumpHyper(pbc, anBoard, sz);
+	}
+	return -1;
 }
 
-extern void BearoffClose(bearoffcontext *ppbc)
+extern void BearoffClose(bearoffcontext * pbc)
 {
-  if (!ppbc)
-    return;
+	if (!pbc)
+		return;
 
-  if ( !ppbc->fInMemory )
-    _close ( ppbc->h );
-  else if ( ppbc->p && ppbc->fMalloc )
-    free ( ppbc->p );
+	if (!pbc->fInMemory)
+		_close(pbc->h);
+	else if (pbc->p && pbc->fMalloc)
+		free(pbc->p);
 
-  if ( ppbc->szFilename )
-    g_free( ppbc->szFilename );
+	if (pbc->szFilename)
+		g_free(pbc->szFilename);
 
-  if ( ppbc->ah ) {
-    int i;
-    for ( i = 0; i < ppbc->nFiles; ++i )
-      _close( ppbc->ah[ i ] );
-    free( ppbc->ah );
-  }
-
-  free(ppbc);
+	free(pbc);
 }
 
 static int ReadIntoMemory ( bearoffcontext *pbc, const int iOffset, const unsigned int nSize )
@@ -945,17 +898,6 @@ static int ReadIntoMemory ( bearoffcontext *pbc, const int iOffset, const unsign
  *
  */
 
-static int
-isExactBearoff ( const unsigned char ac[ 8 ] ) {
-
-  long id = ( ac[ 0 ] | ac[ 1 ] << 8 | ac[ 2 ] << 16 | ac[ 3 ] << 24 );
-  long ver = ( ac[ 4 ] | ac[ 5 ] << 8 | ac[ 6 ] << 16 | ac[ 7 ] << 24 );
-
-  return id == 73457356 && ver == 100;
-
-}
-
-
 extern bearoffcontext *
 BearoffAlloc( void ) {
 
@@ -965,10 +907,7 @@ BearoffAlloc( void ) {
     return NULL;
   
   pbc->h = -1;
-  pbc->ah = NULL;
-  pbc->nFiles = 0;
   pbc->bt = (bearofftype)-1;
-  pbc->bc = (bearoffcreator)-1;
   pbc->nPoints = 0;
   pbc->nChequers = 0;
   pbc->fInMemory = FALSE;
@@ -1021,7 +960,6 @@ extern bearoffcontext *BearoffInit(const char *szFilename, const int bo, void (*
 
   if ( bo & (int)BO_HEURISTIC )
   {
-    pbc->bc = BEAROFF_GNUBG;
     pbc->bt = BEAROFF_ONESIDED;
     pbc->fInMemory = TRUE;
     pbc->h = -1;
@@ -1081,16 +1019,14 @@ extern bearoffcontext *BearoffInit(const char *szFilename, const int bo, void (*
 
   /* detect bearoff program */
 
-  if ( ! strncmp ( sz, "gnubg", 5 ) )
-    pbc->bc = BEAROFF_GNUBG;
-  else if ( isExactBearoff ( (unsigned char*)sz ) )
-    pbc->bc = BEAROFF_UNKNOWN;
-
+  if ( strncmp ( sz, "gnubg", 5 ) != 0 )
+  {
+    fprintf ( stderr, _("Unknown bearoff database\n" ) );
+    _close ( pbc->h );
+    free ( pbc );
+    return NULL;
+}
   pbc->szFilename = szFilename ? g_strdup( szFilename ) : NULL;
-
-  switch ( pbc->bc ) {
-
-  case BEAROFF_GNUBG:
 
     /* one sided or two sided? */
 
@@ -1174,20 +1110,6 @@ extern bearoffcontext *BearoffInit(const char *szFilename, const int bo, void (*
     }
 
     iOffset = 0;
-
-    break;
-
-  case BEAROFF_UNKNOWN: 
-  default:
-
-    fprintf ( stderr,
-              _("Unknown bearoff database\n" ) );
-
-    _close ( pbc->h );
-    free ( pbc );
-    return NULL;
-
-  }
 
   /* 
    * read database into memory if requested 
@@ -1470,31 +1392,16 @@ ReadBearoffOneSidedExact ( const bearoffcontext *pbc, const unsigned int nPosID,
 	return 0;
 }
 
-extern int BearoffDist ( const bearoffcontext *pbc, const unsigned int nPosID,
-              float arProb[ 32 ], float arGammonProb[ 32 ],
-              float ar[ 4 ],
-              unsigned short int ausProb[ 32 ], 
-              unsigned short int ausGammonProb[ 32 ] )
+extern int BearoffDist(const bearoffcontext * pbc, const unsigned int nPosID,
+		       float arProb[32], float arGammonProb[32],
+		       float ar[4], unsigned short int ausProb[32], unsigned short int ausGammonProb[32])
 {
-  switch ( pbc->bc )
-  {
-  case BEAROFF_GNUBG:
-
-    g_assert ( pbc->bt == BEAROFF_ONESIDED );
-
-    if ( pbc->fND ) 
-      return ReadBearoffOneSidedND ( pbc, nPosID, arProb, arGammonProb, ar,
-                                     ausProb, ausGammonProb );
-    else
-      return ReadBearoffOneSidedExact ( pbc, nPosID, arProb, arGammonProb, ar,
-                                        ausProb, ausGammonProb );
-
-  case BEAROFF_UNKNOWN:
-  default:
-    g_assert_not_reached();
-	/* code not reachable */
-	return -1;
-  }
+	g_return_val_if_fail(pbc, -1);
+	g_return_val_if_fail(pbc->bt == BEAROFF_ONESIDED, -1);
+	if (pbc->fND)
+		return ReadBearoffOneSidedND(pbc, nPosID, arProb, arGammonProb, ar, ausProb, ausGammonProb);
+	else
+		return ReadBearoffOneSidedExact(pbc, nPosID, arProb, arGammonProb, ar, ausProb, ausGammonProb);
 }
 
 extern int isBearoff(const bearoffcontext *pbc, const TanBoard anBoard)

@@ -1,3 +1,7 @@
+Thu Jun 12 10:23:38 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* bearoff.c, bearoff.h: more cleanup of unused code
+
 Thu Jun 12 00:20:30 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* bearoff.c, bearoff.h: remove unused code to read non-gnubg exact
