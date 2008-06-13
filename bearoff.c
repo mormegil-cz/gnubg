@@ -18,7 +18,6 @@
  *
  * $Id$
  */
-
 #include "config.h"
 #if USE_MULTITHREAD
 /*must be first here because of strange warning from mingw*/
@@ -27,9 +26,6 @@
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
-#endif
-#if HAVE_SYS_MMAN_H
-#include <sys/mman.h>
 #endif
 
 #include <glib/gi18n.h>
@@ -43,12 +39,6 @@
 #include <errno.h>
 #if HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
-
-#ifdef WIN32
-#include <io.h>
-#else
-#define O_BINARY 0
 #endif
 
 static int setGammonProb(const TanBoard anBoard, unsigned int bp0, unsigned int bp1, float* g0, float* g1)
@@ -288,7 +278,7 @@ static void ReadBearoffFile(const bearoffcontext *pbc, unsigned int offset, unsi
 	MT_Exclusive();
 #endif
 
-	if ((_lseek(pbc->h, (long)offset, SEEK_SET ) < 0) || (_read(pbc->h, buf, nBytes) < (int)nBytes))
+	if ((fseek(pbc->pf, (long)offset, SEEK_SET ) < 0) || (fread(buf, 1, nBytes, pbc->pf ) < (int)nBytes))
 	{
 		if (errno)
 			perror("OS bearoff database");
@@ -314,8 +304,8 @@ static void ReadTwoSidedBearoff ( const bearoffcontext *pbc,
 	unsigned char *pc = NULL;
 	unsigned short int us;
 
-	if ( pbc->fInMemory )
-		pc = ((unsigned char *) pbc->p) + 40 + 2 * iPos * k;
+	if (pbc->p)
+		pc = pbc->p + 40 + 2 * iPos * k;
 	else
 	{
 		ReadBearoffFile(pbc, 40 + 2 * iPos * k, ac, k * 2);
@@ -377,8 +367,8 @@ ReadHypergammon( const bearoffcontext *pbc,
   int i;
   const int x = 28;
 
-  if ( pbc->fInMemory )
-    pc = ((unsigned char *)pbc->p) + 40 + x * iPos;
+  if (pbc->p)
+    pc = pbc->p + 40 + x * iPos;
   else {
     ReadBearoffFile(pbc, 40 + x * iPos, ac, x);
     pc = ac;
@@ -524,6 +514,8 @@ extern int BearoffEval(const bearoffcontext * pbc, const TanBoard anBoard, float
 		return BearoffEvalOneSided(pbc, anBoard, arOutput);
 	case BEAROFF_HYPERGAMMON:
 		return BearoffEvalHypergammon(pbc, anBoard, arOutput);
+	default: 
+		g_assert_not_reached();
 	}
 
 	return 0;
@@ -544,7 +536,7 @@ BearoffStatus ( const bearoffcontext *pbc, char *sz ) {
                     " per player\n"
                     "   - %s\n"
                     "   - number of reads: %lu\n"),
-              pbc->fInMemory ?
+              pbc->p ?
               _("In memory 2-sided bearoff database evaluator") :
               _("On disk 2-sided bearoff database evaluator"),
               _("GNU Backgammon"),
@@ -566,7 +558,7 @@ BearoffStatus ( const bearoffcontext *pbc, char *sz ) {
                     "%s"
                     "   - %s\n"
                     "   - number of reads: %lu\n"),
-              pbc->fInMemory ?
+              pbc->p ?
               _("In memory 1-sided bearoff database evaluator") :
               _("On disk 1-sided bearoff database evaluator"),
               _("GNU Backgammon"),
@@ -586,7 +578,7 @@ BearoffStatus ( const bearoffcontext *pbc, char *sz ) {
 
   case BEAROFF_HYPERGAMMON:
 
-    if ( pbc->fInMemory )
+    if ( pbc->p)
       sprintf( sz, _(" * In memory 2-sided exact %d-chequer Hypergammon "
                      "database evaluator\n"), pbc->nChequers );
     else
@@ -603,6 +595,8 @@ BearoffStatus ( const bearoffcontext *pbc, char *sz ) {
 				Combination ( pbc->nChequers + pbc->nPoints, pbc->nPoints ),
 				pbc->nReads );
     break;
+	default: 
+		g_assert_not_reached();
 
   }
 
@@ -824,6 +818,8 @@ extern int BearoffDump(const bearoffcontext * pbc, const TanBoard anBoard, char 
 		return BearoffDumpOneSided(pbc, anBoard, sz);
 	case BEAROFF_HYPERGAMMON:
 		return BearoffDumpHyper(pbc, anBoard, sz);
+	default: 
+		g_assert_not_reached();
 	}
 	return -1;
 }
@@ -833,9 +829,16 @@ extern void BearoffClose(bearoffcontext * pbc)
 	if (!pbc)
 		return;
 
-	if (!pbc->fInMemory)
-		_close(pbc->h);
-	else if (pbc->p && pbc->fMalloc)
+	if (pbc->pf)
+		fclose(pbc->pf);
+
+	if (pbc->map)
+	{
+		 g_mapped_file_free(pbc->map);
+		 pbc->p = NULL;
+	}
+
+	if (pbc->p)
 		free(pbc->p);
 
 	if (pbc->szFilename)
@@ -844,50 +847,16 @@ extern void BearoffClose(bearoffcontext * pbc)
 	free(pbc);
 }
 
-static int ReadIntoMemory ( bearoffcontext *pbc, const int iOffset, const unsigned int nSize )
+static void ReadIntoMemory ( bearoffcontext *pbc )
 {
-  pbc->fMalloc = TRUE;
-
-#if HAVE_MMAP
-  if ( ( pbc->p = mmap ( NULL, nSize, PROT_READ, 
-                           MAP_SHARED, pbc->h, iOffset ) ) == (void *) -1 ) {
-    /* perror ( "mmap" ); */
-    /* mmap failed */
-#endif /* HAVE_MMAP */
-
-    /* allocate memory for database */
-
-    if ( ( pbc->p = malloc ( nSize ) ) == NULL )
+	GError *error = NULL;
+	pbc->map = g_mapped_file_new(pbc->szFilename, FALSE, &error);
+	if (!pbc->map)
 	{
-      perror ( "pbc->p" );
-      return -1;
-    }
-
-    if ( _lseek( pbc->h, iOffset, SEEK_SET ) == (off_t) -1 ) {
-      perror ( "lseek" );
-      return -1;
-    }
-
-    if ( (unsigned int)_read ( pbc->h, pbc->p, nSize ) < nSize ) {
-      if ( errno )
-        perror ( "read failed" );
-      else
-        fprintf ( stderr, _("incomplete bearoff database\n"
-                            "(expected size: %d)\n"),
-                  nSize );
-      free ( pbc->p );
-      pbc->p = NULL;
-      return -1;
-    }
-
-#if HAVE_MMAP
-  }
-  else
-    pbc->fMalloc = FALSE;
-#endif /* HAVE_MMAP */
-
-  return 0;
-
+		g_printerr(_("Failed to map bearoffdatabase %s: %s\n"), pbc->szFilename, error->message);
+		g_error_free(error);
+	}
+	pbc->p = (unsigned char *)g_mapped_file_get_contents(pbc->map);
 }
 
 /*
@@ -903,24 +872,12 @@ BearoffAlloc( void ) {
 
   bearoffcontext *pbc;
 
-  if( ( pbc = ( bearoffcontext *) malloc( sizeof ( bearoffcontext ) ) ) == NULL )
-    return NULL;
-  
-  pbc->h = -1;
-  pbc->bt = (bearofftype)-1;
-  pbc->nPoints = 0;
-  pbc->nChequers = 0;
-  pbc->fInMemory = FALSE;
-  pbc->fMalloc = FALSE;
-  pbc->szFilename = NULL;
+  pbc = g_new0(bearoffcontext, 1);
   pbc->fCompressed = TRUE;
   pbc->fGammon = TRUE;
   pbc->fND = FALSE;
-  pbc->fHeuristic = FALSE;
-  pbc->nOffsetBuffer = -1;
-  pbc->puchBuffer = NULL;
-  pbc->puchA = NULL;
   pbc->fCubeful = TRUE;
+  pbc->map = NULL;
   pbc->p = NULL;
 
   return pbc;
@@ -931,6 +888,7 @@ static unsigned int MakeInt(unsigned char a, unsigned char b, unsigned char c, u
 {
 	return (a | (unsigned char)b << 8 | (unsigned char)c << 16 | (unsigned char)d << 24);
 }
+
 /*
  * Initialise bearoff database
  *
@@ -944,201 +902,137 @@ static unsigned int MakeInt(unsigned char a, unsigned char b, unsigned char c, u
  *   caller must free returned pointer if not NULL.
  *
  */
-extern bearoffcontext *BearoffInit(const char *szFilename, const int bo, void (*p)(unsigned int))
+extern bearoffcontext *BearoffInit(const char *szFilename, const int bo, void (*p) (unsigned int))
 {
-  bearoffcontext *pbc;
-  char sz[ 41 ];
-  int iOffset = 0;
+	bearoffcontext *pbc;
+	char sz[41];
 
-  if ( ( pbc = BearoffAlloc() ) == NULL ) {
-    /* malloc failed */
-    perror ( "bearoffcontext" );
-    return NULL;
-  }
+	pbc = g_new0(bearoffcontext, 1);
 
-  pbc->nReads = 0;
+	if (bo & (int) BO_HEURISTIC) {
+		pbc->bt = BEAROFF_ONESIDED;
+		pbc->nPoints = 6;
+		pbc->nChequers = 6;
+		pbc->fHeuristic = TRUE;
+		pbc->p = HeuristicDatabase(p);
+		return pbc;
 
-  if ( bo & (int)BO_HEURISTIC )
-  {
-    pbc->bt = BEAROFF_ONESIDED;
-    pbc->fInMemory = TRUE;
-    pbc->h = -1;
-    pbc->nPoints = 6;
-    pbc->nChequers = 6;
-    pbc->fCompressed = FALSE;
-    pbc->fGammon = FALSE;
-    pbc->fND = FALSE;
-    pbc->fCubeful = FALSE;
-    pbc->fHeuristic = TRUE;
-    pbc->fMalloc = TRUE;
-    pbc->p = HeuristicDatabase ( p );
-    pbc->szFilename = szFilename ? g_strdup( szFilename ) : NULL;
+	}
 
-    return pbc;
-    
-  }
+	errno = 0;
 
-  
+	if (!szFilename || !*szFilename) {
+		g_printerr(_("No database filename provided\n"));
+		goto invaliddb;
+	}
+	pbc->szFilename = g_strdup(szFilename);
 
-  if ( ! szFilename || ! *szFilename )
-    return NULL;
-
-  /*
-   * Allocate memory for bearoff context
-   */
-
-  pbc->fInMemory = bo & (int)BO_IN_MEMORY;
-
-  /*
-   * Open bearoff file
-   */
-
-  if ( ( pbc->h = _open(szFilename, O_RDONLY | O_BINARY ) ) < 0 ) {
-    /* open failed */
-    free ( pbc );
-    return NULL;
-  }
+	if (!g_file_test(szFilename, G_FILE_TEST_IS_REGULAR)) {
+		/* fail silently */
+		goto invaliddb;
+	}
 
 
-  /*
-   * Read header bearoff file
-   */
+	if (!(pbc->pf = fopen(szFilename, "rb"))) {
+		g_printerr(_("Invalid or nonexistent database\n"));
+		goto invaliddb;
+	}
+	/* 
+	 * Read header bearoff file
+	 */
 
-  /* read header */
+	/* read header */
 
-  if ( _read ( pbc->h, sz, 40 ) < 40 ) {
-    if ( errno )
-      perror ( szFilename );
-    else {
-      fprintf ( stderr, _("%s: incomplete bearoff database\n"), szFilename );
-      _close ( pbc->h );
-    }
-    free ( pbc );
-    return NULL;
-  }
+	if (fread(sz, 1, 40, pbc->pf) < 40) {
+		g_printerr(_("Database read failed\n"));
+		goto invaliddb;
+	}
 
-  /* detect bearoff program */
+	/* detect bearoff program */
 
-  if ( strncmp ( sz, "gnubg", 5 ) != 0 )
-  {
-    fprintf ( stderr, _("Unknown bearoff database\n" ) );
-    _close ( pbc->h );
-    free ( pbc );
-    return NULL;
-}
-  pbc->szFilename = szFilename ? g_strdup( szFilename ) : NULL;
+	if (strncmp(sz, "gnubg", 5) != 0) {
+		g_printerr(_("Unknown bearoff database\n"));
+		goto invaliddb;
+	}
 
-    /* one sided or two sided? */
+	/* one sided or two sided? */
 
-    if ( ! strncmp ( sz + 6, "TS", 2 ) ) 
-      pbc->bt = BEAROFF_TWOSIDED;
-    else if ( ! strncmp ( sz + 6, "OS", 2 ) )
-      pbc->bt = BEAROFF_ONESIDED;
-    else if ( *(sz+6) == 'H' )
-      pbc->bt = BEAROFF_HYPERGAMMON;
-    else {
-      fprintf ( stderr,
-                _("%s: incomplete bearoff database\n"
-                  "(type is illegal: '%2s')\n"),
-                szFilename, sz + 6 );
-      _close ( pbc->h );
-      free ( pbc );
-      return NULL;
-    }
+	if (!strncmp(sz + 6, "TS", 2))
+		pbc->bt = BEAROFF_TWOSIDED;
+	else if (!strncmp(sz + 6, "OS", 2))
+		pbc->bt = BEAROFF_ONESIDED;
+	else if (*(sz + 6) == 'H')
+		pbc->bt = BEAROFF_HYPERGAMMON;
+	else {
+		g_printerr(_("%s: incomplete bearoff database\n (type is illegal: '%2s')\n"), szFilename, sz + 6);
+		goto invaliddb;
+	}
 
-    if ( pbc->bt == BEAROFF_TWOSIDED || pbc->bt == BEAROFF_ONESIDED ) {
+	if (pbc->bt == BEAROFF_TWOSIDED || pbc->bt == BEAROFF_ONESIDED) {
 
-      /* normal onesided or twosided bearoff database */
+		/* normal onesided or twosided bearoff database */
 
-      /* number of points */
-      
-      pbc->nPoints = (unsigned)atoi ( sz + 9 );
-      if ( pbc->nPoints < 1 || pbc->nPoints >= 24 ) {
-        fprintf ( stderr, 
-                  _("%s: incomplete bearoff database\n"
-                    "(illegal number of points is %d)"), 
-                  szFilename, pbc->nPoints );
-        _close ( pbc->h );
-        free ( pbc );
-        return NULL;
-      }
-      
-      /* number of chequers */
-      
-      pbc->nChequers = (unsigned)atoi ( sz + 12 );
-      if ( pbc->nChequers < 1 || pbc->nChequers > 15 ) {
-        fprintf ( stderr, 
-                  _("%s: incomplete bearoff database\n"
-                    "(illegal number of chequers is %d)"), 
-                  szFilename, pbc->nChequers );
-        _close ( pbc->h );
-        free ( pbc );
-        return NULL;
-      }
+		/* number of points */
 
-    }
-    else {
+		pbc->nPoints = (unsigned) atoi(sz + 9);
+		if (pbc->nPoints < 1 || pbc->nPoints >= 24) {
+			g_printerr(_("%s: incomplete bearoff database\n (illegal number of points is %d)\n"),
+				   szFilename, pbc->nPoints);
+			goto invaliddb;
+		}
 
-      /* hypergammon database */
+		/* number of chequers */
 
-      pbc->nPoints = 25;
-      pbc->nChequers = (unsigned)atoi ( sz + 7 );
+		pbc->nChequers = (unsigned) atoi(sz + 12);
+		if (pbc->nChequers < 1 || pbc->nChequers > 15) {
+			g_printerr(_("%s: incomplete bearoff database\n (illegal number of chequers is %d)"),
+				   szFilename, pbc->nChequers);
+			goto invaliddb;
+		}
 
-    }
+	} else {
 
+		/* hypergammon database */
 
-    pbc->fCompressed = FALSE;
-    pbc->fGammon = FALSE;
-    pbc->fCubeful = FALSE;
-    pbc->fND = FALSE;
-    pbc->fHeuristic = FALSE;
+		pbc->nPoints = 25;
+		pbc->nChequers = (unsigned) atoi(sz + 7);
 
-    switch ( pbc->bt ) {
-    case BEAROFF_TWOSIDED:
-      /* options for two-sided dbs */
-      pbc->fCubeful = atoi ( sz + 15 );
-      break;
-    case BEAROFF_ONESIDED:
-      /* options for one-sided dbs */
-      pbc->fGammon = atoi ( sz + 15 );
-      pbc->fCompressed = atoi ( sz + 17 );
-      pbc->fND = atoi ( sz + 19 );
-      break;
+	}
+	switch (pbc->bt) {
+	case BEAROFF_TWOSIDED:
+		/* options for two-sided dbs */
+		pbc->fCubeful = atoi(sz + 15);
+		break;
+	case BEAROFF_ONESIDED:
+		/* options for one-sided dbs */
+		pbc->fGammon = atoi(sz + 15);
+		pbc->fCompressed = atoi(sz + 17);
+		pbc->fND = atoi(sz + 19);
+		break;
 	case BEAROFF_HYPERGAMMON:
-    default:
-      break;
-    }
+	default:
+		break;
+	}
 
-    iOffset = 0;
+	/* 
+	 * read database into memory if requested 
+	 */
 
-  /* 
-   * read database into memory if requested 
-   */
-
-  if ( pbc->fInMemory )
-  {
-    struct stat st;
-    if ( fstat ( pbc->h, &st ) )
+	if (bo & (int) BO_IN_MEMORY) {
+		fclose(pbc->pf);
+		pbc->pf = NULL;
+		ReadIntoMemory(pbc);
+	}
+	return pbc;
+      invaliddb:
+	if (errno)
 	{
-		perror ( szFilename );
-		_close ( pbc->h );
-		free ( pbc );
-		return NULL;
-    }
-    
-    if ( ReadIntoMemory ( pbc, iOffset, (unsigned int)st.st_size ) ) {
-      
-      _close ( pbc->h );
-      free ( pbc );
-      return NULL;
-
-    }
-    _close ( pbc->h );
-    pbc->h = -1;
-  }
-  return pbc;
+		char *fn = pbc->szFilename ? pbc->szFilename : "";
+		g_printerr(_("Bearoff Database(%s): %s\n"), fn, g_strerror(errno));
+	}
+	BearoffClose(pbc);
+	return NULL;
 }
-
 
 extern float
 fnd ( const float x, const float mu, const float sigma  ) {
@@ -1275,9 +1169,9 @@ static unsigned short int *GetDistCompressed ( unsigned short int aus[ 64 ], con
 
   /* find offsets and no. of non-zero elements */
   
-  if ( pbc->fInMemory )
+  if (pbc->p)
     /* database is in memory */
-    puch = ( (unsigned char *) pbc->p ) + 40 + nPosID * 8;
+    puch = pbc->p + 40 + nPosID * 8;
   else {
     ReadBearoffFile(pbc, 40 + nPosID * 8, ac, 8);
     puch = ac;
@@ -1319,9 +1213,9 @@ static unsigned short int *GetDistCompressed ( unsigned short int aus[ 64 ], con
   
   /* get distribution */
   
-  if ( pbc->fInMemory )
+  if (pbc->p)
     /* from memory */
-    puch = ( ( unsigned char *) pbc->p ) + iOffset;
+    puch = pbc->p + iOffset;
   else {
     /* from disk */
     ReadBearoffFile(pbc, iOffset, ac, nBytes);
@@ -1344,10 +1238,9 @@ static unsigned short int *GetDistUncompressed ( unsigned short int aus[ 64 ], c
 
   iOffset = 40 + 64 * nPosID * ( pbc->fGammon ? 2 : 1 );
 
-  if ( pbc->fInMemory )
+  if (pbc->p)
     /* from memory */
-    puch = 
-      ( ( unsigned char *) pbc->p ) + iOffset;
+    puch = pbc->p + iOffset;
   else {
     /* from disk */
 

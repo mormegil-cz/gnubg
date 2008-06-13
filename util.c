@@ -102,7 +102,7 @@ extern FILE *GetTemporaryFile(const char *nameTemplate, char **retName)
       PrintError("creating temporary file");
       return NULL;
     }
-	pf = _fdopen(tmpd, "w+" );
+	pf = fdopen(tmpd, "w+" );
 	if (pf == NULL)
 	{
 		g_free(retName);

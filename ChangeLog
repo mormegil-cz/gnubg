@@ -1,3 +1,11 @@
+Fri Jun 13 13:04:19 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* bearoff.c, bearoff.h, eval.c, configure.in: always mmap datase files
+	using g_mapped_file. Read using fopen rather than open. Various
+	cleanups.
+
+	* gtkgame.c, util.c: revert some recent visual c++ prompted changes
+
 Thu Jun 12 10:23:38 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* bearoff.c, bearoff.h: more cleanup of unused code

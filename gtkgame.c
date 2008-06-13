@@ -378,7 +378,7 @@ static void StdinReadNotify( gpointer p, gint h, GdkInputCondition cond ) {
     
 	
     if( feof( stdin ) ) {
-	if( !_isatty( STDIN_FILENO ) )
+	if( !isatty( STDIN_FILENO ) )
 	    exit( EXIT_SUCCESS );
 	
 	PromptForExit();

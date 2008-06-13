@@ -24,7 +24,10 @@
 
 #include "gnubg-types.h"
 
+#include <glib.h>
+
 typedef enum _bearofftype {
+	BEAROFF_INVALID,
   BEAROFF_ONESIDED,
   BEAROFF_TWOSIDED,
   BEAROFF_HYPERGAMMON
@@ -32,25 +35,20 @@ typedef enum _bearofftype {
 
 typedef struct _bearoffcontext
 {
-  int h;          /* file handle */
+  FILE *pf;          /* file pointer */
   bearofftype bt; /* type of bearoff database */
   unsigned int nPoints;    /* number of points covered by database */
   unsigned int nChequers;  /* number of chequers for one-sided database */
-  int fInMemory;  /* Is database entirely read into memory? */
-  int fMalloc;    /* is data malloc'ed? */
   char *szFilename; /* filename */
-
   /* one sided dbs */
   int fCompressed; /* is database compressed? */
   int fGammon;     /* gammon probs included */
   int fND;         /* normal distibution instead of exact dist? */
   int fHeuristic;  /* heuristic database? */
-  int nOffsetBuffer;
-  unsigned char *puchBuffer;
-  unsigned char *puchA;
   /* two sided dbs */
   int fCubeful;    /* cubeful equities included */
-  void *p;        /* pointer to data */
+  GMappedFile *map;
+  unsigned char *p;        /* pointer to data in memory */
 
   unsigned long int nReads; /* number of reads */
 
