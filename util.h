@@ -26,12 +26,11 @@
 
 #ifdef WIN32
 #define DOCDIR getDocDir()
-#define BuildFilename(file) g_build_filename(getInstallDir(), file, NULL)
-#define BuildFilename2(file1, file2) g_build_filename(getInstallDir(), file1, file2, NULL)
-#else
+#define PKGDATADIR getInstallDir()
+#endif
+
 #define BuildFilename(file) g_build_filename(PKGDATADIR, file, NULL)
 #define BuildFilename2(file1, file2) g_build_filename(PKGDATADIR, file1, file2, NULL)
-#endif
 
 #ifdef WIN32
 extern char *getInstallDir( void );

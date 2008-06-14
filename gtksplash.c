@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "util.h"
 #include "eval.h"
 #include "gtksplash.h"
 #include "gtktoolbar.h"
