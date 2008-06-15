@@ -268,7 +268,7 @@ static void MT_TaskDone(Task *pt)
 {
     MT_SafeInc(&td.doneTasks);
 #ifndef GLIB_THREADS
-	if (td.doneTasks >= td.totalTasks)
+	if (td.doneTasks >= td.totalTasks && td.totalTasks > 0)
 		SetEvent(td.alldone);
 #endif
 
@@ -540,12 +540,19 @@ int MT_WaitForTasks(void (*pCallback)(void), int callbackTime)
 
 	if (td.addedTasks == 0)
 		return 0;
-
+	
     multi_debug("wait for tasks: lock(1)");
     Mutex_Lock(td.queueLock);
     td.totalTasks = td.addedTasks;
     Mutex_Release(td.queueLock);
     multi_debug("wait for tasks: release(1)");
+
+	if (td.doneTasks >= td.totalTasks)
+		MT_TaskDone(NULL);	/* Already finished */
+
+#if USE_GTK
+	GTKSuspendInput();
+#endif
 
 	multi_debug("while waiting for all tasks");
     while (!WaitForAllTasks(polltime))
@@ -560,14 +567,16 @@ int MT_WaitForTasks(void (*pCallback)(void), int callbackTime)
 #if USE_GTK
 		else
 		{
-			GTKSuspendInput();
 			while(gtk_events_pending())
 				gtk_main_iteration();
-			GTKResumeInput();
 		}
 #endif
     }
 	multi_debug("done while waiting for all tasks");
+
+#if USE_GTK
+	GTKResumeInput();
+#endif
 
     return td.result;
 }
