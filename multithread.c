@@ -547,8 +547,10 @@ int MT_WaitForTasks(void (*pCallback)(void), int callbackTime)
     Mutex_Release(td.queueLock);
     multi_debug("wait for tasks: release(1)");
 
+#ifdef GLIB_THREADS
 	if (td.doneTasks >= td.totalTasks)
 		MT_TaskDone(NULL);	/* Already finished */
+#endif
 
 #if USE_GTK
 	GTKSuspendInput();
