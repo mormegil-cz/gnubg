@@ -844,7 +844,7 @@ extern void BearoffClose(bearoffcontext * pbc)
 	if (pbc->szFilename)
 		g_free(pbc->szFilename);
 
-	free(pbc);
+	g_free(pbc);
 }
 
 static void ReadIntoMemory ( bearoffcontext *pbc )
