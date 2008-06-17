@@ -1,3 +1,7 @@
+Tue Jun 17 16:34:17 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* bearoff.c: be more silent when db files are missing
+
 Tue Jun 17 16:31:10 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtktoolbar.c, xpm/Makefile.am, xpm/gnubg-big.xpm,

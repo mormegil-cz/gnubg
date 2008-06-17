@@ -929,6 +929,7 @@ extern bearoffcontext *BearoffInit(const char *szFilename, const int bo, void (*
 
 	if (!g_file_test(szFilename, G_FILE_TEST_IS_REGULAR)) {
 		/* fail silently */
+		errno = 0;
 		goto invaliddb;
 	}
 
