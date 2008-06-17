@@ -1,3 +1,12 @@
+Tue Jun 17 16:31:10 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtktoolbar.c, xpm/Makefile.am, xpm/gnubg-big.xpm,
+	xpm/stock_edit.xpm, xpm/stock_new.xpm, xpm/stock_open.xpm,
+	xpm/stock_save.xpm, xpm/stock_undo.xpm, xpm/tb_double.xpm,
+	xpm/tb_edit.xpm, xpm/tb_no.xpm, xpm/tb_roll.xpm, xpm/tb_stop.xpm,
+	xpm/tb_undo.xpm, xpm/tb_yes.xpm: use gtk stock icons where directly
+	applicable
+
 Fri Jun 13 13:04:19 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* bearoff.c, bearoff.h, eval.c, configure.in: always mmap datase files
