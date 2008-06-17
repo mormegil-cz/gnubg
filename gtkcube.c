@@ -756,7 +756,7 @@ static void EvalCube ( cubehintdata *pchd, evalcontext *pec )
 	dd.pci = &ci;
 	dd.pec = pec;
 	dd.pes = NULL;
-	if (RunAsyncProcess(asyncCubeDecisionE, &dd, _("Considering cube action...")) != 0)
+	if (RunAsyncProcess((AsyncFun)asyncCubeDecisionE, &dd, _("Considering cube action...")) != 0)
 		return;
 
   /* save evaluation */

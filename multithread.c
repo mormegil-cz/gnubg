@@ -98,16 +98,6 @@ static void TLSSetValue(TLSItem pItem, int value)
 
 #define TLSGet(item) *((int*)g_private_get(item))
 
-static void InitEvent(Event *pEvent)
-{
-    *pEvent = g_cond_new();
-}
-
-static void FreeEvent(Event event)
-{
-    g_cond_free(event);
-}
-
 static void InitManualEvent(ManualEvent *pME)
 {
     ManualEvent pNewME = malloc(sizeof(*pNewME));
@@ -199,18 +189,6 @@ static void TLSSetValue(TLSItem pItem, int value)
 }
 
 #define TLSGet(item) *((int*)TlsGetValue(item))
-
-static void InitEvent(Event *pEvent)
-{
-    *pEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	if (*pEvent == NULL)
-		PrintSystemError("creating event");
-}
-
-static void FreeEvent(Event event)
-{
-    CloseHandle(event);
-}
 
 static void InitManualEvent(ManualEvent *pME)
 {
