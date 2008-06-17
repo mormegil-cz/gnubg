@@ -602,7 +602,7 @@ PlyClicked( GtkWidget *pw, theorywidget *ptw ) {
   dd.pci = &ci;
   dd.pec = &ec;
 
-  if (RunAsyncProcess((AsyncFun)asyncGammonRates, &dd, _("Evaluating gammon percentages")) != ASR_OK)
+  if (RunAsyncProcess((AsyncFun)asyncGammonRates, &dd, _("Evaluating gammon percentages")) != 0)
   {
     fInterrupt = FALSE;
 	return;

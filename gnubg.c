@@ -3089,7 +3089,7 @@ extern void CommandEval( char *sz )
 	dd.pci = &ci;
 	dd.szOutput = szOutput;
 	dd.n = n;
-	if (RunAsyncProcess((AsyncFun)asyncDumpDecision, &dd, _("Evaluating position...")) == ASR_OK)
+	if (RunAsyncProcess((AsyncFun)asyncDumpDecision, &dd, _("Evaluating position...")) == 0)
 	{
 #if USE_GTK
 	if( fX )
@@ -3478,7 +3478,7 @@ static void HintCube( void )
 			dd.pci = &ci;
 			dd.pec = &esEvalCube.ec;
 			dd.pes = NULL;
-			if (RunAsyncProcess((AsyncFun)asyncCubeDecisionE, &dd, _("Considering cube action...")) != ASR_OK)
+			if (RunAsyncProcess((AsyncFun)asyncCubeDecisionE, &dd, _("Considering cube action...")) != 0)
 				return;
 
 			UpdateStoredCube(dd.aarOutput, dd.aarStdDev, &esEvalCube, &ms);
@@ -3513,7 +3513,7 @@ static void HintResigned( void )
   dd.pboard = msBoard();
   dd.pci = &ci;
   dd.pec = &esEvalCube.ec;
-  if (RunAsyncProcess((AsyncFun)asyncMoveDecisionE, &dd, _("Considering resignation...")) != ASR_OK)
+  if (RunAsyncProcess((AsyncFun)asyncMoveDecisionE, &dd, _("Considering resignation...")) != 0)
 	return;
   
   getResignEquities ( dd.aarOutput[0], &ci, ms.fResigned, 
@@ -3570,7 +3570,7 @@ static void HintTake( void )
 	dd.pci = &ci;
 	dd.pec = &esEvalCube.ec;
 	dd.pes = &esEvalCube;
-	if (RunAsyncProcess((AsyncFun)asyncCubeDecisionE, &dd, _("Considering cube action...")) != ASR_OK)
+	if (RunAsyncProcess((AsyncFun)asyncCubeDecisionE, &dd, _("Considering cube action...")) != 0)
 		return;
 
 	FindCubeDecision ( arDouble,  dd.aarOutput, dd.pci );
@@ -3659,7 +3659,7 @@ static void HintChequer( char *sz )
 	  fd.pci = &ci;
 	  fd.pec = &esEvalChequer.ec;
 	  fd.aamf = aamfEval;
-	  if ((RunAsyncProcess((AsyncFun)asyncFindMove, &fd, _("Considering move...")) != ASR_OK) || fInterrupt)
+	  if ((RunAsyncProcess((AsyncFun)asyncFindMove, &fd, _("Considering move...")) != 0) || fInterrupt)
 		return;
 	
     UpdateStoredMoves ( &ml, &ms );
@@ -7089,89 +7089,71 @@ char *SetupLanguage (const char *newLangCode)
 }
 #endif
 
-int asyncFindMove(findData *pfd)
+void asyncFindMove(findData *pfd)
 {
 	if( FindnSaveBestMoves( pfd->pml, ms.anDice[ 0 ], ms.anDice[ 1 ], pfd->pboard,
 				pfd->auchMove, pfd->rThr, pfd->pci, pfd->pec, pfd->aamf) < 0)
-		return ASR_FAILED;
-
-	return ASR_OK;
+		MT_SetResultFailed();
 }
 
-int asyncDumpDecision(decisionData *pdd)
+void asyncDumpDecision(decisionData *pdd)
 {
 	if (DumpPosition( pdd->pboard, pdd->szOutput, pdd->pec, pdd->pci,
                        fOutputMWC, fOutputWinPC, pdd->n, MatchIDFromMatchState( &ms ) ) != 0 )
-		return ASR_FAILED;
-
-	return ASR_OK;
+		MT_SetResultFailed();
 }
 
-int asyncScoreMove(scoreData *psd)
+void asyncScoreMove(scoreData *psd)
 {
     if ( ScoreMove (NULL, psd->pm, psd->pci, psd->pec, psd->pec->nPlies ) < 0 )
-		return ASR_FAILED;
-
-	return ASR_OK;
+		MT_SetResultFailed();
 }
 
-int asyncEvalRoll(decisionData *pdd)
+void asyncEvalRoll(decisionData *pdd)
 {
 	EvaluateRoll (pdd->aarOutput[0], ms.anDice[0], ms.anDice[1], pdd->pboard, pdd->pci, pdd->pec );
-	return ASR_OK;
 }
 
-int asyncAnalyzeMove(moveData *pmd)
+void asyncAnalyzeMove(moveData *pmd)
 {
     if (AnalyzeMove ( pmd->pmr, pmd->pms, plGame, NULL, pmd->pesChequer, pmd->pesCube, pmd->aamf, NULL, NULL ) < 0 )
-		return ASR_FAILED;
-
-	return ASR_OK;
+		MT_SetResultFailed();
 }
 
-int asyncGammonRates(decisionData *pdd)
+void asyncGammonRates(decisionData *pdd)
 {
 	if ( getCurrentGammonRates ( pdd->aarRates, pdd->aarOutput[0], pdd->pboard, pdd->pci, pdd->pec ) < 0 )
-		return ASR_FAILED;
-
-	return ASR_OK;
+		MT_SetResultFailed();
 }
 
-int asyncMoveDecisionE(decisionData *pdd)
+void asyncMoveDecisionE(decisionData *pdd)
 {
 	if ( GeneralEvaluationE ( pdd->aarOutput[0], pdd->pboard, pdd->pci, pdd->pec) < 0 )
-		return ASR_FAILED;
-
-	return ASR_OK;
+		MT_SetResultFailed();
 }
 
-int asyncCubeDecisionE(decisionData *pdd)
+void asyncCubeDecisionE(decisionData *pdd)
 {
 	if ( GeneralCubeDecisionE ( pdd->aarOutput, pdd->pboard, pdd->pci, pdd->pec, pdd->pes ) < 0 )
-		return ASR_FAILED;
-
-	return ASR_OK;
+		MT_SetResultFailed();
 }
 
-int asyncCubeDecision(decisionData *pdd)
+void asyncCubeDecision(decisionData *pdd)
 {
 	if ( GeneralCubeDecision( pdd->aarOutput, pdd->aarStdDev, pdd->aarsStatistics,
 			pdd->pboard, pdd->pci, pdd->pes, NULL, NULL ) < 0 )
-		return ASR_FAILED;
-
-	return ASR_OK;
+		MT_SetResultFailed();
 }
 
 extern int RunAsyncProcess(AsyncFun fn, void *data, const char *msg)
 {
 	int ret;
 #if USE_MULTITHREAD
-	AsyncTask *pt = (AsyncTask*)malloc(sizeof(AsyncTask));
-	pt->task.type = TT_ASYNCTASK;
-	pt->task.pLinkedTask = NULL;
+	Task *pt = (Task*)malloc(sizeof(Task));
+	pt->pLinkedTask = NULL;
 	pt->fun = fn;
 	pt->data = data;
-	MT_AddTask((Task*)pt, FALSE);
+	MT_AddTask(pt, FALSE);
 #endif
 
 	ProgressStart(msg);

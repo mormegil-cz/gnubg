@@ -44,7 +44,7 @@
 randctx rc;
 double timeTaken;
 
-extern void RunEvals(void)
+extern void RunEvals(void *unused)
 {
 	int aanBoard[ EVALS_PER_ITERATION ][ 2 ][ 25 ];
     int i, j, k;
@@ -144,11 +144,11 @@ extern void CommandCalibrate( char *sz )
 			break;
 
 #if USE_MULTITHREAD
-		mt_add_tasks(MT_GetNumThreads(), TT_RUNCALIBRATIONEVALS, NULL);
+		mt_add_tasks(MT_GetNumThreads(), RunEvals, NULL, NULL);
 		MT_WaitForTasks(NULL, 0);
 		iIter += MT_GetNumThreads();
 #else
-		RunEvals();
+		RunEvals(NULL);
 		iIter++;
 #endif
 

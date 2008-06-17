@@ -230,7 +230,7 @@ EvalMoves ( hintdata *phd, evalcontext *pec )
 		sd.pci = &ci;
 		sd.pec = pec;
 
-		if (RunAsyncProcess((AsyncFun)asyncScoreMove, &sd, _("Evaluating positions...")) != ASR_OK)
+		if (RunAsyncProcess((AsyncFun)asyncScoreMove, &sd, _("Evaluating positions...")) != 0)
 		{
 			MoveListFreeSelectionList(plSelList);
 			return;

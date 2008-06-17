@@ -973,7 +973,7 @@ int ro_fInvert;
 int ro_NextTrail;
 unsigned int *altGameCount;
 
-extern void RolloutLoopMT(void)
+extern void RolloutLoopMT(void *unused)
 {
 	TanBoard aanBoardEval;
 	float aar[NUM_ROLLOUT_OUTPUTS];
@@ -1459,7 +1459,7 @@ RolloutGeneral( ConstTanBoard *apBoard,
 	ro_NextTrail = nFirstTrial;
 
 	multi_debug("rollout adding tasks");
-	mt_add_tasks(MT_GetNumThreads(), TT_ROLLOUTLOOP, NULL);
+	mt_add_tasks(MT_GetNumThreads(), RolloutLoopMT, NULL, NULL);
 
 	ro_pfProgress = pfProgress;
 	ro_pUserData = pUserData;

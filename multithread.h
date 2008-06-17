@@ -29,20 +29,12 @@
 
 #define MAX_NUMTHREADS 16
 
-typedef enum _TaskType {TT_ANALYSEMOVE, TT_ROLLOUTLOOP, TT_TEST, TT_RUNCALIBRATIONEVALS, TT_CLOSE, TT_ASYNCTASK} TaskType;
-
 typedef struct _Task
 {
-	TaskType type;
-	struct _Task *pLinkedTask;
-} Task;
-
-typedef struct _AsyncTask
-{
-	Task task;
 	AsyncFun fun;
 	void *data;
-} AsyncTask;
+	struct _Task *pLinkedTask;
+} Task;
 
 typedef struct _AnalyseMoveTask
 {
@@ -60,15 +52,17 @@ extern void MT_Close(void);
 extern void MT_AddTask(Task *pt, gboolean lock);
 extern int MT_WaitForTasks(void (*pCallback)(void), int callbackTime);
 extern void MT_SetNumThreads(unsigned int num);
-extern int MT_Enabled(void);
 extern int MT_GetThreadID(void);
-extern void mt_add_tasks(int num_tasks, TaskType tt, gpointer linked);
+extern void mt_add_tasks(int num_tasks, AsyncFun pFun, void *taskData, gpointer linked);
 extern void MT_Release(void);
 extern int MT_GetDoneTasks(void);
 extern void MT_SyncInit(void);
 extern void MT_SyncStart(void);
 extern double MT_SyncEnd(void);
 extern void MT_Exclusive(void);
+extern void MT_SetResultFailed(void);
+extern void MT_AbortTasks(void);
+
 #ifdef GLIB_THREADS
   #define MT_SafeInc(x) g_atomic_int_add(x, 1)
   #define MT_SafeIncValue(x) (g_atomic_int_exchange_and_add(x, 1) + 1)

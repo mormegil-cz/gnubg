@@ -269,19 +269,18 @@ typedef struct _scoreData
 	const evalcontext *pec;
 } scoreData;
 
-typedef enum _Async_Ret {ASR_OK, ASR_FAILED} Async_Ret;
-typedef int (*AsyncFun)(void *);
+typedef void (*AsyncFun)(void *);
 
-int asyncDumpDecision(decisionData *pdd);
-int asyncFindMove(findData *pfd);
-int asyncScoreMove(scoreData *psd);
-int asyncEvalRoll(decisionData *pcdd);
-int asyncAnalyzeMove(moveData *pmd);
-int asyncGammonRates(decisionData *pcdd);
-int asyncMoveDecisionE(decisionData *pcdd);
-int asyncCubeDecisionE(decisionData *pcdd);
-int asyncCubeDecision(decisionData *pcdd);
-int RunAsyncProcess(int (*fn)(void *), void *data, const char *msg);
+void asyncDumpDecision(decisionData *pdd);
+void asyncFindMove(findData *pfd);
+void asyncScoreMove(scoreData *psd);
+void asyncEvalRoll(decisionData *pcdd);
+void asyncAnalyzeMove(moveData *pmd);
+void asyncGammonRates(decisionData *pcdd);
+void asyncMoveDecisionE(decisionData *pcdd);
+void asyncCubeDecisionE(decisionData *pcdd);
+void asyncCubeDecision(decisionData *pcdd);
+int RunAsyncProcess(AsyncFun fun, void *data, const char *msg);
 
 /* There is a global storedmoves struct to maintain the list of moves
    for "=n" notation (e.g. "hint", "rollout =1 =2 =4").

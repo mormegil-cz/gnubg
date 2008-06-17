@@ -150,5 +150,5 @@ extern int
 ScoreMoveGeneral ( move *pm, const cubeinfo* pci, const evalsetup* pes,
                    rolloutprogressfunc* pfRolloutProgress, void* pUserData );
 
-extern void RolloutLoopMT(void);
+extern void RolloutLoopMT(void *unused);
 #endif

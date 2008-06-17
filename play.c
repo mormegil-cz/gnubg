@@ -967,7 +967,7 @@ static int ComputerTurn( void ) {
 	  dd.pboard = msBoard();
 	  dd.pci = &ci;
 	  dd.pes = &ap[ms.fTurn].esCube;
-	  if (RunAsyncProcess((AsyncFun)asyncCubeDecision, &dd, _("Considering cube action...")) != ASR_OK)
+	  if (RunAsyncProcess((AsyncFun)asyncCubeDecision, &dd, _("Considering cube action...")) != 0)
 		  return -1;
 
       UpdateStoredCube( dd.aarOutput, dd.aarStdDev, &ap[ ms.fTurn ].esCube, &ms );
@@ -1177,7 +1177,7 @@ static int ComputerTurn( void ) {
 		  dd.pboard = msBoard();
 		  dd.pci = &ci;
 		  dd.pes = &ap[ms.fTurn].esCube;
-		  if (RunAsyncProcess((AsyncFun)asyncCubeDecision, &dd, _("Considering cube action...")) != ASR_OK)
+		  if (RunAsyncProcess((AsyncFun)asyncCubeDecision, &dd, _("Considering cube action...")) != 0)
 			return -1;
 
           UpdateStoredCube( dd.aarOutput, dd.aarStdDev, &ap[ ms.fTurn ].esCube, &ms );
@@ -1286,7 +1286,7 @@ static int ComputerTurn( void ) {
 	  fd.pci = &ci;
 	  fd.pec = &ap[ ms.fTurn ].esChequer.ec;
 	  fd.aamf = ap[ ms.fTurn ].aamf;
-	  if ((RunAsyncProcess((AsyncFun)asyncFindMove, &fd, _("Considering move...")) != ASR_OK) || fInterrupt)
+	  if ((RunAsyncProcess((AsyncFun)asyncFindMove, &fd, _("Considering move...")) != 0) || fInterrupt)
 	  {
 		  free( pmr );
 		  return -1;
@@ -2165,7 +2165,7 @@ static skilltype GoodDouble (int fisRedouble, moverecord *pmr )
   dd.pboard = msBoard();
   dd.pci = &ci;
 
-  if (RunAsyncProcess((AsyncFun)asyncCubeDecisionE, &dd, _("Considering cube action...")) != ASR_OK)
+  if (RunAsyncProcess((AsyncFun)asyncCubeDecisionE, &dd, _("Considering cube action...")) != 0)
   {
 	fAnalyseCube = fAnalyseCubeSave;
 	return (SKILL_NONE);
@@ -2347,7 +2347,7 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr)
 
 	dd.pboard = msBoard();
 	dd.pci = &ci;
-	if (RunAsyncProcess((AsyncFun)asyncCubeDecisionE, &dd, _("Considering cube action...")) != ASR_OK)
+	if (RunAsyncProcess((AsyncFun)asyncCubeDecisionE, &dd, _("Considering cube action...")) != 0)
 	{
 		fAnalyseCube = fAnalyseCubeSave;
 		return (SKILL_NONE);
@@ -2608,7 +2608,7 @@ static skilltype GoodMove (moverecord *pmr)
   md.pesChequer = pesChequer;
   md.pesCube = pesChequer;
   md.aamf = fTutorAnalysis ? aamfAnalysis : aamfEval;
-  if (RunAsyncProcess((AsyncFun)asyncAnalyzeMove, &md, _("Considering move...")) != ASR_OK)
+  if (RunAsyncProcess((AsyncFun)asyncAnalyzeMove, &md, _("Considering move...")) != 0)
   {
     fAnalyseMove = fAnalyseMoveSaved;
     return SKILL_NONE;
@@ -3710,7 +3710,7 @@ static skilltype ShouldDouble ( void ) {
 
 	dd.pboard = msBoard();
 	dd.pci = &ci;
-	if (RunAsyncProcess((AsyncFun)asyncCubeDecisionE, &dd, _("Considering cube action...")) != ASR_OK)
+	if (RunAsyncProcess((AsyncFun)asyncCubeDecisionE, &dd, _("Considering cube action...")) != 0)
 	{
 		fAnalyseCube = fAnalyseCubeSave;
 		return (SKILL_NONE);

@@ -1359,8 +1359,6 @@ static GtkWidget *OptionsPages( optionswidget *pow )
     gtk_tooltips_set_tip (ptt, pwev,
 			  _("The number of threads to use in multi-threaded operations,"
 			  " this should be set to the number of logical processing units avaliable"), NULL );
-
-	gtk_widget_set_sensitive(pw, MT_Enabled());
 #endif
     /* return notebook */
 

@@ -986,6 +986,23 @@ static void UpdateProgressBar(void)
 	ProgressValue(progress_offset + MT_GetDoneTasks());
 }
 
+int AnalyseMoveMT(Task *task)
+{
+	AnalyseMoveTask *amt = (AnalyseMoveTask *)task;
+    float doubleError;
+    if (AnalyzeMove(amt->pmr, &amt->ms, amt->plGame, amt->psc,
+                &esAnalysisChequer, &esAnalysisCube, aamfAnalysis,
+                afAnalysePlayers, &doubleError ) < 0 )
+    {
+        MT_AbortTasks();
+    }
+    if (task->pLinkedTask)
+    {    /* Need to analyze take/drop decision in sequence */
+        AnalyseMoveMT(task->pLinkedTask);
+    }
+	return 0;
+}
+
 static int AnalyzeGame ( listOLD *plGame )
 {
 	int result;
@@ -1014,7 +1031,8 @@ static int AnalyzeGame ( listOLD *plGame )
 		if (!pParentTask)
 			pt = (AnalyseMoveTask*)malloc(sizeof(AnalyseMoveTask));
 
-		pt->task.type = TT_ANALYSEMOVE;
+		pt->task.fun = AnalyseMoveMT;
+		pt->task.data = pt;
 		pt->task.pLinkedTask = NULL;
 		pt->pmr = pmr;
 		pt->plGame = plGame;
