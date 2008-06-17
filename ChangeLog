@@ -1,3 +1,7 @@
+Tue Jun 17 21:13:03 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtktoolbar.c: fix icon sizes
+
 Tue Jun 17 16:34:17 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* bearoff.c: be more silent when db files are missing
