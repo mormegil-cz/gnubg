@@ -7161,7 +7161,9 @@ extern int RunAsyncProcess(AsyncFun fn, void *data, const char *msg)
 #if USE_MULTITHREAD
 	ret = MT_WaitForTasks(Progress, 100);
 #else
-	ret = fn(data);	/* Just call function in single threaded build */
+	asyncRet = 0;
+	fn(data);	/* Just call function in single threaded build */
+	ret = asyncRet;
 #endif
 
 	ProgressEnd();

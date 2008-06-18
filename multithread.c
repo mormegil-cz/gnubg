@@ -582,6 +582,5 @@ extern double MT_SyncEnd(void)
 }
 
 #else
-/* Avoid no code warning */
-extern int dummy;
+int asyncRet;
 #endif

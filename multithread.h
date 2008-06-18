@@ -80,6 +80,8 @@ extern void MT_AbortTasks(void);
 #endif
 
 #else /*USE_MULTITHREAD*/
+extern int asyncRet;
+#define MT_SetResultFailed() asyncRet = -1
 #define MT_SafeInc(x) (++(*x))
 #define MT_SafeIncValue(x) (++(*x))
 #define MT_SafeIncCheck(x) ((*x)++)
