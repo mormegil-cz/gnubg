@@ -70,6 +70,7 @@ gnubg_SOURCES = \
 		matchid.h \
 		mec.c \
 		mec.h \
+		multithread.c \
 		multithread.h \
 		openurl.c \
 		openurl.h \
@@ -107,10 +108,6 @@ gnubg_SOURCES = \
 		timer.c \
 		util.h \
 		util.c 
-
-if USE_MULTITHREAD
-gnubg_SOURCES +=  multithread.c
-endif
 
 if USE_GTK
 gnubg_SOURCES += gtkboard.c gtkboard.h gtkgame.c gtkgame.h gtkfile.c gtkfile.h \

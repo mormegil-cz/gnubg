@@ -3666,7 +3666,7 @@ static void gnubg_set_default_icon(void)
 	GList *icons = NULL;
 	GdkPixbuf *icon = NULL;
 	char *ip;
-	int i;
+	guint i;
 	struct {
 		const char *dir;
 		const char *fn;

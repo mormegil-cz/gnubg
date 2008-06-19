@@ -1,3 +1,9 @@
+Thu Jun 19 21:54:55 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am: add multithread.c to non-threaded build
+	* gtkgame.c: signed/unsigned compiler warning
+	* bearoff.c: signed/unsigned compiler warning (fread returns size_t)
+
 Mon Mar 17 21:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* multithread.c + others: Simplify multithreaded code a little bit

@@ -278,7 +278,7 @@ static void ReadBearoffFile(const bearoffcontext *pbc, unsigned int offset, unsi
 	MT_Exclusive();
 #endif
 
-	if ((fseek(pbc->pf, (long)offset, SEEK_SET ) < 0) || (fread(buf, 1, nBytes, pbc->pf ) < (int)nBytes))
+	if ((fseek(pbc->pf, (long)offset, SEEK_SET ) < 0) || (fread(buf, 1, nBytes, pbc->pf ) < nBytes))
 	{
 		if (errno)
 			perror("OS bearoff database");
