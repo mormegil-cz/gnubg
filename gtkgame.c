@@ -82,6 +82,7 @@
 #if USE_BOARD3D
 #include "fun3d.h"
 #endif
+#include "gnubgstock.h"
 
 #define KEY_ESCAPE -229
 
@@ -3387,12 +3388,11 @@ GtkItemFactoryEntry aife[] = {
 	{ N_("/_Game/_Roll"), "<control>R", Command, CMD_ROLL, NULL, NULL },
 	{ N_("/_Game/_Finish move"), "<control>F", FinishMove, 0, NULL, NULL },
 	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>", NULL },
-	{ N_("/_Game/_Double"), "<control>D", Command, CMD_DOUBLE, NULL,
-		NULL },
+	{ N_("/_Game/_Double"), "<control>D", Command, CMD_DOUBLE, "<StockItem>", GNUBG_STOCK_DOUBLE },
 	{ N_("/_Game/Re_sign"), NULL, GTKResign, 0, NULL, NULL },
 	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>", NULL },
-	{ N_("/_Game/_Accept"), NULL, Command, CMD_ACCEPT, "<StockItem>", GTK_STOCK_OK },
-	{ N_("/_Game/Re_ject"), NULL, Command, CMD_REJECT, "<StockItem>", GTK_STOCK_CANCEL },
+	{ N_("/_Game/_Accept"), NULL, Command, CMD_ACCEPT, "<StockItem>", GNUBG_STOCK_ACCEPT },
+	{ N_("/_Game/Re_ject"), NULL, Command, CMD_REJECT, "<StockItem>", GNUBG_STOCK_REJECT },
 	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ N_("/_Game/Play computer turn"), NULL, Command, CMD_PLAY, NULL,
 		NULL },
@@ -3410,7 +3410,7 @@ GtkItemFactoryEntry aife[] = {
 	{ N_("/_Analyse"), NULL, NULL, 0, "<Branch>", NULL },
 	{ N_("/_Analyse/_Evaluate"), "<control>E", Command, CMD_EVAL, NULL, NULL },
 	{ N_("/_Analyse/_Hint"), "<control>H", Command, CMD_HINT,
-		"<StockItem>", GTK_STOCK_DIALOG_INFO},
+		"<StockItem>", GNUBG_STOCK_HINT},
 	{ N_("/_Analyse/_Rollout"), NULL, Command, CMD_ROLLOUT, NULL, NULL },
 	{ N_("/_Analyse/Rollout _cube decision"), 
           NULL, Command, CMD_ROLLOUT_CUBE, NULL, NULL },
@@ -3715,6 +3715,8 @@ extern void InitGTK(int *argc, char ***argv)
 	sz = g_build_filename(szHomeDirectory, "gnubgmenurc", NULL);
 	gtk_accel_map_load(sz);
 	g_free(sz);
+
+	gnubg_stock_init();
 
 #if USE_BOARD3D
 	InitGTK3d(argc, argv);

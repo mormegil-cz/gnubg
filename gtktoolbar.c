@@ -38,6 +38,7 @@
 #include <glib/gi18n.h>
 #include "drawboard.h"
 #include "renderprefs.h"
+#include "gnubgstock.h"
 #if USE_BOARD3D
 #include "fun3d.h"
 #endif
@@ -49,7 +50,7 @@ typedef struct _toolbarwidget {
   GtkWidget *pwNew;        /* button for "New" */
   GtkWidget *pwOpen;       /* button for "Open" */
   GtkWidget *pwSave;     /* button for "Double" */
-  GtkWidget *pwRedouble;   /* button for "Redouble" */
+  GtkWidget *pwDouble;
   GtkWidget *pwTake;       /* button for "Take" */
   GtkWidget *pwDrop;       /* button for "Drop" */
   GtkWidget *pwResign;       /* button for "Play" */
@@ -254,9 +255,8 @@ ToolbarUpdate ( GtkWidget *pwToolbar,
                              c == C_TAKEDROP || c == C_AGREEDECLINE );
   gtk_widget_set_sensitive ( ptw->pwDrop,
                              c == C_TAKEDROP || c == C_AGREEDECLINE );
-  /* FIXME: max beavers etc */
-  gtk_widget_set_sensitive ( ptw->pwRedouble,
-                             c == C_TAKEDROP && ! pms->nMatchTo );
+  gtk_widget_set_sensitive ( ptw->pwDouble,
+                             (c == C_TAKEDROP && ! pms->nMatchTo) || c == C_ROLLDOUBLE );
 
   gtk_widget_set_sensitive ( ptw->pwSave,  plGame != NULL );
   gtk_widget_set_sensitive ( ptw->pwResign, fPlaying  && !fEdit);
@@ -283,13 +283,9 @@ ToolbarNew ( void ) {
 
   toolbarwidget *ptw;
 
-#include "xpm/beaver.xpm"
 #include "xpm/tb_anticlockwise.xpm"
 #include "xpm/tb_clockwise.xpm"
 #include "xpm/resign.xpm"
-#include "xpm/hint_alt.xpm"
-#include "xpm/stock_ok.xpm"
-#include "xpm/stock_cancel.xpm"
     
   /* 
    * Create tool bar 
@@ -342,22 +338,12 @@ ToolbarNew ( void ) {
   gtk_toolbar_append_space(GTK_TOOLBAR(pwToolbar));
 
   /* Take/accept button */
-  TB_BUTTON_ADD(ptw->pwTake, stock_ok_xpm, _("Accept"), ButtonClickedYesNo,
-		  "yes", 
-                  _("Take the offered cube or accept the offered resignation"),
-		  NULL) ;
-  
+	ptw->pwTake = gtk_toolbar_insert_stock(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_ACCEPT, _("Take the offered cube or accept the offered resignation"), NULL, G_CALLBACK(ButtonClickedYesNo), "yes", -1);
   /* drop button */
-  TB_BUTTON_ADD(ptw->pwDrop, stock_cancel_xpm, _("Decline"), ButtonClickedYesNo,
-		  "no", 
-                  _("Drop the offered cube or decline the offered resignation"),
-		  NULL) ;
+	ptw->pwDrop = gtk_toolbar_insert_stock(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_REJECT, _("Drop the offered cube or decline the offered resignation"), NULL, G_CALLBACK(ButtonClickedYesNo), "no", -1);
 
-  /* Redouble button */
-  TB_BUTTON_ADD(ptw->pwRedouble, beaver_xpm, _("Beaver"), ButtonClicked,
-		  "redouble", 
-                  _("Redouble immediately (beaver)"),
-		  NULL) ;
+  /* Double button */
+	ptw->pwDouble = gtk_toolbar_insert_stock(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_DOUBLE, _("Double or redouble(beaver)"), NULL, G_CALLBACK(ButtonClicked), "double", -1);
   
   /* Resign button */
   TB_BUTTON_ADD(ptw->pwResign, resign_xpm, _("Resign"), GTKResign,
@@ -377,10 +363,7 @@ ToolbarNew ( void ) {
   gtk_button_set_relief( GTK_BUTTON(ptw -> pwReset), GTK_RELIEF_NONE);
 
   /* Hint button */
-  TB_BUTTON_ADD(ptw->pwHint, hint_alt_xpm, _("Hint"), ButtonClicked,
-		  "hint", 
-                  _("Show the best moves or cube action"),
-		  NULL) ;
+  ptw->pwHint = gtk_toolbar_insert_stock(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_HINT, _("Show the best moves or cube action"), NULL, G_CALLBACK(ButtonClicked), "hint", -1);
 
   /* edit button */
   ptw->pwEdit = gtk_toggle_button_new();

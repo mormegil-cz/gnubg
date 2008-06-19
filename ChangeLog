@@ -1,3 +1,18 @@
+Thu Jun 19 22:00:38 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* ChangeLog, Makefile.am, configure.in, gnubgstock.c, gnubgstock.h,
+	gtkgame.c, gtktoolbar.c, pixmaps/.cvsignore, pixmaps/Makefile.am,
+	pixmaps/gnubg-stock-pixbufs.h, pixmaps/16x16/actions/cancel_16.png,
+	pixmaps/16x16/actions/double_16.png,
+	pixmaps/16x16/actions/hint_16.png, pixmaps/16x16/actions/ok_16.png,
+	pixmaps/24x24/actions/cancel_24.png,
+	pixmaps/24x24/actions/double_24.png,
+	pixmaps/24x24/actions/hint_16.png, pixmaps/24x24/actions/hint_24.png,
+	pixmaps/24x24/actions/ok_24.png, xpm/beaver.xpm, xpm/hint_alt.xpm,
+	xpm/stock_cancel.xpm, xpm/stock_ok.xpm: Make stock icons for double,
+	hint, cancel, accept and reject actions. Remove beaver button and add
+	general purpose double button instead.
+
 Thu Jun 19 21:54:55 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am: add multithread.c to non-threaded build
