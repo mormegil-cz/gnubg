@@ -988,17 +988,20 @@ static void UpdateProgressBar(void)
 
 void AnalyseMoveMT(Task *task)
 {
-	AnalyseMoveTask *amt = (AnalyseMoveTask *)task;
+	AnalyseMoveTask *amt;
     float doubleError;
+
+analyzeDouble:
+	amt = (AnalyseMoveTask *)task;
     if (AnalyzeMove(amt->pmr, &amt->ms, amt->plGame, amt->psc,
                 &esAnalysisChequer, &esAnalysisCube, aamfAnalysis,
                 afAnalysePlayers, &doubleError ) < 0 )
-    {
         MT_AbortTasks();
-    }
-    if (task->pLinkedTask)
+
+	if (task->pLinkedTask)
     {    /* Need to analyze take/drop decision in sequence */
-        AnalyseMoveMT(task->pLinkedTask);
+		task = task->pLinkedTask;
+		goto analyzeDouble;
     }
 }
 
