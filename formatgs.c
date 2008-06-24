@@ -600,7 +600,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
       
           for ( j = 0; j < 2; ++j ) 
 	  {
-		  float ci = 1.95996f * sqrt( af[ i ][ 1 ][ j ] / psc->nGames );
+		  float ci = 1.95996f * sqrtf( af[ i ][ 1 ][ j ] / psc->nGames );
 		  float max = af[i][0][j]+ci;
 		  float min = af[i][0][j]-ci;
 		  aasz[ j + 1 ] = g_strdup_printf( "%*.*f - %*.*f",
