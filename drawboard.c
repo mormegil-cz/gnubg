@@ -30,7 +30,7 @@
 
 #include "drawboard.h"
 #include "positionid.h"
-#include <glib/gi18n.h>
+#include "gnubgi18n.h"
 
 int fClockwise = FALSE; /* Player 1 moves clockwise */
 
@@ -69,9 +69,7 @@ static char *DrawBoardStd( char *sz, const TanBoard anBoard, int fRoll,
         cOffX -= anBoard[ 1 ][ x ];
     }
     
-    strcpy( pch, _ (" GNU Backgammon  Position ID: ") );
-
-    pch = strchr ( pch, 0 );
+	pch += sprintf(pch, " %-15s %s: ", _("GNU Backgammon"), _("Position ID"));
 
     if( fRoll )
         strcpy( pch, PositionID( (ConstTanBoard)anBoard ) );
@@ -90,8 +88,7 @@ static char *DrawBoardStd( char *sz, const TanBoard anBoard, int fRoll,
     /* match id */
 
     if ( szMatchID && *szMatchID ) {
-      sprintf ( pch, _("                 Match ID   : %s\n"), szMatchID );
-      pch = strchr ( pch, 0 );
+      pch += sprintf(pch, "                 %s   : %s\n", _("Match ID"), szMatchID);
     }
             
     strcpy( pch, fRoll ? " +13-14-15-16-17-18------19-20-21-22-23-24-+     " :
@@ -175,7 +172,7 @@ static char *DrawBoardStd( char *sz, const TanBoard anBoard, int fRoll,
     *pch++ = '\n';
     
     *pch++ = fRoll ? 'v' : '^';
-    strcpy( pch, _("|                  |BAR|                  |     ") );
+    strcpy( pch, "|                  |BAR|                  |     " );
     pch = strchr ( pch, 0 );
     
     if( asz[ 3 ] )
@@ -304,9 +301,7 @@ static char *DrawBoardCls( char *sz, const TanBoard anBoard, int fRoll,
         cOffX -= anBoard[ 1 ][ x ];
     }
     
-    strcpy( pch, _("    GNU Backgammon  Position ID: ") );
-
-    pch = strchr ( pch, 0 );
+	pch += sprintf(pch, "%18s  %s: ", _("GNU Backgammon"), _("Position ID"));
 
     if( fRoll )
         strcpy( pch, PositionID( (ConstTanBoard)anBoard ) );
@@ -325,8 +320,7 @@ static char *DrawBoardCls( char *sz, const TanBoard anBoard, int fRoll,
     /* match id */
 
     if ( szMatchID && *szMatchID ) {
-      sprintf ( pch, _("                    Match ID   : %s\n"), szMatchID );
-      pch = strchr ( pch, 0 );
+      pch += sprintf(pch, "                    %s   : %s\n", _("Match ID"), szMatchID);
     }
             
     strcpy( pch, fRoll ? "    +24-23-22-21-20-19------18-17-16-15-14-13-+  " :
@@ -410,7 +404,7 @@ static char *DrawBoardCls( char *sz, const TanBoard anBoard, int fRoll,
 
     *pch++ = '\n';
     
-    strcpy( pch, _("    |                  |BAR|                  |") );
+    strcpy( pch, "    |                  |BAR|                  |" );
     pch = strchr ( pch, 0 );
     *pch++ = fRoll ? 'v' : '^';
     *pch++ = ' ';   

@@ -404,11 +404,8 @@ AddSoundWidgets (GtkWidget * container)
 
 static GtkWidget *OptionsPages( optionswidget *pow )
 {
-    static char *aszRNG[] = {
-	N_("ANSI"), N_("Blum, Blum and Shub"), N_("BSD"), N_("ISAAC"),
-	N_("MD5"), N_("Mersenne Twister"), N_("random.org"), N_("User"), 
-        N_("File"), NULL
-    }, *aszRNGTip[] = {
+    char *aszRNGTip[] = {
+		NULL,	/* Manual setting */
 	N_("The rand() generator specified by ANSI C (typically linear "
 	   "congruential)"),
 	N_("Blum, Blum and Shub's verifiably strong generator"),
@@ -449,7 +446,7 @@ static GtkWidget *OptionsPages( optionswidget *pow )
       N_("Play 3-chequer hypergammon (i.e., gammon and backgammons possible)")
     };
 
-    char **ppch, **ppchTip;
+    const char **ppch, **ppchTip;
     GtkWidget *pw, *pwn, *pwp, *pwvbox, *pwhbox, *pwev, *pwf, *pwb,
 	*pwAnimBox, *pwFrame, *pwBox, *pwSpeed, *pwScale, *pwhoriz,
 	*pwLabelFile, *table, *label;
@@ -1106,9 +1103,10 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 
     pow->pwPRNGMenu = gtk_combo_box_new_text();
     gtk_box_pack_start (GTK_BOX (pwhbox), pow->pwPRNGMenu, FALSE, FALSE, 0);
-    for( ppch = aszRNG, ppchTip = aszRNGTip; *ppch; ppch++, ppchTip++ ) {
-		gtk_combo_box_append_text(GTK_COMBO_BOX(pow->pwPRNGMenu), gettext( *ppch));
-		gtk_tooltips_set_tip( ptt, pw, gettext( *ppchTip ), NULL );
+    for( i = 1; i < NUM_RNGS; i++)
+	{
+		gtk_combo_box_append_text(GTK_COMBO_BOX(pow->pwPRNGMenu), gettext( aszRNG[i] ));
+		gtk_tooltips_set_tip( ptt, pw, gettext( aszRNGTip[i] ), NULL );
     }
 
     pow->pwSeed = gtk_hbox_new(FALSE, 0);

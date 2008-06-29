@@ -479,7 +479,7 @@ SettingsMenuActivate ( GtkWidget *pwItem,
 
 
 static void
-ClickButton ( GtkWidget *pw, movefilterwidget *pmfw ) {
+ModifyClickButton ( GtkWidget *pw, movefilterwidget *pmfw ) {
 
   int fOK;
   GtkWidget *pwDialog;
@@ -566,7 +566,7 @@ MoveFilterWidget ( movefilter *pmf, int *pfOK,
 
   
   g_signal_connect( G_OBJECT ( pwButton ), "clicked",
-                       G_CALLBACK ( ClickButton ), pmfw );
+                       G_CALLBACK ( ModifyClickButton ), pmfw );
 
   /* save movefilterwidget */
 

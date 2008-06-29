@@ -44,27 +44,25 @@
 #include "md5.h"
 #include "mt19937ar.h"
 #include "isaac.h"
-#include <glib/gi18n.h>
+#include "gnubgi18n.h"
 #include <glib/gstdio.h>
 
 #if USE_GTK
 #include "gtkgame.h"
 #endif
 
-
 const char *aszRNG[ NUM_RNGS ] = {
-   N_ ("ANSI"),
-   N_ ("Blum, Blum and Shub"),
-   N_ ("BSD"),
-   N_ ("ISAAC"),
-   N_ ("manual"),
-   N_ ("MD5"),
-   N_ ("Mersenne Twister"),
-   N_ ("www.random.org"),
-   N_ ("user supplied"),
-   N_ ("read-from-file")
+   N_("manual dice"),
+   N_("ANSI"),
+   N_("Blum, Blum and Shub"),
+   N_("BSD"),
+   N_("ISAAC"),
+   N_("MD5"),
+   N_("Mersenne Twister"),
+   N_("www.random.org"),
+   N_("user supplied"),
+   N_("read from file")
 };
-
 
 rng rngCurrent = RNG_MERSENNE;
 void *rngctxCurrent = NULL;
@@ -196,8 +194,8 @@ extern int InitRNGBBSFactors( char *sz0, char *sz1, void *x ) {
 	BBSFindGood( p );
 
 	pch = mpz_get_str( NULL, 10, p );
-	g_print( _("%s is an invalid Blum factor; using %s instead.\n"),
-		 sz0, pch );
+	g_print( _("%s is an invalid Blum factor, using %s instead."), sz0, pch );
+	g_print("\n");
 	free( pch );
     }
 	
@@ -208,8 +206,8 @@ extern int InitRNGBBSFactors( char *sz0, char *sz1, void *x ) {
 	    BBSFindGood( q );
 	
 	pch = mpz_get_str( NULL, 10, q );
-	g_print( _("%s is an invalid Blum factor; using %s instead.\n"),
-		 sz1, pch );
+	g_print( _("%s is an invalid Blum factor, using %s instead."), sz1, pch );
+	g_print("\n");
 	free( pch );
     }
 	
@@ -280,11 +278,12 @@ static int BBSCheck( rngcontext *rngctx ) {
              mpz_cmp( rngctx->zSeed, rngctx->zOne ) ) ? 0 : -1;
 }
 
-static int BBSInitialSeedFailure( rngcontext *rngctx ) {
-
-    g_print( _("That is not a valid initial state for the Blum, Blum and Shub "
-	       "generator.\n"
-	       "Please choose a different seed and/or modulus.\n" ) );
+static int BBSInitialSeedFailure( rngcontext *rngctx )
+{
+    g_print(_("Invalid seed and/or modulus for the Blum, Blum and Shub generator."));
+	g_print("\n");
+    g_print(_("Please reset the seed and/or modulus before continuing."));
+	g_print("\n");
     mpz_set( rngctx->zSeed, rngctx->zZero ); /* so that BBSCheck will fail */
     
     return -1;
@@ -333,14 +332,6 @@ static int BBSCheckInitialSeed( rngcontext *rngctx ) {
 }
 #endif
 
-static void
-PrintRNGWarning( void ) {
-
-  g_print( _("WARNING: this number may not be correct if the same \n"
-             "RNG is used for, say, both rollouts and interactive play.\n") );
-
-}
-
 extern void
 PrintRNGCounter( const rng rngx, void *p ) {
 
@@ -350,23 +341,29 @@ PrintRNGCounter( const rng rngx, void *p ) {
     case RNG_ANSI:
     case RNG_BSD:
     case RNG_USER:
-      g_print( _("Number of calls since last seed: %lu.\n"), rngctx->c );
-      PrintRNGWarning();
+      g_print( _("Number of calls since last seed: %lu."), rngctx->c );
+	  g_print("\n");
+	  g_print( _("This number may not be correct if the same "
+             "RNG is used for rollouts and interactive play.") );
+	  g_print("\n");
       break;
 
     case RNG_BBS:
     case RNG_ISAAC:
     case RNG_MD5:
-      g_print( _("Number of calls since last seed: %lu.\n"), rngctx->c );
+      g_print( _("Number of calls since last seed: %lu."), rngctx->c );
+	  g_print("\n");
       
       break;
       
     case RNG_RANDOM_DOT_ORG:
-      g_print( _("Number of dice used in current batch: %lu.\n"), rngctx->c );
+      g_print( _("Number of dice used in current batch: %lu."), rngctx->c );
+	  g_print("\n");
       break;
 
     case RNG_FILE:
-      g_print( _("Number of dice read from current file: %lu.\n"), rngctx->c );
+      g_print( _("Number of dice read from current file: %lu."), rngctx->c );
+	  g_print("\n");
       break;
       
     default:
@@ -384,7 +381,8 @@ PrintRNGSeedMP( mpz_t n ) {
 
   char *pch;
   pch = mpz_get_str( NULL, 10, n );
-  g_print( _("The current seed is %s.\n"), pch );
+  g_print( _("The current seed is") );
+  g_print("% s\n", pch);
   free( pch );
 
 }
@@ -394,7 +392,8 @@ PrintRNGSeedMP( mpz_t n ) {
 static void
 PrintRNGSeedNormal( int n ) {
 
-  g_print( _("The current seed is %d.\n"), n );
+  g_print( _("The current seed is") );
+  g_print( " %d.\n"), n );
 
 }
 #endif /* HAVE_LIBGMP */
@@ -411,11 +410,13 @@ extern void PrintRNGSeed( const rng rngx, void *p ) {
 	char *pch;
 
 	pch = mpz_get_str( NULL, 10, rngctx->zSeed );
-	g_print( _("The current seed is %s, "), pch );
+	g_print( _("The current seed is") );
+	g_print( " %s, ", pch );
 	free( pch );
 	
 	pch = mpz_get_str( NULL, 10, rngctx->zModulus );
-	g_print( _("and the modulus is %s.\n"), pch );
+	g_print( _("and the modulus is %s."), pch );
+	g_print("\n");
 	free( pch );
 	
 	return;
@@ -425,13 +426,15 @@ extern void PrintRNGSeed( const rng rngx, void *p ) {
 #endif
 	
     case RNG_MD5:
-	g_print( _("The current seed is %u.\n"), rngctx->nMD5 );
-	break;
+	g_print( _("The current seed is") );
+	g_print( " %u.\n", rngctx->nMD5 );
+	return;
 
     case RNG_FILE:
-        g_print( _("GNU Backgammon is reading dice from file: %s\n"), 
+        g_print( _("GNU Backgammon is reading dice from file: %s"), 
                  rngctx->szDiceFilename );
-        break;
+		g_print("\n");
+        return;
 	
     case RNG_USER:
 #if HAVE_LIBDL
@@ -439,7 +442,6 @@ extern void PrintRNGSeed( const rng rngx, void *p ) {
 	    (*rngctx->pfUserRNGShowSeed)();
 	    return;
 	}
-
 	break;
 #else
 	abort();
@@ -453,7 +455,6 @@ extern void PrintRNGSeed( const rng rngx, void *p ) {
       PrintRNGSeedNormal( rngctx->n );
 #endif
       return;
-      break;
 
     case RNG_BSD:
     case RNG_ANSI:
@@ -462,16 +463,13 @@ extern void PrintRNGSeed( const rng rngx, void *p ) {
 #else
       PrintRNGSeedNormal( rngctx->n );
 #endif
-      PrintRNGWarning();
       return;
-      break;
 
     default:
 	break;
     }
-
-    g_printerr( _("You cannot show the seed with this random number "
-	       "generator.\n") );
+    g_printerr( _("You cannot show the seed with this random number generator.") );
+	g_printerr("\n");
 }
 
 extern void InitRNGSeed( int n, const rng rngx, void *p ) {
@@ -747,9 +745,7 @@ extern int RollDice( unsigned int anDice[ 2 ], const rng rngx, void *p ) {
     case RNG_BBS:
 #if HAVE_LIBGMP
 	if( BBSCheck( rngctx ) ) {
-	    g_printerr( _( "The Blum, Blum and Shub generator is in an illegal "
-			"state.  Please reset the\n"
-			"seed and/or modulus before continuing.\n" ) );
+		BBSInitialSeedFailure(rngctx);
 	    return -1;
 	}
 	
@@ -985,7 +981,8 @@ uglyloop:
 
     if ( feof(rngctx->fDice) ) {
       /* end of file */
-      g_print( _("Rewinding dice file (%s)\n"), rngctx->szDiceFilename );
+      g_print( _("Rewinding dice file (%s)"), rngctx->szDiceFilename );
+	  g_printf("\n");
       fseek( rngctx->fDice, 0, SEEK_SET );
     }
     else if ( n != 1 ) {

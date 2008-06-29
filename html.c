@@ -145,10 +145,10 @@ const char *aszHTMLExportCSSCommand[ NUM_HTML_EXPORT_CSS ] = {
 /* text for links on html page */
 
 static const char *aszLinkText[] = {
-  N_ ("[First Game]"), 
-  N_ ("[Previous Game]"), 
-  N_ ("[Next Game]"), 
-  N_ ("[Last Game]") };
+  N_("[First Game]"), 
+  N_("[Previous Game]"), 
+  N_("[Next Game]"), 
+  N_("[Last Game]") };
 
 static const char*
 bullet = "&bull; ";

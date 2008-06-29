@@ -48,9 +48,9 @@
 #endif
 
 const char *aszGameResult[] = { 
-  N_ ("single game"), 
-  N_ ("gammon"), 
-  N_ ("backgammon") 
+  N_("single game"), 
+  N_("gammon"), 
+  N_("backgammon") 
 };
 const char *aszSkillType[] = { 
   N_("very bad"), 

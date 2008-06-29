@@ -23,7 +23,7 @@
 #include "backgammon.h"
 
 #include <glib.h>
-#include <glib/gi18n.h>
+#include "gnubgi18n.h"
 #include <string.h>
 
 #include "eval.h"
@@ -119,8 +119,8 @@ OutputEvalContext ( const evalcontext *pec, const int fChequer ) {
   char *pc;
   int i;
   
-  sprintf ( sz, _("%d-ply %s"), 
-            pec->nPlies, 
+  sprintf ( sz, "%d-%s %s", 
+            pec->nPlies, _("ply"),
             ( ! fChequer || pec->fCubeful ) ? _("cubeful") : _("cubeless") );
 
 #if defined( REDUCTION_CODE )
@@ -247,28 +247,25 @@ OutputMoveFilterPly( const char *szIndent,
     if ( szIndent && *szIndent )
       strcat( sz, szIndent );
 
-    if ( pmf->Accept < 0 ) {
-      sprintf( strchr( sz, 0 ), 
-               _("Skip pruning for %d-ply moves.\n"),
-               i );
+    if ( pmf->Accept < 0 )
+	{
+      sprintf( strchr( sz, 0 ), _("Skip pruning for %d-ply moves."), i );
+	  strcat(sz, "\n");
       continue;
     }
 
     if ( pmf->Accept == 1 )
-      sprintf( strchr( sz, 0 ),
-               _("keep the best %d-ply move"), i );
+      sprintf( strchr( sz, 0 ), _("keep the best %d-ply move"), i );
     else
-      sprintf( strchr( sz, 0 ),
-               _("keep the first %d %d-ply moves"),
+      sprintf( strchr( sz, 0 ), _("keep the first %d %d-ply moves"),
                pmf->Accept, i );
 
     if ( pmf->Extra )
       sprintf( strchr( sz, 0 ),
-               _(" and up to %d more moves within equity %0.3g\n"),
+               _(" and up to %d more moves within equity %0.3g"),
                pmf->Extra, pmf->Threshold );
-    else
-      strcat( sz, "\n" );
 
+	strcat( sz, "\n" );
   }
 
   return sz;
@@ -299,7 +296,7 @@ OutputEvalContextsForRollout( char *sz, const char *szIndent,
       if ( szIndent && *szIndent )
         strcat ( sz, szIndent );
 
-      sprintf ( strchr ( sz, 0 ), _("Player %d:\n" ), i );
+      sprintf ( strchr ( sz, 0 ), "%s %d:\n", _("Player"), i );
     }
 
     /* chequer play */
@@ -312,7 +309,7 @@ OutputEvalContextsForRollout( char *sz, const char *szIndent,
     if ( aecChequer[ i ].nPlies ) {
 
       sprintf( strchr( sz, 0 ),
-               _("Play: %s "), 
+               "%s: %s ", _("Play"),
                ( j < 0 ) ? "" : gettext ( aszSettings[ j ] ) );
 
       strcat( sz, OutputEvalContext ( &aecChequer[ i ], TRUE ) );
@@ -322,7 +319,7 @@ OutputEvalContextsForRollout( char *sz, const char *szIndent,
 
     }
     else {
-      strcat ( sz, _("Play: ") );
+      sz += sprintf ( sz, "%s: ", _("Play") );
       strcat ( sz, OutputEvalContext ( &aecChequer[ i ], FALSE ) );
       strcat ( sz, "\n" );
     }
@@ -330,7 +327,7 @@ OutputEvalContextsForRollout( char *sz, const char *szIndent,
     if ( szIndent && *szIndent )
       strcat ( sz, szIndent );
 
-    strcat ( sz, _("Cube: ") );
+    sz += sprintf ( sz, "%s: ", _("Cube") );
     strcat ( sz, OutputEvalContext ( &aecCube[ i ], FALSE ) );
     strcat ( sz, "\n" );
 
@@ -364,12 +361,12 @@ OutputRolloutContext ( const char *szIndent, const evalsetup *pes ) {
               _("Full cubeless rollout") );
 
   if ( prc->fTruncBearoffOS && ! prc->fCubeful )
-    strcat ( sz, _(" (trunc. at one-sided bearoff)") );
+    sprintf( strchr ( sz, 0 ), " (%s)", _("trunc. at one-sided bearoff") );
   else if ( prc->fTruncBearoff2 && ! prc->fCubeful )
-    strcat ( sz, _(" (trunc. at exact bearoff)") );
+    sprintf( strchr ( sz, 0 ), " (%s)", _("trunc. at exact bearoff") );
 
-  sprintf ( strchr ( sz, 0 ),
-            prc->fVarRedn ? _(" with var.redn.") : _(" without var.redn.") );
+  sprintf ( strchr ( sz, 0 ), " %s",
+            prc->fVarRedn ? _("with var.redn.") : _("without var.redn.") );
 
   strcat ( sz, "\n" );
   
@@ -383,16 +380,19 @@ OutputRolloutContext ( const char *szIndent, const evalsetup *pes ) {
   if ( prc->fInitial )
     strcat ( sz, ", rollout as initial position" );
 
+  strcat(sz, ", ");
   if ( prc->fRotate ) 
     sprintf ( strchr ( sz, 0 ),
-              _(", %s dice gen. with seed %lu and quasi-random dice\n"),
+              _("%s dice gen. with seed %lu and quasi-random dice"),
               gettext( aszRNG[ prc->rngRollout ] ),
               prc->nSeed ); /* seed may be unsigned long int */
   else
     sprintf ( strchr ( sz, 0 ),
-              _(", %s dice generator with seed %lu\n"),
+              _("%s dice generator with seed %lu"),
               gettext( aszRNG[ prc->rngRollout ] ),
               prc->nSeed ); /* seed may be unsigned long int */
+
+  strcat ( sz, "\n" );
 
    if ( ( prc->fStopOnJsd || prc->fStopMoveOnJsd || prc->fStopOnSTD )
         && szIndent && *szIndent )
@@ -401,17 +401,23 @@ OutputRolloutContext ( const char *szIndent, const evalsetup *pes ) {
     /* stop on std.err */
 
    if ( prc->fStopOnSTD && !prc->fStopMoveOnJsd )
+   {
     sprintf( strchr( sz, 0 ),
              _("Stop when std.errs. are small enough: ratio "
-               "%.4g (min. %d games)\n"),
+               "%.4g (min. %d games)"),
              prc->rStdLimit, prc->nMinimumGames );
+    strcat ( sz, "\n" );
+   }
 
    /* stop on JSD */
    if ( prc->fStopOnJsd || prc->fStopMoveOnJsd )
+   {
      sprintf( strchr( sz, 0 ),
               _("Stop when best play is enough JSDs ahead: limit "
-                "%.4g (min. %d games)\n"),
+                "%.4g (min. %d games)"),
               prc->rJsdLimit, prc->nMinimumJsdGames );
+    strcat ( sz, "\n" );
+   }
 
   /* first play */
 
@@ -426,9 +432,8 @@ OutputRolloutContext ( const char *szIndent, const evalsetup *pes ) {
     if ( szIndent && *szIndent )
       strcat ( sz, szIndent );
     
-    sprintf( strchr( sz, 0 ), 
-             _("Different evaluations after %d plies:\n"),
-             prc->nLate );
+    sprintf( strchr( sz, 0 ), _("Different evaluations after %d plies:"), prc->nLate );
+    strcat ( sz, "\n" );
 
     OutputEvalContextsForRollout( sz, szIndent, 
                                   prc->aecCubeLate, prc->aecChequerLate,
@@ -934,7 +939,7 @@ OutputCubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
   /* header */
 
-  strcpy ( sz, _("\nCube analysis\n") );
+  sprintf(sz, "\n%s\n", _("Cube analysis"));
 
   /* ply & cubeless equity */
 
@@ -944,8 +949,8 @@ OutputCubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     break;
   case EVAL_EVAL:
     sprintf ( strchr ( sz, 0 ), 
-              _("%d-ply"), 
-              pes->ec.nPlies );
+              "%d-%s", 
+              pes->ec.nPlies, _("ply"));
     break;
   case EVAL_ROLLOUT:
     strcat ( sz, _("Rollout") );
@@ -960,7 +965,7 @@ OutputCubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
               _("Money"), 
               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
   else
-    sprintf ( strchr ( sz, 0 ), _(" cubeless equity %s\n"),
+    sprintf ( strchr ( sz, 0 ), " %s %s\n", _("cubeless equity"),
               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
 
 
@@ -979,7 +984,8 @@ OutputCubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
   /* equities */
 
-  strcat( sz, _("Cubeful equities:\n") );
+  strcat( sz, _("Cubeful equities") );
+  strcat( sz, ":\n" );
   if ( pes->et == EVAL_EVAL && exsExport.afCubeParameters[ 0 ] ) {
     strcat( sz, "  " );
     strcat( sz, OutputEvalContext( &pes->ec, FALSE ) );
@@ -1010,8 +1016,8 @@ OutputCubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
   cd = FindBestCubeDecision ( arDouble, aarOutput, pci );
 
   sprintf ( strchr ( sz, 0 ),
-            "%s %s",
-            _("Proper cube action:"),
+            "%s: %s",
+            _("Proper cube action"),
             GetCubeRecommendation ( cd ) );
 
   if ( ( r = getPercent ( cd, arDouble ) ) >= 0.0 )
@@ -1039,7 +1045,7 @@ OutputCubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
     }
 
-    strcat ( sz, _("Rollout details:\n") );
+	sprintf(sz, "%s:\n", _("Rollout details"));
 
     strcat ( sz, 
              OutputRolloutResult ( NULL, asz, aarOutput, aarStdDev,
@@ -1096,17 +1102,18 @@ static int DumpOver(const TanBoard anBoard, char *pchOutput,
 		return -1;
 
 	if (ar[OUTPUT_WIN] > 0.0)
-		strcpy(pchOutput, _("Win "));
+		strcpy(pchOutput, _("Win"));
 	else
-		strcpy(pchOutput, _("Loss "));
+		strcpy(pchOutput, _("Loss"));
+	strcat(pchOutput, " ");
 
 	if (ar[OUTPUT_WINBACKGAMMON] > 0.0 ||
 	    ar[OUTPUT_LOSEBACKGAMMON] > 0.0)
-		strcat(pchOutput, _("(backgammon)\n"));
+		sprintf(pchOutput, "(%s)\n", _("backgammon"));
 	else if (ar[OUTPUT_WINGAMMON] > 0.0 || ar[OUTPUT_LOSEGAMMON] > 0.0)
-		strcat(pchOutput, _("(gammon)\n"));
+		sprintf(pchOutput, "(%s)\n", _("gammon"));
 	else
-		strcat(pchOutput, _("(single)\n"));
+		sprintf(pchOutput, "(%s)\n", _("single"));
 
 	return 0;
 
@@ -1238,32 +1245,32 @@ DumpPosition(const TanBoard anBoard, char *szOutput,
 	cubedecision cd;
 	evalcontext ec;
 	static const char *aszEvaluator[] = {
-		N_("OVER"),
-		N_("HYPERGAMMON-1"),
-		N_("HYPERGAMMON-2"),
-		N_("HYPERGAMMON-3"),
-		N_("BEAROFF2"),
-		N_("BEAROFF-TS"),
-		N_("BEAROFF1"),
-		N_("BEAROFF-OS"),
-		N_("RACE"),
-		N_("CRASHED"),
-		N_("CONTACT")
+		N_("Over"),
+		N_("Hypergammon-1"),
+		N_("Hypergammon-2"),
+		N_("Hypergammon-3"),
+		N_("Bearoff2"),
+		N_("Bearoff-TS"),
+		N_("Bearoff1"),
+		N_("Bearoff-OS"),
+		N_("Race"),
+		N_("Crashed"),
+		N_("Contact")
 	};
 
 	strcpy(szOutput, "");
 
-	strcat(szOutput, _("Position ID:\t"));
+	sprintf(strchr(szOutput, 0), "%s:\t", _("Position ID"));
 	strcat(szOutput, PositionID(anBoard));
 	strcat(szOutput, "\n");
 	if (szMatchID) {
-		strcat(szOutput, _("Match ID:\t"));
+		sprintf(strchr(szOutput, 0), "%s:\t", _("Match ID"));
 		strcat(szOutput, szMatchID);
 		strcat(szOutput, "\n");
 	}
 	strcat(szOutput, "\n");
 
-	strcat(szOutput, _("Evaluator: \t"));
+	sprintf(strchr(szOutput, 0), "%s: \t", _("Evaluator"));
 	strcat(szOutput, gettext(aszEvaluator[pc]));
 	strcat(szOutput, "\n\n");
 	acdf[pc] (anBoard, strchr(szOutput, 0), pci->bgv);
@@ -1293,7 +1300,7 @@ DumpPosition(const TanBoard anBoard, char *szOutput,
 		if (!i)
 			strcpy(szOutput, _("static"));
 		else
-			sprintf(szOutput, _("%2d ply"), i);
+			sprintf(szOutput, "%2d %s", i, _("ply"));
 
 		szOutput = strchr(szOutput, 0);
 

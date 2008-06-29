@@ -7339,8 +7339,7 @@ extern void GTKRecordShow( FILE *pfIn, char *szFile, char *szPlayer ) {
 				EXPAVG_TOTAL ] ) ] ) );
 	
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 21,
-			    gettext ( aszLuckRating[ getLuckRating( (float)pr.arLuck[
-				EXPAVG_TOTAL ] / 20 ) ] ) );
+			    aszLuckRating[ getLuckRating( (float)pr.arLuck[EXPAVG_TOTAL ] / 20 ) ] );
 	
 	if( !CompareNames( pr.szName, szPlayer ) )
 	    gtk_clist_select_row( GTK_CLIST( pwList ), i, 0 );

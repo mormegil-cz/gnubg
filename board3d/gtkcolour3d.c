@@ -24,6 +24,7 @@
 #include "config.h"
 #include "inc3d.h"
 #include "misc3d.h"
+#include <glib/gi18n.h>
 
 #include "gtkcolour.h"
 #include "gtkprefs.h"

@@ -97,7 +97,7 @@ typedef enum {
 #define N_RATINGS ((int)RAT_UNDEFINED + 1)
 
 extern const char* aszRating [ N_RATINGS ];
-extern const char* aszLuckRating[ 7 ];
+extern const char* aszLuckRating[ N_LUCKS ];
 
 extern int afAnalysePlayers[ 2 ];
 
@@ -115,7 +115,7 @@ updateStatisticsGame ( const listOLD* plGame );
 extern void
 updateStatisticsMatch ( listOLD* plMatch );
 
-extern int getLuckRating(float rLuck);
+extern lucktype getLuckRating(float rLuck);
 
 extern float
 relativeFibsRating(float r, int n);

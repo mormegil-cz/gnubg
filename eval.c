@@ -23,7 +23,7 @@
 #include "backgammon.h"
 
 #include <glib.h>
-#include <glib/gi18n.h>
+#include "gnubgi18n.h"
 #include <string.h>
 #include <errno.h>
 #include <cache.h>
@@ -260,16 +260,8 @@ const char *aszVariationCommands[ NUM_VARIATIONS ] = {
   "3-chequer-hypergammon"
 };
 
-
 cubeinfo ciCubeless = { 1, 0, 0, 0, { 0, 0 }, FALSE, FALSE, FALSE,
                         { 1.0, 1.0, 1.0, 1.0 }, VARIATION_STANDARD };
-
-const char *aszEvalType[] = 
-   { 
-     N_ ("No evaluation"), 
-     N_ ("Neural net evaluation"), 
-     N_ ("Rollout")
-   };
 
 #if defined (REDUCTION_CODE)
 static evalcontext ecBasic = { FALSE, 0, 0, TRUE, 0.0 };
@@ -385,15 +377,9 @@ static randctx rc;
  * predefined settings 
  */
 
-const char *aszSettings[ NUM_SETTINGS ] = {
-  N_ ("beginner"), 
-  N_ ("casual play"), 
-  N_ ("intermediate"), 
-  N_ ("advanced"), 
-  N_ ("expert"), 
-  N_ ("world class"),
-  N_ ("supremo"),
-  N_ ("grandmaster") };
+const char *aszSettingList = N_(":Settings List: beginner, casual play, intermediate, advanced, "
+												"expert, world class, supremo, grandmaster");
+const char *aszSettings[ NUM_SETTINGS ];
 
 /* which evaluation context does the predefined settings use */
 #if defined (REDUCTION_CODE)
@@ -435,13 +421,8 @@ int aiSettingsMoveFilter[ NUM_SETTINGS ] = {
 
 /* the predefined move filters */
 
-const char *aszMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ] = {
-  N_("Tiny"),
-  N_("Narrow"),
-  N_("Normal"),
-  N_("Large"),
-  N_("Huge")
-};
+const char *aszMoveFilterList = N_(":Move Filter List: Tiny, Narrow, Normal, Large, Huge");
+const char *aszMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ];
 
 movefilter aaamfMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ][ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] = {
   /* tiny */
@@ -471,12 +452,8 @@ movefilter aaamfMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ][ MAX_FILTER_PLIES 
     { { 0, 20, 0.44f }, { -1, 0, 0 }, { 0, 6, 0.11f }, { -1, 0, 0.0 } } }
 };
 
-
-const char *aszDoubleTypes[ NUM_DOUBLE_TYPES ] = {
-  N_("Double"),
-  N_("Beaver"),
-  N_("Raccoon")
-};
+const char *aszDoubleList = N_(":Move Filter List: Double, Beaver, Raccoon");
+const char *aszDoubleTypes[ NUM_DOUBLE_TYPES ];
 
 /* parameters for EvalEfficiency */
 
@@ -657,18 +634,21 @@ static int binary_weights_failed(char * filename, FILE * weights)
 		return -2;
 	}
 	if (r != WEIGHTS_MAGIC_BINARY) {
-		g_print(_("%s: not a weights file\n"), filename);
+		g_print(_("%s is not a weights file"), filename);
+		g_print("\n");
 		return -3;
 	}
 	if (fread(&r, sizeof r, 1, weights) < 1) {
 		g_print(filename);
 		return -4;
 	}
-	if (r != WEIGHTS_VERSION_BINARY) {
-		g_print(_("%s: incorrect weights version (version %s "
-			     " is required, but these weights "
-			     "are %.2f)\n"), filename, WEIGHTS_VERSION,
-			   r);
+	if (r != WEIGHTS_VERSION_BINARY)
+	{
+		char buf[20];
+		sprintf(buf, "%.2f", r);
+		g_print(_("weights file %s, has incorrect version (%s), expected (%s)"),
+			     filename, buf, WEIGHTS_VERSION);
+		g_print("\n");
 		return -5;
 	}
 
@@ -687,15 +667,15 @@ static int weights_failed(char * filename, FILE * weights)
 	if( fscanf( weights, "GNU Backgammon %15s\n",
 				file_version ) != 1 )
 	{
-		g_print(_("%s: not a weights file\n"), filename );
+		g_print(_("%s is not a weights file"), filename);
+		g_print("\n");
 		return -2;
 	}
 	if( strcmp( file_version, WEIGHTS_VERSION ) )
 	{
-		g_print(_("%s: incorrect weights version (version "
-					"%s is required,\nbut these weights "
-					"are %s)\n"), 
-				filename, WEIGHTS_VERSION, file_version );
+		g_print(_("weights file %s, has incorrect version (%s), expected (%s)"),
+			     filename, file_version, WEIGHTS_VERSION);
+		g_print("\n");
 		return -3;
 	}
 	return 0;
@@ -4029,12 +4009,13 @@ static void StatusBearoff1( char *sz ) {
 
 }
 
-static void StatusNeuralNet( neuralnet *pnn, char *szTitle, char *sz ) {
-
-  sprintf( sz, _(" * %s neural network evaluator:\n"
-                 "   - version %s, %d inputs, %d hidden units"),
-           szTitle, WEIGHTS_VERSION, pnn->cInput, pnn->cHidden );
-  sz = strchr( sz, 0 );
+static void StatusNeuralNet( neuralnet *pnn, char *szTitle, char *sz )
+{
+  char buf[200];
+  sz += sprintf( sz, " * %s %s:\n", szTitle, _("neural network evaluator"));
+  sprintf(buf, _("version %s, %d inputs, %d hidden units"),
+	  WEIGHTS_VERSION, pnn->cInput, pnn->cHidden);
+  sz += sprintf( sz, "   - %s", buf);
   
   if( pnn->nTrained > 1 )
       sprintf( sz, _("trained on %d positions"), pnn->nTrained );
@@ -4087,10 +4068,10 @@ extern void EvalStatus( char *szOutput ) {
 
 
 extern char 
-*GetCubeRecommendation ( const cubedecision cd ) {
-
-  switch ( cd ) {
-
+*GetCubeRecommendation ( const cubedecision cd )
+{
+  switch ( cd )
+  {
   case DOUBLE_TAKE:
     return _("Double, take");
   case DOUBLE_PASS:
@@ -4132,9 +4113,8 @@ extern char
   case OPTIONAL_REDOUBLE_PASS:
     return _("Optional redouble, pass");
   default:
-    return _("I have no idea!");
+    return _("Unknown cube decision");
   }
-
 }
 
 extern void
@@ -5106,9 +5086,9 @@ extern char *FormatEval ( char *sz, evalsetup *pes ) {
     strcpy ( sz, "" );
     break;
   case EVAL_EVAL:
-    sprintf ( sz, _("%s %1i-ply"), 
+    sprintf ( sz, "%s %1i-%s", 
               pes->ec.fCubeful ? _("Cubeful") : _("Cubeless"),
-              pes->ec.nPlies );
+              pes->ec.nPlies, _("ply") );
     break;
   case EVAL_ROLLOUT:
     sprintf ( sz, "%s", _("Rollout") );

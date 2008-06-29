@@ -35,6 +35,7 @@
 #endif
 #include "misc3d.h"
 #include "util.h"
+#include <glib/gi18n.h>
 
 #define MAX_FRAMES 10
 #define DOT_SIZE 32

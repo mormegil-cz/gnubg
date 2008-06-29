@@ -23,7 +23,7 @@
 #include "backgammon.h"
 
 #include <glib.h>
-#include <glib/gi18n.h>
+#include "gnubgi18n.h"
 #include <glib/gprintf.h>
 #include <stdlib.h>
 #include <string.h>
@@ -94,8 +94,7 @@ static gchar *export_get_filename(char *sz)
 	filename = g_strdup(NextToken(&sz));
 
 	if (!filename || !*filename) {
-		outputl(_("You must specify a file to export to "
-			  "(see `help export position simple')."));
+		outputl(_("You must specify a file to export to."));
 		g_free(filename);
 		return NULL;
 	}
@@ -248,11 +247,8 @@ extern void CommandExportPositionSVG(char *sz)
 	cairo_surface_t *surface;
 	cairo_t *cairo;
 
-	if (ms.gs == GAME_NONE) {
-		outputerrf(_
-			   ("No game in progress (type `new game' to start one)."));
+	if (!CheckGameExists())
 		return;
-	}
 
 	filename = export_get_filename(sz);
 	if (!filename)
@@ -268,7 +264,7 @@ extern void CommandExportPositionSVG(char *sz)
 		cairo_destroy(cairo);
 	} else
 #endif
-		outputerrf(_("Failed to create SVG surface for %s"), sz);
+		outputerrf(_("Failed to create cairo surface for %s"), sz);
 }
 
 extern void CommandExportPositionPDF(char *sz)
@@ -281,11 +277,8 @@ extern void CommandExportPositionPDF(char *sz)
 	cairo_surface_t *surface;
 	cairo_t *cairo;
 
-	if (ms.gs == GAME_NONE) {
-		outputerrf(_
-			   ("No game in progress (type `new game' to start one)."));
+	if (!CheckGameExists())
 		return;
-	}
 
 	filename = export_get_filename(sz);
 	if (!filename)
@@ -301,7 +294,7 @@ extern void CommandExportPositionPDF(char *sz)
 		cairo_destroy(cairo);
 	} else
 #endif
-		outputerrf(_("Failed to create PDF surface for %s"), sz);
+		outputerrf(_("Failed to create cairo surface for %s"), sz);
 }
 
 extern void CommandExportPositionPS(char *sz)
@@ -314,11 +307,8 @@ extern void CommandExportPositionPS(char *sz)
 	cairo_surface_t *surface;
 	cairo_t *cairo;
 
-	if (ms.gs == GAME_NONE) {
-		outputerrf(_
-			   ("No game in progress (type `new game' to start one)."));
+	if (!CheckGameExists())
 		return;
-	}
 
 	filename = export_get_filename(sz);
 	if (!filename)
@@ -335,7 +325,7 @@ extern void CommandExportPositionPS(char *sz)
 		cairo_destroy(cairo);
 	} else
 #endif
-		outputerrf(_("Failed to create PS surface for %s"), sz);
+		outputerrf(_("Failed to create cairo surface for %s"), sz);
 }
 
 extern void CommandExportGamePDF(char *sz)
@@ -345,11 +335,8 @@ extern void CommandExportGamePDF(char *sz)
 	cairo_surface_t *surface;
 	cairo_t *cairo;
 
-	if (!plGame) {
-		outputerrf(_
-			   ("No game in progress (type `new game' to start one)."));
+	if (!CheckGameExists())
 		return;
-	}
 
 	filename = export_get_filename(sz);
 	if (!filename)
@@ -363,7 +350,7 @@ extern void CommandExportGamePDF(char *sz)
 		cairo_destroy(cairo);
 	} else
 #endif
-		outputerrf(_("Failed to create PDF surface for %s"), sz);
+		outputerrf(_("Failed to create cairo surface for %s"), sz);
 }
 
 extern void CommandExportGamePS(char *sz)
@@ -373,11 +360,8 @@ extern void CommandExportGamePS(char *sz)
 	cairo_surface_t *surface;
 	cairo_t *cairo;
 
-	if (!plGame) {
-		outputerrf(_
-			   ("No game in progress (type `new game' to start one)."));
+	if (!CheckGameExists())
 		return;
-	}
 
 	filename = export_get_filename(sz);
 	if (!filename)
@@ -391,7 +375,7 @@ extern void CommandExportGamePS(char *sz)
 		cairo_destroy(cairo);
 	} else
 #endif
-		outputerrf(_("Failed to create PS surface for %s"), sz);
+		outputerrf(_("Failed to create cairo surface for %s"), sz);
 }
 
 extern void CommandExportMatchPDF(char *sz)
@@ -423,7 +407,7 @@ extern void CommandExportMatchPDF(char *sz)
 		cairo_destroy(cairo);
 	} else
 #endif
-		outputerrf(_("Failed to create PDF surface for %s"), sz);
+		outputerrf(_("Failed to create cairo surface for %s"), sz);
 }
 
 extern void CommandExportMatchPS(char *sz)
@@ -455,7 +439,7 @@ extern void CommandExportMatchPS(char *sz)
 		cairo_destroy(cairo);
 	} else
 #endif
-		outputerrf(_("Failed to create PS surface for %s"), sz);
+		outputerrf(_("Failed to create cairo surface for %s"), sz);
 }
 
 #if HAVE_LIBPNG
@@ -663,16 +647,12 @@ extern void CommandExportPositionPNG (char *sz)
 {
   sz = NextToken (&sz);
 
-  if (ms.gs == GAME_NONE)
-    {
-      outputl (_("No game in progress (type `new game' to start one)."));
-      return;
-    }
+  if (!CheckGameExists())
+	return;
 
   if (!sz || !*sz)
     {
-      outputl (_("You must specify a file to export to (see `help export "
-		 "position png')."));
+      outputl (_("You must specify a file to export to."));
       return;
     }
 
@@ -814,16 +794,12 @@ extern void CommandExportPositionSnowieTxt (char *sz)
 
   sz = NextToken (&sz);
 
-  if (ms.gs == GAME_NONE)
-    {
-      outputl (_("No game in progress (type `new game' to start one)."));
-      return;
-    }
+  if (!CheckGameExists())
+	return;
 
   if (!sz || !*sz)
     {
-      outputl (_("You must specify a file to export to (see `help export "
-		 "position snowietxt')."));
+      outputl (_("You must specify a file to export to."));
       return;
     }
 
@@ -888,16 +864,12 @@ extern void CommandExportPositionJF (char *sz)
 
   sz = NextToken (&sz);
 
-  if (ms.gs == GAME_NONE)
-    {
-      outputl (_("No game in progress (type `new game' to start one)."));
-      return;
-    }
+  if (!CheckGameExists())
+	return;
 
   if (!sz || !*sz)
     {
-      outputl (_("You must specify a file to export to (see `help export "
-		 "position pos')."));
+      outputl (_("You must specify a file to export to."));
       return;
     }
 
@@ -1151,14 +1123,11 @@ extern void CommandExportGameGam( char *sz ) {
 
     sz = NextToken( &sz );
     
-    if( !plGame ) {
-	outputl( _("No game in progress (type `new game' to start one).") );
-	return;
-    }
+	if (!CheckGameExists())
+		return;
     
     if( !sz || !*sz ) {
-	outputl( _("You must specify a file to export to (see `help export"
-		 "game gam').") );
+	outputl( _("You must specify a file to export to.") );
 	return;
     }
 
@@ -1191,14 +1160,11 @@ extern void CommandExportMatchMat( char *sz ) {
     
     sz = NextToken( &sz );
     
-    if( !plGame ) {
-	outputl( _("No game in progress (type `new game' to start one).") );
-	return;
-    }
+	if (!CheckGameExists())
+		return;
     
     if( !sz || !*sz ) {
-	outputl( _("You must specify a file to export to (see `help export "
-		 "match mat').") );
+	outputl( _("You must specify a file to export to.") );
 	return;
     }
 

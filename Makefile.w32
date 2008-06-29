@@ -79,8 +79,8 @@ LIBEVENT = $(BINDIR)/libevent.a
 LIBBOARD3D = $(BINDIR)/libboard3d.a
 
 MAKEBEAROFFEXE = $(BINDIR)/makebearoff.exe
-OSDB = $(BINDIR)/gnubg_os0.bd
-TSDB = $(BINDIR)/gnubg_ts0.bd
+OSDB = $(BINDIR)/gnubg_os.bd
+TSDB = $(BINDIR)/gnubg_ts.bd
 MAKEWEIGHTS = $(BINDIR)/makeweights.exe
 WEIGHTS = $(BINDIR)/gnubg.wd
 

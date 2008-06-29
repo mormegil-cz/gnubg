@@ -56,8 +56,6 @@
 #include "model.h"
 #include "drawboard.h"	/* for fClockwise decl */
 
-#include <glib/gi18n.h>
-
 /* float versions (to quiet compiler warnings) */
 #define powi(arg1, arg2) (int)pow((double)(arg1), (double)(arg2))
 

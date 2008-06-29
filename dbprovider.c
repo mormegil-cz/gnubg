@@ -39,7 +39,7 @@
 #include "dbprovider.h"
 #include "backgammon.h"
 #include "util.h"
-#include <glib/gi18n.h>
+#include "gnubgi18n.h"
 
 DBProviderType dbProviderType = 0;
 int storeGameStats = TRUE;
@@ -169,7 +169,7 @@ extern DBProvider* GetDBProvider(DBProviderType dbType)
 			/* Get main python dictionary */
 			if ((m = PyImport_AddModule("__main__")) == NULL)
 			{
-				outputl( _("Error importing __main__") );
+				outputl( _("Error importing 'main' module") );
 			}
 			else
 			{
@@ -251,7 +251,7 @@ static int PySQLiteConnect(const char *dbfilename, const char *user, const char 
 	}
 	else if (con == Py_None)
 	{
-		outputl( _("Error calling connect()") );
+		outputl( _("Error connecting to database") );
 		return -1;
 	}
 	if (!exists)
@@ -324,7 +324,7 @@ RowSet* ConvertPythonToRowset(PyObject *v)
 	size_t i, j;
 	if (!PySequence_Check(v))
 	{
-		outputerrf( _("invalid return (non-tuple)") );
+		outputerrf( _("invalid Python return") );
 		return NULL;
 	}
 
@@ -335,7 +335,7 @@ RowSet* ConvertPythonToRowset(PyObject *v)
 		PyObject *cols = PySequence_GetItem(v, 0);
 		if (!PySequence_Check(cols))
 		{
-			outputerrf( _("invalid return (non-tuple)") );
+			outputerrf( _("invalid Python return") );
 			return NULL;
 		}
 		else
@@ -349,7 +349,7 @@ RowSet* ConvertPythonToRowset(PyObject *v)
 
 		if (!e)
 		{
-			outputf(_("Error getting item no %zu\n"), i);
+			outputf("%s\n", _("Error getting item %zu"), i);
 			continue;
 		}
 
@@ -363,7 +363,7 @@ RowSet* ConvertPythonToRowset(PyObject *v)
 				
 				if (!e2)
 				{
-					outputf(_("Error getting sub item no (%zu, %zu)\n"), i, j);
+					outputf("%s\n", _("Error getting sub item (%zu, %zu)"), i, j);
 					continue;
 				}
 				if (PyUnicode_Check(e2))
@@ -376,9 +376,9 @@ RowSet* ConvertPythonToRowset(PyObject *v)
 				else if (PyFloat_Check(e2))
 					sprintf(buf, "%.4f", PyFloat_AsDouble(e2));
 				else if (e2 == Py_None)
-					strcpy(buf, _("[null]"));
+					sprintf(buf, "[%s]", _("none"));
 				else
-					strcpy(buf, _("[unknown type]"));
+					sprintf(buf, "[%s]", _("unknown type"));
 
 				SetRowsetData(pRow, i, j, buf);
 
@@ -387,7 +387,7 @@ RowSet* ConvertPythonToRowset(PyObject *v)
 		}
 		else
 		{
-			outputf(_("Item no. %zu is not a sequence\n"), i);
+			outputf("%s\n", _("Item %zu is not a list"), i);
 		}
 
 		Py_DECREF(e);

@@ -38,29 +38,14 @@
 #include "matchequity.h"
 #include "export.h"
 #include "formatgs.h"
-#include <glib/gi18n.h>
+#include "gnubgi18n.h"
 #include "multithread.h"
 
-const char *aszRating [ N_RATINGS ] = {
-  N_("Awful!"), 
-  N_("Beginner"), 
-  N_("Casual player"), 
-  N_("Intermediate"), 
-  N_("Advanced"), 
-  N_("Expert"),
-  N_("World class"), 
-  N_("Supernatural"), 
-  N_("N/A") };
+const char *aszRatingList = N_(":Rating List: Awful!, Beginner, Casual player, Intermediate, Advanced, Expert, World class, Supernatural, N/A");
+const char *aszRating [ N_RATINGS ];
 
-const char *aszLuckRating[] = {
-  N_("Haaa-haaa"),
-  N_("Go to bed"), 
-  N_("Better luck next time"),
-  N_("None"),
-  N_("Good dice, man!"),
-  N_("Go to Las Vegas immediately"),
-  N_("Cheater :-)")
-};
+const char *aszLuckRatingList = N_(":Luck List: Go to bed, Better luck next time, None, Good dice!, It's your lucky day!");
+const char *aszLuckRating[N_LUCKS];
 
 static const float arThrsRating [ RAT_SUPERNATURAL + 1 ] = {
   1e38f, 0.035f, 0.026f, 0.018f, 0.012f, 0.008f, 0.005f, 0.002f };
@@ -254,9 +239,6 @@ static float LuckAnalysis( const TanBoard anBoard, int n0, int n1,
     return LuckNormal ( anBoard, n0, n1, pci, &ecLuck );
 
 }
-  
-
-
 
 static lucktype Luck( float r ) {
 
@@ -1230,8 +1212,7 @@ AddStatcontext ( const statcontext *pscA, statcontext *pscB ) {
 static int CheckSettings( void ) {
 
     if( !fAnalyseCube && !fAnalyseDice && !fAnalyseMove ) {
-	outputl( _("You must specify at least one type of analysis to perform "
-		 "(see `help set\nanalysis').") );
+	outputl( _("No analysis selected, you must specify at least one type of analysis to perform") );
 	return -1;
     }
 
@@ -1252,15 +1233,12 @@ NumberMovesMatch ( listOLD *plMatch ) {
 
 }
 
-
-extern void CommandAnalyseGame( char *sz ) {
-
+extern void CommandAnalyseGame( char *sz )
+{
   int nMoves;
   
-  if( !plGame ) {
-    outputl( _("No game is being played.") );
+  if (!CheckGameExists())
     return;
-  }
     
   if( CheckSettings() )
     return;
@@ -1290,10 +1268,8 @@ extern void CommandAnalyseMatch( char *sz )
   moverecord *pmr;
   int nMoves;
   
-  if( ListEmpty( &lMatch ) ) {
-      outputl( _("No match is being played.") );
+  if (!CheckGameExists())
       return;
-  }
 
   if( CheckSettings() )
       return;
@@ -1646,10 +1622,8 @@ CommandShowStatisticsGame ( char *sz )
   moverecord *pmr;
   char szOutput[4096];
     
-  if( !plGame ) {
-    outputl( _("No game is being played.") );
+  if (!CheckGameExists())
     return;
-  }
 
   updateStatisticsGame ( plGame );
 
@@ -1673,10 +1647,8 @@ CommandShowStatisticsGame ( char *sz )
 extern void
 CommandAnalyseMove ( char *sz )
 {
-  if( ms.gs == GAME_NONE ) {
-    outputl( _("No game in progress (type `new game' to start one).") );
+  if (!CheckGameExists())
     return;
-  }
 
   if ( plLastMove && plLastMove->plNext && plLastMove->plNext->p )
   {	/* analyse move */
@@ -1800,28 +1772,21 @@ updateStatisticsMatch ( listOLD *plMatch ) {
     AddStatcontext( &pmr->g.sc, &scMatch );
 
   }
-
 }
 
-
-
-extern int getLuckRating ( float rLuck ) {
-
-  if ( rLuck < -0.10 )
-    return 0;
-  else if ( rLuck < -0.06 )
-    return 1;
+extern lucktype getLuckRating ( float rLuck )
+{
+  if ( rLuck < -0.06 )
+    return LUCK_VERYBAD;
   else if ( rLuck < -0.02 )
-    return 2;
+    return LUCK_BAD;
   else if ( rLuck < +0.02 )
-    return 3;
+    return LUCK_NONE;
   else if ( rLuck < +0.06 )
-    return 4;
+    return LUCK_GOOD;
   else
-    return 5;
-
+    return LUCK_VERYGOOD;
 }
-
 
 static void
 AnalyseClearMove ( moverecord *pmr ) {
@@ -1907,10 +1872,8 @@ CommandAnalyseClearMove ( char *sz ) {
 extern void
 CommandAnalyseClearGame ( char *sz ) {
 
-  if( !plGame ) {
-    outputl( _("No game is being played.") );
+  if (!CheckGameExists())
     return;
-  }
 
   AnalyseClearGame ( plGame );
 
@@ -1926,10 +1889,8 @@ CommandAnalyseClearMatch ( char *sz ) {
 
   listOLD *pl;
 
-  if( ListEmpty( &lMatch ) ) {
-    outputl( _("No match is being played.") );
+  if (!CheckGameExists())
     return;
-  }
 
   for( pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext ) 
     AnalyseClearGame ( pl->p );

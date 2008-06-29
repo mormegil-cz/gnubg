@@ -27,10 +27,15 @@
 #ifdef WIN32
 #include <windows.h>
 
+/* Some variables to get make* tools compiling */
 char *aszRNG[1]; 
 char *aszSkillType[ 1 ]; 
 int exsExport;
 int ap;
+const char *aszRatingList;
+const char *aszLuckRatingList;
+const char *aszLuckRating;
+const char *aszRating;
 
 extern char * getInstallDir( void )
 {

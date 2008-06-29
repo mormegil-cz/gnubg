@@ -104,7 +104,7 @@
 #include "drawboard.h"
 #include "external.h"
 #include "rollout.h"
-#include <glib/gi18n.h>
+#include "gnubgi18n.h"
 
 #if HAVE_SOCKETS
 /* Stuff for the yacc/lex parser */
@@ -129,7 +129,7 @@ void OutputWin32SocketError(const char* action)
 		NULL, WSAGetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 		(LPTSTR) &lpMsgBuf, 0, NULL) != 0)
 	{
-		outputerrf(_("Windows socket error (%s):\n%s"), action, (LPCTSTR)lpMsgBuf);
+		outputerrf("%s (%s):\n%s", _("Windows socket error"), action, (LPCTSTR)lpMsgBuf);
 		LocalFree(lpMsgBuf);
 	}
 }
@@ -595,8 +595,7 @@ extern void CommandExternal( char *sz ) {
     sz = NextToken( &sz );
     
     if( !sz || !*sz ) {
-	outputl( _("You must specify the name of the socket to the external\n"
-		 "controller -- try `help external'.") );
+	outputl( _("You must specify the name of the socket to the external controller.") );
 	return;
     }
 
@@ -618,12 +617,12 @@ listenloop:
       free( psa );
       
       if( listen( h, 1 ) < 0 ) {
-	SockErr( _("listen") );
+	SockErr( "listen" );
 	closesocket( h );
 	ExternalUnbind( sz );
 	return;
       }
-      outputf( _("Waiting for a connection from %s...\n"), sz);
+      outputf( "%s\n", _("Waiting for a connection from %s..."), sz);
       outputx();
       ProcessGtkEvents();
 
@@ -644,7 +643,7 @@ listenloop:
           continue;
 	}
 	
-	SockErr( _("accept") );
+	SockErr( "accept" );
 	closesocket( h );
 	ExternalUnbind( sz );
 	return;
@@ -655,7 +654,7 @@ listenloop:
 
       /* print info about remove client */
 
-      outputf( _("Accepted connection from %s.\n"), 
+      outputf( "%s\n", _("Accepted connection from %s."),
                  inet_ntoa( saRemote.sin_addr ) );
       outputx();
       ProcessGtkEvents();
