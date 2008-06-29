@@ -43,7 +43,7 @@ int translateList(const char *msgStrs, const char *list[], int numStrings)
 		else
 			msgLen = strlen(transList);
 
-		list[i] = curElement = (char*)malloc(msgLen + 1);
+		list[i] = curElement = (char*)g_malloc(msgLen + 1);
 		strncpy(curElement, transList, msgLen);
 		curElement[msgLen] = '\0';
 
@@ -52,7 +52,7 @@ int translateList(const char *msgStrs, const char *list[], int numStrings)
 	return TRUE;
 }
 
-void freeList(const char *list[], int numStrings)
+static void freeList(const char *list[], int numStrings)
 {
 	int i;
 	for (i = 0; i < numStrings; i++)
