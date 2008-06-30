@@ -95,7 +95,7 @@ all-no:
 $(srcdir)/$(GETTEXT_PACKAGE).pot: $(POTFILES)
 	$(XGETTEXT) --default-domain=$(GETTEXT_PACKAGE) --directory=$(top_srcdir) \
 	  --add-comments --keyword=_ --keyword=N_ \
-	  --keyword=Q_:1g \
+	  --keyword=Q_ \
 	  --flag=outputf:1:c-format \
 	  --flag=outputerrf:1:c-format \
           --flag=g_strdup_printf:1:c-format \

@@ -126,7 +126,7 @@ endif
 #
 gnubg_LDADD = -L$(srcdir)/lib lib/libevent.la @GTK_LIBS@ @LIBPNG_LIBS@ @CAIRO_LIBS@ @PANGOCAIRO_LIBS@ \
 	      @GTHREAD_LIBS@ \
-	      @LTLIBOBJS@ @LTLIBINTL@ @LIBXML2_LIBS@ \
+	      @LTLIBOBJS@ @LIBXML2_LIBS@ \
 	      @FREETYPE2_LIBS@ @PYTHON_LSPEC@ @GLIB_LIBS@ @LIBPNG_LIBS@ @SQLITE_LIBS@ @GSTREAMER_LIBS@
 if USE_BOARD3D
 gnubg_LDADD += -L$(srcdir)/board3d board3d/libboard3d.la @GTKGLEXT_LIBS@
@@ -167,7 +167,7 @@ pkgdata_DATA = gnubg_ts0.bd gnubg.wd boards.xml \
 EXTRA_DIST = config.rpath  userrng.c copying.awk gnubg.gtkrc credits.sh \
 	$(BUILT_SOURCES) ABOUT-NLS boards.xml gnubg.sql autogen.sh \
 	gnubg.weights textures.txt corecount.c \
-	external_y.h sgf_y.h
+	external_y.h sgf_y.h commands.inc
 
 #
 ##credits.c target

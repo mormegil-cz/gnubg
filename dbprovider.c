@@ -36,10 +36,10 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <string.h>
+#include <glib/gi18n.h>
 #include "dbprovider.h"
 #include "backgammon.h"
 #include "util.h"
-#include "gnubgi18n.h"
 
 DBProviderType dbProviderType = 0;
 int storeGameStats = TRUE;
@@ -349,7 +349,7 @@ RowSet* ConvertPythonToRowset(PyObject *v)
 
 		if (!e)
 		{
-			outputf("%s\n", _("Error getting item %zu"), i);
+			outputf(_("Error getting item %zu\n"), i);
 			continue;
 		}
 
@@ -363,7 +363,7 @@ RowSet* ConvertPythonToRowset(PyObject *v)
 				
 				if (!e2)
 				{
-					outputf("%s\n", _("Error getting sub item (%zu, %zu)"), i, j);
+					outputf(_("Error getting sub item (%zu, %zu)\n"), i, j);
 					continue;
 				}
 				if (PyUnicode_Check(e2))
@@ -387,7 +387,7 @@ RowSet* ConvertPythonToRowset(PyObject *v)
 		}
 		else
 		{
-			outputf("%s\n", _("Item %zu is not a list"), i);
+			outputf(_("Item %zu is not a list\n"), i);
 		}
 
 		Py_DECREF(e);

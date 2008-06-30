@@ -24,6 +24,7 @@
 #include <glib.h>
 #include <string.h>
 #include <stdlib.h>
+#include <glib/gi18n.h>
 
 #include "backgammon.h"
 #include "drawboard.h"
@@ -38,14 +39,26 @@
 #include "matchequity.h"
 #include "export.h"
 #include "formatgs.h"
-#include "gnubgi18n.h"
 #include "multithread.h"
 
-const char *aszRatingList = N_(":Rating List: Awful!, Beginner, Casual player, Intermediate, Advanced, Expert, World class, Supernatural, N/A");
-const char *aszRating [ N_RATINGS ];
+const char *aszRating [ N_RATINGS ] = {
+  N_("rating|Awful!"), 
+  N_("rating|Beginner"), 
+  N_("rating|Casual player"), 
+  N_("rating|Intermediate"), 
+  N_("rating|Advanced"), 
+  N_("rating|Expert"),
+  N_("rating|World class"), 
+  N_("rating|Supernatural"), 
+  N_("rating|N/A") };
 
-const char *aszLuckRatingList = N_(":Luck List: Go to bed, Better luck next time, None, Good dice!, It's your lucky day!");
-const char *aszLuckRating[N_LUCKS];
+const char *aszLuckRating[N_LUCKS] = {
+  N_("luck|Go to bed"), 
+  N_("luck|Bad dice, man!"),
+  N_("luck|None"),
+  N_("luck|Good dice, man!"),
+  N_("luck|Go to Las Vegas"),
+};
 
 static const float arThrsRating [ RAT_SUPERNATURAL + 1 ] = {
   1e38f, 0.035f, 0.026f, 0.018f, 0.012f, 0.008f, 0.005f, 0.002f };

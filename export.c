@@ -23,7 +23,7 @@
 #include "backgammon.h"
 
 #include <glib.h>
-#include "gnubgi18n.h"
+#include <glib/gi18n.h>
 #include <glib/gprintf.h>
 #include <stdlib.h>
 #include <string.h>

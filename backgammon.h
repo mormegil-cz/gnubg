@@ -1013,6 +1013,7 @@ extern void CommandTake(char *);
 
 extern int getGameNumber(const listOLD * plGame);
 extern int getMoveNumber(const listOLD * plGame, const void *p);
+extern int CheckGameExists(void);
 
 extern void ProcessGtkEvents(void);
 #if !USE_MULTITHREAD

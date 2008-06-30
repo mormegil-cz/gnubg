@@ -28,8 +28,8 @@
 #include <unistd.h>
 #endif
 
-#include "gnubgi18n.h"
 #include <glib.h>
+#include <glib/gi18n.h>
 #include "bearoffgammon.h"
 #include "eval.h"
 #include "positionid.h"
@@ -574,6 +574,8 @@ extern void BearoffStatus(const bearoffcontext *pbc, char *sz)
 			? _("database includes gammon distributions")
 			: _("database does not include gammon distributions"));
 		break;
+	default:
+		g_assert_not_reached();
 	}
 	sprintf(buf, _("number of reads: %lu"), pbc->nReads);
 	sprintf(sz, "   - %s\n", buf);
@@ -689,7 +691,7 @@ static int BearoffDumpOneSided ( const bearoffcontext *pbc, const TanBoard anBoa
 
   sz += sprintf(sz, "\n%s\n", _("Average rolls"));
   sz += sprintf(sz, "%s\t\t\t\t%s\n", _("Bearing off"), _("Saving gammon"));
-  sz += sprintf(sz, "\t%s\t%s\t%s\t%s\n", _("Player"), _("Opponent"));
+  sz += sprintf(sz, "\t%s\t%s\t%s\t%s\n", _("Player"), _("Opponent"), _("Player"), _("Opponent"));
 
   /* mean rolls */
 
@@ -725,8 +727,9 @@ static int BearoffDumpOneSided ( const bearoffcontext *pbc, const TanBoard anBoa
 
   sz += sprintf(sz, "\n%s:\n", _("Effective pip count") );
   sz += sprintf(sz, "\t%s\t%s\n", _("Player"), _("Opponent"));
-  sz += sprintf(sz, "%s\t%7.3f\t%7.3f\n%s\t%7.3f\t%7.3f\n\n", _("EPC"), _("Wastage"),
+  sz += sprintf(sz, "%s\t%7.3f\t%7.3f\n%s\t%7.3f\t%7.3f\n\n", _("EPC"),
            ar[ 0 ][ 0 ] * x, ar[ 1 ][ 0 ] * x,
+	   _("Wastage"),
            ar[ 0 ][ 0 ] * x - anPips[ 1 ],
            ar[ 1 ][ 0 ] * x - anPips[ 0 ] );
 
@@ -812,7 +815,7 @@ static void ReadIntoMemory ( bearoffcontext *pbc )
 	pbc->map = g_mapped_file_new(pbc->szFilename, FALSE, &error);
 	if (!pbc->map)
 	{
-		g_printerr("%s: %s\n", _("Failed to map bearoffdatabase %s"), pbc->szFilename, error->message);
+		g_printerr(_("%s: Failed to map bearoffdatabase %s\n"), pbc->szFilename, error->message);
 		g_error_free(error);
 	}
 	pbc->p = (unsigned char *)g_mapped_file_get_contents(pbc->map);

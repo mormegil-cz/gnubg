@@ -446,7 +446,7 @@ static GtkWidget *OptionsPages( optionswidget *pow )
       N_("Play 3-chequer hypergammon (i.e., gammon and backgammons possible)")
     };
 
-    const char **ppch, **ppchTip;
+    char **ppch;
     GtkWidget *pw, *pwn, *pwp, *pwvbox, *pwhbox, *pwev, *pwf, *pwb,
 	*pwAnimBox, *pwFrame, *pwBox, *pwSpeed, *pwScale, *pwhoriz,
 	*pwLabelFile, *table, *label;

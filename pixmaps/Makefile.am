@@ -31,6 +31,7 @@ STOCK_IMAGES = \
 PIXMAPS = gnubg-big.png
 
 EXTRA_DIST = \
+	     gnubg-stock-pixbufs.h \
 	     gnubg.ico \
 	     $(STOCK_IMAGES) \
 	     $(ICONS_16_SCALABLE) \
@@ -60,3 +61,4 @@ nobase_dist_gnubgicons_DATA = \
 dist_gnubgpixmaps_DATA = $(PIXMAPS)
 
 noinst_DATA = gnubg-stock-pixbufs.h
+CLEANFILES=stock-icons.list gnubg-stock-pixbufs.h

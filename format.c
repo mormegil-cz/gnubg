@@ -23,7 +23,7 @@
 #include "backgammon.h"
 
 #include <glib.h>
-#include "gnubgi18n.h"
+#include <glib/gi18n.h>
 #include <string.h>
 
 #include "eval.h"
@@ -149,7 +149,7 @@ OutputEvalContext ( const evalcontext *pec, const int fChequer ) {
     if ( ! cmp_evalcontext ( &aecSettings[ i ], pec ) ) {
       sprintf ( pc = strchr ( sz, 0 ),
                 " [%s]",
-                gettext ( aszSettings[ i ] ) );
+                Q_ ( aszSettings[ i ] ) );
       break;
     }
 
@@ -310,7 +310,7 @@ OutputEvalContextsForRollout( char *sz, const char *szIndent,
 
       sprintf( strchr( sz, 0 ),
                "%s: %s ", _("Play"),
-               ( j < 0 ) ? "" : gettext ( aszSettings[ j ] ) );
+               ( j < 0 ) ? "" : Q_ ( aszSettings[ j ] ) );
 
       strcat( sz, OutputEvalContext ( &aecChequer[ i ], TRUE ) );
       strcat( sz, "\n" );

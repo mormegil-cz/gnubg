@@ -21,7 +21,7 @@
 #include "config.h"
 #include "backgammon.h"
 #include <glib.h>
-#include "gnubgi18n.h"
+#include <glib/gi18n.h>
 #ifndef _MSC_VER
 #include <string.h>
 #include <stdlib.h>

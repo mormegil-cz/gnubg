@@ -1022,7 +1022,7 @@ extern void SetAnnotation( moverecord *pmr ) {
 	    pwBox = gtk_hbox_new( FALSE, 0 );
 	    gtk_box_pack_start( GTK_BOX( pwBox ), 
                                 gtk_label_new( 
-                                   gettext ( aszDoubleTypes[ dt ] ) ),
+                                   Q_ ( aszDoubleTypes[ dt ] ) ),
 				FALSE, FALSE, 2 );
 	    gtk_box_pack_start( GTK_BOX( pwBox ), 
                                 SkillMenu( pmr->stCube, "double" ),
@@ -2019,7 +2019,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
       if ( i < NUM_SETTINGS )
         gtk_menu_append ( GTK_MENU ( pwMenu ),
                           pwItem = gtk_menu_item_new_with_label ( 
-                          gettext ( aszSettings[ i ] ) ) );
+                          Q_ ( aszSettings[ i ] ) ) );
       else
         gtk_menu_append ( GTK_MENU ( pwMenu ),
                           pwItem = gtk_menu_item_new_with_label (
@@ -7327,19 +7327,19 @@ extern void GTKRecordShow( FILE *pfIn, char *szFile, char *szPlayer ) {
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 17, sz );
 
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 18,
-			    gettext ( aszRating[ GetRating( (float)pr.arErrorChequerplay[
+			    Q_ ( aszRating[ GetRating( (float)pr.arErrorChequerplay[
 				EXPAVG_TOTAL ] ) ] ) );
 	
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 19,
-			    gettext ( aszRating[ GetRating( (float)pr.arErrorCube[
+			    Q_ ( aszRating[ GetRating( (float)pr.arErrorCube[
 				EXPAVG_TOTAL ] ) ] ) );
 	
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 20,
-			    gettext ( aszRating[ GetRating( (float)pr.arErrorCombined[
+			    Q_ ( aszRating[ GetRating( (float)pr.arErrorCombined[
 				EXPAVG_TOTAL ] ) ] ) );
 	
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 21,
-			    aszLuckRating[ getLuckRating( (float)pr.arLuck[EXPAVG_TOTAL ] / 20 ) ] );
+			    Q_(aszLuckRating[ getLuckRating( (float)pr.arLuck[EXPAVG_TOTAL ] / 20 ) ]) );
 	
 	if( !CompareNames( pr.szName, szPlayer ) )
 	    gtk_clist_select_row( GTK_CLIST( pwList ), i, 0 );

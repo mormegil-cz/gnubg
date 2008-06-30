@@ -23,7 +23,7 @@
 #include "backgammon.h"
 
 #include <glib.h>
-#include "gnubgi18n.h"
+#include <glib/gi18n.h>
 #include <string.h>
 #include <errno.h>
 #include <cache.h>
@@ -263,6 +263,13 @@ const char *aszVariationCommands[ NUM_VARIATIONS ] = {
 cubeinfo ciCubeless = { 1, 0, 0, 0, { 0, 0 }, FALSE, FALSE, FALSE,
                         { 1.0, 1.0, 1.0, 1.0 }, VARIATION_STANDARD };
 
+const char *aszEvalType[] = 
+   { 
+     N_ ("No evaluation"), 
+     N_ ("Neural net evaluation"), 
+     N_ ("Rollout")
+   };
+
 #if defined (REDUCTION_CODE)
 static evalcontext ecBasic = { FALSE, 0, 0, TRUE, 0.0 };
 #else
@@ -377,9 +384,15 @@ static randctx rc;
  * predefined settings 
  */
 
-const char *aszSettingList = N_(":Settings List: beginner, casual play, intermediate, advanced, "
-												"expert, world class, supremo, grandmaster");
-const char *aszSettings[ NUM_SETTINGS ];
+const char *aszSettings[ NUM_SETTINGS ] = {
+  N_ ("setting|beginner"), 
+  N_ ("setting|casual play"), 
+  N_ ("setting|intermediate"), 
+  N_ ("setting|advanced"), 
+  N_ ("setting|expert"), 
+  N_ ("setting|world class"),
+  N_ ("setting|supremo"),
+  N_ ("setting|grandmaster") };
 
 /* which evaluation context does the predefined settings use */
 #if defined (REDUCTION_CODE)
@@ -421,8 +434,13 @@ int aiSettingsMoveFilter[ NUM_SETTINGS ] = {
 
 /* the predefined move filters */
 
-const char *aszMoveFilterList = N_(":Move Filter List: Tiny, Narrow, Normal, Large, Huge");
-const char *aszMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ];
+const char *aszMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ] = {
+  N_("Tiny"),
+  N_("Narrow"),
+  N_("Normal"),
+  N_("Large"),
+  N_("Huge")
+};
 
 movefilter aaamfMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ][ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] = {
   /* tiny */
@@ -452,8 +470,12 @@ movefilter aaamfMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ][ MAX_FILTER_PLIES 
     { { 0, 20, 0.44f }, { -1, 0, 0 }, { 0, 6, 0.11f }, { -1, 0, 0.0 } } }
 };
 
-const char *aszDoubleList = N_(":Move Filter List: Double, Beaver, Raccoon");
-const char *aszDoubleTypes[ NUM_DOUBLE_TYPES ];
+
+const char *aszDoubleTypes[ NUM_DOUBLE_TYPES ] = {
+  N_("doubletype|Double"),
+  N_("doubletype|Beaver"),
+  N_("doubletype|Raccoon")
+};
 
 /* parameters for EvalEfficiency */
 

@@ -44,7 +44,7 @@
 #include "md5.h"
 #include "mt19937ar.h"
 #include "isaac.h"
-#include "gnubgi18n.h"
+#include <glib/gi18n.h>
 #include <glib/gstdio.h>
 
 #if USE_GTK
@@ -382,7 +382,7 @@ PrintRNGSeedMP( mpz_t n ) {
   char *pch;
   pch = mpz_get_str( NULL, 10, n );
   g_print( _("The current seed is") );
-  g_print("% s\n", pch);
+  g_print("%s\n", pch);
   free( pch );
 
 }

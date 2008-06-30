@@ -345,7 +345,7 @@ MoveFilterSetup ( movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
     if ( i < NUM_MOVEFILTER_SETTINGS )
       gtk_menu_append ( GTK_MENU ( pwMenu ),
                         pwItem = gtk_menu_item_new_with_label ( 
-                                    gettext ( aszMoveFilterSettings[ i ] ) ) );
+                                    Q_ ( aszMoveFilterSettings[ i ] ) ) );
     else
       gtk_menu_append ( GTK_MENU ( pwMenu ),
                         pwItem = gtk_menu_item_new_with_label (
@@ -537,7 +537,7 @@ MoveFilterWidget ( movefilter *pmf, int *pfOK,
     if ( i < NUM_MOVEFILTER_SETTINGS )
       gtk_menu_append ( GTK_MENU ( pwMenu ),
                         pwItem = gtk_menu_item_new_with_label ( 
-                                    gettext ( aszMoveFilterSettings[ i ] ) ) );
+                                    Q_( aszMoveFilterSettings[ i ] ) ) );
     else
       gtk_menu_append ( GTK_MENU ( pwMenu ),
                         pwItem = gtk_menu_item_new_with_label (

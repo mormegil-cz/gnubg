@@ -1,3 +1,16 @@
+Mon Jun 30 23:12:09 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, analysis.c, backgammon.h, bearoff.c, configure.in,
+	dbprovider.c, dice.c, drawboard.c, eval.c, export.c, external.c,
+	file.c, format.c, formatgs.c, gnubg.c, gtkgame.c, gtkmovefilter.c,
+	gtkoptions.c, util.c, pixmaps/Makefile.am, po/cs.po, po/da.po,
+	po/de.po, po/en_US.po, po/fr.po, po/gnubg.pot, po/is.po, po/it.po,
+	po/ja.po, po/ru.po, po/tr.po, po/gnubg-langs/__catstatus.php,
+	mkinstalldirs, po/LINGUAS: fix minor translation problems and update
+	the pot/po files to use glib macros
+	* gnubgi18n.c, gnubgi18n.h: removed as similar functions are provided by
+	glib/gettext
+
 Mon Jun 30 19:38:38 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* po/* m4/*, configure.in: modify gettext and friends to use glib

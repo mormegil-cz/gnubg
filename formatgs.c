@@ -23,7 +23,7 @@
 #include "backgammon.h"
 
 #include <glib.h>
-#include "gnubgi18n.h"
+#include <glib/gi18n.h>
 
 #include "formatgs.h"
 #include "format.h"
@@ -226,7 +226,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
       for ( i = 0; i < 2; ++i )
         if ( psc->anUnforcedMoves[ i ] )
           aasz[ i + 1 ] =
-            g_strdup( gettext ( aszRating[ GetRating( aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ] ) ] ) );
+            g_strdup( Q_(aszRating[ GetRating( aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ] ) ] ) );
         else 
           aasz[ i + 1 ] = g_strdup( _("n/a") );
 
@@ -342,7 +342,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
       for ( i = 0; i < 2; ++i )
         if ( psc->anCloseCube[ i ] )
           aasz[ i + 1 ] =
-            g_strdup( gettext ( aszRating[ GetRating( aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ] ) ] ) );
+            g_strdup( Q_ ( aszRating[ GetRating( aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ] ) ] ) );
         else 
           aasz[ i + 1 ] = g_strdup( _("n/a") );
 
@@ -410,7 +410,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
       for ( i = 0; i < 2; ++i )
         if ( psc->anTotalMoves[ i ] )
           aasz[ i + 1 ] =
-            g_strdup( aszLuckRating[ getLuckRating( psc->arLuck[ i ][ 0 ] / psc->anTotalMoves[ i ] ) ] );
+            g_strdup( Q_(aszLuckRating[ getLuckRating( psc->arLuck[ i ][ 0 ] / psc->anTotalMoves[ i ] ) ]) );
         else 
           aasz[ i + 1 ] = g_strdup( _("n/a") );
 
@@ -479,7 +479,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
         for ( i = 0; i < 2; ++i )
           if ( psc->anCloseCube[ i ] + psc->anUnforcedMoves[ i ] )
             aasz[ i + 1 ] =
-              g_strdup( gettext ( aszRating[ GetRating( aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ] ) ] ) );
+              g_strdup( Q_ ( aszRating[ GetRating( aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ] ) ] ) );
           else 
             aasz[ i + 1 ] = g_strdup( _("n/a") );
 

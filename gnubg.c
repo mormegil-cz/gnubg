@@ -59,7 +59,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "sgf.h"
 #include "export.h"
 #include "import.h"
-#include "gnubgi18n.h"
+#include <glib/gi18n.h>
 #include <glib/gstdio.h>
 #include <locale.h>
 #include "matchequity.h"
@@ -1124,8 +1124,7 @@ extern int SetToggle( const char *szName, int *pf, char *sz, const char *szOn, c
     int cch;
     
     if( !pch ) {
-	outputf( _("You must specify whether to set %s on or off."), szName, szName );
-	output("\n");
+	outputf( _("You must specify whether to set %s on or off.\n"), szName );
 
 	return -1;
     }
@@ -1156,8 +1155,7 @@ extern int SetToggle( const char *szName, int *pf, char *sz, const char *szOn, c
 	return FALSE;
     }
 
-    outputf( _("Illegal keyword `%s'."), pch, szName );
-	output("\n");
+    outputf( _("Illegal keyword `%s'.\n"), pch );
 
     return -1;
 }
@@ -2194,7 +2192,7 @@ static void HintTake( void )
   else {
     outputf ( "%s : %6.2f%%\n", _("MWC for take"),
               100.0 * ( 1.0 - eq2mwc ( arDouble[ 2 ], &ci ) ) );
-    outputf ( ": %6.2f%%\n", _("MWC for pass"),
+    outputf ( "%s: %6.2f%%\n", _("MWC for pass"),
               100.0 * ( 1.0 - eq2mwc ( arDouble[ 3 ], &ci ) ) );
   }
 	
@@ -2427,8 +2425,6 @@ extern void PromptForExit( void )
 #if HAVE_LIBREADLINE
         write_history( gnubg_histfile );
 #endif /* HAVE_READLINE */
-
-	FreeTranslationLists();
 
 #if USE_GTK
 	if (gtk_main_level() == 1)
@@ -4712,7 +4708,7 @@ static int getDiceRandomDotOrg(void)
 		return anBuf[nCurrent++];
 	else {
 
-		outputf("%s\n", _("Fetching %d random numbers from <www.random.org>"), BUFLENGTH);
+		outputf(_("Fetching %d random numbers from <www.random.org>\n"), BUFLENGTH);
 		outputx();
 
 		/* fetch new numbers */
@@ -4910,8 +4906,6 @@ int main(int argc, char *argv[])
 #if USE_MULTITHREAD
 	MT_InitThreads();
 #endif
-
-	InitTranslationLists();
 
 	/* set language */
 	init_defaults();
@@ -5792,7 +5786,7 @@ extern void ProcessGtkEvents(void)
 #endif
 }
 
-extern int CheckGameExists()
+extern int CheckGameExists(void)
 {
 	if (plGame)
 	{

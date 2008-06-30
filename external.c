@@ -104,7 +104,7 @@
 #include "drawboard.h"
 #include "external.h"
 #include "rollout.h"
-#include "gnubgi18n.h"
+#include <glib/gi18n.h>
 
 #if HAVE_SOCKETS
 /* Stuff for the yacc/lex parser */
@@ -622,7 +622,7 @@ listenloop:
 	ExternalUnbind( sz );
 	return;
       }
-      outputf( "%s\n", _("Waiting for a connection from %s..."), sz);
+      outputf( _("Waiting for a connection from %s...\n"), sz);
       outputx();
       ProcessGtkEvents();
 
@@ -654,7 +654,7 @@ listenloop:
 
       /* print info about remove client */
 
-      outputf( "%s\n", _("Accepted connection from %s."),
+      outputf(_("Accepted connection from %s.\n"),
                  inet_ntoa( saRemote.sin_addr ) );
       outputx();
       ProcessGtkEvents();

@@ -27,10 +27,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <glib/gi18n.h>
 
 #include "drawboard.h"
 #include "positionid.h"
-#include "gnubgi18n.h"
 
 int fClockwise = FALSE; /* Player 1 moves clockwise */
 
