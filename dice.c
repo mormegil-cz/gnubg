@@ -393,7 +393,7 @@ static void
 PrintRNGSeedNormal( int n ) {
 
   g_print( _("The current seed is") );
-  g_print( " %d.\n"), n );
+  g_print( " %d.\n", n );
 
 }
 #endif /* HAVE_LIBGMP */
