@@ -1,3 +1,8 @@
+Mon Jun 30 19:38:38 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* po/* m4/*, configure.in: modify gettext and friends to use glib
+	gettext macros
+
 Sun Jun 29 21:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* analysis.c - gnubg.c: First part of translation string cleanup

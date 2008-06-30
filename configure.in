@@ -289,7 +289,10 @@ dnl *************
 
 dnl internationalization macros
 dnl
-AM_GNU_GETTEXT([external])
+AC_SUBST(GETTEXT_PACKAGE, gnubg)
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE", [The package name, for gettext])
+AM_GLIB_GNU_GETTEXT
+
 
 dnl
 dnl config files
