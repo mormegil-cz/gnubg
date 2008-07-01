@@ -199,26 +199,44 @@ ConstTanBoard msBoard(void) {return (ConstTanBoard)ms.anBoard;}
 
 matchinfo mi;
 
-int fDisplay = TRUE, fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
-    fAutoCrawford = 1, fAutoRoll = TRUE,
-    fCubeUse = TRUE, 
-    fConfirm = TRUE, fShowProgress, fJacoby = TRUE,
-    fOutputRawboard = FALSE, 
-    fAnalyseCube = TRUE,
-    fAnalyseDice = TRUE, fAnalyseMove = TRUE, fRecord = TRUE,
-    nToolbarStyle = 2, fStyledGamelist = TRUE, fFullScreen = FALSE;
-unsigned int cAnalysisMoves = 1, cAutoDoubles = 0, nDefaultLength = 7, nBeavers = 3;
-int fCubeEqualChequer = TRUE, fPlayersAreSame = TRUE, 
-	fTruncEqualPlayer0 =TRUE;
-int fInvertMET = FALSE;
-int fConfirmSave = TRUE;
-int fTutor = FALSE, fTutorCube = TRUE, fTutorChequer = TRUE;
-int fTutorAnalysis = FALSE;
-int nThreadPriority = 0;
-int fCheat = FALSE;
-unsigned int afCheatRoll[ 2 ] = { 0, 0 };
-int fGotoFirstGame = FALSE;
 float rRatingOffset = 2050;
+int fAnalyseCube = TRUE;
+int fAnalyseDice = TRUE;
+int fAnalyseMove = TRUE;
+int fAutoBearoff = FALSE;
+int fAutoCrawford = 1;
+int fAutoGame = TRUE;
+int fAutoMove = FALSE;
+int fAutoRoll = TRUE;
+int fCheat = FALSE;
+int fConfirmNew = TRUE;
+int fConfirmSave = TRUE;
+int fCubeEqualChequer = TRUE;
+int fCubeUse = TRUE;
+int fDisplay = TRUE;
+int fFullScreen = FALSE;
+int fGotoFirstGame = FALSE;
+int fInvertMET = FALSE;
+int fJacoby = TRUE;
+int fOutputRawboard = FALSE;
+int fPlayersAreSame = TRUE;
+int fRecord = TRUE;
+int fShowProgress;
+int fStyledGamelist = TRUE;
+int fTruncEqualPlayer0 =TRUE;
+int fTutorAnalysis = FALSE;
+int fTutorChequer = TRUE;
+int fTutorCube = TRUE;
+int fTutor = FALSE;
+int nConfirmDefault = -1;
+int nThreadPriority = 0;
+int nToolbarStyle = 2;
+unsigned int afCheatRoll[ 2 ] = { 0, 0 };
+unsigned int cAnalysisMoves = 1;
+unsigned int cAutoDoubles = 0;
+unsigned int nBeavers = 3;
+unsigned int nDefaultLength = 7;
+
 #if USE_BOARD3D
 int fSync = -1;	/* Not set */
 int fResetSync = FALSE;	/* May need to wait for main window */
@@ -2358,7 +2376,7 @@ Shutdown( void ) {
 
 /* Called on various exit commands -- e.g. EOF on stdin, "quit" command,
    etc.  If stdin is not a TTY, this should always exit immediately (to
-   avoid enless loops on EOF).  If stdin is a TTY, and fConfirm is set,
+   avoid enless loops on EOF).  If stdin is a TTY, and fConfirmNew is set,
    and a game is in progress, then we ask the user if they're sure. */
 extern void PromptForExit( void )
 {
@@ -2375,7 +2393,7 @@ extern void PromptForExit( void )
 
 	fExiting = TRUE;
 
-	if( fInteractive && fConfirm && ms.gs == GAME_PLAYING ) {
+	if( fInteractive && fConfirmNew && ms.gs == GAME_PLAYING ) {
 		fInterrupt = FALSE;
 
 		if( !GetInputYN( _("Are you sure you want to exit and abort the game in progress?") ) )
@@ -3234,13 +3252,21 @@ extern void CommandSaveSettings( char *szParam )
 		    fTutorAnalysis ? "on" : "off",
 		    ((TutorSkill == SKILL_VERYBAD) ? "very bad" :
 		     (TutorSkill == SKILL_BAD) ? "bad" : "doubtful"),
-		    fConfirm ? "on" : "off",
+		    fConfirmNew ? "on" : "off",
                     fConfirmSave ? "on" : "off",
                     fCubeUse ? "on" : "off",
 #if USE_GTK
                     nDelay,
 #endif
                     fDisplay ? "on" : "off");
+
+    fprintf( pf, "set confirm default ");
+    if (nConfirmDefault == 1)
+	    fprintf( pf, "yes\n");
+    else if (nConfirmDefault == 0)
+	    fprintf( pf, "no\n");
+    else
+	    fprintf( pf, "ask\n");
 
     SaveEvalSetupSettings ( pf, "set evaluation chequerplay", &esEvalChequer );
     SaveEvalSetupSettings ( pf, "set evaluation cubedecision", &esEvalCube );
@@ -3954,6 +3980,12 @@ extern int GetInputYN( char *szPrompt )
 {
 
     char *pch;
+
+    if (nConfirmDefault != -1)
+	    return nConfirmDefault;
+
+    if (!fInteractive)
+	    return FALSE;
 
 #if USE_GTK
     if( fX )

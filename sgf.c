@@ -1432,7 +1432,7 @@ extern void CommandLoadGame(char *sz)
     }
 
     if ((pl = LoadCollection(sz))) {
-	if (ms.gs == GAME_PLAYING && fConfirm) {
+	if (ms.gs == GAME_PLAYING && fConfirmNew) {
 	    if (fInterrupt)
 		return;
 
@@ -1491,7 +1491,7 @@ extern void CommandLoadPosition(char *sz)
     }
 
     if ((pl = LoadCollection(sz))) {
-	if (ms.gs == GAME_PLAYING && fConfirm) {
+	if (ms.gs == GAME_PLAYING && fConfirmNew) {
 	    if (fInterrupt)
 		return;
 
@@ -1549,7 +1549,7 @@ extern void CommandLoadMatch(char *sz)
     if ((pl = LoadCollection(sz))) {
 	/* FIXME make sure the root nodes have MI properties; if not,
 	   we're loading a session. */
-	if (ms.gs == GAME_PLAYING && fConfirm) {
+	if (ms.gs == GAME_PLAYING && fConfirmNew) {
 	    if (fInterrupt)
 		return;
 

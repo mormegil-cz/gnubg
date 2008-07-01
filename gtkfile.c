@@ -426,26 +426,40 @@ enum {
 	NUM_COLS
 };
 
-static char *batch_analyse(void)
+static char *batch_analyse(gchar *filename)
 {
-	gchar *save;
-	gchar *savecmd;
+	gchar *file;
+	gchar *folder;
 	gchar *dir;
+	gchar *save;
+	gchar *cmd;
 
-	dir = g_build_filename(szCurrentFolder, "analysed", NULL);
+	DisectPath(filename, NULL, &file, &folder);
+	dir = g_build_filename(folder, "analysed", NULL);
+	g_free(folder);
+
 	if (!g_file_test(dir, G_FILE_TEST_EXISTS))
 		g_mkdir(dir, 0700);
+
 	if (!g_file_test(dir, G_FILE_TEST_IS_DIR))
 	{
 		g_free(dir);
 		return (_("Failed to make directory"));
 	}
 
-	save = g_strconcat(dir, G_DIR_SEPARATOR_S, szCurrentFileName, ".sgf",
-			NULL);
+	save = g_strconcat(dir, G_DIR_SEPARATOR_S, file, ".sgf", NULL);
+	g_free(file);
 	g_free(dir);
 	if (g_file_test((save), G_FILE_TEST_EXISTS))
 		return(_("Previous"));
+
+	g_free(szCurrentFileName);
+	szCurrentFileName = NULL;
+	cmd = g_strdup_printf("import auto \"%s\"", filename);
+	UserCommand(cmd);
+	g_free(cmd);
+	if (!szCurrentFileName)
+		return _("Failed import");
 
 	UserCommand("analysis clear match");
 	UserCommand("analyse match");
@@ -453,15 +467,14 @@ static char *batch_analyse(void)
 	if (!MatchAnalysed())
 		return(_("Cancelled"));
 
-	savecmd = g_strdup_printf("save match \"%s\"", save);
-	UserCommand(savecmd);
-	g_free(savecmd);
+	cmd = g_strdup_printf("save match \"%s\"", save);
+	UserCommand(cmd);
+	g_free(cmd);
 	return (_("Done"));
 }
 
 static void batch_do_all(gpointer batch_model)
 {
-	gchar *cmd;
 	gchar *result;
 	GtkTreeIter iter;
 	gboolean valid;
@@ -476,16 +489,7 @@ static void batch_do_all(gpointer batch_model)
 		gtk_tree_model_get(batch_model, &iter, COL_PATH, &filename,
 				   -1);
 
-		g_free(szCurrentFileName);
-		szCurrentFileName = NULL;
-
-		cmd = g_strdup_printf("import auto \"%s\"", filename);
-		UserCommand(cmd);
-		g_free(cmd);
-		if (!szCurrentFileName)
-			result = g_strdup(_("Failed import"));
-		else
-				result = batch_analyse();
+		result = batch_analyse(filename);
 		gtk_list_store_set(batch_model, &iter, COL_RESULT, result,
 				   -1);
 
@@ -594,6 +598,7 @@ static void batch_create_dialog_and_run(GSList * filenames)
 	GtkWidget *skip_button;
 	GtkWidget *stop_button;
 	GtkTreeModel *model;
+	GtkWidget *sw;
 
 	view = batch_create_view(filenames);
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
@@ -604,13 +609,19 @@ static void batch_create_dialog_and_run(GSList * filenames)
 			DIALOG_FLAG_MODAL | DIALOG_FLAG_MINMAXBUTTONS |
 			DIALOG_FLAG_NOTIDY, NULL, NULL);
 
+	gtk_window_set_default_size( GTK_WINDOW( dialog ), -1, 400);
+
 	pwOldGrab = pwGrab;
 	pwGrab = dialog;
 
 	g_signal_connect(G_OBJECT(dialog), "destroy",
 			 G_CALLBACK(batch_cancel), model);
-	gtk_container_add(GTK_CONTAINER(DialogArea(dialog, DA_MAIN)),
-			  view);
+
+
+	sw = gtk_scrolled_window_new (NULL, NULL);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_container_add (GTK_CONTAINER (sw), view);
+	gtk_container_add (GTK_CONTAINER (DialogArea (dialog, DA_MAIN)), sw);
 
 	buttons = DialogArea(dialog, DA_BUTTONS);
 

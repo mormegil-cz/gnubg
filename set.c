@@ -757,9 +757,26 @@ extern void CommandSetAppearance( char *sz ) {
 #endif /* USE_GTK */
 }
 
+extern void CommandSetConfirmDefault( char *sz ) {
+
+	if (!sz || !*sz) 
+	{
+		outputf("Needs an argument!\n");
+		return;
+	}
+	if (strcmp(sz, "yes") == 0)
+		nConfirmDefault = 1;
+	else if(strcmp(sz, "no") == 0) 
+		nConfirmDefault = 0;
+	else if(strcmp(sz, "ask") == 0) 
+		nConfirmDefault = -1;
+	else
+		outputf(_("Invalid argument\n"));
+}
+
 extern void CommandSetConfirmNew( char *sz ) {
     
-    SetToggle( "confirm new", &fConfirm, sz, 
+    SetToggle( "confirm new", &fConfirmNew, sz, 
                _("Will ask for confirmation before "
                  "aborting games in progress."), 
                _("Will not ask for confirmation "

@@ -436,6 +436,7 @@ command cER = {
       "automatically"), szONOFF, &cOnOff },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetConfirm[] = {
+    { "default", CommandSetConfirmDefault, N_("Set default answer to yes/no questions"), NULL, NULL },
     { "new", CommandSetConfirmNew, N_("Ask for confirmation before aborting "
       "a game in progress"), szONOFF, &cOnOff },
     { "save", CommandSetConfirmSave, N_("Ask for confirmation before "

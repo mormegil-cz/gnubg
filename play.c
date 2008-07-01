@@ -730,7 +730,7 @@ static int NewGame( void )
     
     if( !fRecord && !ms.nMatchTo && lMatch.plNext->p ) {
 	/* only recording the active game of a session; discard any others */
-	if( fConfirm ) {
+	if( fConfirmNew ) {
 	    if( fInterrupt )
 		return -1;
 	    
@@ -2840,7 +2840,7 @@ extern void CommandNewGame( char *sz )
     }
 
     if( ms.gs == GAME_PLAYING ) {
-	if( fConfirm ) {
+	if( fConfirmNew ) {
 	    if( fInterrupt )
 		return;
 	    
@@ -2935,7 +2935,7 @@ extern void CommandNewMatch( char *sz )
        return;
     }
 
-    if( ms.gs == GAME_PLAYING && fConfirm ) {
+    if( ms.gs == GAME_PLAYING && fConfirmNew ) {
 	if( fInterrupt )
 	    return;
 
@@ -2974,7 +2974,7 @@ extern void CommandNewMatch( char *sz )
 
 extern void CommandNewSession( char *sz ) {
 
-    if( ms.gs == GAME_PLAYING && fConfirm ) {
+    if( ms.gs == GAME_PLAYING && fConfirmNew ) {
 	if( fInterrupt )
 	    return;
 	    

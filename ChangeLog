@@ -1,3 +1,10 @@
+Wed Jul  2 00:01:04 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, commands.inc, gnubg.c, gtkfile.c, gtkoptions.c,
+	import.c, play.c, set.c, sgf.c, show.c: fix minor problems with the
+	batch analyse function and add an option for setting default answers
+	to yes/no questions.
+
 Mon Jun 30 23:12:09 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am, analysis.c, backgammon.h, bearoff.c, configure.in,

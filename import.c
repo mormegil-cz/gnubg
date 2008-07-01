@@ -353,7 +353,7 @@ ImportJF( FILE * fp, char *szFileName) {
   char aszPlayer[ 2 ][ MAX_NAME_LEN ];
   int i;
   
-  if( ms.gs == GAME_PLAYING && fConfirm ) {
+  if( ms.gs == GAME_PLAYING && fConfirmNew ) {
     if( fInterrupt )
       return -1;
     
@@ -984,7 +984,7 @@ static int ImportMatVariation( FILE *fp, char *szFilename, bgvariation bgVariati
         n = sscanf( szLine, "%d %*1[Pp]oint %*1[Mm]atch%c", &nLength, &ch );
     } while(n != 2);
     
-    if( ms.gs == GAME_PLAYING && fConfirm ) {
+    if( ms.gs == GAME_PLAYING && fConfirmNew ) {
       if( fInterrupt ) {
         g_free( pchComment );
         return -1;
@@ -1499,7 +1499,7 @@ static int ImportOldmoves( FILE *pf, char *szFilename ) {
       
     } 
     
-    if( ms.gs == GAME_PLAYING && fConfirm ) {
+    if( ms.gs == GAME_PLAYING && fConfirmNew ) {
 	if( fInterrupt )
 	    return -1;
 	
@@ -2254,7 +2254,7 @@ static int ImportSGG( FILE *pf, char *szFilename ) {
 		return -1;
 	}
 
-    if( ms.gs == GAME_PLAYING && fConfirm ) {
+    if( ms.gs == GAME_PLAYING && fConfirmNew ) {
 	if( fInterrupt )
 	    return -1;
 	
@@ -2936,7 +2936,7 @@ static int ImportBKG( FILE *pf, const char *szFilename ) {
 
     int i;
 
-    if( ms.gs == GAME_PLAYING && fConfirm ) {
+    if( ms.gs == GAME_PLAYING && fConfirmNew ) {
 	if( fInterrupt )
 	    return -1;
 	    
@@ -3141,7 +3141,7 @@ ImportSnowieTxt( FILE *pf ) {
   TanBoard anBoard;
   char aszPlayer[ 2 ][ MAX_NAME_LEN ];
 
-  if( ms.gs == GAME_PLAYING && fConfirm ) {
+  if( ms.gs == GAME_PLAYING && fConfirmNew ) {
     if( fInterrupt )
       return -1;
     
