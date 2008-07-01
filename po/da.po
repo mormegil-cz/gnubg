@@ -6521,7 +6521,7 @@ msgstr "Validerende CSS!"
 #: html.c:1931
 #, c-format
 msgid "<!-- Output generated %s by %s (http://www.gnu.org/software/gnubg/) "
-msgstr "Udskriften er lavet %s af (http://www.gnu.org/software/gnubg/)"
+msgstr "Udskriften er lavet %s af %s (http://www.gnu.org/software/gnubg/)"
 
 #: html.c:1938
 #, c-format
