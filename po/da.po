@@ -27,7 +27,7 @@ msgstr ""
 "Project-Id-Version: gnubg 0.12\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-06-30 21:11+0200\n"
-"PO-Revision-Date: 2008-07-01 09:54+0200\n"
+"PO-Revision-Date: 2008-07-01 14:02+0200\n"
 "Last-Translator: Christian Anthon <anthon@chemie.uni-erlangen.de>\n"
 "Language-Team: American English <kde-i18n-doc@lists.kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -97,7 +97,6 @@ msgid ""
 "No analysis selected, you must specify at least one type of analysis to "
 "perform"
 msgstr ""
-"Ingen analyse valgt. Du skal angive mindst een type analyse som skal udføres."
 
 #: analysis.c:1262
 msgid "Analysing game; move:"
@@ -2114,7 +2113,8 @@ msgid "invalid value cubeinfo (see gnubg.setcubeinfo() for an example)"
 msgstr ""
 
 #: gnubgmodule.c:293
-msgid "invalid dict value in evalcontext (see gnubg.evalcontext() for an example)"
+msgid ""
+"invalid dict value in evalcontext (see gnubg.evalcontext() for an example)"
 msgstr ""
 
 #: gnubgmodule.c:307
@@ -2150,7 +2150,8 @@ msgid "invalid position number"
 msgstr ""
 
 #: gnubgmodule.c:2401
-msgid "This installation of GNU Backgammon was compiled without Python support."
+msgid ""
+"This installation of GNU Backgammon was compiled without Python support."
 msgstr ""
 
 #: gnubgmodule.c:2410
@@ -2187,7 +2188,8 @@ msgstr ""
 
 #: gtkboard.c:1973 play.c:1773 play.c:2104 play.c:2225 play.c:2427 play.c:2643
 #: play.c:3560 play.c:3621 play.c:3761 play.c:3871
-msgid "It is the computer's turn -- type `play' to force it to move immediately."
+msgid ""
+"It is the computer's turn -- type `play' to force it to move immediately."
 msgstr ""
 
 #: gtkboard.c:2406 gtkboard.c:2413
@@ -3494,40 +3496,33 @@ msgid "Start a new %d point match"
 msgstr ""
 
 #: gtkgame.c:4306
-#, fuzzy
 msgid "Match settings"
-msgstr "Statistik for kampen"
+msgstr ""
 
 #: gtkgame.c:4309
-#, fuzzy
 msgid "Length:"
-msgstr "<længde>"
+msgstr "Længde:"
 
 #. Here the simplified player settings starts
 #: gtkgame.c:4321
-#, fuzzy
 msgid "Player settings"
-msgstr "/_Opsætning"
+msgstr ""
 
 #: gtkgame.c:4328
-#, fuzzy
 msgid "Current player settings"
-msgstr "Brikflytningsvurdering"
+msgstr ""
 
 #: gtkgame.c:4331
-#, fuzzy
 msgid "GNU Backgammon vs. Human"
-msgstr "GNU Backgammon - Tip"
+msgstr ""
 
 #: gtkgame.c:4332
-#, fuzzy
 msgid "Human vs. Human"
-msgstr "Menneske"
+msgstr ""
 
 #: gtkgame.c:4336
-#, fuzzy
 msgid "Modify player settings..."
-msgstr "Kopiér resultat af udrulning"
+msgstr ""
 
 #: gtkgame.c:4348 gtkoptions.c:1077
 msgid "Manual dice"
@@ -3538,9 +3533,8 @@ msgid "Tutor mode"
 msgstr ""
 
 #: gtkgame.c:4388
-#, fuzzy
 msgid "GNU Backgammon - New"
-msgstr "GNU - Backgammon - dobleterning"
+msgstr ""
 
 #: gtkgame.c:4408
 msgid "Set match equity table"
@@ -3564,10 +3558,9 @@ msgstr ""
 
 #: gtkgame.c:4780 gtkrace.c:258
 msgid "Trials:"
-msgstr "Antal spil:"
+msgstr ""
 
 #: gtkgame.c:4784
-#, fuzzy
 msgid "Truncation"
 msgstr "Afkortning"
 
@@ -3584,9 +3577,8 @@ msgid "Evaluation for later plies"
 msgstr ""
 
 #: gtkgame.c:4818
-#, fuzzy
 msgid "Enable separate evaluations "
-msgstr "Neural net-vurdering"
+msgstr ""
 
 #: gtkgame.c:4829
 msgid "Change eval after ply:"
@@ -3601,9 +3593,8 @@ msgid "Stop when STDs are small enough "
 msgstr ""
 
 #: gtkgame.c:4861 gtkgame.c:4911
-#, fuzzy
 msgid "Minimum Trials:"
-msgstr "Antal spil:"
+msgstr ""
 
 #: gtkgame.c:4873
 msgid "Ratio |Standard Deviation/Value|:"
@@ -3626,9 +3617,8 @@ msgid "No of j.s.d.s from best move"
 msgstr ""
 
 #: gtkgame.c:4940
-#, fuzzy
 msgid "Bearoff Truncation"
-msgstr "Afkortning"
+msgstr ""
 
 #: gtkgame.c:4947
 msgid "Truncate cubeless (and cubeful money) at exact bearoff database"
@@ -3676,28 +3666,24 @@ msgid "Save Rollout Settings As (*.rol)"
 msgstr ""
 
 #: gtkgame.c:5062
-#, fuzzy
 msgid "Open rollout settings (*.rol)"
-msgstr "Kopiér resultat af udrulning"
+msgstr ""
 
 #: gtkgame.c:5128
 msgid "GNU Backgammon - Rollouts"
 msgstr "GNU Backgammon - Udrulninger"
 
 #: gtkgame.c:5132
-#, fuzzy
 msgid "Save As"
-msgstr "Gem parti"
+msgstr ""
 
 #: gtkgame.c:5136
-#, fuzzy
 msgid "Load"
-msgstr "Se fremad:"
+msgstr ""
 
 #: gtkgame.c:5146
-#, fuzzy
 msgid "General Settings"
-msgstr "/_Opsætning"
+msgstr ""
 
 #: gtkgame.c:5154
 msgid "First Play (1) "
@@ -3708,9 +3694,8 @@ msgid "Later Play (1) "
 msgstr ""
 
 #: gtkgame.c:5166
-#, fuzzy
 msgid "Truncation Pt."
-msgstr "Afkortning"
+msgstr ""
 
 #: gtkgame.c:5435
 msgid "GNU Backgammon - Evaluation"
@@ -3750,9 +3735,8 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: gtkgame.c:5709 show.c:1008
-#, fuzzy
 msgid "Money Session"
-msgstr "pengespil"
+msgstr "Pengespil"
 
 #: gtkgame.c:5812 show.c:650
 msgid "Copying"
@@ -3763,9 +3747,8 @@ msgid "Warranty"
 msgstr "Garanti"
 
 #: gtkgame.c:5825
-#, fuzzy
 msgid "Evaluation engine"
-msgstr "/_Analyse/Vis evalueringsmotor"
+msgstr ""
 
 #: gtkgame.c:5834
 msgid "About GNU Backgammon"
@@ -3784,19 +3767,16 @@ msgid "Copying conditions"
 msgstr "Betingelser for kopiering"
 
 #: gtkgame.c:5872
-#, fuzzy
 msgid "Report Bug"
-msgstr "/_Hjælp/_Om gnubg"
+msgstr ""
 
 #: gtkgame.c:5878
-#, fuzzy
 msgid "Evaluation Engine"
-msgstr "Evaluering"
+msgstr ""
 
 #: gtkgame.c:5897
-#, fuzzy
 msgid "GNU Backgammon - Build Info"
-msgstr "GNU Backgammon - Tip"
+msgstr ""
 
 #: gtkgame.c:5922
 msgid ""
@@ -3807,14 +3787,12 @@ msgid ""
 msgstr ""
 
 #: gtkgame.c:5984
-#, fuzzy
 msgid "GNU Backgammon - Credits"
-msgstr "GNU - Backgammon - dobleterning"
+msgstr ""
 
 #: gtkgame.c:6024
-#, fuzzy
 msgid "Special thanks"
-msgstr "Speciel tak til:"
+msgstr "Speciel tak til"
 
 #: gtkgame.c:6099
 #, c-format
@@ -3832,39 +3810,32 @@ msgid "Help - command reference"
 msgstr ""
 
 #: gtkgame.c:6482
-#, fuzzy
 msgid "Chequer Play Statistics:"
-msgstr "Statistic for brikflytning:"
+msgstr "Statistik for brikflytning:"
 
 #: gtkgame.c:6483
-#, fuzzy
 msgid "Cube Statistics:"
-msgstr "Doblings-statistik"
+msgstr "Statistik for doblinger:"
 
 #: gtkgame.c:6484
-#, fuzzy
 msgid "Luck Statistics:"
 msgstr "Statistik for held"
 
 #: gtkgame.c:6485
-#, fuzzy
 msgid "Overall Statistics:"
 msgstr "Statistik for kampen"
 
 #: gtkgame.c:6649
-#, fuzzy
 msgid "Statistics for game "
-msgstr "Statistikker for alle spil"
+msgstr ""
 
 #: gtkgame.c:6726
-#, fuzzy
 msgid "Show all games"
-msgstr "/_Opsætning/Optag alle partier"
+msgstr ""
 
 #: gtkgame.c:6730
-#, fuzzy
 msgid "Move to first game"
-msgstr "pengespil"
+msgstr ""
 
 #: gtkgame.c:6734 gtkpanels.c:824
 msgid "Move back to the previous game"
@@ -3879,14 +3850,14 @@ msgid "Move ahead to last game"
 msgstr ""
 
 #: gtkgame.c:6750
-#, fuzzy, c-format
+#, c-format
 msgid "All games: %s %d, %s %d"
-msgstr "Pip-optælling: Rød %d, Hvid %d<br />\n"
+msgstr ""
 
 #: gtkgame.c:6753
-#, fuzzy, c-format
+#, c-format
 msgid "All games: %s, %s"
-msgstr "Pip-optælling: Rød %d, Hvid %d<br />\n"
+msgstr ""
 
 #: gtkgame.c:6770
 #, c-format
@@ -3894,9 +3865,8 @@ msgid "Game %d: %s %d, %s %d"
 msgstr ""
 
 #: gtkgame.c:6915 gtkgame.c:7169
-#, fuzzy
 msgid "Overall"
-msgstr "Samlet rangering"
+msgstr "Samlet"
 
 #: gtkgame.c:6955
 msgid "Graph"
@@ -3910,48 +3880,40 @@ msgid ""
 msgstr ""
 
 #: gtkgame.c:6961
-#, fuzzy
 msgid "Split statistics into panels"
-msgstr "Statistikker for alle spil"
+msgstr ""
 
 #: gtkgame.c:7141
-#, fuzzy
 msgid "GNU Backgammon - Player records"
-msgstr "GNU Backgammon - Spillere"
+msgstr ""
 
 #: gtkgame.c:7161
 msgid "Name"
 msgstr ""
 
 #: gtkgame.c:7164
-#, fuzzy
 msgid "Chequer"
-msgstr "Brikflytningsvurdering"
+msgstr ""
 
 #: gtkgame.c:7173
-#, fuzzy
 msgid "Games"
-msgstr "/_Spil"
+msgstr ""
 
 #: gtkgame.c:7194
-#, fuzzy
 msgid "Games:"
-msgstr "/_Spil"
+msgstr ""
 
 #: gtkgame.c:7197
-#, fuzzy
 msgid "Chequer:"
-msgstr "Brikflytningsvurdering"
+msgstr ""
 
 #: gtkgame.c:7200
-#, fuzzy
 msgid "Cube:"
-msgstr "dobleterning"
+msgstr "Dobleterning:"
 
 #: gtkgame.c:7203
-#, fuzzy
 msgid "Overall:"
-msgstr "Samlet rangering"
+msgstr "Samlet:"
 
 #: gtkgame.c:7206
 msgid "Luck:"
@@ -3972,7 +3934,7 @@ msgstr ""
 #: gtkgame.c:7218 progress.c:256 progress.c:350
 #, c-format
 msgid "Total"
-msgstr "Ialt"
+msgstr "I alt"
 
 #: gtkgame.c:7227
 msgid "Erase"
@@ -3987,14 +3949,13 @@ msgid "No player records found."
 msgstr ""
 
 #: gtkgame.c:7443
-#, fuzzy
 msgid "GNU Backgammon - Match information"
-msgstr "GNU Backgamon - Annotering"
+msgstr ""
 
 #: gtkgame.c:7450 gtkgame.c:7453
-#, fuzzy, c-format
+#, c-format
 msgid "%s's rating:"
-msgstr "Vurdering af held"
+msgstr ""
 
 #: gtkgame.c:7456
 msgid "Date:"
@@ -4009,14 +3970,12 @@ msgid "Round:"
 msgstr ""
 
 #: gtkgame.c:7459
-#, fuzzy
 msgid "Place:"
-msgstr "Ply:"
+msgstr ""
 
 #: gtkgame.c:7460
-#, fuzzy
 msgid "Annotator:"
-msgstr "Annotering"
+msgstr ""
 
 #: gtkgame.c:7463
 msgid "Comments:"
@@ -4024,9 +3983,8 @@ msgstr ""
 
 #. FIXME should be modal but presently causes crash and/or killing of the main window
 #: gtkgame.c:7570
-#, fuzzy
 msgid "GNU Backgammon - Speed estimate"
-msgstr "GNU Backgammon - Basis"
+msgstr ""
 
 #: gtkgame.c:7579
 msgid "Speed recorded:"
@@ -4041,33 +3999,28 @@ msgid "Calibrate"
 msgstr ""
 
 #: gtkgame.c:7614
-#, fuzzy
 msgid "GNU Backgammon - Calibration"
-msgstr "GNU Backgammon - Evaluering"
+msgstr ""
 
 #: gtkgame.c:7620
-#, fuzzy
 msgid "Calibrating:"
-msgstr "Samlet rangering"
+msgstr ""
 
 #: gtkgame.c:7622
 msgid "       (n/a)       "
 msgstr "       (i/t)       "
 
 #: gtkgame.c:7678
-#, fuzzy
 msgid "Resign normal"
-msgstr "/_Game/Tilbyd re_signation/_Normal"
+msgstr ""
 
 #: gtkgame.c:7679
-#, fuzzy
 msgid "Resign gammon"
-msgstr "/_Game/Tilbyd re_signation/_Gammon"
+msgstr ""
 
 #: gtkgame.c:7680
-#, fuzzy
 msgid "Resign backgammon"
-msgstr "/_Game/Tilbyd re_signation/_Backgammon"
+msgstr ""
 
 #: gtkgamelist.c:224 html.c:2510
 msgid "#"
@@ -4087,9 +4040,8 @@ msgid "%d-away"
 msgstr "%d væk"
 
 #: gtkmet.c:228
-#, fuzzy
 msgid "GNU Backgammon - Match equity table"
-msgstr "GNU Backgammon - Manual"
+msgstr ""
 
 #: gtkmet.c:231
 msgid "Load table..."
@@ -4117,9 +4069,8 @@ msgid "Always accept: "
 msgstr ""
 
 #: gtkmovefilter.c:251
-#, fuzzy
 msgid "moves."
-msgstr "%d træk\n"
+msgstr ""
 
 #: gtkmovefilter.c:265
 msgid "Add extra: "
@@ -4141,14 +4092,12 @@ msgid "%d-ply"
 msgstr "%d-ply"
 
 #: gtkmovefilter.c:492
-#, fuzzy
 msgid "GNU Backgammon - Move filter setup"
-msgstr "GNU Backgammon - Hjælp"
+msgstr ""
 
 #: gtkmovefilter.c:522
-#, fuzzy
 msgid "Move filter"
-msgstr "Maksimalt antal træk for analyse:"
+msgstr ""
 
 #. Button
 #: gtkmovefilter.c:564
@@ -4180,9 +4129,8 @@ msgid "Diff."
 msgstr ""
 
 #: gtkoptions.c:167
-#, fuzzy
 msgid "Doubtful"
-msgstr "Doblinger"
+msgstr ""
 
 #: gtkoptions.c:167
 msgid "Bad"
@@ -4197,9 +4145,8 @@ msgid "Select soundfile"
 msgstr ""
 
 #: gtkoptions.c:300
-#, fuzzy
 msgid "Sound command:"
-msgstr "Indlæs kommandoer"
+msgstr ""
 
 #: gtkoptions.c:309
 msgid "Beep on invalid input"
@@ -4222,13 +4169,13 @@ msgid "Sound Event"
 msgstr ""
 
 #: gtkoptions.c:366
-#, fuzzy
 msgid "Path:"
-msgstr "Kamplængde:"
+msgstr ""
 
 #. Manual setting
 #: gtkoptions.c:409
-msgid "The rand() generator specified by ANSI C (typically linear congruential)"
+msgid ""
+"The rand() generator specified by ANSI C (typically linear congruential)"
 msgstr ""
 
 #: gtkoptions.c:411
@@ -4309,9 +4256,8 @@ msgid "10th best"
 msgstr ""
 
 #: gtkoptions.c:432 set.c:3897
-#, fuzzy
 msgid "median"
-msgstr "medium"
+msgstr ""
 
 #: gtkoptions.c:433 set.c:3898
 msgid "10th worst"
@@ -4358,7 +4304,8 @@ msgid "Use standard backgammon starting position"
 msgstr ""
 
 #: gtkoptions.c:442
-msgid "Use Nick \"Nack\" Ballard's Nackgammon starting position with standard rules."
+msgid ""
+"Use Nick \"Nack\" Ballard's Nackgammon starting position with standard rules."
 msgstr ""
 
 #: gtkoptions.c:444
@@ -4374,14 +4321,12 @@ msgid "Play 3-chequer hypergammon (i.e., gammon and backgammons possible)"
 msgstr ""
 
 #: gtkoptions.c:467
-#, fuzzy
 msgid "Game"
-msgstr "/_Spil"
+msgstr ""
 
 #: gtkoptions.c:472
-#, fuzzy
 msgid "Start new games immediately"
-msgstr "Tag med det samme til Las Vegas"
+msgstr ""
 
 #: gtkoptions.c:475
 msgid ""
@@ -4433,14 +4378,12 @@ msgid ""
 msgstr ""
 
 #: gtkoptions.c:518
-#, fuzzy
 msgid "Variations"
-msgstr "Reduktion af varians"
+msgstr ""
 
 #: gtkoptions.c:562
-#, fuzzy
 msgid "Use doubling cube"
-msgstr "/_Opsætning/Spil med dobleterning"
+msgstr ""
 
 #: gtkoptions.c:566
 msgid ""
@@ -4449,9 +4392,8 @@ msgid ""
 msgstr ""
 
 #: gtkoptions.c:574
-#, fuzzy
 msgid "Use Crawford rule"
-msgstr "Jacoby-regel"
+msgstr ""
 
 #: gtkoptions.c:578
 msgid ""
@@ -4461,9 +4403,8 @@ msgid ""
 msgstr ""
 
 #: gtkoptions.c:585
-#, fuzzy
 msgid "Use Jacoby rule"
-msgstr "Jacoby-regel"
+msgstr "Anvend Jacoby-regel"
 
 #: gtkoptions.c:589
 msgid ""
@@ -4473,9 +4414,8 @@ msgid ""
 msgstr ""
 
 #: gtkoptions.c:601
-#, fuzzy
 msgid "Maximum number of beavers:"
-msgstr "Antal tilladte bævere:"
+msgstr "Antal tilladte beavers:"
 
 #: gtkoptions.c:612
 msgid ""
@@ -4485,9 +4425,8 @@ msgid ""
 msgstr ""
 
 #: gtkoptions.c:624
-#, fuzzy
 msgid "Maximum automatic doubles:"
-msgstr "GNU Backgammon - Autodobling"
+msgstr ""
 
 #: gtkoptions.c:635
 msgid ""
@@ -4508,46 +4447,41 @@ msgid ""
 msgstr ""
 
 #: gtkoptions.c:662
-#, fuzzy
 msgid "Cube Decisions"
-msgstr "Brug af dobleterning"
+msgstr ""
 
 #: gtkoptions.c:665
-#, fuzzy
 msgid "Use the tutor for cube decisions."
-msgstr "Totalt antal mulige brug af dobleterningen"
+msgstr ""
 
 #: gtkoptions.c:671
 msgid "Use the tutor for chequer play decisions."
 msgstr ""
 
 #: gtkoptions.c:674
-#, fuzzy
 msgid "Tutor decisions"
-msgstr "Brug af dobleterning"
+msgstr ""
 
 #: gtkoptions.c:681
-#, fuzzy
 msgid "Same as Evaluation"
-msgstr "Evaluering"
+msgstr ""
 
 #: gtkoptions.c:685
-msgid "The tutor will consider your decisions using the \"Evaluation\" settings."
+msgid ""
+"The tutor will consider your decisions using the \"Evaluation\" settings."
 msgstr ""
 
 #: gtkoptions.c:689
-#, fuzzy
 msgid "Same as Analysis"
-msgstr "- analyse"
+msgstr ""
 
 #: gtkoptions.c:693
 msgid "The tutor will consider your decisions using the \"Analysis\" settings."
 msgstr ""
 
 #: gtkoptions.c:702
-#, fuzzy
 msgid "Warning level:"
-msgstr "Indlæringsrate:"
+msgstr ""
 
 #: gtkoptions.c:711
 msgid ""
@@ -4556,14 +4490,12 @@ msgid ""
 msgstr ""
 
 #: gtkoptions.c:725
-#, fuzzy
 msgid "Display"
-msgstr "Forsinkelse i millisekunder:"
+msgstr ""
 
 #: gtkoptions.c:730
-#, fuzzy
 msgid "Clockwise movement"
-msgstr "/_Opsætning/Spil med uret"
+msgstr ""
 
 #: gtkoptions.c:734
 msgid ""
@@ -4573,9 +4505,8 @@ msgid ""
 msgstr ""
 
 #: gtkoptions.c:746
-#, fuzzy
 msgid "Move delay:"
-msgstr "Pengespil"
+msgstr ""
 
 #: gtkoptions.c:753
 msgid "ms"
@@ -4662,7 +4593,8 @@ msgid "Slide moving chequers"
 msgstr ""
 
 #: gtkoptions.c:853
-msgid "Show automatically moved chequers moving across the board between the points."
+msgid ""
+"Show automatically moved chequers moving across the board between the points."
 msgstr ""
 
 #: gtkoptions.c:869
@@ -4714,9 +4646,8 @@ msgid ""
 msgstr ""
 
 #: gtkoptions.c:921
-#, fuzzy
 msgid "Match equity as MWC"
-msgstr "Kampandeltabeller"
+msgstr ""
 
 #: gtkoptions.c:925
 msgid ""
@@ -4745,9 +4676,8 @@ msgid ""
 msgstr ""
 
 #: gtkoptions.c:958
-#, fuzzy
 msgid "Number of digits in output:"
-msgstr "Antal knudepunkter i det skjulte lag:"
+msgstr ""
 
 #: gtkoptions.c:968
 msgid ""
@@ -4763,12 +4693,10 @@ msgid ""
 msgstr ""
 
 #: gtkoptions.c:991
-#, fuzzy
 msgid "Match"
-msgstr "Kamplængde:"
+msgstr ""
 
 #: gtkoptions.c:1002
-#, fuzzy
 msgid "Default match length:"
 msgstr "Kamplængde:"
 
@@ -4782,12 +4710,10 @@ msgstr ""
 
 #. match equity table
 #: gtkoptions.c:1018 gtktheory.c:790
-#, fuzzy
 msgid "Match equity table"
-msgstr "Kampandeltabeller"
+msgstr "Match equity tabel"
 
 #: gtkoptions.c:1027
-#, fuzzy
 msgid "Current:"
 msgstr "Nuværende: "
 
@@ -4796,9 +4722,8 @@ msgid "Load..."
 msgstr ""
 
 #: gtkoptions.c:1036
-#, fuzzy
 msgid "Read a file containing a match equity table."
-msgstr "Sæt standardkatalog for indlæsning af kampandeltabeller"
+msgstr ""
 
 #: gtkoptions.c:1045
 msgid ""
@@ -4837,7 +4762,6 @@ msgid ""
 msgstr ""
 
 #: gtkoptions.c:1114
-#, fuzzy
 msgid "Seed: "
 msgstr "Basis:"
 
@@ -4856,9 +4780,9 @@ msgid "Always roll the "
 msgstr ""
 
 #: gtkoptions.c:1175
-#, fuzzy, c-format
+#, c-format
 msgid "roll for player %s."
-msgstr "Efter Crawford for spiller %s"
+msgstr ""
 
 #: gtkoptions.c:1188
 msgid ""
@@ -4870,9 +4794,8 @@ msgid ""
 msgstr ""
 
 #: gtkoptions.c:1202
-#, fuzzy
 msgid "Database"
-msgstr "Spiller 0"
+msgstr ""
 
 #: gtkoptions.c:1210
 msgid "Other"
@@ -4889,9 +4812,8 @@ msgid ""
 msgstr ""
 
 #: gtkoptions.c:1224
-#, fuzzy
 msgid "Confirm when overwriting existing files"
-msgstr "/_Opsætning/Bekræft/_Før eksisterende filer overskrives"
+msgstr ""
 
 #: gtkoptions.c:1228
 msgid ""
@@ -4900,9 +4822,8 @@ msgid ""
 msgstr ""
 
 #: gtkoptions.c:1233
-#, fuzzy
 msgid "Record all games"
-msgstr "/_Opsætning/Optag alle partier"
+msgstr "Optag alle partier"
 
 #: gtkoptions.c:1239
 msgid ""
@@ -4912,14 +4833,12 @@ msgid ""
 msgstr ""
 
 #: gtkoptions.c:1250
-#, fuzzy
 msgid "Cache size:"
-msgstr "Mellemlager-størrelse (antal positioner):"
+msgstr "Mellemlager-størrelse:"
 
 #: gtkoptions.c:1258
-#, fuzzy
 msgid "entries"
-msgstr "Centreret"
+msgstr ""
 
 #: gtkoptions.c:1261
 msgid ""
@@ -4951,19 +4870,16 @@ msgid ""
 msgstr ""
 
 #: gtkoptions.c:1295
-#, fuzzy
 msgid "Default SGF folder:"
-msgstr "Kamplængde:"
+msgstr ""
 
 #: gtkoptions.c:1306
-#, fuzzy
 msgid "Default Import folder:"
-msgstr "Kamplængde:"
+msgstr ""
 
 #: gtkoptions.c:1318
-#, fuzzy
 msgid "Default Export folder:"
-msgstr "Kamplængde:"
+msgstr ""
 
 #: gtkoptions.c:1333
 msgid "Web browser:"
@@ -4974,9 +4890,8 @@ msgid "Eval Threads:"
 msgstr ""
 
 #: gtkoptions.c:1355
-#, fuzzy
 msgid "threads"
-msgstr "Se fremad:"
+msgstr ""
 
 #: gtkoptions.c:1358
 msgid ""
@@ -4989,19 +4904,16 @@ msgid "Select file with dice"
 msgstr ""
 
 #: gtkoptions.c:1784
-#, fuzzy
 msgid "GNU Backgammon - General options"
-msgstr "GNU Backgamon - Annotering"
+msgstr ""
 
 #: gtkoptions.c:1804
-#, fuzzy
 msgid "GNU Backgammon - Sound options"
-msgstr "GNU Backgamon - Annotering"
+msgstr ""
 
 #: gtkpanels.c:255
-#, fuzzy
 msgid "Messages - GNU Backgammon"
-msgstr "GNU Backgammon"
+msgstr ""
 
 #: gtkpanels.c:278
 #, c-format
@@ -5009,43 +4921,37 @@ msgid "equal"
 msgstr ""
 
 #: gtkpanels.c:281
-#, fuzzy
 msgid "ahead"
-msgstr "Se fremad:"
+msgstr "fremad"
 
 #: gtkpanels.c:281
 msgid "behind"
 msgstr ""
 
 #: gtkpanels.c:356
-#, fuzzy
 msgid "Theory - GNU Backgammon"
-msgstr "GNU Backgammon"
+msgstr ""
 
 #: gtkpanels.c:358
-#, fuzzy
 msgid "Pip count"
-msgstr "Ubrugte pip"
+msgstr ""
 
 #: gtkpanels.c:362
-#, fuzzy
 msgid "Return hits"
-msgstr " %s dobler til %d"
+msgstr ""
 
 #: gtkpanels.c:364
-#, fuzzy
 msgid "Kleinman count"
-msgstr "/_Analyse/_Kleinman-tælling"
+msgstr ""
 
 #: gtkpanels.c:387
-#, fuzzy, c-format
+#, c-format
 msgid "Unknown keyword: %s\n"
-msgstr "ukendt bræt-type\n"
+msgstr ""
 
 #: gtkpanels.c:394
-#, fuzzy
 msgid "Available commands:\n"
-msgstr "Indlæs kommandoer"
+msgstr ""
 
 #: gtkpanels.c:420
 msgid "<subcommand>\n"
@@ -5056,29 +4962,25 @@ msgid "Available subcommands:\n"
 msgstr ""
 
 #: gtkpanels.c:606
-#, fuzzy
 msgid "Command - GNU Backgammon"
-msgstr "GNU Backgammon"
+msgstr ""
 
 #: gtkpanels.c:627
-#, fuzzy
 msgid "Help"
-msgstr "/_Hjælp"
+msgstr ""
 
 #: gtkpanels.c:648
-#, fuzzy
 msgid "Annotation - GNU Backgammon"
-msgstr "GNU Backgammon"
+msgstr ""
 
 #: gtkpanels.c:741
-#, fuzzy, c-format
+#, c-format
 msgid "Game %d: %d, %d"
-msgstr "Pip-optælling: Rød %d, Hvid %d<br />\n"
+msgstr ""
 
 #: gtkpanels.c:808
-#, fuzzy
 msgid "Game record - GNU Backgammon"
-msgstr "GNU Backgammon"
+msgstr ""
 
 #: gtkpanels.c:829
 msgid "Move back to the previous roll"
@@ -5097,24 +4999,20 @@ msgid "Move ahead to the next marked decision"
 msgstr ""
 
 #: gtkpanels.c:855
-#, fuzzy
 msgid "(no game)"
-msgstr "Åben parti"
+msgstr ""
 
 #: gtkpanels.c:899
-#, fuzzy
 msgid "Commentary"
-msgstr "Stilling i kampen"
+msgstr ""
 
 #: gtkpanels.c:904
-#, fuzzy
 msgid "Messages"
-msgstr "/_Vinduer/Gu_ile"
+msgstr ""
 
 #: gtkpanels.c:907
-#, fuzzy
 msgid "Command"
-msgstr "<kommando>"
+msgstr ""
 
 #: gtkpanels.c:910
 msgid "Theory"
@@ -5237,45 +5135,38 @@ msgid "Windows will be detached."
 msgstr ""
 
 #: gtkpanels.c:1564
-#, fuzzy
 msgid "window"
-msgstr "/_Vinduer"
+msgstr ""
 
 #: gtkpanels.c:1575
-#, fuzzy
 msgid ""
 "Default geometries:\n"
 "\n"
-msgstr "Standardværdi: "
+msgstr ""
 
 #: gtkprefs.c:220 gtkprefs.c:3037
 msgid "GNU Backgammon - Appearance"
 msgstr ""
 
 #: gtkprefs.c:240
-#, fuzzy
 msgid "predefined"
-msgstr "/_Opsætning"
+msgstr ""
 
 #: gtkprefs.c:249
-#, fuzzy
 msgid "Custom design"
-msgstr "Brug af dobleterning"
+msgstr ""
 
 #: gtkprefs.c:410
-#, fuzzy
 msgid "Chequer 0:"
-msgstr "Brikflytningsvurdering"
+msgstr ""
 
 #: gtkprefs.c:418
-#, fuzzy
 msgid "Chequer 1:"
-msgstr "Brikflytningsvurdering"
+msgstr ""
 
 #: gtkprefs.c:425
-#, fuzzy
 msgid "Piece type"
-msgstr "<farve>"
+msgstr ""
 
 #: gtkprefs.c:432
 msgid "Rounded disc"
@@ -5294,9 +5185,8 @@ msgid "Piece will be a flat sided disc"
 msgstr ""
 
 #: gtkprefs.c:444
-#, fuzzy
 msgid "Texture type"
-msgstr "<farve>"
+msgstr ""
 
 #: gtkprefs.c:452
 msgid "All of piece"
@@ -5307,9 +5197,8 @@ msgid "All of piece will be textured"
 msgstr ""
 
 #: gtkprefs.c:457
-#, fuzzy
 msgid "Top Only"
-msgstr "/_Analyse/_Thorp-tælling"
+msgstr ""
 
 #: gtkprefs.c:458
 msgid "Only top of piece will be textured"
@@ -5332,9 +5221,8 @@ msgid "Cube colour:"
 msgstr ""
 
 #: gtkprefs.c:528
-#, fuzzy
 msgid "Text colour:"
-msgstr "<farve>"
+msgstr ""
 
 #: gtkprefs.c:549 gtkprefs.c:635
 msgid ""
@@ -5363,9 +5251,8 @@ msgid ""
 msgstr ""
 
 #: gtkprefs.c:577
-#, fuzzy
 msgid "Rounded points"
-msgstr "Exportér position som EPS"
+msgstr ""
 
 #: gtkprefs.c:578
 msgid "Display the points with a rounded end"
@@ -5422,9 +5309,8 @@ msgid "Specular"
 msgstr ""
 
 #: gtkprefs.c:723
-#, fuzzy
 msgid "Chequer shape:"
-msgstr "Brikflytningsvurdering"
+msgstr ""
 
 #: gtkprefs.c:728
 msgid "Flat"
@@ -5559,7 +5445,8 @@ msgid "Try the quick draw option to improve performance"
 msgstr ""
 
 #: gtkprefs.c:1262
-msgid "The quick draw option will not change the result of this performance test"
+msgid ""
+"The quick draw option will not change the result of this performance test"
 msgstr ""
 
 #: gtkprefs.c:1277
@@ -5575,27 +5462,24 @@ msgid "Light Source Type"
 msgstr ""
 
 #: gtkprefs.c:1343
-#, fuzzy
 msgid "Positional"
-msgstr " GNU Backgammon  Positions ID: "
+msgstr ""
 
 #: gtkprefs.c:1344
 msgid "This is a fixed light source, like a lamp"
 msgstr ""
 
 #: gtkprefs.c:1348
-#, fuzzy
 msgid "Directional"
-msgstr "Ingen vurdering"
+msgstr ""
 
 #: gtkprefs.c:1349
 msgid "This is a light direction, like the sun"
 msgstr ""
 
 #: gtkprefs.c:1354
-#, fuzzy
 msgid "Light Position"
-msgstr "Exportér position som EPS"
+msgstr ""
 
 #: gtkprefs.c:1364
 msgid "Left"
@@ -5626,9 +5510,8 @@ msgid "Light Levels"
 msgstr ""
 
 #: gtkprefs.c:1429
-#, fuzzy
 msgid "Ambient"
-msgstr "<farve>"
+msgstr ""
 
 #: gtkprefs.c:1437
 msgid "Ambient light specifies the general light level"
@@ -5643,28 +5526,24 @@ msgid "Specular light is reflected light off shiny surfaces"
 msgstr ""
 
 #: gtkprefs.c:1493
-#, fuzzy
 msgid "Display Type"
-msgstr "Forsinkelse i millisekunder:"
+msgstr ""
 
 #: gtkprefs.c:1500
-#, fuzzy
 msgid "2d Board"
-msgstr "- bræt"
+msgstr ""
 
 #: gtkprefs.c:1504
-#, fuzzy
 msgid "3d Board"
-msgstr "- bræt"
+msgstr ""
 
 #: gtkprefs.c:1512
 msgid "Numbered point labels"
 msgstr ""
 
 #: gtkprefs.c:1515
-#, fuzzy
 msgid "Show or hide point numbers"
-msgstr "Advarsel: overset dobling"
+msgstr ""
 
 #: gtkprefs.c:1517
 msgid "Dynamic labels"
@@ -5683,9 +5562,8 @@ msgid "Show or hide arrow indicating who is moving"
 msgstr ""
 
 #: gtkprefs.c:1542
-#, fuzzy
 msgid "3d Options"
-msgstr "Exportér position som EPS"
+msgstr ""
 
 #: gtkprefs.c:1549
 msgid "Show shadows"
@@ -5708,9 +5586,8 @@ msgid "dark"
 msgstr ""
 
 #: gtkprefs.c:1575
-#, fuzzy
 msgid "Animate dice rolls"
-msgstr "Indtast terninger: "
+msgstr ""
 
 #: gtkprefs.c:1576
 msgid "Dice rolls will shake across board"
@@ -5775,9 +5652,8 @@ msgid "high"
 msgstr ""
 
 #: gtkprefs.c:1660
-#, fuzzy
 msgid "Dice size"
-msgstr "Mellemlager-størrelse (antal positioner):"
+msgstr ""
 
 #: gtkprefs.c:1666
 msgid "small"
@@ -5788,14 +5664,12 @@ msgid "Vary the size of the dice"
 msgstr ""
 
 #: gtkprefs.c:1678
-#, fuzzy
 msgid "large"
 msgstr "stor"
 
 #: gtkprefs.c:1681
-#, fuzzy
 msgid "Quick drawing"
-msgstr "Vurdering af held"
+msgstr ""
 
 #: gtkprefs.c:1682
 msgid "Fast drawing option to improve performance"
@@ -5806,19 +5680,16 @@ msgid "Test performance"
 msgstr ""
 
 #: gtkprefs.c:1899
-#, fuzzy
 msgid "unknown title"
-msgstr "Vurdering af held"
+msgstr ""
 
 #: gtkprefs.c:1900
-#, fuzzy
 msgid "unknown author"
-msgstr "Vurdering af held"
+msgstr ""
 
 #: gtkprefs.c:2031
-#, fuzzy
 msgid "GNU Backgammon - Add current board design"
-msgstr "GNU Backgammon - Brug af dobleterning"
+msgstr ""
 
 #: gtkprefs.c:2045
 msgid "Title of new design:"
@@ -5829,24 +5700,21 @@ msgid "Author of new design:"
 msgstr ""
 
 #: gtkprefs.c:2390
-#, fuzzy
 msgid "Export Design"
-msgstr "Exportér pengespil som PDF"
+msgstr ""
 
 #. user defined
 #: gtkprefs.c:2416
-#, fuzzy
 msgid "User defined"
-msgstr "/_Opsætning"
+msgstr ""
 
 #: gtkprefs.c:2417
 msgid "User"
 msgstr ""
 
 #: gtkprefs.c:2474
-#, fuzzy
 msgid "Import Design"
-msgstr "Exportér pengespil som PDF"
+msgstr ""
 
 #. no designs found
 #: gtkprefs.c:2481
@@ -5905,34 +5773,29 @@ msgstr ""
 
 #. update design
 #: gtkprefs.c:2722
-#, fuzzy
 msgid "Update design"
-msgstr "Gem vægte"
+msgstr ""
 
 #: gtkprefs.c:2735
-#, fuzzy
 msgid "Export design"
-msgstr "Ekspert"
+msgstr ""
 
 #. import design
 #: gtkprefs.c:2743
-#, fuzzy
 msgid "Import design"
-msgstr "Exportér pengespil som PDF"
+msgstr ""
 
 #: gtkprefs.c:2922
 msgid "Lighting"
 msgstr ""
 
 #: gtkprefs.c:2931
-#, fuzzy
 msgid "Designs"
-msgstr "Gem vægte"
+msgstr ""
 
 #: gtkprefs.c:2939
-#, fuzzy
 msgid "Chequers"
-msgstr "Brikflytningsvurdering"
+msgstr ""
 
 #: gtkprefs.c:2942 gtkprefs.c:2959
 msgid "Border"
@@ -5959,9 +5822,9 @@ msgid "General"
 msgstr ""
 
 #: gtkrace.c:138
-#, fuzzy, c-format
+#, c-format
 msgid "Player %s"
-msgstr "Spiller 0"
+msgstr ""
 
 #: gtkrace.c:167
 msgid "EPC = Effective pip count = Avg. rolls * 8.167"
@@ -5972,15 +5835,14 @@ msgid "Wastage = EPC - Pips"
 msgstr ""
 
 #: gtkrace.c:264
-#, fuzzy
 msgid "Roll out"
-msgstr "Udrulning"
+msgstr ""
 
 #. result
 #: gtkrace.c:277
-#, fuzzy, c-format
+#, c-format
 msgid "%s on roll:"
-msgstr "Spiller 0"
+msgstr ""
 
 #: gtkrace.c:306
 msgid "Std.dev."
@@ -5988,38 +5850,32 @@ msgstr ""
 
 #. create dialog
 #: gtkrace.c:344
-#, fuzzy
 msgid "GNU Backgammon - Race Theory"
-msgstr "GNU Backgammon - Teori"
+msgstr "GNU Backgammon - Løbespilsteori"
 
 #: gtkrace.c:359
 msgid "8912 Rule"
 msgstr ""
 
 #: gtkrace.c:365
-#, fuzzy
 msgid "Kleinman Formula"
-msgstr "/_Analyse/_Kleinman-tælling"
+msgstr "Kleinmanformel"
 
 #: gtkrace.c:371
-#, fuzzy
 msgid "Thorp Count"
-msgstr "/_Analyse/_Thorp-tælling"
+msgstr "Thorp-tælling"
 
 #: gtkrace.c:377
-#, fuzzy
 msgid "Keith Count"
-msgstr "/_Analyse/_Kleinman-tælling"
+msgstr "Keithtælling"
 
 #: gtkrace.c:383
-#, fuzzy
 msgid "One-Sided Rollout/Database"
-msgstr "/_Analyse/_Rul ud"
+msgstr ""
 
 #: gtkrace.c:388
-#, fuzzy
 msgid "Two-Sided Database"
-msgstr "%s: inkomplet udtagningsdatabase\n"
+msgstr ""
 
 #: gtkrelational.c:53
 msgid "Nick"
@@ -6038,11 +5894,10 @@ msgid ""
 msgstr ""
 
 #: gtkrelational.c:56
-#, fuzzy
 msgid ""
 "Gnu\n"
 "Cube"
-msgstr "dobleterning"
+msgstr ""
 
 #: gtkrelational.c:57
 msgid ""
@@ -6057,11 +5912,10 @@ msgid ""
 msgstr ""
 
 #: gtkrelational.c:59
-#, fuzzy
 msgid ""
 "Snw\n"
 "Cube"
-msgstr "dobleterning"
+msgstr ""
 
 #: gtkrelational.c:62
 msgid ""
@@ -6070,11 +5924,10 @@ msgid ""
 msgstr ""
 
 #: gtkrelational.c:63
-#, fuzzy
 msgid ""
 "WDb\n"
 "Take"
-msgstr "Accepteringer"
+msgstr ""
 
 #: gtkrelational.c:64
 msgid ""
@@ -6083,16 +5936,14 @@ msgid ""
 msgstr ""
 
 #: gtkrelational.c:65
-#, fuzzy
 msgid ""
 "MDb\n"
 "Take"
-msgstr "Accepteringer"
+msgstr ""
 
 #: gtkrelational.c:136 gtkrelational.c:785
-#, fuzzy
 msgid "No data in database"
-msgstr "Exportér database"
+msgstr ""
 
 #: gtkrelational.c:386
 #, c-format
@@ -6112,19 +5963,17 @@ msgid "This database structure is invalid"
 msgstr ""
 
 #: gtkrelational.c:577
-#, fuzzy
 msgid "This database contains no matches"
-msgstr "Databasen er tom."
+msgstr ""
 
 #: gtkrelational.c:579
-#, fuzzy
 msgid "This database contains 1 match"
-msgstr "Databasen er tom."
+msgstr ""
 
 #: gtkrelational.c:582
-#, fuzzy, c-format
+#, c-format
 msgid "This database contains %d matches\n"
-msgstr "Databasen er tom."
+msgstr ""
 
 #: gtkrelational.c:587
 #, c-format
@@ -6134,18 +5983,16 @@ msgid ""
 msgstr ""
 
 #: gtkrelational.c:623
-#, fuzzy
 msgid "Add Database"
-msgstr "%s: inkomplet udtagningsdatabase\n"
+msgstr ""
 
 #: gtkrelational.c:623
 msgid "Database Name:"
 msgstr ""
 
 #: gtkrelational.c:638
-#, fuzzy
 msgid "Failed to create database!"
-msgstr "/_Analyse/Analysér pengespil"
+msgstr ""
 
 #: gtkrelational.c:647
 msgid "Are you sure you want to delete all the matches in this database?"
@@ -6160,47 +6007,40 @@ msgid "Failed to delete database!"
 msgstr ""
 
 #: gtkrelational.c:688
-#, fuzzy
 msgid "Databases"
-msgstr "Udtagnings-statistik"
+msgstr ""
 
 #: gtkrelational.c:705
-#, fuzzy
 msgid "DB Type"
-msgstr "Forsinkelse i millisekunder:"
+msgstr ""
 
 #: gtkrelational.c:711
-#, fuzzy
 msgid "Username"
-msgstr "Ekstern"
+msgstr ""
 
 #: gtkrelational.c:719
-#, fuzzy
 msgid "Password"
-msgstr "Før Crawford"
+msgstr ""
 
 #: gtkrelational.c:737
 msgid "Store game stats"
 msgstr ""
 
 #: gtkrelational.c:743
-#, fuzzy
 msgid "Info"
-msgstr "nej"
+msgstr ""
 
 #: gtkrelational.c:790
-#, fuzzy
 msgid "GNU Backgammon - Relational Database"
-msgstr "GNU Backgammon - Evaluering"
+msgstr ""
 
 #: gtkrelational.c:879
 msgid "Query"
 msgstr ""
 
 #: gtkrelational.c:951
-#, fuzzy
 msgid "GNU Backgammon - Database Result"
-msgstr "GNU Backgammon - Kataloger"
+msgstr ""
 
 #: gtkrolls.c:109
 #, c-format
@@ -6208,14 +6048,12 @@ msgid "%d%d"
 msgstr ""
 
 #: gtkrolls.c:139
-#, fuzzy
 msgid "Average equity"
-msgstr "Gennemsnitlig antal pip spildt"
+msgstr ""
 
 #: gtkrolls.c:196 gtktempmap.c:112
-#, fuzzy
 msgid "Calculating equities"
-msgstr "Evaluering"
+msgstr ""
 
 #: gtkrolls.c:223 sound.c:254
 msgid "Roll"
@@ -6230,14 +6068,13 @@ msgid "Depth"
 msgstr ""
 
 #: gtksplash.c:61
-#, fuzzy
 msgid "Starting "
-msgstr "/_Opsætning"
+msgstr ""
 
 #: gtktempmap.c:107
-#, fuzzy, c-format
+#, c-format
 msgid "Calculating equities for %s"
-msgstr "Evaluering"
+msgstr ""
 
 #. dialog
 #: gtktempmap.c:529
@@ -6245,14 +6082,13 @@ msgid "Sho Sengoku Temperature Map - Distribution of rolls"
 msgstr ""
 
 #: gtktempmap.c:731 gtktheory.c:896
-#, fuzzy, c-format
+#, c-format
 msgid "%d ply"
-msgstr "%2d ply"
+msgstr ""
 
 #: gtktempmap.c:760
-#, fuzzy
 msgid "Show equities"
-msgstr "Vurdering uden dobleterning"
+msgstr ""
 
 #: gtktempmap.c:767
 msgid "Show best move"
@@ -6311,9 +6147,8 @@ msgid ""
 msgstr ""
 
 #: gtktheory.c:465
-#, fuzzy
 msgid "Player                          Gammon   BG\n"
-msgstr "                  Kamp ID    : %s\n"
+msgstr ""
 
 #: gtktheory.c:486
 msgid ""
@@ -6322,21 +6157,20 @@ msgid ""
 msgstr ""
 
 #: gtktheory.c:490
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%s:\n"
 "\n"
 "Player                          Gammon   BG\n"
-msgstr "                  Kamp ID    : %s\n"
+msgstr ""
 
 #: gtktheory.c:493
 msgid "Doubled cube"
 msgstr ""
 
 #: gtktheory.c:605
-#, fuzzy
 msgid "Evaluating gammon percentages"
-msgstr "Gammon og backgammon sandsynlighed"
+msgstr ""
 
 #. create dialog
 #: gtktheory.c:661
@@ -6417,27 +6251,23 @@ msgid "Start new game, match, session or position"
 msgstr ""
 
 #: gtktoolbar.c:315
-#, fuzzy
 msgid "Open game, match, session or position"
-msgstr "Åben kamp eller pengespil"
+msgstr ""
 
 #. Save button
 #: gtktoolbar.c:335
-#, fuzzy
 msgid "Save match, session, game or position"
-msgstr "Gem kamp eller pengespil"
+msgstr ""
 
 #. Take/accept button
 #: gtktoolbar.c:341
-#, fuzzy
 msgid "Take the offered cube or accept the offered resignation"
-msgstr "Du bør acceptere resigneringen"
+msgstr ""
 
 #. drop button
 #: gtktoolbar.c:343
-#, fuzzy
 msgid "Drop the offered cube or decline the offered resignation"
-msgstr "Du bør acceptere resigneringen"
+msgstr ""
 
 #. Double button
 #: gtktoolbar.c:346
@@ -6445,35 +6275,30 @@ msgid "Double or redouble(beaver)"
 msgstr ""
 
 #: gtktoolbar.c:351
-#, fuzzy
 msgid "Resign the current game"
-msgstr "Statistik for dette spil"
+msgstr ""
 
 #. reset button
 #: gtktoolbar.c:362
-#, fuzzy
 msgid "Undo moves"
-msgstr "Utvungne træk"
+msgstr ""
 
 #. Hint button
 #: gtktoolbar.c:366
-#, fuzzy
 msgid "Show the best moves or cube action"
-msgstr "Neural net-vurdering"
+msgstr ""
 
 #: gtktoolbar.c:372
-#, fuzzy
 msgid "Edit"
-msgstr "/_Redigér"
+msgstr "Redigér"
 
 #: gtktoolbar.c:375
 msgid "Toggle Edit Mode"
 msgstr ""
 
 #: gtktoolbar.c:382
-#, fuzzy
 msgid "Direction"
-msgstr "Ingen vurdering"
+msgstr ""
 
 #: gtktoolbar.c:388
 msgid "Reverse direction of play"
@@ -6504,9 +6329,8 @@ msgid "Interupt the current process?"
 msgstr ""
 
 #: gtkwindows.c:201
-#, fuzzy
 msgid "Close"
-msgstr "Støj"
+msgstr ""
 
 #: gtkwindows.c:277
 msgid "GNU Backgammon - Message"
@@ -6518,14 +6342,12 @@ msgstr "GNU Backgammon - Spørgsmål"
 
 #. are you sure
 #: gtkwindows.c:279 gtkwindows.c:280 gtkwindows.c:383
-#, fuzzy
 msgid "GNU Backgammon - Warning"
-msgstr "GNU Backgammonb - Indlæringsrate"
+msgstr ""
 
 #: gtkwindows.c:281
-#, fuzzy
 msgid "GNU Backgammon - Error"
-msgstr "GNU Backgammon - Teori"
+msgstr ""
 
 #: gtkwindows.c:393
 msgid "Don't show this again"
@@ -6589,14 +6411,14 @@ msgid "Standard error"
 msgstr ""
 
 #: html.c:731
-#, fuzzy, c-format
+#, c-format
 msgid "Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br /></span></table>\n"
-msgstr "Positions-ID: <tt>%s</tt> Kamp-ID: <tt>%s</tt><br />\n"
+msgstr ""
 
 #: html.c:1094 html.c:1581
-#, fuzzy, c-format
+#, c-format
 msgid "Pip counts: %s %d, %s %d<br />\n"
-msgstr "Pip-optælling: Rød %d, Hvid %d<br />\n"
+msgstr ""
 
 #: html.c:1105 html.c:1590
 #, c-format
@@ -6614,10 +6436,10 @@ msgid "Move number %d:"
 msgstr "Træk nummer %d:"
 
 #: html.c:1666 text.c:161
-#, fuzzy, c-format
+#, c-format
 msgid " %s resigns %d point"
 msgid_plural " %s resigns %d points"
-msgstr[0] " %s tilbyder %d point"
+msgstr[0] ""
 msgstr[1] " %s tilbyder %d point"
 
 #: html.c:1678
@@ -6631,9 +6453,9 @@ msgid " %s doubles to %d"
 msgstr " %s dobler til %d"
 
 #: html.c:1698 text.c:193
-#, fuzzy, c-format
+#, c-format
 msgid " %s on roll, cube decision?"
-msgstr " %s på rul, brug af dobleterning?"
+msgstr " %s på rul, cubeaction?"
 
 #: html.c:1732 html.c:3691 show.c:893 text.c:212
 #, c-format
@@ -6666,9 +6488,9 @@ msgid "money game"
 msgstr "pengespil"
 
 #: html.c:1767
-#, fuzzy, c-format
+#, c-format
 msgid "%s (analysed by %s)"
-msgstr "%s (analyseret af GNU Backgammon %s)"
+msgstr "%s (analyseret af %s)"
 
 #: html.c:1788
 #, c-format
@@ -6676,11 +6498,12 @@ msgid "Game number %d"
 msgstr "Parti nummer %d"
 
 #: html.c:1868
-#, fuzzy, c-format
-msgid "Output generated %s by <a href=\"http://www.gnu.org/software/gnubg/\">%s</a>"
+#, c-format
+msgid ""
+"Output generated %s by <a href=\"http://www.gnu.org/software/gnubg/\">%s</a>"
 msgstr ""
-"Udskriften er lavet %s af <a href=\"http://www.gnu.org/software/gnubg/\">GNU "
-"Backgammon %s</a>"
+"Udskriften er lavet %s af <a href=\"http://www.gnu.org/software/gnubg/\">%s</"
+"a>"
 
 #: html.c:1875
 #, c-format
@@ -6696,16 +6519,14 @@ msgid "Valid CSS!"
 msgstr "Validerende CSS!"
 
 #: html.c:1931
-#, fuzzy, c-format
+#, c-format
 msgid "<!-- Output generated %s by %s (http://www.gnu.org/software/gnubg/) "
-msgstr ""
-"Udskriften er lavet %s af <a href=\"http://www.gnu.org/software/gnubg/\">GNU "
-"Backgammon %s</a>"
+msgstr "Udskriften er lavet %s af (http://www.gnu.org/software/gnubg/)"
 
 #: html.c:1938
-#, fuzzy, c-format
+#, c-format
 msgid "(HTML Export version %d.%d) -->"
-msgstr "(HTML-eksport version %d. %d)"
+msgstr "(HTML-eksport version %d. %d) -->"
 
 #: html.c:2252
 msgid "Proper cube action:"
@@ -6730,14 +6551,14 @@ msgid "Cannot move"
 msgstr "Intet lovligt træk"
 
 #: html.c:2806
-#, fuzzy, c-format
+#, c-format
 msgid "%s%s moves %s"
-msgstr "*%s flytter %s"
+msgstr ""
 
 #: html.c:2811
-#, fuzzy, c-format
+#, c-format
 msgid "%s%s cannot move"
-msgstr "* Intet lovligt træk for %s"
+msgstr ""
 
 #: html.c:2845 text.c:594
 msgid "accepts"
@@ -6769,18 +6590,17 @@ msgid "Annotation"
 msgstr "Annotering"
 
 #: html.c:3136
-#, fuzzy, c-format
+#, c-format
 msgid "%s's rating"
-msgstr "Vurdering af held"
+msgstr ""
 
 #: html.c:3149 text.c:706
 msgid "%B %d, %Y"
 msgstr ""
 
 #: html.c:3150
-#, fuzzy
 msgid "Date"
-msgstr "Spiller 0"
+msgstr ""
 
 #. event, round, place and annotator
 #: html.c:3155
@@ -6788,24 +6608,20 @@ msgid "Event"
 msgstr ""
 
 #: html.c:3157
-#, fuzzy
 msgid "Place"
-msgstr "Ply:"
+msgstr ""
 
 #: html.c:3158
-#, fuzzy
 msgid "Annotator"
-msgstr "Annotering"
+msgstr ""
 
 #: html.c:3159
-#, fuzzy
 msgid "Comment"
-msgstr "Stilling i kampen"
+msgstr ""
 
 #: html.c:3196
-#, fuzzy
 msgid "Recorded player statistics"
-msgstr "Statistic for brikflytning"
+msgstr ""
 
 #: html.c:3207
 msgid "Chequer (Long-term error rate)"
@@ -6824,30 +6640,26 @@ msgid "Cube (Short-term error rate)"
 msgstr ""
 
 #: html.c:3227
-#, fuzzy
 msgid "Chequer (total)"
-msgstr "Brikflytningsvurdering"
+msgstr ""
 
 #: html.c:3232
-#, fuzzy
 msgid "Cube (total)"
-msgstr "Heldrate (totalt)"
+msgstr ""
 
 #: html.c:3237
-#, fuzzy
 msgid "Luck (total)"
-msgstr "Heldrate (totalt)"
+msgstr "Held (totalt)"
 
 #: html.c:3242
-#, fuzzy
 msgid "Games (total)"
-msgstr "Heldrate (totalt)"
+msgstr ""
 
 #: html.c:3367
-#, fuzzy, c-format
+#, c-format
 msgid "<p %s>%s wins %d point</p>\n"
 msgid_plural "<p %s>%s wins %d points</p>\n"
-msgstr[0] "%s%s vinner %d point%s"
+msgstr[0] ""
 msgstr[1] "%s%s vinner %d point%s"
 
 #: html.c:3419
@@ -6864,7 +6676,6 @@ msgid "No game in progress (type `new game' to start one)."
 msgstr "Intet spil er i gang (skriv 'new game' for at starte et)."
 
 #: html.c:3462
-#, fuzzy
 msgid "You must specify a file to export to (see `help export game html')."
 msgstr ""
 "Du skal angive hvilken fil du ønsker at eksportere til (se `help export game "
@@ -6883,9 +6694,9 @@ msgstr ""
 "position html')."
 
 #: htmlimages.c:650
-#, fuzzy, c-format
+#, c-format
 msgid "You must specify a file to export to (see `%s')\n"
-msgstr "Du skal angive en fil at eksportere til (se 'help database export')."
+msgstr "Du skal angive en fil at eksportere til (se '%s')."
 
 #: htmlimages.c:657
 #, c-format
@@ -6893,18 +6704,14 @@ msgid "Cannot create htmlimages: %s already exists!"
 msgstr ""
 
 #: htmlimages.c:763
-#, fuzzy
 msgid "Generating image:"
-msgstr "Genererer database..."
+msgstr ""
 
 #: htmlimages.c:774
-#, fuzzy
 msgid ""
 "This installation of GNU Backgammon was compiled without\n"
 "support for writing HTML images."
 msgstr ""
-"Denne installation af GNU Backgammon er blevet kompileret uden GDBM\n"
-"understøttelse og operationer med positionsdatabaser er ikke implementerede."
 
 #: import.c:173
 msgid "File not recognised as Jellyfish file."
@@ -6918,9 +6725,8 @@ msgid ""
 msgstr ""
 
 #: import.c:376
-#, fuzzy
 msgid "This file is not a valid Jellyfish .pos file!\n"
-msgstr "Import af Jellyfish .pos filer"
+msgstr ""
 
 #: import.c:587 import.c:756 import.c:1198 import.c:1700 import.c:1749
 #: import.c:1842 import.c:2644 import.c:2891
@@ -6956,9 +6762,9 @@ msgid "Unrecognised move \"%s\" in .mat file.\n"
 msgstr ""
 
 #: import.c:962
-#, fuzzy, c-format
+#, c-format
 msgid "%s: not a valid .mat file"
-msgstr "%s: ugyldig .mat fil\n"
+msgstr "%s: ugyldig .mat fil"
 
 #: import.c:1026
 #, c-format
@@ -6976,9 +6782,9 @@ msgid "Unrecognised move \"%s\" in oldmoves file.\n"
 msgstr ""
 
 #: import.c:1486 import.c:1492
-#, fuzzy, c-format
+#, c-format
 msgid "%s: not a valid oldmoves file"
-msgstr "%s: ugyldig oldmoves-fil\n"
+msgstr "%s: ugyldig oldmoves-fil"
 
 #: import.c:1632
 msgid "Beaver record found but doesn't follow a double"
@@ -6994,9 +6800,9 @@ msgstr ""
 
 #. No player line found
 #: import.c:2253
-#, fuzzy, c-format
+#, c-format
 msgid "%s: not a valid SGG file"
-msgstr "%s: ugyldig SGG-fil\n"
+msgstr "%s: ugyldig SGG-fil"
 
 #: import.c:2345
 #, c-format
@@ -7008,9 +6814,8 @@ msgid "TrueMoneyGames (http://www.truemoneygames.com)"
 msgstr ""
 
 #: import.c:3543
-#, fuzzy
 msgid "You must specify a BKG session file to import (see `help import bkg')."
-msgstr "Du skal angive en fil at importere fra (se 'help database import')."
+msgstr ""
 
 #: import.c:3569
 msgid "You must specify a position file to import (see `help import pos')."
@@ -7021,48 +6826,47 @@ msgid "You must specify a match file to import (see `help import mat')."
 msgstr ""
 
 #: import.c:3621
-msgid "You must specify an oldmoves file to import (see `help import oldmoves')."
+msgid ""
+"You must specify an oldmoves file to import (see `help import oldmoves')."
 msgstr ""
 
 #: import.c:3648
-#, fuzzy
 msgid "You must specify an SGG file to import (see `help import sgg')."
-msgstr "Du skal angive en fil at importere fra (se 'help database import')."
+msgstr ""
 
 #: import.c:3674
-#, fuzzy
 msgid "You must specify an TMG file to import (see `help import tmg')."
-msgstr "Du skal angive en fil at importere fra (se 'help database import')."
+msgstr ""
 
 #: import.c:3700
-#, fuzzy
-msgid "You must specify a Snowie Text file to import (see `help import snowietxt')."
-msgstr "Du skal angive en fil at importere fra (se 'help database import')."
+msgid ""
+"You must specify a Snowie Text file to import (see `help import snowietxt')."
+msgstr ""
 
 #: import.c:3724
-#, fuzzy
-msgid "You must specify a GammonEmpire file to import (see `help import empire')."
-msgstr "Du skal angive en fil at importere fra (se 'help database import')."
+msgid ""
+"You must specify a GammonEmpire file to import (see `help import empire')."
+msgstr ""
 
 #: import.c:3752
-#, fuzzy
-msgid "You must specify a PartyGammon file to import (see `help import party')."
-msgstr "Du skal angive en fil at importere fra (se 'help database import')."
+msgid ""
+"You must specify a PartyGammon file to import (see `help import party')."
+msgstr ""
 
 #: import.c:3805
-#, fuzzy, c-format
+#, c-format
 msgid "You must specify a file to import (see `help import auto')."
-msgstr "Du skal angive en fil at importere fra (se 'help database import')."
+msgstr ""
 
 #: import.c:3811
-#, fuzzy, c-format
+#, c-format
 msgid "%s is not a backgammon file"
-msgstr "GNU Backgammon"
+msgstr ""
 
 #: import.c:3976
-#, fuzzy
-msgid "You must specify a BackGammonRoom file to import (see `help import bgroom')."
-msgstr "Du skal angive en fil at importere fra (se 'help database import')."
+msgid ""
+"You must specify a BackGammonRoom file to import (see `help import bgroom')."
+msgstr ""
 
 #: latex.c:398
 #, c-format
@@ -7119,9 +6923,9 @@ msgid ""
 msgstr ""
 
 #: makebearoff.c:1634
-#, fuzzy, c-format
+#, c-format
 msgid "Size of database                  : %.0f (%.1f MB)\n"
-msgstr "                 Kamp ID   : %s\n"
+msgstr ""
 
 #: makebearoff.c:1645
 #, c-format
@@ -7134,9 +6938,8 @@ msgid "Estimated size of compressed db   : %.0f (%.1f MB)\n"
 msgstr ""
 
 #: makebearoff.c:1663 makebearoff.c:1757
-#, fuzzy
 msgid "Error initialising old bearoff database!\n"
-msgstr "%s: ikke en brugbar udtagningsdatabase\n"
+msgstr ""
 
 #: makebearoff.c:1673 makebearoff.c:1765
 msgid "The old database is not of the same kind as the requested database\n"
@@ -7184,9 +6987,9 @@ msgid ""
 msgstr ""
 
 #: makehyper.c:676
-#, fuzzy, c-format
+#, c-format
 msgid "Number of chequers: %d\n"
-msgstr "Antal knudepunkter i det skjulte lag:"
+msgstr ""
 
 #: makehyper.c:680
 #, c-format
@@ -7204,9 +7007,9 @@ msgid "Estimated size of file             : %d bytes\n"
 msgstr ""
 
 #: makehyper.c:684
-#, fuzzy, c-format
+#, c-format
 msgid "Output file                        : '%s'\n"
-msgstr "                  Kamp ID    : %s\n"
+msgstr ""
 
 #: makehyper.c:685
 #, c-format
@@ -7254,9 +7057,9 @@ msgid "Time for writing final file: %d seconds\n"
 msgstr ""
 
 #: makehyper.c:759
-#, fuzzy, c-format
+#, c-format
 msgid "Total time: %d seconds\n"
-msgstr "Totalt antal mulige brug af dobleterningen"
+msgstr ""
 
 #: makeweights.c:83
 #, c-format
@@ -7368,7 +7171,8 @@ msgid "very lucky"
 msgstr ""
 
 #: play.c:737 play.c:2847
-msgid "Are you sure you want to start a new game, and discard the one in progress? "
+msgid ""
+"Are you sure you want to start a new game, and discard the one in progress? "
 msgstr ""
 
 #: play.c:798
@@ -7414,10 +7218,10 @@ msgid "(%s's double has been cancelled.)\n"
 msgstr ""
 
 #: play.c:1641
-#, fuzzy, c-format
+#, c-format
 msgid "%s wins a %s and %d point.\n"
 msgid_plural "%s wins a %s and %d points.\n"
-msgstr[0] "%s%s vinner %d point%s"
+msgstr[0] "%s vinder en %s og %d point.\n"
 msgstr[1] "%s%s vinner %d point%s"
 
 #: play.c:1683
@@ -7905,9 +7709,9 @@ msgid "Estimated SE after %d trials "
 msgstr ""
 
 #: progress.c:1043
-#, fuzzy, c-format
+#, c-format
 msgid "Finished (%d trials)"
-msgstr "Færdig (%v spil)"
+msgstr "Færdig (%d spil)"
 
 #: progress.c:1160
 #, c-format
@@ -7931,33 +7735,31 @@ msgstr ""
 
 #. To avoid *.po include \r.
 #: progress.c:1195
-#, fuzzy, c-format
+#, c-format
 msgid "Rollout: %d/%d trials"
-msgstr "Statistic for udrulning"
+msgstr ""
 
 #: record.c:85 record.c:98
-#, fuzzy, c-format
+#, c-format
 msgid "%s: invalid record file version"
-msgstr "%s: ugyldig vægte-fil\n"
+msgstr ""
 
 #: record.c:111 record.c:149
-#, fuzzy, c-format
+#, c-format
 msgid "%s: invalid record file"
-msgstr "%s: ugyldig vægte-fil\n"
+msgstr ""
 
 #: record.c:412 show.c:926 show.c:2242
 msgid "No game is being played."
 msgstr "Intet spil er i gang."
 
 #: record.c:423 record.c:456
-#, fuzzy
 msgid "No game statistics are available."
-msgstr "Statistic for parti %d"
+msgstr ""
 
 #: record.c:428
-#, fuzzy
 msgid "Game statistics saved to player records."
-msgstr "Statistic for parti %d"
+msgstr ""
 
 #: record.c:441 relational.c:469 show.c:665 show.c:867
 msgid "No match is being played."
@@ -7973,35 +7775,30 @@ msgid "Statistics from %d games were saved to player records.\n"
 msgstr ""
 
 #: record.c:475
-#, fuzzy
 msgid "No session is being played."
-msgstr "Intet spil er igang."
+msgstr ""
 
 #: record.c:490
-#, fuzzy
 msgid "You must specify which player's record to erase."
 msgstr ""
-"Du skal angive hvilken fil du ønsker at eksportere til \n"
-"(se `help export game latex')."
 
 #: record.c:503
-#, fuzzy, c-format
+#, c-format
 msgid "No record exists for player %s.\n"
-msgstr "Efter Crawford for spiller %s"
+msgstr ""
 
 #: record.c:514
-#, fuzzy, c-format
+#, c-format
 msgid "Record for player %s erased.\n"
-msgstr "Efter Crawford for spiller %s"
+msgstr ""
 
 #: record.c:521 relational.c:796
 msgid "Are you sure you want to erase all player records?"
 msgstr ""
 
 #: record.c:534
-#, fuzzy
 msgid "All player records erased."
-msgstr "Statistic for brikflytning"
+msgstr ""
 
 #: record.c:568 text.c:759
 msgid ""
@@ -8012,9 +7809,9 @@ msgid ""
 msgstr ""
 
 #: record.c:592
-#, fuzzy, c-format
+#, c-format
 msgid "No record for player `%s' found.\n"
-msgstr "Efter Crawford for spiller %s"
+msgstr ""
 
 #: relational.c:475
 msgid "The match is not finished\n"
@@ -8035,9 +7832,8 @@ msgid "Match exists, overwrite?"
 msgstr ""
 
 #: relational.c:519
-#, fuzzy
 msgid "Error adding match."
-msgstr "%s: ikke en brugbar udtagningsdatabase\n"
+msgstr ""
 
 #: relational.c:593
 msgid "Database connection test failed, installation problem!\n"
@@ -8054,47 +7850,38 @@ msgid "Database test is successful!"
 msgstr ""
 
 #: relational.c:628
-#, fuzzy
 msgid ""
 "You must specify a player name to list the details for (see `help relational "
 "show details')."
 msgstr ""
-"Du skal angive mindst een type analyse som skal udføres (se 'help set\n"
-"analysis')."
 
 #: relational.c:639 relational.c:684 relational.c:760
-#, fuzzy
 msgid "Player not found or player stats empty"
-msgstr "Genererer database..."
+msgstr ""
 
 #: relational.c:722
-#, fuzzy
 msgid "Opponents"
-msgstr "Åben parti"
+msgstr ""
 
 #: relational.c:726
-#, fuzzy
 msgid "Player statistics"
-msgstr "- statistik"
+msgstr ""
 
 #: relational.c:731
-#, fuzzy
 msgid ""
 "Player statistics\n"
 "\n"
-msgstr "Statistik for kampen"
+msgstr ""
 
 #: relational.c:750
-#, fuzzy
 msgid ""
 "You must specify a player name to remove (see `help relational erase "
 "player')."
-msgstr "Du skal angive en fil at eksportere til (se 'help database export')."
+msgstr ""
 
 #: relational.c:857
-#, fuzzy
 msgid "You must specify a sql query to run."
-msgstr "Du skal angive en fil at eksportere til (se 'help database export')."
+msgstr ""
 
 #: relational.c:867
 msgid "No rows found.\n"
@@ -8107,9 +7894,9 @@ msgid "New player name already exists."
 msgstr ""
 
 #: relational.c:938
-#, fuzzy, c-format
+#, c-format
 msgid "Error running database command"
-msgstr "%s: ikke en brugbar udtagningsdatabase\n"
+msgstr ""
 
 #: renderprefs.c:609
 #, c-format
@@ -8231,13 +8018,13 @@ msgid ""
 msgstr ""
 
 #: set.c:109
-msgid "You can't set a seed if you're using manual dice generation or random.org"
+msgid ""
+"You can't set a seed if you're using manual dice generation or random.org"
 msgstr ""
 
 #: set.c:117 set.c:127 set.c:2076
-#, fuzzy
 msgid "You must specify a valid seed -- try `help set seed'."
-msgstr "Du skal angive en fil at eksportere til (se 'help database export')."
+msgstr ""
 
 #: set.c:120
 #, c-format
@@ -8263,14 +8050,14 @@ msgid "You are already using the %s generator.\n"
 msgstr ""
 
 #: set.c:168
-#, fuzzy, c-format
+#, c-format
 msgid "You must specify a valid modulus (see `help set rng bbs')."
-msgstr "Du skal angive en fil at importere fra (se 'help database import')."
+msgstr ""
 
 #: set.c:179
-#, fuzzy, c-format
+#, c-format
 msgid "You must specify two valid factors (see `help set rng bbs')."
-msgstr "Du skal angive en fil at importere fra (se 'help database import')."
+msgstr ""
 
 #: set.c:217
 #, c-format
@@ -8292,11 +8079,8 @@ msgid "GNU Backgammon will now use the %s generator.\n"
 msgstr ""
 
 #: set.c:282
-#, fuzzy
 msgid "You must specify for which ply you want to set a filter"
 msgstr ""
-"Du skal angive hvilken fil du ønsker at eksportere til \n"
-"(se `help export game latex')."
 
 #: set.c:287
 #, c-format
@@ -8320,11 +8104,11 @@ msgid ""
 msgstr ""
 
 #: set.c:315
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "You must set a count of extra moves and a search tolerance -- try help set %"
 "s movefilter"
-msgstr "Du skal angive en fil at eksportere til (se 'help database export')."
+msgstr ""
 
 #: set.c:332 show.c:399
 msgid "Cube action will be analysed."
@@ -8365,9 +8149,8 @@ msgid "Dice rolls will not be analysed."
 msgstr ""
 
 #: set.c:370
-#, fuzzy
 msgid "luck analysis"
-msgstr "- analyse"
+msgstr ""
 
 #: set.c:381 show.c:406
 msgid "Chequer play will be analysed."
@@ -8391,14 +8174,12 @@ msgid "`%s' threshold set to %.3f.\n"
 msgstr ""
 
 #: set.c:408
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "You must specify a semi-positive number for the threshold (see `help set "
 "analysis\n"
 "threshold %s').\n"
 msgstr ""
-"Du skal angive mindst een type analyse som skal udføres (se 'help set\n"
-"analysis')."
 
 #: set.c:456
 msgid "Show colours in game window"
@@ -8527,9 +8308,8 @@ msgid "The position cache has been sized to %d entries.\n"
 msgstr ""
 
 #: set.c:655
-#, fuzzy
 msgid "You must specify the number of threads to use."
-msgstr "Du skal indtaste to numre mellem 1 og 6."
+msgstr ""
 
 #: set.c:661
 #, c-format
@@ -8562,17 +8342,15 @@ msgid "The evaluation speed has been cleared."
 msgstr ""
 
 #: set.c:710
-#, fuzzy
 msgid ""
 "If you give a parameter to `set calibration', it must be a legal number of "
 "evaluations per second."
 msgstr ""
-"Hvis du angiver en parameter til `database train' skal\n"
-"den være lige med antal positioner der skal trænes på."
 
 #: set.c:717
 #, c-format
-msgid "The speed estimate has been set to %.0f static evaluations per second.\n"
+msgid ""
+"The speed estimate has been set to %.0f static evaluations per second.\n"
 msgstr ""
 
 #: set.c:724 show.c:595
@@ -8604,7 +8382,8 @@ msgid "The cube has been centred."
 msgstr ""
 
 #: set.c:820
-msgid "You must specify which player owns the cube (see `help set cube owner')."
+msgid ""
+"You must specify which player owns the cube (see `help set cube owner')."
 msgstr ""
 
 #: set.c:832
@@ -8772,9 +8551,8 @@ msgid ""
 msgstr ""
 
 #: set.c:1131
-#, fuzzy
 msgid "You must specify a speed between 0 and 7 -- try `help set speed'."
-msgstr "Du skal angive en fil at eksportere til (se 'help database export')."
+msgstr ""
 
 #: set.c:1139
 #, c-format
@@ -8782,17 +8560,16 @@ msgid "Animation speed set to %d.\n"
 msgstr ""
 
 #: set.c:1145
-#, fuzzy
 msgid "GNU Backgammon will beep on illegal input."
-msgstr "GNU Backgamon - Annotering"
+msgstr ""
 
 #: set.c:1146
-#, fuzzy
 msgid "GNU Backgammon will not beep on illegal input."
-msgstr "GNU Backgammon - Glødningsrate"
+msgstr ""
 
 #: set.c:1152
-msgid "A dice icon will be shown below the board when a human player is on roll."
+msgid ""
+"A dice icon will be shown below the board when a human player is on roll."
 msgstr ""
 
 #: set.c:1154
@@ -8872,15 +8649,13 @@ msgid "Saved window positions will not be applied to new windows."
 msgstr ""
 
 #: set.c:1238
-#, fuzzy
 msgid "This installation of GNU Backgammon was compiled without GUI support."
 msgstr ""
-"Denne installation af GNU Backgammon er blevet kompileret uden GDBM\n"
-"understøttelse og operationer med positionsdatabaser er ikke implementerede."
 
 #: set.c:1327 set.c:1346
 #, c-format
-msgid "(Note that this setting will have no effect until you `set player %s gnu'.)\n"
+msgid ""
+"(Note that this setting will have no effect until you `set player %s gnu'.)\n"
 msgstr ""
 
 #: set.c:1356
@@ -8954,30 +8729,22 @@ msgid "Only the active game in a session will be recorded."
 msgstr ""
 
 #: set.c:1579
-#, fuzzy
 msgid ""
 "This installation of GNU Backgammon was compiled without the Blum, Blum and "
 "Shub generator."
 msgstr ""
-"Denne installation af GNU Backgammon er blevet kompileret uden GDBM\n"
-"understøttelse og operationer med positionsdatabaser er ikke implementerede."
 
 #: set.c:1588
-#, fuzzy
-msgid "This installation of GNU Backgammon was compiled without the BSD generator."
+msgid ""
+"This installation of GNU Backgammon was compiled without the BSD generator."
 msgstr ""
-"Denne installation af GNU Backgammon er blevet kompileret uden GDBM\n"
-"understøttelse og operationer med positionsdatabaser er ikke implementerede."
 
 #: set.c:1618
-#, fuzzy
 msgid ""
 "This installation of GNU Backgammon was compiled without support for sockets "
 "needed for fetching\n"
 "random numbers from <www.random.org>"
 msgstr ""
-"Denne installation af GNU Backgammon er blevet kompileret uden GDBM\n"
-"understøttelse og operationer med positionsdatabaser er ikke implementerede."
 
 #: set.c:1630
 msgid ""
@@ -9002,11 +8769,10 @@ msgid "Do not change evaluations during rollout."
 msgstr ""
 
 #: set.c:1677
-#, fuzzy
 msgid ""
 "You must specify a valid ply at which to change evaluations -- try `help set "
 "rollout late plies'."
-msgstr "Du skal angive en fil at eksportere til (se 'help database export')."
+msgstr ""
 
 #: set.c:1686
 msgid "No evaluations changes will be made during rollouts."
@@ -9026,11 +8792,10 @@ msgid "Do not stop rollout based on STDs"
 msgstr ""
 
 #: set.c:1720
-#, fuzzy
 msgid ""
 "You must specify a valid minimum number of games to rollout -- try 'help set "
 "rollout limit minimumgames'."
-msgstr "Du skal angive en fil at eksportere til (se 'help database export')."
+msgstr ""
 
 #: set.c:1727
 #, c-format
@@ -9067,11 +8832,10 @@ msgid "Do not stop rollout of moves based on J.S.D.s"
 msgstr ""
 
 #: set.c:1783
-#, fuzzy
 msgid ""
 "You must specify a valid minimum number of games to rollout -- try 'help set "
 "rollout jsd minimumgames'."
-msgstr "Du skal angive en fil at eksportere til (se 'help database export')."
+msgstr ""
 
 #: set.c:1789
 #, c-format
@@ -9096,9 +8860,8 @@ msgid "Chequer play in rollouts"
 msgstr ""
 
 #: set.c:1902
-#, fuzzy
 msgid "Chequer play for later moves in rollouts"
-msgstr "Brikflytningsvurdering"
+msgstr ""
 
 #: set.c:1929
 msgid "Chequer play in rollouts (for player 1)"
@@ -9121,9 +8884,8 @@ msgid "Cube decisions in rollouts"
 msgstr ""
 
 #: set.c:1976
-#, fuzzy
 msgid "Cube decisions for later plies in rollouts"
-msgstr "Doblebeslutnings rangering"
+msgstr ""
 
 #: set.c:1991
 msgid "Cube decisions in rollouts (for player 1)"
@@ -9146,11 +8908,13 @@ msgid "Will truncate *cubeless* rollouts when reaching exact bearoff database"
 msgstr ""
 
 #: set.c:2026
-msgid "Will not truncate *cubeless* rollouts when reaching exact bearoff database"
+msgid ""
+"Will not truncate *cubeless* rollouts when reaching exact bearoff database"
 msgstr ""
 
 #: set.c:2040
-msgid "Will truncate *cubeless* rollouts when reaching one-sided bearoff database"
+msgid ""
+"Will truncate *cubeless* rollouts when reaching one-sided bearoff database"
 msgstr ""
 
 #: set.c:2042
@@ -9225,11 +8989,10 @@ msgid "Evaluation of rollouts at truncation point are separately specified."
 msgstr ""
 
 #: set.c:2148
-#, fuzzy
 msgid ""
 "You must specify a valid ply at which to truncate rollouts -- try `help set "
 "rollout'."
-msgstr "Du skal angive en fil at eksportere til (se 'help database export')."
+msgstr ""
 
 #: set.c:2157
 msgid "Rollouts will not be truncated."
@@ -9250,9 +9013,8 @@ msgid "Chequer play evaluations at rollout truncation point"
 msgstr ""
 
 #: set.c:2177
-#, fuzzy
 msgid "Cube decisions at rollout truncation point"
-msgstr "Doblebeslutnings rangering"
+msgstr ""
 
 #: set.c:2191
 msgid "Will lookahead during rollouts to reduce variance."
@@ -9291,7 +9053,8 @@ msgid ""
 msgstr ""
 
 #: set.c:2356 set.c:2367 set.c:2374
-msgid "The Crawford rule applies only in match play when a player's score is 1-away."
+msgid ""
+"The Crawford rule applies only in match play when a player's score is 1-away."
 msgstr ""
 
 #: set.c:2380
@@ -9319,9 +9082,8 @@ msgid "You cannot play the Crawford game once the match is already over."
 msgstr ""
 
 #: set.c:2509
-#, fuzzy
 msgid "You must specify either 0, 1 or 2"
-msgstr "Du skal indtaste to numre mellem 1 og 6."
+msgstr ""
 
 #: set.c:2525
 msgid "There must be a game in progress to set a player on roll."
@@ -9405,19 +9167,19 @@ msgid "Incorrect syntax for set warning command."
 msgstr ""
 
 #: set.c:2676 set.c:2720
-#, fuzzy, c-format
+#, c-format
 msgid "Unknown warning %s."
-msgstr "Vurdering af held"
+msgstr ""
 
 #: set.c:2694
-#, fuzzy, c-format
+#, c-format
 msgid "Unknown value %s."
-msgstr "ukendt bræt-type\n"
+msgstr ""
 
 #: set.c:2698
-#, fuzzy, c-format
+#, c-format
 msgid "Warning %s set %s."
-msgstr "Antal doblinger fejlagtigt afslået"
+msgstr ""
 
 #: set.c:2734
 msgid "You must specify the number of beavers to allow."
@@ -9437,9 +9199,8 @@ msgid "No beavers allowed in money sessions."
 msgstr ""
 
 #: set.c:2755
-#, fuzzy
 msgid "You must specify a number between 1 and 6.\n"
-msgstr "Du skal indtaste to numre mellem 1 og 6."
+msgstr "Du skal indtaste et tal mellem 1 og 6.\n"
 
 #: set.c:2761
 #, c-format
@@ -9525,9 +9286,8 @@ msgid ""
 msgstr ""
 
 #: set.c:2909
-#, fuzzy
 msgid "You must specify a player -- try `help set analysis player'."
-msgstr "Du skal angive en fil at eksportere til (se 'help database export')."
+msgstr ""
 
 #: set.c:2946
 #, c-format
@@ -9537,9 +9297,9 @@ msgid ""
 msgstr ""
 
 #: set.c:2958
-#, fuzzy, c-format
+#, c-format
 msgid "Analyse %s's chequerplay and cube decisions."
-msgstr "Totalt antal mulige brug af dobleterningen"
+msgstr ""
 
 #: set.c:2961
 #, c-format
@@ -9563,9 +9323,9 @@ msgid "`eval' and `hint' cube decisions"
 msgstr ""
 
 #: set.c:3047
-#, fuzzy, c-format
+#, c-format
 msgid "%s set to: %s\n"
-msgstr " %s dobler til %d"
+msgstr ""
 
 #: set.c:3051
 #, c-format
@@ -9573,14 +9333,12 @@ msgid "%s cleared.\n"
 msgstr ""
 
 #: set.c:3057
-#, fuzzy
 msgid "Match annotator"
-msgstr "Stilling i kampen"
+msgstr ""
 
 #: set.c:3062
-#, fuzzy
 msgid "Match comment"
-msgstr "Stilling i kampen"
+msgstr ""
 
 #: set.c:3085
 msgid "Match date cleared."
@@ -9597,9 +9355,8 @@ msgid "Match date set to %04d-%02d-%02d.\n"
 msgstr ""
 
 #: set.c:3106
-#, fuzzy
 msgid "Match event"
-msgstr "Kamplængde:"
+msgstr ""
 
 #: set.c:3115
 #, c-format
@@ -9612,18 +9369,14 @@ msgid "New matches will default to %d points.\n"
 msgstr ""
 
 #: set.c:3121
-#, fuzzy
 msgid "Match place"
-msgstr "kamp"
+msgstr ""
 
 #: set.c:3130
-#, fuzzy
 msgid ""
 "You must specify which player's rating to set (see `help set matchinfo "
 "rating')."
 msgstr ""
-"Du skal angive hvilken fil du ønsker at eksportere til (se `help export "
-"match latex')."
 
 #: set.c:3135
 #, c-format
@@ -9631,9 +9384,8 @@ msgid "Rating for %s"
 msgstr ""
 
 #: set.c:3142
-#, fuzzy
 msgid "Match round"
-msgstr "Stilling i kampen"
+msgstr ""
 
 #: set.c:3156
 msgid "Include annotations in exports"
@@ -9740,14 +9492,12 @@ msgid "Do not show detailed parameters for rollouts"
 msgstr ""
 
 #: set.c:3320
-#, fuzzy
 msgid "Export moves marked 'very bad'."
-msgstr "Antal træk markeret som meget dårlige"
+msgstr ""
 
 #: set.c:3321
-#, fuzzy
 msgid "Do not export moves marked 'very bad'."
-msgstr "Antal træk markeret som meget dårlige"
+msgstr ""
 
 #: set.c:3330
 msgid "Export moves marked 'bad'."
@@ -9770,19 +9520,16 @@ msgid "Export unmarked moves."
 msgstr ""
 
 #: set.c:3351
-#, fuzzy
 msgid "Do not export unmarked moves."
-msgstr "Utvungne træk"
+msgstr ""
 
 #: set.c:3360
-#, fuzzy
 msgid "Export cube decisions marked 'very bad'."
-msgstr "Advarsel: brugen af dobleterningen er market som %s"
+msgstr ""
 
 #: set.c:3361
-#, fuzzy
 msgid "Do not export cube decisions marked 'very bad'."
-msgstr "Advarsel: brugen af dobleterningen er market som %s"
+msgstr ""
 
 #: set.c:3370
 msgid "Export cube decisions marked 'bad'."
@@ -9845,11 +9592,8 @@ msgid "CSS stylesheet for HTML export: %s\n"
 msgstr ""
 
 #: set.c:3506
-#, fuzzy
 msgid "You must specify a URL. See `help set export html pictureurl'."
 msgstr ""
-"Du skal angive hvilken fil du ønsker at eksportere til (se `help export game "
-"html')."
 
 #: set.c:3517
 #, c-format
@@ -9956,9 +9700,8 @@ msgid "Priority changes are not supported on this platform.\n"
 msgstr ""
 
 #: set.c:3812
-#, fuzzy
 msgid "You must specify a priority between -20 and 20."
-msgstr "Du skal indtaste to numre mellem 1 og 6."
+msgstr ""
 
 #: set.c:3834
 msgid "Allow GNU Backgammon to manipulate the dice."
@@ -9969,9 +9712,8 @@ msgid "Disallow GNU Backgammon to manipulate the dice."
 msgstr ""
 
 #: set.c:3847
-#, fuzzy
 msgid "You must specify a player -- try `help set cheat player'."
-msgstr "Du skal angive en fil at eksportere til (se 'help database export')."
+msgstr ""
 
 #: set.c:3904
 #, c-format
@@ -9979,14 +9721,12 @@ msgid "%s will get the %s roll on each turn.\n"
 msgstr ""
 
 #: set.c:3914
-#, fuzzy
 msgid "You must specify a size between 1 and 21."
-msgstr "Du skal indtaste to numre mellem 1 og 6."
+msgstr ""
 
 #: set.c:3930 set.c:3948
-#, fuzzy
 msgid "You must specify a size between 1 and 20."
-msgstr "Du skal indtaste to numre mellem 1 og 6."
+msgstr ""
 
 #: set.c:3936
 #, c-format
@@ -9999,9 +9739,9 @@ msgid "Size of generated PNG images are %dx%d pixels\n"
 msgstr ""
 
 #: set.c:3967
-#, fuzzy, c-format
+#, c-format
 msgid "The current match or session is being played as `%s'.\n"
-msgstr "Intet spil er igang."
+msgstr ""
 
 #: set.c:3970
 #, c-format
@@ -10021,43 +9761,38 @@ msgid "Cube efficiency must be between 0 and 1"
 msgstr ""
 
 #: set.c:4043
-#, fuzzy
 msgid "Cube efficiency for one sided bearoff positions"
-msgstr "Effektivitet af doblinger for %s: %7.4f"
+msgstr ""
 
 #: set.c:4051
-#, fuzzy
 msgid "Cube efficiency for crashed positions"
-msgstr "Effektivitet af doblinger for %s: %7.4f"
+msgstr ""
 
 #: set.c:4058
-#, fuzzy
 msgid "Cube efficiency for contact positions"
-msgstr "Effektivitet af doblinger for %s: %7.4f"
+msgstr ""
 
 #: set.c:4069
-#, fuzzy, c-format
+#, c-format
 msgid "Cube efficiency race factor set to %7.5f\n"
-msgstr "Effektivitet af doblinger for %s: %7.4f"
+msgstr "Effektivitet af doblinger sat til %7.5f\n"
 
 #: set.c:4072
 msgid "Cube efficiency race factor must be larger than 0."
 msgstr ""
 
 #: set.c:4079
-#, fuzzy
 msgid "Cube efficiency race max"
-msgstr "Effektivitet af doblinger for %s: %7.4f"
+msgstr ""
 
 #: set.c:4086
-#, fuzzy
 msgid "Cube efficiency race min"
-msgstr "Effektivitet af doblinger for %s: %7.4f"
+msgstr ""
 
 #: set.c:4097
-#, fuzzy, c-format
+#, c-format
 msgid "Cube efficiency race coefficient set to %7.5f\n"
-msgstr "Effektivitet af doblinger for %s: %7.4f"
+msgstr ""
 
 #: set.c:4101
 msgid "Cube efficiency race coefficient must be larger than 0."
@@ -10073,9 +9808,8 @@ msgid "The rating offset for estimating absolute ratings is: %.1f\n"
 msgstr ""
 
 #: set.c:4142
-#, fuzzy
 msgid "You must specify a number greater than 50"
-msgstr "Du skal indtaste to numre mellem 1 og 6."
+msgstr ""
 
 #: set.c:4157
 msgid "Please provide a positive number\n"
@@ -10105,15 +9839,13 @@ msgid "You must specify a file to load from (see `help load game')."
 msgstr ""
 
 #: sgf.c:1441
-msgid "Are you sure you want to load a saved game, and discard the one in progress? "
+msgid ""
+"Are you sure you want to load a saved game, and discard the one in progress? "
 msgstr ""
 
 #: sgf.c:1488
-#, fuzzy
 msgid "You must specify a file to load from (see `help load position')."
 msgstr ""
-"Du skal angive hvilken fil du ønsker at eksportere til (se `help export "
-"position html')."
 
 #: sgf.c:1500
 msgid ""
@@ -10140,11 +9872,8 @@ msgid "You must specify a file to save to (see `help save match')."
 msgstr ""
 
 #: sgf.c:2464
-#, fuzzy
 msgid "You must specify a file to save to (see `help save position')."
 msgstr ""
-"Du skal angive hvilken fil du ønsker at eksportere til (se `help export "
-"position html')."
 
 #: sgf_l.l:91
 msgid "illegal character in SGF file"
@@ -10198,9 +9927,8 @@ msgid "        Noise standard deviation %5.3f"
 msgstr ""
 
 #: show.c:132
-#, fuzzy
 msgid "        Noiseless evaluations"
-msgstr "Ingen vurdering"
+msgstr ""
 
 #: show.c:134
 msgid " (deterministic noise).\n"
@@ -10211,14 +9939,14 @@ msgid " (pseudo-random noise).\n"
 msgstr ""
 
 #: show.c:169
-#, fuzzy, c-format
+#, c-format
 msgid "%s for first %d plies:\n"
-msgstr " %s tilbyder %d point"
+msgstr ""
 
 #: show.c:177 show.c:190 show.c:206
-#, fuzzy, c-format
+#, c-format
 msgid "Player %d:\n"
-msgstr "Spiller 0"
+msgstr ""
 
 #: show.c:185
 #, c-format
@@ -10255,11 +9983,13 @@ msgid "Will truncate money game rollouts when reaching exact bearoff database."
 msgstr ""
 
 #: show.c:252
-msgid "Will not truncate money game rollouts when reaching exact bearoff database."
+msgid ""
+"Will not truncate money game rollouts when reaching exact bearoff database."
 msgstr ""
 
 #: show.c:256
-msgid "Will truncate *cubeless* rollouts when reaching one-sided bearoff database."
+msgid ""
+"Will truncate *cubeless* rollouts when reaching one-sided bearoff database."
 msgstr ""
 
 #: show.c:258
@@ -10307,9 +10037,8 @@ msgstr ""
 
 #. simple summary - show_evals will deal with player differences
 #: show.c:292
-#, fuzzy
 msgid "Evaluation parameters:"
-msgstr "Indlæringsrate:"
+msgstr ""
 
 #. Cube different from Chequer
 #: show.c:296
@@ -10321,19 +10050,19 @@ msgid "Cube decision parameters:"
 msgstr ""
 
 #: show.c:303
-#, fuzzy, c-format
+#, c-format
 msgid "Move filter for first %d plies:\n"
-msgstr " %s tilbyder %d point"
+msgstr ""
 
 #: show.c:305
-#, fuzzy, c-format
+#, c-format
 msgid "Move filter after %d plies:\n"
-msgstr " %s tilbyder %d point"
+msgstr ""
 
 #: show.c:309
-#, fuzzy, c-format
+#, c-format
 msgid "Move filter:\n"
-msgstr "Maksimalt antal træk for analyse:"
+msgstr ""
 
 #: show.c:314
 msgid "Truncation point Chequer play evaluation:"
@@ -10398,9 +10127,8 @@ msgid "    Cube decisions:"
 msgstr ""
 
 #: show.c:454
-#, fuzzy
 msgid "    Luck analysis:"
-msgstr "- analyse"
+msgstr ""
 
 #: show.c:461
 msgid "On"
@@ -10449,7 +10177,8 @@ msgid "No evaluation speed has been recorded."
 msgstr ""
 
 #: show.c:631
-msgid "GNU Backgammon will ask for confirmation before aborting games in progress."
+msgid ""
+"GNU Backgammon will ask for confirmation before aborting games in progress."
 msgstr ""
 
 #: show.c:634
@@ -10459,11 +10188,13 @@ msgid ""
 msgstr ""
 
 #: show.c:638
-msgid "GNU Backgammon will ask for confirmation before overwriting existing files."
+msgid ""
+"GNU Backgammon will ask for confirmation before overwriting existing files."
 msgstr ""
 
 #: show.c:641
-msgid "GNU Backgammon will not ask for confirmation overwriting existing files."
+msgid ""
+"GNU Backgammon will not ask for confirmation overwriting existing files."
 msgstr ""
 
 #: show.c:660
@@ -10548,9 +10279,9 @@ msgid "Your language preference is set to %s.\n"
 msgstr ""
 
 #: show.c:758
-#, fuzzy, c-format
+#, c-format
 msgid "Language not set"
-msgstr "Indlæringsrate:"
+msgstr ""
 
 #: show.c:770
 #, c-format
@@ -10558,9 +10289,8 @@ msgid "%s (%s) vs. %s (%s)"
 msgstr ""
 
 #: show.c:771 show.c:773
-#, fuzzy
 msgid "unknown rating"
-msgstr "Vurdering af held"
+msgstr ""
 
 #: show.c:776
 #, c-format
@@ -10578,14 +10308,14 @@ msgid "Round: %s\n"
 msgstr ""
 
 #: show.c:787 text.c:723
-#, fuzzy, c-format
+#, c-format
 msgid "Place: %s\n"
-msgstr "Spiller 0"
+msgstr ""
 
 #: show.c:790 text.c:727
-#, fuzzy, c-format
+#, c-format
 msgid "Annotator: %s\n"
-msgstr "Annotering"
+msgstr ""
 
 #: show.c:798
 #, c-format
@@ -10691,9 +10421,9 @@ msgid "%s has offered to resign a %s.\n"
 msgstr ""
 
 #: show.c:964
-#, fuzzy, c-format
+#, c-format
 msgid "The current browser is %s\n"
-msgstr "Det aktuelle basis er %u.\n"
+msgstr ""
 
 #: show.c:1005
 #, c-format
@@ -10713,16 +10443,16 @@ msgid ""
 msgstr ""
 
 #: show.c:1111
-#, fuzzy, c-format
+#, c-format
 msgid "sum              : %d\n"
-msgstr "       (i/t)       "
+msgstr ""
 
 #: show.c:1112
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "diff             : %d\n"
 "\n"
-msgstr "       (i/t)       "
+msgstr ""
 
 #: show.c:1114
 #, c-format
@@ -10742,9 +10472,9 @@ msgid "1 calculation thread."
 msgstr ""
 
 #: show.c:1154
-#, fuzzy, c-format
+#, c-format
 msgid "%d calculation threads."
-msgstr "Evaluering"
+msgstr ""
 
 #: show.c:1165
 #, c-format
@@ -10859,9 +10589,8 @@ msgid "Effective pip count:"
 msgstr ""
 
 #: show.c:1372
-#, fuzzy
 msgid "                       EPC      Wastage"
-msgstr "|                  |BAR|                  |     "
+msgstr ""
 
 #: show.c:1375
 #, c-format
@@ -10915,7 +10644,8 @@ msgid "Match equities shown in MWC (match winning chance) (match play only)."
 msgstr ""
 
 #: show.c:1486
-msgid "Match equities shown in EMG (normalized money game equity) (match play only)."
+msgid ""
+"Match equities shown in EMG (normalized money game equity) (match play only)."
 msgstr ""
 
 #: show.c:1490
@@ -11060,13 +10790,10 @@ msgid "both"
 msgstr "begge"
 
 #: show.c:1886
-#, fuzzy
 msgid ""
 "\n"
 "Output move analysis:\n"
 msgstr ""
-"\n"
-"Vis træk:\n"
 
 #: show.c:1888
 msgid "- show at most"
@@ -11090,34 +10817,28 @@ msgid "- show rollout parameters"
 msgstr ""
 
 #: show.c:1906
-#, fuzzy
 msgid "- for unmarked moves"
-msgstr "Utvungne træk"
+msgstr ""
 
 #: show.c:1908
-#, fuzzy, c-format
+#, c-format
 msgid "- for moves marked '%s'"
-msgstr "Antal træk markeret som dårlige"
+msgstr ""
 
 #: show.c:1915
-#, fuzzy
 msgid ""
 "\n"
 "Output cube decision analysis:\n"
 msgstr ""
-"\n"
-"Doblebeslutnings statistikker:\n"
-"\n"
 
 #: show.c:1931
-#, fuzzy
 msgid "- for unmarked cube decisions"
-msgstr "Totalt antal mulige brug af dobleterningen"
+msgstr ""
 
 #: show.c:1933
-#, fuzzy, c-format
+#, c-format
 msgid "- for cube decisions marked '%s'"
-msgstr "Advarsel: brugen af dobleterningen er market som %s"
+msgstr ""
 
 #: show.c:1941
 msgid "- actual cube decisions"
@@ -11183,7 +10904,8 @@ msgid "Warnings are given for 'doubtful', 'bad', or 'very bad' cube decisions."
 msgstr ""
 
 #: show.c:1999
-msgid "No warnings are given for 'doubtful', 'bad', or 'very bad' cube decisions."
+msgid ""
+"No warnings are given for 'doubtful', 'bad', or 'very bad' cube decisions."
 msgstr ""
 
 #: show.c:2003
@@ -11191,7 +10913,8 @@ msgid "Warnings are given for 'doubtful', 'bad', or 'very bad' chequer moves."
 msgstr ""
 
 #: show.c:2006
-msgid "No warnings are given for 'doubtful', 'bad', or 'very bad' chequer moves."
+msgid ""
+"No warnings are given for 'doubtful', 'bad', or 'very bad' chequer moves."
 msgstr ""
 
 #: show.c:2010
@@ -11241,9 +10964,9 @@ msgid "You are playing: %s\n"
 msgstr ""
 
 #: show.c:2170
-#, fuzzy, c-format
+#, c-format
 msgid "Default variation is: %s\n"
-msgstr "   Standardværdi : \"%s\"\n"
+msgstr ""
 
 #: show.c:2177
 #, c-format
@@ -11276,9 +10999,8 @@ msgid ""
 msgstr ""
 
 #: show.c:2213
-#, fuzzy
 msgid "Position not in any two-sided database\n"
-msgstr "%s: inkomplet udtagningsdatabase\n"
+msgstr ""
 
 #: show.c:2273
 #, c-format
@@ -11326,37 +11048,32 @@ msgid "sound"
 msgstr ""
 
 #: sound.c:245
-#, fuzzy
 msgid "Starting GNU Backgammon"
-msgstr "GNU Backgammon"
+msgstr ""
 
 #: sound.c:246
-#, fuzzy
 msgid "Exiting GNU Backgammon"
-msgstr "GNU Backgammon"
+msgstr ""
 
 #: sound.c:247
 msgid "Agree"
 msgstr ""
 
 #: sound.c:248
-#, fuzzy
 msgid "Doubling"
-msgstr "Doblinger"
+msgstr ""
 
 #: sound.c:250
-#, fuzzy
 msgid "Chequer movement"
-msgstr "/_Opsætning/Spil med uret"
+msgstr ""
 
 #: sound.c:252
 msgid "Redouble"
 msgstr ""
 
 #: sound.c:256
-#, fuzzy
 msgid "Human fans"
-msgstr "Menneske"
+msgstr ""
 
 #: sound.c:257
 msgid "Human wins game"
@@ -11371,14 +11088,12 @@ msgid "Bot fans"
 msgstr ""
 
 #: sound.c:260
-#, fuzzy
 msgid "Bot wins game"
-msgstr "pengespil"
+msgstr ""
 
 #: sound.c:261
-#, fuzzy
 msgid "Bot wins match"
-msgstr "Importér .sgg kamp"
+msgstr ""
 
 #: sound.c:262
 msgid "Analysis is finished"
@@ -11405,13 +11120,10 @@ msgid "Sound for: %s: %s\n"
 msgstr ""
 
 #: speed.c:117
-#, fuzzy
 msgid ""
 "If you specify a parameter to `calibrate', it must be a number of iterations "
 "to run."
 msgstr ""
-"Hvis du angiver en parameter til `database generate' skal\n"
-"den være lig antal positioner der skal genereres."
 
 #: speed.c:125
 msgid "Calibration not available."
@@ -11442,16 +11154,16 @@ msgid ", resigns %s"
 msgstr ""
 
 #: text.c:154
-#, fuzzy, c-format
+#, c-format
 msgid "Move number %d: "
-msgstr "Træk nummer %d:"
+msgstr ""
 
 #: text.c:173
-#, fuzzy, c-format
+#, c-format
 msgid ""
 " %s to play %d%d\n"
 "\n"
-msgstr " %s skal spille %d %d"
+msgstr ""
 
 #: text.c:220
 #, c-format
@@ -11461,56 +11173,55 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: text.c:258
-#, fuzzy, c-format
+#, c-format
 msgid "Output generated %sby %s "
-msgstr "%s (analyseret af GNU Backgammon %s)"
+msgstr ""
 
 #: text.c:263
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "(Text Export version %d.%d)\n"
 "\n"
-msgstr "(HTML-eksport version %d. %d)"
+msgstr ""
 
 #: text.c:372 text.c:393
 msgid "Cannot analyse beaver nor raccoons!\n"
 msgstr ""
 
 #: text.c:564
-#, fuzzy, c-format
+#, c-format
 msgid "* %s moves %s"
-msgstr "*%s flytter %s"
+msgstr ""
 
 #: text.c:569
-#, fuzzy, c-format
+#, c-format
 msgid "* %s cannot move"
-msgstr "* Intet lovligt træk for %s"
+msgstr ""
 
 #: text.c:615
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Game statistics for game %d\n"
 "\n"
-msgstr "Statistic for parti %d"
+msgstr ""
 
 #: text.c:620
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Match statistics\n"
 "\n"
-msgstr "Statistik for kampen"
+msgstr ""
 
 #: text.c:622
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Session statistics\n"
 "\n"
-msgstr "Statistik for pengespillet"
+msgstr ""
 
 #: text.c:672
-#, fuzzy
 msgid "Annotation:\n"
-msgstr "Annotering"
+msgstr ""
 
 #: text.c:688
 msgid ""
@@ -11534,44 +11245,33 @@ msgid "Comments: %s\n"
 msgstr ""
 
 #: text.c:757
-#, fuzzy
 msgid ""
 "Statistics from player records:\n"
 "\n"
-msgstr "Statistic for parti %d"
+msgstr ""
 
 #: text.c:908
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%s wins %d points\n"
 "\n"
-msgstr "%s%s vinner %d point%s"
+msgstr ""
 
 #: text.c:913
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%s wins %d point\n"
 "\n"
-msgstr "%s%s vinner %d point%s"
+msgstr ""
 
 #: text.c:945
-#, fuzzy
 msgid "You must specify a file to export to (see `help export game text')."
 msgstr ""
-"Du skal angive hvilken fil du ønsker at eksportere til \n"
-"(se `help export game latex')."
 
 #: text.c:982
-#, fuzzy
 msgid "You must specify a file to export to (see `help export match text')."
 msgstr ""
-"Du skal angive hvilken fil du ønsker at eksportere til (se `help export "
-"match latex')."
 
 #: text.c:1042
-#, fuzzy
 msgid "You must specify a file to export to (see `help export position text')."
 msgstr ""
-"Du skal angive hvilken fil du ønsker at eksportere til (se `help export "
-"position html')."
-
