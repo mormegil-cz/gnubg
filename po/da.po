@@ -6696,7 +6696,7 @@ msgstr ""
 #: htmlimages.c:650
 #, c-format
 msgid "You must specify a file to export to (see `%s')\n"
-msgstr "Du skal angive en fil at eksportere til (se '%s')."
+msgstr "Du skal angive en fil at eksportere til (se '%s').\n"
 
 #: htmlimages.c:657
 #, c-format
@@ -7222,7 +7222,7 @@ msgstr ""
 msgid "%s wins a %s and %d point.\n"
 msgid_plural "%s wins a %s and %d points.\n"
 msgstr[0] "%s vinder en %s og %d point.\n"
-msgstr[1] "%s%s vinner %d point%s"
+msgstr[1] "%s vinder en %s og %d point.\n"
 
 #: play.c:1683
 #, c-format
