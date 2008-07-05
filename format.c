@@ -319,7 +319,7 @@ OutputEvalContextsForRollout( char *sz, const char *szIndent,
 
     }
     else {
-      sz += sprintf ( sz, "%s: ", _("Play") );
+      sprintf ( strchr( sz, 0 ), "%s: ", _("Play") );
       strcat ( sz, OutputEvalContext ( &aecChequer[ i ], FALSE ) );
       strcat ( sz, "\n" );
     }
@@ -327,7 +327,7 @@ OutputEvalContextsForRollout( char *sz, const char *szIndent,
     if ( szIndent && *szIndent )
       strcat ( sz, szIndent );
 
-    sz += sprintf ( sz, "%s: ", _("Cube") );
+    sprintf ( strchr( sz, 0 ), "%s: ", _("Cube") );
     strcat ( sz, OutputEvalContext ( &aecCube[ i ], FALSE ) );
     strcat ( sz, "\n" );
 
