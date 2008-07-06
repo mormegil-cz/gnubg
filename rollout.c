@@ -42,128 +42,130 @@
 #include "rollout.h"
 
 int log_rollouts = 0;
-static FILE *logfp;
 char *log_file_name = 0;
 
 /* make sgf files of rollouts if log_rollouts is true and we have a file 
  * name template to work with
  */
 
-static void 
-log_cube (const char *action, int side) {
-  fprintf (logfp, ";%s[%s]\n", side ? "B" : "W", action);
-}
-
-
-static void
-log_move (const int *anMove, int side, int die0, int die1) {
-  int i;
-
-  fprintf (logfp, ";%s[%d%d", side ? "B" : "W", die0, die1);
-
-  for (i = 0; i < 8; i += 2) {
-    if (anMove[i] < 0) 
-      break;
-
-    if (anMove[i] > 23) 
-      fprintf (logfp, "y");
-    else if (!side)
-      fprintf (logfp, "%c", 'a' + anMove[i]  );
-    else
-      fprintf (logfp, "%c", 'x' - anMove[i] );
-
-    if (anMove[i + 1] < 0)
-      fprintf (logfp, "z");
-    else if (!side)
-      fprintf (logfp, "%c", 'a' + anMove[i + 1]  );
-    else
-      fprintf (logfp, "%c", 'x' - anMove[i + 1] );
-
-  }
-
-  fprintf (logfp, "%s", "]\n");
-     
-}
-
-static void board_to_sgf (const unsigned int anBoard[25], int direction)
+static void log_cube(FILE * logfp, const char *action, int side)
 {
-  unsigned int i, j;
-  int c = direction > 0 ? 'a' : 'x';
-
-  for (i = 0; i < 24; ++i) {
-    for (j = 0; j < anBoard[i]; ++j)
-      fprintf (logfp, "[%c]", c);
-    
-    c += direction;
-  }
-
-  for (j = 0; j < anBoard[24]; ++j) 
-    fprintf (logfp, "[y]");
+	if (!logfp)
+		return;
+	fprintf(logfp, ";%s[%s]\n", side ? "B" : "W", action);
 }
 
-    
+static void log_move(FILE * logfp, const int *anMove, int side, int die0, int die1)
+{
+	int i;
+	if (!logfp)
+		return;
 
-static void log_game_start (const char *name, const cubeinfo *pci, int fCubeful,
-		     const TanBoard anBoard) {
-  time_t     t = time (0);
-  struct tm  *now = localtime (&t);
-  const char *rule;
+	fprintf(logfp, ";%s[%d%d", side ? "B" : "W", die0, die1);
 
-  if (pci->nMatchTo == 0) {
-    if (!fCubeful)
-      rule = "RU[NoCube:Jacoby]";
-    else if (!pci -> fJacoby) {
-      rule = "";
-    }
-    else {
-      rule = "RU[Jacoby]";
-    }
-  } else {
-    if (!fCubeful) {
-      rule = "RU[NoCube:Crawford]";
-    } else if (fAutoCrawford) {
-      rule = (ms.fCrawford) ? "RU[Crawford:CrawfordGame]" : "RU[Crawford]";
-    } else {
-      rule = "";
-    }
-  }
+	for (i = 0; i < 8; i += 2) {
+		if (anMove[i] < 0)
+			break;
 
-  if ((logfp = fopen (name, "w")) == 0) {
-    log_rollouts = 0;
-    return;
-  }
+		if (anMove[i] > 23)
+			fprintf(logfp, "y");
+		else if (!side)
+			fprintf(logfp, "%c", 'a' + anMove[i]);
+		else
+			fprintf(logfp, "%c", 'x' - anMove[i]);
 
-  fprintf (logfp, "(;FF[4]GM[6]CA[UTF-8]AP[GNU Backgammon:0.14-devel]MI"
-	   "[length:%d][game:0][ws:%d][bs:%d][wtime:0][btime:0]"
-	   "[wtimeouts:0][btimeouts:0]PW[White]PB[Black]DT[%d-%02d-%02d]"
-	   "%s\n", pci->nMatchTo, pci->anScore[0], pci->anScore[1], 
-	   1900 + now->tm_year, 1 + now->tm_mon, now->tm_mday, rule);
+		if (anMove[i + 1] < 0)
+			fprintf(logfp, "z");
+		else if (!side)
+			fprintf(logfp, "%c", 'a' + anMove[i + 1]);
+		else
+			fprintf(logfp, "%c", 'x' - anMove[i + 1]);
 
-  /* set the rest of the things up */
-  fprintf (logfp, ";PL[%s]\n", pci->fMove ? "B" : "W" );
-  fprintf (logfp, ";CP[%s]\n", pci->fCubeOwner == 0 ? "w" :
-	   pci->fCubeOwner == 1 ? "b" : "c");
-  fprintf (logfp, ";CV[%d]\n", pci->nCube);
-  fprintf (logfp, ";AE[a:y]AW");
-  if (!pci->fMove) {
-    board_to_sgf (anBoard[1],  1);
-    fprintf (logfp, "AB");
-    board_to_sgf (anBoard[0], -1);
-  } else {
-    board_to_sgf (anBoard[0], 1);
-    fprintf (logfp, "AB");
-    board_to_sgf (anBoard[1], -1);
-  }
-  fprintf (logfp, "\n");
+	}
+
+	fprintf(logfp, "%s", "]\n");
+
 }
 
-static void log_game_over (void) {
-  if (logfp) {
-    fprintf (logfp, ")" );
-    fclose (logfp);
-  }
+static void board_to_sgf(FILE * logfp, const unsigned int anBoard[25], int direction)
+{
+	unsigned int i, j;
+	int c = direction > 0 ? 'a' : 'x';
+	if (!logfp)
+		return;
 
-  logfp = 0;
+	for (i = 0; i < 24; ++i) {
+		for (j = 0; j < anBoard[i]; ++j)
+			fprintf(logfp, "[%c]", c);
+
+		c += direction;
+	}
+
+	for (j = 0; j < anBoard[24]; ++j)
+		fprintf(logfp, "[y]");
+}
+
+static FILE *log_game_start(const char *name, const cubeinfo * pci, int fCubeful, const TanBoard anBoard)
+{
+	time_t t = time(0);
+	struct tm *now = localtime(&t);
+	const char *rule;
+	FILE *logfp = NULL;
+
+	if (pci->nMatchTo == 0) {
+		if (!fCubeful)
+			rule = "RU[NoCube:Jacoby]";
+		else if (!pci->fJacoby) {
+			rule = "";
+		} else {
+			rule = "RU[Jacoby]";
+		}
+	} else {
+		if (!fCubeful) {
+			rule = "RU[NoCube:Crawford]";
+		} else if (fAutoCrawford) {
+			rule = (ms.fCrawford) ? "RU[Crawford:CrawfordGame]" : "RU[Crawford]";
+		} else {
+			rule = "";
+		}
+	}
+
+	if ((logfp = fopen(name, "w")) == 0) {
+		log_rollouts = 0;
+		return NULL;
+	}
+
+	fprintf(logfp, "(;FF[4]GM[6]CA[UTF-8]AP[GNU Backgammon:0.14-devel]MI"
+		"[length:%d][game:0][ws:%d][bs:%d][wtime:0][btime:0]"
+		"[wtimeouts:0][btimeouts:0]PW[White]PB[Black]DT[%d-%02d-%02d]"
+		"%s\n", pci->nMatchTo, pci->anScore[0], pci->anScore[1],
+		1900 + now->tm_year, 1 + now->tm_mon, now->tm_mday, rule);
+
+	/* set the rest of the things up */
+	fprintf(logfp, ";PL[%s]\n", pci->fMove ? "B" : "W");
+	fprintf(logfp, ";CP[%s]\n", pci->fCubeOwner == 0 ? "w" : pci->fCubeOwner == 1 ? "b" : "c");
+	fprintf(logfp, ";CV[%d]\n", pci->nCube);
+	fprintf(logfp, ";AE[a:y]AW");
+	if (!pci->fMove) {
+		board_to_sgf(logfp, anBoard[1], 1);
+		fprintf(logfp, "AB");
+		board_to_sgf(logfp, anBoard[0], -1);
+	} else {
+		board_to_sgf(logfp, anBoard[0], 1);
+		fprintf(logfp, "AB");
+		board_to_sgf(logfp, anBoard[1], -1);
+	}
+	fprintf(logfp, "\n");
+	return logfp;
+}
+
+static void log_game_over(FILE * logfp)
+{
+	if (!logfp)
+		return;
+	fprintf(logfp, ")");
+	fclose(logfp);
+	logfp = 0;
 }
 
 static void
@@ -324,7 +326,7 @@ BasicCubefulRollout ( unsigned int aanBoard[][ 2 ][ 25 ],
                       const cubeinfo aci[], int afCubeDecTop[], unsigned int cci,
                       rolloutcontext *prc,
                       rolloutstat aarsStatistics[][ 2 ],
-		      int nBasisCube, perArray *dicePerms) {
+		      int nBasisCube, perArray *dicePerms, FILE* logfp) {
 
   unsigned int anDice [ 2 ];
   unsigned int cUnfinished = cci;
@@ -488,8 +490,8 @@ BasicCubefulRollout ( unsigned int aanBoard[][ 2 ][ 25 ],
           case DOUBLE_BEAVER:
           case REDOUBLE_TAKE:
 			if (log_rollouts) {
-				log_cube ("double",  pci->fMove);
-				log_cube ("take",   !pci->fMove);
+				log_cube (logfp, "double",  pci->fMove);
+				log_cube (logfp, "take",   !pci->fMove);
 			}
 
 				/* update statistics */
@@ -504,8 +506,8 @@ BasicCubefulRollout ( unsigned int aanBoard[][ 2 ][ 25 ],
           case DOUBLE_PASS:
           case REDOUBLE_PASS:
 			if (log_rollouts) {
-				log_cube ("double", pci->fMove);
-				log_cube ("drop",  !pci->fMove);
+				log_cube (logfp, "double", pci->fMove);
+				log_cube (logfp, "drop",  !pci->fMove);
 			}
 
 			*pf = FALSE;
@@ -712,7 +714,7 @@ BasicCubefulRollout ( unsigned int aanBoard[][ 2 ][ 25 ],
         }
 
 	if (log_rollouts) {
-	  log_move (aanMoves[ anDice[ 0 ] - 1][ anDice[ 1 ] - 1], 
+	  log_move (logfp, aanMoves[ anDice[ 0 ] - 1][ anDice[ 1 ] - 1], 
 		    pci->fMove, anDice[0], anDice[1]);
 	}
 
@@ -955,23 +957,24 @@ char *log_name;
 cubeinfo *aciLocal;
 int show_jsds;
 
-float (* aarMu )[ NUM_ROLLOUT_OUTPUTS ];
-float (* aarSigma )[ NUM_ROLLOUT_OUTPUTS ];
-double (* aarResult )[ NUM_ROLLOUT_OUTPUTS ];
-double (* aarVariance )[ NUM_ROLLOUT_OUTPUTS ];
+float (*aarMu)[NUM_ROLLOUT_OUTPUTS];
+float (*aarSigma)[NUM_ROLLOUT_OUTPUTS];
+double (*aarResult)[NUM_ROLLOUT_OUTPUTS];
+double (*aarVariance)[NUM_ROLLOUT_OUTPUTS];
 int *fNoMore;
-jsdinfo * ajiJSD;
+jsdinfo *ajiJSD;
 
 int ro_alternatives;
 evalsetup **ro_apes;
 ConstTanBoard *ro_apBoard;
 const cubeinfo **ro_apci;
 int **ro_apCubeDecTop;
-rolloutstat (*ro_aarsStatistics)[2];
+rolloutstat(*ro_aarsStatistics)[2];
 int ro_fCubeRollout;
 int ro_fInvert;
-int ro_NextTrail;
+int ro_NextTrial;
 unsigned int *altGameCount;
+int *altTrialCount;
 
 extern void RolloutLoopMT(void *unused)
 {
@@ -980,41 +983,48 @@ extern void RolloutLoopMT(void *unused)
 	int err_too_big;
 	double v, s;
 	int active_alternatives;
-	unsigned int i, j;
+	unsigned int j;
 	int alt;
+	FILE *logfp = NULL;
 	rolloutcontext *prc = NULL;
 	perArray dicePerms;
 	dicePerms.nPermutationSeed = -1;
 
 	/* ============ begin rollout loop ============= */
 
-	while ((i = MT_SafeIncValue(&ro_NextTrail) - 1) < cGames) {
+	while (MT_SafeIncValue(&ro_NextTrial) <= (int) cGames) {
 		active_alternatives = ro_alternatives;
 		err_too_big = 1;
 
 		for (alt = 0; alt < ro_alternatives; ++alt) {
-			prc = &ro_apes[alt]->rc;
-
+			unsigned int trial = MT_SafeIncValue(&altTrialCount[alt]) - 1;
 			/* skip this one if it's already finished */
-			if (fNoMore[alt])
+			if (fNoMore[alt] || (trial > cGames - 1)) {
+				MT_SafeDec(&altTrialCount[alt]);
 				continue;
+			}
+
+
+			prc = &ro_apes[alt]->rc;
 
 			/* get the dice generator set up... */
 			if (prc->fRotate)
 				QuasiRandomSeed(&dicePerms, prc->nSeed);
 
-			nSkip = prc->nSkip;	/* Multi-thread safe? */
+			nSkip = 0;	/* not multi-thread safe do quasi random dice for initial positions */
 
 			/* ... and the RNG */
 			if (prc->rngRollout != RNG_MANUAL)
-				InitRNGSeed(prc->nSeed + (i << 8), prc->rngRollout, rngctxRollout);
+				InitRNGSeed(prc->nSeed + (trial << 8), prc->rngRollout, rngctxRollout);
 
 			memcpy(&aanBoardEval, ro_apBoard[alt], sizeof(aanBoardEval));
 
 			/* roll something out */
 			if (log_rollouts && log_name) {
-				sprintf(log_name, "%s-%5.5d-%c.sgf", log_file_name, i, alt + 'a');
-				log_game_start(log_name, ro_apci[alt], prc->fCubeful, (ConstTanBoard) (&aanBoardEval));
+				sprintf(log_name, "%s-%5.5d-%c.sgf", log_file_name, trial, alt + 'a');
+				logfp =
+				    log_game_start(log_name, ro_apci[alt], prc->fCubeful,
+						   (ConstTanBoard) (&aanBoardEval));
 				if (!log_rollouts) {
 					/* open failed */
 					log_rollouts = 0;
@@ -1022,13 +1032,13 @@ extern void RolloutLoopMT(void *unused)
 					log_name = 0;
 				}
 			}
-			BasicCubefulRollout(&aanBoardEval, &aar, 0, i, ro_apci[alt],
+			BasicCubefulRollout(&aanBoardEval, &aar, 0, trial, ro_apci[alt],
 					    ro_apCubeDecTop[alt], 1, prc,
 					    ro_aarsStatistics ? ro_aarsStatistics + alt : NULL,
-					    aciLocal[ro_fCubeRollout ? 0 : alt].nCube, &dicePerms);
+					    aciLocal[ro_fCubeRollout ? 0 : alt].nCube, &dicePerms, logfp);
 
 			if (log_rollouts) {
-				log_game_over();
+				log_game_over(logfp);
 			}
 
 			if (fInterrupt)
@@ -1037,14 +1047,6 @@ extern void RolloutLoopMT(void *unused)
 			multi_debug("exclusive lock: update result for alternative");
 			MT_Exclusive();
 			altGameCount[alt]++;
-			if (altGameCount[alt] > cGames || fNoMore[alt]) {
-				altGameCount[alt]--;
-				multi_debug("exclusive release: alternative is already done");
-				MT_Release();
-				continue;
-			}
-			if (altGameCount[alt] == cGames)
-				fNoMore[alt] = TRUE;
 
 			if (ro_fInvert)
 				InvertEvaluationR(aar, ro_apci[alt]);
@@ -1061,8 +1063,8 @@ extern void RolloutLoopMT(void *unused)
 					rDelta = rMuNew - aarMu[alt][j];
 
 					aarVariance[alt][j] =
-					    aarVariance[alt][j] * (1.0 - 1.0 / (altGameCount[alt] - 1)) + (altGameCount[alt]) * rDelta *
-					    rDelta;
+					    aarVariance[alt][j] * (1.0 - 1.0 / (altGameCount[alt] - 1)) +
+					    (altGameCount[alt]) * rDelta * rDelta;
 				}
 
 				aarMu[alt][j] = rMuNew;
@@ -1140,8 +1142,8 @@ extern void RolloutLoopMT(void *unused)
 			qsort((void *) ajiJSD, ro_alternatives, sizeof(jsdinfo), comp_jsdinfo_equity);
 
 			/* 3 replace the equities with the equity difference from the best move (ajiJSD[0]), the JSDs
-			   with the number of JSDs the equity difference represents and decide if we should either
-			   stop or resume rolling a move out */
+			   with the number of JSDs the equity difference represents and decide if we should either stop 
+			   or resume rolling a move out */
 			v = ajiJSD[0].rEquity;
 			s = ajiJSD[0].rJSD;
 			s *= s;
@@ -1158,7 +1160,7 @@ extern void RolloutLoopMT(void *unused)
 				ajiJSD[alt].rJSD = ajiJSD[alt].rEquity / denominator;
 
 				if ((rcRollout.fStopMoveOnJsd || rcRollout.fStopOnJsd) &&
-				    (i >= (rcRollout.nMinimumJsdGames - 1))) {
+				    (altGameCount[alt] >= (rcRollout.nMinimumJsdGames - 1))) {
 					if (ajiJSD[alt].rJSD > rcRollout.rJsdLimit) {
 						/* This move is no longer worth rolling out */
 
@@ -1174,8 +1176,8 @@ extern void RolloutLoopMT(void *unused)
 							   these calculations any more so we'll change the minimum
 							   games to do */
 							fNoMore[ajiJSD[alt].nOrder] = 0;
-							if (rcRollout.nMinimumJsdGames <= i)
-								rcRollout.nMinimumJsdGames = i;
+							if (rcRollout.nMinimumJsdGames <= altGameCount[alt])
+								rcRollout.nMinimumJsdGames = altGameCount[alt];
 						}
 					}
 				}
@@ -1191,7 +1193,7 @@ extern void RolloutLoopMT(void *unused)
 		}
 
 		/* see if we can quit because the answers are good enough */
-		if (rcRollout.fStopOnSTD && (i >= (rcRollout.nMinimumGames - 1))) {
+		if (rcRollout.fStopOnSTD && (altGameCount[alt] >= (rcRollout.nMinimumGames - 1))) {
 			err_too_big = 0;
 
 			for (alt = 0; alt < ro_alternatives; ++alt) {
@@ -1257,19 +1259,18 @@ void *ro_pUserData;
 
 static void UpdateProgress(void)
 {
-	if(fShowProgress)
-	{
+	if (fShowProgress) {
 		int alt;
 		rolloutcontext *prc;
 
 		multi_debug("exclusive lock: update progress");
 		MT_Exclusive();
 
-		for (alt = 0; alt < ro_alternatives; ++alt)
-		{
-			prc = &ro_apes[ alt ]->rc;
-			(*ro_pfProgress)( aarMu, aarSigma, prc, aciLocal, altGameCount[alt]-1, alt, ajiJSD[ alt ].nRank + 1,
-				ajiJSD[ alt ].rJSD, fNoMore[ alt ], show_jsds, ro_pUserData );
+		for (alt = 0; alt < ro_alternatives; ++alt) {
+			prc = &ro_apes[alt]->rc;
+			(*ro_pfProgress) (aarMu, aarSigma, prc, aciLocal, altGameCount[alt] - 1, alt,
+					  ajiJSD[alt].nRank + 1, ajiJSD[alt].rJSD, fNoMore[alt], show_jsds,
+					  ro_pUserData);
 		}
 
 		MT_Release();
@@ -1278,174 +1279,168 @@ static void UpdateProgress(void)
 }
 
 extern int
-RolloutGeneral( ConstTanBoard *apBoard, 
-                float (* apOutput[])[ NUM_ROLLOUT_OUTPUTS ],
-                float (* apStdDev[])[ NUM_ROLLOUT_OUTPUTS ],
-                rolloutstat aarsStatistics[][2],
-                evalsetup (* apes[]),
-                const cubeinfo (* apci[]), 
-                int (* apCubeDecTop[]), int alternatives, 
-                int fInvert, int fCubeRollout,
-                rolloutprogressfunc *pfProgress, void *pUserData )
+RolloutGeneral(ConstTanBoard * apBoard,
+	       float (*apOutput[])[NUM_ROLLOUT_OUTPUTS],
+	       float (*apStdDev[])[NUM_ROLLOUT_OUTPUTS],
+	       rolloutstat aarsStatistics[][2],
+	       evalsetup(*apes[]),
+	       const cubeinfo(*apci[]),
+	       int (*apCubeDecTop[]), int alternatives,
+	       int fInvert, int fCubeRollout, rolloutprogressfunc * pfProgress, void *pUserData)
 {
-  unsigned int j;
-  int alt;
-  unsigned int i;
-  int nFirstTrial;
-  unsigned int trialsDone;
-  rolloutcontext *prc = NULL, rcRolloutSave;
-  evalsetup *pes;
-  int nIsCubeless = 0;
-  int nIsCubeful = 0;
-  int fOutputMWCSave = fOutputMWC;
+	unsigned int j;
+	int alt;
+	unsigned int i;
+	int nFirstTrial;
+	unsigned int trialsDone;
+	rolloutcontext *prc = NULL, rcRolloutSave;
+	evalsetup *pes;
+	int nIsCubeless = 0;
+	int nIsCubeful = 0;
+	int fOutputMWCSave = fOutputMWC;
 
-  show_jsds = 1;
+	show_jsds = 1;
 
-	ajiJSD = g_alloca ( alternatives * sizeof ( jsdinfo ));
-	fNoMore =  g_alloca ( alternatives * sizeof ( int ));
-	aciLocal = g_alloca ( alternatives * sizeof ( cubeinfo ) );
-	altGameCount =  g_alloca ( alternatives * sizeof ( int ));
+	ajiJSD = g_alloca(alternatives * sizeof(jsdinfo));
+	fNoMore = g_alloca(alternatives * sizeof(int));
+	aciLocal = g_alloca(alternatives * sizeof(cubeinfo));
+	altGameCount = g_alloca(alternatives * sizeof(int));
+	altTrialCount = g_alloca(alternatives * sizeof(int));
 
-	aarMu = g_alloca( alternatives * NUM_ROLLOUT_OUTPUTS *sizeof ( float ) );
-	aarSigma = g_alloca( alternatives * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-	aarResult = g_alloca( alternatives * NUM_ROLLOUT_OUTPUTS * sizeof ( double ) );
-	aarVariance = g_alloca( alternatives * NUM_ROLLOUT_OUTPUTS *  sizeof ( double ) );
+	aarMu = g_alloca(alternatives * NUM_ROLLOUT_OUTPUTS * sizeof(float));
+	aarSigma = g_alloca(alternatives * NUM_ROLLOUT_OUTPUTS * sizeof(float));
+	aarResult = g_alloca(alternatives * NUM_ROLLOUT_OUTPUTS * sizeof(double));
+	aarVariance = g_alloca(alternatives * NUM_ROLLOUT_OUTPUTS * sizeof(double));
 
-  if( alternatives < 1 ) {
-    errno = EINVAL;
-    return -1;
-  }
+	if (alternatives < 1) {
+		errno = EINVAL;
+		return -1;
+	}
 
-  if (ms.nMatchTo == 0)
-    fOutputMWC = 0;
+	if (ms.nMatchTo == 0)
+		fOutputMWC = 0;
 
-  memcpy (&rcRolloutSave, &rcRollout, sizeof (rcRollout));
-  if (alternatives == 1) {
-    rcRollout.fStopMoveOnJsd = 0;
-    rcRollout.fStopOnJsd = 0;
-  }
+	memcpy(&rcRolloutSave, &rcRollout, sizeof(rcRollout));
+	if (alternatives == 1) {
+		rcRollout.fStopMoveOnJsd = 0;
+		rcRollout.fStopOnJsd = 0;
+	}
 
-  /* make sure cube decisions are rolled out cubeful */
-  if (fCubeRollout) {
-	rcRollout.fCubeful = rcRollout.aecCubeTrunc.fCubeful =
-	  rcRollout.aecChequerTrunc.fCubeful = 1;
-	for (i = 0; i < 2; ++i) 
-	  rcRollout.aecCube[ i ].fCubeful = rcRollout.aecChequer[ i ].fCubeful =
-	  rcRollout.aecCubeLate[ i ].fCubeful = 
-		rcRollout.aecChequerLate[ i] .fCubeful = 1;
-  }
+	/* make sure cube decisions are rolled out cubeful */
+	if (fCubeRollout) {
+		rcRollout.fCubeful = rcRollout.aecCubeTrunc.fCubeful = rcRollout.aecChequerTrunc.fCubeful = 1;
+		for (i = 0; i < 2; ++i)
+			rcRollout.aecCube[i].fCubeful = rcRollout.aecChequer[i].fCubeful =
+			    rcRollout.aecCubeLate[i].fCubeful = rcRollout.aecChequerLate[i].fCubeful = 1;
+	}
 
-  /* initialise internal variables and figure out what the first 
-     trial will be */
+	/* quasi random dice may not be thread safe when we need to skip
+	 * some rolls for initial positions */
+	if (fInitial)
+		fRotate = FALSE;
+
+	/* initialise internal variables and figure out what the first trial will be */
 
 	if (log_rollouts && log_file_name)
-		log_name = malloc (strlen (log_file_name) + 6 + 2 + 4 + 1);
+		log_name = malloc(strlen(log_file_name) + 6 + 2 + 4 + 1);
 	else
 		log_name = NULL;
 
-  cGames = rcRollout.nTrials;
-  nFirstTrial = 0;
+	/* nFirstTrial will be the smallest number of trials done for an alternative */
+	nFirstTrial = cGames = rcRollout.nTrials;
 
-  for ( alt = 0; alt < alternatives; ++alt) {
-    pes = apes[ alt ];
-    prc = &pes->rc;
+	for (alt = 0; alt < alternatives; ++alt) {
+		pes = apes[alt];
+		prc = &pes->rc;
 
-    /* fill out the JSD stuff */
-    ajiJSD[ alt ].rEquity = ajiJSD[ alt ].rJSD = 0.0f;
-    ajiJSD[ alt ].nRank = 0;
-    ajiJSD[ alt ].nOrder = alt;
+		/* fill out the JSD stuff */
+		ajiJSD[alt].rEquity = ajiJSD[alt].rJSD = 0.0f;
+		ajiJSD[alt].nRank = 0;
+		ajiJSD[alt].nOrder = alt;
 
-    /* save input cubeinfo */
-    memcpy ( &aciLocal[ alt ], apci [ alt ], sizeof ( cubeinfo ) );
+		/* save input cubeinfo */
+		memcpy(&aciLocal[alt], apci[alt], sizeof(cubeinfo));
 
-    /* Invert cubeinfo */
+		/* Invert cubeinfo */
 
-    if ( fInvert )
-      aciLocal[ alt ].fMove = ! aciLocal[ alt ].fMove;
+		if (fInvert)
+			aciLocal[alt].fMove = !aciLocal[alt].fMove;
 
-    if ((pes->et != EVAL_ROLLOUT) || (prc->nGamesDone == 0))
-	{
-      /* later the saved context may to be stored with the move, so
-	 cubeful/cubeless must be made consistent */
-      rcRolloutSave.fCubeful = rcRolloutSave.aecCubeTrunc.fCubeful =
-	rcRolloutSave.aecChequerTrunc.fCubeful = 
-	(fCubeRollout || rcRolloutSave.fCubeful);
-      for (i = 0; i < 2; ++i)
-          rcRolloutSave.aecCube[ i ].fCubeful = 
-	    rcRolloutSave.aecChequer[ i ].fCubeful =
-	    rcRolloutSave.aecCubeLate[ i ].fCubeful =
-	    rcRolloutSave.aecChequerLate[ i] .fCubeful = 
-	    (fCubeRollout || rcRolloutSave.fCubeful);
+		if ((pes->et != EVAL_ROLLOUT) || (prc->nGamesDone == 0)) {
+			/* later the saved context may to be stored with the move, so cubeful/cubeless must be made
+			   consistent */
+			rcRolloutSave.fCubeful = rcRolloutSave.aecCubeTrunc.fCubeful =
+			    rcRolloutSave.aecChequerTrunc.fCubeful = (fCubeRollout || rcRolloutSave.fCubeful);
+			for (i = 0; i < 2; ++i)
+				rcRolloutSave.aecCube[i].fCubeful =
+				    rcRolloutSave.aecChequer[i].fCubeful =
+				    rcRolloutSave.aecCubeLate[i].fCubeful =
+				    rcRolloutSave.aecChequerLate[i].fCubeful = (fCubeRollout || rcRolloutSave.fCubeful);
 
-      memcpy (prc, &rcRollout, sizeof (rolloutcontext));
-      prc->nGamesDone = 0;
-      prc->nSkip = 0;
-      nFirstTrial = 0;
-      altGameCount[alt] = 0;
+			memcpy(prc, &rcRollout, sizeof(rolloutcontext));
+			prc->nGamesDone = 0;
+			prc->nSkip = 0;
+			nFirstTrial = 0;
+			altTrialCount[alt] = altGameCount[alt] = 0;
 
-      if (aarsStatistics) {
-        initRolloutstat ( &aarsStatistics[ alt ][ 0 ] );
-        initRolloutstat ( &aarsStatistics[ alt ][ 1 ] );
-      }
+			if (aarsStatistics) {
+				initRolloutstat(&aarsStatistics[alt][0]);
+				initRolloutstat(&aarsStatistics[alt][1]);
+			}
 
-      /* initialise internal variables */
-      for (j = 0; j < NUM_ROLLOUT_OUTPUTS; ++j) {
-        aarResult[ alt ][ j ] = aarVariance[ alt ][ j ] =
-          aarMu[ alt ][ j ] = aarSigma[ alt ][ j ] = 0.0f;
-      }
-    }
-	else
-	{
-      int nGames = prc->nGamesDone;
-      double r;
+			/* initialise internal variables */
+			for (j = 0; j < NUM_ROLLOUT_OUTPUTS; ++j) {
+				aarResult[alt][j] = aarVariance[alt][j] = aarMu[alt][j] = aarSigma[alt][j] = 0.0f;
+			}
+		} else {
+			int nGames = prc->nGamesDone;
+			double r;
 
-      /* make sure the saved rollout contexts are consistent for
-	 cubeful/not cubeful */
-      prc->fCubeful = prc->aecCubeTrunc.fCubeful =
-	  prc->aecChequerTrunc.fCubeful = (prc->fCubeful || fCubeRollout);
-      for (i = 0; i < 2; ++i) 
-	prc->aecCube[ i ].fCubeful = prc->aecChequer[ i ].fCubeful =
-	  prc->aecCubeLate[ i ].fCubeful = 
-	  prc->aecChequerLate[ i] .fCubeful = (prc->fCubeful || fCubeRollout);
+			/* make sure the saved rollout contexts are consistent for cubeful/not cubeful */
+			prc->fCubeful = prc->aecCubeTrunc.fCubeful =
+			    prc->aecChequerTrunc.fCubeful = (prc->fCubeful || fCubeRollout);
+			for (i = 0; i < 2; ++i)
+				prc->aecCube[i].fCubeful = prc->aecChequer[i].fCubeful =
+				    prc->aecCubeLate[i].fCubeful =
+				    prc->aecChequerLate[i].fCubeful = (prc->fCubeful || fCubeRollout);
 
-      altGameCount[alt] = nGames;
-      if (nGames < nFirstTrial)
-        nFirstTrial = nGames;
-      /* restore internal variables from input values */
-      for ( j = 0; j < NUM_ROLLOUT_OUTPUTS; ++j) {
-        r = aarMu[ alt ][ j ] = (*apOutput[ alt ])[ j ];
-        aarResult[ alt ][ j ] = r * nGames;
-        r = aarSigma[ alt ][ j ] = (*apStdDev[ alt ])[ j ];
-        aarVariance[ alt ][ j ] = r * r * nGames;
-      }
-    }
+			altTrialCount[alt] = altGameCount[alt] = nGames;
+			if (nGames < nFirstTrial)
+				nFirstTrial = nGames;
+			/* restore internal variables from input values */
+			for (j = 0; j < NUM_ROLLOUT_OUTPUTS; ++j) {
+				r = aarMu[alt][j] = (*apOutput[alt])[j];
+				aarResult[alt][j] = r * nGames;
+				r = aarSigma[alt][j] = (*apStdDev[alt])[j];
+				aarVariance[alt][j] = r * r * nGames;
+			}
+		}
 
-    /* force all moves/cube decisions to be considered 
-       and reset the upper bound on trials */
-    fNoMore[ alt ] = 0;
-    prc->nTrials = cGames;
+		/* force all moves/cube decisions to be considered and reset the upper bound on trials */
+		fNoMore[alt] = 0;
+		prc->nTrials = cGames;
 
-    pes->et = EVAL_ROLLOUT;
-    if (prc->fCubeful)
-      ++nIsCubeful;
-    else
-      ++nIsCubeless;
+		pes->et = EVAL_ROLLOUT;
+		if (prc->fCubeful)
+			++nIsCubeful;
+		else
+			++nIsCubeless;
 
-    /* we can't do JSD tricks on initial positions */
-    if (prc->fInitial) {
-      rcRollout.fStopMoveOnJsd = 0;
-      show_jsds = 0;
-    }
+		/* we can't do JSD tricks on initial positions */
+		if (prc->fInitial) {
+			rcRollout.fStopMoveOnJsd = 0;
+			show_jsds = 0;
+		}
 
-  }
+	}
 
-  /* we can't do JSD tricks if some rollouts are cubeful and some not */
-  if (nIsCubeful && nIsCubeless)
-    rcRollout.fStopMoveOnJsd = 0;
+	/* we can't do JSD tricks if some rollouts are cubeful and some not */
+	if (nIsCubeful && nIsCubeless)
+		rcRollout.fStopMoveOnJsd = 0;
 
-  /* if we're using stop on JSD, turn off stop on STD error */
-  if (rcRollout.fStopMoveOnJsd)
-    rcRollout.fStopOnSTD = 0;
+	/* if we're using stop on JSD, turn off stop on STD error */
+	if (rcRollout.fStopMoveOnJsd)
+		rcRollout.fStopOnSTD = 0;
 
 	/* Put parameters in global variables - urgh, would be better in task variable really... */
 	ro_alternatives = alternatives;
@@ -1456,7 +1451,7 @@ RolloutGeneral( ConstTanBoard *apBoard,
 	ro_aarsStatistics = aarsStatistics;
 	ro_fCubeRollout = fCubeRollout;
 	ro_fInvert = fInvert;
-	ro_NextTrail = nFirstTrial;
+	ro_NextTrial = nFirstTrial;
 
 	multi_debug("rollout adding tasks");
 	mt_add_tasks(MT_GetNumThreads(), RolloutLoopMT, NULL, NULL);
@@ -1474,51 +1469,48 @@ RolloutGeneral( ConstTanBoard *apBoard,
 		outputf(_("\nRollout done. Printing final results.\n"));
 	UpdateProgress();
 
-  if (log_rollouts && log_name) {
-    free (log_name);
-    log_name = 0;
-  }
+	if (log_rollouts && log_name) {
+		free(log_name);
+		log_name = 0;
+	}
 
-  for (alt = 0, trialsDone = 0; alt < alternatives; ++alt)
-  {
-    if ( apes[ alt ]->rc.nGamesDone > trialsDone )
-      trialsDone = apes[ alt ]->rc.nGamesDone;
-  }
+	for (alt = 0, trialsDone = 0; alt < alternatives; ++alt) {
+		if (apes[alt]->rc.nGamesDone > trialsDone)
+			trialsDone = apes[alt]->rc.nGamesDone;
+	}
 
-  memcpy (&rcRollout, &rcRolloutSave, sizeof (rcRollout));
-  fOutputMWC = fOutputMWCSave;
+	memcpy(&rcRollout, &rcRolloutSave, sizeof(rcRollout));
+	fOutputMWC = fOutputMWCSave;
 
-  /* return -1 if no games rolled out */
-  if (trialsDone == 0)
-    return -1;
+	/* return -1 if no games rolled out */
+	if (trialsDone == 0)
+		return -1;
 
-  /* store results */
-  for (alt = 0; alt < alternatives; alt++)
-  {
-    if( apOutput[alt] )
-      for ( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
-        (*apOutput[ alt ])[ i ] = aarMu[ alt ][ i ];
+	/* store results */
+	for (alt = 0; alt < alternatives; alt++) {
+		if (apOutput[alt])
+			for (i = 0; i < NUM_ROLLOUT_OUTPUTS; i++)
+				(*apOutput[alt])[i] = aarMu[alt][i];
 
-    if( apStdDev[alt] )
-      for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
-        (*apStdDev[ alt ])[ i ] = aarSigma[ alt ][ i ]; 
-  }
+		if (apStdDev[alt])
+			for (i = 0; i < NUM_ROLLOUT_OUTPUTS; i++)
+				(*apStdDev[alt])[i] = aarSigma[alt][i];
+	}
 
-  if( fShowProgress
+	if (fShowProgress
 #if USE_GTK
-      && !fX
+	    && !fX
 #endif
-      ) {
-    for( i = 0; i < 79; i++ )
-      outputc( ' ' );
+	    ) {
+		for (i = 0; i < 79; i++)
+			outputc(' ');
 
-    outputc( '\r' );
-    fflush( stdout );
-  }
+		outputc('\r');
+		fflush(stdout);
+	}
 
-  return trialsDone;
+	return trialsDone;
 }
-
 #else
 
 static int UpdateTimePassed(void)
@@ -1578,6 +1570,7 @@ RolloutGeneral( ConstTanBoard *apBoard,
   int active_alternatives;
   int show_jsds = 1;
   char *log_name = 0;
+  FILE *logfp = NULL;
   perArray dicePerms;
   dicePerms.nPermutationSeed = -1;
 
@@ -1751,7 +1744,7 @@ RolloutGeneral( ConstTanBoard *apBoard,
 
       if (log_rollouts && log_name) {
 	sprintf (log_name, "%s-%5.5d-%c.sgf", log_file_name, i, alt + 'a');
-	log_game_start (log_name, apci[ alt ], prc->fCubeful, 
+	logfp = log_game_start (log_name, apci[ alt ], prc->fCubeful, 
 			(ConstTanBoard)(aanBoardEval + alt));
 	if ( !log_rollouts) {
 	  /* open failed */
@@ -1764,10 +1757,10 @@ RolloutGeneral( ConstTanBoard *apBoard,
       BasicCubefulRollout( aanBoardEval + alt, aar + alt, 0, i, apci[ alt ], 
                            apCubeDecTop[ alt ], 1, prc, 
 			   aarsStatistics ? aarsStatistics + alt : NULL,
-			   aciLocal[ fCubeRollout ? 0 : alt ].nCube, &dicePerms);
+			   aciLocal[ fCubeRollout ? 0 : alt ].nCube, &dicePerms, logfp);
 
       if (log_rollouts) {
-	log_game_over ();
+	log_game_over (logfp);
       }
 
       if( fInterrupt )

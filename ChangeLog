@@ -1,3 +1,7 @@
+Mon Jul  7 00:22:35 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* rollout.c: fix multithreaded dice generation and logfiles
+
 Mon Jul  7 00:20:52 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c: print prompt and answer for automatic questions
