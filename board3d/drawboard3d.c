@@ -128,6 +128,8 @@ static void TidyShadows(BoardData3d* bd3d)
 
 void Tidy3dObjects(BoardData3d* bd3d, const renderdata *prd)
 {
+	bd3d->shadowsInitialised = FALSE;
+
 	glDeleteLists(bd3d->pieceList, 1);
 	glDeleteLists(bd3d->diceList, 1);
 	glDeleteLists(bd3d->piecePickList, 1);
@@ -3503,9 +3505,12 @@ void updateHingeOccPos(BoardData3d* bd3d, int show3dHinges)
 
 void updateOccPos(const BoardData* bd)
 {	/* Make sure shadows are in correct place */
-	updateCubeOccPos(bd, bd->bd3d);
-	updateDiceOccPos(bd, bd->bd3d);
-	updatePieceOccPos(bd, bd->bd3d);
+	if (ShadowsInitilised(bd->bd3d))
+	{
+		updateCubeOccPos(bd, bd->bd3d);
+		updateDiceOccPos(bd, bd->bd3d);
+		updatePieceOccPos(bd, bd->bd3d);
+	}
 }
 
 static void MakeShadowModel(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
