@@ -3982,7 +3982,10 @@ extern int GetInputYN( char *szPrompt )
     char *pch;
 
     if (nConfirmDefault != -1)
+    {
+	    outputf("%s %s\n", szPrompt, nConfirmDefault ? _("yes") : _("no"));
 	    return nConfirmDefault;
+    }
 
     if (!fInteractive)
 	    return FALSE;
