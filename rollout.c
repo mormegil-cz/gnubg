@@ -1336,8 +1336,8 @@ RolloutGeneral(ConstTanBoard * apBoard,
 
 	/* quasi random dice may not be thread safe when we need to skip
 	 * some rolls for initial positions */
-	if (fInitial)
-		fRotate = FALSE;
+	if (rcRollout.fInitial)
+		rcRollout.fRotate = FALSE;
 
 	/* initialise internal variables and figure out what the first trial will be */
 
