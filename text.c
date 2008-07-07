@@ -703,8 +703,8 @@ TextMatchInfo ( FILE *pf, const matchinfo *pmi ) {
     tmx.tm_year = pmi->nYear - 1900;
     tmx.tm_mon = pmi->nMonth - 1;
     tmx.tm_mday = pmi->nDay;
-    strftime ( sz, sizeof ( sz ), _("%B %d, %Y"), &tmx );
-    fprintf ( pf, _("Date: %s\n"), sz ); 
+    strftime ( sz, sizeof ( sz ), _("%x"), &tmx );
+    fprintf ( pf, _("Date: %s\n"), sz );
 
   }
   /* else fputs ( _("Date: n/a\n"), pf ); */

@@ -22,7 +22,7 @@ typedef struct _credEntry {
 } credEntry;
 
 typedef struct _credits {
-	char* Title;
+	const char* Title;
 	credEntry *Entry;
 } credits;
 
@@ -34,7 +34,7 @@ extern credEntry ceCredits[];
 
 extern credits creditList[];
 
-extern char aszAUTHORS[];
+extern const char aszAUTHORS[];
 
-extern char aszCOPYRIGHT[];
+extern const char aszCOPYRIGHT[];
 

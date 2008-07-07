@@ -134,8 +134,8 @@ static float NormalDistArea ( float rMin, float rMax, float rMu, float rSigma )
   rtMin = ( rMin - rMu ) / rSigma;
   rtMax = ( rMax - rMu ) / rSigma;
 
-  rInt1 = ( erf( rtMin / sqrt(2) ) + 1.0f ) / 2.0f;
-  rInt2 = ( erf( rtMax / sqrt(2) ) + 1.0f ) / 2.0f;
+  rInt1 = ( erf( rtMin / sqrtf(2) ) + 1.0f ) / 2.0f;
+  rInt2 = ( erf( rtMax / sqrtf(2) ) + 1.0f ) / 2.0f;
 
   return rInt2 - rInt1;
 }
@@ -190,10 +190,10 @@ initPostCrawfordMET ( float afMETPostCrawford[ MAXSCORE ],
   for ( i = iStart; i < MAXSCORE; i++ ) {
 
     afMETPostCrawford[ i ] = 
-      rG * 0.5 * 
-      ( (i-4 >=0) ? afMETPostCrawford[ i-4 ] : 1.0 )
-      + (1.0 - rG) * 0.5 * 
-      ( (i-2 >=0) ? afMETPostCrawford[ i-2 ] : 1.0 );
+      rG * 0.5f * 
+      ( (i-4 >=0) ? afMETPostCrawford[ i-4 ] : 1.0f )
+      + (1.0f - rG) * 0.5f * 
+      ( (i-2 >=0) ? afMETPostCrawford[ i-2 ] : 1.0f );
 
     /*"insane post crawford equity" */
     g_assert( afMETPostCrawford[ i ] >= 0.0f &&
@@ -268,11 +268,11 @@ initMETZadeh ( float aafMET[ MAXSCORE ][ MAXSCORE ],
   for ( i = 0; i < MAXSCORE; i++ ) {
 
     aafMET[ i ][ 0 ] = 
-      rG1 * 0.5 *
-      ( (i-2 >=0) ? afMETPostCrawford[ i-2 ] : 1.0 )
-      + (1.0 - rG1) * 0.5 * 
-      ( (i-1 >=0) ? afMETPostCrawford[ i-1 ] : 1.0 );
-    aafMET[ 0 ][ i ] = 1.0 - aafMET[ i ][ 0 ];
+      rG1 * 0.5f *
+      ( (i-2 >=0) ? afMETPostCrawford[ i-2 ] : 1.0f )
+      + (1.0 - rG1) * 0.5f * 
+      ( (i-1 >=0) ? afMETPostCrawford[ i-1 ] : 1.0f );
+    aafMET[ 0 ][ i ] = 1.0f - aafMET[ i ][ 0 ];
 
   }
 
@@ -296,9 +296,9 @@ initMETZadeh ( float aafMET[ MAXSCORE ][ MAXSCORE ],
             - (1.0-rG2) * GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) )
           /
           ( rG1 * GET_MET( i - 4 * nCubePrimeValue, j, aafMET )
-            + (1.0-rG1) * GET_MET ( i - 2 * nCubePrimeValue, j, aafMET )
+            + (1.0f-rG1) * GET_MET ( i - 2 * nCubePrimeValue, j, aafMET )
             - rG2 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET )
-            - (1.0-rG2) * GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) );
+            - (1.0f-rG2) * GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) );
 
 
 
@@ -309,12 +309,12 @@ initMETZadeh ( float aafMET[ MAXSCORE ][ MAXSCORE ],
           aaafD1bar[ j ][ i ][ nCube ] = 
             ( GET_MET ( j - nCubeValue, i, aafMET )
               - rG2 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET )
-              - (1.0-rG2) * GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) )
+              - (1.0f-rG2) * GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) )
             /
             ( rG1 * GET_MET( j - 4 * nCubePrimeValue, i, aafMET )
-              + (1.0-rG1) * GET_MET ( j - 2 * nCubePrimeValue, i, aafMET )
+              + (1.0f-rG1) * GET_MET ( j - 2 * nCubePrimeValue, i, aafMET )
               - rG2 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET )
-              - (1.0-rG2) * GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) );
+              - (1.0f-rG2) * GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) );
 
 
   
@@ -327,12 +327,12 @@ initMETZadeh ( float aafMET[ MAXSCORE ][ MAXSCORE ],
         aaafD2bar[ i ][ j ][ nCube ] = 
           ( GET_MET ( j - nCubeValue, i, aafMET )
             - rG2 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET )
-            - (1.0-rG2) * GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) )
+            - (1.0f-rG2) * GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) )
           /
           ( rG1 * GET_MET( j - 4 * nCubePrimeValue, i, aafMET )
-            + (1.0-rG1) * GET_MET ( j - 2 * nCubePrimeValue, i, aafMET )
+            + (1.0f-rG1) * GET_MET ( j - 2 * nCubePrimeValue, i, aafMET )
             - rG2 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET )
-            - (1.0-rG2) * GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) );
+            - (1.0f-rG2) * GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) );
 
 
         if ( i != j ) {
@@ -342,12 +342,12 @@ initMETZadeh ( float aafMET[ MAXSCORE ][ MAXSCORE ],
           aaafD2bar[ j ][ i ][ nCube ] = 
             ( GET_MET ( i - nCubeValue, j, aafMET )
               - rG2 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET )
-              - (1.0-rG2) * GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) )
+              - (1.0f-rG2) * GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) )
             /
             ( rG1 * GET_MET( i - 4 * nCubePrimeValue, j, aafMET )
-              + (1.0-rG1) * GET_MET ( i - 2 * nCubePrimeValue, j, aafMET )
+              + (1.0f-rG1) * GET_MET ( i - 2 * nCubePrimeValue, j, aafMET )
               - rG2 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET )
-              - (1.0-rG2) * GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) );
+              - (1.0f-rG2) * GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) );
   
 
 
@@ -365,14 +365,14 @@ initMETZadeh ( float aafMET[ MAXSCORE ][ MAXSCORE ],
         else {
   
           aaafD1[ i ][ j ][ nCube ] = 
-            1.0 + 
+            1.0f + 
             ( aaafD2[ i ][ j ][ nCube+1 ] + rDelta )
-            * ( aaafD1bar[ i ][ j ][ nCube ] - 1.0 );
+            * ( aaafD1bar[ i ][ j ][ nCube ] - 1.0f );
           if ( i != j )
             aaafD1[ j ][ i ][ nCube ] = 
-              1.0 + 
+              1.0f + 
               ( aaafD2[ j ][ i ][ nCube+1 ] + rDelta )
-              * ( aaafD1bar[ j ][ i ][ nCube ] - 1.0 );
+              * ( aaafD1bar[ j ][ i ][ nCube ] - 1.0f );
   
         }
 
@@ -389,15 +389,15 @@ initMETZadeh ( float aafMET[ MAXSCORE ][ MAXSCORE ],
         else {
   
           aaafD2[ i ][ j ][ nCube ] = 
-            1.0 + 
+            1.0f + 
             ( aaafD1[ i ][ j ][ nCube+1 ] + rDelta )
-            * ( aaafD2bar[ i ][ j ][ nCube ] - 1.0 );
+            * ( aaafD2bar[ i ][ j ][ nCube ] - 1.0f );
 
           if ( i != j ) 
             aaafD2[ j ][ i ][ nCube ] = 
-              1.0 + 
+              1.0f + 
               ( aaafD1[ j ][ i ][ nCube+1 ] + rDelta )
-              * ( aaafD2bar[ j ][ i ][ nCube ] - 1.0 );
+              * ( aaafD2bar[ j ][ i ][ nCube ] - 1.0f );
         }
 
 
@@ -407,18 +407,18 @@ initMETZadeh ( float aafMET[ MAXSCORE ][ MAXSCORE ],
 
           aafMET[ i ][ j ] = 
             ( 
-             ( aaafD2[ i ][ j ][ 0 ] + rDeltaBar - 0.5 )
+             ( aaafD2[ i ][ j ][ 0 ] + rDeltaBar - 0.5f )
              * GET_MET( i - 1, j, aafMET ) 
-             + ( aaafD1[ i ][ j ][ 0 ] + rDeltaBar - 0.5 )
+             + ( aaafD1[ i ][ j ][ 0 ] + rDeltaBar - 0.5f )
              * GET_MET( i, j - 1, aafMET ) )
             /
             (
              aaafD1[ i ][ j ][ 0 ] + rDeltaBar +
-             aaafD2[ i ][ j ][ 0 ] + rDeltaBar - 1.0 );
+             aaafD2[ i ][ j ][ 0 ] + rDeltaBar - 1.0f );
 
 
           if ( i != j )
-            aafMET[ j ][ i ] = 1.0 - aafMET[ i ][ j ];
+            aafMET[ j ][ i ] = 1.0f - aafMET[ i ][ j ];
 
         }
 
@@ -491,9 +491,9 @@ GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] ) {
     if ( arOutput[ OUTPUT_WIN ] < 1.0 ) {
       arG[ 1 ] = ( arOutput[ OUTPUT_LOSEGAMMON ] -
               arOutput[ OUTPUT_LOSEBACKGAMMON ] ) /
-        ( 1.0 - arOutput[ OUTPUT_WIN ] );
+        ( 1.0f - arOutput[ OUTPUT_WIN ] );
       arBG[ 1 ] = arOutput[ OUTPUT_LOSEBACKGAMMON ] /
-        ( 1.0 - arOutput[ OUTPUT_WIN ] );
+        ( 1.0f - arOutput[ OUTPUT_WIN ] );
     }
     else {
       arG[ 1 ] = 0.0;
@@ -520,9 +520,9 @@ GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] ) {
     if ( arOutput[ OUTPUT_WIN ] < 1.0 ) {
       arG[ 0 ] = ( arOutput[ OUTPUT_LOSEGAMMON ] -
               arOutput[ OUTPUT_LOSEBACKGAMMON ] ) /
-        ( 1.0 - arOutput[ OUTPUT_WIN ] );
+        ( 1.0f - arOutput[ OUTPUT_WIN ] );
       arBG[ 0 ] = arOutput[ OUTPUT_LOSEBACKGAMMON ] /
-        ( 1.0 - arOutput[ OUTPUT_WIN ] );
+        ( 1.0f - arOutput[ OUTPUT_WIN ] );
     }
     else {
       arG[ 0 ] = 0.0;
@@ -566,7 +566,7 @@ GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] ) {
 
 
       rDTL =
-        ( 1.0 - arG[ ! k ] - arBG[ ! k ] ) * 
+        ( 1.0f - arG[ ! k ] - arBG[ ! k ] ) * 
 		aarMETResults[k][k ? DTLP1 : DTLP0]
 		+ arG[ ! k ] * aarMETResults[k][k ? DTLGP1 : DTLGP0] 
 		+ arBG[ ! k ] * aarMETResults[k][k ? DTLBP1 : DTLBP0];
@@ -576,7 +576,7 @@ GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] ) {
 		aarMETResults[k][DP];
 
       rDTW = 
-        ( 1.0 - arG[ k ] - arBG[ k ] ) * 
+        ( 1.0f - arG[ k ] - arBG[ k ] ) * 
 		aarMETResults[k][k ? DTWP1 : DTWP0]
 		+ arG[ k ] * aarMETResults[k][k ? DTWGP1 : DTWGP0] 
 		+ arBG[ k ] * aarMETResults[k][k ? DTWBP1 : DTWBP0];
@@ -603,13 +603,13 @@ GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] ) {
         /* double, take win */
 
         rDTW = 
-          ( 1.0 - arG[ k ] - arBG[ k ] ) * 
+          ( 1.0f - arG[ k ] - arBG[ k ] ) * 
 		  aarMETResults[k][DTW]
 		  + arG[ k ] * aarMETResults[k][DTWG]
 		  + arBG[ k ] * aarMETResults[k][DTWB];
 
         arCPLive[ k ][ n ] = 
-          1.0 - arCPLive[ ! k ][ n + 1] * ( rDP - rDTW ) / ( rRDP - rDTW );
+          1.0f - arCPLive[ ! k ][ n + 1] * ( rDP - rDTW ) / ( rRDP - rDTW );
 
       }
       
@@ -659,25 +659,25 @@ GetDoublePointDeadCube ( float arOutput [ 5 ], cubeinfo *pci ) {
     float rW, rL;
 
     if ( arOutput[ 0 ] > 0.0 )
-      rW = 1.0 + ( arOutput[ 1 ] + arOutput[ 2 ] ) / arOutput[ 0 ];
+      rW = 1.0f + ( arOutput[ 1 ] + arOutput[ 2 ] ) / arOutput[ 0 ];
     else
-      rW = 1.0;
+      rW = 1.0f;
 
     if ( arOutput[ 0 ] < 1.0 )
-      rL = 1.0 + ( arOutput[ 3 ] + arOutput[ 4 ] ) /
-        ( 1.0 - arOutput [ 0 ] );
+      rL = 1.0f + ( arOutput[ 3 ] + arOutput[ 4 ] ) /
+        ( 1.0f - arOutput [ 0 ] );
     else
-      rL = 1.0;
+      rL = 1.0f;
 
     if ( pci->fCubeOwner == -1 && pci->fJacoby) {
 
       /* centered cube */
 
       if ( pci->fBeavers ) {
-        return ( rL - 0.25 ) / ( rW + rL - 0.5 );
+        return ( rL - 0.25f ) / ( rW + rL - 0.5f );
       }
       else {
-        return ( rL - 0.5 ) / ( rW + rL - 1.0 );
+        return ( rL - 0.5f ) / ( rW + rL - 1.0f );
       }
     }
     else {
@@ -713,9 +713,9 @@ GetDoublePointDeadCube ( float arOutput [ 5 ], cubeinfo *pci ) {
     if ( arOutput[ OUTPUT_WIN ] < 1.0 ) {
       rG2 = ( arOutput[ OUTPUT_LOSEGAMMON ] -
               arOutput[ OUTPUT_LOSEBACKGAMMON ] ) /
-        ( 1.0 - arOutput[ OUTPUT_WIN ] );
+        ( 1.0f - arOutput[ OUTPUT_WIN ] );
       rBG2 = arOutput[ OUTPUT_LOSEBACKGAMMON ] /
-        ( 1.0 - arOutput[ OUTPUT_WIN ] );
+        ( 1.0f - arOutput[ OUTPUT_WIN ] );
     }
     else {
       rG2 = 0.0;
@@ -733,25 +733,25 @@ GetDoublePointDeadCube ( float arOutput [ 5 ], cubeinfo *pci ) {
     /* double point */
 
     rDTW = 
-      ( 1.0 - rG1 - rBG1 ) * 
+      ( 1.0f - rG1 - rBG1 ) * 
 	  aarMETResults[player][DTW]
       + rG1 * aarMETResults[player][DTWG]
       + rBG1 * aarMETResults[player][DTWB];
 
     rNDW = 
-      ( 1.0 - rG1 - rBG1 ) * 
+      ( 1.0f - rG1 - rBG1 ) * 
 	  aarMETResults[player][NDW] 
       + rG1 * aarMETResults[player][NDWG]
       + rBG1 * aarMETResults[player][NDWB];
 
     rDTL = 
-      ( 1.0 - rG2 - rBG2 ) * 
+      ( 1.0f - rG2 - rBG2 ) * 
 	  aarMETResults[player][DTL]
       + rG2 * aarMETResults[player][DTLG]
       + rBG2 * aarMETResults[player][DTLB];
 
     rNDL = 
-      ( 1.0 - rG2 - rBG2 ) * 
+      ( 1.0f - rG2 - rBG2 ) * 
 	  aarMETResults[player][NDL]
       + rG2 * aarMETResults[player][NDLG]
       + rBG2 * aarMETResults[player][NDLB];
@@ -824,7 +824,7 @@ ExtendMET ( float aarMET[ MAXSCORE ][ MAXSCORE ],
   for ( i = 0; i < MAXSCORE; i++ )
     for ( j = ( (i < nMaxScore) ? nMaxScore : i + 1);
           j < MAXSCORE; j++ )
-      aafMET[ i ][ j ] = 1.0 - aafMET[ j ][ i ];
+      aafMET[ i ][ j ] = 1.0f - aafMET[ j ][ i ];
 
 }
 
@@ -1582,7 +1582,7 @@ getGammonPrice ( float arGammonPrice[ 4 ],
             0, 3 * nCube, 1, fCrawford,
             aafMET, aafMETPostCrawford );
 
-  float rCenter = ( rWin + rLose ) / 2.0;
+  float rCenter = ( rWin + rLose ) / 2.0f;
 
   /* FIXME: correct numerical problems in a better way, than done
      below. If cube is dead gammon or backgammon price might be a
@@ -1599,21 +1599,21 @@ getGammonPrice ( float arGammonPrice[ 4 ],
        which is twice the "usual" gammon value */
 
     arGammonPrice[ 0 ] = 
-      ( rWinGammon - rCenter ) / ( rWin - rCenter ) - 1.0;
+      ( rWinGammon - rCenter ) / ( rWin - rCenter ) - 1.0f;
 
     /* this expression can be reduced to:
        2 * ( rLose - rLoseGammon ) / ( rWin - rLose )
        which is twice the "usual" gammon value */
 
     arGammonPrice[ 1 ] = 
-      ( rCenter - rLoseGammon ) / ( rWin - rCenter ) - 1.0;
+      ( rCenter - rLoseGammon ) / ( rWin - rCenter ) - 1.0f;
 
     arGammonPrice[ 2 ] = 
       ( rWinBG - rCenter ) / ( rWin - rCenter ) - 
-      ( arGammonPrice[ 0 ] + 1.0 );
+      ( arGammonPrice[ 0 ] + 1.0f );
     arGammonPrice[ 3 ] = 
       ( rCenter - rLoseBG ) / ( rWin - rCenter ) - 
-      ( arGammonPrice[ 1 ] + 1.0 );
+      ( arGammonPrice[ 1 ] + 1.0f );
 
   }
   else
@@ -1871,7 +1871,7 @@ getME ( const int nScore0, const int nScore1, const int nMatchTo,
       /* player 0 is leading match */
       /* FIXME: use pc-MET for player 0 */
       return ( fPlayer ) ? 
-        aafMETPostCrawford[ 1 ][ n1 ] : 1.0 - aafMETPostCrawford[ 1 ][ n1 ];
+        aafMETPostCrawford[ 1 ][ n1 ] : 1.0f - aafMETPostCrawford[ 1 ][ n1 ];
     else
       /* player 1 is leading the match */
       return ( fPlayer ) ? 
@@ -1880,7 +1880,7 @@ getME ( const int nScore0, const int nScore1, const int nMatchTo,
   }
   else 
     /* non-post-Crawford games */
-    return ( fPlayer ) ? 1.0 - aafMET[ n0 ][ n1 ] : aafMET[ n0 ][ n1 ];
+    return ( fPlayer ) ? 1.0f - aafMET[ n0 ][ n1 ] : aafMET[ n0 ][ n1 ];
 
   g_assert ( FALSE );
   return 0.0f;
@@ -1917,7 +1917,7 @@ getMEAtScore( const int nScore0, const int nScore1, const int nMatchTo,
       /* player 0 is leading match */
       /* FIXME: use pc-MET for player 0 */
       return ( fPlayer ) ? 
-        aafMETPostCrawford[ 1 ][ n1 ] : 1.0 - aafMETPostCrawford[ 1 ][ n1 ];
+        aafMETPostCrawford[ 1 ][ n1 ] : 1.0f - aafMETPostCrawford[ 1 ][ n1 ];
     else
       /* player 1 is leading the match */
       return ( fPlayer ) ? 
@@ -1926,7 +1926,7 @@ getMEAtScore( const int nScore0, const int nScore1, const int nMatchTo,
   }
   else 
     /* non-post-Crawford games */
-    return ( fPlayer ) ? 1.0 - aafMET[ n0 ][ n1 ] : aafMET[ n0 ][ n1 ];
+    return ( fPlayer ) ? 1.0f - aafMET[ n0 ][ n1 ] : aafMET[ n0 ][ n1 ];
 
   g_assert ( FALSE );
   return 0.0f;
@@ -1958,8 +1958,8 @@ invertMET ( void ) {
     for ( j = 0; j < i; j++ ) {
 
       r = aafMET[ i ][ j ];
-      aafMET[ i ][ j ] = 1.0 - aafMET[ j ][ i ];
-      aafMET[ j ][ i ] = 1.0 - r;
+      aafMET[ i ][ j ] = 1.0f - aafMET[ j ][ i ];
+      aafMET[ j ][ i ] = 1.0f - r;
 
     }
   }
@@ -2050,15 +2050,15 @@ getMEMultiple ( const int nScore0, const int nScore1, const int nMatchTo,
 	  *p0++ = 0.0f; *p1++ = 1.0f;
 	} else if (fCrawf) {
 	  if (s0 == 0) { /* player 0 is leading */
-		*p0++ = 1.0 - aafMETPostCrawford[ 1 ][ s1 ];
-		*p1++ =       aafMETPostCrawford[ 1 ][ s1 ];
+		*p0++ = 1.0f - aafMETPostCrawford[ 1 ][ s1 ];
+		*p1++ =        aafMETPostCrawford[ 1 ][ s1 ];
 	  } else {
-		*p0++ =       aafMETPostCrawford[ 0 ][ s0 ];
-		*p1++ = 1.0 - aafMETPostCrawford[ 0 ][ s0 ];
+		*p0++ =        aafMETPostCrawford[ 0 ][ s0 ];
+		*p1++ = 1.0f - aafMETPostCrawford[ 0 ][ s0 ];
 	  }
 	} else { /* non-post-Crawford */
-	  *p0++ =       aafMET[ s0 ][ s1 ];
-	  *p1++ = 1.0 - aafMET[ s0 ][ s1 ];
+	  *p0++ =        aafMET[ s0 ][ s1 ];
+	  *p1++ = 1.0f - aafMET[ s0 ][ s1 ];
 	}
   }
 

@@ -140,11 +140,11 @@ renderdata rdDefault = {
       { 0xFF, 0x5F, 0x5F, 0xFF }, { 0xBF, 0xBF, 0xBF, 0xFF } }, /* aanBoardC */
     { 25, 25, 25, 25 }, /* aSpeckle */
     { 1.5, 1.5 }, /* arRefraction */
-    { 0.2, 1.0 }, /* arCoefficient */
+    { 0.2f, 1.0f }, /* arCoefficient */
     { 3.0, 30.0 }, /* arExponent */
-    { 0.2, 1.0 }, /* arDiceCoefficient */
+    { 0.2f, 1.0f }, /* arDiceCoefficient */
     { 3.0, 30.0 }, /* arDiceExponent */
-    { -0.55667, 0.32139, 0.76604 }, /* arLight */
+    { -0.55667f, 0.32139f, 0.76604f }, /* arLight */
     0.5, /* rRound */
     -1, /* nSize */
     TRUE, /* fHinges */
@@ -664,8 +664,8 @@ static void RenderFramePainted( renderdata *prd, unsigned char *puch,
     float x, z, cos_theta, diffuse, specular;
 	unsigned char *colours = (unsigned char*) g_alloca(4 * 3 * prd->nSize * sizeof(unsigned char));
 
-    diffuse = 0.8 * prd->arLight[ 2 ] + 0.2;
-    specular = pow( prd->arLight[ 2 ], 20 ) * 0.6;
+    diffuse = 0.8f * prd->arLight[ 2 ] + 0.2f;
+    specular = pow( prd->arLight[ 2 ], 20 ) * 0.6f;
 
     /* fill whole board area with flat colour */
     FillArea( puch, nStride, prd->nSize * BOARD_WIDTH, prd->nSize * ( BOARD_HEIGHT - 1 ),

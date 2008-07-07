@@ -431,7 +431,7 @@ extern char *GetSoundFile(gnubgsound sound)
 	return BuildFilename(sound_file[sound]);
 }
 
-extern void SetSoundFile(gnubgsound sound, const char *file)
+extern void SetSoundFile(const gnubgsound sound, const char *file)
 {
 	char *old_file = GetSoundFile(sound);
 	const char *new_file = file ? file : "";

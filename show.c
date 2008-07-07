@@ -63,6 +63,9 @@
 #include "openurl.h"
 #include "multithread.h"
 
+#ifdef WIN32
+#include <io.h>
+#endif
 
 static void ShowMoveFilter ( const movefilter *pmf, const int ply) {
   

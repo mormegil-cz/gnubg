@@ -5177,7 +5177,7 @@ extern void SetRollouts( gpointer p, guint n, GtkWidget *pwIgnore )
   GTKRunDialog(pwDialog);
 
   if( fOK || saveAs ) {
-    int fCubeful;
+    unsigned int fCubeful;
     outputoff();
 
     if((fCubeful = rw.rcRollout.fCubeful) != rcRollout.fCubeful ) {

@@ -1050,7 +1050,7 @@ CalculateHalfInputs( const unsigned int anBoard[ 25 ], const unsigned int anBoar
 
 	  g_assert( n );
     
-  afInput[ I_BREAK_CONTACT ] = n / (15 + 152.0);
+  afInput[ I_BREAK_CONTACT ] = n / (15 + 152.0f);
 
   {
     unsigned int p  = 0;
@@ -1060,7 +1060,7 @@ CalculateHalfInputs( const unsigned int anBoard[ 25 ], const unsigned int anBoar
 		p += (i+1) * anBoard[i];
     }
     
-    afInput[I_FREEPIP] = p / 100.0;
+    afInput[I_FREEPIP] = p / 100.0f;
   }
 
   {
@@ -1105,7 +1105,7 @@ CalculateHalfInputs( const unsigned int anBoard[ 25 ], const unsigned int anBoar
       t = 0;
     }
 
-    afInput[ I_TIMING ] = t / 100.0;
+    afInput[ I_TIMING ] = t / 100.0f;
   }
 
   /* Back chequer */
@@ -1119,7 +1119,7 @@ CalculateHalfInputs( const unsigned int anBoard[ 25 ], const unsigned int anBoar
       }
     }
     
-    afInput[ I_BACK_CHEQUER ] = nBack / 24.0;
+    afInput[ I_BACK_CHEQUER ] = nBack / 24.0f;
 
     /* Back anchor */
 
@@ -1129,7 +1129,7 @@ CalculateHalfInputs( const unsigned int anBoard[ 25 ], const unsigned int anBoar
       }
     }
     
-    afInput[ I_BACK_ANCHOR ] = i / 24.0;
+    afInput[ I_BACK_ANCHOR ] = i / 24.0f;
     
     /* Forward anchor */
 
@@ -1150,7 +1150,7 @@ CalculateHalfInputs( const unsigned int anBoard[ 25 ], const unsigned int anBoar
       }
     }
 	
-    afInput[ I_FORWARD_ANCHOR ] = n == 0 ? 2.0 : n / 6.0;
+    afInput[ I_FORWARD_ANCHOR ] = n == 0 ? 2.0f : n / 6.0f;
   }
     
 
@@ -1396,21 +1396,21 @@ CalculateHalfInputs( const unsigned int anBoard[ 25 ], const unsigned int anBoar
       }
     }
 
-    afInput[ I_PIPLOSS ] = np / ( 12.0 * 36.0 );
+    afInput[ I_PIPLOSS ] = np / ( 12.0f * 36.0f );
       
-    afInput[ I_P1 ] = n1 / 36.0;
-    afInput[ I_P2 ] = n2 / 36.0;
+    afInput[ I_P1 ] = n1 / 36.0f;
+    afInput[ I_P2 ] = n2 / 36.0f;
   }
 
-  afInput[ I_BACKESCAPES ] = Escapes( anBoard, 23 - nOppBack ) / 36.0;
+  afInput[ I_BACKESCAPES ] = Escapes( anBoard, 23 - nOppBack ) / 36.0f;
 
-  afInput[ I_BACKRESCAPES ] = Escapes1( anBoard, 23 - nOppBack ) / 36.0;
+  afInput[ I_BACKRESCAPES ] = Escapes1( anBoard, 23 - nOppBack ) / 36.0f;
   
   for( n = 36, i = 15; i < 24 - nOppBack; i++ )
     if( ( j = Escapes( anBoard, i ) ) < n )
       n = j;
 
-  afInput[ I_ACONTAIN ] = ( 36 - n ) / 36.0;
+  afInput[ I_ACONTAIN ] = ( 36 - n ) / 36.0f;
   afInput[ I_ACONTAIN2 ] = afInput[ I_ACONTAIN ] * afInput[ I_ACONTAIN ];
 
   if( nOppBack < 0 ) {
@@ -1424,14 +1424,14 @@ CalculateHalfInputs( const unsigned int anBoard[ 25 ], const unsigned int anBoar
       n = j;
 
     
-  afInput[ I_CONTAIN ] = ( 36 - n ) / 36.0;
+  afInput[ I_CONTAIN ] = ( 36 - n ) / 36.0f;
   afInput[ I_CONTAIN2 ] = afInput[ I_CONTAIN ] * afInput[ I_CONTAIN ];
     
   for( n = 0, i = 6; i < 25; i++ )
     if( anBoard[ i ] )
       n += ( i - 5 ) * anBoard[ i ] * Escapes( anBoardOpp, i );
 
-  afInput[ I_MOBILITY ] = n / 3600.00;
+  afInput[ I_MOBILITY ] = n / 3600.0f;
 
   j = 0;
   n = 0; 
@@ -1462,7 +1462,7 @@ CalculateHalfInputs( const unsigned int anBoard[ 25 ], const unsigned int anBoar
     k = (k + j - 1) / j;
   }
 
-  afInput[ I_MOMENT2 ] = k / 400.0;
+  afInput[ I_MOMENT2 ] = k / 400.0f;
 
   if( anBoard[ 24 ] > 0 ) {
     int loss = 0;
@@ -1494,9 +1494,9 @@ CalculateHalfInputs( const unsigned int anBoard[ 25 ], const unsigned int anBoar
       }
     }
       
-    afInput[ I_ENTER ] = loss / (36.0 * (49.0/6.0));
+    afInput[ I_ENTER ] = loss / (36.0f * (49.0f/6.0f));
   } else {
-    afInput[ I_ENTER ] = 0.0;
+    afInput[ I_ENTER ] = 0.0f;
   }
 
   n = 0;
@@ -1504,7 +1504,7 @@ CalculateHalfInputs( const unsigned int anBoard[ 25 ], const unsigned int anBoar
     n += anBoardOpp[ i ] > 1;
   }
     
-  afInput[ I_ENTER2 ] = ( 36 - ( n - 6 ) * ( n - 6 ) ) / 36.0; 
+  afInput[ I_ENTER2 ] = ( 36 - ( n - 6 ) * ( n - 6 ) ) / 36.0f; 
 
   {
     int pa = -1;
@@ -1536,7 +1536,7 @@ CalculateHalfInputs( const unsigned int anBoard[ 25 ], const unsigned int anBoar
     }
 
     if( tot ) {
-      afInput[I_BACKBONE] = 1 - (w / (tot * 11.0));
+      afInput[I_BACKBONE] = 1 - (w / (tot * 11.0f));
     } else {
       afInput[I_BACKBONE] = 0;
     }
@@ -1563,9 +1563,9 @@ CalculateHalfInputs( const unsigned int anBoard[ 25 ], const unsigned int anBoar
       if( nAc > 1 ) {
 	/* g_assert( tot >= 4 ); */
       
-	afInput[I_BACKG] = (tot - 3) / 4.0;
+	afInput[I_BACKG] = (tot - 3) / 4.0f;
       } else if( nAc == 1 ) {
-	afInput[I_BACKG1] = tot / 8.0;
+	afInput[I_BACKG1] = tot / 8.0f;
       }
     }
   }
@@ -1603,7 +1603,7 @@ CalculateRaceInputs(const TanBoard anBoard, float inputs[])
 
     /* Men off */
     for(k = 0; k < 14; ++k) {
-      afInput[ RI_OFF + k ] = (menOff == (k+1)) ? 1.0 : 0.0;
+      afInput[ RI_OFF + k ] = (menOff == (k+1)) ? 1.0f : 0.0f;
     }
     
     {
@@ -1619,7 +1619,7 @@ CalculateRaceInputs(const TanBoard anBoard, float inputs[])
 	}
       }
       
-      afInput[RI_NCROSS] = nCross / 10.0;
+      afInput[RI_NCROSS] = nCross / 10.0f;
     }
   }
 }
@@ -1776,15 +1776,15 @@ menOffAll(const unsigned int* anBoard, float* afInput)
   if( menOff > 10 ) {
     afInput[ 0 ] = 1.0;
     afInput[ 1 ] = 1.0;
-    afInput[ 2 ] = ( menOff - 10 ) / 5.0;
+    afInput[ 2 ] = ( menOff - 10 ) / 5.0f;
   } else if( menOff > 5 ) {
-    afInput[ 0 ] = 1.0;
-    afInput[ 1 ] = ( menOff - 5 ) / 5.0;
-    afInput[ 2 ] = 0.0;
+    afInput[ 0 ] = 1.0f;
+    afInput[ 1 ] = ( menOff - 5 ) / 5.0f;
+    afInput[ 2 ] = 0.0f;
   } else {
-    afInput[ 0 ] = menOff ? menOff / 5.0 : 0.0;
-    afInput[ 1 ] = 0.0;
-    afInput[ 2 ] = 0.0;
+    afInput[ 0 ] = menOff ? menOff / 5.0f : 0.0f;
+    afInput[ 1 ] = 0.0f;
+    afInput[ 2 ] = 0.0f;
   }
 }
 
@@ -1800,17 +1800,17 @@ menOffNonCrashed(const unsigned int* anBoard, float* afInput)
   {                                                   g_assert( menOff <= 8 ); }
     
   if( menOff > 5 ) {
-    afInput[ 0 ] = 1.0;
-    afInput[ 1 ] = 1.0;
-    afInput[ 2 ] = ( menOff - 6 ) / 3.0;
+    afInput[ 0 ] = 1.0f;
+    afInput[ 1 ] = 1.0f;
+    afInput[ 2 ] = ( menOff - 6 ) / 3.0f;
   } else if( menOff > 2 ) {
-    afInput[ 0 ] = 1.0;
-    afInput[ 1 ] = ( menOff - 3 ) / 3.0;
-    afInput[ 2 ] = 0.0;
+    afInput[ 0 ] = 1.0f;
+    afInput[ 1 ] = ( menOff - 3 ) / 3.0f;
+    afInput[ 2 ] = 0.0f;
   } else {
-    afInput[ 0 ] = menOff ? menOff / 3.0 : 0.0;
-    afInput[ 1 ] = 0.0;
-    afInput[ 2 ] = 0.0;
+    afInput[ 0 ] = menOff ? menOff / 3.0f : 0.0f;
+    afInput[ 1 ] = 0.0f;
+    afInput[ 2 ] = 0.0f;
   }
 }
 
@@ -2003,7 +2003,7 @@ SanityCheck( const TanBoard anBoard, float arOutput[] )
     }
 
     {
-      float lose = 1.0 - arOutput[ OUTPUT_WIN ];
+      float lose = 1.0f - arOutput[ OUTPUT_WIN ];
       if( arOutput[ OUTPUT_LOSEGAMMON ] > lose ) {
 	arOutput[ OUTPUT_LOSEGAMMON ] = lose;
       }
@@ -2543,7 +2543,7 @@ static float Noise( const evalcontext* pec, const TanBoard anBoard,
 	    r = x * x + y * y;
 	} while( r > 1.0f || r == 0.0f );
 
-	r = y * sqrt( -2.0f * log( r ) / r );
+	r = y * sqrtf( -2.0f * log( r ) / r );
     }
 
     r *= pec->rNoise;
@@ -2741,7 +2741,7 @@ FindBestMoveInEval(NNState *nnStates, int const nDice0, int const nDice1, const 
 
 static int 
 EvaluatePositionFull( NNState *nnStates, const TanBoard anBoard, float arOutput[],
-                      const cubeinfo* pci, const evalcontext* pec, int nPlies,
+                      const cubeinfo* pci, const evalcontext* pec, unsigned int nPlies,
                       positionclass pc ) {
   int i, n0, n1;
 #if defined( REDUCTION_CODE )
@@ -2863,7 +2863,7 @@ EvaluatePositionFull( NNState *nnStates, const TanBoard anBoard, float arOutput[
 	;
     
     /* flop eval */
-    arOutput[ OUTPUT_WIN ] = 1.0 - arOutput[ OUTPUT_WIN ];
+    arOutput[ OUTPUT_WIN ] = 1.0f - arOutput[ OUTPUT_WIN ];
 
     rTemp = arOutput[ OUTPUT_WINGAMMON ];
     arOutput[ OUTPUT_WINGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ];
@@ -3096,7 +3096,7 @@ extern void InvertEvaluation( float ar[ NUM_OUTPUTS ] ) {
 
 	float r;
     
-	ar[ OUTPUT_WIN ] = 1.0 - ar[ OUTPUT_WIN ];
+	ar[ OUTPUT_WIN ] = 1.0f - ar[ OUTPUT_WIN ];
 	
 	r = ar[ OUTPUT_WINGAMMON ];
 	ar[ OUTPUT_WINGAMMON ] = ar[ OUTPUT_LOSEGAMMON ];
@@ -3133,7 +3133,7 @@ InvertEvaluationR ( float ar[ NUM_ROLLOUT_OUTPUTS], const cubeinfo* pci )
   ar [ OUTPUT_EQUITY ] = - ar[ OUTPUT_EQUITY ];
 
   if ( pci->nMatchTo )
-    ar [ OUTPUT_CUBEFUL_EQUITY ] = 1.0 - ar[ OUTPUT_CUBEFUL_EQUITY ];
+    ar [ OUTPUT_CUBEFUL_EQUITY ] = 1.0f - ar[ OUTPUT_CUBEFUL_EQUITY ];
   else
     ar [ OUTPUT_CUBEFUL_EQUITY ] = - ar[ OUTPUT_CUBEFUL_EQUITY ];
 
@@ -3179,7 +3179,7 @@ Utility( float ar[ NUM_OUTPUTS ], const cubeinfo* pci ) {
        players, so there is no need to use pci->fMove. */
 
     return 
-      ar[ OUTPUT_WIN ] * 2.0 - 1.0 +
+      ar[ OUTPUT_WIN ] * 2.0f - 1.0f +
       ( ar[ OUTPUT_WINGAMMON ] - ar[ OUTPUT_LOSEGAMMON ] ) * 
       pci -> arGammonPrice[ 0 ] +
       ( ar[ OUTPUT_WINBACKGAMMON ] - ar[ OUTPUT_LOSEBACKGAMMON ] ) *
@@ -3191,7 +3191,7 @@ Utility( float ar[ NUM_OUTPUTS ], const cubeinfo* pci ) {
     /* equity calculation for match play */
 
     return
-      ar [ OUTPUT_WIN ] * 2.0 - 1.0
+      ar [ OUTPUT_WIN ] * 2.0f - 1.0f
       + ar[ OUTPUT_WINGAMMON ] *
       pci -> arGammonPrice[ pci -> fMove ] 
       - ar[ OUTPUT_LOSEGAMMON ] *
@@ -3219,7 +3219,7 @@ UtilityME( float ar[ NUM_OUTPUTS ], const cubeinfo* pci ) {
     /* calculate money equity */
 
     return 
-      ar[ OUTPUT_WIN ] * 2.0 - 1.0 +
+      ar[ OUTPUT_WIN ] * 2.0f - 1.0f +
       ( ar[ OUTPUT_WINGAMMON ] - ar[ OUTPUT_LOSEGAMMON ] ) +
       ( ar[ OUTPUT_WINBACKGAMMON ] - ar[ OUTPUT_LOSEBACKGAMMON ] );
 
@@ -3264,7 +3264,7 @@ mwc2eq ( const float rMwc, const cubeinfo *pci ) {
    *
    */
 
-  return ( 2.0 * rMwc - ( rMwcWin + rMwcLose ) ) / 
+  return ( 2.0f * rMwc - ( rMwcWin + rMwcLose ) ) / 
     ( rMwcWin - rMwcLose );
 
 }
@@ -3294,7 +3294,7 @@ eq2mwc ( const float rEq, const cubeinfo *pci ) {
    */
 
   return 
-    0.5 * ( rEq * ( rMwcWin - rMwcLose ) + ( rMwcWin + rMwcLose ) );
+    0.5f * ( rEq * ( rMwcWin - rMwcLose ) + ( rMwcWin + rMwcLose ) );
 
 }
 
@@ -3318,7 +3318,7 @@ se_mwc2eq ( const float rMwc, const cubeinfo *pci ) {
                      pci->fMove, pci->nCube, ! pci->fMove, pci->fCrawford,
                      aafMET, aafMETPostCrawford );
 
-  return 2.0 / ( rMwcWin - rMwcLose ) * rMwc;
+  return 2.0f / ( rMwcWin - rMwcLose ) * rMwc;
 
 }
 
@@ -3352,7 +3352,7 @@ se_eq2mwc ( const float rEq, const cubeinfo *pci ) {
    */
 
   return 
-    0.5 * rEq * ( rMwcWin - rMwcLose );
+    0.5f * rEq * ( rMwcWin - rMwcLose );
 
 }
 
@@ -3759,10 +3759,10 @@ FindnSaveBestMoves( movelist *pml,
      Ensure that auchMove is evaluated at the deepest ply. */
 
   unsigned int i;
-  int nMoves, iPly;
+  unsigned int nMoves, iPly;
   move *pm;
   movefilter* mFilters;
-  int nMaxPly = 0;
+  unsigned int nMaxPly = 0;
   int cOldMoves;
     
   /* Find all moves -- note that pml contains internal pointers to static
@@ -4183,7 +4183,7 @@ SetCubeInfoMoney( cubeinfo *pci, const int nCube, const int fCubeOwner,
     
     pci->arGammonPrice[ 0 ] = pci->arGammonPrice[ 1 ] =
 	pci->arGammonPrice[ 2 ] = pci->arGammonPrice[ 3 ] =
-	    ( fJacoby && fCubeOwner == -1 ) ? 0.0 : 1.0;
+	    ( fJacoby && fCubeOwner == -1 ) ? 0.0f : 1.0f;
 
     return 0;
 }
@@ -4560,8 +4560,8 @@ MoneyLive( const float rW, const float rL, const float p,
   if ( pci->fCubeOwner == -1 ) {
 
     /* centered cube */
-    float rTP = ( rL - 0.5 ) / ( rW + rL + 0.5 );
-    float rCP = ( rL + 1.0 ) / ( rW + rL + 0.5 ); 
+    float rTP = ( rL - 0.5f ) / ( rW + rL + 0.5f );
+    float rCP = ( rL + 1.0f ) / ( rW + rL + 0.5f ); 
 
     if ( p < rTP )
       /* linear interpolation between
@@ -4582,7 +4582,7 @@ MoneyLive( const float rW, const float rL, const float p,
     /* owned cube */
 
     /* cash point */
-    float rCP = ( rL + 1.0 ) / ( rW + rL + 0.5 ); 
+    float rCP = ( rL + 1.0f ) / ( rW + rL + 0.5f ); 
 
     if ( p < rCP )
       /* linear interpolation between
@@ -4599,7 +4599,7 @@ MoneyLive( const float rW, const float rL, const float p,
     /* unavailable cube */
 
     /* take point */
-    float rTP = ( rL - 0.5 ) / ( rW + rL + 0.5 );
+    float rTP = ( rL - 0.5f ) / ( rW + rL + 0.5f );
 
     if ( p < rTP )
       /* linear interpolation between
@@ -4635,15 +4635,15 @@ Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX ) {
   /* First calculate average win and loss W and L: */
 
   if ( arOutput[ 0 ] > epsilon )
-    rW = 1.0 + ( arOutput[ 1 ] + arOutput[ 2 ] ) / arOutput[ 0 ];
+    rW = 1.0f + ( arOutput[ 1 ] + arOutput[ 2 ] ) / arOutput[ 0 ];
   else {
     /* basically a dead cube */
     return Utility ( arOutput, pci );
   }
 
   if ( arOutput[ 0 ] < omepsilon )
-    rL = 1.0 + ( arOutput[ 3 ] + arOutput[ 4 ] ) /
-      ( 1.0 - arOutput [ 0 ] );
+    rL = 1.0f + ( arOutput[ 3 ] + arOutput[ 4 ] ) /
+      ( 1.0f - arOutput [ 0 ] );
   else {
     /* basically a dead cube */
     return Utility ( arOutput, pci );
@@ -4653,7 +4653,7 @@ Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX ) {
   rEqDead = Utility( arOutput, pci );
   rEqLive = MoneyLive( rW, rL, arOutput[ 0 ], pci );
 
-  return rEqDead * ( 1.0 - rCubeX ) + rEqLive * rCubeX;
+  return rEqDead * ( 1.0f - rCubeX ) + rEqLive * rCubeX;
 
 }
 
@@ -4683,8 +4683,8 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX
   }
 
   if ( arOutput[ 0 ] < 1.0 ) {
-    rG1 = ( arOutput[ 3 ] - arOutput[ 4 ] ) / ( 1.0 - arOutput[ 0 ] );
-    rBG1 = arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] );
+    rG1 = ( arOutput[ 3 ] - arOutput[ 4 ] ) / ( 1.0f - arOutput[ 0 ] );
+    rBG1 = arOutput[ 4 ] / ( 1.0f - arOutput[ 0 ] );
   }
   else {
     rG1 = 0.0;
@@ -4708,14 +4708,14 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX
 
   rMWCOppCash = aarMETResult[pci->fMove][NDL];
 
-  rOppTG = 1.0 - arCP[ ! pci->fMove ];
+  rOppTG = 1.0f - arCP[ ! pci->fMove ];
   rTG = arCP[ pci->fMove ];
 
   if ( arOutput[ 0 ] <= rOppTG ) {
 
     /* Opp too good to double */
 
-    rMWCLose = ( 1.0 - rG1 - rBG1 ) * aarMETResult[pci->fMove][NDL]
+    rMWCLose = ( 1.0f - rG1 - rBG1 ) * aarMETResult[pci->fMove][NDL]
       + rG1 * aarMETResult[pci->fMove][NDLG]
       + rBG1 * aarMETResult[pci->fMove][NDLB];
 
@@ -4728,7 +4728,7 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX
       
     /* (1-x) MWC(dead) + x MWC(live) */
 
-    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+    return  rMWCDead * ( 1.0f - rCubeX ) + rMWCLive * rCubeX;
 
   }
   else if ( rOppTG < arOutput[ 0 ] && arOutput[ 0 ] < rTG ) {
@@ -4738,7 +4738,7 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX
     rMWCLive = 
       rMWCOppCash + 
       (rMWCCash - rMWCOppCash) * ( arOutput[ 0 ] - rOppTG ) / ( rTG - rOppTG); 
-    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+    return  rMWCDead * ( 1.0f - rCubeX ) + rMWCLive * rCubeX;
 
   } else {
 
@@ -4752,19 +4752,19 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX
 	 
     */
 
-    rMWCWin = ( 1.0 - rG0 - rBG0 ) * aarMETResult[pci->fMove][NDW]
+    rMWCWin = ( 1.0f - rG0 - rBG0 ) * aarMETResult[pci->fMove][NDW]
       + rG0 * aarMETResult[pci->fMove][NDWG]
 	  + rBG0 * aarMETResult[pci->fMove][NDWB];
 
     if ( rTG < 1.0 )
       rMWCLive = rMWCCash + 
-        ( rMWCWin - rMWCCash ) * ( arOutput[ 0 ] - rTG ) / ( 1.0 - rTG );
+        ( rMWCWin - rMWCCash ) * ( arOutput[ 0 ] - rTG ) / ( 1.0f - rTG );
     else
       rMWCLive = rMWCWin;
 
     /* (1-x) MWC(dead) + x MWC(live) */
 
-    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+    return  rMWCDead * ( 1.0f - rCubeX ) + rMWCLive * rCubeX;
 
   } 
 
@@ -4796,8 +4796,8 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX ) 
   }
 
   if ( arOutput[ 0 ] < 1.0 ) {
-    rG1 = ( arOutput[ 3 ] - arOutput[ 4 ] ) / ( 1.0 - arOutput[ 0 ] );
-    rBG1 = arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] );
+    rG1 = ( arOutput[ 3 ] - arOutput[ 4 ] ) / ( 1.0f - arOutput[ 0 ] );
+    rBG1 = arOutput[ 4 ] / ( 1.0f - arOutput[ 0 ] );
   }
   else {
     rG1 = 0.0;
@@ -4831,7 +4831,7 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX ) 
 	 
     */
 
-    rMWCLose = ( 1.0 - rG1 - rBG1 ) * aarMETResult[pci->fMove][NDL]
+    rMWCLose = ( 1.0f - rG1 - rBG1 ) * aarMETResult[pci->fMove][NDL]
       + rG1 * aarMETResult[pci->fMove][NDLG]
       + rBG1 * aarMETResult[pci->fMove][NDLB];
 
@@ -4843,7 +4843,7 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX ) 
 
     /* (1-x) MWC(dead) + x MWC(live) */
 
-    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+    return  rMWCDead * ( 1.0f - rCubeX ) + rMWCLive * rCubeX;
 
   } 
   else {
@@ -4859,19 +4859,19 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX ) 
     */
 
     rMWCWin = 
-      ( 1.0 - rG0 - rBG0 ) * aarMETResult[pci->fMove][NDW]
+      ( 1.0f - rG0 - rBG0 ) * aarMETResult[pci->fMove][NDW]
       + rG0 * aarMETResult[pci->fMove][NDWG]
       + rBG0 * aarMETResult[pci->fMove][NDWB];
 
     if ( rTG < 1.0 )
       rMWCLive = rMWCCash + 
-        ( rMWCWin - rMWCCash ) * ( arOutput[ 0 ] - rTG ) / ( 1.0 - rTG );
+        ( rMWCWin - rMWCCash ) * ( arOutput[ 0 ] - rTG ) / ( 1.0f - rTG );
     else
       rMWCLive = rMWCWin;
       
     /* (1-x) MWC(dead) + x MWC(live) */
 
-    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+    return  rMWCDead * ( 1.0f - rCubeX ) + rMWCLive * rCubeX;
 
   }
 
@@ -4904,8 +4904,8 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCu
   }
 
   if ( arOutput[ 0 ] < 1.0 ) {
-    rG1 = ( arOutput[ 3 ] - arOutput[ 4 ] ) / ( 1.0 - arOutput[ 0 ] );
-    rBG1 = arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] );
+    rG1 = ( arOutput[ 3 ] - arOutput[ 4 ] ) / ( 1.0f - arOutput[ 0 ] );
+    rBG1 = arOutput[ 4 ] / ( 1.0f - arOutput[ 0 ] );
   }
   else {
     rG1 = 0.0;
@@ -4927,7 +4927,7 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCu
 
   rMWCOppCash = aarMETResult[pci->fMove][NDL];
 
-  rOppTG = 1.0 - arCP[ ! pci->fMove ];
+  rOppTG = 1.0f - arCP[ ! pci->fMove ];
 
   if ( arOutput[ 0 ] <= rOppTG ) {
 
@@ -4941,7 +4941,7 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCu
 	 
     */
 
-    rMWCLose = ( 1.0 - rG1 - rBG1 ) * aarMETResult[pci->fMove][NDL]
+    rMWCLose = ( 1.0f - rG1 - rBG1 ) * aarMETResult[pci->fMove][NDL]
       + rG1 * aarMETResult[pci->fMove][NDLG]
       + rBG1 * aarMETResult[pci->fMove][NDLB];
 
@@ -4954,7 +4954,7 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCu
       
     /* (1-x) MWC(dead) + x MWC(live) */
 
-    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+    return  rMWCDead * ( 1.0f - rCubeX ) + rMWCLive * rCubeX;
 
   }
   else {
@@ -4967,20 +4967,20 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCu
 	 
     */
 
-    rMWCWin = ( 1.0 - rG0 - rBG0 ) * aarMETResult[pci->fMove][NDW]
+    rMWCWin = ( 1.0f - rG0 - rBG0 ) * aarMETResult[pci->fMove][NDW]
       + rG0 * aarMETResult[pci->fMove][NDWG]
       + rBG0 * aarMETResult[pci->fMove][NDWB];
 
     if ( arOutput[ 0 ] != rOppTG )
       rMWCLive = rMWCOppCash + 
         ( rMWCWin - rMWCOppCash ) * ( arOutput[ 0 ] - rOppTG ) 
-        / ( 1.0 - rOppTG );
+        / ( 1.0f - rOppTG );
     else
       rMWCLive = rMWCWin;
 
     /* (1-x) MWC(dead) + x MWC(live) */
 
-    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+    return  rMWCDead * ( 1.0f - rCubeX ) + rMWCLive * rCubeX;
 
   } 
 
@@ -5409,7 +5409,7 @@ GetECF3 ( float arCubeful[], int cci,
       if ( aci[ 0 ].nMatchTo )
         rDT = arCf [ i + 1 ];
       else
-        rDT = 2.0 * arCf[ i + 1 ];
+        rDT = 2.0f * arCf[ i + 1 ];
 
       GetDPEq ( NULL, &rDP, &aci[ i ] );
 
@@ -5513,7 +5513,7 @@ EvaluatePositionCubeful4( NNState *nnStates, const TanBoard anBoard,
                           float arCubeful[],
                           const cubeinfo aciCubePos[], int cci, 
                           const cubeinfo* pciMove, const evalcontext* pec, 
-                          int nPlies, int fTop ) {
+                          unsigned int nPlies, int fTop ) {
   
   
   /* calculate cubeful equity */
@@ -5667,7 +5667,7 @@ EvaluatePositionCubeful4( NNState *nnStates, const TanBoard anBoard,
 #endif
     
     arOutput[ OUTPUT_WIN ] =
-      1.0 - arOutput[ OUTPUT_WIN ] / sumW;
+      1.0f - arOutput[ OUTPUT_WIN ] / sumW;
 	  
     r = arOutput[ OUTPUT_WINGAMMON ] / sumW;
     arOutput[ OUTPUT_WINGAMMON ] =
@@ -5681,7 +5681,7 @@ EvaluatePositionCubeful4( NNState *nnStates, const TanBoard anBoard,
 
     for ( i = 0; i < 2 * cci; i++ ) 
       if ( pciMove->nMatchTo )
-        arCf[ i ] = 1.0 - arCf[ i ] / sumW;
+        arCf[ i ] = 1.0f - arCf[ i ] / sumW;
       else
         arCf[ i ] = - arCf[ i ] / sumW;
 #undef sumW
@@ -5726,7 +5726,7 @@ EvaluatePositionCubeful4( NNState *nnStates, const TanBoard anBoard,
         return -1;
       }
 
-      arOutput[ 0 ] = ( arEquity[ 0 ] + 1.0 ) / 2.0;
+      arOutput[ 0 ] = ( arEquity[ 0 ] + 1.0f ) / 2.0f;
       arOutput[ 1 ] = arOutput[ 2 ] = arOutput[ 3 ] = arOutput[ 4 ] = 0.0;
 
     }
@@ -6127,10 +6127,10 @@ calculate_gammon_rates( float aarRates[ 2 ][ 2 ],
     aarRates[ ! pci->fMove ][ 0 ] =
       ( arOutput[ OUTPUT_LOSEGAMMON ] -
         arOutput[ OUTPUT_LOSEBACKGAMMON ] ) /
-      ( 1.0 - arOutput[ OUTPUT_WIN ] );
+      ( 1.0f - arOutput[ OUTPUT_WIN ] );
     aarRates[ ! pci->fMove ][ 1 ] =
       arOutput[ OUTPUT_LOSEBACKGAMMON ] /
-      ( 1.0 - arOutput[ OUTPUT_WIN ] );
+      ( 1.0f - arOutput[ OUTPUT_WIN ] );
   }
   else {
     aarRates[ ! pci->fMove ][ 0 ] = aarRates[ ! pci->fMove ][ 1 ] = 0;
@@ -6193,7 +6193,7 @@ getMoneyPoints ( float aaarPoints[ 2 ][ 7 ][ 2 ],
   /* calculate average cubeless value of games won */
 
   for ( i = 0; i < 2; i++ )
-    arCLV[ i ] = 1.0 + aarRates[ i ][ 0 ] + 2.0f * aarRates[ i ][ 1 ];
+    arCLV[ i ] = 1.0f + aarRates[ i ][ 0 ] + 2.0f * aarRates[ i ][ 1 ];
 
     /* calculate points */
     
@@ -6208,18 +6208,18 @@ getMoneyPoints ( float aaarPoints[ 2 ][ 7 ][ 2 ],
 
     /* take point */
       
-    aaarPoints[ i ][ 0 ][ 0 ] = ( rL - 0.5 ) / ( rW + rL );
-    aaarPoints[ i ][ 0 ][ 1 ] = ( rL - 0.5 ) / ( rW + rL + 0.5 );
+    aaarPoints[ i ][ 0 ][ 0 ] = ( rL - 0.5f ) / ( rW + rL );
+    aaarPoints[ i ][ 0 ][ 1 ] = ( rL - 0.5f ) / ( rW + rL + 0.5f );
 
     /* beaver point */
 
     aaarPoints[ i ][ 1 ][ 0 ] = rL / ( rW + rL );
-    aaarPoints[ i ][ 1 ][ 1 ] = rL / ( rW + rL + 0.5 );
+    aaarPoints[ i ][ 1 ][ 1 ] = rL / ( rW + rL + 0.5f );
 
     /* raccoon point */
 
     aaarPoints[ i ][ 2 ][ 0 ] = rL / ( rW + rL );
-    aaarPoints[ i ][ 2 ][ 1 ] = ( rL + 0.5 ) / ( rW + rL + 0.5 );
+    aaarPoints[ i ][ 2 ][ 1 ] = ( rL + 0.5f ) / ( rW + rL + 0.5f );
 
     /* initial double point */
       
@@ -6232,27 +6232,27 @@ getMoneyPoints ( float aaarPoints[ 2 ][ 7 ][ 2 ],
           
       if ( fBeavers )
         /* with beavers */
-        aaarPoints[ i ][ 3 ][ 0 ] = ( rL - 0.25 ) / ( rL + rW - 0.5 );
+        aaarPoints[ i ][ 3 ][ 0 ] = ( rL - 0.25f ) / ( rL + rW - 0.5f );
       else
         /* without beavers */
-        aaarPoints[ i ][ 3 ][ 0 ] = ( rL - 0.5 ) / ( rL + rW - 1.0 );
+        aaarPoints[ i ][ 3 ][ 0 ] = ( rL - 0.5f ) / ( rL + rW - 1.0f );
         
     }
-    aaarPoints[ i ][ 3 ][ 1 ] = ( rL + 1.0 ) / ( rL + rW + 0.5 );
+    aaarPoints[ i ][ 3 ][ 1 ] = ( rL + 1.0f ) / ( rL + rW + 0.5f );
 
     /* redouble point */
     aaarPoints[ i ][ 4 ][ 0 ] = rL / ( rW + rL );
-    aaarPoints[ i ][ 4 ][ 1 ] = ( rL + 1.0 ) / ( rL + rW + 0.5 );
+    aaarPoints[ i ][ 4 ][ 1 ] = ( rL + 1.0f ) / ( rL + rW + 0.5f );
 
     /* cash point */
 
-    aaarPoints[ i ][ 5 ][ 0 ] = ( rL + 0.5 ) / ( rW + rL );
-    aaarPoints[ i ][ 5 ][ 1 ] = ( rL + 1.0 ) / ( rW + rL + 0.5 );
+    aaarPoints[ i ][ 5 ][ 0 ] = ( rL + 0.5f ) / ( rW + rL );
+    aaarPoints[ i ][ 5 ][ 1 ] = ( rL + 1.0f ) / ( rW + rL + 0.5f );
 
     /* too good point */
       
-    aaarPoints[ i ][ 6 ][ 0 ] = ( rL + 1.0 ) / ( rW + rL );
-    aaarPoints[ i ][ 6 ][ 1 ] = ( rL + 1.0 ) / ( rW + rL + 0.5 );
+    aaarPoints[ i ][ 6 ][ 0 ] = ( rL + 1.0f ) / ( rW + rL );
+    aaarPoints[ i ][ 6 ][ 1 ] = ( rL + 1.0f ) / ( rW + rL + 0.5f );
 
   }
 
@@ -6289,11 +6289,11 @@ getMatchPoints ( float aaarPoints[ 2 ][ 4 ][ 2 ],
 
   /* get cash points */
 
-  arOutput[ 0 ] = 0.5;
-  arOutput[ 1 ] = 0.5 * ( aarRates[ 0 ][ 0 ] + aarRates[ 0 ][ 1 ] );
-  arOutput[ 2 ] = 0.5 * aarRates[ 0 ][ 1 ];
-  arOutput[ 3 ] = 0.5 * ( aarRates[ 1 ][ 0 ] + aarRates[ 1 ][ 1 ] );
-  arOutput[ 4 ] = 0.5 * aarRates[ 1 ][ 1 ];
+  arOutput[ 0 ] = 0.5f;
+  arOutput[ 1 ] = 0.5f * ( aarRates[ 0 ][ 0 ] + aarRates[ 0 ][ 1 ] );
+  arOutput[ 2 ] = 0.5f * aarRates[ 0 ][ 1 ];
+  arOutput[ 3 ] = 0.5f * ( aarRates[ 1 ][ 0 ] + aarRates[ 1 ][ 1 ] );
+  arOutput[ 4 ] = 0.5f * aarRates[ 1 ][ 1 ];
 
   GetPoints ( arOutput, pci, arCP2 );
 
@@ -6309,7 +6309,7 @@ getMatchPoints ( float aaarPoints[ 2 ][ 4 ][ 2 ],
       /* MWC for "double, take; win" */
 
     rDTW =
-      (1.0 - aarRates[ i ][ 0 ] - aarRates[ i ][ 1 ]) *
+      (1.0f - aarRates[ i ][ 0 ] - aarRates[ i ][ 1 ]) *
       getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
               2 * pci->nCube, i, pci->fCrawford,
               aafMET, aafMETPostCrawford )
@@ -6325,7 +6325,7 @@ getMatchPoints ( float aaarPoints[ 2 ][ 4 ][ 2 ],
     /* MWC for "no double, take; win" */
 
     rNDW =
-      (1.0 - aarRates[ i ][ 0 ] - aarRates[ i ][ 1 ]) *
+      (1.0f - aarRates[ i ][ 0 ] - aarRates[ i ][ 1 ]) *
       getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
               pci->nCube, i, pci->fCrawford,
               aafMET, aafMETPostCrawford )
@@ -6341,7 +6341,7 @@ getMatchPoints ( float aaarPoints[ 2 ][ 4 ][ 2 ],
     /* MWC for "Double, take; lose" */
 
     rDTL =
-      (1.0 - aarRates[ ! i ][ 0 ] - aarRates[ ! i ][ 1 ]) *
+      (1.0f - aarRates[ ! i ][ 0 ] - aarRates[ ! i ][ 1 ]) *
       getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
               2 * pci->nCube, ! i, pci->fCrawford,
               aafMET, aafMETPostCrawford )
@@ -6357,7 +6357,7 @@ getMatchPoints ( float aaarPoints[ 2 ][ 4 ][ 2 ],
     /* MWC for "No double; lose" */
 
     rNDL =
-      (1.0 - aarRates[ ! i ][ 0 ] - aarRates[ ! i ][ 1 ]) *
+      (1.0f - aarRates[ ! i ][ 0 ] - aarRates[ ! i ][ 1 ]) *
       getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
               1 * pci->nCube, ! i, pci->fCrawford,
               aafMET, aafMETPostCrawford )
@@ -6390,7 +6390,7 @@ getMatchPoints ( float aaarPoints[ 2 ][ 4 ][ 2 ],
     rRisk = rDTW - rDP;
     rGain = rDP - rDTL;
 
-    arCP1 [ i ] = 1.0 - rRisk / ( rRisk + rGain );
+    arCP1 [ i ] = 1.0f - rRisk / ( rRisk + rGain );
 
     /* find too good point */
 
@@ -6404,7 +6404,7 @@ getMatchPoints ( float aaarPoints[ 2 ][ 4 ][ 2 ],
       /* With redouble */
 
       rDTW =
-        (1.0 - aarRates[ i ][ 0 ] - aarRates[ i ][ 1 ]) *
+        (1.0f - aarRates[ i ][ 0 ] - aarRates[ i ][ 1 ]) *
         getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
                 4 * pci->nCube, i, pci->fCrawford,
                 aafMET, aafMETPostCrawford )
@@ -6418,7 +6418,7 @@ getMatchPoints ( float aaarPoints[ 2 ][ 4 ][ 2 ],
                 aafMET, aafMETPostCrawford );
 
       rDTL =
-        (1.0 - aarRates[ ! i ][ 0 ] - aarRates[ ! i ][ 1 ]) *
+        (1.0f - aarRates[ ! i ][ 0 ] - aarRates[ ! i ][ 1 ]) *
         getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
                 4 * pci->nCube, ! i, pci->fCrawford,
                 aafMET, aafMETPostCrawford )
@@ -6434,7 +6434,7 @@ getMatchPoints ( float aaarPoints[ 2 ][ 4 ][ 2 ],
       rRisk = rDTW - rDP;
       rGain = rDP - rDTL;
         
-      arCP2 [ i ] = 1.0 - rRisk / ( rRisk + rGain );
+      arCP2 [ i ] = 1.0f - rRisk / ( rRisk + rGain );
 
       /* Double point */
 

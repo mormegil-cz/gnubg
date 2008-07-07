@@ -1,3 +1,9 @@
+Mon Jul  7 22:42:20 CEST 2008 Petr Kadlec <mormegil@centrum.cz>
+
+	* eval.c, gnubg.c, gtkgame.c, matchequity.c, render.c, renderprefs.c
+	show.c, sound.c: minor fixes for MSVC compiler happinnes (mainly adding
+	"float" suffix to decimal number literals etc.)
+
 Mon Jul  7 12:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* rollout.c: Give each thread separate random number context to

@@ -37,6 +37,13 @@
 #include <ctype.h>
 #ifdef WIN32
 #include <io.h>
+#if _MSC_VER
+#include <direct.h>
+#endif
+#endif
+
+#if defined(_MSC_VER) && HAVE_LIBXML2
+#include <libxml/xmlmemory.h>
 #endif
 
 #if HAVE_LIBREADLINE
@@ -1319,7 +1326,7 @@ extern void InitBoard( TanBoard anBoard, const bgvariation bgv )
 {
 
   int i;
-  unsigned int j;
+  int j;
 
   for( i = 0; i < 25; i++ )
     anBoard[ 0 ][ i ] = anBoard[ 1 ][ i ] = 0;
@@ -4894,6 +4901,21 @@ static void null_debug (const gchar* dom, GLogLevelFlags logflags, const gchar* 
 {
 }
 
+#if defined(_MSC_VER) && HAVE_LIBXML2
+
+static void * XMLCALL wrap_xml_g_malloc(size_t size)
+{
+	return g_malloc(size);
+}
+
+static void * XMLCALL wrap_xml_g_realloc(void *mem, size_t size)
+{
+	return g_realloc(mem, size);
+}
+
+#endif
+
+
 int main(int argc, char *argv[])
 {
 #if USE_GTK
@@ -4986,7 +5008,7 @@ int main(int argc, char *argv[])
 		_chdir(szDataDirectory);
 	}
 #if defined(_MSC_VER) && HAVE_LIBXML2
-	xmlMemSetup(g_free, g_malloc, g_realloc, g_strdup);
+	xmlMemSetup(g_free, wrap_xml_g_malloc, wrap_xml_g_realloc, g_strdup);
 #endif
 #endif
 
