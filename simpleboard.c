@@ -68,8 +68,7 @@ static void fill_and_stroke(cairo_t * cr, SimpleBoardColor c)
  */
 static void get_point_base(gint i, gint * x, gint * y, gint * direction)
 {
-	g_return_if_fail(i < 24);
-	g_return_if_fail(i > -1);
+	g_assert(i >= 0 && i < 24);
 
 	if (i > 17) {
 		*x = 170 + (i - 18) * 20;
@@ -460,8 +459,7 @@ static void draw_borders(cairo_t * cr)
 extern int simple_board_draw(SimpleBoard * board)
 {
 	cairo_t *cr = board->cr;
-
-	g_return_val_if_fail(cr, 1);
+	assert(cr != NULL);
 
 	cairo_save(cr);
 	draw_header_text(board);
@@ -515,9 +513,7 @@ extern SimpleBoard *simple_board_new_from_ids(gchar * position_id,
 					      cairo_t * cr)
 {
 	SimpleBoard *board;
-
-	g_return_val_if_fail(position_id, NULL);
-	g_return_val_if_fail(match_id, NULL);
+	g_assert(position_id != NULL && match_id != NULL);
 
 	board = simple_board_new(NULL, cr);
 	if (!PositionFromID(board->ms.anBoard, position_id))

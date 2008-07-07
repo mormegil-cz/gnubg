@@ -279,7 +279,7 @@ evalcontext ecTD = { FALSE, 0, FALSE, TRUE, 0.0 };
     { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 2, 0.04f }, { -1, 0, 0 } } , \
   }
 
-void *rngctxRollout = NULL;
+rngcontext *rngctxRollout = NULL;
 
 #if defined (REDUCTION_CODE)
 rolloutcontext rcRollout =
@@ -2892,7 +2892,7 @@ static void LoadRCFiles(void)
 
 
 static void
-SaveRNGSettings ( FILE *pf, const char *sz, rng rngCurrent, void *rngctx ) {
+SaveRNGSettings ( FILE *pf, const char *sz, rng rngCurrent, rngcontext *rngctx ) {
 
     switch( rngCurrent ) {
     case RNG_ANSI:

@@ -1,3 +1,8 @@
+Mon Jul  7 12:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* rollout.c: Give each thread separate random number context to
+	try and get results the same as single-threaded rollouts.
+
 Mon Jul  7 00:22:35 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* rollout.c: fix multithreaded dice generation and logfiles

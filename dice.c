@@ -65,7 +65,7 @@ const char *aszRNG[ NUM_RNGS ] = {
 };
 
 rng rngCurrent = RNG_MERSENNE;
-void *rngctxCurrent = NULL;
+rngcontext *rngctxCurrent = NULL;
 
 static int (*getDiceRandomDotOrg) (void);
 static int (*GetManualDice) (unsigned int[2]);
@@ -131,9 +131,7 @@ static void InitRNGBBS( rngcontext *rngctx ) {
     }
 }
 
-extern int InitRNGBBSModulus( const char *sz, void *p ) {
-
-    rngcontext *rngctx = (rngcontext *) p;
+extern int InitRNGBBSModulus( const char *sz, rngcontext *rngctx ) {
 
     if( !sz )
 	return -1;
@@ -170,11 +168,10 @@ static int BBSFindGood( mpz_t x ) {
     return 0;
 }
 
-extern int InitRNGBBSFactors( char *sz0, char *sz1, void *x ) {
+extern int InitRNGBBSFactors( char *sz0, char *sz1, rngcontext *rngctx ) {
 
     mpz_t p, q;
     char *pch;
-    rngcontext *rngctx = (rngcontext *) x;
     
     if( !sz0 || !sz1 )
 	return -1;
@@ -333,9 +330,7 @@ static int BBSCheckInitialSeed( rngcontext *rngctx ) {
 #endif
 
 extern void
-PrintRNGCounter( const rng rngx, void *p ) {
-
-    rngcontext *rngctx = (rngcontext *) p;
+PrintRNGCounter( const rng rngx, rngcontext *rngctx ) {
 
     switch( rngx ) {
     case RNG_ANSI:
@@ -399,9 +394,7 @@ PrintRNGSeedNormal( int n ) {
 #endif /* HAVE_LIBGMP */
 
 
-extern void PrintRNGSeed( const rng rngx, void *p ) {
-
-    rngcontext *rngctx = (rngcontext *) p;
+extern void PrintRNGSeed( const rng rngx, rngcontext *rngctx ) {
 
     switch( rngx ) {
     case RNG_BBS:
@@ -472,9 +465,7 @@ extern void PrintRNGSeed( const rng rngx, void *p ) {
 	g_printerr("\n");
 }
 
-extern void InitRNGSeed( int n, const rng rngx, void *p ) {
-
-    rngcontext *rngctx = (rngcontext *) p;
+extern void InitRNGSeed( int n, const rng rngx, rngcontext *rngctx ) {
 
     rngctx->n = n;
     rngctx->c = 0;
@@ -542,9 +533,7 @@ extern void InitRNGSeed( int n, const rng rngx, void *p ) {
 }
 
 #if HAVE_LIBGMP
-static void InitRNGSeedMP( mpz_t n, rng rng, void *p ) {
-
-    rngcontext *rngctx = (rngcontext *) p;
+static void InitRNGSeedMP( mpz_t n, rng rng, rngcontext *rngctx ) {
 
     mpz_set( rngctx->nz, n );
     rngctx->c = 0;
@@ -596,7 +585,7 @@ static void InitRNGSeedMP( mpz_t n, rng rng, void *p ) {
     }
 }
     
-extern int InitRNGSeedLong( char *sz, rng rng, void *rngctx ) {
+extern int InitRNGSeedLong( char *sz, rng rng, rngcontext *rngctx ) {
 
     mpz_t n;
     
@@ -614,9 +603,8 @@ extern int InitRNGSeedLong( char *sz, rng rng, void *rngctx ) {
 #endif
 
 extern void
-CloseRNG( const rng rngx, void *p ) {
+CloseRNG( const rng rngx, rngcontext *rngctx ) {
 
-  rngcontext *rngctx = (rngcontext *) p;
 
   switch ( rngx ) {
   case RNG_USER:
@@ -731,9 +719,7 @@ extern void *InitRNG( unsigned long *pnSeed, int *pfInitFrom,
 
 }
 
-extern int RollDice( unsigned int anDice[ 2 ], const rng rngx, void *p ) {
-
-    rngcontext *rngctx = (rngcontext *) p;
+extern int RollDice( unsigned int anDice[ 2 ], const rng rngx, rngcontext *rngctx ) {
 
     switch( rngx ) {
     case RNG_ANSI:
@@ -946,25 +932,18 @@ extern int UserRNGOpen( void *p, const char *sz ) {
 #endif /* HAVE_LIBDL */
 
 
-extern FILE *OpenDiceFile(void *p, const char *sz)
+extern FILE *OpenDiceFile(rngcontext *rngctx, const char *sz)
 {
-	rngcontext *rngctx = (rngcontext *) p;
-
 	g_free(rngctx->szDiceFilename);	/* initialized to NULL */
 	rngctx->szDiceFilename = g_strdup(sz);
 
 	return (rngctx->fDice = g_fopen(sz, "r"));
-
 }
 
-extern void
-CloseDiceFile ( void *p ) {
-
-  rngcontext *rngctx = (rngcontext *) p;
-
+extern void CloseDiceFile ( rngcontext *rngctx )
+{
   if ( rngctx->fDice )
     fclose( rngctx->fDice );
-
 }
 
 
@@ -999,11 +978,14 @@ uglyloop:
 
 }
 
-extern char *
-GetDiceFileName( void *p ) {
-
-  rngcontext *rngctx = (rngcontext *) p;
-
+extern char *GetDiceFileName( rngcontext *rngctx )
+{
   return rngctx->szDiceFilename;
+}
 
+rngcontext *CopyRNGContext(rngcontext *rngctx)
+{
+	rngcontext *newCtx = (rngcontext *)malloc(sizeof(rngcontext));
+	*newCtx = *rngctx;
+	return newCtx;
 }

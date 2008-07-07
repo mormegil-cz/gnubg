@@ -398,7 +398,7 @@ extern unsigned int cAnalysisMoves;
 extern unsigned int cAutoDoubles;
 extern unsigned int nBeavers;
 extern unsigned int nDefaultLength;
-extern void *rngctxRollout;
+extern rngcontext *rngctxRollout;
 
 extern command acAnnotateMove[];
 extern command acSet[];

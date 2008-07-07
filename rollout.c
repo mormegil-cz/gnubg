@@ -326,7 +326,7 @@ BasicCubefulRollout ( unsigned int aanBoard[][ 2 ][ 25 ],
                       const cubeinfo aci[], int afCubeDecTop[], unsigned int cci,
                       rolloutcontext *prc,
                       rolloutstat aarsStatistics[][ 2 ],
-		      int nBasisCube, perArray *dicePerms, FILE* logfp) {
+		      int nBasisCube, perArray *dicePerms, rngcontext *rngctxRollout, FILE* logfp) {
 
   unsigned int anDice [ 2 ];
   unsigned int cUnfinished = cci;
@@ -987,6 +987,8 @@ extern void RolloutLoopMT(void *unused)
 	int alt;
 	FILE *logfp = NULL;
 	rolloutcontext *prc = NULL;
+	/* Each thread gets a copy of the rngctxRollout */
+	rngcontext *rngctxMTRollout = CopyRNGContext(rngctxRollout);
 	perArray dicePerms;
 	dicePerms.nPermutationSeed = -1;
 
@@ -1015,7 +1017,7 @@ extern void RolloutLoopMT(void *unused)
 
 			/* ... and the RNG */
 			if (prc->rngRollout != RNG_MANUAL)
-				InitRNGSeed(prc->nSeed + (trial << 8), prc->rngRollout, rngctxRollout);
+				InitRNGSeed(prc->nSeed + (trial << 8), prc->rngRollout, rngctxMTRollout);
 
 			memcpy(&aanBoardEval, ro_apBoard[alt], sizeof(aanBoardEval));
 
@@ -1035,7 +1037,7 @@ extern void RolloutLoopMT(void *unused)
 			BasicCubefulRollout(&aanBoardEval, &aar, 0, trial, ro_apci[alt],
 					    ro_apCubeDecTop[alt], 1, prc,
 					    ro_aarsStatistics ? ro_aarsStatistics + alt : NULL,
-					    aciLocal[ro_fCubeRollout ? 0 : alt].nCube, &dicePerms, logfp);
+					    aciLocal[ro_fCubeRollout ? 0 : alt].nCube, &dicePerms, rngctxMTRollout, logfp);
 
 			if (log_rollouts) {
 				log_game_over(logfp);
@@ -1252,6 +1254,7 @@ extern void RolloutLoopMT(void *unused)
 		if (((active_alternatives < 2) && rcRollout.fStopOnJsd) || !err_too_big)
 			break;
 	}
+	free(rngctxMTRollout);
 }
 
 rolloutprogressfunc *ro_pfProgress;
@@ -1757,7 +1760,7 @@ RolloutGeneral( ConstTanBoard *apBoard,
       BasicCubefulRollout( aanBoardEval + alt, aar + alt, 0, i, apci[ alt ], 
                            apCubeDecTop[ alt ], 1, prc, 
 			   aarsStatistics ? aarsStatistics + alt : NULL,
-			   aciLocal[ fCubeRollout ? 0 : alt ].nCube, &dicePerms, logfp);
+			   aciLocal[ fCubeRollout ? 0 : alt ].nCube, &dicePerms, rngctxRollout, logfp);
 
       if (log_rollouts) {
 	log_game_over (logfp);
