@@ -70,7 +70,7 @@ rngcontext *rngctxCurrent = NULL;
 static int (*getDiceRandomDotOrg) (void);
 static int (*GetManualDice) (unsigned int[2]);
 
-typedef struct _rngcontext {
+struct _rngcontext {
 
   /* RNG_USER */
 #if HAVE_LIBDL
@@ -111,7 +111,7 @@ typedef struct _rngcontext {
 #endif
   int n; /* seed */
 
-} rngcontext;
+};
   
 
 static int

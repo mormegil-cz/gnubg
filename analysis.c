@@ -981,7 +981,7 @@ static void UpdateProgressBar(void)
 	ProgressValue(progress_offset + MT_GetDoneTasks());
 }
 
-void AnalyseMoveMT(Task *task)
+static void AnalyseMoveMT(Task *task)
 {
 	AnalyseMoveTask *amt;
     float doubleError;

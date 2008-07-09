@@ -459,7 +459,7 @@ static void draw_borders(cairo_t * cr)
 extern int simple_board_draw(SimpleBoard * board)
 {
 	cairo_t *cr = board->cr;
-	assert(cr != NULL);
+	g_assert(cr != NULL);
 
 	cairo_save(cr);
 	draw_header_text(board);
