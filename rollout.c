@@ -105,7 +105,7 @@ static void board_to_sgf(FILE * logfp, const unsigned int anBoard[25], int direc
 		fprintf(logfp, "[y]");
 }
 
-static FILE *log_game_start(const char *name, const cubeinfo * pci, int fCubeful, const TanBoard anBoard)
+static FILE *log_game_start(const char *name, const cubeinfo * pci, int fCubeful, TanBoard anBoard)
 {
 	time_t t = time(0);
 	struct tm *now = localtime(&t);
@@ -975,7 +975,7 @@ int *altTrialCount;
 
 extern void RolloutLoopMT(void *unused)
 {
-	TanBoard aanBoardEval;
+	TanBoard anBoardEval;
 	float aar[NUM_ROLLOUT_OUTPUTS];
 	int err_too_big;
 	double v, s;
@@ -1016,15 +1016,15 @@ extern void RolloutLoopMT(void *unused)
 			if (prc->rngRollout != RNG_MANUAL)
 				InitRNGSeed(prc->nSeed + (trial << 8), prc->rngRollout, rngctxMTRollout);
 
-			memcpy(&aanBoardEval, ro_apBoard[alt], sizeof(aanBoardEval));
+			memcpy(&anBoardEval, ro_apBoard[alt], sizeof(anBoardEval));
 
 			/* roll something out */
 			if (log_rollouts && log_file_name) {
 				char *log_name = g_strdup_printf("%s-%7.7d-%c.sgf", log_file_name, trial, alt + 'a');
-				logfp = log_game_start(log_name, ro_apci[alt], prc->fCubeful, (ConstTanBoard) (&aanBoardEval));
+				logfp = log_game_start(log_name, ro_apci[alt], prc->fCubeful, anBoardEval);
 				g_free(log_name);
 			}
-			BasicCubefulRollout(&aanBoardEval, &aar, 0, trial, ro_apci[alt],
+			BasicCubefulRollout(&anBoardEval, &aar, 0, trial, ro_apci[alt],
 					    ro_apCubeDecTop[alt], 1, prc,
 					    ro_aarsStatistics ? ro_aarsStatistics + alt : NULL,
 					    aciLocal[ro_fCubeRollout ? 0 : alt].nCube, &dicePerms, rngctxMTRollout, logfp);
@@ -1550,7 +1550,6 @@ RolloutGeneral( ConstTanBoard *apBoard,
   int fOutputMWCSave = fOutputMWC;
   int active_alternatives;
   int show_jsds = 1;
-  char *log_name = 0;
   FILE *logfp = NULL;
   perArray dicePerms;
   dicePerms.nPermutationSeed = -1;
@@ -1716,7 +1715,7 @@ RolloutGeneral( ConstTanBoard *apBoard,
 
       if (log_rollouts && log_file_name) {
 	      char *log_name = g_strdup_printf("%s-%7.7d-%c.sgf", log_file_name, i, alt + 'a');
-	      logfp = log_game_start(log_name, apci[alt], prc->fCubeful, (ConstTanBoard) (&aanBoardEval));
+	      logfp = log_game_start(log_name, apci[alt], prc->fCubeful, aanBoardEval[alt]);
 	      g_free(log_name);
       }
 
