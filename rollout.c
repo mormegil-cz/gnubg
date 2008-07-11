@@ -130,10 +130,8 @@ static FILE *log_game_start(const char *name, const cubeinfo * pci, int fCubeful
 		}
 	}
 
-	if ((logfp = fopen(name, "w")) == 0) {
-		log_rollouts = 0;
+	if ((logfp = fopen(name, "w")) == 0)
 		return NULL;
-	}
 
 	fprintf(logfp, "(;FF[4]GM[6]CA[UTF-8]AP[GNU Backgammon:0.14-devel]MI"
 		"[length:%d][game:0][ws:%d][bs:%d][wtime:0][btime:0]"
@@ -489,7 +487,7 @@ BasicCubefulRollout ( unsigned int aanBoard[][ 2 ][ 25 ],
           case DOUBLE_TAKE:
           case DOUBLE_BEAVER:
           case REDOUBLE_TAKE:
-			if (log_rollouts) {
+			if (logfp) {
 				log_cube (logfp, "double",  pci->fMove);
 				log_cube (logfp, "take",   !pci->fMove);
 			}
@@ -505,7 +503,7 @@ BasicCubefulRollout ( unsigned int aanBoard[][ 2 ][ 25 ],
         
           case DOUBLE_PASS:
           case REDOUBLE_PASS:
-			if (log_rollouts) {
+			if (logfp) {
 				log_cube (logfp, "double", pci->fMove);
 				log_cube (logfp, "drop",  !pci->fMove);
 			}
@@ -713,7 +711,7 @@ BasicCubefulRollout ( unsigned int aanBoard[][ 2 ][ 25 ],
 
         }
 
-	if (log_rollouts) {
+	if (logfp) {
 	  log_move (logfp, aanMoves[ anDice[ 0 ] - 1][ anDice[ 1 ] - 1], 
 		    pci->fMove, anDice[0], anDice[1]);
 	}
@@ -953,7 +951,6 @@ comp_jsdinfo_order (const void *a, const void *b) {
 #if USE_MULTITHREAD
 /* Lots of shared variables - should probably not be globals... */
 unsigned int cGames;
-char *log_name;
 cubeinfo *aciLocal;
 int show_jsds;
 
@@ -1022,24 +1019,17 @@ extern void RolloutLoopMT(void *unused)
 			memcpy(&aanBoardEval, ro_apBoard[alt], sizeof(aanBoardEval));
 
 			/* roll something out */
-			if (log_rollouts && log_name) {
-				sprintf(log_name, "%s-%5.5d-%c.sgf", log_file_name, trial, alt + 'a');
-				logfp =
-				    log_game_start(log_name, ro_apci[alt], prc->fCubeful,
-						   (ConstTanBoard) (&aanBoardEval));
-				if (!log_rollouts) {
-					/* open failed */
-					log_rollouts = 0;
-					free(log_name);
-					log_name = 0;
-				}
+			if (log_rollouts && log_file_name) {
+				char *log_name = g_strdup_printf("%s-%7.7d-%c.sgf", log_file_name, trial, alt + 'a');
+				logfp = log_game_start(log_name, ro_apci[alt], prc->fCubeful, (ConstTanBoard) (&aanBoardEval));
+				g_free(log_name);
 			}
 			BasicCubefulRollout(&aanBoardEval, &aar, 0, trial, ro_apci[alt],
 					    ro_apCubeDecTop[alt], 1, prc,
 					    ro_aarsStatistics ? ro_aarsStatistics + alt : NULL,
 					    aciLocal[ro_fCubeRollout ? 0 : alt].nCube, &dicePerms, rngctxMTRollout, logfp);
 
-			if (log_rollouts) {
+			if (logfp) {
 				log_game_over(logfp);
 			}
 
@@ -1342,13 +1332,6 @@ RolloutGeneral(ConstTanBoard * apBoard,
 	if (rcRollout.fInitial)
 		rcRollout.fRotate = FALSE;
 
-	/* initialise internal variables and figure out what the first trial will be */
-
-	if (log_rollouts && log_file_name)
-		log_name = malloc(strlen(log_file_name) + 6 + 2 + 4 + 1);
-	else
-		log_name = NULL;
-
 	/* nFirstTrial will be the smallest number of trials done for an alternative */
 	nFirstTrial = cGames = rcRollout.nTrials;
 
@@ -1471,11 +1454,6 @@ RolloutGeneral(ConstTanBoard * apBoard,
 #endif
 		outputf(_("\nRollout done. Printing final results.\n"));
 	UpdateProgress();
-
-	if (log_rollouts && log_name) {
-		free(log_name);
-		log_name = 0;
-	}
 
 	for (alt = 0, trialsDone = 0; alt < alternatives; ++alt) {
 		if (apes[alt]->rc.nGamesDone > trialsDone)
@@ -1603,10 +1581,6 @@ RolloutGeneral( ConstTanBoard *apBoard,
 
   /* initialise internal variables and figure out what the first 
      trial will be */
-
-  if (log_rollouts && log_file_name) {
-    log_name = malloc (strlen (log_file_name) + 6 + 2 + 4 + 1);
-  }
 
   cGames = rcRollout.nTrials;
   nFirstTrial = 0 ;
@@ -1740,29 +1714,19 @@ RolloutGeneral( ConstTanBoard *apBoard,
       memcpy ( &aanBoardEval[alt][0][0], apBoard[ alt ], 
                sizeof( anBoardOrig ));
 
-      /* roll something out */
-#if 0
-      printf ("rollout game %d alt %d\n", i, alt);
-#endif
-
-      if (log_rollouts && log_name) {
-	sprintf (log_name, "%s-%5.5d-%c.sgf", log_file_name, i, alt + 'a');
-	logfp = log_game_start (log_name, apci[ alt ], prc->fCubeful, 
-			(ConstTanBoard)(aanBoardEval + alt));
-	if ( !log_rollouts) {
-	  /* open failed */
-	  log_rollouts = 0;
-	  free (log_name);
-	  log_name = 0;
-	} 
+      if (log_rollouts && log_file_name) {
+	      char *log_name = g_strdup_printf("%s-%7.7d-%c.sgf", log_file_name, i, alt + 'a');
+	      logfp = log_game_start(log_name, apci[alt], prc->fCubeful, (ConstTanBoard) (&aanBoardEval));
+	      g_free(log_name);
       }
 
+      /* roll something out */
       BasicCubefulRollout( aanBoardEval + alt, aar + alt, 0, i, apci[ alt ], 
                            apCubeDecTop[ alt ], 1, prc, 
 			   aarsStatistics ? aarsStatistics + alt : NULL,
 			   aciLocal[ fCubeRollout ? 0 : alt ].nCube, &dicePerms, rngctxRollout, logfp);
 
-      if (log_rollouts) {
+      if (logfp) {
 	log_game_over (logfp);
       }
 
@@ -2019,11 +1983,6 @@ RolloutGeneral( ConstTanBoard *apBoard,
 					ajiJSD[ alt ].rJSD, fNoMore[ alt ], show_jsds,
 					pUserData );
 	}
-
-  if (log_rollouts && log_name) {
-    free (log_name);
-    log_name = 0;
-  }
 
   for (alt = 0, cGames = 0; alt < alternatives; ++alt)
   {
