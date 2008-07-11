@@ -12,6 +12,9 @@ libevent_la_SOURCES = buffer.c dynarray.c event.c fifo.c hash.c heap.c list.c \
 neuralnetsse.o: neuralnetsse.c sse.h mm_malloc.h
 	if $(COMPILE) $(SSE_CFLAGS) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
 	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+neuralnetsse.lo: neuralnetsse.c sse.h mm_malloc.h
+	$(LTCOMPILE) $(SSE_CFLAGS) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
 
 noinst_HEADERS = buffer.h cache.h dynarray.h event.h fifo.h hash.h heap.h \
 	list.h neuralnet.h mt19937ar.h isaac.h isaacs.h md5.h ../eval.h sse.h mm_malloc.h
