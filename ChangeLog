@@ -1,3 +1,8 @@
+Fri Jul 11 22:54:46 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* bearoff.c, dice.c, eval.c, format.c, gnubg.c, show.c, renderprefs.c:
+	fix some printf format related compiler warnings
+
 Fri Jul 11 22:48:59 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* rollout.c: fix type of board in log_game_start

@@ -1325,8 +1325,8 @@ extern void HandleCommand( char *sz, command *ac )
 extern void InitBoard( TanBoard anBoard, const bgvariation bgv )
 {
 
-  int i;
-  int j;
+  unsigned int i;
+  unsigned int j;
 
   for( i = 0; i < 25; i++ )
     anBoard[ 0 ][ i ] = anBoard[ 1 ][ i ] = 0;
@@ -3774,7 +3774,7 @@ extern void Prompt( void )
 	return;
 #endif
 
-    g_print( FormatPrompt() );
+    g_print("%s", FormatPrompt() );
     fflush( stdout );    
 }
 
@@ -3952,7 +3952,7 @@ extern char *GetInput( char *szPrompt )
     if( fInterrupt )
 	return NULL;
 
-    g_print( szPrompt );
+    g_print("%s", szPrompt );
     fflush( stdout );
 
     sz = malloc( 256 ); /* FIXME it would be nice to handle longer strings */

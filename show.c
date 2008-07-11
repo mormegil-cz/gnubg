@@ -952,7 +952,7 @@ ShowAuthors( const credEntry ace[], const char *title ) {
 
   int i;
 
-  outputf( title );
+  outputf("%s", title );
   outputc( '\n' );
   
   for ( i = 0; ace[ i ].Name; ++i ) {
@@ -1148,7 +1148,7 @@ extern void CommandShowKleinman(char *sz)
 	}
 #endif
 	show_kleinman(an, out);
-	outputf(out);
+	outputf("%s",out);
 }
 
 #if USE_MULTITHREAD
@@ -1204,7 +1204,7 @@ extern void CommandShowThorp(char *sz)
 	}
 #endif
 	show_thorp(an, out);
-	g_print(out);
+	g_print("%s", out);
 
 }
 

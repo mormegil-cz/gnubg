@@ -669,7 +669,7 @@ RenderPreferencesCommand (renderdata * prd, char *sz)
   if (prd->arLight[1] < 0)
     rAzimuth = 360 - rAzimuth;
 
-  sprintf (sz, g_strdup_printf ("set appearance board=#%02X%02X%02X;%s ",
+  strcpy(sz, g_strdup_printf ("set appearance board=#%02X%02X%02X;%s ",
         prd->aanBoardColour[0][0],
         prd->aanBoardColour[0][1],
         prd->aanBoardColour[0][2],

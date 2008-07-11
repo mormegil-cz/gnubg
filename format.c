@@ -463,25 +463,20 @@ extern char *
 OutputEquity ( const float r, const cubeinfo *pci, const int f ) {
 
   static char sz[ 9 ];
-  char fmt[ 32 ];
 
   if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) {
-    /* fmt: "%+7.3f" or "%7.3f" */
-    sprintf( fmt, f ? "%%+%d.%df" : "%%%d.%df", 
-             fOutputDigits + 4, fOutputDigits );
-    sprintf ( sz, fmt, r );
+    if (f)
+	    sprintf ( sz, "%+*.*f", fOutputDigits + 4, fOutputDigits, r );
+    else
+	    sprintf ( sz, "%*.*f", fOutputDigits + 4, fOutputDigits, r );
   }
   else {
     if ( fOutputMatchPC ) {
-      /* fmt: "%6.2f%%" */
-      sprintf( fmt, "%%%d.%df%%%%", fOutputDigits + 3, fOutputDigits > 1 ? fOutputDigits - 1 : 0 );
-      sprintf ( sz, fmt,
+      sprintf ( sz, "%*.*f%%",fOutputDigits + 3, fOutputDigits > 1 ? fOutputDigits - 1 : 0,
                 100.0f * ( f ? eq2mwc ( r, pci ) : se_eq2mwc ( r, pci ) ) );
     }
     else {
-      /* fmt: "%6.4f" */
-      sprintf( fmt, "%%+%d.%df", fOutputDigits + 3, fOutputDigits + 1 );
-      sprintf ( sz, fmt, f ? eq2mwc ( r, pci ) : se_eq2mwc ( r, pci ) );
+      sprintf ( sz, "%*.*f",fOutputDigits + 3, fOutputDigits + 1, f ? eq2mwc ( r, pci ) : se_eq2mwc ( r, pci ) );
     }
   }
 
@@ -490,22 +485,20 @@ OutputEquity ( const float r, const cubeinfo *pci, const int f ) {
 }
 
 
-extern char *
-OutputMoneyEquity ( const float ar[], const int f ) {
+extern char *OutputMoneyEquity(const float ar[], const int f)
+{
 
-  static char sz[ 9 ];
-  char fmt[ 32 ];
+	static char sz[9];
+	float eq = 2.0 * ar[OUTPUT_WIN] - 1.0 + ar[OUTPUT_WINGAMMON] + ar[OUTPUT_WINBACKGAMMON] -
+	    ar[OUTPUT_LOSEGAMMON] - ar[OUTPUT_LOSEBACKGAMMON];
 
-  /* fmt: "%+7.3f" or "%7.3f" */
-  sprintf( fmt, f ? "%%+%d.%df" : "%%%d.%df", 
-           fOutputDigits + 4, fOutputDigits );
+	if (f)
+		sprintf(sz, "%+*.*f", fOutputDigits + 4, fOutputDigits, eq);
+	else
+		sprintf(sz, "%*.*f", fOutputDigits + 4, fOutputDigits, eq);
 
-  sprintf ( sz, fmt,
-            2.0 * ar[ OUTPUT_WIN ] - 1.0
-            + ar[ OUTPUT_WINGAMMON ] + ar[ OUTPUT_WINBACKGAMMON] 
-            - ar[ OUTPUT_LOSEGAMMON ] - ar[ OUTPUT_LOSEBACKGAMMON] );
 
-  return sz;
+	return sz;
 
 }
 
@@ -529,38 +522,30 @@ OutputEquityScale ( const float r, const cubeinfo *pci,
                     const cubeinfo *pciBase, const int f ) {
 
   static char sz[ 9 ];
-  char fmt[ 32 ];
 
   if ( ! pci->nMatchTo ) {
-    /* fmt: "%+7.3f" or "%7.3f" */
-    sprintf( fmt, f ? "%%+%d.%df" : "%%%d.%df", 
-             fOutputDigits + 4, fOutputDigits );
-    sprintf ( sz, fmt, pci->nCube / pciBase->nCube * r );
+	  if (f)
+		  sprintf(sz, "%+*.*f", fOutputDigits + 4, fOutputDigits, pci->nCube / pciBase->nCube * r);
+	  else
+		  sprintf(sz, "%*.*f", fOutputDigits + 4, fOutputDigits,pci->nCube / pciBase->nCube * r);
   }
   else {
 
     if ( fOutputMWC ) {
 
       if ( fOutputMatchPC ) {
-        /* fmt: "%6.2f%%" */
-        sprintf( fmt, "%%%d.%df%%%%", fOutputDigits + 3, fOutputDigits > 1 ? fOutputDigits - 1 : 0 );
-        sprintf ( sz, fmt,
-                  100.0f * ( f ? eq2mwc ( r, pci ) : se_eq2mwc ( r, pci ) ) );
+        sprintf ( sz, "%*.*f%%",fOutputDigits + 3, fOutputDigits > 1 ? fOutputDigits - 1 : 0, 100.0f * ( f ? eq2mwc ( r, pci ) : se_eq2mwc ( r, pci ) ) );
       }
       else {
-        /* fmt: "%6.4f" */
-        sprintf( fmt, "%%+%d.%df", fOutputDigits + 3, fOutputDigits + 1 );
-        sprintf ( sz, fmt, f ? eq2mwc ( r, pci ) : se_eq2mwc ( r, pci ) );
+        sprintf( sz, "%*.*f", fOutputDigits + 3, fOutputDigits + 1, f ? eq2mwc ( r, pci ) : se_eq2mwc ( r, pci ) );
       }
 
     }
     else {
-      /* fmt: "%+7.3f" or "%7.3f" */
-      sprintf( fmt, f ? "%%+%d.%df" : "%%%d.%df", 
-               fOutputDigits + 4, fOutputDigits );
-      sprintf ( sz, fmt, f ? 
-                mwc2eq ( eq2mwc ( r, pci ),pciBase ) : 
-                se_mwc2eq( se_eq2mwc( r, pci ), pciBase ) );
+	    if (f)
+		    sprintf ( sz, "%+*.*f",fOutputDigits + 4, fOutputDigits, mwc2eq ( eq2mwc ( r, pci ),pciBase ));
+	    else
+		    sprintf ( sz, "%*.*f",fOutputDigits + 4, fOutputDigits, se_mwc2eq( se_eq2mwc( r, pci ), pciBase ) );
     }
       
 
@@ -588,24 +573,17 @@ extern char *
 OutputEquityDiff ( const float r1, const float r2, const cubeinfo *pci ) {
 
   static char sz[ 9 ];
-  char fmt[ 32 ];
 
   if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) {
-    /* fmt: "%+7.3f" */
-    sprintf( fmt, "%%+%d.%df", fOutputDigits + 4, fOutputDigits );
-    sprintf ( sz, fmt, r1 - r2 );
+    sprintf ( sz, "%+*.*f", fOutputDigits + 4, fOutputDigits, r1 - r2 );
   }
   else {
     if ( fOutputMatchPC ) {
-      /* fmt: "%6.2f%%" */
-      sprintf( fmt, "%%%d.%df%%%%", fOutputDigits + 3, fOutputDigits > 1 ? fOutputDigits - 1 : 0 );
-      sprintf ( sz, fmt,
+      sprintf ( sz, "%*.*f%%", fOutputDigits + 3, fOutputDigits > 1 ? fOutputDigits - 1 : 0, 
                 100.0f * eq2mwc ( r1, pci ) - 100.0f * eq2mwc ( r2, pci ) );
     }
     else {
-      /* fmt: "%6.4f" */
-      sprintf( fmt, "%%+%d.%df", fOutputDigits + 3, fOutputDigits + 1 );
-      sprintf ( sz, fmt, eq2mwc ( r1, pci ) - eq2mwc ( r2, pci ) );
+      sprintf ( sz, "%*.*f",  fOutputDigits + 3, fOutputDigits + 1, eq2mwc ( r1, pci ) - eq2mwc ( r2, pci ) );
     }
   }
 
@@ -634,24 +612,18 @@ OutputMWCDiff ( const float r1, const float r2, const cubeinfo *pci ) {
   char fmt[ 32 ];
 
   if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) {
-    /* fmt: "%+7.3f" */
-    sprintf( fmt, "%%+%d.%df", fOutputDigits + 4, fOutputDigits );
     if ( pci->nMatchTo ) 
-      sprintf ( sz, fmt, r1 - r2 );
+      sprintf ( sz, "%+*.*f", fOutputDigits + 4, fOutputDigits, r1 - r2 );
     else
-      sprintf ( sz, fmt, mwc2eq( r1, pci ) - mwc2eq( r2, pci ) );
+      sprintf ( sz, "%+*.*f", fOutputDigits + 4, fOutputDigits, mwc2eq( r1, pci ) - mwc2eq( r2, pci ) );
   }
   else {
     if ( fOutputMatchPC ) {
-      /* fmt: "%6.2f%%" */
-      sprintf( fmt, "%%%d.%df%%%%", fOutputDigits + 3, fOutputDigits > 1 ? fOutputDigits - 1 : 0 );
-      sprintf ( sz, fmt,
+      sprintf ( sz, "%*.*f%%", fOutputDigits + 3, fOutputDigits > 1 ? fOutputDigits - 1 : 0,
                 100.0f * r1 - 100.0f * r2 );
     }
     else {
-      /* fmt: "%6.4f" */
-      sprintf( fmt, "%%+%d.%df", fOutputDigits + 3, fOutputDigits + 1 );
-      sprintf ( sz, fmt, r1 - r2 );
+      sprintf( fmt, "%*.*f", fOutputDigits + 3, fOutputDigits + 1, r1 - r2 );
     }
   }
 
@@ -673,33 +645,29 @@ extern char *
 OutputMWC ( const float r, const cubeinfo *pci, const int f ) {
 
   static char sz[ 9 ];
-  char fmt[ 32 ];
 
   if ( ! pci->nMatchTo ) {
-    /* fmt: "%+7.3f" */
-    sprintf( fmt, f ? "%%+%d.%df" : "%%%d.%df", 
-             fOutputDigits + 4, fOutputDigits );
-    sprintf ( sz, fmt, r );
+	  if (f)
+		  sprintf ( sz, "%+*.*f", fOutputDigits + 4, fOutputDigits, r );
+	  else
+		  sprintf ( sz, "%*.*f", fOutputDigits + 4, fOutputDigits, r );
   }
   else {
     
     if ( ! fOutputMWC ) {
-      /* fmt: "%+7.3f" */
-      sprintf( fmt, f ? "%%+%d.%df" : "%%%d.%df", 
-               fOutputDigits + 4, fOutputDigits );
-      sprintf ( sz, fmt, 
-                f ? mwc2eq ( r, pci ) : se_mwc2eq ( r, pci ) );
+      if (f)
+	      sprintf ( sz, "%+*.*f", fOutputDigits + 4, fOutputDigits, mwc2eq ( r, pci ));
+      else
+	      sprintf ( sz, "%*.*f", fOutputDigits + 4, fOutputDigits, se_mwc2eq ( r, pci ) );
     }
     else if ( fOutputMatchPC ) {
-      /* fmt: "%6.2f%%" */
-      sprintf( fmt, "%%%d.%df%%%%", fOutputDigits + 3, fOutputDigits > 1 ? fOutputDigits - 1 : 0 );
-      sprintf ( sz, fmt, 100.0f * r );
+      sprintf ( sz, "%*.*f%%", fOutputDigits + 3, fOutputDigits > 1 ? fOutputDigits - 1 : 0 , 100.0f * r );
     }
     else {
-      /* fmt: "%6.4f" */
-      sprintf( fmt, f? "%%+%d.%df" : "%%%d.%df", 
-               fOutputDigits + 3, fOutputDigits + 1 );
-      sprintf ( sz, fmt, r );
+	    if (f)
+		    sprintf ( sz, "%+*.*f", fOutputDigits + 3, fOutputDigits + 1 , r );
+	    else
+		    sprintf ( sz, "%*.*f", fOutputDigits + 3, fOutputDigits + 1 , r );
     }
   }
 
@@ -712,17 +680,12 @@ extern char *
 OutputPercent ( const float r ) {
 
   static char sz[ 9 ];
-  char fmt[ 32 ];
 
   if ( fOutputWinPC ) {
-    /* fmt: "%5.1f" */
-	  sprintf( fmt, "%%%d.%df%%%%", fOutputDigits + 2, fOutputDigits > 2 ? fOutputDigits - 2 : 0 );
-    sprintf ( sz, fmt, 100.0 * r );
+    sprintf ( sz, "%*.*f", fOutputDigits + 2, fOutputDigits > 2 ? fOutputDigits - 2 : 0, 100.0 * r );
   }
   else {
-    /* fmt: "%5.3f" */
-    sprintf( fmt, "%%%d.%df", fOutputDigits + 2, fOutputDigits  );
-    sprintf ( sz, fmt, r );
+    sprintf ( sz, "%*.*f", fOutputDigits + 2, fOutputDigits, r );
   }
 
   return sz;

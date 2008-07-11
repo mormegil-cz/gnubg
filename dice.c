@@ -965,7 +965,7 @@ uglyloop:
       fseek( rngctx->fDice, 0, SEEK_SET );
     }
     else if ( n != 1 ) {
-      g_printerr(rngctx->szDiceFilename);
+      g_printerr("%s", rngctx->szDiceFilename);
       return -1;
     }
     else if ( uch >= '1' && uch <= '6' )
