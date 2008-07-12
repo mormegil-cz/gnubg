@@ -22,7 +22,7 @@ Mon Jul  7 22:42:20 CEST 2008 Petr Kadlec <mormegil@centrum.cz>
 	show.c, sound.c: minor fixes for MSVC compiler happinnes (mainly adding
 	"float" suffix to decimal number literals etc.)
 
-Mon Jul  7 12:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+Mon Jul  7 12:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* rollout.c: Give each thread separate random number context to
 	try and get results the same as single-threaded rollouts.
@@ -64,7 +64,7 @@ Mon Jun 30 19:38:38 CEST 2008 Christian Anthon <anthon@kiku.dk>
 	* po/* m4/*, configure.in: modify gettext and friends to use glib
 	gettext macros
 
-Sun Jun 29 21:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+Sun Jun 29 21:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* analysis.c - gnubg.c: First part of translation string cleanup
 
@@ -93,7 +93,7 @@ Thu Jun 19 21:54:55 CEST 2008 Christian Anthon <anthon@kiku.dk>
 	* gtkgame.c: signed/unsigned compiler warning
 	* bearoff.c: signed/unsigned compiler warning (fread returns size_t)
 
-Mon Mar 17 21:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+Mon Mar 17 21:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* multithread.c + others: Simplify multithreaded code a little bit
 
@@ -333,7 +333,7 @@ Tue Mar 18 01:54:21 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* po/*.po, po/gnubg.pot: update the translation files
 
-Mon Mar 17 21:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+Mon Mar 17 21:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* credits.sh/c: Update copyright to 2008.
 
@@ -348,7 +348,7 @@ Sun Mar 16 21:56:59 CET 2008 Christian Anthon <anthon@kiku.dk>
 	non-src/sgf_y.h: minor updates to version printing and to non-src
 	files
 
-Sun Mar 16 10:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+Sun Mar 16 10:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gtktoolbar.c: Change menus:
 		Add menu items for edit position and swap direction toolbar commands.
@@ -358,7 +358,7 @@ Sun Mar 16 10:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 		Put panel items in a sub menu.
 		Move match info to file menu.
 
-Sat Mar 15 13:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+Sat Mar 15 13:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c: Merge match/session analysis menu items.
 
@@ -374,11 +374,11 @@ Thu Mar 13 21:54:24 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtkprefs.c: change the wood type to combo_box
 
-Thu Mar 13 22:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+Thu Mar 13 22:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtktoolbar.c, gtkgame.c: Move stop button from toolbar to status bar.
 
-Thu Mar 13 22:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+Thu Mar 13 22:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtk files: Tidy up some common gtk functions and remove SIG_IO signal.
 
@@ -399,17 +399,17 @@ Tue Mar 11 14:53:12 CET 2008 Christian Anthon <anthon@kiku.dk>
 	xpm/tb_redouble.xpm: cleanup in the help menu and delete some unused
 	xpms
 
-Mon Mar 10 09:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+Mon Mar 10 09:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gtkfile.c: Remove export button/menu item (use save instead)
 
-Sun Mar  9 12:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+Sun Mar  9 12:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gtkfile.c: Move load commands from menu into load dialog.
 	  (and other small changes to this dialog)
 	* gtkexport.c: Move generate html images from file menu into export settings.
 
-Sat Mar  8 09:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+Sat Mar  8 09:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* boardpos.c, render.c: Change 2d direction arrow to look like 3d arrow (smaller and near bearoff tray).
 		Move cube to side of board.  Swap position of pieces on bar.
@@ -419,7 +419,7 @@ Fri Mar  7 22:28:52 CET 2008 Christian Anthon <anthon@kiku.dk>
 	* backgammon.h, gnubg.c, gtkgame.c, gtkpanels.c, board3d/Makefile.am,
 	board3d/gtkcolour3d.c: minor stuff and warnings
 
-Fri Feb 29 19:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+Fri Feb 29 19:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkprefs.c, gtkcolour3d.c: Change 3d previews to use widgets not pixmaps.
 
@@ -447,7 +447,7 @@ Mon Feb 25 15:12:08 CET 2008 Christian Anthon <anthon@kiku.dk>
 	Removed declared but undefined, and defined, but unused. Move all
 	declarations to backgammon.h and all lists of commands to gnubg.c.
 
-Sun Feb 24 10:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+Sun Feb 24 10:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubg.c, play.c, multithreaded.c, others: Fix multi-threaded progress indicator.
 
@@ -486,15 +486,15 @@ Sun Feb 10 23:21:33 CET 2008 Christian Anthon <anthon@kiku.dk>
 	simpleboard.c, text.c: allow cairo ps and pdf to export games and
 	matches
 
-Sun Feb 10 11:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+Sun Feb 10 11:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkoptions.c: Move database settings to options dialog.
 
-Sat Feb  9 23:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+Sat Feb  9 23:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkrelational.c: Put simple stats into relational dialog
 
-Sat Feb  9 14:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+Sat Feb  9 14:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* dbprovider.c, relational.c: Added game stats to database
 
@@ -507,11 +507,11 @@ Fri Feb  8 11:24:23 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am, configure.in: compile in native sqlite3 on linux
 
-Thu Feb  7 22:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+Thu Feb  7 22:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* dbprovider.c: Added native sqlite interface.
 
-Wed Feb  6 22:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+Wed Feb  6 22:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* dbprovider.c+.h, gnubg.c, relational.c, gtkrelational.c, database.py:
 	Move relational code out of database.py and into relational.c
@@ -552,7 +552,7 @@ Sat Jan 19 09:58:13 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* drawboard.c: fix board after uint changes
 
-Tue Jan 15 22:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+Tue Jan 15 22:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubg-types.h + others: change board type to unsigned
 		hopefully not breaking anything on the way (esp. bearoff)
@@ -583,7 +583,7 @@ Sun Jan 13 00:36:48 CET 2008 Christian Anthon <anthon@kiku.dk>
 	* configure.in, common.h: change how acosf, signbit and lrint are
 	checked for to allow to compile with -Werror
 
-Sat Jan 12 23:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+Sat Jan 12 23:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* sound.c, set.c, gnubg.c: Re-introduce exit sound, but disabled by default
 
@@ -593,7 +593,7 @@ Wed Jan  2 15:48:02 CET 2008 Christian Anthon <anthon@kiku.dk>
 	po/POTFILES.in: fix make distcheck
 	* multithread.h: fix typo and add MT_SafeDecCheck
 
-Tue Jan 01 21:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+Tue Jan 01 21:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* relational.c, gtkrelational.c, database.py, gnubg.sql:
 		Simplify relational database by removing "environments".
