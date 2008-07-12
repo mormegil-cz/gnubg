@@ -3118,6 +3118,7 @@ extern void CommandSaveSettings( char *szParam )
     unsigned int cCache; 
     char *szFile;
     char szTemp[ 4096 ];
+    GString *gst;
 #if USE_GTK
     const char *aszAnimation[] = {"none", "blink", "slide"};
 #endif
@@ -3209,7 +3210,9 @@ extern void CommandSaveSettings( char *szParam )
 
     /* Render preferences */
 
-    fputs( RenderPreferencesCommand( GetMainAppearance(), szTemp ), pf );
+    gst = RenderPreferencesCommand( GetMainAppearance());
+    fputs( gst->str, pf );
+    g_string_free(gst, TRUE);
     fputc( '\n', pf );
     
     fprintf( pf, 
@@ -4057,7 +4060,7 @@ extern void output( const char *sz )
     
 #if USE_GTK
     if( fX ) {
-	GTKOutput( g_strdup( sz ) );
+	GTKOutput( sz );
 	return;
     }
 #endif
@@ -4077,15 +4080,9 @@ extern void outputl( const char *sz )
     
 #if USE_GTK
     if( fX ) {
-	int cch;
-	char *pch;
-
-	cch = strlen( sz );
-	pch = g_malloc( cch + 2 );
-	strcpy( pch, sz );
-	pch[ cch ] = '\n';
-	pch[ cch + 1 ] = 0;
-	GTKOutput( pch );
+	    char *szOut = g_strdup_printf("%s\n", sz);
+	GTKOutput( szOut  );
+	g_free(szOut);
 	return;
     }
 #endif

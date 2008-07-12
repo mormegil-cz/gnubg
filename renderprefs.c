@@ -652,192 +652,134 @@ WriteMaterialDice (renderdata * prd, int num)
 }
 
 #endif
-extern char *
-RenderPreferencesCommand (renderdata * prd, char *sz)
+extern GString *RenderPreferencesCommand(renderdata * prd)
 {
 
-  gchar buf[G_ASCII_DTOSTR_BUF_SIZE];
-  gchar buf1[G_ASCII_DTOSTR_BUF_SIZE];
-  gchar buf2[G_ASCII_DTOSTR_BUF_SIZE];
-  gchar buf3[G_ASCII_DTOSTR_BUF_SIZE];
-  
-  float rElevation = (float)(asinf (prd->arLight[2]) * 180 / G_PI);
-  float rAzimuth = (fabs (prd->arLight[2] - 1.0f) < 1e-5) ? 0.0f :
-    (float)(acosf (prd->arLight[0] / sqrt (1.0 - prd->arLight[2] *
-            prd->arLight[2])) * 180 / G_PI);
+	gchar buf[G_ASCII_DTOSTR_BUF_SIZE];
+	gchar buf1[G_ASCII_DTOSTR_BUF_SIZE];
+	gchar buf2[G_ASCII_DTOSTR_BUF_SIZE];
+	gchar buf3[G_ASCII_DTOSTR_BUF_SIZE];
+	GString *gst = g_string_new(NULL);
 
-  if (prd->arLight[1] < 0)
-    rAzimuth = 360 - rAzimuth;
+	float rElevation = (float) (asinf(prd->arLight[2]) * 180 / G_PI);
+	float rAzimuth = (fabs(prd->arLight[2] - 1.0f) < 1e-5) ? 0.0f :
+	    (float) (acosf(prd->arLight[0] / sqrt(1.0 - prd->arLight[2] * prd->arLight[2])) * 180 / G_PI);
 
-  strcpy(sz, g_strdup_printf ("set appearance board=#%02X%02X%02X;%s ",
-        prd->aanBoardColour[0][0],
-        prd->aanBoardColour[0][1],
-        prd->aanBoardColour[0][2],
-        g_ascii_formatd (buf, G_ASCII_DTOSTR_BUF_SIZE, "%.2f",
-             prd->aSpeckle[0] / 128.0f)));
+	if (prd->arLight[1] < 0)
+		rAzimuth = 360 - rAzimuth;
 
+	g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%.2f", prd->aSpeckle[0] / 128.0f);
+	g_string_append_printf(gst, "set appearance board=#%02X%02X%02X;%s ", prd->aanBoardColour[0][0],
+			       prd->aanBoardColour[0][1], prd->aanBoardColour[0][2], buf);
 
-  strcat (sz, g_strdup_printf ("border=#%02X%02X%02X ",
-             prd->aanBoardColour[1][0],
-             prd->aanBoardColour[1][1],
-             prd->aanBoardColour[1][2]));
+	g_string_append_printf(gst, "border=#%02X%02X%02X ", prd->aanBoardColour[1][0], prd->aanBoardColour[1][1],
+			       prd->aanBoardColour[1][2]);
+	g_string_append_printf(gst, "moveindicator=%c ", prd->showMoveIndicator ? 'y' : 'n');
 
-  strcat (sz, g_strdup_printf ("moveindicator=%c ",
-         prd->showMoveIndicator ? 'y' : 'n'));
 #if USE_BOARD3D
+	g_string_append_printf(gst, "boardtype=%c ", display_is_2d(prd) ? '2' : '3');
+	g_string_append_printf(gst, "hinges3d=%c ", prd->fHinges3d ? 'y' : 'n');
+	g_string_append_printf(gst, "boardshadows=%c ", prd->showShadows ? 'y' : 'n');
+	g_string_append_printf(gst, "shadowdarkness=%d ", prd->shadowDarkness);
+	g_string_append_printf(gst, "animateroll=%c ", prd->animateRoll ? 'y' : 'n');
+	g_string_append_printf(gst, "animateflag=%c ", prd->animateFlag ? 'y' : 'n');
+	g_string_append_printf(gst, "closeboard=%c ", prd->closeBoardOnExit ? 'y' : 'n');
+	g_string_append_printf(gst, "quickdraw=%c ", prd->quickDraw ? 'y' : 'n');
+	g_string_append_printf(gst, "curveaccuracy=%d ", prd->curveAccuracy);
+	g_string_append_printf(gst, "lighttype=%c ", prd->lightType == LT_POSITIONAL ? 'p' : 'd');
 
-  strcat (sz, g_strdup_printf ("boardtype=%c ",
-         display_is_2d(prd) ? '2' : '3'));
-  strcat (sz, g_strdup_printf ("hinges3d=%c ",
-         prd->fHinges3d ? 'y' : 'n'));
-  strcat (sz, g_strdup_printf ("boardshadows=%c ",
-         prd->showShadows ? 'y' : 'n'));
-  strcat (sz, g_strdup_printf ("shadowdarkness=%d ",
-         prd->shadowDarkness));
-  strcat (sz, g_strdup_printf ("animateroll=%c ",
-         prd->animateRoll ? 'y' : 'n'));
-  strcat (sz, g_strdup_printf ("animateflag=%c ",
-         prd->animateFlag ? 'y' : 'n'));
-  strcat (sz, g_strdup_printf ("closeboard=%c ",
-         prd->closeBoardOnExit ? 'y' : 'n'));
-  strcat (sz, g_strdup_printf ("quickdraw=%c ",
-         prd->quickDraw ? 'y' : 'n'));
-  strcat (sz, g_strdup_printf ("curveaccuracy=%d ",
-         prd->curveAccuracy));
-  strcat (sz, g_strdup_printf ("lighttype=%c ",
-         prd->lightType == LT_POSITIONAL ? 'p' : 'd'));
-  strcat (sz, g_strdup_printf ("lightposx=%s ",
-         g_ascii_formatd (buf, G_ASCII_DTOSTR_BUF_SIZE, "%f", prd->lightPos[0])));
-  strcat (sz, g_strdup_printf ("lightposy=%s ",
-         g_ascii_formatd (buf, G_ASCII_DTOSTR_BUF_SIZE, "%f", prd->lightPos[1])));
-  strcat (sz, g_strdup_printf ("lightposz=%s ",
-         g_ascii_formatd (buf, G_ASCII_DTOSTR_BUF_SIZE, "%f", prd->lightPos[2])));
-  strcat (sz, g_strdup_printf ("lightambient=%d ", prd->lightLevels[0]));
-  strcat (sz, g_strdup_printf ("lightdiffuse=%d ", prd->lightLevels[1]));
-  strcat (sz, g_strdup_printf ("lightspecular=%d ", prd->lightLevels[2]));
-  strcat (sz, g_strdup_printf ("boardangle=%d ", prd->boardAngle));
-  strcat (sz, g_strdup_printf ("skewfactor=%d ", prd->skewFactor));
-  strcat (sz, g_strdup_printf ("planview=%c ", prd->planView ? 'y' : 'n'));
-  strcat (sz, g_strdup_printf ("dicesize=%s ",
-         g_ascii_formatd (buf, G_ASCII_DTOSTR_BUF_SIZE, "%f", prd->diceSize)));
-  strcat (sz, g_strdup_printf ("roundededges=%c ",
-         prd->roundedEdges ? 'y' : 'n'));
-  strcat (sz, g_strdup_printf ("bgintrays=%c ", prd->bgInTrays ? 'y' : 'n'));
-  strcat (sz, g_strdup_printf ("roundedpoints=%c ",
-         prd->roundedPoints ? 'y' : 'n'));
-  strcat (sz, g_strdup_printf ("piecetype=%d ", prd->pieceType));
-  strcat (sz, g_strdup_printf ("piecetexturetype=%d ", prd->pieceTextureType));
-  strcat (sz, g_strdup_printf ("chequers3d0=%s ",
-         WriteMaterial (&prd->ChequerMat[0])));
-  strcat (sz, g_strdup_printf ("chequers3d1=%s ",
-         WriteMaterial (&prd->ChequerMat[1])));
-  strcat (sz, g_strdup_printf ("dice3d0=%s ", WriteMaterialDice (prd, 0)));
-  strcat (sz, g_strdup_printf ("dice3d1=%s ", WriteMaterialDice (prd, 1)));
-  strcat (sz, g_strdup_printf ("dot3d0=%s ",
-         WriteMaterial (&prd->DiceDotMat[0])));
-  strcat (sz, g_strdup_printf ("dot3d1=%s ",
-         WriteMaterial (&prd->DiceDotMat[1])));
-  strcat (sz, g_strdup_printf ("cube3d=%s ", WriteMaterial (&prd->CubeMat)));
-  strcat (sz, g_strdup_printf ("cubetext3d=%s ",
-         WriteMaterial (&prd->CubeNumberMat)));
-  strcat (sz, g_strdup_printf ("base3d=%s ", WriteMaterial (&prd->BaseMat)));
-  strcat (sz, g_strdup_printf ("points3d0=%s ",
-         WriteMaterial (&prd->PointMat[0])));
-  strcat (sz, g_strdup_printf ("points3d1=%s ",
-         WriteMaterial (&prd->PointMat[1])));
-  strcat (sz, g_strdup_printf ("border3d=%s ", WriteMaterial (&prd->BoxMat)));
-  strcat (sz, g_strdup_printf ("hinge3d=%s ", WriteMaterial (&prd->HingeMat)));
-  strcat (sz, g_strdup_printf ("numbers3d=%s ",
-         WriteMaterial (&prd->PointNumberMat)));
-  strcat (sz, g_strdup_printf ("background3d=%s ",
-         WriteMaterial (&prd->BackGroundMat)));
+	g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%f", prd->lightPos[0]);
+	g_string_append_printf(gst, "lightposx=%s ", buf);
+
+	g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%f", prd->lightPos[1]);
+	g_string_append_printf(gst, "lightposy=%s ", buf);
+	g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%f", prd->lightPos[2]);
+	g_string_append_printf(gst, "lightposz=%s ", buf);
+	g_string_append_printf(gst, "lightambient=%d ", prd->lightLevels[0]);
+	g_string_append_printf(gst, "lightdiffuse=%d ", prd->lightLevels[1]);
+	g_string_append_printf(gst, "lightspecular=%d ", prd->lightLevels[2]);
+	g_string_append_printf(gst, "boardangle=%d ", prd->boardAngle);
+	g_string_append_printf(gst, "skewfactor=%d ", prd->skewFactor);
+	g_string_append_printf(gst, "planview=%c ", prd->planView ? 'y' : 'n');
+
+	g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%f", prd->diceSize);
+	g_string_append_printf(gst, "dicesize=%s ", buf);
+
+	g_string_append_printf(gst, "roundededges=%c ", prd->roundedEdges ? 'y' : 'n');
+	g_string_append_printf(gst, "bgintrays=%c ", prd->bgInTrays ? 'y' : 'n');
+	g_string_append_printf(gst, "roundedpoints=%c ", prd->roundedPoints ? 'y' : 'n');
+	g_string_append_printf(gst, "piecetype=%d ", prd->pieceType);
+	g_string_append_printf(gst, "piecetexturetype=%d ", prd->pieceTextureType);
+	g_string_append_printf(gst, "chequers3d0=%s ", WriteMaterial(&prd->ChequerMat[0]));
+	g_string_append_printf(gst, "chequers3d1=%s ", WriteMaterial(&prd->ChequerMat[1]));
+	g_string_append_printf(gst, "dice3d0=%s ", WriteMaterialDice(prd, 0));
+	g_string_append_printf(gst, "dice3d1=%s ", WriteMaterialDice(prd, 1));
+	g_string_append_printf(gst, "dot3d0=%s ", WriteMaterial(&prd->DiceDotMat[0]));
+	g_string_append_printf(gst, "dot3d1=%s ", WriteMaterial(&prd->DiceDotMat[1]));
+	g_string_append_printf(gst, "cube3d=%s ", WriteMaterial(&prd->CubeMat));
+	g_string_append_printf(gst, "cubetext3d=%s ", WriteMaterial(&prd->CubeNumberMat));
+	g_string_append_printf(gst, "base3d=%s ", WriteMaterial(&prd->BaseMat));
+	g_string_append_printf(gst, "points3d0=%s ", WriteMaterial(&prd->PointMat[0]));
+	g_string_append_printf(gst, "points3d1=%s ", WriteMaterial(&prd->PointMat[1]));
+	g_string_append_printf(gst, "border3d=%s ", WriteMaterial(&prd->BoxMat));
+	g_string_append_printf(gst, "hinge3d=%s ", WriteMaterial(&prd->HingeMat));
+	g_string_append_printf(gst, "numbers3d=%s ", WriteMaterial(&prd->PointNumberMat));
+	g_string_append_printf(gst, "background3d=%s ", WriteMaterial(&prd->BackGroundMat));
 #endif
-  strcat (sz, g_strdup_printf ("labels=%c ", prd->fLabels ? 'y' : 'n'));
-  strcat (sz, g_strdup_printf ("dynamiclabels=%c ",
-         prd->fDynamicLabels ? 'y' : 'n'));
-  strcat (sz, g_strdup_printf ("wood=%s ", aszWoodName[prd->wt]));
-  strcat (sz, g_strdup_printf ("hinges=%c ", prd->fHinges ? 'y' : 'n'));
-  strcat (sz, g_strdup_printf ("light=%s;%s ",
-      g_ascii_formatd (buf, G_ASCII_DTOSTR_BUF_SIZE, "%f", rAzimuth),
-      g_ascii_formatd (buf1, G_ASCII_DTOSTR_BUF_SIZE, "%f", rElevation)));
-  strcat (sz,
-    g_strdup_printf ("shape=%s  ",
-         g_ascii_formatd (buf, G_ASCII_DTOSTR_BUF_SIZE,
-              "%0.1f", (1.0 - prd->rRound))));
-  strcat (sz,
-    g_strdup_printf ("chequers0=#%02X%02X%02X;%s;%s;%s;%s ",
-         (int) (prd->aarColour[0][0] * 0xFF),
-         (int) (prd->aarColour[0][1] * 0xFF),
-         (int) (prd->aarColour[0][2] * 0xFF),
-         g_ascii_formatd (buf, G_ASCII_DTOSTR_BUF_SIZE,
-              "%.2f", prd->aarColour[0][3]),
-         g_ascii_formatd (buf1, G_ASCII_DTOSTR_BUF_SIZE,
-              "%.2f", prd->arRefraction[0]),
-         g_ascii_formatd (buf2, G_ASCII_DTOSTR_BUF_SIZE,
-              "%.2f", prd->arCoefficient[0]),
-         g_ascii_formatd (buf3, G_ASCII_DTOSTR_BUF_SIZE,
-              "%.2f", prd->arExponent[0])));
-  strcat (sz,
-    g_strdup_printf ("chequers1=#%02X%02X%02X;%s;%s;%s;%s ",
-         (int) (prd->aarColour[1][0] * 0xFF),
-         (int) (prd->aarColour[1][1] * 0xFF),
-         (int) (prd->aarColour[1][2] * 0xFF),
-         g_ascii_formatd (buf, G_ASCII_DTOSTR_BUF_SIZE,
-              "%.2f", prd->aarColour[1][3]),
-         g_ascii_formatd (buf1, G_ASCII_DTOSTR_BUF_SIZE,
-              "%.2f", prd->arRefraction[1]),
-         g_ascii_formatd (buf2, G_ASCII_DTOSTR_BUF_SIZE,
-              "%.2f", prd->arCoefficient[1]),
-         g_ascii_formatd (buf3, G_ASCII_DTOSTR_BUF_SIZE,
-              "%.2f", prd->arExponent[1])));
-  strcat (sz,
-    g_strdup_printf ("dice0=#%02X%02X%02X;%s;%s;%c ",
-         (int) (prd->aarDiceColour[0][0] * 0xFF),
-         (int) (prd->aarDiceColour[0][1] * 0xFF),
-         (int) (prd->aarDiceColour[0][2] * 0xFF),
-         g_ascii_formatd (buf, G_ASCII_DTOSTR_BUF_SIZE,
-              "%.2f", prd->arDiceCoefficient[0]),
-         g_ascii_formatd (buf1, G_ASCII_DTOSTR_BUF_SIZE,
-              "%.2f", prd->arDiceExponent[0]),
-         prd->afDieColour[0] ? 'y' : 'n'));
-  strcat (sz,
-    g_strdup_printf ("dice1=#%02X%02X%02X;%s;%s;%c ",
-         (int) (prd->aarDiceColour[1][0] * 0xFF),
-         (int) (prd->aarDiceColour[1][1] * 0xFF),
-         (int) (prd->aarDiceColour[1][2] * 0xFF),
-         g_ascii_formatd (buf, G_ASCII_DTOSTR_BUF_SIZE,
-              "%.2f", prd->arDiceCoefficient[1]),
-         g_ascii_formatd (buf1, G_ASCII_DTOSTR_BUF_SIZE,
-              "%.2f", prd->arDiceExponent[1]),
-         prd->afDieColour[1] ? 'y' : 'n'));
-  strcat (sz,
-    g_strdup_printf ("dot0=#%02X%02X%02X ",
-         (int) (prd->aarDiceDotColour[0][0] * 0xFF),
-         (int) (prd->aarDiceDotColour[0][1] * 0xFF),
-         (int) (prd->aarDiceDotColour[0][2] * 0xFF)));
-  strcat (sz,
-    g_strdup_printf ("dot1=#%02X%02X%02X ",
-         (int) (prd->aarDiceDotColour[1][0] * 0xFF),
-         (int) (prd->aarDiceDotColour[1][1] * 0xFF),
-         (int) (prd->aarDiceDotColour[1][2] * 0xFF)));
-  strcat (sz,
-    g_strdup_printf ("cube=#%02X%02X%02X ",
-         (int) (prd->arCubeColour[0] * 0xFF),
-         (int) (prd->arCubeColour[1] * 0xFF),
-         (int) (prd->arCubeColour[2] * 0xFF)));
-  strcat (sz,
-    g_strdup_printf ("points0=#%02X%02X%02X;%s ",
-         prd->aanBoardColour[2][0],
-         prd->aanBoardColour[2][1],
-         prd->aanBoardColour[2][2],
-         g_ascii_formatd (buf, G_ASCII_DTOSTR_BUF_SIZE,
-                       "%.2f", prd->aSpeckle[2] / 128.0)));
-  strcat (sz,
-    g_strdup_printf ("points1=#%02X%02X%02X;%s",
-         prd->aanBoardColour[3][0],
-         prd->aanBoardColour[3][1],
-         prd->aanBoardColour[3][2],
-         g_ascii_formatd (buf, G_ASCII_DTOSTR_BUF_SIZE,
-                       "%.2f", prd->aSpeckle[3] / 128.0)));
-  return sz;
+	g_string_append_printf(gst, "labels=%c ", prd->fLabels ? 'y' : 'n');
+	g_string_append_printf(gst, "dynamiclabels=%c ", prd->fDynamicLabels ? 'y' : 'n');
+	g_string_append_printf(gst, "wood=%s ", aszWoodName[prd->wt]);
+	g_string_append_printf(gst, "hinges=%c ", prd->fHinges ? 'y' : 'n');
+
+	g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%f", rAzimuth);
+	g_ascii_formatd(buf1, G_ASCII_DTOSTR_BUF_SIZE, "%f", rElevation);
+	g_string_append_printf(gst, "light=%s;%s ", buf, buf1);
+
+	g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.1f", (1.0 - prd->rRound));
+	g_string_append_printf(gst, "shape=%s  ", buf);
+
+	g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%.2f", prd->aarColour[0][3]);
+	g_ascii_formatd(buf1, G_ASCII_DTOSTR_BUF_SIZE, "%.2f", prd->arRefraction[0]);
+	g_ascii_formatd(buf2, G_ASCII_DTOSTR_BUF_SIZE, "%.2f", prd->arCoefficient[0]);
+	g_ascii_formatd(buf3, G_ASCII_DTOSTR_BUF_SIZE, "%.2f", prd->arExponent[0]);
+	g_string_append_printf(gst, "chequers0=#%02X%02X%02X;%s;%s;%s;%s ", (int) (prd->aarColour[0][0] * 0xFF),
+			       (int) (prd->aarColour[0][1] * 0xFF), (int) (prd->aarColour[0][2] * 0xFF), buf, buf1,
+			       buf2, buf3);
+
+	g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%.2f", prd->aarColour[1][3]);
+	g_ascii_formatd(buf1, G_ASCII_DTOSTR_BUF_SIZE, "%.2f", prd->arRefraction[1]);
+	g_ascii_formatd(buf2, G_ASCII_DTOSTR_BUF_SIZE, "%.2f", prd->arCoefficient[1]);
+	g_ascii_formatd(buf3, G_ASCII_DTOSTR_BUF_SIZE, "%.2f", prd->arExponent[1]);
+	g_string_append_printf(gst, "chequers1=#%02X%02X%02X;%s;%s;%s;%s ", (int) (prd->aarColour[1][0] * 0xFF),
+			       (int) (prd->aarColour[1][1] * 0xFF), (int) (prd->aarColour[1][2] * 0xFF), buf, buf1,
+			       buf2, buf3);
+
+	g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%.2f", prd->arDiceCoefficient[0]);
+	g_ascii_formatd(buf1, G_ASCII_DTOSTR_BUF_SIZE, "%.2f", prd->arDiceExponent[0]);
+	g_string_append_printf(gst, "dice0=#%02X%02X%02X;%s;%s;%c ", (int) (prd->aarDiceColour[0][0] * 0xFF),
+			       (int) (prd->aarDiceColour[0][1] * 0xFF), (int) (prd->aarDiceColour[0][2] * 0xFF), buf,
+			       buf1, prd->afDieColour[0] ? 'y' : 'n');
+
+	g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%.2f", prd->arDiceCoefficient[1]);
+	g_ascii_formatd(buf1, G_ASCII_DTOSTR_BUF_SIZE, "%.2f", prd->arDiceExponent[1]);
+	g_string_append_printf(gst, "dice1=#%02X%02X%02X;%s;%s;%c ", (int) (prd->aarDiceColour[1][0] * 0xFF),
+			       (int) (prd->aarDiceColour[1][1] * 0xFF), (int) (prd->aarDiceColour[1][2] * 0xFF), buf,
+			       buf1, prd->afDieColour[1] ? 'y' : 'n');
+
+	g_string_append_printf(gst, "dot0=#%02X%02X%02X ", (int) (prd->aarDiceDotColour[0][0] * 0xFF),
+			       (int) (prd->aarDiceDotColour[0][1] * 0xFF), (int) (prd->aarDiceDotColour[0][2] * 0xFF));
+	g_string_append_printf(gst, "dot1=#%02X%02X%02X ", (int) (prd->aarDiceDotColour[1][0] * 0xFF),
+			       (int) (prd->aarDiceDotColour[1][1] * 0xFF), (int) (prd->aarDiceDotColour[1][2] * 0xFF));
+	g_string_append_printf(gst, "cube=#%02X%02X%02X ", (int) (prd->arCubeColour[0] * 0xFF),
+			       (int) (prd->arCubeColour[1] * 0xFF), (int) (prd->arCubeColour[2] * 0xFF));
+
+	g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%.2f", prd->aSpeckle[2] / 128.0);
+	g_string_append_printf(gst, "points0=#%02X%02X%02X;%s ", prd->aanBoardColour[2][0], prd->aanBoardColour[2][1],
+			       prd->aanBoardColour[2][2], buf);
+
+	g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%.2f", prd->aSpeckle[3] / 128.0);
+	g_string_append_printf(gst, "points1=#%02X%02X%02X;%s", prd->aanBoardColour[3][0], prd->aanBoardColour[3][1],
+			       prd->aanBoardColour[3][2], buf);
+
+	return gst;
 }

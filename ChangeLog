@@ -1,3 +1,8 @@
+Sat Jul 12 09:10:43 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c, renderprefs.c, renderprefs.h: fix places where g_strdup
+	wasn't followed by g_free
+
 Fri Jul 11 22:54:46 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* bearoff.c, dice.c, eval.c, format.c, gnubg.c, show.c, renderprefs.c:

@@ -32,7 +32,7 @@ extern void CopyAppearance(renderdata* prd);
 
 extern void RenderPreferencesParam( renderdata *prd, const char *szParam,
 				   char *szValue );
-extern char *RenderPreferencesCommand( renderdata *prd, char *sz );
+extern GString *RenderPreferencesCommand( renderdata *prd );
 
 #if USE_BOARD3D
 char *WriteMaterial(Material* pMat);
