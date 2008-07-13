@@ -29,6 +29,7 @@
 #endif
 
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <glib/gi18n.h>
 #include "bearoffgammon.h"
 #include "eval.h"
@@ -892,7 +893,7 @@ extern bearoffcontext *BearoffInit(const char *szFilename, const int bo, void (*
 	}
 
 
-	if (!(pbc->pf = fopen(szFilename, "rb"))) {
+	if (!(pbc->pf = g_fopen(szFilename, "rb"))) {
 		g_printerr("%s\n", _("Invalid or nonexistent database"));
 		goto invaliddb;
 	}

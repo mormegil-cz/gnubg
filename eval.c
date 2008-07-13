@@ -23,6 +23,7 @@
 #include "backgammon.h"
 
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <glib/gi18n.h>
 #include <string.h>
 #include <errno.h>
@@ -804,7 +805,7 @@ extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 
     if( szWeightsBinary)
     { 
-		pfWeights = fopen(szWeightsBinary, "rb");
+		pfWeights = g_fopen(szWeightsBinary, "rb");
 	    if (!binary_weights_failed(szWeightsBinary, pfWeights))
 	    {
 		    if( !fReadWeights && !( fReadWeights =
@@ -825,7 +826,7 @@ extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 
     if( !fReadWeights && szWeights )
 	{
-		pfWeights = fopen(szWeights, "r");
+		pfWeights = g_fopen(szWeights, "r");
 	    if (!weights_failed(szWeights, pfWeights))
 	    {
 		    if( !( fReadWeights =

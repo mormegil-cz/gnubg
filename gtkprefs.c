@@ -2446,7 +2446,7 @@ static void ExportDesign ( GtkWidget *pw, gpointer data )
 
 	/* write designs to file */
 
-	if ( ! ( pf = fopen ( szFile, "w+" ) ) ) {
+	if ( ! ( pf = g_fopen ( szFile, "w+" ) ) ) {
 		outputerr ( szFile );
 		free_board_design( pbde, NULL );
 		g_free ( pch );

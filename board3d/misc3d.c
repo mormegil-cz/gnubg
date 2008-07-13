@@ -36,6 +36,7 @@
 #include "misc3d.h"
 #include "util.h"
 #include <glib/gi18n.h>
+#include <glib/gstdio.h>
 
 #define MAX_FRAMES 10
 #define DOT_SIZE 32
@@ -452,7 +453,7 @@ void LoadTextureInfo(void)
 	textures = NULL;
 
 	szFile = BuildFilename(TEXTURE_FILE );
-	fp = fopen(szFile, "r");
+	fp = g_fopen(szFile, "r");
 	g_free(szFile);
 	if (!fp)
 	{

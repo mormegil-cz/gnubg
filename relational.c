@@ -38,6 +38,7 @@
 #include "dbprovider.h"
 #include "util.h"
 #include <glib/gi18n.h>
+#include <glib/gstdio.h>
 #include <glib.h>
 
 int RunQueryValue(DBProvider *pdb, const char *query)
@@ -364,7 +365,7 @@ int CreateDatabase(DBProvider *pdb)
 	char buffer[10240];
 	char *pBuf = buffer;
 	char *szFile = BuildFilename("gnubg.sql");
-	FILE *fp = fopen(szFile, "r");
+	FILE *fp = g_fopen(szFile, "r");
 	g_free(szFile);
 	if (!fp)
 		return FALSE;

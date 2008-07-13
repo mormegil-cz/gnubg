@@ -2787,7 +2787,7 @@ extern void CommandLoadCommands( char *sz )
 	return;
     }
 
-    if( ( pf = fopen( sz, "r" ) ) ) {
+    if( ( pf = g_fopen( sz, "r" ) ) ) {
 	LoadCommands( pf, sz );
 	fclose( pf );
     } else

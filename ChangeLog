@@ -1,3 +1,11 @@
+Sun Jul 13 21:07:17 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* bearoff.c, eval.c, export.c, file.c, gnubg.c, gnubgmodule.c,
+	gtkprefs.c, html.c, import.c, latex.c, makebearoff.c, makehyper.c,
+	makeweights.c, relational.c, rollout.c, sgf.c, text.c,
+	board3d/matrix.c, board3d/misc3d.c: replace fopen with g_fopen to
+	avoid problems with special characters in filenames
+
 Sat Jul 12 09:10:43 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c, renderprefs.c, renderprefs.h: fix places where g_strdup

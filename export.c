@@ -23,6 +23,7 @@
 #include "backgammon.h"
 
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <glib/gi18n.h>
 #include <glib/gprintf.h>
 #include <stdlib.h>
@@ -457,7 +458,7 @@ extern int WritePNG (const char *sz, unsigned char *puch, unsigned int nStride,
   png_text atext[3];
   unsigned int i;
 
-  if (!(pf = fopen (sz, "wb")))
+  if (!(pf = g_fopen (sz, "wb")))
     return -1;
 
   if (!(ppng = png_create_write_struct (PNG_LIBPNG_VER_STRING,
@@ -808,7 +809,7 @@ extern void CommandExportPositionSnowieTxt (char *sz)
 
   if (!strcmp (sz, "-"))
     pf = stdout;
-  else if (!(pf = fopen (sz, "w")))
+  else if (!(pf = g_fopen (sz, "w")))
     {
       outputerr (sz);
       return;
@@ -879,7 +880,7 @@ extern void CommandExportPositionJF (char *sz)
 
   if (!strcmp (sz, "-"))
     fp = stdout;
-  else if (!(fp = fopen (sz, "wb")))
+  else if (!(fp = g_fopen (sz, "wb")))
     {
       outputerr (sz);
       return;
@@ -1136,7 +1137,7 @@ extern void CommandExportGameGam( char *sz ) {
 
     if( !strcmp( sz, "-" ) )
 	pf = stdout;
-    else if( !( pf = fopen( sz, "w" ) ) ) {
+    else if( !( pf = g_fopen( sz, "w" ) ) ) {
 	outputerr( sz );
 	return;
     }
@@ -1173,7 +1174,7 @@ extern void CommandExportMatchMat( char *sz ) {
 
     if( !strcmp( sz, "-" ) )
 	pf = stdout;
-    else if( !( pf = fopen( sz, "w" ) ) ) {
+    else if( !( pf = g_fopen( sz, "w" ) ) ) {
 	outputerr( sz );
 	return;
     }

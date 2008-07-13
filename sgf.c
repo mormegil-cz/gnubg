@@ -22,6 +22,7 @@
 #include "config.h"
 
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <ctype.h>
 #include <math.h>
 #include <stdio.h>
@@ -102,7 +103,7 @@ static listOLD *LoadCollection(char *sz)
     SGFErrorHandler = ErrorHandler;
 
     if (strcmp(sz, "-")) {
-	if (!(pf = fopen(sz, "r"))) {
+	if (!(pf = g_fopen(sz, "r"))) {
 	    outputerr(sz);
 	    return NULL;
 	}
@@ -2387,7 +2388,7 @@ extern void CommandSaveGame(char *sz)
 
     if (!strcmp(sz, "-"))
 	pf = stdout;
-    else if (!(pf = fopen(sz, "w"))) {
+    else if (!(pf = g_fopen(sz, "w"))) {
 	outputerr(sz);
 	return;
     }
@@ -2427,7 +2428,7 @@ extern void CommandSaveMatch(char *sz)
 
     if (!strcmp(sz, "-"))
 	pf = stdout;
-    else if (!(pf = fopen(sz, "w"))) {
+    else if (!(pf = g_fopen(sz, "w"))) {
 	outputerr(sz);
 	return;
     }
@@ -2471,7 +2472,7 @@ extern void CommandSavePosition(char *sz)
 
     if (!strcmp(sz, "-"))
 	pf = stdout;
-    else if (!(pf = fopen(sz, "w"))) {
+    else if (!(pf = g_fopen(sz, "w"))) {
 	outputerr(sz);
 	return;
     }

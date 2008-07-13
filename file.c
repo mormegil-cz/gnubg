@@ -21,6 +21,7 @@
 #include "config.h"
 #include "backgammon.h"
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <glib/gi18n.h>
 #ifndef _MSC_VER
 #include <string.h>
@@ -74,7 +75,7 @@ static FileHelper *OpenFileHelper(const char *filename)
 		return NULL;	/* File not found */
 
 	fh = g_new(FileHelper, 1);
-	fh->fp = fopen(filename, "r");
+	fh->fp = g_fopen(filename, "r");
 	if (!fh->fp) {		/* Failed to open file */
 		g_free(fh);
 		return NULL;

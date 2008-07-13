@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <stdarg.h>
 
 #include "backgammon.h"
@@ -952,7 +953,7 @@ extern void CommandExportGameText( char *sz ) {
 
     if( !strcmp( sz, "-" ) )
 	pf = stdout;
-    else if( !( pf = fopen( sz, "w" ) ) ) {
+    else if( !( pf = g_fopen( sz, "w" ) ) ) {
 	outputerr( sz );
 	return;
     }
@@ -1006,7 +1007,7 @@ extern void CommandExportMatchText( char *sz ) {
 
       if( !strcmp( szCurrent, "-" ) )
 	pf = stdout;
-      else if( !( pf = fopen( szCurrent, "w" ) ) ) {
+      else if( !( pf = g_fopen( szCurrent, "w" ) ) ) {
 	outputerr( szCurrent );
 	return;
       }
@@ -1050,7 +1051,7 @@ extern void CommandExportPositionText( char *sz ) {
 
     if( !strcmp( sz, "-" ) )
 	pf = stdout;
-    else if( !( pf = fopen( sz, "w" ) ) ) {
+    else if( !( pf = g_fopen( sz, "w" ) ) ) {
 	outputerr( sz );
 	return;
     }

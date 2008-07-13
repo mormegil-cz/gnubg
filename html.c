@@ -3420,7 +3420,7 @@ OpenCSS( const char *sz ) {
              pchBase );
     pf = NULL;
   }
-  else if ( ! ( pf = fopen( pchCSS, "w" ) ) ) {
+  else if ( ! ( pf = g_fopen( pchCSS, "w" ) ) ) {
     outputerr( pchCSS );
   }
 
@@ -3469,7 +3469,7 @@ extern void CommandExportGameHtml( char *sz ) {
 
     if( !strcmp( sz, "-" ) )
 	pf = stdout;
-    else if( !( pf = fopen( sz, "w" ) ) ) {
+    else if( !( pf = g_fopen( sz, "w" ) ) ) {
 	outputerr( sz );
 	return;
     }
@@ -3562,7 +3562,7 @@ extern void CommandExportMatchHtml( char *sz ) {
 
       if( !strcmp( szCurrent, "-" ) )
 	pf = stdout;
-      else if( !( pf = fopen( szCurrent, "w" ) ) ) {
+      else if( !( pf = g_fopen( szCurrent, "w" ) ) ) {
 	outputerr( szCurrent );
 		for ( j = 0; j < 4; j++ )
 		  free (filenames [ j ] );
@@ -3621,7 +3621,7 @@ extern void CommandExportPositionHtml( char *sz ) {
 
     if( !strcmp( sz, "-" ) )
 	pf = stdout;
-    else if( !( pf = fopen( sz, "w" ) ) ) {
+    else if( !( pf = g_fopen( sz, "w" ) ) ) {
 	outputerr( sz );
 	return;
     }
@@ -3765,7 +3765,7 @@ extern void CommandExportPositionGammOnLine ( char *sz ) {
 
     if( !strcmp( sz, "-" ) )
 	pf = stdout;
-    else if( !( pf = fopen( sz, "w" ) ) ) {
+    else if( !( pf = g_fopen( sz, "w" ) ) ) {
 	outputerr( sz );
 	return;
     }

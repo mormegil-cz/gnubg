@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <time.h>
 
 #include "backgammon.h"
@@ -130,7 +131,7 @@ static FILE *log_game_start(const char *name, const cubeinfo * pci, int fCubeful
 		}
 	}
 
-	if ((logfp = fopen(name, "w")) == 0)
+	if ((logfp = g_fopen(name, "w")) == 0)
 		return NULL;
 
 	fprintf(logfp, "(;FF[4]GM[6]CA[UTF-8]AP[GNU Backgammon:0.14-devel]MI"

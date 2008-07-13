@@ -23,6 +23,7 @@
 
 #include "config.h"
 #include "inc3d.h"
+#include <glib/gstdio.h>
 
 void setIdMatrix(float m[4][4])
 {
@@ -189,11 +190,11 @@ void dumpMatrix(const float m[4][4])
 	if (create)
 	{
 		create = 0;
-		fp = fopen("test.txt", "w");
+		fp = g_fopen("test.txt", "w");
 	}
 	else
 	{
-		fp = fopen("test.txt", "a");
+		fp = g_fopen("test.txt", "a");
 	}
 	if (!fp)
 		return;

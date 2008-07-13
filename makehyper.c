@@ -22,6 +22,7 @@
 #include "config.h"
 
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -226,7 +227,7 @@ StartFromDatabase( hyperequity ahe[], const int nC,
   int i, j, k;
   float r;
 
-  if ( ! ( pf = fopen ( szFilename, "r+b" ) ) ) {
+  if ( ! ( pf = g_fopen ( szFilename, "r+b" ) ) ) {
     perror ( szFilename );
     exit(2);
   }
@@ -563,7 +564,7 @@ WriteHyperFile ( const char *szFilename, const hyperequity ahe[],
   FILE *pf;
 
   
-  if ( ! ( pf = fopen ( szFilename, "w+b" ) ) ) {
+  if ( ! ( pf = g_fopen ( szFilename, "w+b" ) ) ) {
     perror ( szFilename );
     return;
   }

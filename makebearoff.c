@@ -1567,7 +1567,7 @@ extern int main( int argc, char **argv )
     exit(EXIT_FAILURE);
   }
 
-  if ( ! ( output = fopen ( szOutput, "w+b" ) ) ) {
+  if ( ! ( output = g_fopen ( szOutput, "w+b" ) ) ) {
     perror ( szOutput );
     return EXIT_FAILURE;
   }

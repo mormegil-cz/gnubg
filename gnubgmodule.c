@@ -34,6 +34,7 @@
 #include "backgammon.h"
 
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <signal.h>
 
 #include "eval.h"
@@ -2429,7 +2430,7 @@ extern int LoadPythonFile(const char *sz)
 		return FALSE;
 	}
 
-	pf = fopen(path, "r");
+	pf = g_fopen(path, "r");
 
 	if (pf)
 	{
