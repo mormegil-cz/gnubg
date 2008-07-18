@@ -489,7 +489,7 @@ extern char *OutputMoneyEquity(const float ar[], const int f)
 {
 
 	static char sz[9];
-	float eq = 2.0 * ar[OUTPUT_WIN] - 1.0 + ar[OUTPUT_WINGAMMON] + ar[OUTPUT_WINBACKGAMMON] -
+	float eq = 2.0f * ar[OUTPUT_WIN] - 1.0f + ar[OUTPUT_WINGAMMON] + ar[OUTPUT_WINBACKGAMMON] -
 	    ar[OUTPUT_LOSEGAMMON] - ar[OUTPUT_LOSEBACKGAMMON];
 
 	if (f)
