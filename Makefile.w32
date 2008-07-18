@@ -6,25 +6,29 @@ BINDIR=../bin
 OBJDIR=$(BINDIR)/obj
 
 TARGET = $(BINDIR)/gnubg.exe
+CMDTARGET = $(BINDIR)/gnubgCmd.exe
 
 SOURCE = analysis bearoff bearoffgammon non-src/copying non-src/credits \
-	dice drawboard eval export external \
-	gnubg gtk-multiview \
-	gtkboard gtkcube gtkchequer gtkexport gtkgame gtkmet \
-	play gtkprefs gtkmovefilter gtkrace gtktheory \
-	htmlimages \
+	dice drawboard eval export external gnubg \
+	htmlimages play \
 	html import multithread latex matchequity \
 	matchid positionid record \
 	render rollout set sgf non-src/sgf_l non-src/sgf_y show sound \
-	text osr gtksplash gtkcolour renderprefs speed openurl \
-	gtkrolls boardpos gtktempmap progress format gtktoolbar \
-	gtkoptions formatgs \
-	timer mec relational gtkgamelist \
-	gtkpanels gnubgmodule non-src/external_l non-src/external_y gtkfile \
-	gtkmovelist gtkmovelistctrl gtkwindows gtkrelational file simpleboard \
-	util corecount dbprovider
+	text osr renderprefs speed openurl \
+	boardpos progress format \
+	formatgs \
+	timer mec relational \
+	gnubgmodule non-src/external_l non-src/external_y \
+	file simpleboard \
+	util corecount dbprovider gnubgstock
+
+GTKSOURCE = gtk-multiview gtkboard gtkcube gtkchequer gtkexport gtkgame gtkmet \
+	gtkprefs gtkmovefilter gtkrace gtktheory gtksplash gtkcolour \
+	gtkrolls gtktempmap gtktoolbar gtkoptions gtkgamelist gtkpanels gtkfile \
+	gtkmovelist gtkmovelistctrl gtkwindows gtkrelational
 
 OBJECTS=$(patsubst %,$(OBJDIR)/%.o,$(SOURCE))
+GTKOBJECTS=$(patsubst %,$(OBJDIR)/%.o,$(GTKSOURCE))
 
 BIN_DIRS=$(BINDIR) $(BINDIR)/textures $(BINDIR)/met $(BINDIR)/fonts $(BINDIR)/flags $(BINDIR)/sounds $(BINDIR)/scripts
 TEXTURES=$(patsubst textures/%,$(BINDIR)/textures/%,$(wildcard textures/*.png)) $(patsubst textures/%,$(BINDIR)/textures/%,$(wildcard textures/*.bmp))
@@ -34,12 +38,12 @@ METFILES=$(patsubst met/%,$(BINDIR)/met/%,$(wildcard met/*.xml))
 FONTFILES=$(patsubst fonts/%,$(BINDIR)/fonts/%,$(wildcard fonts/*.ttf))
 POFILES=$(patsubst po/%.po,$(BINDIR)/locale/%/LC_MESSAGES/gnubg.mo,$(wildcard po/*.po))
 SCRIPTS=$(patsubst scripts/%,$(BINDIR)/scripts/%,$(wildcard scripts/*.py))
-EXTRA_FILES=$(BINDIR)/textures.txt $(BINDIR)/gnubg.png $(BINDIR)/met/met.dtd \
+EXTRA_FILES=$(BINDIR)/textures.txt $(BINDIR)/met/met.dtd \
 			$(BINDIR)/gnubg.gtkrc $(BINDIR)/boards.xml $(BINDIR)/gnubg.sql
 
 makebearoff_SOURCE = makebearoff eval positionid matchequity \
 		     matchid osr bearoffgammon bearoff \
-		     format mec util
+		     mec util
 
 makebearoff_OBJECTS=$(patsubst %,$(OBJDIR)/%.o,$(makebearoff_SOURCE))
 
@@ -67,7 +71,7 @@ INCLUDE = -I. -I./lib -I./board3d -I./non-src \
 
 LIBPATH = -L$(BINDIR) -L"$(PYTHON_DIR)/libs"
 
-LIBS = -levent -lboard3d -lglib-2.0.dll -lxml2 -lfreetype.dll \
+LIBS = -levent -lglib-2.0.dll -lxml2 -lfreetype.dll \
        -lgobject-2.0.dll -lgtk-win32-2.0 -lgdk-win32-2.0 \
        -liconv -lpng -lz -lwinmm -lpango-1.0 -lpangocairo-1.0 -lgdk_pixbuf-2.0 \
        -lopengl32 -lglu32 -lglut32 -lwsock32 \
@@ -76,20 +80,26 @@ LIBS = -levent -lboard3d -lglib-2.0.dll -lxml2 -lfreetype.dll \
 
 #LIBOPTIONS=-mwindows
 LIBEVENT = $(BINDIR)/libevent.a
-LIBBOARD3D = $(BINDIR)/libboard3d.a
+LIBBOARD3D = #$(BINDIR)/libboard3d.a
 
 MAKEBEAROFFEXE = $(BINDIR)/makebearoff.exe
-OSDB = $(BINDIR)/gnubg_os.bd
-TSDB = $(BINDIR)/gnubg_ts.bd
+OSDB = $(BINDIR)/gnubg_os0.bd
+TSDB = $(BINDIR)/gnubg_ts0.bd
 MAKEWEIGHTS = $(BINDIR)/makeweights.exe
 WEIGHTS = $(BINDIR)/gnubg.wd
 
 all: objdirs $(BIN_DIRS) $(TEXTURES) $(FLAGPICS) $(SOUNDS) $(METFILES) $(POFILES) $(SCRIPTS) $(FONTFILES) $(EXTRA_FILES) \
-		Libraries $(WEIGHTS) BearOffDBs  $(TARGET)
+		LibEvent Lib3d $(WEIGHTS) BearOffDBs $(TARGET)
 	@echo $(TARGET) done
 
-Libraries:
+cmdline: $(BIN_DIRS) $(TEXTURES) $(FLAGPICS) $(SOUNDS) $(METFILES) $(POFILES) $(SCRIPTS) $(FONTFILES) $(EXTRA_FILES) \
+		LibEvent $(WEIGHTS) BearOffDBs $(CMDTARGET)
+	@echo $(CMDTARGET) done
+
+LibEvent:
 	@$(MAKE) --no-print-directory -fmakefile.w32 -C lib
+	
+Lib3d:
 	@$(MAKE) --no-print-directory -fmakefile.win -C board3d
 
 BearOffDBs: $(MAKEBEAROFFEXE) $(OSDB) $(TSDB)
@@ -123,9 +133,13 @@ $(MAKEWEIGHTS): $(LIBEVENT) $(OBJDIR)/makeweights.o
 	@echo linking makeweights
 	@$(CC) -o $(MAKEWEIGHTS) $(OBJDIR)/makeweights.o $(LIBPATH) $(makebearoff_LIBS)
 
-$(TARGET): $(LIBEVENT) $(LIBBOARD3D) $(OBJECTS)
+$(TARGET): $(LIBEVENT) $(LIBBOARD3D) $(OBJECTS) $(GTKOBJECTS)
 	@echo linking
-	@$(CC) -o "$(TARGET)" $(OBJECTS) $(LIBPATH) $(LIBS) $(LIBOPTIONS)
+	@$(CC) -o "$(TARGET)" $(OBJECTS) $(GTKOBJECTS) $(LIBPATH) -lboard3d $(LIBS) $(LIBOPTIONS)
+
+$(CMDTARGET): $(LIBEVENT) $(LIBBOARD3D) $(OBJECTS)
+	@echo linking
+	@$(CC) -o "$(CMDTARGET)" $(OBJECTS) $(LIBPATH) $(LIBS) $(LIBOPTIONS)
 
 objdirs: $(OBJDIR) $(OBJDIR)\non-src
 
