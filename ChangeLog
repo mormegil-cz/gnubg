@@ -1,3 +1,11 @@
+Fri Jul 18 18:07:38 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, credits.sh, gnubg.c, gtkgame.c, gtkgame.h,
+	relational.c, show.c: Changes to allow GTKTextWindow to be called from
+	within a dialog. Make license, etc. be printed as text rather than
+	gtk_lists. Make the intro text conform with the GPL3 suggestion. Minor
+	translational changes.
+
 Sun Jul 13 21:07:17 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* bearoff.c, eval.c, export.c, file.c, gnubg.c, gnubgmodule.c,

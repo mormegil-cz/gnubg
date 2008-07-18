@@ -231,7 +231,6 @@ extern const char aszAUTHORS[];
 extern const char aszCOPYRIGHT[];
 
 EOF
-
 cat > credits.c <<EOF
 /* Do not modify this file!  It is created automatically by credits.sh.
    Modify credits.sh instead. 
@@ -253,7 +252,7 @@ cat > credits.c <<EOF
 #include <glib/gi18n.h>
 #include "credits.h"
 
-const char aszCOPYRIGHT[] = N_("Copyright, 1999-2004 by Gary Wong, 2004-2008 GNU Backgammon is the legal\nproperty of its authors.");
+const char aszCOPYRIGHT[] = N_("Copyright (C) 2008 by the AUTHORS; for details type \`show version'.");
 
 credEntry ceAuthors[] = {
 EOF

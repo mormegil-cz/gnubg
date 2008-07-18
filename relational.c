@@ -724,7 +724,7 @@ extern void CommandRelationalShowDetails (char *sz)
 #if USE_GTK
   if (fX)
     {
-      GTKTextWindow (output, _("Player statistics"), DT_INFO);
+      GTKTextWindow (output, _("Player statistics"), DT_INFO, NULL);
     }
   else
 #endif

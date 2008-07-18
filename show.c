@@ -654,7 +654,7 @@ extern void CommandShowCopying( char *sz ) {
 
 #if USE_GTK
     if( fX )
-	ShowList( aszCopying, _("Copying"), NULL );
+	ShowList( aszCopying, _("Copying"), NULL);
     else
 #endif
 	ShowPaged( aszCopying );
@@ -1094,7 +1094,7 @@ extern void CommandShowWarranty( char *sz ) {
 
 #if USE_GTK
     if( fX )
-	ShowList( aszWarranty, _("Warranty"), NULL );
+	ShowList( aszWarranty, _("Warranty"), NULL);
     else
 #endif
 	ShowPaged( aszWarranty );
@@ -1517,7 +1517,7 @@ extern void CommandShowVersion( char *sz )
 
 	outputl( gettext ( VERSION_STRING ) );
 	outputc( '\n' );
-	ShowAuthors( ceAuthors, _("Written by:") );
+	ShowAuthors( ceAuthors, _("AUTHORS") );
 }
 
 extern void CommandShowMarketWindow ( char * sz ) {

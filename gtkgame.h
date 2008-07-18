@@ -137,7 +137,7 @@ extern void GTKShowVersion(void);
 extern void GTKSuspendInput(void);
 extern void GTKTextToClipboard(const char *sz);
 extern void GTKTextWindow(const char *szOutput, const char *title,
-			  const int type);
+			  const int type, GtkWidget *parent);
 extern void GTKThaw(void);
 extern void GTKUpdateAnnotations(void);
 extern void HideAllPanels(gpointer p, guint n, GtkWidget * pw);
@@ -164,7 +164,7 @@ extern void SetToolbarStyle(int value);
 extern void setWindowGeometry(gnubgwindow window);
 extern void ShowAllPanels(gpointer p, guint n, GtkWidget * pw);
 extern void ShowHidePanel(gnubgwindow panel);
-extern void ShowList(char *asz[], const char *szTitle, GtkWidget * pwParent);
+extern void ShowList(char *asz[], const char *szTitle, GtkWidget *parent);
 extern void ShowMove(hintdata * phd, const int f);
 extern void SwapBoardToPanel(int ToPanel);
 extern void ToggleDockPanels(gpointer p, guint n, GtkWidget * pw);

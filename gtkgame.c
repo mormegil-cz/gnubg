@@ -23,6 +23,7 @@
 
 #include <glib.h>
 #include <glib/gstdio.h>
+#include <glib/gi18n.h>
 #include <fcntl.h>
 #include <math.h>
 #include <stdio.h>
@@ -3909,29 +3910,14 @@ extern void GtkChangeLanguage(void)
 	}
 }
 
-extern void ShowList( char *psz[], const char *szTitle, GtkWidget *parent)
+extern void ShowList(char *psz[], const char *szTitle, GtkWidget * parent)
 {
-    GtkWidget *pwDialog, *pwList, *pwScroll;
 
-	pwDialog = GTKCreateDialog(szTitle, DT_INFO, parent, DIALOG_FLAG_MODAL, NULL, NULL);
-
-    pwList = gtk_list_new();
-    while( *psz )
-	gtk_container_add( GTK_CONTAINER( pwList ),
-			   gtk_list_item_new_with_label( *psz++ ) );
-    
-	pwScroll = gtk_scrolled_window_new( NULL, NULL );
-    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pwScroll ),
-				    GTK_POLICY_AUTOMATIC,
-				    GTK_POLICY_AUTOMATIC );
-    gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW( pwScroll ),
-					   pwList );
-    
-	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), pwScroll);
-    
-	gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 560, 400 );
-
-	GTKRunDialog(pwDialog);
+ 	GString *gst = g_string_new(NULL);
+ 	while (*psz)
+ 		g_string_append_printf(gst, "%s\n", *psz++);
+ 	GTKTextWindow(gst->str, szTitle, DT_INFO, parent);
+	g_string_free(gst, TRUE);
 }
 
 extern void OK( GtkWidget *pw, int *pf ) {
@@ -5394,10 +5380,10 @@ extern void SetRollouts( gpointer p, guint n, GtkWidget *pwIgnore )
 }
 
 void
-GTKTextWindow (const char *szOutput, const char *title, const int type)
+GTKTextWindow (const char *szOutput, const char *title, const int type, GtkWidget *parent)
 {
 
-  GtkWidget *pwDialog = GTKCreateDialog (title, type, NULL, 0, NULL, NULL);
+  GtkWidget *pwDialog = GTKCreateDialog (title, type, parent, 0, NULL, NULL);
   GtkWidget *pwText;
   GtkWidget *sw;
   GtkTextBuffer *buffer;
@@ -5406,6 +5392,7 @@ GTKTextWindow (const char *szOutput, const char *title, const int type)
 
   pwText = gtk_text_view_new ();
   gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (pwText), GTK_WRAP_NONE);
+  gtk_text_view_set_editable(GTK_TEXT_VIEW(pwText), FALSE);
 
   buffer = gtk_text_buffer_new (NULL);
   gtk_text_buffer_create_tag (buffer, "monospace", "family", "monospace",
@@ -5432,7 +5419,7 @@ GTKTextWindow (const char *szOutput, const char *title, const int type)
 }
 
 extern void GTKEval( char *szOutput ) {
-    GTKTextWindow( szOutput,  _("GNU Backgammon - Evaluation"), DT_INFO);
+    GTKTextWindow( szOutput,  _("GNU Backgammon - Evaluation"), DT_INFO, NULL);
 }
 
 static void DestroyHint( gpointer p ) {
@@ -5807,22 +5794,23 @@ extern void GTKShowScoreSheet( void )
 	GTKRunDialog(pwDialog);
 }
 
-static void GtkShowCopying(GtkWidget *pwWidget)
+static void GtkShowCopying(GtkWidget *parent)
 {
-	ShowList( aszCopying, _("Copying"), pwWidget );
+	ShowList( aszCopying, _("Copying"), parent);
 }
 
-static void GtkShowWarranty(GtkWidget *pwWidget)
+static void GtkShowWarranty(GtkWidget *parent)
 {
-	ShowList( aszWarranty, _("Warranty"), pwWidget );
+	ShowList( aszWarranty, _("Warranty"), parent);
 }
 
-static void GtkShowEngine(GtkWidget * pwWidget)
+static void GtkShowEngine(GtkWidget *parent)
 {
-    char **szBuffer = g_new0(char*, 2);
+    char *szBuffer[2];
     szBuffer[0] = g_new0(char, 4096);
+    szBuffer[1] = NULL;
     EvalStatus(szBuffer[0]);
-    ShowList(szBuffer, _("Evaluation engine"), pwWidget);
+    ShowList(szBuffer, _("Evaluation engine"), parent);
 }
 
 extern void GTKShowVersion( void )
@@ -5860,7 +5848,7 @@ extern void GTKShowVersion( void )
 	pwButton = gtk_button_new_with_label(_("Copying conditions") ),
 	FALSE, FALSE, 8 );
 	g_signal_connect( G_OBJECT( pwButton ), "clicked",
-		G_CALLBACK( GtkShowCopying ), NULL );
+		G_CALLBACK( GtkShowCopying ), pwDialog );
 	
 	gtk_box_pack_start( GTK_BOX( pwButtonBox ), 
 	pwButton = gtk_button_new_with_label(_("Warranty") ),
@@ -5878,7 +5866,7 @@ extern void GTKShowVersion( void )
 	pwButton = gtk_button_new_with_label(_("Evaluation Engine") ),
 	FALSE, FALSE, 8 );
 	g_signal_connect( G_OBJECT( pwButton ), "clicked",
-		G_CALLBACK( GtkShowEngine ), NULL );
+		G_CALLBACK( GtkShowEngine ), pwDialog );
 	GTKRunDialog(pwDialog);
 }
 
@@ -5918,11 +5906,8 @@ extern void GTKShowBuildInfo(GtkWidget *pw, GtkWidget *pwParent)
 	gtk_box_pack_start( GTK_BOX( pwBox ),
 			gtk_label_new( _(aszCOPYRIGHT) ), FALSE, FALSE, 4 );
 
-	gtk_box_pack_start( GTK_BOX( pwBox ), pwPrompt = gtk_label_new(
-	_("GNU Backgammon is free software, covered by the GNU General Public "
-	"License version 3 or later, and you are welcome to change it and/or "
-	"distribute copies of it under certain conditions.  There is "
-	"absolutely no warranty for GNU Backgammon.") ), FALSE, FALSE, 4 );
+	pwPrompt = gtk_label_new( _(intro_string));
+	gtk_box_pack_start( GTK_BOX( pwBox ), pwPrompt, FALSE, FALSE, 4 );
 	gtk_label_set_line_wrap( GTK_LABEL( pwPrompt ), TRUE );
 	
 	GTKRunDialog(pwDialog);
@@ -5970,45 +5955,50 @@ static int FindName(listOLD* pList, const char* name)
 	return FALSE;
 }
 
-extern void GTKCommandShowCredits(GtkWidget *pw, GtkWidget *pwParent)
+extern void GTKCommandShowCredits(GtkWidget * pw, GtkWidget * pwParent)
 {
-	GtkWidget *pwDialog, *pwBox, *pwMainHBox, *pwHBox = 0, *pwVBox,
-		*pwList = gtk_list_new(),
-		*pwScrolled = gtk_scrolled_window_new( NULL, NULL );
+	GtkWidget *pwDialog;
+	GtkWidget *pwBox;
+	GtkWidget *pwMainHBox;
+	GtkWidget *pwHBox = 0;
+	GtkWidget *pwVBox;
+	GtkWidget *pwScrolled;
+	GtkWidget *treeview;
+	GtkCellRenderer *renderer;
+	GtkTreeViewColumn *column;
+	GtkListStore *store;
+	GtkTreeIter iter;
 	int i = 0;
 	credits *credit = &creditList[0];
-	credEntry* ce;
+	credEntry *ce;
 
+	pwScrolled = gtk_scrolled_window_new(NULL, NULL);
 	ListCreate(&names);
 
-	pwDialog = GTKCreateDialog( _("GNU Backgammon - Credits"),
-		DT_INFO, pwParent, DIALOG_FLAG_MODAL, NULL, NULL );
+	pwDialog = GTKCreateDialog(_("GNU Backgammon - Credits"), DT_INFO, pwParent, DIALOG_FLAG_MODAL, NULL, NULL);
 
 	pwMainHBox = gtk_hbox_new(FALSE, 0);
 
-	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), pwMainHBox);
+	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), pwMainHBox);
 
-	pwBox = gtk_vbox_new( FALSE, 0);
+	pwBox = gtk_vbox_new(FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(pwMainHBox), pwBox, FALSE, FALSE, 0);
-	gtk_container_set_border_width( GTK_CONTAINER(pwBox), 8);
+	gtk_container_set_border_width(GTK_CONTAINER(pwBox), 8);
 
-	while (credit->Title)
-	{
+	while (credit->Title) {
 		/* Two columns, so new hbox every-other one */
-		if (i / 2 == (i + 1) / 2)
-		{
-			pwHBox = gtk_hbox_new( TRUE, 0);
+		if (i / 2 == (i + 1) / 2) {
+			pwHBox = gtk_hbox_new(TRUE, 0);
 			gtk_box_pack_start(GTK_BOX(pwBox), pwHBox, TRUE, FALSE, 0);
 		}
 
-		pwVBox = gtk_vbox_new( FALSE, 0);
+		pwVBox = gtk_vbox_new(FALSE, 0);
 		gtk_box_pack_start(GTK_BOX(pwHBox), pwVBox, FALSE, FALSE, 0);
 
 		AddTitle(pwVBox, _(credit->Title));
 
 		ce = credit->Entry;
-		while(ce->Name)
-		{
+		while (ce->Name) {
 			AddName(pwVBox, ce->Name, _(ce->Type));
 			ce++;
 		}
@@ -6018,27 +6008,36 @@ extern void GTKCommandShowCredits(GtkWidget *pw, GtkWidget *pwParent)
 		i++;
 	}
 
-	pwVBox = gtk_vbox_new( FALSE, 0);
+	pwVBox = gtk_vbox_new(FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(pwMainHBox), pwVBox, FALSE, FALSE, 0);
 
 	AddTitle(pwVBox, _("Special thanks"));
 
-	gtk_container_set_border_width( GTK_CONTAINER(pwVBox), 8);
-	gtk_box_pack_start( GTK_BOX( pwVBox ), pwScrolled, TRUE, TRUE, 0 );
-	gtk_widget_set_size_request( pwScrolled, 150, -1 );
-	gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW( pwScrolled ),
-						pwList );
-	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pwScrolled ),
-					GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
+	/* create list store */
+	store = gtk_list_store_new(1, G_TYPE_STRING);
 
-	for( i = 0; ceCredits[ i ].Name; i++ ) {
-		if (!FindName(&names, ceCredits[ i ].Name ))
-		gtk_container_add( GTK_CONTAINER( pwList ),
-			gtk_list_item_new_with_label(ceCredits[ i ].Name)) ;
+	/* add data to the list store */
+	for (i = 0; ceCredits[i].Name; i++) {
+		if (!FindName(&names, ceCredits[i].Name)) {
+			gtk_list_store_append(store, &iter);
+			gtk_list_store_set(store, &iter, 0, ceCredits[i].Name, -1);
+		}
 	}
 
-	while(names.plNext->p)
-		ListDelete(names.plNext );
+	/* create tree view */
+	treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+	renderer = gtk_cell_renderer_text_new();
+	column = gtk_tree_view_column_new_with_attributes(_("Contributers"), renderer, "text", 0, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+
+	while (names.plNext->p)
+		ListDelete(names.plNext);
+	gtk_container_set_border_width(GTK_CONTAINER(pwVBox), 8);
+	gtk_box_pack_start(GTK_BOX(pwVBox), pwScrolled, TRUE, TRUE, 0);
+	gtk_widget_set_size_request(pwScrolled, 150, -1);
+	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(pwScrolled), treeview);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(pwScrolled), GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
+
 
 	GTKRunDialog(pwDialog);
 }

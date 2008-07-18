@@ -34,6 +34,7 @@
 #define VERSION_STRING "GNU Backgammon " VERSION
 #define GNUBG_CHARSET "UTF-8"
 
+const gchar *intro_string;
 typedef struct _command {
 	/* Command name (NULL indicates end of list) */
 	const char *sz;

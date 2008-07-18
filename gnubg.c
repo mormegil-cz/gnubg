@@ -175,6 +175,10 @@ int fReadingCommand;
 #endif
 #endif
 
+const gchar *intro_string = N_("This program comes with ABSOLUTELY NO WARRANTY; for details type `show warranty'.\n"
+				"This is free software, and you are welcome to redistribute it\n"
+				"under certain conditions; type `show copying' for details.\n");
+
 char *szLang=NULL;
 
 const char szDefaultPrompt[] = "(\\p) ",
@@ -635,7 +639,7 @@ char const *aszBuildInfo[] = {
     N_("SQLite database supported."),
 #endif
 #if USE_GTK
-    N_("Window system supported."),
+    N_("GTK graphical interface supported."),
 #endif
 #if HAVE_SOCKETS
     N_("External players supported."),
@@ -2158,7 +2162,7 @@ static void HintResigned( void )
               - rEqBefore );
     outputf ( "%s : %+6.3f (%+6.3f)\n\n", _("Equity after resignation"),
               - rEqAfter, rEqBefore - rEqAfter );
-    outputf ( "%s : %s\n\n", _("Correct resign decision "),
+    outputf ( "%s : %s\n\n", _("Correct resign decision"),
               ( rEqBefore - rEqAfter >= 0 ) ?
               _("Accept") : _("Reject") );
     
@@ -4478,18 +4482,8 @@ static void BearoffProgress( unsigned int i )
 
 static void version(void)
 {
-
-	const char *pch;
-	g_print(_(VERSION_STRING));
-	g_print("\n\n%s\n\n", _(aszCOPYRIGHT));
-	g_print(_("GNU Backgammon is free software, covered by the GNU General Public License\n"
-		      "version 3 or later, and you are welcome to change it and/or distribute\n"
-			  "copies of it under certain conditions.  Type \"show copying\" to see the\n"
-			  "conditions. There is absolutely no warranty for GNU Backgammon. Type \n"
-			  "\"show warranty\" for details.\n\n"));
-
-	while ((pch = GetBuildInfoString()))
-		g_print("%s\n", gettext(pch));
+	g_print("%s\n%s\n",_(VERSION_STRING),  _(aszCOPYRIGHT));
+	g_print("%s", _(intro_string));
 }
 
 #if HAVE_LIBREADLINE
@@ -4945,11 +4939,11 @@ int main(int argc, char *argv[])
 		{"splash", 'S', 0, G_OPTION_ARG_NONE, &fSplash,
 		 N_("Don't show gtk splash screen"), NULL},
 		{"tty", 't', 0, G_OPTION_ARG_NONE, &fNoX,
-		 N_("Start on tty instead of using window system"), NULL},
+		 N_("Start on tty instead of using the graphical interface"), NULL},
 		{"version", 'v', 0, G_OPTION_ARG_NONE, &show_version,
 		 N_("Show version information and exit"), NULL},
 		{"window-system-only", 'w', 0, G_OPTION_ARG_NONE, &fNoTTY,
-		 N_("Ignore tty input when using window system"), NULL},
+		 N_("Ignore tty input when using the graphical interface"), NULL},
 		{"debug", 'd', 0, G_OPTION_ARG_NONE, &debug,
 		 N_("Turn on debug"), NULL},
 		{NULL, 0, 0, 0, NULL, NULL, NULL}
@@ -5160,7 +5154,7 @@ extern void CommandEq2MWC ( char *sz )
             -1.0, 100.0 * eq2mwc ( -1.0, &ci ) );
   outputf ( "%s = %+6.3f: %6.2f%%\n", _("MWC for equity"),
             +1.0, 100.0 * eq2mwc ( +1.0, &ci ) );
-  outputf ( _("By linear interpolation:\n") );
+  outputf ( "%s:\n", _("By linear interpolation") );
   outputf ( "%s = %+6.3f: %6.2f%%\n", _("MWC for equity"),
             rEq, 100.0 * eq2mwc ( rEq, &ci ) );
 
