@@ -1,3 +1,8 @@
+Sat Jul 19 23:54:09 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* bearoff.c, eval.c, osr.c: replace 6, 15 with nChequers and nPoints
+	in a couple of places
+
 Fri Jul 18 18:07:38 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, credits.sh, gnubg.c, gtkgame.c, gtkgame.h,

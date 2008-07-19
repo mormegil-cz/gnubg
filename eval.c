@@ -1941,7 +1941,7 @@ SanityCheck( const TanBoard anBoard, float arOutput[] )
     for( i = 0; i < 2; i++ ) 
       if( anBack[ i ] < 6 && pbc1 )
 	anMaxTurns[ i ] = 
-	  MaxTurns( PositionBearoff( anBoard[ i ], 6, 15 ) );
+	  MaxTurns( PositionBearoff( anBoard[ i ], pbc1->nPoints, pbc1->nChequers ) );
       else
 	anMaxTurns[ i ] = anCross[ i ] * 2;
       
@@ -2254,7 +2254,7 @@ raceBGprob(const TanBoard anBoard, int side, const bgvariation bgv)
   {
     const long* bgp = getRaceBGprobs(dummy[1-side]);
     if( bgp ) {
-      int k = PositionBearoff(anBoard[side], 6, 15 );
+      int k = PositionBearoff(anBoard[side], pbc1->nPoints, pbc1->nChequers );
       unsigned short int aProb[32];
 
       float p = 0.0;
