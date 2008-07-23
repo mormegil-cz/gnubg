@@ -4068,7 +4068,7 @@ extern void output( const char *sz )
 	return;
     }
 #endif
-    g_print("%s", sz);
+    fprintf(stdout, "%s", sz);
     if( !isatty( STDOUT_FILENO ) ) 
        fflush( stdout );
 
@@ -4150,22 +4150,21 @@ extern void outputerrf( const char *sz, ... )
 }
 
 /* Write an error message, vfprintf() style */
-extern void outputerrv( const char *sz, va_list val )
+extern void outputerrv(const char *sz, va_list val)
 {
 
-    char *szFormatted;
-    szFormatted = g_strdup_vprintf( sz, val );
+	char *szFormatted;
+	szFormatted = g_strdup_vprintf(sz, val);
 
 #if USE_GTK
-    if( fX )
-	GTKOutputErr( szFormatted );
-#else
-	g_printerr("%s", szFormatted);
-    if( !isatty( STDOUT_FILENO ) ) 
-       fflush( stdout );
-    putc( '\n', stderr );
+	if (fX)
+		GTKOutputErr(szFormatted);
 #endif
-    g_free( szFormatted );
+	fprintf(stderr, "%s", szFormatted);
+	if (!isatty(STDOUT_FILENO))
+		fflush(stdout);
+	putc('\n', stderr);
+	g_free(szFormatted);
 }
 
 /* Signifies that all output for the current command is complete */
@@ -5715,29 +5714,28 @@ char * SetupLanguage (const char *newLangCode)
 	return(setlocale(LC_ALL, ""));
 }
 #else
-char *SetupLanguage (const char *newLangCode)
+char *SetupLanguage(const char *newLangCode)
 {
-	static char *org_lang=NULL;
-	char *result=NULL;
+	static char *org_lang = NULL;
+	char *result = NULL;
 
-	if (!org_lang)
-	{
-		if (!(org_lang=g_strdup(setlocale(LC_ALL, ""))))
-			org_lang=g_strdup("C");
+	if (!org_lang) {
+		org_lang = g_strdup(setlocale(LC_ALL, ""));
+		if (!org_lang) {
+			outputerrf(_("Locale in your environment not supported by "
+				     "C library. Falling back to C locale.\n"));
+			org_lang = g_strdup("C");
+		}
 	}
 
-	if (newLangCode && *newLangCode && strcmp (newLangCode, "system") != 0)
-	{
+	if (newLangCode && *newLangCode && strcmp(newLangCode, "system") != 0) {
 		g_setenv("LC_ALL", newLangCode, TRUE);
-		result = setlocale (LC_ALL, newLangCode);
+		result = setlocale(LC_ALL, newLangCode);
+		return (result);
 	}
-
-	if (!result)
-	{
-		g_setenv("LC_ALL", org_lang, TRUE);
-		result = setlocale (LC_ALL, org_lang);
-	}
-	return(result);
+	g_setenv("LC_ALL", org_lang, TRUE);
+	result = setlocale(LC_ALL, org_lang);
+	return (result);
 }
 #endif
 

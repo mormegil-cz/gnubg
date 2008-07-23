@@ -3029,9 +3029,11 @@ static gboolean FlagClicked(GtkWidget *pw, GdkEventButton *event, void* dummy)
 	gtk_frame_set_shadow_type(GTK_FRAME(gtk_bin_get_child(GTK_BIN(pw))), GTK_SHADOW_ETCHED_OUT);
 	gtk_widget_modify_bg(eb, GTK_STATE_NORMAL, &pwMain->style->bg[GTK_STATE_SELECTED]);
 
-	/* Immediately translate this dialog */
-	SetupLanguage((char*)g_object_get_data(G_OBJECT(curSel), "lang"));
-	SetLangDialogText();
+	if (SetupLanguage((char *) g_object_get_data(G_OBJECT(curSel), "lang")))
+		/* Immediately translate this dialog */
+		SetLangDialogText();
+	else
+		outputerrf(_("Locale '%s' not supported by C library."), (char *) g_object_get_data(G_OBJECT(curSel), "lang"));
 
 	gtk_widget_set_sensitive(DialogArea(pwLangDialog, DA_OK), TRUE);
 

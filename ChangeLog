@@ -1,3 +1,10 @@
+Wed Jul 23 11:34:27 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* set.c, gnubg.c, gtkgame.c: give a sensible error message if language
+	change fails, i.e. locale unsupported.
+	* gtkwindows.c: don't run gtk_widget_present(parent) if parent isn't
+	realized.
+
 Sat Jul 19 23:54:09 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* bearoff.c, eval.c, osr.c: replace 6, 15 with nChequers and nPoints
