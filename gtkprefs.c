@@ -3079,7 +3079,7 @@ extern void BoardPreferences(GtkWidget *pwBoard)
 
 	SetTitle();
 
-	gtk_notebook_set_page(GTK_NOTEBOOK(pwNotebook), NUM_NONPREVIEW_PAGES);
+	gtk_notebook_set_current_page(GTK_NOTEBOOK(pwNotebook), NUM_NONPREVIEW_PAGES);
 
 	g_signal_connect(pwDialog, "map", G_CALLBACK(pref_dialog_map), bd);
 

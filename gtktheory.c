@@ -529,7 +529,11 @@ static void GraphExpose( GtkWidget *pwGraph, GdkEventExpose *pev,
     int i, x = 8, y = 12, cx = pwGraph->allocation.width - 16 - 1,
 	cy = pwGraph->allocation.height - 12, iPlayer, ax[ 3 ];
     char sz[ 4 ];
+    PangoLayout *layout = gtk_widget_create_pango_layout(pwGraph, NULL);
     
+    g_print("cx %d cy %d\n", cx, cy);
+    pango_layout_set_font_description(layout,pango_font_description_from_string("sans 7"));
+
     /* FIXME: The co-ordinates used in this function should be determined
        from the text size, not hard-coded.  But GDK's text handling will
        undergo an overhaul with Pango once GTK+ 2.0 comes out, so let's
@@ -543,10 +547,13 @@ static void GraphExpose( GtkWidget *pwGraph, GdkEventExpose *pev,
 			 x + cx * i / 20 );
 
 	if( !( i & 3 ) ) {
-	    sprintf( sz, "%d", i * 5 );
-	    gtk_paint_string( pwGraph->style, pwGraph->window,
-			      GTK_STATE_NORMAL, NULL, pwGraph, "label",
-			      x + cx * i / 20 - 8 /* FIXME */, y - 3, sz );
+		int width;
+		int height;
+		sprintf( sz, "%d", i * 5 );
+		pango_layout_set_text(layout, sz, -1);
+		pango_layout_get_pixel_size(layout, &width, &height);
+		gtk_paint_layout( pwGraph->style, pwGraph->window, GTK_STATE_NORMAL, TRUE, NULL, pwGraph, "label",
+			      x + cx * i / 20 - width/2 /* FIXME */, y-height-1, layout );
 	}
     }
 
@@ -999,7 +1006,7 @@ GTKShowTheory ( const int fActivePage ) {
   ResetTheory ( NULL, ptw );
   TheoryUpdated ( NULL, ptw );
   
-  gtk_notebook_set_page ( GTK_NOTEBOOK ( pwNotebook ), fActivePage ? 2 /* prices */ : 0 /* market */ );
+  gtk_notebook_set_current_page ( GTK_NOTEBOOK ( pwNotebook ), fActivePage ? 2 /* prices */ : 0 /* market */ );
 
   GTKRunDialog(pwDialog);
 }

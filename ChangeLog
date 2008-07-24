@@ -1,3 +1,8 @@
+Thu Jul 24 11:36:21 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtkchequer.c, gtkgame.c, gtkprefs.c, gtkrace.c, gtktheory.c: get rid
+	of deprecated functions gtk_notebook_set_page and gtk_paint_string
+
 Wed Jul 23 11:34:27 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* set.c, gnubg.c, gtkgame.c: give a sensible error message if language

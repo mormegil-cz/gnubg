@@ -107,6 +107,7 @@ static void MoveListRolloutClicked(GtkWidget *pw, hintdata *phd)
   free ( ai );
 
   MoveListUpdate ( phd );
+  SetAnnotation(pmrCurAnn);
 }
 
 extern void ShowMove ( hintdata *phd, const int f )
@@ -253,7 +254,7 @@ EvalMoves ( hintdata *phd, evalcontext *pec )
   free ( ai );
 
   MoveListUpdate ( phd );
-
+  SetAnnotation(pmrCurAnn);
 }
 
 static void

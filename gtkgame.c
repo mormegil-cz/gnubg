@@ -1158,7 +1158,7 @@ extern void SetAnnotation( moverecord *pmr ) {
     if ( pmr && pmr->mt == MOVE_NORMAL && pwMoveAnalysis && pwCubeAnalysis ) {
 
       if ( badSkill(pmr->stCube) )
-        gtk_notebook_set_page ( GTK_NOTEBOOK ( pw ), 1 );
+        gtk_notebook_set_current_page ( GTK_NOTEBOOK ( pw ), 1 );
 
 
     }
