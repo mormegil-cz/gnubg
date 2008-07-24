@@ -20,7 +20,7 @@
  */
 
 #include "config.h"
-
+#define GTK_DISABLE_DEPRECATED 1
 #include <gtk/gtk.h>
 
 #include <stdio.h>
@@ -31,7 +31,6 @@
 #include "backgammon.h"
 #include "eval.h"
 #include "gtkrace.h"
-#include "gtkgame.h"
 #include <glib/gi18n.h>
 #include "osr.h"
 #include "format.h"
@@ -192,22 +191,22 @@ PerformOSR ( GtkWidget *pw, racewidget *prw ) {
               1 * 16 + 1 * 20 + 1 * 24 ) / 36.0f;
   float arMu[ 2 ];
   gchar *pch;
+  GtkTreeIter iter;
+  GtkTreeModel *store;
 
   raceProbs ( (ConstTanBoard)prw->anBoard, nTrials, ar, arMu );
 
   PipCount( (ConstTanBoard)prw->anBoard, anPips );
   
+  store = gtk_tree_view_get_model(GTK_TREE_VIEW(prw->pwOutput));
+  gtk_tree_model_get_iter_first(store, &iter);
   for ( i = 0; i < 5; ++i ) {
     if( fOutputWinPC )
       sprintf( sz, "%5.1f%%", ar[ i ] * 100.0f );
     else
       sprintf( sz, "%5.3f", ar[ i ] );
-    
-      gtk_clist_set_text( GTK_CLIST( pwOutput ), 0, i + 1, sz );
+    gtk_list_store_set(GTK_LIST_STORE(store), &iter, i + 1, sz, -1 );
   }
-
-  for ( i = 0; i < 5; ++i )
-    gtk_clist_set_text ( GTK_CLIST ( pwOutput ), 1, i + 1, _( "n/a" ) );
 
   /* effective pip count */
 
@@ -227,6 +226,34 @@ PerformOSR ( GtkWidget *pw, racewidget *prw ) {
 
 }
 
+static GtkWidget *do_rollout_view(void)
+{
+	GtkWidget *view;
+	GtkListStore *store;
+	GtkCellRenderer *renderer;
+	GtkTreeIter iter;
+	int i;
+
+	const char *aszTitle[] = {
+		NULL,
+		N_("Win"),
+		N_("W g"),
+		N_("W bg"),
+		N_("L g"),
+		N_("L bg")
+	};
+	store = gtk_list_store_new(6, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
+				   G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(GTK_LIST_STORE(store), &iter, 0, _("Rollout"), -1);
+	view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+	renderer = gtk_cell_renderer_text_new();
+	for (i = 0; i < 6; i++) {
+		gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(view), -1, gettext(aszTitle[i]),
+							    renderer, "text", i, NULL);
+	}
+	return view;
+}
 static GtkWidget *
 OSRPage ( TanBoard anBoard, racewidget *prw ) {
 
@@ -237,14 +264,6 @@ OSRPage ( TanBoard anBoard, racewidget *prw ) {
   char *asz[ 6 ];
   float ar0[ 2 ] = { 0, 0 };
   char *pch;
-  const char *aszTitle[] = {
-    NULL,
-    N_("Win"),
-    N_("W g"),
-    N_("W bg"),
-    N_("L g"),
-    N_("L bg") 
-  };
 
   gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
   gtk_container_add( GTK_CONTAINER( pwp ), pwvbox );
@@ -280,30 +299,8 @@ OSRPage ( TanBoard anBoard, racewidget *prw ) {
   gtk_misc_set_alignment( GTK_MISC( pw ), 0.0f, 0.5f );
   g_free( pch );
 
-  for ( i = 0; i < 6; ++i )
-    asz[ i ] = (char*)(aszTitle[ i ] ? gettext ( aszTitle[ i ] ) :  "");
-
-  prw->pwOutput = gtk_clist_new_with_titles( 6, asz );
-  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                       prw->pwOutput, FALSE, FALSE, 4 );
-  gtk_clist_set_selection_mode( GTK_CLIST( prw->pwOutput ),
-                                GTK_SELECTION_BROWSE );
-  gtk_clist_column_titles_passive( GTK_CLIST( prw->pwOutput ) );
-
-  for( i = 0; i < 6; i++ ) {
-    gtk_clist_set_column_auto_resize( GTK_CLIST( prw->pwOutput ), i, TRUE );
-    gtk_clist_set_column_justification( GTK_CLIST( prw->pwOutput ), i,
-                                        i ? GTK_JUSTIFY_RIGHT :
-                                        GTK_JUSTIFY_LEFT );
-    }
-
-  for ( i = 0; i < 6; ++i )
-    asz[ i ] = NULL;
-
-  gtk_clist_append ( GTK_CLIST ( prw->pwOutput ), asz );
-  gtk_clist_append ( GTK_CLIST ( prw->pwOutput ), asz );
-  gtk_clist_set_text ( GTK_CLIST ( prw->pwOutput ), 0, 0, _( "Rollout" ) );
-  gtk_clist_set_text ( GTK_CLIST ( prw->pwOutput ), 1, 0, _( "Std.dev." ) );
+  prw->pwOutput = do_rollout_view();
+  gtk_box_pack_start ( GTK_BOX ( pwvbox ), prw->pwOutput, FALSE, FALSE, 4 );
 
   /* effective pip count */
 

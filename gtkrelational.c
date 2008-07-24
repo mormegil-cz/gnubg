@@ -20,11 +20,12 @@
  */
 
 #include "config.h"
+#define GTK_DISABLE_DEPRECATED 1
 #include <gtk/gtk.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "gtkgame.h"
+#include "common.h"
 #include "gtkrelational.h"
 #include "relational.h"
 #include "gtkwindows.h"
@@ -69,7 +70,7 @@ static gchar *titles[] = {
 static GtkWidget *pwPlayerName;
 static GtkWidget *pwPlayerNotes;
 static GtkWidget *pwQueryText;
-static GtkWidget *pwQueryResult;
+static GtkWidget *pwQueryResult = NULL;
 static GtkWidget *pwQueryBox;
 
 GtkListStore *playerStore;
@@ -342,38 +343,38 @@ extern void GtkRelationalAddMatch(gpointer p, guint n, GtkWidget * pw)
 
 static GtkWidget *GetRelList(RowSet * pRow)
 {
-	unsigned int i;
+	unsigned int i, j;
 	PangoRectangle logical_rect;
 	PangoLayout *layout;
+	GtkListStore *store;
+	GType *types;
+	GtkTreeIter iter;
+	GtkCellRenderer *renderer;
+	GtkTreeViewColumn *column;
+	GtkWidget *treeview;
+
 	unsigned int cols = pRow ? pRow->cols : 0;
 	unsigned int rows = pRow ? pRow->rows : 0;
-	GtkWidget *pwList = gtk_clist_new(cols);
-	gtk_clist_column_titles_show(GTK_CLIST(pwList));
-	gtk_clist_column_titles_passive(GTK_CLIST(pwList));
-	for (i = 0; i < cols; i++) {
-		char *widthStr = malloc(pRow->widths[i] + 1);
-		int width;
-		memset(widthStr, 'a', pRow->widths[i]);
-		widthStr[pRow->widths[i]] = '\0';
 
-		layout = gtk_widget_create_pango_layout(pwList, widthStr);
-		pango_layout_get_pixel_extents(layout, NULL,
-					       &logical_rect);
-		g_object_unref(layout);
-		width = logical_rect.width;
-		gtk_clist_set_column_title(GTK_CLIST(pwList), i,
-					   pRow->data[0][i]);
+	if (!pRow || !rows || !cols)
+		return gtk_label_new( _("Search failed or empty."));
 
-		gtk_clist_set_column_width(GTK_CLIST(pwList), i, width);
-		gtk_clist_set_column_resizeable(GTK_CLIST(pwList), i,
-						FALSE);
-	}
-	GTK_WIDGET_UNSET_FLAGS(pwList, GTK_CAN_FOCUS);
+	types = g_new(GType, cols);
+	for (j=0; j<cols; j++)
+		types[j] = G_TYPE_STRING;
+	store = gtk_list_store_newv(cols, types);
+	g_free(types);
 
 	for (i = 1; i < rows; i++) {
-		gtk_clist_append(GTK_CLIST(pwList), pRow->data[i]);
+		gtk_list_store_append(store, &iter);
+		for (j = 0; j< cols; j++)
+			gtk_list_store_set(store, &iter, j, pRow->data[i][j], -1);
 	}
-	return pwList;
+	treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+	renderer = gtk_cell_renderer_text_new();
+	for (j = 0; j < cols; j++)
+		gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), -1, pRow->data[0][j], renderer, "text", j, NULL);
+	return treeview;
 }
 
 static void ShowRelationalErase(GtkWidget *pw, GtkWidget *notused)
@@ -436,7 +437,8 @@ static void RelationalQuery(GtkWidget * pw, GtkWidget * pwVbox)
 		query = pch;
 
 	rs = RunQuery(query);
-	gtk_widget_destroy(pwQueryResult);
+	if (pwQueryResult)
+		gtk_widget_destroy(pwQueryResult);
 	pwQueryResult = GetRelList(rs);
 	gtk_box_pack_start(GTK_BOX(pwQueryBox), pwQueryResult, 
 			TRUE, TRUE, 0);
@@ -921,15 +923,7 @@ extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw)
 			 G_CALLBACK(RelationalQuery), pwVbox);
 	gtk_box_pack_start(GTK_BOX(pwHbox), pwRun, FALSE, FALSE, 0);
 
-	pwQueryResult = gtk_clist_new(1);
-	gtk_clist_set_column_title(GTK_CLIST(pwQueryResult), 0, " ");
-	gtk_clist_column_titles_show(GTK_CLIST(pwQueryResult));
-	gtk_clist_column_titles_passive(GTK_CLIST(pwQueryResult));
-
 	pwQueryBox = gtk_vbox_new(FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pwQueryBox), pwQueryResult, TRUE, TRUE,
-			   0);
-
 	pwScrolled = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(pwScrolled),
 				       GTK_POLICY_AUTOMATIC,

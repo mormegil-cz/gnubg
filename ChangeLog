@@ -1,3 +1,7 @@
+Thu Jul 24 14:32:45 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtkrelational.c, gtkrace.c: cleanup of deprecated gtk functions
+
 Thu Jul 24 11:36:21 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtkchequer.c, gtkgame.c, gtkprefs.c, gtkrace.c, gtktheory.c: get rid
