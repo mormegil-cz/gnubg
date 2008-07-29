@@ -37,7 +37,6 @@
 #include "util.h"
 #include "backgammon.h"
 #include "multithread.h"
-#include <glib/gi18n.h>
 
 #ifdef WIN32
 #include <windows.h>

@@ -37,7 +37,6 @@
 #include "analysis.h"
 #include "dbprovider.h"
 #include "util.h"
-#include <glib/gi18n.h>
 #include <glib/gstdio.h>
 #include <glib.h>
 

@@ -23,7 +23,6 @@
 
 #include <glib.h>
 #include <glib/gstdio.h>
-#include <glib/gi18n.h>
 #include <fcntl.h>
 #include <math.h>
 #include <stdio.h>
@@ -61,7 +60,6 @@
 #include "gtkprefs.h"
 #include "gtksplash.h"
 #include "gtkrelational.h"
-#include <glib/gi18n.h>
 #include "gtkfile.h"
 #include "matchequity.h"
 #include "openurl.h"

@@ -30,7 +30,6 @@
 #include <stdlib.h>
 
 #include "backgammon.h"
-#include <glib/gi18n.h>
 
 #if USE_GTK
 #include "gtkgame.h"

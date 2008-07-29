@@ -31,7 +31,6 @@
 #include "backgammon.h"
 #include "eval.h"
 #include "gtktheory.h"
-#include <glib/gi18n.h>
 #include "matchequity.h"
 #include "gtkwindows.h"
 

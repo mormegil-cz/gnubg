@@ -36,7 +36,6 @@
 #include "gtkboard.h"
 #include "gtkgame.h"
 #include "gtkchequer.h"
-#include <glib/gi18n.h>
 #include "gtktempmap.h"
 #include "gtkwindows.h"
 #include "progress.h"

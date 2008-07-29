@@ -23,7 +23,6 @@
 #include "backgammon.h"
 
 #include <glib.h>
-#include <glib/gi18n.h>
 #include <string.h>
 
 #include "eval.h"

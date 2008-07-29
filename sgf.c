@@ -38,7 +38,6 @@
 #include "analysis.h"
 #include "positionid.h"
 #include "sgf.h"
-#include <glib/gi18n.h>
 
 static const char *szFile;
 static int fError;

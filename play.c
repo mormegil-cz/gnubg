@@ -36,7 +36,6 @@
 #include "matchid.h"
 #include "matchequity.h"
 #include "rollout.h"
-#include <glib/gi18n.h>
 #include "sound.h"
 #include "renderprefs.h"
 #include "md5.h"

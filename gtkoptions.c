@@ -36,7 +36,6 @@
 #include "eval.h"
 #include "dice.h"
 #include "gtkgame.h"
-#include <glib/gi18n.h>
 #include "gtkfile.h"
 #include "sound.h"
 #include "drawboard.h"

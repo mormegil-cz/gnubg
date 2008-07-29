@@ -38,7 +38,6 @@
 #include "record.h"
 #include "formatgs.h"
 
-#include <glib/gi18n.h>
 #include <glib.h>
 #include <glib/gstdio.h>
 #ifdef WIN32

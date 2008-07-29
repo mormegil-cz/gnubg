@@ -29,7 +29,6 @@
 
 #include "backgammon.h"
 #include "gtkgame.h"
-#include <glib/gi18n.h>
 #include "matchequity.h"
 #include "gtkmet.h"
 #include "gtkwindows.h"

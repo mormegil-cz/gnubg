@@ -42,7 +42,6 @@
 #include "positionid.h"
 #include "analysis.h"
 #include "util.h"
-#include <glib/gi18n.h>
 
 #if USE_PYTHON
 

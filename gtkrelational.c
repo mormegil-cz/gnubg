@@ -21,6 +21,7 @@
 
 #include "config.h"
 #define GTK_DISABLE_DEPRECATED 1
+#include "backgammon.h"
 #include <gtk/gtk.h>
 #include <string.h>
 #include <stdlib.h>
@@ -30,7 +31,6 @@
 #include "relational.h"
 #include "gtkwindows.h"
 #include "dbprovider.h"
-#include <glib/gi18n.h>
 
 enum {
 	COLUMN_NICK,
@@ -344,13 +344,10 @@ extern void GtkRelationalAddMatch(gpointer p, guint n, GtkWidget * pw)
 static GtkWidget *GetRelList(RowSet * pRow)
 {
 	unsigned int i, j;
-	PangoRectangle logical_rect;
-	PangoLayout *layout;
 	GtkListStore *store;
 	GType *types;
 	GtkTreeIter iter;
 	GtkCellRenderer *renderer;
-	GtkTreeViewColumn *column;
 	GtkWidget *treeview;
 
 	unsigned int cols = pRow ? pRow->cols : 0;

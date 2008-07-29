@@ -74,7 +74,6 @@
 #include "sound.h"
 #include "openurl.h"
 
-#include <glib/gi18n.h>
 
 #include "sound.h"
 

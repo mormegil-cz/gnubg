@@ -36,7 +36,6 @@
 #include "rollout.h"
 #include "progress.h"
 #include "backgammon.h"
-#include <glib/gi18n.h>
 #include "format.h"
 #include "time.h"
 

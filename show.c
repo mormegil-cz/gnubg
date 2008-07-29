@@ -39,7 +39,6 @@
 #include "dice.h"
 #include "matchequity.h"
 #include "matchid.h"
-#include <glib/gi18n.h>
 #include "sound.h"
 #include "osr.h"
 #include "positionid.h"

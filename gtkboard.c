@@ -40,7 +40,6 @@
 #include "renderprefs.h"
 #include "sound.h"
 #include "matchid.h"
-#include <glib/gi18n.h>
 #include "boardpos.h"
 #include "matchequity.h"
 #include "gtktoolbar.h"

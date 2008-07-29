@@ -34,7 +34,6 @@
 
 #include "eval.h"
 #include "positionid.h"
-#include <glib/gi18n.h>
 #include <locale.h>
 #include "bearoff.h"
 #include "drawboard.h"

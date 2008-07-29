@@ -31,7 +31,6 @@
 #include "backgammon.h"
 #include "eval.h"
 #include "gtkrace.h"
-#include <glib/gi18n.h>
 #include "osr.h"
 #include "format.h"
 #include "gtkwindows.h"
@@ -180,7 +179,6 @@ EffectivePipCount( const float arPips[ 2 ], const float arWastage[ 2 ],
 static void
 PerformOSR ( GtkWidget *pw, racewidget *prw ) {
 
-  GtkWidget *pwOutput = prw->pwOutput;
   int nTrials = (int)prw->padjTrials->value;
   float ar[ 5 ];
   int i, j;
@@ -260,8 +258,6 @@ OSRPage ( TanBoard anBoard, racewidget *prw ) {
   GtkWidget *pwvbox = gtk_vbox_new( FALSE, 4 );
   GtkWidget *pw;
   GtkWidget *pwp = gtk_alignment_new( 0, 0, 0, 0 );
-  int i;
-  char *asz[ 6 ];
   float ar0[ 2 ] = { 0, 0 };
   char *pch;
 

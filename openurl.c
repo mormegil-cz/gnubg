@@ -24,7 +24,6 @@
 #include <stdlib.h>
 #include "backgammon.h"
 #include <glib.h>
-#include <glib/gi18n.h>
 #include "openurl.h"
 #ifdef WIN32
 #include "windows.h"

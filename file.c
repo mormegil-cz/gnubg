@@ -22,7 +22,6 @@
 #include "backgammon.h"
 #include <glib.h>
 #include <glib/gstdio.h>
-#include <glib/gi18n.h>
 #ifndef _MSC_VER
 #include <string.h>
 #include <stdlib.h>

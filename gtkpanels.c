@@ -26,7 +26,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "backgammon.h"
-#include <glib/gi18n.h>
 #include <string.h>
 #include "gtkboard.h"
 #include "gtkgame.h"

@@ -27,7 +27,6 @@
 #include "eval.h"
 #include "gtkchequer.h"
 #include "backgammon.h"
-#include <glib/gi18n.h>
 #include "format.h"
 #include "assert.h"
 #include "gtkmovelistctrl.h"

@@ -24,7 +24,6 @@
 #include <glib.h>
 #include <string.h>
 #include <stdlib.h>
-#include <glib/gi18n.h>
 
 #include "backgammon.h"
 #include "drawboard.h"

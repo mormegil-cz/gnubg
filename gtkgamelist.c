@@ -29,7 +29,6 @@
 #include <string.h>
 
 #include "backgammon.h"
-#include <glib/gi18n.h>
 #include "gtkboard.h"
 #include "drawboard.h"
 #include "positionid.h"

@@ -28,6 +28,7 @@
 #include "analysis.h"
 #include "eval.h"
 #include "rollout.h"
+#include <glib/gi18n.h>
 
 #define MAX_CUBE ( 1 << 12 )
 #define MAX_NAME_LEN 32

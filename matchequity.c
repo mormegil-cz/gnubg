@@ -56,7 +56,6 @@
 #include "eval.h"
 #include "matchequity.h"
 #include "backgammon.h"
-#include <glib/gi18n.h>
 
 static const xmlChar* XML_PUBLIC_ID = BAD_CAST "-//GNU Backgammon//DTD Match Equity Tables//EN";
 
@@ -431,7 +430,7 @@ initMETZadeh ( float aafMET[ MAXSCORE ][ MAXSCORE ],
 }
 
 extern int
-GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] ) {
+GetPoints ( float arOutput [ 5 ], const cubeinfo *pci, float arCP[ 2 ] ) {
 
   /*
    * Input:

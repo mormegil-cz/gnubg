@@ -30,7 +30,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <glib/gi18n.h>
 
 #if HAVE_LIBXML2
 #include <libxml/parser.h>

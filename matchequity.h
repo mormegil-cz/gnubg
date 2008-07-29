@@ -84,7 +84,7 @@ InitMatchEquity ( const char *szFileName );
 /* Get double points */
 
 extern int
-GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] );
+GetPoints ( float arOutput [ 5 ], const cubeinfo *pci, float arCP[ 2 ] );
 
 extern float
 GetDoublePointDeadCube ( float arOutput [ 5 ], cubeinfo *pci );

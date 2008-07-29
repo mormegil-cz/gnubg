@@ -26,7 +26,6 @@
 #else
 #include "backgammon.h"
 #endif
-#include <glib/gi18n.h>
 #if USE_MULTITHREAD
 #include "multithread.h"
 #endif

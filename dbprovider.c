@@ -36,7 +36,6 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <string.h>
-#include <glib/gi18n.h>
 #include "dbprovider.h"
 #include "backgammon.h"
 #include "util.h"

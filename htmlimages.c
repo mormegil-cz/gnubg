@@ -40,7 +40,6 @@
 #include "backgammon.h"
 #include "export.h"
 #include <glib/gstdio.h>
-#include <glib/gi18n.h>
 #include "render.h"
 #include "renderprefs.h"
 #include "boardpos.h"

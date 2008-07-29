@@ -30,7 +30,6 @@
 #include "backgammon.h"
 #include "eval.h"
 #include "gtkgame.h"
-#include <glib/gi18n.h>
 #include "matchequity.h"
 #include "gtkmovefilter.h"
 #include "gtkwindows.h"

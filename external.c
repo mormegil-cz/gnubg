@@ -104,7 +104,6 @@
 #include "drawboard.h"
 #include "external.h"
 #include "rollout.h"
-#include <glib/gi18n.h>
 
 #if HAVE_SOCKETS
 /* Stuff for the yacc/lex parser */

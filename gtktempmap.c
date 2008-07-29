@@ -36,7 +36,6 @@
 #include "gtktempmap.h"
 #include "gtkgame.h"
 #include "drawboard.h"
-#include <glib/gi18n.h>
 #include "format.h"
 #include "render.h"
 #include "renderprefs.h"

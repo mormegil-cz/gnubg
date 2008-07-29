@@ -44,7 +44,6 @@
 #include "md5.h"
 #include "mt19937ar.h"
 #include "isaac.h"
-#include <glib/gi18n.h>
 #include <glib/gstdio.h>
 
 #if USE_GTK

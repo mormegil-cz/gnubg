@@ -37,7 +37,6 @@
 #include "matchid.h"
 #include "record.h"
 
-#include <glib/gi18n.h>
 
 
 /* "Color" of chequers */

@@ -37,7 +37,6 @@
 #endif
 #include "matchid.h"
 #include "positionid.h"
-#include <glib/gi18n.h>
 #include "format.h"
 #include "multithread.h"
 #include "rollout.h"

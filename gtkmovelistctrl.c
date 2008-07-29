@@ -28,7 +28,6 @@
 #include "drawboard.h"
 #include "gtkchequer.h"
 #include "string.h"
-#include <glib/gi18n.h>
 
 
 GdkColor wlCol;
