@@ -702,23 +702,19 @@ extern void AddGame( moverecord *pmr ) {
 
 static void DiceRolled(void)
 {
-	playSound ( SOUND_ROLL );
-    
+	playSound(SOUND_ROLL);
+
 #if USE_GTK
-	if (fX && fDisplay)
-	{
+	if (fX) {
 		BoardData *bd = BOARD(pwBoard)->board_data;
 		/* Make sure dice are updated */
 		bd->diceRoll[0] = 0;
 		bd->diceShown = DICE_ROLLING;
 		ShowBoard();
-	}
-	if ( ! fX )
-#else
-	if (fDisplay)
+	} else
 #endif
+	if (fDisplay)
 		ShowBoard();
-
 }
 
 static int NewGame( void )

@@ -1,3 +1,7 @@
+Wed Jul 30 12:50:47 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* play.c: show board when dice rolled if, and only if, fX or fDisplay.
+
 Tue Jul 29 00:31:04 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtktheory.c: port to gtk_tree_view
