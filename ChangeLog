@@ -1,3 +1,8 @@
+Wed Jul 30 20:27:26 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h: issue warning if libintl.h is included too early to
+	avoid libintl_printf warnings under mingw.
+
 Wed Jul 30 17:01:07 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtkboard.c, gtkchequer.c, gtkcube.c, gtkgame.c, gtkgame.h,

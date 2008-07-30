@@ -28,7 +28,6 @@
 #include "analysis.h"
 #include "eval.h"
 #include "rollout.h"
-#include <glib/gi18n.h>
 
 #define MAX_CUBE ( 1 << 12 )
 #define MAX_NAME_LEN 32
@@ -423,6 +422,9 @@ extern command acTop[];
 extern command cFilename;
 extern command cOnOff;
 
+#ifdef _LIBINTL_H
+#warning "libintl.h already included expect warnings under mingw"
+#endif
 /* Write a string to stdout/status bar/popup window */
 extern void output(const char *sz);
 /* Write a string to stdout/status bar/popup window, and append \n */
@@ -455,6 +457,8 @@ extern void outputnew(void);
 extern void outputoff(void);
 /* Enable output */
 extern void outputon(void);
+/* now we can include libintl.h */
+#include <glib/gi18n.h>
 /* Like strncpy, except it does the right thing */
 extern char *strcpyn(char *szDest, const char *szSrc, int cch);
 
