@@ -1,3 +1,4 @@
+
 /*
  * gtkprefs.c
  *
@@ -429,12 +430,12 @@ static GtkWidget *ChequerPrefs3d( BoardData *bd)
 	gtk_container_add (GTK_CONTAINER (dtPieceTypeFrame), vbox);
 
 	pwRoundedPiece = gtk_radio_button_new_with_label (NULL, _("Rounded disc"));
-	gtk_tooltips_set_tip(ptt, pwRoundedPiece, _("Piece will be a rounded disc"), 0);
+	gtk_widget_set_tooltip_text(pwRoundedPiece, _("Piece will be a rounded disc"));
 	gtk_box_pack_start (GTK_BOX (vbox), pwRoundedPiece, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwRoundedPiece), (bd->rd->pieceType == PT_ROUNDED));
 
 	pwFlatPiece = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON(pwRoundedPiece), _("Flat edged disc"));
-	gtk_tooltips_set_tip(ptt, pwFlatPiece, _("Piece will be a flat sided disc"), 0);
+	gtk_widget_set_tooltip_text( pwFlatPiece, _("Piece will be a flat sided disc"));
 	gtk_box_pack_start (GTK_BOX (vbox), pwFlatPiece, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwFlatPiece), (bd->rd->pieceType == PT_FLAT));
 	g_signal_connect(G_OBJECT(pwFlatPiece), "toggled", G_CALLBACK(option_changed), bd);
@@ -449,12 +450,12 @@ static GtkWidget *ChequerPrefs3d( BoardData *bd)
 	gtk_widget_set_sensitive(GTK_WIDGET(dtTextureTypeFrame), (bd->rd->ChequerMat[0].textureInfo != NULL));
 
 	pwTextureAllPiece = gtk_radio_button_new_with_label (NULL, _("All of piece"));
-	gtk_tooltips_set_tip(ptt, pwTextureAllPiece, _("All of piece will be textured"), 0);
+	gtk_widget_set_tooltip_text( pwTextureAllPiece, _("All of piece will be textured"));
 	gtk_box_pack_start (GTK_BOX (vbox), pwTextureAllPiece, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwTextureAllPiece), (bd->rd->pieceTextureType == PTT_ALL));
 
 	pwTextureTopPiece = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON(pwTextureAllPiece), _("Top Only"));
-	gtk_tooltips_set_tip(ptt, pwTextureTopPiece, _("Only top of piece will be textured"), 0);
+	gtk_widget_set_tooltip_text( pwTextureTopPiece, _("Only top of piece will be textured"));
 	gtk_box_pack_start (GTK_BOX (vbox), pwTextureTopPiece, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwTextureTopPiece), (bd->rd->pieceTextureType == PTT_TOP));
 	g_signal_connect(G_OBJECT(pwTextureTopPiece), "toggled", G_CALLBACK(option_changed), bd);
@@ -552,7 +553,7 @@ static GtkWidget *BoardPage3d( BoardData *bd )
 		gtk_colour_picker_new3d(&bd->rd->BaseMat, DF_NO_ALPHA, TT_GENERAL), FALSE, FALSE, TT_PIECE);
 
 	pwBgTrays = gtk_check_button_new_with_label (_("Show background in bear-off trays"));
-	gtk_tooltips_set_tip(ptt, pwBgTrays, _("If unset the bear-off trays will be drawn with the board colour"), 0);
+	gtk_widget_set_tooltip_text( pwBgTrays, _("If unset the bear-off trays will be drawn with the board colour"));
 	gtk_box_pack_start (GTK_BOX (pw), pwBgTrays, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwBgTrays), bd->rd->bgInTrays);
 	g_signal_connect(G_OBJECT(pwBgTrays), "toggled", G_CALLBACK(option_changed),0);
@@ -574,7 +575,7 @@ static GtkWidget *BoardPage3d( BoardData *bd )
 		gtk_colour_picker_new3d(&bd->rd->PointMat[1], DF_FULL_ALPHA, TT_GENERAL), FALSE, FALSE, TT_PIECE);
 
 	pwRoundPoints = gtk_check_button_new_with_label (_("Rounded points"));
-	gtk_tooltips_set_tip(ptt, pwBgTrays, _("Display the points with a rounded end"), 0);
+	gtk_widget_set_tooltip_text( pwBgTrays, _("Display the points with a rounded end"));
 	gtk_box_pack_start (GTK_BOX (pw), pwRoundPoints, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(pwRoundPoints), bd->rd->roundedPoints);
 	g_signal_connect(G_OBJECT(pwRoundPoints), "toggled", G_CALLBACK(option_changed),0);
@@ -601,7 +602,7 @@ static GtkWidget *BorderPage3d( BoardData *bd )
 		gtk_colour_picker_new3d(&bd->rd->BoxMat, DF_FULL_ALPHA, TT_GENERAL), FALSE, FALSE, TT_PIECE);
 
 	pwRoundedEdges = gtk_check_button_new_with_label (_("Rounded board edges"));
-	gtk_tooltips_set_tip(ptt, pwRoundedEdges, _("Toggle rounded or square edges to the board"), 0);
+	gtk_widget_set_tooltip_text( pwRoundedEdges, _("Toggle rounded or square edges to the board"));
 	gtk_box_pack_start (GTK_BOX (pw), pwRoundedEdges, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwRoundedEdges), bd->rd->roundedEdges);
 	g_signal_connect(G_OBJECT(pwRoundedEdges), "toggled", G_CALLBACK(option_changed), 0);
@@ -1340,12 +1341,12 @@ static GtkWidget *LightingPage(BoardData *bd)
 		gtk_container_add (GTK_CONTAINER (dtLightSourceFrame), vbox);
 		
 		pwLightSource = gtk_radio_button_new_with_label (NULL, _("Positional"));
-		gtk_tooltips_set_tip(ptt, pwLightSource, _("This is a fixed light source, like a lamp"), 0);
+		gtk_widget_set_tooltip_text( pwLightSource, _("This is a fixed light source, like a lamp"));
 		gtk_box_pack_start (GTK_BOX (vbox), pwLightSource, FALSE, FALSE, 0);
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwLightSource), (bd->rd->lightType == LT_POSITIONAL));
 		
 		pwDirectionalSource = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON(pwLightSource), _("Directional"));
-		gtk_tooltips_set_tip(ptt, pwDirectionalSource, _("This is a light direction, like the sun"), 0);
+		gtk_widget_set_tooltip_text( pwDirectionalSource, _("This is a light direction, like the sun"));
 		gtk_box_pack_start (GTK_BOX (vbox), pwDirectionalSource, FALSE, FALSE, 0);
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwDirectionalSource), (bd->rd->lightType == LT_DIRECTIONAL));
 		g_signal_connect(G_OBJECT(pwDirectionalSource), "toggled", G_CALLBACK(option_changed), bd);
@@ -1433,7 +1434,7 @@ static GtkWidget *LightingPage(BoardData *bd)
 		g_signal_connect( G_OBJECT( padjLightLevelAmbient ), "value-changed",
 					G_CALLBACK( option_changed ), NULL);
 		pwLightLevelAmbient = gtk_hscale_new(padjLightLevelAmbient);
-		gtk_tooltips_set_tip(ptt, pwLightLevelAmbient, _("Ambient light specifies the general light level"), 0);
+		gtk_widget_set_tooltip_text( pwLightLevelAmbient, _("Ambient light specifies the general light level"));
 		gtk_box_pack_start(GTK_BOX(hBox), pwLightLevelAmbient, TRUE, TRUE, 0);
 
 		hBox = gtk_hbox_new (FALSE, 0);
@@ -1447,7 +1448,7 @@ static GtkWidget *LightingPage(BoardData *bd)
 		g_signal_connect( G_OBJECT( padjLightLevelDiffuse ), "value-changed",
 					G_CALLBACK( option_changed ), NULL);
 		pwLightLevelDiffuse = gtk_hscale_new(padjLightLevelDiffuse);
-		gtk_tooltips_set_tip(ptt, pwLightLevelDiffuse, _("Diffuse light specifies light from the light source"), 0);
+		gtk_widget_set_tooltip_text( pwLightLevelDiffuse, _("Diffuse light specifies light from the light source"));
 		gtk_box_pack_start(GTK_BOX(hBox), pwLightLevelDiffuse, TRUE, TRUE, 0);
 
 		hBox = gtk_hbox_new (FALSE, 0);
@@ -1461,7 +1462,7 @@ static GtkWidget *LightingPage(BoardData *bd)
 		g_signal_connect( G_OBJECT( padjLightLevelSpecular ), "value-changed",
 					G_CALLBACK( option_changed ), NULL);
 		pwLightLevelSpecular = gtk_hscale_new(padjLightLevelSpecular);
-		gtk_tooltips_set_tip(ptt, pwLightLevelSpecular, _("Specular light is reflected light off shiny surfaces"), 0);
+		gtk_widget_set_tooltip_text( pwLightLevelSpecular, _("Specular light is reflected light off shiny surfaces"));
 		gtk_box_pack_start(GTK_BOX(hBox), pwLightLevelSpecular, TRUE, TRUE, 0);
 	}
 	else
@@ -1511,7 +1512,7 @@ static GtkWidget *GeneralPage( BoardData *bd, GtkWidget* bdMain ) {
     pwLabels = gtk_check_button_new_with_label( _("Numbered point labels") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwLabels ), bd->rd->fLabels );
     gtk_box_pack_start( GTK_BOX( pw ), pwLabels, FALSE, FALSE, 0 );
-    gtk_tooltips_set_tip( ptt, pwLabels, _("Show or hide point numbers"), NULL );
+    gtk_widget_set_tooltip_text( pwLabels, _("Show or hide point numbers"));
 
     pwDynamicLabels = gtk_check_button_new_with_label( _("Dynamic labels") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwDynamicLabels ), 
@@ -1524,12 +1525,12 @@ static GtkWidget *GeneralPage( BoardData *bd, GtkWidget* bdMain ) {
                         G_CALLBACK( LabelsToggled ), 0);
     LabelsToggled(0, 0);
     
-    gtk_tooltips_set_tip( ptt, pwDynamicLabels,
+    gtk_widget_set_tooltip_text( pwDynamicLabels,
 			  _("Update the labels so they are correct "
-                            "for the player on roll"), NULL );
+                            "for the player on roll"));
 
 	pwMoveIndicator = gtk_check_button_new_with_label (_("Show move indicator"));
-	gtk_tooltips_set_tip(ptt, pwMoveIndicator, _("Show or hide arrow indicating who is moving"), 0);
+	gtk_widget_set_tooltip_text( pwMoveIndicator, _("Show or hide arrow indicating who is moving"));
 	gtk_box_pack_start (GTK_BOX (pw), pwMoveIndicator, FALSE, FALSE, 0);
 
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwMoveIndicator), bd->rd->showMoveIndicator);
@@ -1546,7 +1547,7 @@ static GtkWidget *GeneralPage( BoardData *bd, GtkWidget* bdMain ) {
 	gtk_container_add (GTK_CONTAINER (frame3dOptions), pw);
 	
 	pwShowShadows = gtk_check_button_new_with_label (_("Show shadows"));
-	gtk_tooltips_set_tip(ptt, pwShowShadows, _("Display shadows, this option requires a fast graphics card"), 0);
+	gtk_widget_set_tooltip_text( pwShowShadows, _("Display shadows, this option requires a fast graphics card"));
 	gtk_box_pack_start (GTK_BOX (pw), pwShowShadows, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwShowShadows), bd->rd->showShadows);
 	g_signal_connect(G_OBJECT(pwShowShadows), "toggled", G_CALLBACK(toggle_show_shadows), NULL);
@@ -1562,7 +1563,7 @@ static GtkWidget *GeneralPage( BoardData *bd, GtkWidget* bdMain ) {
 	g_signal_connect( G_OBJECT( padjDarkness ), "value-changed",
 			       G_CALLBACK( option_changed ), NULL);
 	pwDarkness = gtk_hscale_new(padjDarkness);
-	gtk_tooltips_set_tip(ptt, pwDarkness, _("Vary the darkness of the shadows"), 0);
+	gtk_widget_set_tooltip_text( pwDarkness, _("Vary the darkness of the shadows"));
 	gtk_scale_set_draw_value(GTK_SCALE(pwDarkness), FALSE);
 	gtk_box_pack_start(GTK_BOX(hBox), pwDarkness, TRUE, TRUE, 0);
 
@@ -1572,17 +1573,17 @@ static GtkWidget *GeneralPage( BoardData *bd, GtkWidget* bdMain ) {
 	toggle_show_shadows(pwShowShadows, -1);
 
 	pwAnimateRoll = gtk_check_button_new_with_label (_("Animate dice rolls"));
-	gtk_tooltips_set_tip(ptt, pwAnimateRoll, _("Dice rolls will shake across board"), 0);
+	gtk_widget_set_tooltip_text( pwAnimateRoll, _("Dice rolls will shake across board"));
 	gtk_box_pack_start (GTK_BOX (pw), pwAnimateRoll, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwAnimateRoll), bd->rd->animateRoll);
 	
 	pwAnimateFlag = gtk_check_button_new_with_label (_("Animate resignation flag"));
-	gtk_tooltips_set_tip(ptt, pwAnimateFlag, _("Waves resignation flag"), 0);
+	gtk_widget_set_tooltip_text( pwAnimateFlag, _("Waves resignation flag"));
 	gtk_box_pack_start (GTK_BOX (pw), pwAnimateFlag, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwAnimateFlag), bd->rd->animateFlag);
 
 	pwCloseBoard = gtk_check_button_new_with_label (_("Close board on exit"));
-	gtk_tooltips_set_tip(ptt, pwCloseBoard, _("When you quit gnubg, the board will close"), 0);
+	gtk_widget_set_tooltip_text( pwCloseBoard, _("When you quit gnubg, the board will close"));
 	gtk_box_pack_start (GTK_BOX (pw), pwCloseBoard, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwCloseBoard), bd->rd->closeBoardOnExit );
 
@@ -1604,7 +1605,7 @@ static GtkWidget *GeneralPage( BoardData *bd, GtkWidget* bdMain ) {
 	g_signal_connect( G_OBJECT( padjBoardAngle ), "value-changed",
 			       G_CALLBACK( option_changed ), NULL);
 	pwBoardAngle = gtk_hscale_new(padjBoardAngle);
-	gtk_tooltips_set_tip(ptt, pwBoardAngle, _("Vary the angle the board is tilted at"), 0);
+	gtk_widget_set_tooltip_text( pwBoardAngle, _("Vary the angle the board is tilted at"));
 	gtk_scale_set_digits( GTK_SCALE( pwBoardAngle ), 0 );
     gtk_widget_set_size_request( pwBoardAngle, 100, -1 );
 	gtk_box_pack_start(GTK_BOX(hBox), pwBoardAngle, FALSE, FALSE, 0);
@@ -1621,12 +1622,12 @@ static GtkWidget *GeneralPage( BoardData *bd, GtkWidget* bdMain ) {
 			       G_CALLBACK( option_changed ), NULL);
 	pwSkewFactor = gtk_hscale_new(padjSkewFactor);
     gtk_widget_set_size_request( pwSkewFactor, 100, -1 );
-	gtk_tooltips_set_tip(ptt, pwSkewFactor, _("Vary the field-of-view of the 3d display"), 0);
+	gtk_widget_set_tooltip_text( pwSkewFactor, _("Vary the field-of-view of the 3d display"));
 	gtk_scale_set_digits( GTK_SCALE( pwSkewFactor ), 0 );
 	gtk_box_pack_start(GTK_BOX(hBox), pwSkewFactor, FALSE, FALSE, 0);
 
 	pwPlanView = gtk_check_button_new_with_label (_("Plan view"));
-	gtk_tooltips_set_tip(ptt, pwPlanView, _("Display the 3d board with a 2d overhead view"), 0);
+	gtk_widget_set_tooltip_text( pwPlanView, _("Display the 3d board with a 2d overhead view"));
 	gtk_box_pack_start (GTK_BOX (pw), pwPlanView, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwPlanView), bd->rd->planView);
 	g_signal_connect(G_OBJECT(pwPlanView), "toggled", G_CALLBACK(toggle_planview), NULL);
@@ -1646,9 +1647,9 @@ static GtkWidget *GeneralPage( BoardData *bd, GtkWidget* bdMain ) {
 	g_signal_connect( G_OBJECT( padjAccuracy ), "value-changed",
 			       G_CALLBACK( option_changed ), NULL);
 	pwAccuracy = gtk_hscale_new(padjAccuracy);
-	gtk_tooltips_set_tip(ptt, pwAccuracy, _("Change how accurately curves are drawn."
+	gtk_widget_set_tooltip_text( pwAccuracy, _("Change how accurately curves are drawn."
 		" If performance is slow try lowering this value."
-		" Increasing this value will only have an effect on large displays"), 0);
+		" Increasing this value will only have an effect on large displays"));
 	gtk_scale_set_draw_value(GTK_SCALE(pwAccuracy), FALSE);
 	gtk_box_pack_start(GTK_BOX(hBox), pwAccuracy, TRUE, TRUE, 0);
 
@@ -1670,7 +1671,7 @@ static GtkWidget *GeneralPage( BoardData *bd, GtkWidget* bdMain ) {
 	g_signal_connect( G_OBJECT( padjDiceSize ), "value-changed",
 			       G_CALLBACK( DiceSizeChanged ), NULL);
 	pwDiceSize = gtk_hscale_new(padjDiceSize);
-	gtk_tooltips_set_tip(ptt, pwDiceSize, _("Vary the size of the dice"), 0);
+	gtk_widget_set_tooltip_text( pwDiceSize, _("Vary the size of the dice"));
 	gtk_scale_set_draw_value(GTK_SCALE(pwDiceSize), FALSE);
 	gtk_box_pack_start(GTK_BOX(hBox), pwDiceSize, TRUE, TRUE, 0);
 
@@ -1678,7 +1679,7 @@ static GtkWidget *GeneralPage( BoardData *bd, GtkWidget* bdMain ) {
 	gtk_box_pack_start(GTK_BOX(hBox), lab, FALSE, FALSE, 0);
 
 	pwQuickDraw = gtk_check_button_new_with_label (_("Quick drawing"));
-	gtk_tooltips_set_tip(ptt, pwQuickDraw, _("Fast drawing option to improve performance"), 0);
+	gtk_widget_set_tooltip_text( pwQuickDraw, _("Fast drawing option to improve performance"));
 	gtk_box_pack_start (GTK_BOX (pw), pwQuickDraw, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwQuickDraw), bd->rd->quickDraw);
 	g_signal_connect(G_OBJECT(pwQuickDraw), "toggled", G_CALLBACK(toggle_quick_draw), NULL);

@@ -29,6 +29,7 @@
 #include <string.h>
 #include "gtkboard.h"
 #include "gtkgame.h"
+#include "gtktoolbar.h"
 #include "positionid.h"
 #if USE_BOARD3D
 #include "fun3d.h"

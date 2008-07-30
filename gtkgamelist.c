@@ -415,7 +415,7 @@ extern void GTKSetMoveRecord( moverecord *pmr ) {
 	GtkWidget* pwWin = GetPanelWidget(WINDOW_HINT);
     if (pwWin)
 	{
-		hintdata *phd = gtk_object_get_user_data(GTK_OBJECT(pwWin));
+		hintdata *phd = g_object_get_data(G_OBJECT(pwWin), "user_data");
 		phd->fButtonsValid = FALSE;
 		CheckHintButtons(phd);
 	}

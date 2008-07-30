@@ -1,3 +1,4 @@
+
 /*
  * gtkboard.c
  *
@@ -4108,7 +4109,7 @@ static gboolean cube_widget_expose( GtkWidget *cube, GdkEventExpose *event,
     int cubeStride = setSize * CUBE_WIDTH * 4;
     int cubeFaceStride = setSize * CUBE_LABEL_WIDTH * 3;
     
-    n = GPOINTER_TO_INT(gtk_object_get_user_data( GTK_OBJECT( cube ) ));
+    n = GPOINTER_TO_INT(g_object_get_data( G_OBJECT( cube ), "user_data" ));
     if( ( nValue = n % N_CUBES_IN_WIDGET - 1 ) == -1 )
 	nValue = 5; /* use 64 cube for 1 */
     
@@ -4142,8 +4143,8 @@ static gboolean cube_widget_press( GtkWidget *cube, GdkEvent *event,
 {
 
     GtkWidget *pwTable = cube->parent;
-    int n = GPOINTER_TO_INT(gtk_object_get_user_data( GTK_OBJECT( cube ) ));
-    int *an = gtk_object_get_user_data( GTK_OBJECT( pwTable ) );
+    int n = GPOINTER_TO_INT(g_object_get_data( G_OBJECT( cube ), "user_data" ));
+    int *an = g_object_get_data( G_OBJECT( pwTable ), "user_data" );
 
     an[ 0 ] = n % N_CUBES_IN_WIDGET; /* value */
     if( n < N_CUBES_IN_WIDGET )
@@ -4195,8 +4196,8 @@ extern GtkWidget *board_cube_widget( Board *board )
 		for( x = 0; x <= N_CUBES_IN_WIDGET-1; x++ )
 		{
 			pwCube = gtk_drawing_area_new();
-			gtk_object_set_user_data( GTK_OBJECT( pwCube ),
-							GINT_TO_POINTER(( y * N_CUBES_IN_WIDGET + x ) ));
+			g_object_set_data( G_OBJECT( pwCube ),
+							GINT_TO_POINTER(( y * N_CUBES_IN_WIDGET + x )), "user_data" );
 			gtk_drawing_area_size( GTK_DRAWING_AREA( pwCube ),
 						CUBE_WIDTH * setSize,
 						CUBE_HEIGHT * setSize );
@@ -4224,7 +4225,7 @@ static gboolean dice_widget_expose( GtkWidget *dice, GdkEventExpose *event,
 
     int setSize = bd->rd->nSize;
 
-    int n = GPOINTER_TO_INT(gtk_object_get_user_data( GTK_OBJECT( dice ) ));
+    int n = GPOINTER_TO_INT(g_object_get_data( G_OBJECT( dice ), "user_data" ));
 
     DrawDie( dice->window, TTachDice, TTachPip, setSize, bd->gc_copy,
              0, 0, bd->turn > 0, n % 6 + 1 );
@@ -4239,8 +4240,8 @@ static gboolean dice_widget_press( GtkWidget *dice, GdkEvent *event, BoardData
 {
 
     GtkWidget *pwTable = dice->parent;
-    int n = GPOINTER_TO_INT(gtk_object_get_user_data( GTK_OBJECT( dice ) ));
-    int *an = gtk_object_get_user_data( GTK_OBJECT( pwTable ) );
+    int n = GPOINTER_TO_INT(g_object_get_data( G_OBJECT( dice ), "user_data" ));
+    int *an = g_object_get_data( G_OBJECT( pwTable ), "user_data" );
 
     an[ 0 ] = n % 6 + 1;
     an[ 1 ] = n / 6 + 1;
@@ -4306,8 +4307,8 @@ extern GtkWidget *board_dice_widget( Board *board )
 		for( x = 0; x < 6; x++ )
 		{
 			pwDice = gtk_drawing_area_new();
-			gtk_object_set_user_data( GTK_OBJECT( pwDice ),
-							GINT_TO_POINTER(( y * 6 + x ) ));
+			g_object_set_data( G_OBJECT( pwDice ),
+							GINT_TO_POINTER(( y * 6 + x )), "user_data" );
 			gtk_drawing_area_size( GTK_DRAWING_AREA( pwDice ),
 						2 * DIE_WIDTH * setSize,
 						DIE_HEIGHT * setSize );

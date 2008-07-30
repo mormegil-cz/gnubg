@@ -1,3 +1,10 @@
+Wed Jul 30 17:01:07 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtkboard.c, gtkchequer.c, gtkcube.c, gtkgame.c, gtkgame.h,
+	gtkgamelist.c, gtkmovefilter.c, gtkmovelist.c, gtkpanels.c,
+	gtkprefs.c, gtksplash.c, gtktempmap.c, gtktoolbar.h, gtkwindows.c:
+	more deprecated gtk functions
+
 Wed Jul 30 13:20:05 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtkboard.c, gtkgame.c, gtkgame.h, gtkoptions.c, gtkpanels.c,

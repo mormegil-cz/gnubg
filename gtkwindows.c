@@ -30,7 +30,6 @@
 #include "gtkgame.h"
 #include <gdk/gdkkeysyms.h>
 #include <glib/gi18n.h>
-#include "gtktoolbar.h"
 typedef void (*dialog_func_ty)(GtkWidget *, void*);
 
 typedef struct _Warning

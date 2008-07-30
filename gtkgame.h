@@ -28,7 +28,6 @@
 
 extern GdkColor wlCol;
 extern GtkAccelGroup *pagMain;
-extern GtkItemFactory *pif;
 #if (GTK_MAJOR_VERSION < 3) && (GTK_MINOR_VERSION < 12)
 extern GtkTooltips *ptt;
 #define gtk_widget_set_tooltip_text(pw,text) gtk_tooltips_set_tip(ptt, (pw), (text), NULL)

@@ -1,3 +1,4 @@
+
 /*
  * gtktempmap.c
  *
@@ -313,14 +314,14 @@ UpdateTempMapEquities( tempmapwidget *ptmw ) {
 static void
 ExposeQuadrant( GtkWidget *pw, GdkEventExpose *pev, tempmapwidget *ptmw ) {
   
-  int *pi = (int *) gtk_object_get_user_data( GTK_OBJECT( pw ) );
+  int *pi = (int *) g_object_get_data( G_OBJECT( pw ), "user_data" );
   int i = 0;
   int j = 0;
   int m = 0;
   float r = 0.0f;
   cubeinfo ci;
 
-  gtk_draw_box( pw->style, pw->window, GTK_STATE_NORMAL, GTK_SHADOW_IN,
+  gtk_paint_box( pw->style, pw->window, GTK_STATE_NORMAL, GTK_SHADOW_IN, NULL, NULL, NULL,
                 0, 0, pw->allocation.width, pw->allocation.height );
 
   /* this is very ugly! Use Pango instead... 
@@ -375,7 +376,7 @@ static void
 ExposeDie( GtkWidget *pw, GdkEventExpose *pev,
            tempmapwidget *ptmw ) {
 
-  int *pi = (int *) gtk_object_get_user_data( GTK_OBJECT( pw ) );
+  int *pi = (int *) g_object_get_data( G_OBJECT( pw ), "user_data" );
   GdkGC *gc = ( ( BoardData *) ( BOARD( pwBoard ) )->board_data )->gc_copy;
   int x, y;
   int nSizeDie;
@@ -424,7 +425,7 @@ ExposeDie( GtkWidget *pw, GdkEventExpose *pev,
 static void
 TempMapPlyToggled( GtkWidget *pw, tempmapwidget *ptmw ) {
 
-  int *pi = (int *) gtk_object_get_user_data( GTK_OBJECT( pw ) );
+  int *pi = (int *) g_object_get_data( G_OBJECT( pw ), "user_data" );
 #if defined(REDUCTION_CODE)
   evalcontext ec = { TRUE, 0, 0, TRUE, 0.0 };
 #else
@@ -598,7 +599,7 @@ GTKShowTempMap( const matchstate ams[], const int n,
           pi = (int *) g_malloc( sizeof ( int ) );
           *pi = i * 6 + j + m * 100;
           
-          gtk_object_set_data_full( GTK_OBJECT( ptm->aapwDA[ i ][ j ] ),
+          g_object_set_data_full( G_OBJECT( ptm->aapwDA[ i ][ j ] ),
                                     "user_data", pi, g_free );
           
           g_signal_connect( G_OBJECT( ptm->aapwDA[ i ][ j ] ),
@@ -619,7 +620,7 @@ GTKShowTempMap( const matchstate ams[], const int n,
         pi = (int *) g_malloc( sizeof ( int ) );
         *pi = i;
         
-        gtk_object_set_data_full( GTK_OBJECT( pw ),
+        g_object_set_data_full( G_OBJECT( pw ),
                                   "user_data", pi, g_free );
         
         g_signal_connect( G_OBJECT( pw ),
@@ -638,7 +639,7 @@ GTKShowTempMap( const matchstate ams[], const int n,
         pi = (int *) g_malloc( sizeof ( int ) );
         *pi = i;
         
-        gtk_object_set_data_full( GTK_OBJECT( pw ),
+        g_object_set_data_full( G_OBJECT( pw ),
                                   "user_data", pi, g_free );
         
         g_signal_connect( G_OBJECT( pw ),
@@ -666,7 +667,7 @@ GTKShowTempMap( const matchstate ams[], const int n,
       pi = (int *) g_malloc( sizeof ( int ) );
       *pi = -m - 1;
       
-      gtk_object_set_data_full( GTK_OBJECT( ptm->pwAverage ),
+      g_object_set_data_full( G_OBJECT( ptm->pwAverage ),
                                 "user_data", pi, g_free );
       
       g_signal_connect( G_OBJECT( ptm->pwAverage ),
@@ -696,7 +697,7 @@ GTKShowTempMap( const matchstate ams[], const int n,
                                i, i + 1,
                                1, 2 );
     
-    gtk_object_set_data( GTK_OBJECT( pw ), "user_data", NULL );
+    g_object_set_data( G_OBJECT( pw ), "user_data", NULL );
     
     g_signal_connect( G_OBJECT( pw ),
                         "expose_event",
@@ -738,7 +739,7 @@ GTKShowTempMap( const matchstate ams[], const int n,
     pi = (int *) g_malloc( sizeof ( int ) );
     *pi = i;
     
-    gtk_object_set_data_full( GTK_OBJECT( pw ),
+    g_object_set_data_full( G_OBJECT( pw ),
                               "user_data", pi, g_free );
     
     g_signal_connect( G_OBJECT( pw ), "toggled", 

@@ -190,7 +190,7 @@ static void
 SetupSettingsMenuActivate ( GtkWidget *pwItem,
                             movefiltersetupwidget *pfmsw ) {
 
-  int *piSelected = (int*)gtk_object_get_data ( GTK_OBJECT ( pwItem ), "user_data" );
+  int *piSelected = (int*)g_object_get_data ( G_OBJECT ( pwItem ), "user_data" );
 
   if ( *piSelected == NUM_MOVEFILTER_SETTINGS )
     return; /* user defined */
@@ -352,7 +352,7 @@ MoveFilterSetup ( movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
 
     pi = (int*)g_malloc ( sizeof ( int ) );
     *pi = i;
-    gtk_object_set_data_full( GTK_OBJECT( pwItem ), "user_data", 
+    g_object_set_data_full( G_OBJECT( pwItem ), "user_data", 
                               pi, g_free );
 
     g_signal_connect( G_OBJECT ( pwItem ), "activate",
@@ -396,7 +396,7 @@ MoveFilterSetup ( movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
 
   }
 
-  gtk_object_set_data_full( GTK_OBJECT( pwSetup ), "user_data", 
+  g_object_set_data_full( G_OBJECT( pwSetup ), "user_data", 
                             pmfsw, g_free );
 
   pmfsw->pfOK = pfOK;
@@ -413,7 +413,7 @@ static void
 MoveFilterSetupOK ( GtkWidget *pw, GtkWidget *pwMoveFilterSetup ) {
 
   movefiltersetupwidget *pmfsw = (movefiltersetupwidget *)
-    gtk_object_get_user_data ( GTK_OBJECT ( pwMoveFilterSetup ) );
+    g_object_get_data ( G_OBJECT ( pwMoveFilterSetup ), "user_data" );
 
                                
   if ( pmfsw->pfOK )
@@ -464,7 +464,7 @@ static void
 SettingsMenuActivate ( GtkWidget *pwItem,
                        movefilterwidget *pmfw ) {
 
-  int *piSelected = (int*)gtk_object_get_data ( GTK_OBJECT ( pwItem ), "user_data" );
+  int *piSelected = (int*)g_object_get_data ( G_OBJECT ( pwItem ), "user_data" );
 
   if ( *piSelected == NUM_MOVEFILTER_SETTINGS )
     return; /* user defined */
@@ -544,7 +544,7 @@ MoveFilterWidget ( movefilter *pmf, int *pfOK,
 
     pi = (int*)g_malloc ( sizeof ( int ) );
     *pi = i;
-    gtk_object_set_data_full( GTK_OBJECT( pwItem ), "user_data", 
+    g_object_set_data_full( G_OBJECT( pwItem ), "user_data", 
                               pi, g_free );
 
     g_signal_connect( G_OBJECT ( pwItem ), "activate",
@@ -569,7 +569,7 @@ MoveFilterWidget ( movefilter *pmf, int *pfOK,
 
   /* save movefilterwidget */
 
-  gtk_object_set_data_full( GTK_OBJECT( pwFrame ), "user_data", pmfw, g_free );
+  g_object_set_data_full( G_OBJECT( pwFrame ), "user_data", pmfw, g_free );
 
   MoveFilterChanged ( pmfw );
 
@@ -624,7 +624,7 @@ MoveFilterSetPredefined ( GtkWidget *pwMoveFilter,
 
 
   movefilterwidget *pmfw = (movefilterwidget *)
-    gtk_object_get_user_data ( GTK_OBJECT ( pwMoveFilter ) );
+    g_object_get_data ( G_OBJECT ( pwMoveFilter ), "user_data" );
 
   if ( i < 0 )
     return;

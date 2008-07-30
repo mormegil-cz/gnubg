@@ -30,7 +30,6 @@
 #include "util.h"
 #include "eval.h"
 #include "gtksplash.h"
-#include "gtktoolbar.h"
 #include "gtkgame.h"
 #include <glib/gi18n.h>
 

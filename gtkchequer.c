@@ -265,7 +265,7 @@ MoveListEval ( GtkWidget *pw, hintdata *phd )
 static void
 MoveListEvalPly ( GtkWidget *pw, hintdata *phd )
 {
-  char *szPly = (char*)gtk_object_get_data ( GTK_OBJECT ( pw ), "user_data" );
+  char *szPly = (char*)g_object_get_data ( G_OBJECT ( pw ), "user_data" );
 #if defined (REDUCTION_CODE)
   evalcontext ec = { TRUE, 0, 0, TRUE, 0.0 };
 #else
@@ -306,7 +306,7 @@ static void MoveListRolloutPresets(GtkWidget * pw, hintdata * phd)
 	gchar *path=NULL;
 	gchar *command=NULL;
 
-	preset = (const gchar *) gtk_object_get_data(GTK_OBJECT(pw), "user_data");
+	preset = (const gchar *) g_object_get_data(G_OBJECT(pw), "user_data");
 	file = g_strdup_printf("%s.rol", preset);
 	path = g_build_filename(szHomeDirectory, "rol", file, NULL);
 	if (g_file_test(path, G_FILE_TEST_IS_REGULAR)) {
@@ -439,8 +439,6 @@ CreateMoveListTools ( hintdata *phd )
   int i;
   char *sz;
 
-  GtkTooltips *pt = gtk_tooltips_new ();
-
   pwDetails = 
     phd->fDetails ? NULL : gtk_toggle_button_new_with_label( _("Details") );
   phd->pwRollout = pwRollout;
@@ -479,10 +477,10 @@ CreateMoveListTools ( hintdata *phd )
     g_signal_connect( G_OBJECT( pwply ), "clicked",
                         G_CALLBACK( MoveListEvalPly ), phd );
 
-    gtk_object_set_data_full ( GTK_OBJECT ( pwply ), "user_data", sz, g_free );
+    g_object_set_data_full ( G_OBJECT ( pwply ), "user_data", sz, g_free );
 
     sz = g_strdup_printf ( _("Evaluate play on cubeful %d-ply"), i );
-    gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwply, sz, sz );
+    gtk_widget_set_tooltip_text( pwply, sz);
     g_free ( sz );
 
   }
@@ -523,10 +521,10 @@ CreateMoveListTools ( hintdata *phd )
 	  g_signal_connect( G_OBJECT( ro_preset ), "clicked",
 			  G_CALLBACK( MoveListRolloutPresets ), phd );
 
-	  gtk_object_set_data_full ( GTK_OBJECT ( ro_preset ), "user_data", sz, g_free );
+	  g_object_set_data_full ( G_OBJECT ( ro_preset ), "user_data", sz, g_free );
 
 	  sz = g_strdup_printf ( _("Rollout preset %c"), i+'a' );
-	  gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), ro_preset, sz, sz );
+	  gtk_widget_set_tooltip_text( ro_preset, sz);
 	  g_free ( sz );
 
   }
@@ -581,38 +579,30 @@ CreateMoveListTools ( hintdata *phd )
 
   /* tool tips */
 
-  gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwRollout,
-                         _("Rollout chequer play with current settings"),
+  gtk_widget_set_tooltip_text( pwRollout,
                          _("Rollout chequer play with current settings") );
 
-  gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwEval,
-                         _("Evaluate chequer play with current settings"),
+  gtk_widget_set_tooltip_text( pwEval,
                          _("Evaluate chequer play with current settings") );
 
-  gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwRolloutSettings,
-                         _("Modify rollout settings"),
+  gtk_widget_set_tooltip_text( pwRolloutSettings,
                          _("Modify rollout settings") );
 
-  gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwEvalSettings,
-                         _("Modify evaluation settings"),
+  gtk_widget_set_tooltip_text( pwEvalSettings,
                          _("Modify evaluation settings") );
 
-  gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwMWC,
-                         _("Toggle output as MWC or equity"),
+  gtk_widget_set_tooltip_text( pwMWC,
                          _("Toggle output as MWC or equity") );
 
-  gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwCopy,
-                         _("Copy selected moves to clipboard"),
+  gtk_widget_set_tooltip_text( pwCopy,
                          _("Copy selected moves to clipboard") );
 
-  gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwMove,
-                         _("Move the selected move"),
+  gtk_widget_set_tooltip_text( pwMove,
                          _("Move the selected move") );
 
-  gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwTempMap,
+  gtk_widget_set_tooltip_text( pwTempMap,
                          _("Show Sho Sengoku Temperature Map of position "
-                           "after selected move"),
-                         "" );
+                           "after selected move"));
 
 
   return pwTools;
@@ -698,7 +688,7 @@ CreateMoveList( movelist *pml, unsigned int *piHighlight, const int fButtonsVali
                        mlt,
                        FALSE, FALSE, 0 );
 
-    gtk_object_set_data_full( GTK_OBJECT( pwHBox ), "user_data", 
+    g_object_set_data_full( G_OBJECT( pwHBox ), "user_data", 
                               phd, free );
 
 	CheckHintButtons(phd);

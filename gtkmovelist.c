@@ -146,7 +146,7 @@ extern void MoveListRefreshSize(void)
 	custom_cell_renderer_invalidate_size();
 	if (pwMoveAnalysis)
 	{
-		hintdata *phd = (hintdata *)gtk_object_get_user_data(GTK_OBJECT(pwMoveAnalysis));
+		hintdata *phd = (hintdata *)g_object_get_data(G_OBJECT(pwMoveAnalysis), "user_data");
 		MoveListUpdate(phd);
 	}
 }

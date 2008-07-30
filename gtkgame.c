@@ -1,3 +1,4 @@
+
 /*
  * gtkgame.c
  *
@@ -490,7 +491,7 @@ extern int GTKGetManualDice( unsigned int an[ 2 ] ) {
     
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
 		       pwDice );
-    gtk_object_set_user_data( GTK_OBJECT( pwDice ), an );
+    g_object_set_data( G_OBJECT( pwDice ), "user_data", an );
     
     g_signal_connect( G_OBJECT( pwDice ), "destroy",
 			G_CALLBACK( DestroySetDice ), pwDialog );
@@ -529,7 +530,7 @@ extern void GTKSetCube( gpointer p, guint n, GtkWidget *pw ) {
     
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
 		       pwCube );
-    gtk_object_set_user_data( GTK_OBJECT( pwCube ), an );
+    g_object_set_data( G_OBJECT( pwCube ), "user_data", an );
     
     g_signal_connect( G_OBJECT( pwCube ), "destroy",
 			G_CALLBACK( DestroySetCube ), pwDialog );
@@ -606,7 +607,7 @@ static void SkillMenuActivate( GtkWidget *pw, skilltype st ) {
     char sz[ 64 ];
 
     sprintf( sz, "annotate %s %s", 
-             (char *) gtk_object_get_user_data( GTK_OBJECT( pw ) ),
+             (char *) g_object_get_data( G_OBJECT( pw ), "user_data" ),
              aszSkillCmd[ st ] );
     UserCommand( sz );
 
@@ -625,7 +626,7 @@ SkillMenu(skilltype stSelect, char* szAnno)
       GtkWidget* pwItem = gtk_menu_item_new_with_label(l);
     
       gtk_menu_append( GTK_MENU( pwMenu ), pwItem);
-      gtk_object_set_user_data( GTK_OBJECT( pwItem ), szAnno );
+      g_object_set_data( G_OBJECT( pwItem ), "user_data", szAnno );
       g_signal_connect( G_OBJECT( pwItem ), "activate",
 			  G_CALLBACK( SkillMenuActivate ),
 			  GINT_TO_POINTER( st ) );
@@ -1832,7 +1833,7 @@ static void EvalGetValues ( evalcontext *pec, evalwidget *pew ) {
 #if defined( REDUCTION_CODE )
   pwMenu = gtk_option_menu_get_menu ( GTK_OPTION_MENU ( pew->pwReduced ) );
   pwItem = gtk_menu_get_active ( GTK_MENU ( pwMenu ) );
-  pi = (int *) gtk_object_get_user_data ( GTK_OBJECT ( pwItem ) );
+  pi = (int *) g_object_get_data ( G_OBJECT ( pwItem ), "user_data" );
   pec->nReduced = *pi;
 #else
   pec->fUsePrune =
@@ -1917,7 +1918,7 @@ static void SettingsMenuActivate ( GtkWidget *pwItem,
   int *piSelected;
   
 
-  piSelected = gtk_object_get_data ( GTK_OBJECT ( pwItem ), "user_data" );
+  piSelected = g_object_get_data ( G_OBJECT ( pwItem ), "user_data" );
 
   if ( *piSelected == NUM_SETTINGS )
     return; /* user defined */
@@ -2028,7 +2029,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
 
       pi = malloc ( sizeof ( int ) );
       *pi = i;
-      gtk_object_set_data_full( GTK_OBJECT( pwItem ), "user_data", 
+      g_object_set_data_full( G_OBJECT( pwItem ), "user_data", 
                                 pi, free );
 
       g_signal_connect( G_OBJECT ( pwItem ), "activate",
@@ -2116,7 +2117,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
       gtk_menu_append ( GTK_MENU ( pwMenu ), pwItem );
       pi = g_malloc ( sizeof ( int ) );
       *pi = i;
-      gtk_object_set_data_full ( GTK_OBJECT ( pwItem ), "user_data", 
+      g_object_set_data_full ( G_OBJECT ( pwItem ), "user_data", 
                                  pi, g_free );
 
     }
@@ -2274,7 +2275,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
                          G_CALLBACK( EvalChanged ), pew );
 #endif 
     
-    gtk_object_set_data_full( GTK_OBJECT( pwEval ), "user_data", pew, free );
+    g_object_set_data_full( G_OBJECT( pwEval ), "user_data", pew, free );
 
     return pwEval;
 }
@@ -2282,7 +2283,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
 static void EvalOK( GtkWidget *pw, void *p ) {
 
     GtkWidget *pwEval = GTK_WIDGET( p );
-    evalwidget *pew = gtk_object_get_user_data( GTK_OBJECT( pwEval ) );
+    evalwidget *pew = g_object_get_data( G_OBJECT( pwEval ), "user_data" );
 
     if( pew->pfOK )
 	*pew->pfOK = TRUE;
@@ -2354,10 +2355,10 @@ EvaluationOK ( GtkWidget *pw, setevalwidget *psew ) {
   if ( psew->pfOK )
     *psew->pfOK = TRUE;
 
-  pew = gtk_object_get_user_data ( GTK_OBJECT ( psew->pwChequer ) );
+  pew = g_object_get_data ( G_OBJECT ( psew->pwChequer ), "user_data" );
   EvalGetValues ( pew->pec, pew );
 
-  pew = gtk_object_get_user_data ( GTK_OBJECT ( psew->pwCube ) );
+  pew = g_object_get_data ( G_OBJECT ( psew->pwCube ), "user_data" );
   EvalGetValues ( pew->pec, pew );
 
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
@@ -3559,14 +3560,6 @@ static void CreateMainWindow(void)
     gtk_window_set_role( GTK_WINDOW( pwMain ), "main" );
     gtk_window_set_type_hint( GTK_WINDOW( pwMain ),
 			      GDK_WINDOW_TYPE_HINT_NORMAL );
-    /* NB: the following call to gtk_object_set_user_data is needed
-       to work around a nasty bug in GTK+ (the problem is that calls to
-       gtk_object_get_user_data relies on a side effect from a previous
-       call to gtk_object_set_data).  Adding a call here guarantees that
-       gtk_object_get_user_data will work as we expect later.
-       FIXME: this can eventually be removed once GTK+ is fixed. */
-    gtk_object_set_user_data( GTK_OBJECT( pwMain ), NULL );
-    
     gtk_window_set_title( GTK_WINDOW( pwMain ), _("GNU Backgammon") );
     /* FIXME add an icon */
     gtk_container_add( GTK_CONTAINER( pwMain ),
@@ -4157,7 +4150,7 @@ static void ToolButtonPressed( GtkWidget *pw, newwidget *pnw ) {
   char sz[40];
   int *pi;
 
-  pi = (int *) gtk_object_get_user_data ( GTK_OBJECT ( pw ) );
+  pi = (int *) g_object_get_data ( G_OBJECT ( pw ), "user_data" );
   sprintf(sz, "new match %d", *pi);
   UpdatePlayerSettings( pnw );
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
@@ -4285,7 +4278,7 @@ static GtkWidget *NewWidget( newwidget *pnw)
      
       pi = malloc ( sizeof ( int ) );
       *pi = i;
-     gtk_object_set_data_full( GTK_OBJECT( pwButtons ), "user_data",
+     g_object_set_data_full( G_OBJECT( pwButtons ), "user_data",
                                   pi, free );
 
      g_signal_connect( G_OBJECT( pwButtons ), "clicked",
