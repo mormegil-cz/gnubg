@@ -820,35 +820,35 @@ static void CreateGameWindow( void ) {
 			pw = PixmapButton( pcmap, prevgame_xpm,
 					   "previous game" ),
 			FALSE, FALSE, 4 );
-    gtk_tooltips_set_tip( ptt, pw, _("Move back to the previous game"), "" );
+    gtk_widget_set_tooltip_text(pw, _("Move back to the previous game"));
     gtk_box_pack_start( GTK_BOX( phbox ),
 			pw = PixmapButton( pcmap, prevmove_xpm,
 					   "previous roll" ),
 			FALSE, FALSE, 0 );
-    gtk_tooltips_set_tip( ptt, pw, _("Move back to the previous roll"), "" );
+    gtk_widget_set_tooltip_text(pw, _("Move back to the previous roll"));
     gtk_box_pack_start( GTK_BOX( phbox ),
 			pw = PixmapButton( pcmap, nextmove_xpm,
 					   "next roll" ),
 			FALSE, FALSE, 4 );
-    gtk_tooltips_set_tip( ptt, pw, _("Move ahead to the next roll"), "" );
+    gtk_widget_set_tooltip_text(pw, _("Move ahead to the next roll"));
     gtk_box_pack_start( GTK_BOX( phbox ),
 			pw = PixmapButton( pcmap, nextgame_xpm,
 				      "next game" ),
 			FALSE, FALSE, 0 );
-    gtk_tooltips_set_tip( ptt, pw, _("Move ahead to the next game"), "" );
+    gtk_widget_set_tooltip_text(pw, _("Move ahead to the next game"));
 
     gtk_box_pack_start( GTK_BOX( phbox ),
 			pw = PixmapButton( pcmap, prevmarked_xpm,
 					   "previous marked" ),
 			FALSE, FALSE, 4 );
-    gtk_tooltips_set_tip( ptt, pw, _("Move back to the previous marked "
-				     "decision" ), "" );
+    gtk_widget_set_tooltip_text(pw, _("Move back to the previous marked "
+				     "decision" ));
     gtk_box_pack_start( GTK_BOX( phbox ),
 			pw = PixmapButton( pcmap, nextmarked_xpm,
 					   "next marked" ),
 			FALSE, FALSE, 0 );
-    gtk_tooltips_set_tip( ptt, pw, _("Move ahead to the next marked "
-				     "decision" ), "" );
+    gtk_widget_set_tooltip_text(pw, _("Move ahead to the next marked "
+				     "decision" ));
         
     gtk_menu_append( GTK_MENU( pm ), gtk_menu_item_new_with_label(
 	_("(no game)") ) );

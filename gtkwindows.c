@@ -397,7 +397,7 @@ extern int GTKShowWarning(warningType warning, GtkWidget *pwParent)
 		g_free(buf);
 		pwTick = gtk_check_button_new();
 		gtk_container_add(GTK_CONTAINER(pwTick), label);
-		gtk_tooltips_set_tip(ptt, pwTick, _("If set, this message won't appear again"), 0);
+		gtk_widget_set_tooltip_text(pwTick, _("If set, this message won't appear again"));
 		gtk_box_pack_start( GTK_BOX( pwv ), pwTick, TRUE, TRUE, 0 );
 		gtk_widget_grab_focus(DialogArea(pwDialog, DA_OK));
 

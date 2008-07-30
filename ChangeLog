@@ -1,3 +1,10 @@
+Wed Jul 30 13:20:05 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtkboard.c, gtkgame.c, gtkgame.h, gtkoptions.c, gtkpanels.c,
+	gtktempmap.c, gtkwindows.c: port tooltips to the gtk-2.12 version,
+	which is more flexible than the old one (e.g. treeview cells). Allow
+	for tips with the older gtk versions to work as well.
+
 Wed Jul 30 12:50:47 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* play.c: show board when dice rolled if, and only if, fX or fDisplay.

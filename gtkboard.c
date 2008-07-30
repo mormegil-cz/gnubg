@@ -3745,7 +3745,7 @@ static GtkWidget *chequer_key_new( int iPlayer, Board *board )
 			G_CALLBACK( key_press ), iPlayer ? pw : NULL );
 
     sprintf( sz, _("Set player %d on roll."), iPlayer );
-    gtk_tooltips_set_tip( ptt, pw, sz, NULL );
+    gtk_widget_set_tooltip_text(pw, sz);
 
     return pw;
 }

@@ -276,7 +276,9 @@ GtkWidget *pwAnalysis;
 GtkWidget *pwCommentary;
 static moverecord *pmrAnnotation;
 GtkAccelGroup *pagMain;
+#if (GTK_MAJOR_VERSION < 3) && (GTK_MINOR_VERSION < 12)
 GtkTooltips *ptt;
+#endif
 GtkItemFactory *pif;
 guint nNextTurn = 0; /* GTK idle function */
 static guint idOutput, idProgress;
@@ -2006,10 +2008,10 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
     gtk_container_add ( GTK_CONTAINER ( pw2 ),
                         gtk_label_new ( _("Select a predefined setting:") ) );
 
-    gtk_tooltips_set_tip( ptt, pwev,
+    gtk_widget_set_tooltip_text(pwev,
                           _("Select a predefined setting, ranging from "
                             "beginner's play to the grandmaster setting "
-                            "that will test your patience"), NULL );
+                            "that will test your patience"));
 
     pwMenu = gtk_menu_new ();
 
@@ -2060,12 +2062,11 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
     gtk_container_add ( GTK_CONTAINER ( pw2 ), pwev );
 
-    gtk_tooltips_set_tip( ptt, pwev,
+    gtk_widget_set_tooltip_text(pwev,
                           _("Specify how many rolls GNU Backgammon should "
                             "lookahead. Each ply costs approximately a factor "
                             "of 21 in computational time. Also note that "
-                            "2-ply is equivalent to Snowie's 3-ply setting."),
-                          NULL );
+                            "2-ply is equivalent to Snowie's 3-ply setting."));
 
     pwFrame2 = gtk_frame_new ( _("Lookahead") );
     gtk_container_add ( GTK_CONTAINER ( pwev ), pwFrame2 );
@@ -2090,14 +2091,14 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
     gtk_container_add ( GTK_CONTAINER ( pw2 ), pwev );
 
-    gtk_tooltips_set_tip( ptt, pwev,
+    gtk_widget_set_tooltip_text(pwev,
 				/* xgettext: no-c-format */
                           _("Instead of averaging over all 21 possible "
                             "dice rolls it is possible to average over a "
                             "reduced set, for example 7 rolls for the 33% "
                             "speed option. The 33% speed option will "
                             "typically be three times faster than the "
-                            "full search without reduction."), NULL );
+                            "full search without reduction."));
                           
     pwFrame2 = gtk_frame_new ( _("Reduced evaluations") );
     gtk_container_add ( GTK_CONTAINER ( pwev ), pwFrame2 );
@@ -2163,20 +2164,20 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
 
     if ( fMoveFilter ) 
       /* checker play */
-      gtk_tooltips_set_tip( ptt, pew->pwCubeful,
+      gtk_widget_set_tooltip_text(pew->pwCubeful,
                             _("Instruct GNU Backgammon to use cubeful "
                               "evaluations, i.e., include the value of "
                               "cube ownership in the evaluations. It is "
-                              "recommended to enable this option."), NULL );
+                              "recommended to enable this option."));
     else
       /* checker play */
-      gtk_tooltips_set_tip( ptt, pew->pwCubeful,
+      gtk_widget_set_tooltip_text(pew->pwCubeful,
                             _("GNU Backgammon will always perform "
                               "cubeful evaluations for cube decisions. "
                               "Disabling this option will make GNU Backgammon "
                               "use cubeless evaluations in the interval nodes "
                               "of higher ply evaluations. It is recommended "
-                              "to enable this option"), NULL );
+                              "to enable this option"));
 
     /* noise */
 
@@ -2184,7 +2185,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
     gtk_container_add ( GTK_CONTAINER ( pw2 ), pwev );
 
-    gtk_tooltips_set_tip( ptt, pwev,
+    gtk_widget_set_tooltip_text(pwev,
                           _("You can use this option to introduce noise "
                             "or errors in the evaluations. This is useful for "
                             "introducing levels below 0-ply. The lower rated "
@@ -2192,7 +2193,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
                             "server uses this technique. "
                             "The introduced noise can be "
                             "deterministic, i.e., always the same noise for "
-                            "the same position, or it can be random"), NULL );
+                            "the same position, or it can be random"));
 
     pwFrame2 = gtk_frame_new ( _("Noise") );
     gtk_container_add ( GTK_CONTAINER ( pwev ), pwFrame2 );
@@ -2236,14 +2237,14 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
       gtk_container_add ( GTK_CONTAINER ( pwEval ), pwev ); 
       gtk_container_add ( GTK_CONTAINER ( pwev ), pew->pwMoveFilter );
 
-      gtk_tooltips_set_tip( ptt, pwev,
+      gtk_widget_set_tooltip_text(pwev,
                             _("GNU Backgammon will evaluate all moves at "
                               "0-ply. The move filter controls how many "
                               "moves to be evaluted at higher plies. "
                               "A \"smaller\" filter will be faster, but "
                               "GNU Backgammon may not find the best move. "
                               "Power users may set up their own filters "
-                              "by clicking on the [Modify] button"), NULL );
+                              "by clicking on the [Modify] button"));
 
     }
     else
@@ -3735,7 +3736,9 @@ extern void InitGTK(int *argc, char ***argv)
 			     (gdk_pixbuf_new_from_xpm_data
 			      ((const char **) question_xpm)));
 
+#if (GTK_MAJOR_VERSION < 3) && (GTK_MINOR_VERSION < 12)
 	ptt = gtk_tooltips_new();
+#endif
 	
 	gnubg_set_default_icon();
 
@@ -6722,23 +6725,23 @@ static void AddNavigation(GtkWidget* pvbox)
 	gtk_box_pack_start( GTK_BOX( phbox ),
 			pw = StatsPixmapButton(pcmap, allgames_xpm, StatsAllGames),
 			FALSE, FALSE, 4 );
-	gtk_tooltips_set_tip( ptt, pw, _("Show all games"), "" );
+	gtk_widget_set_tooltip_text(pw, _("Show all games"));
 	gtk_box_pack_start( GTK_BOX( phbox ),
 			pw = StatsPixmapButton(pcmap, prevgame_xpm, StatsFirstGame),
 			FALSE, FALSE, 4 );
-	gtk_tooltips_set_tip( ptt, pw, _("Move to first game"), "" );
+	gtk_widget_set_tooltip_text(pw, _("Move to first game"));
 	gtk_box_pack_start( GTK_BOX( phbox ),
 			pw = StatsPixmapButton(pcmap, prevmove_xpm, StatsPreviousGame),
 			FALSE, FALSE, 0 );
-	gtk_tooltips_set_tip( ptt, pw, _("Move back to the previous game"), "" );
+	gtk_widget_set_tooltip_text(pw, _("Move back to the previous game"));
 	gtk_box_pack_start( GTK_BOX( phbox ),
 			pw = StatsPixmapButton(pcmap, nextmove_xpm, StatsNextGame),
 			FALSE, FALSE, 4 );
-	gtk_tooltips_set_tip( ptt, pw, _("Move ahead to the next game"), "" );
+	gtk_widget_set_tooltip_text(pw, _("Move ahead to the next game"));
 	gtk_box_pack_start( GTK_BOX( phbox ),
 			pw = StatsPixmapButton(pcmap, nextgame_xpm, StatsLastGame),
 			FALSE, FALSE, 0 );
-	gtk_tooltips_set_tip( ptt, pw, _("Move ahead to last game"), "" );
+	gtk_widget_set_tooltip_text(pw, _("Move ahead to last game"));
 
 	pm = gtk_menu_new();
 
@@ -6904,7 +6907,7 @@ extern void GTKDumpStatcontext( int game )
 	gtk_notebook_popup_disable( GTK_NOTEBOOK( pwNotebook ) );
 
 /* Not sure if this is a good idea...
-	gtk_tooltips_set_tip( ptt, pwNotebook, _("Right click to copy statistics"), "" );
+	gtk_widget_set_tooltip_text(pwNotebook, _("Right click to copy statistics"));
 */
 
 	pvbox = gtk_vbox_new( FALSE, 0 ),
@@ -6952,13 +6955,13 @@ extern void GTKDumpStatcontext( int game )
 	pw = StatGraph(gd);
 	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), pw,
 					  gtk_label_new(_("Graph")));
-    gtk_tooltips_set_tip( ptt, pw, _("This graph shows the total error rates per game for each player."
+    gtk_widget_set_tooltip_text(pw, _("This graph shows the total error rates per game for each player."
 		" The games are along the bottom and the error rates up the side."
-		" Chequer error in green, cube error in blue."), "" );
+		" Chequer error in green, cube error in blue."));
 #endif
 
 	pwUsePanels = gtk_check_button_new_with_label(_("Split statistics into panels"));
-	gtk_tooltips_set_tip(ptt, pwUsePanels, "Show data in a single list or split other several panels", 0);
+	gtk_widget_set_tooltip_text(pwUsePanels, "Show data in a single list or split other several panels");
 	gtk_box_pack_start (GTK_BOX (pvbox), pwUsePanels, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwUsePanels), fGUIUseStatsPanel);
 	g_signal_connect(G_OBJECT(pwUsePanels), "toggled", G_CALLBACK(toggle_fGUIUseStatsPanel), NULL);

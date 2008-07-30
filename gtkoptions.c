@@ -309,18 +309,14 @@ AddSoundWidgets (GtkWidget * container)
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (soundBeepIllegal),
 				  fGUIBeep);
     gtk_box_pack_start (GTK_BOX (pwvboxTop), soundBeepIllegal, FALSE, FALSE, 0);
-    gtk_tooltips_set_tip (ptt, soundBeepIllegal,
-			  _
-			  ("Emit a warning beep if invalid moves are attempted."),
-			  NULL);
+    gtk_widget_set_tooltip_text(soundBeepIllegal, _ ("Emit a warning beep if invalid moves are attempted."));
 
     soundsEnabled =
 	gtk_check_button_new_with_label (_("Enable sound effects"));
     gtk_box_pack_start (GTK_BOX (pwvboxTop), soundsEnabled, FALSE, FALSE, 0);
-    gtk_tooltips_set_tip (ptt, soundsEnabled,
+    gtk_widget_set_tooltip_text( soundsEnabled,
 			  _
-			  ("Have GNU Backgammon make sound effects when various events occur."),
-			  NULL);
+			  ("Have GNU Backgammon make sound effects when various events occur."));
     g_signal_connect(G_OBJECT (soundsEnabled), "toggled", G_CALLBACK (SoundToggled), NULL);
 #define SOUND_COL 0
     for (i = 0; i < NUM_SOUNDS; i++)
@@ -470,49 +466,49 @@ static GtkWidget *OptionsPages( optionswidget *pow )
     pow->pwAutoGame = gtk_check_button_new_with_label (
 	_("Start new games immediately"));
     gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwAutoGame, FALSE, FALSE, 0);
-    gtk_tooltips_set_tip( ptt, pow->pwAutoGame,
+    gtk_widget_set_tooltip_text(pow->pwAutoGame,
 			  _("Whenever a game is complete, automatically "
 			    "start another one in the same match or "
-			    "session."), NULL );
+			    "session."));
 
     pow->pwAutoRoll = gtk_check_button_new_with_label (
 	_("Roll the dice automatically"));
     gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwAutoRoll, FALSE, FALSE, 0);
-    gtk_tooltips_set_tip( ptt, pow->pwAutoRoll,
+    gtk_widget_set_tooltip_text(pow->pwAutoRoll,
 			  _("On a human player's turn, if they are not "
 			    "permitted to double, then roll the dice "
-			    "immediately."), NULL );
+			    "immediately."));
     
     pow->pwAutoMove = gtk_check_button_new_with_label (
 	_("Play forced moves automatically"));
     gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwAutoMove, FALSE, FALSE, 0);
-    gtk_tooltips_set_tip( ptt, pow->pwAutoMove,
+    gtk_widget_set_tooltip_text(pow->pwAutoMove,
 			  _("On a human player's turn, if there are no "
 			    "legal moves or only one legal move, then "
-			    "finish their turn for them."), NULL );
+			    "finish their turn for them."));
 
     pow->pwAutoBearoff = gtk_check_button_new_with_label(
 	_("Play bearoff moves automatically"));
     gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwAutoBearoff, FALSE, FALSE, 0);
-    gtk_tooltips_set_tip( ptt, pow->pwAutoBearoff,
+    gtk_widget_set_tooltip_text(pow->pwAutoBearoff,
 			  _("On a human player's turn in a non-contact "
 			    "bearoff, if there is an unambiguous move which "
 			    "bears off as many chequers as possible, then "
-			    "choose that move automatically."), NULL );
+			    "choose that move automatically."));
 
     pow->pwIllegal = gtk_check_button_new_with_label(
 	_("Allow dragging to illegal points"));
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwIllegal ),
 				  fGUIIllegal );
     gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwIllegal, FALSE, FALSE, 0 );
-    gtk_tooltips_set_tip( ptt, pow->pwIllegal,
+    gtk_widget_set_tooltip_text(pow->pwIllegal,
 			  _("If set, when considering your move you may "
 			    "temporarily move chequers onto points which "
 			    "cannot be reached with the current dice roll.  "
 			    "If unset, you may move chequers only onto "
 			    "legal points.  Either way, the resulting move "
 			    "must be legal when you pick up the dice, or it "
-			    "will not be accepted."), NULL );
+			    "will not be accepted."));
 
     pwf = gtk_frame_new( _("Variations") );
     gtk_box_pack_start( GTK_BOX ( pwvbox ), pwf, FALSE, FALSE, 0 );
@@ -535,8 +531,8 @@ static GtkWidget *OptionsPages( optionswidget *pow )
       gtk_toggle_button_set_active ( 
                GTK_TOGGLE_BUTTON ( pow->apwVariations[ i ] ), bgvDefault == (bgvariation)i );
 
-      gtk_tooltips_set_tip( ptt, pow->apwVariations[ i ],
-                            gettext ( aszVariationsTooltips[ i ] ), NULL );
+      gtk_widget_set_tooltip_text(pow->apwVariations[ i ],
+                            gettext ( aszVariationsTooltips[ i ] ));
 
     }
 
@@ -561,11 +557,10 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 	_("Use doubling cube") );
     gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwCubeUsecube,
 			FALSE, FALSE, 0 );
-    gtk_tooltips_set_tip( ptt, pow->pwCubeUsecube,
+    gtk_widget_set_tooltip_text(pow->pwCubeUsecube,
 			  _("When the doubling cube is used, under certain "
 			    "conditions players may offer to raise the stakes "
-			    "of the game by using the \"double\" command."),
-			  NULL );
+			    "of the game by using the \"double\" command."));
     g_signal_connect( G_OBJECT ( pow->pwCubeUsecube ), "toggled",
 			G_CALLBACK( UseCubeToggled ), pow );
 
@@ -573,23 +568,23 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 	_("Use Crawford rule"));
     gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwAutoCrawford,
 			FALSE, FALSE, 0);
-    gtk_tooltips_set_tip( ptt, pow->pwAutoCrawford,
+    gtk_widget_set_tooltip_text(pow->pwAutoCrawford,
 			  _("In match play, the Crawford rule specifies that "
 			    "if either player reaches match point (i.e. is "
 			    "one point away from winning the match), then "
 			    "the doubling cube may not be used for the next "
-			    "game only."), NULL );
+			    "game only."));
   
     pow->pwCubeJacoby = gtk_check_button_new_with_label(
 	_("Use Jacoby rule") );
     gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwCubeJacoby,
 			FALSE, FALSE, 0 );
-    gtk_tooltips_set_tip( ptt, pow->pwCubeJacoby,
+    gtk_widget_set_tooltip_text(pow->pwCubeJacoby,
 			  _("Under the Jacoby rule, players may not score "
 			    "double or triple for a gammon or backgammon "
 			    "unless the cube has been doubled and accepted.  "
 			    "The Jacoby rule is only ever used in money "
-			    "games, not matches."), NULL );
+			    "games, not matches."));
 
     pwev = gtk_event_box_new();
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
@@ -607,12 +602,12 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 					  1, 0);
     gtk_box_pack_start (GTK_BOX (pwhbox), pow->pwBeavers, TRUE, TRUE, 0);
     gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pow->pwBeavers), TRUE);
-    gtk_tooltips_set_tip (ptt, pwev,
+    gtk_widget_set_tooltip_text( pwev,
 			  _("When doubled, a player may \"beaver\" (instantly "
 			    "redouble).  This option allows you to specify "
 			    "how many consecutive redoubles are permitted.  "
 			    "Beavers are only ever used in money games, not "
-			    "matches."), NULL);
+			    "matches."));
 
     pwev = gtk_event_box_new();
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
@@ -630,13 +625,13 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 						pow->padjCubeAutomatic),
 					    1, 0);
     gtk_box_pack_start (GTK_BOX (pwhbox), pow->pwAutomatic, TRUE, TRUE, 0);
-    gtk_tooltips_set_tip (ptt, pwev,
+    gtk_widget_set_tooltip_text( pwev,
 			  _("If the opening roll is a double, the players "
 			    "may choose to increase the cube value and "
 			    "reroll (an \"automatic double\").  This option "
 			    "allows you to control how many automatic doubles "
 			    "may be applied.  Automatic doubles are only "
-			    "ever used in money games, not matches." ), NULL);
+			    "ever used in money games, not matches." ));
     gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pow->pwAutomatic), TRUE);
 
     /* Tutor options */
@@ -649,26 +644,24 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 
     pow->pwTutor = gtk_check_button_new_with_label (_("Tutor mode"));
     gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwTutor, FALSE, FALSE, 0);
-    gtk_tooltips_set_tip( ptt, pow->pwTutor,
+    gtk_widget_set_tooltip_text(pow->pwTutor,
 			  _("When using the tutor, GNU Backgammon will "
 			    "analyse your decisions during play and prompt "
-			    "you if it thinks you are making a mistake."),
-			  NULL );
+			    "you if it thinks you are making a mistake."));
     
     g_signal_connect( G_OBJECT ( pow->pwTutor ), "toggled",
 			 G_CALLBACK ( TutorToggled ), pow );
 
     pow->pwTutorCube = gtk_check_button_new_with_label (_("Cube Decisions"));
     gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwTutorCube, FALSE, FALSE, 0);
-    gtk_tooltips_set_tip( ptt, pow->pwTutorCube,
-			  _("Use the tutor for cube decisions."), NULL );
+    gtk_widget_set_tooltip_text(pow->pwTutorCube,
+			  _("Use the tutor for cube decisions."));
     
     pow->pwTutorChequer = gtk_check_button_new_with_label (_("Chequer play"));
     gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwTutorChequer,
 			FALSE, FALSE, 0);
-    gtk_tooltips_set_tip( ptt, pow->pwTutorChequer,
-			  _("Use the tutor for chequer play decisions."),
-			  NULL );
+    gtk_widget_set_tooltip_text(pow->pwTutorChequer,
+			  _("Use the tutor for chequer play decisions."));
 
     pwf = gtk_frame_new (_("Tutor decisions"));
     gtk_box_pack_start (GTK_BOX (pwvbox), pwf, TRUE, TRUE, 0);
@@ -680,17 +673,17 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 	NULL, _("Same as Evaluation"));
     gtk_box_pack_start (GTK_BOX (pwb), pow->pwTutorEvalHint,
 			FALSE, FALSE, 0);
-    gtk_tooltips_set_tip( ptt, pow->pwTutorEvalHint,
+    gtk_widget_set_tooltip_text(pow->pwTutorEvalHint,
 			  _("The tutor will consider your decisions using "
-			    "the \"Evaluation\" settings."), NULL );
+			    "the \"Evaluation\" settings."));
 	
     pow->pwTutorEvalAnalysis = gtk_radio_button_new_with_label_from_widget(
 	GTK_RADIO_BUTTON( pow->pwTutorEvalHint ), _("Same as Analysis"));
     gtk_box_pack_start (GTK_BOX (pwb), pow->pwTutorEvalAnalysis,
 			FALSE, FALSE, 0);
-    gtk_tooltips_set_tip( ptt, pow->pwTutorEvalAnalysis,
+    gtk_widget_set_tooltip_text(pow->pwTutorEvalAnalysis,
 			  _("The tutor will consider your decisions using "
-			    "the \"Analysis\" settings."), NULL );
+			    "the \"Analysis\" settings."));
 
     pwev = gtk_event_box_new();
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
@@ -706,10 +699,10 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 		gtk_combo_box_append_text (GTK_COMBO_BOX (pow->pwTutorSkill), gettext( *ppch ));
 	}
 	g_assert(nTutorSkillCurrent >= 0 && nTutorSkillCurrent <= 2) ;
-    gtk_tooltips_set_tip (ptt, pwev,
+    gtk_widget_set_tooltip_text( pwev,
 			  _("Specify how bad GNU Backgammon must think a "
 			    "decision is before questioning you about a "
-			    "possible mistake."), NULL );
+			    "possible mistake."));
 
     gtk_widget_set_sensitive (pow->pwTutorSkill, fTutor);
     gtk_widget_set_sensitive( pow->pwTutorCube, fTutor );
@@ -729,12 +722,11 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 	_("Clockwise movement"));
     gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwGameClockwise,
 			FALSE, FALSE, 0);
-    gtk_tooltips_set_tip( ptt, pow->pwGameClockwise,
+    gtk_widget_set_tooltip_text(pow->pwGameClockwise,
 			  _("Orient up the board so that player 1's chequers "
 			    "advance clockwise (and player 0 moves "
 			    "anticlockwise).  Otherwise, player 1 moves "
-			    "anticlockwise and player 0 moves clockwise."),
-			  NULL );
+			    "anticlockwise and player 0 moves clockwise."));
   
     pwev = gtk_event_box_new();
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
@@ -751,10 +743,10 @@ static GtkWidget *OptionsPages( optionswidget *pow )
     gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pw), TRUE);
     gtk_box_pack_start (GTK_BOX (pwhbox), gtk_label_new( _("ms") ),
 			FALSE, FALSE, 0);
-    gtk_tooltips_set_tip (ptt, pwev,
+    gtk_widget_set_tooltip_text( pwev,
 			  _("Set a delay so that GNU Backgammon "
 			    "will pause between each move, to give you a "
-			    "chance to see it."), NULL );
+			    "chance to see it."));
 
     pow->pwUseDiceIcon = 
 	gtk_check_button_new_with_label( _("Show dice below board when human "
@@ -763,55 +755,52 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 				  bd->rd->fDiceArea );
     gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwUseDiceIcon, FALSE, FALSE,
 			0 );
-    gtk_tooltips_set_tip( ptt, pow->pwUseDiceIcon,
+    gtk_widget_set_tooltip_text(pow->pwUseDiceIcon,
 			  _("When it is your turn to roll, a pair of dice "
 			    "will be shown below the board, and you can "
 			    "click on them to roll.  Even if you choose not "
 			    "to show the dice, you can always roll by "
 			    "clicking the area in the middle of the board "
-			    "where the dice will land."), NULL );
+			    "where the dice will land."));
     
     pow->pwShowIDs = gtk_check_button_new_with_label(
 	_("Show Position ID and Match ID above board") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwShowIDs ),
 				  bd->rd->fShowIDs);
     gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwShowIDs, FALSE, FALSE, 0 );
-    gtk_tooltips_set_tip( ptt, pow->pwShowIDs,
+    gtk_widget_set_tooltip_text(pow->pwShowIDs,
 			  _("Two entry fields will be shown above the board, "
 			    "which can be useful for recording, entering and "
 			    "exchanging board positions and match "
-			    "situations."), NULL );
+			    "situations."));
     
     pow->pwShowPips = gtk_check_button_new_with_label(
 	_("Show pip count below board") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwShowPips ),
 				  fGUIShowPips );
     gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwShowPips, FALSE, FALSE, 0 );
-    gtk_tooltips_set_tip( ptt, pow->pwShowPips,
+    gtk_widget_set_tooltip_text(pow->pwShowPips,
 			  _("The \"pip counts\" (number of points each player "
 			    "must advance all of their chequers to bear them "
-			    "all off) will be shown below the scores."),
-			  NULL );
+			    "all off) will be shown below the scores."));
 	
     pow->pwShowWastage = gtk_check_button_new_with_label(
 	_("Show EPC wastage below board") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwShowWastage ),
 				  fGUIShowWastage );
     gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwShowWastage, FALSE, FALSE, 0 );
-    gtk_tooltips_set_tip( ptt, pow->pwShowWastage,
+    gtk_widget_set_tooltip_text(pow->pwShowWastage,
 			  _("The \"effective pip count wastage\" "
-                            "will be shown below the scores."),
-			  NULL );
+                            "will be shown below the scores."));
 	
     pow->pwShowEPCs = gtk_check_button_new_with_label(
 	_("Show EPCs below board") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwShowEPCs ),
 				  fGUIShowEPCs );
     gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwShowEPCs, FALSE, FALSE, 0 );
-    gtk_tooltips_set_tip( ptt, pow->pwShowEPCs,
+    gtk_widget_set_tooltip_text(pow->pwShowEPCs,
 			  _("The \"effective pip counts\" "
-                            "will be shown below the scores."),
-			  NULL );
+                            "will be shown below the scores."));
 	
     pwAnimBox = gtk_hbox_new( FALSE, 0 );
     gtk_box_pack_start( GTK_BOX( pwvbox ), pwAnimBox, FALSE, FALSE, 0 );
@@ -827,9 +816,9 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 				  animGUI == ANIMATE_NONE );
     gtk_box_pack_start( GTK_BOX( pwBox ), pow->pwAnimateNone, FALSE, FALSE,
 			0 );
-    gtk_tooltips_set_tip( ptt, pow->pwAnimateNone,
+    gtk_widget_set_tooltip_text(pow->pwAnimateNone,
 			  _("Do not display any kind of animation for "
-			    "automatically moved chequers."), NULL );
+			    "automatically moved chequers."));
     
     pow->pwAnimateBlink = gtk_radio_button_new_with_label_from_widget(
 	GTK_RADIO_BUTTON( pow->pwAnimateNone ), _("Blink moving chequers") );
@@ -837,10 +826,9 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 				  animGUI == ANIMATE_BLINK );
     gtk_box_pack_start( GTK_BOX( pwBox ), pow->pwAnimateBlink, FALSE, FALSE,
 			0 );
-    gtk_tooltips_set_tip( ptt, pow->pwAnimateBlink,
+    gtk_widget_set_tooltip_text(pow->pwAnimateBlink,
 			  _("When automatically moving chequers, flash "
-			    "them between the original and final points."),
-			  NULL );
+			    "them between the original and final points."));
     
     pow->pwAnimateSlide = gtk_radio_button_new_with_label_from_widget(
 	GTK_RADIO_BUTTON( pow->pwAnimateNone ), _("Slide moving chequers") );
@@ -848,9 +836,9 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 				  animGUI == ANIMATE_SLIDE );
     gtk_box_pack_start( GTK_BOX( pwBox ), pow->pwAnimateSlide, FALSE, FALSE,
 			0 );
-    gtk_tooltips_set_tip( ptt, pow->pwAnimateSlide,
+    gtk_widget_set_tooltip_text(pow->pwAnimateSlide,
 			  _("Show automatically moved chequers moving across "
-			    "the board between the points."), NULL );
+			    "the board between the points."));
 
     pwev = gtk_event_box_new();
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
@@ -872,9 +860,9 @@ static GtkWidget *OptionsPages( optionswidget *pow )
     gtk_box_pack_start( GTK_BOX( pwSpeed ), pwScale, TRUE, TRUE, 0 );
     gtk_box_pack_start( GTK_BOX( pwSpeed ), gtk_label_new( _("Fast") ),
 			FALSE, FALSE, 4 );
-    gtk_tooltips_set_tip( ptt, pwev,
+    gtk_widget_set_tooltip_text(pwev,
 			  _("Control the rate at which blinking or sliding "
-			    "chequers are displayed."), NULL );
+			    "chequers are displayed."));
     
     g_signal_connect( G_OBJECT( pow->pwAnimateNone ), "toggled",
 			G_CALLBACK( ToggleAnimation ), pwSpeed );
@@ -885,10 +873,10 @@ static GtkWidget *OptionsPages( optionswidget *pow )
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwDragTargetHelp ),
 				  fGUIDragTargetHelp );
     gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwDragTargetHelp, FALSE, FALSE, 0 );
-    gtk_tooltips_set_tip( ptt, pow->pwDragTargetHelp,
+    gtk_widget_set_tooltip_text(pow->pwDragTargetHelp,
 			  _("The possible target points for a move will be "
 			    "indicated by coloured rectangles when a chequer "
-			    "has been dragged a short distance."), NULL );
+			    "has been dragged a short distance."));
 
     pow->pwDisplay = gtk_check_button_new_with_label (
 	_("Display computer moves"));
@@ -896,11 +884,11 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwDisplay ),
 				  fDisplay );
-    gtk_tooltips_set_tip (ptt, pow->pwDisplay,
+    gtk_widget_set_tooltip_text( pow->pwDisplay,
 			  _("Show each move made by a computer player.  You "
 			    "might want to turn this off when playing games "
 			    "between computer players, to speed things "
-			    "up."), NULL );
+			    "up."));
 
     pow->pwSetWindowPos = gtk_check_button_new_with_label(
 	_("Restore window positions") );
@@ -908,43 +896,41 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 			FALSE, FALSE, 0);
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwSetWindowPos ),
 				  fGUISetWindowPos );
-    gtk_tooltips_set_tip( ptt, pow->pwSetWindowPos,
+    gtk_widget_set_tooltip_text(pow->pwSetWindowPos,
 			  _("Restore the previous size and position when "
 			    "recreating windows.  This is really the job "
 			    "of the session manager and window manager, "
 			    "but since some platforms have poor or missing "
 			    "window managers, GNU Backgammon tries to "
-			    "do the best it can."), NULL );
+			    "do the best it can."));
     
     pow->pwOutputMWC = gtk_check_button_new_with_label (
 	_("Match equity as MWC"));
     gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwOutputMWC,
 			FALSE, FALSE, 0);
-    gtk_tooltips_set_tip( ptt, pow->pwOutputMWC,
+    gtk_widget_set_tooltip_text(pow->pwOutputMWC,
 			  _("Show match equities as match winning chances.  "
 			    "Otherwise, match equities will be shown as "
 			    "EMG (equivalent equity in a money game) "
-			    "points-per-game."), NULL );
+			    "points-per-game."));
     
     pow->pwOutputGWC = gtk_check_button_new_with_label (
 	_("GWC as percentage"));
     gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwOutputGWC,
 			FALSE, FALSE, 0);
-    gtk_tooltips_set_tip( ptt, pow->pwOutputGWC,
+    gtk_widget_set_tooltip_text(pow->pwOutputGWC,
 			  _("Show game winning chances as percentages (e.g. "
 			    "58.3%).  Otherwise, game winning chances will "
-			    "be shown as probabilities (e.g. 0.583)."),
-			  NULL );
+			    "be shown as probabilities (e.g. 0.583)."));
 
     pow->pwOutputMWCpst = gtk_check_button_new_with_label (
 	_("MWC as percentage"));
     gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwOutputMWCpst,
 			FALSE, FALSE, 0);
-    gtk_tooltips_set_tip( ptt, pow->pwOutputMWCpst,
+    gtk_widget_set_tooltip_text(pow->pwOutputMWCpst,
 			  _("Show match winning chances as percentages (e.g. "
 			    "71.2%).  Otherwise, match winning chances will "
-			    "be shown as probabilities (e.g. 0.712)."),
-			  NULL );
+			    "be shown as probabilities (e.g. 0.712)."));
 
     /* number of digits in output */
 
@@ -963,7 +949,7 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 					  1, 0);
     gtk_box_pack_start (GTK_BOX (pwhbox), pow->pwDigits, TRUE, TRUE, 0);
     gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pow->pwDigits), TRUE);
-    gtk_tooltips_set_tip (ptt, pwev,
+    gtk_widget_set_tooltip_text( pwev,
 			  _("Control the number of digits to be shown after "
                             "the decimal point in "
                             "probabilities and equities. "
@@ -979,8 +965,7 @@ static GtkWidget *OptionsPages( optionswidget *pow )
                             "winning chances are derived from this value "
                             "to produce numbers with approximately the same "
                             "number of digits. The default value of 3 results "
-                            "in MWCs being output as 50.33%."),
-                          NULL );
+                            "in MWCs being output as 50.33%."));
 
 
     /* Match options */
@@ -1010,9 +995,9 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 			gtk_label_new( _("points") ),
 			FALSE, FALSE, 0);
     gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pw), TRUE);
-    gtk_tooltips_set_tip (ptt, pwev,
+    gtk_widget_set_tooltip_text( pwev,
 			  _("Specify the default length to use when starting "
-			    "new matches."), NULL );
+			    "new matches."));
     
     pwf = gtk_frame_new (_("Match equity table"));
     gtk_box_pack_start (GTK_BOX (pwvbox), pwf, TRUE, TRUE, 0);
@@ -1031,20 +1016,18 @@ static GtkWidget *OptionsPages( optionswidget *pow )
     pow->pwLoadMET = gtk_button_new_with_label (_("Load..."));
     gtk_box_pack_start (GTK_BOX (pwb), pow->pwLoadMET, FALSE, FALSE, 0);
     gtk_container_set_border_width (GTK_CONTAINER (pow->pwLoadMET), 2);
-    gtk_tooltips_set_tip( ptt, pow->pwLoadMET,
-			  _("Read a file containing a match equity table."),
-			  NULL );
+    gtk_widget_set_tooltip_text(pow->pwLoadMET,
+			  _("Read a file containing a match equity table."));
 
     g_signal_connect( G_OBJECT ( pow->pwLoadMET ), "clicked",
 			 G_CALLBACK ( SetMET ), (gpointer) pwLabelFile );
 
     pow->pwCubeInvert = gtk_check_button_new_with_label (_("Invert table"));
     gtk_box_pack_start (GTK_BOX (pwb), pow->pwCubeInvert, FALSE, FALSE, 0);
-    gtk_tooltips_set_tip( ptt, pow->pwCubeInvert,
+    gtk_widget_set_tooltip_text(pow->pwCubeInvert,
 			  _("Use the specified match equity table around "
 			    "the other way (i.e., swap the players before "
-			    "looking up equities in the table)."),
-			  NULL );
+			    "looking up equities in the table)."));
 
     gtk_widget_set_sensitive( pow->pwLoadMET, fCubeUse );
     gtk_widget_set_sensitive( pow->pwCubeInvert, fCubeUse );
@@ -1068,23 +1051,22 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 				  fGUIHighDieFirst );
     gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwHigherDieFirst, FALSE, FALSE,
 			0 );
-    gtk_tooltips_set_tip( ptt, pow->pwHigherDieFirst,
+    gtk_widget_set_tooltip_text(pow->pwHigherDieFirst,
 			  _("Force the higher of the two dice to be shown "
-			    "on the left."), NULL );
+			    "on the left."));
     
     pow->pwDiceManual = gtk_radio_button_new_with_label( NULL,
 							 _("Manual dice") );
     gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwDiceManual, FALSE, FALSE, 0);
-    gtk_tooltips_set_tip( ptt, pow->pwDiceManual,
-			  _("Enter each dice roll by hand." ), NULL );
+    gtk_widget_set_tooltip_text(pow->pwDiceManual,
+			  _("Enter each dice roll by hand." ));
     
     pow->pwDicePRNG = gtk_radio_button_new_with_label_from_widget(
 	GTK_RADIO_BUTTON( pow->pwDiceManual ),
 	_("Random number generator:"));
-    gtk_tooltips_set_tip( ptt, pow->pwDicePRNG,
+    gtk_widget_set_tooltip_text(pow->pwDicePRNG,
 			  _("GNU Backgammon will generate dice rolls itself, "
-			    "with a generator selected from the menu below." ),
-			  NULL );
+			    "with a generator selected from the menu below." ));
     gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwDicePRNG, FALSE, FALSE, 0);
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pow->pwDiceManual),
 				  (rngCurrent == RNG_MANUAL));
@@ -1105,7 +1087,7 @@ static GtkWidget *OptionsPages( optionswidget *pow )
     for( i = 1; i < NUM_RNGS; i++)
 	{
 		gtk_combo_box_append_text(GTK_COMBO_BOX(pow->pwPRNGMenu), gettext( aszRNG[i] ));
-		gtk_tooltips_set_tip( ptt, pw, gettext( aszRNGTip[i] ), NULL );
+		gtk_widget_set_tooltip_text(pw, gettext( aszRNGTip[i] ));
     }
 
     pow->pwSeed = gtk_hbox_new(FALSE, 0);
@@ -1122,10 +1104,10 @@ static GtkWidget *OptionsPages( optionswidget *pow )
     gtk_box_pack_start (GTK_BOX (pow->pwSeed), pw, TRUE, TRUE, 0);
     gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pw), TRUE);
 		    
-    gtk_tooltips_set_tip( ptt, pow->pwSeed,
+    gtk_widget_set_tooltip_text(pow->pwSeed,
 			  _("Specify the \"seed\" (generator state), which "
 			    "can be useful in some circumstances to provide "
-			    "duplicate dice sequences."), NULL );
+			    "duplicate dice sequences."));
 
     gtk_widget_set_sensitive( pow->pwPRNGMenu, (rngCurrent != RNG_MANUAL));
     gtk_widget_set_sensitive( pow->pwSeed,  (rngCurrent != RNG_MANUAL));
@@ -1183,7 +1165,7 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 
     
 
-    gtk_tooltips_set_tip (ptt, pow->pwCheat,
+    gtk_widget_set_tooltip_text( pow->pwCheat,
 			  _("Now it's proven! GNU Backgammon is able to "
                             "manipulate the dice. This is meant as a "
                             "learning tool. Examples of use: (a) learn "
@@ -1191,7 +1173,7 @@ static GtkWidget *OptionsPages( optionswidget *pow )
                             "sequence, (b) learn to control your temper "
                             "while things are going bad, (c) learn to play "
                             "very good or very bad rolls, or "
-                            "(d) just have fun. " ), NULL );
+                            "(d) just have fun. " ));
 
     ManualDiceToggled( NULL, pow );
 
@@ -1214,19 +1196,19 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 	_("Confirm when aborting game"));
     gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwConfStart,
 			FALSE, FALSE, 0);
-    gtk_tooltips_set_tip( ptt, pow->pwConfStart,
+    gtk_widget_set_tooltip_text(pow->pwConfStart,
 			  _("Ask for confirmation when ending a game or "
 			    "starting a new game would erase the record "
-			    "of the game in progress."), NULL );
+			    "of the game in progress."));
 
     pow->pwConfOverwrite = gtk_check_button_new_with_label (
 	_("Confirm when overwriting existing files"));
     gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwConfOverwrite,
 			FALSE, FALSE, 0);
-    gtk_tooltips_set_tip( ptt, pow->pwConfOverwrite,
+    gtk_widget_set_tooltip_text(pow->pwConfOverwrite,
 			  _("Ask for confirmation when writing to a file "
 			    "would overwrite data in an existing file with "
-			    "the same name."), NULL );
+			    "the same name."));
     
     pow->pwRecordGames = gtk_check_button_new_with_label (
 	_("Record all games"));
@@ -1234,11 +1216,11 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 			FALSE, FALSE, 0);
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwRecordGames ),
                                 fRecord );
-    gtk_tooltips_set_tip( ptt, pow->pwRecordGames,
+    gtk_widget_set_tooltip_text(pow->pwRecordGames,
 			  _("Keep the game records for all previous games in "
 			    "the current match or session.  You might want "
 			    "to disable this when playing extremely long "
-			    "matches or sessions, to save memory."), NULL );
+			    "matches or sessions, to save memory."));
   
     pwev = gtk_event_box_new();
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
@@ -1256,13 +1238,13 @@ static GtkWidget *OptionsPages( optionswidget *pow )
     gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pw), TRUE);
     gtk_box_pack_start (GTK_BOX (pwhbox), gtk_label_new( _("entries") ),
 			FALSE, FALSE, 0);
-    gtk_tooltips_set_tip (ptt, pwev,
+    gtk_widget_set_tooltip_text( pwev,
 			  _("GNU Backgammon uses a cache of previous "
 			    "evaluations to speed up processing.  Increasing "
 			    "the size may help evaluations complete more "
 			    "quickly, but decreasing the size will use "
 			    "less memory.  Each entry uses around 50 bytes, "
-			    "depending on the platform." ), NULL );
+			    "depending on the platform." ));
 
     /* goto first game upon loading option */
 
@@ -1270,12 +1252,11 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 	_("Goto first game when loading matches or sessions"));
     gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwGotoFirstGame,
 			FALSE, FALSE, 0);
-    gtk_tooltips_set_tip( ptt, pow->pwGotoFirstGame,
+    gtk_widget_set_tooltip_text(pow->pwGotoFirstGame,
 			  _("This option controls whether GNU Backgammon "
                             "shows the board after the last move in the "
                             "match, game, or session or whether it should "
-                            "show the first move in the first game"),
-                          NULL );
+                            "show the first move in the first game"));
 
     /* display styles in game list */
 
@@ -1283,11 +1264,10 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 	_("Display colours for marked moves in game list"));
     gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwGameListStyles,
 			FALSE, FALSE, 0);
-    gtk_tooltips_set_tip( ptt, pow->pwGameListStyles,
+    gtk_widget_set_tooltip_text(pow->pwGameListStyles,
 			  _("This option controls whether moves in the "
                             "game list window are shown in different "
-                            "colours depending on their analysis"),
-                          NULL );
+                            "colours depending on their analysis"));
 
     table = gtk_table_new (2, 3, FALSE);
     
@@ -1353,9 +1333,9 @@ static GtkWidget *OptionsPages( optionswidget *pow )
     gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pw), TRUE);
     gtk_box_pack_start (GTK_BOX (pwhbox), gtk_label_new( _("threads") ),
 			FALSE, FALSE, 0);
-    gtk_tooltips_set_tip (ptt, pwev,
+    gtk_widget_set_tooltip_text( pwev,
 			  _("The number of threads to use in multi-threaded operations,"
-			  " this should be set to the number of logical processing units avaliable"), NULL );
+			  " this should be set to the number of logical processing units avaliable"));
 #endif
     /* return notebook */
 
