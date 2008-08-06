@@ -4196,8 +4196,8 @@ extern GtkWidget *board_cube_widget( Board *board )
 		for( x = 0; x <= N_CUBES_IN_WIDGET-1; x++ )
 		{
 			pwCube = gtk_drawing_area_new();
-			g_object_set_data( G_OBJECT( pwCube ),
-							GINT_TO_POINTER(( y * N_CUBES_IN_WIDGET + x )), "user_data" );
+			g_object_set_data( G_OBJECT( pwCube ), "user_data",
+							GINT_TO_POINTER(( y * N_CUBES_IN_WIDGET + x )));
 			gtk_drawing_area_size( GTK_DRAWING_AREA( pwCube ),
 						CUBE_WIDTH * setSize,
 						CUBE_HEIGHT * setSize );
@@ -4307,8 +4307,8 @@ extern GtkWidget *board_dice_widget( Board *board )
 		for( x = 0; x < 6; x++ )
 		{
 			pwDice = gtk_drawing_area_new();
-			g_object_set_data( G_OBJECT( pwDice ),
-							GINT_TO_POINTER(( y * 6 + x )), "user_data" );
+			g_object_set_data( G_OBJECT( pwDice ), "user_data",
+							GINT_TO_POINTER(( y * 6 + x )));
 			gtk_drawing_area_size( GTK_DRAWING_AREA( pwDice ),
 						2 * DIE_WIDTH * setSize,
 						DIE_HEIGHT * setSize );
