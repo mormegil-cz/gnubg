@@ -475,7 +475,7 @@ ShowBestMoveToggled( GtkWidget *pw, tempmapwidget *ptmw ) {
 
 
 static void
-DestroyDialog( gpointer p ) {
+DestroyDialog( gpointer p, GObject *obj ) {
 
   tempmapwidget *ptmw = (tempmapwidget *) p;
   int i;
@@ -777,7 +777,7 @@ GTKShowTempMap( const matchstate ams[], const int n,
   /* modality */
 
   gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 400, 500 ); 
-  gtk_object_weakref( GTK_OBJECT( pwDialog ), DestroyDialog, ptmw );
+  g_object_weak_ref( G_OBJECT( pwDialog ), DestroyDialog, ptmw );
 
   GTKRunDialog(pwDialog);
 }

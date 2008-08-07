@@ -1,3 +1,9 @@
+Thu Aug  7 15:28:33 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* configure.in: add options to disable deprecated glib/gtk functions
+	* gtkgame.c, gtktempmap.c: replace gtk_object_weakref with
+	g_object_weakref
+
 Thu Aug  7 15:19:09 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* board3d/gtkcolour3d.c: replace af gtk_combo with a gtk_combo_box
