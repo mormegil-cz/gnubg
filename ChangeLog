@@ -1,3 +1,9 @@
+Thu Aug  7 15:19:09 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* board3d/gtkcolour3d.c: replace af gtk_combo with a gtk_combo_box
+	* gtkgame.c, gtkrace.c, gtkrelational.c, gtktheory.c: g_object_unref
+	the gtktreemodel in a couple of places where forgotten
+
 Wed Jul 30 20:27:26 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h: issue warning if libintl.h is included too early to

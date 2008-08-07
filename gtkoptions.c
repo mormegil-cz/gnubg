@@ -330,6 +330,7 @@ AddSoundWidgets (GtkWidget * container)
       }
 
     soundList = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+    g_object_unref (G_OBJECT (store));	/* The view now holds a reference.  We can get rid of our own reference */
     gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(soundList)), GTK_SELECTION_BROWSE);
     gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (soundList), -1, _("Sound Event"), renderer, "text", SOUND_COL, NULL);
     gtk_tree_view_set_headers_clickable (GTK_TREE_VIEW (soundList), FALSE);
@@ -337,7 +338,6 @@ AddSoundWidgets (GtkWidget * container)
     g_signal_connect (soundList, "map_event", G_CALLBACK (SoundGrabFocus), NULL);
     g_signal_connect (soundList, "destroy", G_CALLBACK (SoundTidy), NULL);
 
-    g_object_unref (G_OBJECT (store));	/* The view now holds a reference.  We can get rid of our own reference */
 
     pwScrolled = gtk_scrolled_window_new (NULL, NULL);
     gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (pwScrolled),

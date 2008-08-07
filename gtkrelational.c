@@ -241,11 +241,11 @@ static GtkWidget *do_list_store(void)
 		return NULL;
 
 	treeview = gtk_tree_view_new_with_model(model);
+	g_object_unref(model);
 	gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(treeview), TRUE);
 	gtk_tree_view_set_search_column(GTK_TREE_VIEW(treeview),
 					COLUMN_NICK);
 
-	g_object_unref(model);
 
 	add_columns(GTK_TREE_VIEW(treeview));
 
@@ -368,6 +368,7 @@ static GtkWidget *GetRelList(RowSet * pRow)
 			gtk_list_store_set(store, &iter, j, pRow->data[i][j], -1);
 	}
 	treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+	g_object_unref(store);
 	renderer = gtk_cell_renderer_text_new();
 	for (j = 0; j < cols; j++)
 		gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview), -1, pRow->data[0][j], renderer, "text", j, NULL);
@@ -683,6 +684,7 @@ extern GtkWidget *RelationalOptions(void)
 
 	dbStore = gtk_list_store_new(1, G_TYPE_STRING);
 	dbList = gtk_tree_view_new_with_model(GTK_TREE_MODEL(dbStore));
+	g_object_unref(dbStore);
 	gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(dbList)), GTK_SELECTION_BROWSE);
 	gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(dbList), -1, _("Databases"), gtk_cell_renderer_text_new(), "text", 0, NULL);
 	gtk_tree_view_set_headers_clickable(GTK_TREE_VIEW(dbList), FALSE);

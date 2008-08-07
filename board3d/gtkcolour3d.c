@@ -31,14 +31,13 @@
 
 static GtkWidget *pcpAmbient, *pcpDiffuse, *pcpSpecular;
 static GtkAdjustment *padjShine, *padjOpacity;
-static GtkWidget *psOpacity, *pOpacitylabel, *pTexturelabel, *pwPreview, *textureCombo;
+static GtkWidget *psOpacity, *pOpacitylabel, *pTexturelabel, *pwPreview, *textureComboBox;
 static Material col3d;
 static Material cancelValue;
 static int useOpacity, useTexture;
 static float opacityValue;
 static int bUpdate = TRUE;
 static GLUquadricObj *qobj;
-static char lastTextureStr[NAME_SIZE + 1];
 
 /* Store the previews details here */
 #define MAX_DETAILS 15
@@ -190,21 +189,16 @@ static void SetupColourPreview(void)
 	glLoadIdentity();
 }
 
-static void TextureChange(void)
+static void TextureChange(GtkComboBox * combo, gpointer data)
 {
-	char* current = (char *)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(textureCombo)->entry));
+	char *current = gtk_combo_box_get_active_text(combo);
 
-	if (current && *current && *lastTextureStr && (strcmp(current, lastTextureStr)))
-	{
-		strcpy(lastTextureStr, current);
+	if (!strcmp(current, NO_TEXTURE_STRING))
+		col3d.textureInfo = 0;
+	else
+		FindNamedTexture(&col3d.textureInfo, current);
 
-		if (!strcmp(current, NO_TEXTURE_STRING))
-			col3d.textureInfo = 0;
-		else
-			FindNamedTexture(&col3d.textureInfo, current);
-
-		UpdateColourPreview(0);
-	}
+	UpdateColourPreview(0);
 }
 
 static gboolean expose_event_preview3d(GtkWidget *widget, GdkEventExpose *notused, Material* pMat)
@@ -243,13 +237,13 @@ static GtkWidget *CreateGLPreviewWidget(Material* pMat)	// Rename this (and the 
 	/* Set OpenGL-capability to the widget - no list sharing */
 	if (!gtk_widget_set_gl_capability(p3dWidget, getGlConfig(), NULL, TRUE, GDK_GL_RGBA_TYPE))
 	{
-		g_print("Can't create opengl capable widget\n");
+		outputerrf("Can't create opengl capable widget\n");
 		return NULL;
 	}
 
 	if (p3dWidget == NULL)
 	{
-		g_print("Can't create opengl drawing widget\n");
+		outputerrf("Can't create opengl drawing widget\n");
 		return NULL;
 	}
 
@@ -302,12 +296,10 @@ static void AddWidgets(GtkWidget *window)
 
 	pTexturelabel = gtk_label_new(_("Texture:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), pTexturelabel, 2, 3, 2, 3);
-	textureCombo = gtk_combo_new();
-	gtk_combo_set_value_in_list(GTK_COMBO(textureCombo), TRUE, FALSE);
-	gtk_widget_set_sensitive(GTK_WIDGET(GTK_COMBO(textureCombo)->entry), FALSE);
-	g_signal_connect(G_OBJECT(GTK_COMBO(textureCombo)->list), "selection-changed",
-							G_CALLBACK(TextureChange), 0);
-	gtk_table_attach_defaults(GTK_TABLE (table), textureCombo, 2, 4, 3, 4);
+	textureComboBox = gtk_combo_box_new_text();
+	gtk_widget_set_sensitive(textureComboBox, FALSE);
+	g_signal_connect(textureComboBox, "changed", G_CALLBACK( TextureChange ), NULL );
+	gtk_table_attach_defaults(GTK_TABLE (table), textureComboBox, 2, 4, 3, 4);
 
 	label = gtk_label_new(_("Preview:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), label, 0, 1, 3, 4);
@@ -326,7 +318,7 @@ static gboolean OkClicked(GtkWidget *pw, UpdateDetails* pDetails)
 
 	if (useTexture)
 	{
-		texStr = (char *)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(textureCombo)->entry));
+		texStr = gtk_combo_box_get_active_text(GTK_COMBO_BOX(textureComboBox));
 
 		if (!strcmp(texStr, NO_TEXTURE_STRING))
 			col3d.textureInfo = 0;
@@ -354,6 +346,26 @@ static void setCol(GtkColourPicker* pCP, const float val[4])
 		dval[i] = val[i];
 
 	gtk_colour_picker_set_colour(pCP, dval);
+}
+
+static void append_to_combo_box(gpointer data, gpointer combo)
+{
+	gtk_combo_box_append_text(combo, data);
+}
+
+
+static gboolean combo_box_select_text(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer text)
+{
+	gchar *value;
+	gtk_tree_model_get(model, iter, 0, &value, -1);
+	if (strcmp(value, text) == 0)
+	{
+		gtk_combo_box_set_active_iter(GTK_COMBO_BOX(textureComboBox), iter);
+		g_free(value);
+		return TRUE;
+	}
+	g_free(value);
+	return FALSE;
 }
 
 static void UpdateColour3d(GtkWidget *notused, UpdateDetails* pDetails)
@@ -395,19 +407,19 @@ static void UpdateColour3d(GtkWidget *notused, UpdateDetails* pDetails)
 	else
 	{
 		GList *glist = GetTextureList(pDetails->textureType);
-		*lastTextureStr = '\0';	/* Don't update values */
-		gtk_combo_set_popdown_strings(GTK_COMBO(textureCombo), glist);
+		gtk_list_store_clear(GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(textureComboBox))));
+		g_list_foreach(glist, append_to_combo_box, textureComboBox);
 		g_list_free(glist);
 
 		if (col3d.textureInfo)
 		{
-			gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(textureCombo)->entry), col3d.textureInfo->name);
-			strcpy(lastTextureStr, col3d.textureInfo->name);
-		}
-		else
-			strcpy(lastTextureStr, NO_TEXTURE_STRING);
+			gtk_tree_model_foreach(gtk_combo_box_get_model(GTK_COMBO_BOX(textureComboBox)),
+					combo_box_select_text,
+					col3d.textureInfo->name);
+	       	}
+
 		useTexture = 1;
-		gtk_widget_set_sensitive(GTK_WIDGET(textureCombo), !IsFlagSet(pDetails->textureType, TT_DISABLED));
+		gtk_widget_set_sensitive(GTK_WIDGET(textureComboBox), !IsFlagSet(pDetails->textureType, TT_DISABLED));
 	}
 
 	/* Copy material - to reset if cancel pressed */
@@ -423,7 +435,7 @@ static void UpdateColour3d(GtkWidget *notused, UpdateDetails* pDetails)
 	}
 	if (!useTexture)
 	{
-		gtk_widget_hide(textureCombo);
+		gtk_widget_hide(textureComboBox);
 		gtk_widget_hide(pTexturelabel);
 	}
 
@@ -463,7 +475,7 @@ GtkWidget* gtk_colour_picker_new3d(Material* pMat, int opacity, TextureType text
 
 	if (curDetail == MAX_DETAILS)
 	{
-		g_print("Error: Too many 3d colour previews\n");
+		outputerrf("Error: Too many 3d colour previews\n");
 		return 0;
 	}
 	details[curDetail].mat = *pMat;
