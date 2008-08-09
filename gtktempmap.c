@@ -320,12 +320,18 @@ ExposeQuadrant( GtkWidget *pw, GdkEventExpose *pev, tempmapwidget *ptmw ) {
   int m = 0;
   float r = 0.0f;
   cubeinfo ci;
+  PangoLayout *layout1, *layout2;
+  char font1[20], font2[20];
+  float y1, y2;
+
 
   gtk_paint_box( pw->style, pw->window, GTK_STATE_NORMAL, GTK_SHADOW_IN, NULL, NULL, NULL,
                 0, 0, pw->allocation.width, pw->allocation.height );
 
-  /* this is very ugly! Use Pango instead... 
-     Also: consider marking market losers with bold or other color */
+  sprintf(font1, "sans %.2f", pw->allocation.width/8.0);
+  sprintf(font2, "sans %.2f", pw->allocation.width/15.0);
+  y1 = pw->allocation.height/3.0;
+  y2 = 2.0*pw->allocation.height/3.0;
 
   if ( pi ) {
     if ( *pi >= 0 ) {
@@ -349,9 +355,11 @@ ExposeQuadrant( GtkWidget *pw, GdkEventExpose *pev, tempmapwidget *ptmw ) {
       r = ptmw->atm[ m ].rAverage;
     
     GetMatchStateCubeInfo( &ci, ptmw->atm[ m ].pms );
-    gtk_draw_string( pw->style, pw->window, GTK_STATE_NORMAL,
-                     10, 15, 
-                     GetEquityString( r, &ci, ptmw->fInvert ) );
+    layout1 = gtk_widget_create_pango_layout(pw, NULL);
+    pango_layout_set_font_description(layout1,pango_font_description_from_string(font1));
+    pango_layout_set_text(layout1, GetEquityString( r, &ci, ptmw->fInvert ), -1);
+    gtk_paint_layout( pw->style, pw->window, GTK_STATE_NORMAL, TRUE, NULL, pw, NULL, 10, y1, layout1 );
+
   }
 
 
@@ -363,8 +371,11 @@ ExposeQuadrant( GtkWidget *pw, GdkEventExpose *pev, tempmapwidget *ptmw ) {
 
     FormatMove( szMove, (ConstTanBoard)ptmw->atm[ m ].pms->anBoard, 
                 ptmw->atm[ m ].aaanMove[ i ][ j ] );
-    gtk_draw_string( pw->style, pw->window, GTK_STATE_NORMAL,
-                     10, 30, szMove );
+
+    layout2 = gtk_widget_create_pango_layout(pw, NULL);
+    pango_layout_set_font_description(layout2,pango_font_description_from_string(font2));
+    pango_layout_set_text(layout2, szMove, -1);
+    gtk_paint_layout( pw->style, pw->window, GTK_STATE_NORMAL, TRUE, NULL, pw, NULL, 10, y2, layout2 );
 
   }
 
@@ -588,7 +599,7 @@ GTKShowTempMap( const matchstate ams[], const int n,
           gtk_container_add( GTK_CONTAINER( ptm->aapwe[ i ][ j ] ),
                              ptm->aapwDA[ i ][ j ] );
           
-          gtk_drawing_area_size( GTK_DRAWING_AREA( ptm->aapwDA[ i ][ j ] ),
+          gtk_widget_set_size_request( ptm->aapwDA[ i ][ j ] ,
                                  SIZE_QUADRANT, SIZE_QUADRANT );
           
           gtk_table_attach_defaults( GTK_TABLE( pwTable ), 
@@ -611,8 +622,7 @@ GTKShowTempMap( const matchstate ams[], const int n,
         /* die */
 
         pw = gtk_drawing_area_new();
-        gtk_drawing_area_size( GTK_DRAWING_AREA( pw ), 
-                               SIZE_QUADRANT, SIZE_QUADRANT );
+        gtk_widget_set_size_request(  pw, SIZE_QUADRANT, SIZE_QUADRANT );
         
         gtk_table_attach_defaults( GTK_TABLE( pwTable ),
                                    pw, 0, 1, i + 1, i + 2 );
@@ -630,8 +640,7 @@ GTKShowTempMap( const matchstate ams[], const int n,
         /* die */
     
         pw = gtk_drawing_area_new();
-        gtk_drawing_area_size( GTK_DRAWING_AREA( pw ), 
-                               SIZE_QUADRANT, SIZE_QUADRANT );
+        gtk_widget_set_size_request( pw, SIZE_QUADRANT, SIZE_QUADRANT );
     
         gtk_table_attach_defaults( GTK_TABLE( pwTable ),
                                    pw, i + 1, i + 2, 0, 1 );
@@ -657,8 +666,7 @@ GTKShowTempMap( const matchstate ams[], const int n,
 
       gtk_container_add( GTK_CONTAINER( ptm->pweAverage ), ptm->pwAverage );
 
-      gtk_drawing_area_size( GTK_DRAWING_AREA( ptm->pwAverage ),
-                             SIZE_QUADRANT, SIZE_QUADRANT );
+      gtk_widget_set_size_request( ptm->pwAverage, SIZE_QUADRANT, SIZE_QUADRANT );
       
       gtk_table_attach_defaults( GTK_TABLE( pwTable ), 
                                  ptm->pweAverage,
@@ -690,7 +698,7 @@ GTKShowTempMap( const matchstate ams[], const int n,
   for ( i = 0; i < 16; ++i ) {
 
     pw = gtk_drawing_area_new();
-    gtk_drawing_area_size( GTK_DRAWING_AREA( pw ), 15, 20 );
+    gtk_widget_set_size_request( pw, 15, 20 );
     
     gtk_table_attach_defaults( GTK_TABLE( pwTable ), 
                                pw,

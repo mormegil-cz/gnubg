@@ -1,3 +1,7 @@
+Sun Aug 10 01:35:06 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtktempmap.c: improve a bit on  printing of equties and best moves
+
 Thu Aug  7 15:28:33 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* configure.in: add options to disable deprecated glib/gtk functions
