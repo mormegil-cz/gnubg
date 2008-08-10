@@ -20,7 +20,6 @@
  */
 
 #include "config.h"
-#define GTK_DISABLE_DEPRECATED 1
 
 #include <gtk/gtk.h>
 
@@ -507,7 +506,6 @@ static void GraphExpose( GtkWidget *pwGraph, GdkEventExpose *pev,
     char sz[ 4 ];
     PangoLayout *layout = gtk_widget_create_pango_layout(pwGraph, NULL);
     
-    g_print("cx %d cy %d\n", cx, cy);
     pango_layout_set_font_description(layout,pango_font_description_from_string("sans 7"));
 
     /* FIXME: The co-ordinates used in this function should be determined
