@@ -1,3 +1,8 @@
+Mon Aug 11 10:48:21 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c, gnubgmodule.c, gtkcube.c, gtkgame.c, gtkgamelist.c, set.c:
+	update a few strings for translation.
+
 Sun Aug 10 01:35:06 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtktempmap.c: improve a bit on  printing of equties and best moves
@@ -10,7 +15,7 @@ Thu Aug  7 15:28:33 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 Thu Aug  7 15:19:09 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
-	* board3d/gtkcolour3d.c: replace af gtk_combo with a gtk_combo_box
+	* board3d/gtkcolour3d.c: replace a gtk_combo with a gtk_combo_box
 	* gtkgame.c, gtkrace.c, gtkrelational.c, gtktheory.c: g_object_unref
 	the gtktreemodel in a couple of places where forgotten
 

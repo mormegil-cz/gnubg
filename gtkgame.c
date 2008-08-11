@@ -3872,7 +3872,7 @@ extern void RunGTK( GtkWidget *pwSplash, char *commands, char *python_script, ch
         if (python_script)
         {
 #ifdef WIN32
-			outputerrf(_("The windows gtk interface doesn't support the '-p' option. Use the cl interface instead"));
+			outputerrf(_("The MS windows GTK interface doesn't support the '-p' option. Use the cl interface instead"));
 #else
 			g_idle_add( python_run_file, g_strdup(python_script) );
 #endif
@@ -3880,6 +3880,7 @@ extern void RunGTK( GtkWidget *pwSplash, char *commands, char *python_script, ch
 			python_script = NULL;
 		}
 
+	gui_up_and_running = TRUE;
 		gtk_main();
 
 		if (reasonExited == RE_LANGUAGE_CHANGE)
@@ -4862,7 +4863,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   gtk_container_add( GTK_CONTAINER( pwHBox ), prpw->pwMaxError);
 
 
-  pwFrame = gtk_frame_new ( _("Stop Rollouts of multiple moves based on j.s.d.") );
+  pwFrame = gtk_frame_new ( _("Stop Rollouts of multiple moves based on JSD") );
   gtk_container_add ( GTK_CONTAINER (pwPage ), pwFrame );
 
   /* an hbox for the frame */
@@ -4879,7 +4880,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( prw->prwGeneral->pwJsdDoStop ), prw->rcRollout.fStopOnJsd);
   g_signal_connect( G_OBJECT( prw->prwGeneral->pwJsdDoStop ), "toggled", G_CALLBACK (JsdStopToggled), prw);
 
-  prpw->pwJsdDoMoveStop = gtk_check_button_new_with_label (_( "Stop rollout of move when best move j.s.d. appears better " ) );
+  prpw->pwJsdDoMoveStop = gtk_check_button_new_with_label (_( "Stop rollout of move when best move JSD appears better " ) );
   gtk_container_add( GTK_CONTAINER( pwv ), prpw->pwJsdDoMoveStop );
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( prw->prwGeneral->pwJsdDoMoveStop ), prw->rcRollout.fStopMoveOnJsd);
   g_signal_connect( G_OBJECT( prw->prwGeneral->pwJsdDoMoveStop ), "toggled", G_CALLBACK (JsdStopToggled), prw);
@@ -4901,7 +4902,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   prpw->pwJsdAdjLimit = pwHBox = gtk_hbox_new( FALSE, 0 );
   gtk_container_add( GTK_CONTAINER( pwv ), pwHBox);
   gtk_container_add( GTK_CONTAINER( pwHBox ), 
-                   gtk_label_new( _("No of j.s.d.s from best move" ) ) );
+                   gtk_label_new( _("No of JSDs from best move" ) ) );
 
   prpw->padjJsdLimit = GTK_ADJUSTMENT( gtk_adjustment_new( 
                        prw->rcRollout.rJsdLimit, 0, 8, .0001, .0001, 0.001 ) );

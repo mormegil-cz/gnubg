@@ -3585,7 +3585,7 @@ static void _set_tutor_skill (skilltype Skill, int skillno, char *skill) {
 
   nTutorSkillCurrent = skillno;
   TutorSkill = Skill;
-  outputf ( _("Tutor warnings will be give for play marked `%s'.\n"), skill);
+  outputf ( _("Tutor warnings will be given for play marked `%s'.\n"), skill);
 }
 
 extern void CommandSetTutorSkillDoubtful( char * sz) {

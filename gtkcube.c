@@ -59,7 +59,7 @@ OutputPercentsTable( const float ar[] )
     GtkWidget *pw;
     int i;
     static gchar *headings[] = { N_("Win"), N_("W(g)"), N_("W(bg)"),
-                                 N_("-"), N_("Lose"), N_("L(g)"), N_("L(bg)") };
+                                 "-", N_("Lose"), N_("L(g)"), N_("L(bg)") };
     pwTable = gtk_table_new ( 2, 7, FALSE );
     
     for (i = 0; i < 7; i++)

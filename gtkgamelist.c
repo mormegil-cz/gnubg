@@ -270,7 +270,7 @@ extern GtkWidget* GL_Create(void)
     GetStyleFromRCFile(&psLucky[LUCK_VERYBAD], "gamelist-luck-bad", psGameList);
     GetStyleFromRCFile(&psLucky[LUCK_VERYGOOD], "gamelist-luck-good", psGameList);
 
-	layout = gtk_widget_create_pango_layout(pwGameList, _("99"));
+	layout = gtk_widget_create_pango_layout(pwGameList, "99");
 	pango_layout_get_pixel_extents (layout, NULL, &logical_rect);
 	g_object_unref (layout);
 	nMaxWidth = logical_rect.width;

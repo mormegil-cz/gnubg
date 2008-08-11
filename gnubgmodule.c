@@ -521,7 +521,7 @@ PythonEvaluate( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   if ( GeneralEvaluationE( arOutput, (ConstTanBoard)anBoard, &ci, &ec ) ) {
     PyErr_SetString( PyExc_StandardError, 
-                     _("interupted/errro in GeneralEvaluateE") );
+                     _("interupted/errno in GeneralEvaluateE") );
     return NULL;
   }
 
