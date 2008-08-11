@@ -3880,7 +3880,6 @@ extern void RunGTK( GtkWidget *pwSplash, char *commands, char *python_script, ch
 			python_script = NULL;
 		}
 
-	gui_up_and_running = TRUE;
 		gtk_main();
 
 		if (reasonExited == RE_LANGUAGE_CHANGE)
