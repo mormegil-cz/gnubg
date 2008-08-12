@@ -171,8 +171,9 @@ extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt,
 		gtk_window_present(GTK_WINDOW(parent));
 	if (parent != NULL)
 		gtk_window_set_transient_for(GTK_WINDOW(pwDialog), GTK_WINDOW(parent));
-        if (flags & DIALOG_FLAG_MODAL && !( flags & DIALOG_FLAG_NOTIDY))
-			g_signal_connect(G_OBJECT(pwDialog), "destroy", G_CALLBACK(quitter), parent);
+
+	if ((flags & DIALOG_FLAG_MODAL) && !(flags & DIALOG_FLAG_NOTIDY))
+		g_signal_connect(G_OBJECT(pwDialog), "destroy", G_CALLBACK(quitter), parent);
 
 	pag = gtk_accel_group_new();
 	gtk_window_add_accel_group(GTK_WINDOW(pwDialog), pag);

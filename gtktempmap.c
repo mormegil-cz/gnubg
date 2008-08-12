@@ -330,8 +330,8 @@ ExposeQuadrant( GtkWidget *pw, GdkEventExpose *pev, tempmapwidget *ptmw ) {
 
   sprintf(font1, "sans %.2f", pw->allocation.width/8.0);
   sprintf(font2, "sans %.2f", pw->allocation.width/15.0);
-  y1 = pw->allocation.height/3.0;
-  y2 = 2.0*pw->allocation.height/3.0;
+  y1 = pw->allocation.height / 3.0f;
+  y2 = 2.0f * pw->allocation.height / 3.0f;
 
   if ( pi ) {
     if ( *pi >= 0 ) {
@@ -358,7 +358,7 @@ ExposeQuadrant( GtkWidget *pw, GdkEventExpose *pev, tempmapwidget *ptmw ) {
     layout1 = gtk_widget_create_pango_layout(pw, NULL);
     pango_layout_set_font_description(layout1,pango_font_description_from_string(font1));
     pango_layout_set_text(layout1, GetEquityString( r, &ci, ptmw->fInvert ), -1);
-    gtk_paint_layout( pw->style, pw->window, GTK_STATE_NORMAL, TRUE, NULL, pw, NULL, 10, y1, layout1 );
+    gtk_paint_layout( pw->style, pw->window, GTK_STATE_NORMAL, TRUE, NULL, pw, NULL, 10, (int)y1, layout1 );
 
   }
 
@@ -375,7 +375,7 @@ ExposeQuadrant( GtkWidget *pw, GdkEventExpose *pev, tempmapwidget *ptmw ) {
     layout2 = gtk_widget_create_pango_layout(pw, NULL);
     pango_layout_set_font_description(layout2,pango_font_description_from_string(font2));
     pango_layout_set_text(layout2, szMove, -1);
-    gtk_paint_layout( pw->style, pw->window, GTK_STATE_NORMAL, TRUE, NULL, pw, NULL, 10, y2, layout2 );
+    gtk_paint_layout( pw->style, pw->window, GTK_STATE_NORMAL, TRUE, NULL, pw, NULL, 10, (int)y2, layout2 );
 
   }
 
