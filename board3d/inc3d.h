@@ -70,6 +70,19 @@ typedef enum _BoardState
 	BOARD_CLOSED, BOARD_CLOSING, BOARD_OPENING, BOARD_OPEN
 } BoardState;
 
+/* Font info */
+
+#define FONT_PITCH 24
+#define FONT_SIZE (base_unit / 20.0f)
+#define FONT_HEIGHT_RATIO 1.f
+
+#define CUBE_FONT_PITCH 34
+#define CUBE_FONT_SIZE (base_unit / 24.0f)
+#define CUBE_FONT_HEIGHT_RATIO 1.25f
+
+#define FONT_VERA "fonts/Vera.ttf"
+#define FONT_VERA_SERIF_BOLD "fonts/VeraSeBd.ttf"
+
 /* Animation paths */
 #define MAX_PATHS 3
 typedef enum _PathType

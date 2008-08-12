@@ -28,9 +28,6 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#define FONT_VERA "fonts/Vera.ttf"
-#define FONT_VERA_SERIF_BOLD "fonts/VeraSeBd.ttf"
-
 struct _OGLFont
 {
 	unsigned int glyphs;
@@ -39,6 +36,7 @@ struct _OGLFont
 	float scale;
 	float heightRatio;
 	float height;
+	float length;
 };
 
 typedef struct _Point
@@ -69,48 +67,119 @@ typedef struct _Mesh
 } Mesh;
 
 static int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, const char *pPath, int pointSize, float size, float heightRatio);
+static int RenderText(const char *text, FT_Library ftLib, OGLFont *pFont, const char *pPath, int pointSize, float scale, float heightRatio);
 static void PopulateVectoriser(Vectoriser* pVect, const FT_Outline* pOutline);
 static void TidyMemory(const Vectoriser* pVect, const Mesh* pMesh);
 static void PopulateContour(GArray *contour, const FT_Vector* points, const char* pointTags, int numberOfPoints);
 static void PopulateMesh(const Vectoriser* pVect, Mesh* pMesh);
-static int MakeGlyph(const FT_Outline* pOutline, unsigned int displayList);
+static int RenderGlyph(const FT_Outline* pOutline);
 
-#define FONT_PITCH 24
-#define FONT_SIZE (base_unit / 20.0f)
-#define FONT_HEIGHT_RATIO 1.f
-
-#define CUBE_FONT_PITCH 34
-#define CUBE_FONT_SIZE (base_unit / 24.0f)
-#define CUBE_FONT_HEIGHT_RATIO 1.25f
-
-int BuildFont3d(BoardData3d* bd3d)
+int CreateNumberFont(OGLFont **ppFont, const char *fontFile, int pitch, float size, float heightRatio)
 {
+	char *filename;
 	FT_Library ftLib;
-        char *file;
 	if (FT_Init_FreeType(&ftLib))
 		return 0;
 
-	free(bd3d->numberFont);
-	bd3d->numberFont = (OGLFont*)malloc(sizeof(OGLFont));
-	file = BuildFilename(FONT_VERA);
-	if (!CreateOGLFont(ftLib, bd3d->numberFont, file, FONT_PITCH, FONT_SIZE, FONT_HEIGHT_RATIO))
+	free(*ppFont);
+	*ppFont = (OGLFont*)malloc(sizeof(OGLFont));
+
+	filename = BuildFilename(fontFile);
+	if (!CreateOGLFont(ftLib, *ppFont, fontFile, pitch, size, heightRatio))
 	{
-		g_print("Failed to create font %s\n", file);
+		g_print("Failed to create font %s\n", filename);
 		return 0;
 	}
-	g_free(file);
-
-	free(bd3d->cubeFont);
-	bd3d->cubeFont = (OGLFont*)malloc(sizeof(OGLFont));
-	file = BuildFilename(FONT_VERA_SERIF_BOLD);
-	if (!CreateOGLFont(ftLib, bd3d->cubeFont, file, CUBE_FONT_PITCH, CUBE_FONT_SIZE, CUBE_FONT_HEIGHT_RATIO))
-	{
-		g_print("Failed to create font %s\n", file);
-		return 0;
-	}
-	g_free(file);
-
+	g_free(filename);
 	return !FT_Done_FreeType(ftLib);
+}
+
+int CreateFontText(OGLFont **ppFont, const char *text, const char *fontFile, int pitch, float size, float heightRatio)
+{
+	char *filename;
+
+	FT_Library ftLib;
+	if (FT_Init_FreeType(&ftLib))
+		return 0;
+
+	free(*ppFont);
+	*ppFont = (OGLFont*)malloc(sizeof(OGLFont));
+
+	filename = BuildFilename(fontFile);
+	if (!RenderText(text, ftLib, *ppFont, fontFile, pitch, size, heightRatio))
+	{
+		g_print("Failed to create font %s\n", filename);
+		return 0;
+	}
+	g_free(filename);
+	return !FT_Done_FreeType(ftLib);
+}
+
+void FreeNumberFont(OGLFont *ppFont)
+{
+	glDeleteLists(ppFont->glyphs, 10);
+}
+
+void FreeFontText(OGLFont *ppFont)
+{
+	glDeleteLists(ppFont->glyphs, 1);
+}
+
+static int RenderText(const char *text, FT_Library ftLib, OGLFont *pFont, const char *pPath, int pointSize, float scale, float heightRatio)
+{
+	int len = 0;
+	FT_Face face;
+
+	if (FT_New_Face(ftLib, pPath, 0, &face))
+		return 0;
+
+	if (FT_Set_Char_Size(face, 0, pointSize * 64 /* 26.6 fractional points */, 0, 0))
+		return 0;
+
+	/* Create text glyphs */
+	pFont->glyphs = glGenLists(1);
+	glNewList(pFont->glyphs, GL_COMPILE);
+
+	pFont->scale = scale;
+	pFont->height = 0;
+
+	while (*text)
+	{
+		/* Draw character */
+		unsigned int glyphIndex = FT_Get_Char_Index(face, *text);
+		if (!glyphIndex)
+			return 0;
+
+		if (FT_Load_Glyph(face, glyphIndex, FT_LOAD_NO_HINTING))
+			return 0;
+		assert(face->glyph->format == ft_glyph_format_outline);
+		if (pFont->height == 0)
+			pFont->height = (float)face->glyph->metrics.height * scale * heightRatio / 64;
+
+
+		if (!RenderGlyph(&face->glyph->outline))
+			return 0;
+
+		text++;
+		len += face->glyph->advance.x;
+		/* Move on to next place */
+		if (*text)
+		{
+			int kern = 0;
+			FT_Vector kernAdvance;
+			unsigned int nextGlyphIndex = FT_Get_Char_Index(face, *text);
+			if (nextGlyphIndex && !FT_Get_Kerning(face, glyphIndex, nextGlyphIndex, ft_kerning_unfitted, &kernAdvance))
+				kern = kernAdvance.x;
+				
+			glTranslatef((face->glyph->advance.x + kern) / 64.0f, 0.f, 0.f);
+			len += kern;
+		}
+	}
+	glEndList();
+
+	pFont->length = (len / 64.0f) * pFont->scale;
+
+	return !FT_Done_Face(face);
 }
 
 static int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, const char *pPath, int pointSize, float scale, float heightRatio)
@@ -154,8 +223,10 @@ static int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, const char *pPath, in
 			return 0;
 		assert(face->glyph->format == ft_glyph_format_outline);
 
-		if (!MakeGlyph(&face->glyph->outline, pFont->glyphs + i))
+		glNewList(pFont->glyphs + i, GL_COMPILE);
+		if (!RenderGlyph(&face->glyph->outline))
 			return 0;
+		glEndList();
 
 		/* Calculate kerning table */
 		for (j = 0; j < 10; j++)
@@ -171,18 +242,15 @@ static int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, const char *pPath, in
 	return !FT_Done_Face(face);
 }
 
-static int MakeGlyph(const FT_Outline* pOutline, unsigned int displayList)
+static int RenderGlyph(const FT_Outline* pOutline)
 {
-	Vectoriser vect;
 	Mesh mesh;
 	unsigned int index, point;
 
+	Vectoriser vect;
 	PopulateVectoriser(&vect, pOutline);
-
 	if ((vect.contours->len < 1) || (vect.numPoints < 3))
 		return 0;
-
-	glNewList(displayList, GL_COMPILE);
 
 	/* Solid font */
 	PopulateMesh(&vect, &mesh);
@@ -220,8 +288,6 @@ static int MakeGlyph(const FT_Outline* pOutline, unsigned int displayList)
 	}
 	glDisable(GL_LINE_SMOOTH);
 	glDisable(GL_BLEND);
-
-	glEndList();
 
 	TidyMemory(&vect, &mesh);
 
@@ -517,39 +583,46 @@ static void TidyMemory(const Vectoriser* pVect, const Mesh* pMesh)
 	g_list_free(combineList);
 }
 
-extern void glPrintPointNumbers(const BoardData3d* bd3d, const char *text)
+extern void glPrintPointNumbers(const OGLFont *numberFont, const char *text)
 {
 	/* Align horizontally */
-	glTranslatef(-getTextLen3d(bd3d->numberFont, text) / 2.0f, 0.f, 0.f);
-	RenderString3d(bd3d->numberFont, text);
+	glTranslatef(-getTextLen3d(numberFont, text) / 2.0f, 0.f, 0.f);
+	RenderString3d(numberFont, text);
 }
 
-extern void glPrintCube(const BoardData3d* bd3d, const char *text)
+extern void glPrintCube(const OGLFont *cubeFont, const char *text)
 {
 	/* Align horizontally and vertically */
 	float saveScale = 0;
-	float heightOffset = -bd3d->cubeFont->height;
+	float heightOffset = -cubeFont->height;
 	if (strlen(text) > 1)
 	{	/* Make font smaller for 2 digit cube numbers */
-		saveScale = bd3d->cubeFont->scale;
-		bd3d->cubeFont->scale *= CUBE_TWODIGIT_FACTOR;
+		saveScale = cubeFont->scale;
+		((OGLFont *)cubeFont)->scale *= CUBE_TWODIGIT_FACTOR;
 		heightOffset *= CUBE_TWODIGIT_FACTOR;
 	}
-	glTranslatef(-getTextLen3d(bd3d->cubeFont, text) / 2.0f, heightOffset / 2.0f, 0.f);
-	RenderString3d(bd3d->cubeFont, text);
+	glTranslatef(-getTextLen3d(cubeFont, text) / 2.0f, heightOffset / 2.0f, 0.f);
+	RenderString3d(cubeFont, text);
 
 	if (strlen(text) > 1)
-		bd3d->cubeFont->scale = saveScale;
+		((OGLFont *)cubeFont)->scale = saveScale;
 }
 
-extern void glPrintNumbersRA(const BoardData3d* bd3d, const char *text)
+extern void glPrintNumbersRA(const OGLFont *numberFont, const char *text)
 {
 	/* Right align */
-	glTranslatef(-getTextLen3d(bd3d->numberFont, text), 0.f, 0.f);
-	RenderString3d(bd3d->numberFont, text);
+	glTranslatef(-getTextLen3d(numberFont, text), 0.f, 0.f);
+	RenderString3d(numberFont, text);
 }
 
 extern float GetFontHeight3d(const OGLFont *font)
 {
 	return font->height;
+}
+
+extern void glDrawText(const OGLFont *font)
+{
+	glTranslatef(-font->length / 2.f, -font->height / 2.f, 0.f);
+	glScalef(font->scale, font->scale, 1.f);
+	glCallList(font->glyphs);
 }

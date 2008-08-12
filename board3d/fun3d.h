@@ -120,11 +120,16 @@ void shadowInit(BoardData3d *bd3d, renderdata *prd);
 void shadowDisplay(void (*drawScene)(const BoardData *, const BoardData3d *, const renderdata *), const BoardData* bd, const BoardData3d *bd3d, const renderdata *prd);
 
 /* font functions */
-void glPrintPointNumbers(const BoardData3d* bd3d, const char *text);
-void glPrintCube(const BoardData3d* bd3d, const char *text);
-void glPrintNumbersRA(const BoardData3d* bd3d, const char *text);
-int BuildFont3d(BoardData3d* bd3d);
+void glPrintPointNumbers(const OGLFont *numberFont, const char *text);
+void glPrintCube(const OGLFont *cubeFont, const char *text);
+void glPrintNumbersRA(const OGLFont *numberFont, const char *text);
+int CreateFonts(BoardData3d *bd3d);
 float GetFontHeight3d(const OGLFont *font);
+int CreateNumberFont(OGLFont **ppFont, const char *fontFile, int pitch, float size, float heightRatio);
+void FreeFontText(OGLFont *ppFont);
+void FreeNumberFont(OGLFont *ppFont);
+int CreateFontText(OGLFont **ppFont, const char *text, const char *fontFile, int pitch, float size, float heightRatio);
+extern void glDrawText(const OGLFont *font);
 
 GtkWidget *GetDrawingArea3d(const BoardData3d* bd3d);
 extern int MaterialCompare(Material* pMat1, Material* pMat2);

@@ -47,8 +47,7 @@ struct _GraphData
 #define TOT_WIDTH (NUM_HEIGHT * 3)
 
 static float modelWidth, modelHeight;
-static BoardData3d fonts;
-static Texture total;
+static OGLFont *numberFont = NULL, *totalText = NULL;
 
 static gboolean graph_button_press_event(void)
 {
@@ -94,12 +93,11 @@ static void realize(GtkWidget *widget, void* notused)
 	/* Deep blue background colour */
 	glClearColor(.2f, .2f, .4f, 1.f);
 
-	if (!BuildFont3d(&fonts))
-		g_print("Error creating fonts\n");
+	if (!CreateNumberFont(&numberFont, FONT_VERA, FONT_PITCH, FONT_SIZE, FONT_HEIGHT_RATIO))
+		g_print("Error creating font\n");
 
-	total.texID = 0;
-	if (!LoadTexture(&total, TEXTURE_PATH"total.bmp"))
-		g_print("Total bitmap not found\n");
+	if (!CreateFontText(&totalText, _("Totals"), FONT_VERA, FONT_PITCH, FONT_SIZE, FONT_HEIGHT_RATIO))
+		g_print("Error creating font\n");
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -179,7 +177,7 @@ static void PrintBottomNumber(unsigned int num, float width, float height, float
 	glColor3f(1.f, 1.f, 1.f);
 	glScalef(width, height, 1.f);
 	glLineWidth(.5f);
-	glPrintCube(&fonts, numStr);
+	glPrintCube(numberFont, numStr);
 	glPopMatrix();
 }
 
@@ -193,7 +191,8 @@ static void PrintSideNumber(int num, float width, float height, float x, float y
 
 	glScalef(width, height, 1.f);
 	glLineWidth(.5f);
-	glPrintNumbersRA(&fonts, numStr);
+	glPrintNumbersRA(numberFont, numStr);
+
 	glPopMatrix();
 }
 
@@ -234,24 +233,16 @@ static void DrawGraph(const GraphData *gd)
 	unsigned int i;
 	float lastx = 0;
 
-	if (total.texID)
-	{
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, total.texID);
+	glPushMatrix();
+	glTranslatef(NUM_WIDTH + RES_WIDTH * (float)gd->numGames + TOTAL_GAP + COL_WIDTH + (INTER_GAP + MID_GAP) / 2.0f,
+		NUM_HEIGHT / 2, 0.f);
 
-		glPushMatrix();
-		glTranslatef(NUM_WIDTH + RES_WIDTH * (float)gd->numGames + TOTAL_GAP + (INTER_GAP + MID_GAP) / 2.0f,
-			NUM_HEIGHT / 2.0f - TOT_WIDTH / 6.0f, 0.f);
+	glColor3f(1.f, 1.f, 1.f);
+	glLineWidth(.5f);
+	glScalef(NUM_WIDTH * 10, NUM_HEIGHT * 10, 1.f);
+	glDrawText(totalText);
 
-		glBegin(GL_QUADS);
-			glTexCoord2f(0.f, 0.f); glVertex3f(0.f, 0.f, 0.f);
-			glTexCoord2f(1.f, 0.f); glVertex3f(COL_WIDTH * 2, 0.f, 0.f);
-			glTexCoord2f(1.f, 1.f); glVertex3f(COL_WIDTH * 2, TOT_WIDTH, 0.f);
-			glTexCoord2f(0.f, 1.f); glVertex3f(0.f, TOT_WIDTH, 0.f);
-		glEnd();
-		glDisable(GL_TEXTURE_2D);
-		glPopMatrix();
-	}
+	glPopMatrix();
 
 	DrawLeftAxis(gd);
 
@@ -303,6 +294,20 @@ static gboolean expose_event(GtkWidget *widget, GdkEventExpose *notused, const G
 	return TRUE;
 }
 
+static void destroy_event (GtkWidget *pw, void *notused)
+{
+	if (numberFont != NULL)
+	{
+		FreeNumberFont(numberFont);
+		numberFont = NULL;
+	}
+	if (totalText != NULL)
+	{
+		FreeFontText(totalText);
+		totalText = NULL;
+	}
+}
+
 GtkWidget* StatGraph(GraphData* pgd)
 {
 	float f1, f2;
@@ -328,6 +333,7 @@ GtkWidget* StatGraph(GraphData* pgd)
 	g_signal_connect(G_OBJECT(pw), "realize", G_CALLBACK(realize), pgd);
 	g_signal_connect(G_OBJECT(pw), "configure_event", G_CALLBACK(configure_event), pgd);
 	g_signal_connect(G_OBJECT(pw), "expose_event", G_CALLBACK(expose_event), pgd);
+	g_signal_connect(G_OBJECT(pw), "destroy", G_CALLBACK(destroy_event), NULL);
 
 	return pw;
 }
