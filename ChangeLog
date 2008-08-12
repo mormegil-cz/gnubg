@@ -1,3 +1,7 @@
+Tue Aug 12 19:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* board3d files, removed total.bmp: Replace totoal.bmp with text in graph
+
 Mon Aug 11 10:48:21 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c, gnubgmodule.c, gtkcube.c, gtkgame.c, gtkgamelist.c, set.c:
