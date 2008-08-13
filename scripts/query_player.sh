@@ -105,7 +105,7 @@ EOF`
 
 POINTS_WON="select sum(round(actual_result+0.5,0)) from matchstat where player_id = '$NAME_ID_RESULT';"
 
-NUMBER_MATCHES="select count(session_id) from session ;" 
+NUMBER_MATCHES="select count(session_id) from matchstat where player_id = '$NAME_ID_RESULT';" 
 
 TOTAL_ERRORS="select round(sum(snowie_error_rate_per_move*snowie_moves)*1000/sum(snowie_moves),2) from matchstat where player_id = $NAME_ID_RESULT;"
 
