@@ -85,9 +85,10 @@ int CreateNumberFont(OGLFont **ppFont, const char *fontFile, int pitch, float si
 	*ppFont = (OGLFont*)malloc(sizeof(OGLFont));
 
 	filename = BuildFilename(fontFile);
-	if (!CreateOGLFont(ftLib, *ppFont, fontFile, pitch, size, heightRatio))
+	if (!CreateOGLFont(ftLib, *ppFont, filename, pitch, size, heightRatio))
 	{
-		g_print("Failed to create font %s\n", filename);
+		outputerrf(_("Failed to create font from (%s)\n"), filename);
+		g_free(filename);
 		return 0;
 	}
 	g_free(filename);
@@ -106,9 +107,10 @@ int CreateFontText(OGLFont **ppFont, const char *text, const char *fontFile, int
 	*ppFont = (OGLFont*)malloc(sizeof(OGLFont));
 
 	filename = BuildFilename(fontFile);
-	if (!RenderText(text, ftLib, *ppFont, fontFile, pitch, size, heightRatio))
+	if (!RenderText(text, ftLib, *ppFont, filename, pitch, size, heightRatio))
 	{
-		g_print("Failed to create font %s\n", filename);
+		outputerrf(_("Failed to create font from (%s)\n"), filename);
+		g_free(filename);
 		return 0;
 	}
 	g_free(filename);
