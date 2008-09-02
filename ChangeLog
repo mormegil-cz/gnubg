@@ -1,3 +1,9 @@
+Tue Sep  2 23:05:52 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtkcolour.c, gtkcolour.h, gtkprefs.c, gtkprefs.h,
+	board3d/gtkcolour3d.c, board3d/misc3d.h, board3d/inc3d.h: use the
+	gtk_color_button, rather than designing our own.
+
 Tue Aug 12 19:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* board3d files, removed total.bmp: Replace totoal.bmp with text in graph

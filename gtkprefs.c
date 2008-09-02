@@ -39,7 +39,6 @@
 
 #include "drawboard.h"
 #include "gtkboard.h"
-#include "gtkcolour.h"
 #include "gtkgame.h"
 #include "gtkfile.h"
 #include "gtkprefs.h"
@@ -51,6 +50,7 @@
 
 #if USE_BOARD3D
 #include "fun3d.h"
+#include "misc3d.h"
 #define NUM_NONPREVIEW_PAGES 2
 #else
 #define NUM_NONPREVIEW_PAGES 1
@@ -260,7 +260,7 @@ static void SetTitle(void)
 	gtk_window_set_title( GTK_WINDOW( pwDialog ),  title);
 }
 
-void UpdatePreview(GtkWidget *notused)
+extern void UpdatePreview(void)
 {
 	if (!fUpdate)
 		return;
@@ -334,7 +334,7 @@ static void DieColourChanged (GtkWidget *pw, gpointer pf)
 	}
 #endif
 
-	UpdatePreview(0);
+	UpdatePreview();
 }
 
 static void option_changed(GtkWidget *widget, GtkWidget *pw)
@@ -366,7 +366,7 @@ static void option_changed(GtkWidget *widget, GtkWidget *pw)
 		board_create_pixmaps(pwPrevBoard, bd);
 	}
 }
-	UpdatePreview(0);
+	UpdatePreview();
 }
 
 #if USE_BOARD3D
@@ -643,6 +643,35 @@ static GtkWidget *BorderPage3d( BoardData *bd )
 
 #endif
 
+extern void gtk_color_button_get_array(GtkColorButton *button, double array[4])
+{
+	GdkColor color;
+	guint16 alpha;
+
+	gtk_color_button_get_color(button, &color);
+	alpha = gtk_color_button_get_alpha(button);
+
+	array[0] = (gdouble)color.red / 65535.0;
+	array[1] = (gdouble)color.green / 65535.0;
+	array[2] = (gdouble)color.blue / 65535.0;
+	array[3] = (gdouble)alpha / 65535;
+
+}
+
+extern void gtk_color_button_set_from_array(GtkColorButton *button, double array[4])
+{
+	GdkColor color;
+	guint16 alpha;
+
+	color.red = array[0]*65535;
+	color.green = array[1]*65535;
+	color.blue = array[2]*65535;
+	alpha = array[3]*65535;
+
+	gtk_color_button_set_color(button, &color);
+	gtk_color_button_set_alpha(button, alpha);
+}
+
 static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
 
     GtkWidget *pw, *pwhbox, *pwx, *pwScale, *pwBox;
@@ -665,13 +694,12 @@ static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
     gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Colour:") ),
 			FALSE, FALSE, 4 );
 
-    gtk_box_pack_start( GTK_BOX( pwhbox ),
-			apwColour[ f ] = gtk_colour_picker_new(UpdatePreview, 0/*&pwPreview[PI_CHEQUERS0 + f]*/), TRUE,
-			TRUE, 4 );
-    
-    gtk_colour_picker_set_has_opacity_control(GTK_COLOUR_PICKER(apwColour[f]), TRUE);
-    gtk_colour_picker_set_colour( GTK_COLOUR_PICKER( apwColour[ f ] ),
-				   bd->rd->aarColour[ f ] );
+    apwColour[ f ] = gtk_color_button_new();
+    g_object_set(G_OBJECT(apwColour[f]), "use-alpha", TRUE, NULL);
+    g_signal_connect(G_OBJECT(apwColour[f]), "color-set", UpdatePreview, NULL);
+    gtk_box_pack_start( GTK_BOX( pwhbox ),apwColour[ f ] , TRUE, TRUE, 4 );
+
+    gtk_color_button_set_from_array( GTK_COLOR_BUTTON( apwColour[ f ] ), bd->rd->aarColour[ f ] );
 
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 4 );
@@ -780,23 +808,14 @@ static GtkWidget *DicePrefs( BoardData *bd, int f ) {
 			FALSE, FALSE, 0 );
     gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Die colour:") ),
 			FALSE, FALSE, 4 );
-    gtk_box_pack_start( GTK_BOX( pwhbox ),
-			apwDiceColour[ f ] = gtk_colour_picker_new(UpdatePreview,0),
-			TRUE, TRUE, 4 );
-
-    gtk_colour_picker_set_colour( GTK_COLOUR_PICKER( apwDiceColour[ f ] ),
-				   bd->rd->aarDiceColour[ f ] );
+    apwDiceColour[ f ] = gtk_color_button_new();
+    g_signal_connect(G_OBJECT(apwDiceColour[ f ]), "color-set", UpdatePreview, NULL);
+    gtk_color_button_set_from_array( GTK_COLOR_BUTTON( apwDiceColour[ f ] ), bd->rd->aarDiceColour[ f ] );
+    gtk_box_pack_start( GTK_BOX( pwhbox ), apwDiceColour[ f ], TRUE, TRUE, 4 );
 
     gtk_box_pack_start( GTK_BOX( apwDiceColourBox[ f ] ), 
                         pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 4 );
-    /*
-    gtk_box_pack_start( GTK_BOX( pwhbox ),
-			gtk_label_new( _("Refractive Index:") ), FALSE, FALSE,
-			4 );
-    gtk_box_pack_end( GTK_BOX( pwhbox ), gtk_hscale_new( apadj[ f ] ), TRUE,
-		      TRUE, 4 );
-    */
 
     gtk_box_pack_start( GTK_BOX( apwDiceColourBox[ f ] ), 
                         pwhbox = gtk_hbox_new( FALSE, 0 ),
@@ -835,14 +854,12 @@ static GtkWidget *DicePrefs( BoardData *bd, int f ) {
 			pwhbox = gtk_hbox_new( FALSE, 0 ), FALSE, FALSE, 0 );
     gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Pip colour:") ),
 			FALSE, FALSE, 4 );
-    gtk_box_pack_start( GTK_BOX( pwhbox ),
-			apwDiceDotColour[ f ] = gtk_colour_picker_new(UpdatePreview,0),
-			TRUE, TRUE, 4 );
-    
-    gtk_colour_picker_set_colour( 
-        GTK_COLOUR_PICKER( apwDiceDotColour[ f ] ),
-        bd->rd->aarDiceDotColour[ f ] );
 
+    apwDiceDotColour[ f ] = gtk_color_button_new();
+    g_signal_connect(G_OBJECT(apwDiceDotColour[ f ]), "color-set", UpdatePreview, NULL);
+    gtk_color_button_set_from_array( GTK_COLOR_BUTTON( apwDiceDotColour[ f ] ), bd->rd->aarDiceDotColour[ f ] );
+    gtk_box_pack_start( GTK_BOX( pwhbox ), apwDiceDotColour[ f ], TRUE, TRUE, 4 );
+    
     g_signal_connect( G_OBJECT( apwDieColour[ f ] ), "toggled",
                          G_CALLBACK( DieColourChanged ), GINT_TO_POINTER(f));
 
@@ -864,11 +881,10 @@ static GtkWidget *CubePrefs( BoardData *bd ) {
     gtk_box_pack_start( GTK_BOX( pwx ), gtk_label_new( _("Cube colour:") ),
 			FALSE, FALSE, 0 );
     
-    gtk_box_pack_start ( GTK_BOX ( pwx ), 
-                         pwCubeColour = gtk_colour_picker_new(UpdatePreview,0),
-			 TRUE, TRUE, 0 );
-    gtk_colour_picker_set_colour( GTK_COLOUR_PICKER( pwCubeColour ),
-				   bd->rd->arCubeColour );
+    pwCubeColour = gtk_color_button_new();
+    g_signal_connect(G_OBJECT(pwCubeColour), "color-set", UpdatePreview, NULL);
+    gtk_color_button_set_from_array(GTK_COLOR_BUTTON(pwCubeColour), bd->rd->arCubeColour);
+    gtk_box_pack_start ( GTK_BOX ( pwx ), pwCubeColour, TRUE, TRUE, 0 );
 
     /* FIXME add cube text colour settings */
 
@@ -908,11 +924,12 @@ static GtkWidget *BoardPage( BoardData *bd ) {
 	gtk_box_pack_start( GTK_BOX( pwhbox ),
 			    gtk_label_new( gettext( asz[ j ] ) ),
 			    FALSE, FALSE, 4 );
+	apwBoard[j] = gtk_color_button_new();
+	g_signal_connect(G_OBJECT(apwBoard[j]), "color-set", UpdatePreview, NULL);
+	gtk_color_button_set_from_array( GTK_COLOR_BUTTON( apwBoard[ j ] ), ar );
 	gtk_box_pack_start( GTK_BOX( pwhbox ),
-			    apwBoard[ j ] = gtk_colour_picker_new(UpdatePreview,0),
+			    apwBoard[ j ],
 				TRUE, TRUE, 4 );
-	gtk_colour_picker_set_colour( GTK_COLOUR_PICKER( apwBoard[ j ] ),
-				      ar );
 
 	gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			    FALSE, FALSE, 4 );
@@ -998,12 +1015,12 @@ static GtkWidget *BorderPage( BoardData *bd ) {
     
     for( i = 0; i < 3; i++ )
 	ar[ i ] = bd->rd->aanBoardColour[ 1 ][ i ] / 255.0;
-    
-    gtk_box_pack_start( GTK_BOX( pw ), apwBoard[ 1 ] =
-			gtk_colour_picker_new(UpdatePreview,0),
+
+    apwBoard[1] = gtk_color_button_new();
+    g_signal_connect(G_OBJECT(apwBoard[1]), "color-set", UpdatePreview, NULL);
+    gtk_box_pack_start( GTK_BOX( pw ), apwBoard[ 1 ],
 			FALSE, FALSE, 0 );
-    gtk_colour_picker_set_colour( GTK_COLOUR_PICKER( apwBoard[ 1 ] ),
-				   ar );
+    gtk_color_button_set_from_array( GTK_COLOR_BUTTON( apwBoard[ 1 ] ), ar );
 
     pwHinges = gtk_check_button_new_with_label( _("Show hinges") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwHinges ), bd->rd->fHinges );
@@ -1103,7 +1120,7 @@ static void LightChanged2d( GtkWidget *pwWidget, void* data )
 	board_free_pixmaps( bd );
 	board_create_pixmaps( pwPrevBoard, bd );
 
-	UpdatePreview(0);
+	UpdatePreview();
 }
 
 static void LabelsToggled( GtkWidget *pwWidget, void* data )
@@ -1140,7 +1157,7 @@ static void MoveIndicatorToggled( GtkWidget *pwWidget, void* data )
 		board_free_pixmaps( bd );
 		board_create_pixmaps( pwPrevBoard, bd );
 	}
-	UpdatePreview(0);
+	UpdatePreview();
 }
 
 #if USE_BOARD3D
@@ -1775,7 +1792,7 @@ UseDesign ( void ) {
 		/* chequers */
 
 		for ( i = 0; i < 2; ++i ) {
-			gtk_colour_picker_set_colour ( GTK_COLOUR_PICKER ( apwColour[ i ] ),
+			gtk_color_button_set_from_array ( GTK_COLOR_BUTTON ( apwColour[ i ] ),
 											newPrefs.aarColour[ i ] );
 
 			gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadj[ i ] ),
@@ -1795,7 +1812,7 @@ UseDesign ( void ) {
 			gtk_widget_set_sensitive ( GTK_WIDGET ( apwDiceColourBox[ i ] ),
 									! newPrefs.afDieColour[ i ] );
 
-			gtk_colour_picker_set_colour( GTK_COLOUR_PICKER( apwDiceColour[ i ] ),
+			gtk_color_button_set_from_array( GTK_COLOR_BUTTON( apwDiceColour[ i ] ),
 										newPrefs.afDieColour[ i ] ? 
 										newPrefs.aarColour[ i ] :
 										newPrefs.aarDiceColour[ i ] );
@@ -1813,14 +1830,14 @@ UseDesign ( void ) {
 
 			/* die dot */
 
-			gtk_colour_picker_set_colour ( GTK_COLOUR_PICKER ( apwDiceDotColour[ i ] ), 
+			gtk_color_button_set_from_array ( GTK_COLOR_BUTTON ( apwDiceDotColour[ i ] ), 
 											newPrefs.aarDiceDotColour[ i ] );
 
 		}
 
 		/* cube colour */
 
-		gtk_colour_picker_set_colour ( GTK_COLOUR_PICKER ( pwCubeColour ), 
+		gtk_color_button_set_from_array ( GTK_COLOR_BUTTON ( pwCubeColour ), 
 										newPrefs.arCubeColour );
 
 		/* board + points */
@@ -1834,7 +1851,7 @@ UseDesign ( void ) {
 			for ( j = 0; j < 3; j++ )
 			ar[ j ] = newPrefs.aanBoardColour[ i ][ j ] / 255.0;
 
-			gtk_colour_picker_set_colour ( GTK_COLOUR_PICKER ( apwBoard[ i ]),
+			gtk_color_button_set_from_array ( GTK_COLOR_BUTTON ( apwBoard[ i ]),
 											ar );
 		}
 
@@ -2835,35 +2852,35 @@ static void GetPrefs ( renderdata* prd ) {
 	prd->arDiceExponent[ i ] = (float)apadjDiceExponent[ i ]->value;
     }
     
-    gtk_colour_picker_get_colour( GTK_COLOUR_PICKER( apwColour[ 0 ] ), ar );
+    gtk_color_button_get_array( GTK_COLOR_BUTTON( apwColour[ 0 ] ), ar );
     for( i = 0; i < 4; i++ )
 	prd->aarColour[ 0 ][ i ] = ar[ i ];
 
-    gtk_colour_picker_get_colour( GTK_COLOUR_PICKER( apwColour[ 1 ] ), ar );
+    gtk_color_button_get_array( GTK_COLOR_BUTTON( apwColour[ 1 ] ), ar );
     for( i = 0; i < 4; i++ )
 	prd->aarColour[ 1 ][ i ] = ar[ i ];
 
-    gtk_colour_picker_get_colour( GTK_COLOUR_PICKER( apwDiceColour[ 0 ] ), 
+    gtk_color_button_get_array( GTK_COLOR_BUTTON( apwDiceColour[ 0 ] ), 
                                    ar );
     for( i = 0; i < 3; i++ )
 	prd->aarDiceColour[ 0 ][ i ] = ar[ i ];
 
-    gtk_colour_picker_get_colour( GTK_COLOUR_PICKER( apwDiceColour[ 1 ] ), 
+    gtk_color_button_get_array( GTK_COLOR_BUTTON( apwDiceColour[ 1 ] ), 
                                    ar );
     for( i = 0; i < 3; i++ )
 	prd->aarDiceColour[ 1 ][ i ] = ar[ i ];
 
     for ( j = 0; j < 2; ++j ) {
 
-      gtk_colour_picker_get_colour( 
-           GTK_COLOUR_PICKER( apwDiceDotColour[ j ] ), 
+      gtk_color_button_get_array( 
+           GTK_COLOR_BUTTON( apwDiceDotColour[ j ] ), 
            ar );
       for( i = 0; i < 3; i++ )
 	prd->aarDiceDotColour[ j ][ i ] = ar[ i ];
     }
 
     /* cube colour */
-    gtk_colour_picker_get_colour( GTK_COLOUR_PICKER( pwCubeColour ), ar );
+    gtk_color_button_get_array( GTK_COLOR_BUTTON( pwCubeColour ), ar );
 
 	for( i = 0; i < 3; i++ )
 		prd->arCubeColour[ i ] = ar[ i ];
@@ -2871,7 +2888,7 @@ static void GetPrefs ( renderdata* prd ) {
     /* board colour */
 
     for( j = 0; j < 4; j++ ) {
-	gtk_colour_picker_get_colour( GTK_COLOUR_PICKER( apwBoard[ j ] ),
+	gtk_color_button_get_array( GTK_COLOR_BUTTON( apwBoard[ j ] ),
 				      ar );
 	for( i = 0; i < 3; i++ )
 	    prd->aanBoardColour[ j ][ i ] = (unsigned char)(ar[ i ] * 0xFF);

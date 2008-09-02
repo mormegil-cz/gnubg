@@ -234,5 +234,8 @@ struct _ClipBox
 extern void TestHarnessDraw(const BoardData *bd);
 #endif
 
+#define DF_VARIABLE_OPACITY 1
+#define DF_NO_ALPHA 2
+#define DF_FULL_ALPHA 4
 
 #endif

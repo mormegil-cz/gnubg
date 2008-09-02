@@ -26,8 +26,17 @@
 #include "misc3d.h"
 #include <glib/gi18n.h>
 
-#include "gtkcolour.h"
 #include "gtkprefs.h"
+
+typedef struct UpdateDetails_T
+{
+	Material mat;
+	Material *pBoardMat;
+	GtkWidget* preview;
+	GtkWidget** parentPreview;
+	int opacity;
+	TextureType textureType;
+} UpdateDetails;
 
 static GtkWidget *pcpAmbient, *pcpDiffuse, *pcpSpecular;
 static GtkAdjustment *padjShine, *padjOpacity;
@@ -147,7 +156,7 @@ static void Draw(Material* pMat)
 		glDisable(GL_BLEND);
 }
 
-static void UpdateColourPreview(void *notused)
+static void UpdateColourPreview(void)
 {
 	TextureInfo* tempTexture;
 	double ambient[4], diffuse[4], specular[4];
@@ -158,14 +167,14 @@ static void UpdateColourPreview(void *notused)
 	if (useOpacity)
 		opacityValue = (float)padjOpacity->value / 100.0f;
 
-	gtk_colour_picker_get_colour(GTK_COLOUR_PICKER(pcpAmbient), ambient);
-	gtk_colour_picker_get_colour(GTK_COLOUR_PICKER(pcpDiffuse), diffuse);
-	gtk_colour_picker_get_colour(GTK_COLOUR_PICKER(pcpSpecular), specular);
+	gtk_color_button_get_array(GTK_COLOR_BUTTON(pcpAmbient), ambient);
+	gtk_color_button_get_array(GTK_COLOR_BUTTON(pcpDiffuse), diffuse);
+	gtk_color_button_get_array(GTK_COLOR_BUTTON(pcpSpecular), specular);
 
 	tempTexture = col3d.textureInfo;	/* Remeber texture, as setupmat resets it */
-	SetupMat(&col3d, (float)ambient[0], (float)ambient[1], (float)ambient[2],
-		(float)diffuse[0], (float)diffuse[1], (float)diffuse[2],
-		(float)specular[0], (float)specular[1], (float)specular[2],
+	SetupMat(&col3d, ambient[0], ambient[1], ambient[2],
+		diffuse[0], diffuse[1], diffuse[2],
+		specular[0], specular[1], specular[2],
 		(int)padjShine->value, opacityValue);
 	col3d.textureInfo = tempTexture;
 
@@ -198,7 +207,7 @@ static void TextureChange(GtkComboBox * combo, gpointer data)
 	else
 		FindNamedTexture(&col3d.textureInfo, current);
 
-	UpdateColourPreview(0);
+	UpdateColourPreview();
 }
 
 static gboolean expose_event_preview3d(GtkWidget *widget, GdkEventExpose *notused, Material* pMat)
@@ -253,6 +262,32 @@ static GtkWidget *CreateGLPreviewWidget(Material* pMat)	// Rename this (and the 
 	return p3dWidget;
 }
 
+static gboolean combo_box_select_text(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer text)
+{
+	gchar *value;
+	gtk_tree_model_get(model, iter, 0, &value, -1);
+	if (strcmp(value, text) == 0)
+	{
+		gtk_combo_box_set_active_iter(GTK_COMBO_BOX(textureComboBox), iter);
+		g_free(value);
+		return TRUE;
+	}
+	g_free(value);
+	return FALSE;
+}
+
+static void texture_set_active(void)
+{
+	if (col3d.textureInfo)
+	{
+		gtk_tree_model_foreach(gtk_combo_box_get_model(GTK_COMBO_BOX(textureComboBox)),
+				combo_box_select_text,
+				col3d.textureInfo->name);
+	}
+	else
+		gtk_combo_box_set_active(GTK_COMBO_BOX(textureComboBox), 0);
+}
+
 static void AddWidgets(GtkWidget *window)
 {
 	GtkWidget *table, *label, *scale;
@@ -261,17 +296,20 @@ static void AddWidgets(GtkWidget *window)
 
 	label = gtk_label_new(_("Ambient colour:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), label, 0, 1, 0, 1);
-	pcpAmbient = gtk_colour_picker_new((ColorPickerFunc)UpdateColourPreview, 0);
+	pcpAmbient = gtk_color_button_new();
+	g_signal_connect(G_OBJECT(pcpAmbient), "color-set", UpdateColourPreview, NULL);
 	gtk_table_attach_defaults(GTK_TABLE (table), pcpAmbient, 1, 2, 0, 1);
 
 	label = gtk_label_new(_("Diffuse colour:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), label, 0, 1, 1, 2);
-	pcpDiffuse = gtk_colour_picker_new((ColorPickerFunc)UpdateColourPreview, 0);
+	pcpDiffuse = gtk_color_button_new();
+	g_signal_connect(G_OBJECT(pcpDiffuse), "color-set", UpdateColourPreview, NULL);
 	gtk_table_attach_defaults(GTK_TABLE (table), pcpDiffuse, 1, 2, 1, 2);
 
 	label = gtk_label_new(_("Specular colour:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), label, 2, 3, 0, 1);
-	pcpSpecular = gtk_colour_picker_new((ColorPickerFunc)UpdateColourPreview, 0);
+	pcpSpecular = gtk_color_button_new();
+	g_signal_connect(G_OBJECT(pcpSpecular), "color-set", UpdateColourPreview, NULL);
 	gtk_table_attach_defaults(GTK_TABLE (table), pcpSpecular, 3, 4, 0, 1);
 
 	label = gtk_label_new(_("Shine:"));
@@ -297,6 +335,7 @@ static void AddWidgets(GtkWidget *window)
 	pTexturelabel = gtk_label_new(_("Texture:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), pTexturelabel, 2, 3, 2, 3);
 	textureComboBox = gtk_combo_box_new_text();
+	texture_set_active();
 	gtk_widget_set_sensitive(textureComboBox, FALSE);
 	g_signal_connect(textureComboBox, "changed", G_CALLBACK( TextureChange ), NULL );
 	gtk_table_attach_defaults(GTK_TABLE (table), textureComboBox, 2, 4, 3, 4);
@@ -329,7 +368,7 @@ static gboolean OkClicked(GtkWidget *pw, UpdateDetails* pDetails)
 			GetTextures(bd->bd3d, bd->rd);
 		}
 	}
-	UpdatePreview(0);
+	UpdatePreview();
 	gtk_widget_queue_draw(pDetails->preview);
 
 	/* Close dialog */
@@ -338,35 +377,20 @@ static gboolean OkClicked(GtkWidget *pw, UpdateDetails* pDetails)
 	return TRUE;
 }
 
-static void setCol(GtkColourPicker* pCP, const float val[4])
-{
-	double dval[4];
-	int i;
-	for (i = 0; i < 4; i++)
-		dval[i] = val[i];
-
-	gtk_colour_picker_set_colour(pCP, dval);
-}
-
 static void append_to_combo_box(gpointer data, gpointer combo)
 {
 	gtk_combo_box_append_text(combo, data);
 }
 
-
-static gboolean combo_box_select_text(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer text)
+static void gtk_color_button_set_from_farray(GtkColorButton *button, float col[4])
 {
-	gchar *value;
-	gtk_tree_model_get(model, iter, 0, &value, -1);
-	if (strcmp(value, text) == 0)
-	{
-		gtk_combo_box_set_active_iter(GTK_COMBO_BOX(textureComboBox), iter);
-		g_free(value);
-		return TRUE;
-	}
-	g_free(value);
-	return FALSE;
+	int i;
+	double cold[4];
+	for (i = 0; i<4; i++)
+		cold[i] = col[i];
+	gtk_color_button_set_from_array(button, cold);
 }
+
 
 static void UpdateColour3d(GtkWidget *notused, UpdateDetails* pDetails)
 {
@@ -382,9 +406,9 @@ static void UpdateColour3d(GtkWidget *notused, UpdateDetails* pDetails)
 	bUpdate = FALSE;
 
 	/* Setup widgets */
-	setCol(GTK_COLOUR_PICKER(pcpAmbient), col3d.ambientColour);
-	setCol(GTK_COLOUR_PICKER(pcpDiffuse), col3d.diffuseColour);
-	setCol(GTK_COLOUR_PICKER(pcpSpecular), col3d.specularColour);
+	gtk_color_button_set_from_farray(GTK_COLOR_BUTTON(pcpAmbient), col3d.ambientColour);
+	gtk_color_button_set_from_farray(GTK_COLOR_BUTTON(pcpDiffuse), col3d.diffuseColour);
+	gtk_color_button_set_from_farray(GTK_COLOR_BUTTON(pcpSpecular), col3d.specularColour);
 
 	gtk_adjustment_set_value (padjShine, (double)col3d.shine);
 	if (IsFlagSet(pDetails->opacity, DF_VARIABLE_OPACITY))
@@ -410,13 +434,8 @@ static void UpdateColour3d(GtkWidget *notused, UpdateDetails* pDetails)
 		gtk_list_store_clear(GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(textureComboBox))));
 		g_list_foreach(glist, append_to_combo_box, textureComboBox);
 		g_list_free(glist);
-
-		if (col3d.textureInfo)
-		{
-			gtk_tree_model_foreach(gtk_combo_box_get_model(GTK_COMBO_BOX(textureComboBox)),
-					combo_box_select_text,
-					col3d.textureInfo->name);
-	       	}
+		
+		texture_set_active();
 
 		useTexture = 1;
 		gtk_widget_set_sensitive(GTK_WIDGET(textureComboBox), !IsFlagSet(pDetails->textureType, TT_DISABLED));
@@ -441,7 +460,7 @@ static void UpdateColour3d(GtkWidget *notused, UpdateDetails* pDetails)
 
 	/* Update preview */
 	bUpdate = TRUE;
-	UpdateColourPreview(0);
+	UpdateColourPreview();
 
 	gtk_main();
 }

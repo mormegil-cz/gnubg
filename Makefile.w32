@@ -23,7 +23,7 @@ SOURCE = analysis bearoff bearoffgammon non-src/copying non-src/credits \
 	util corecount dbprovider gnubgstock
 
 GTKSOURCE = gtk-multiview gtkboard gtkcube gtkchequer gtkexport gtkgame gtkmet \
-	gtkprefs gtkmovefilter gtkrace gtktheory gtksplash gtkcolour \
+	gtkprefs gtkmovefilter gtkrace gtktheory gtksplash \
 	gtkrolls gtktempmap gtktoolbar gtkoptions gtkgamelist gtkpanels gtkfile \
 	gtkmovelist gtkmovelistctrl gtkwindows gtkrelational
 
