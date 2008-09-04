@@ -19,6 +19,8 @@ board3d/misc3d.h
 board3d/model.c
 board3d/model.h
 board3d/shadow.c
+board3d/tr.c
+board3d/tr.h
 board3d/types3d.h
 board3d/wglBuffer.c
 board3d/wglBuffer.h
@@ -55,12 +57,12 @@ format.h
 gnubg.c
 gnubgmodule.c
 gnubgmodule.h
+gnubgstock.c
+gnubgstock.h
 gtkboard.c
 gtkboard.h
 gtkchequer.c
 gtkchequer.h
-gtkcolour.c
-gtkcolour.h
 gtkcube.c
 gtkcube.h
 gtkexport.c
@@ -138,6 +140,7 @@ openurl.c
 openurl.h
 osr.c
 osr.h
+pixmaps/gnubg-stock-pixbufs.h
 play.c
 positionid.c
 positionid.h
