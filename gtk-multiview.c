@@ -26,7 +26,9 @@
 #include <gtk/gtk.h>
 #include "gtk-multiview.h"
 
-static void    gtk_multiview_init          (GtkMultiview      *multiview);
+G_DEFINE_TYPE (GtkMultiview, gtk_multiview, GTK_TYPE_CONTAINER)
+
+
 static void    gtk_multiview_class_init    (GtkMultiviewClass *klass);
 static void    gtk_multiview_size_request  (GtkWidget         *widget,
 					    GtkRequisition    *requisition);
@@ -44,34 +46,6 @@ static void    gtk_multiview_add           (GtkContainer      *widget,
 static void    gtk_multiview_remove        (GtkContainer      *widget,
 					    GtkWidget         *child);
 
-
-static GtkContainerClass *parent_class = NULL;
-
-GtkType
-gtk_multiview_get_type (void)
-{
-  static GtkType multiview_type = 0;
-
-  if (!multiview_type)
-    {
-      static const GtkTypeInfo multiview_info =
-      {
-        "GtkMultiview",
-        sizeof (GtkMultiview),
-        sizeof (GtkMultiviewClass),
-        (GtkClassInitFunc) gtk_multiview_class_init,
-        (GtkObjectInitFunc) gtk_multiview_init,
-        /* reserved_1 */ NULL,
-        /* reserved_2 */ NULL,
-        (GtkClassInitFunc) NULL,
-      };
-
-      multiview_type = gtk_type_unique (gtk_container_get_type (), &multiview_info);
-    }
-
-  return multiview_type;
-}
-
 static void
 gtk_multiview_init (GtkMultiview *multiview)
 {
@@ -84,14 +58,11 @@ gtk_multiview_init (GtkMultiview *multiview)
 static void
 gtk_multiview_class_init (GtkMultiviewClass *klass)
 {
-  GtkObjectClass *object_class;
   GtkWidgetClass *widget_class;
   GtkContainerClass *container_class;
 
-  object_class = (GtkObjectClass*) klass;
   widget_class = (GtkWidgetClass*) klass;
   container_class = (GtkContainerClass*) klass;
-  parent_class = GTK_CONTAINER_CLASS(gtk_type_class (gtk_container_get_type ()));
 
   widget_class->size_request = gtk_multiview_size_request;
   widget_class->size_allocate = gtk_multiview_size_allocate;
@@ -136,6 +107,7 @@ gtk_multiview_size_request  (GtkWidget      *widget,
 	}
     }
 }
+
 static void
 gtk_multiview_size_allocate (GtkWidget     *widget,
 			     GtkAllocation *allocation)
@@ -276,7 +248,7 @@ gtk_multiview_remove (GtkContainer *container,
 GtkWidget *
 gtk_multiview_new (void)
 {
-  return GTK_WIDGET (gtk_type_new (gtk_multiview_get_type ()));
+	return g_object_new(GTK_TYPE_MULTIVIEW, NULL);
 }
 
 void

@@ -1,3 +1,7 @@
+Thu Sep  4 15:18:09 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtk-multiview.[ch]: port to g_object
+
 Tue Sep  2 23:05:52 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtkcolour.c, gtkcolour.h, gtkprefs.c, gtkprefs.h,
