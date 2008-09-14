@@ -563,9 +563,9 @@ void CheckDatabase(const char *database)
 	
 		char *dbString, *buf, *buf2 = NULL;
 		if (version < DB_VERSION)
-			dbString = _("This database is from an old version of gnubg and cannot be used");
+			dbString = _("This database is from an old version of GNU Backgammon and cannot be used");
 		else if (version > DB_VERSION)
-			dbString = _("This database is from a new version of gnubg and cannot be used");
+			dbString = _("This database is from a new version of GNU Backgammon and cannot be used");
 		else
 		{
 			if (matchcount < 0)

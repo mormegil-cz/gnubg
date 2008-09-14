@@ -1354,7 +1354,7 @@ extern void CommandSetMessage( char *sz ) {
 
 	SetToggle("message", &woPanel[WINDOW_MESSAGE].showing, sz,
 		_("Show window with messages"),
-		_("Do not show window with message."));
+		_("Do not show window with messages."));
 }
 
 extern void CommandSetTheoryWindow( char *sz ) {

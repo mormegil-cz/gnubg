@@ -1,3 +1,7 @@
+Sun Sep 14 22:32:57 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* : update danish translation and adjust a few strings
+
 Thu Sep  4 15:18:09 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtk-multiview.[ch]: port to g_object

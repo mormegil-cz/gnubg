@@ -549,8 +549,7 @@ extern void CommandShowDelay( char *sz ) {
     else
 	outputl( _("No delay is being used.") );
 #else
-    outputl( _("The `show delay' command applies only when using a window "
-	  "system.") );
+    outputl( _("The `show delay' command applies only when using the GUI"));
 #endif
 }
 
@@ -1811,7 +1810,7 @@ extern void CommandShowMarketWindow ( char * sz ) {
       N_("Initial Double Point (IDP)"),
       N_("Redouble Point (RDP)"),
       N_("Cash Point (CP)"),
-      N_("Too good Point (TP)")
+      N_("Too good Point (TGP)")
     };
 
     float aaarPoints[ 2 ][ 7 ][ 2 ];

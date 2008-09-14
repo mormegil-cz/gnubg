@@ -771,7 +771,7 @@ extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 		if ( ! pbc2 )
 			fprintf ( stderr, 
 					"\n***WARNING***\n\n" 
-					"Note that gnubg does not use the gnubg.bd file.\n"
+					"Note that GNU Backgammon does not use the gnubg.bd file.\n"
 					"You should obtain the file gnubg_ts0.bd or generate\n"
 					"it yourself using the program 'makebearoff'.\n"
 					"You can generate the file with the command:\n"

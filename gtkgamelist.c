@@ -276,7 +276,7 @@ extern GtkWidget* GL_Create(void)
 	nMaxWidth = logical_rect.width;
     gtk_clist_set_column_width( GTK_CLIST( pwGameList ), 0, nMaxWidth );
 
-	layout = gtk_widget_create_pango_layout(pwGameList, _(" (set board AAAAAAAAAAAAAA)"));
+	layout = gtk_widget_create_pango_layout(pwGameList, " (set board AAAAAAAAAAAAAA)");
 	pango_layout_get_pixel_extents (layout, NULL, &logical_rect);
 	g_object_unref (layout);
 	nMaxWidth = logical_rect.width;

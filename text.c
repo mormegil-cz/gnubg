@@ -703,7 +703,7 @@ TextMatchInfo ( FILE *pf, const matchinfo *pmi ) {
     tmx.tm_year = pmi->nYear - 1900;
     tmx.tm_mon = pmi->nMonth - 1;
     tmx.tm_mday = pmi->nDay;
-    strftime ( sz, sizeof ( sz ), _("%x"), &tmx );
+    strftime ( sz, sizeof ( sz ), "%x", &tmx );
     fprintf ( pf, _("Date: %s\n"), sz );
 
   }
@@ -903,17 +903,9 @@ static void ExportGameText ( FILE *pf, listOLD *plGame,
 
       /* print game result */
 
-      if ( pmgi->nPoints > 1 )
-        fprintf ( pf, 
-                  _("%s wins %d points\n\n"),
+        fprintf ( pf, ngettext("%s wins %d point", "%s wins %d points",  pmgi->nPoints), 
                   ap[ pmgi->fWinner ].szName, 
                   pmgi->nPoints );
-      else
-        fprintf ( pf, 
-                  _("%s wins %d point\n\n"),
-                  ap[ pmgi->fWinner ].szName,
-                  pmgi->nPoints );
-
     }
 
     if ( psc ) {

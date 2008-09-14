@@ -769,7 +769,7 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 				  bd->rd->fShowIDs);
     gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwShowIDs, FALSE, FALSE, 0 );
     gtk_widget_set_tooltip_text(pow->pwShowIDs,
-			  _("Two entry fields will be shown above the board, "
+			  _("One entry field will be shown above the board, "
 			    "which can be useful for recording, entering and "
 			    "exchanging board positions and match "
 			    "situations."));
@@ -992,7 +992,7 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 			      1, 0);
     gtk_box_pack_start (GTK_BOX (pwhbox), pw, TRUE, TRUE, 0);
     gtk_box_pack_start (GTK_BOX (pwhbox),
-			gtk_label_new( _("points") ),
+			gtk_label_new( _("length|points") ),
 			FALSE, FALSE, 0);
     gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pw), TRUE);
     gtk_widget_set_tooltip_text( pwev,
@@ -1206,9 +1206,7 @@ static GtkWidget *OptionsPages( optionswidget *pow )
     gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwConfOverwrite,
 			FALSE, FALSE, 0);
     gtk_widget_set_tooltip_text(pow->pwConfOverwrite,
-			  _("Ask for confirmation when writing to a file "
-			    "would overwrite data in an existing file with "
-			    "the same name."));
+	_("Confirm when overwriting existing files"));
     
     pow->pwRecordGames = gtk_check_button_new_with_label (
 	_("Record all games"));
