@@ -48,8 +48,16 @@ stock-icons.list: $(STOCK_IMAGES) Makefile.am
 	    echo "  $(srcdir)/$$image" >> $@; \
 	  done )
 
+if FOUND_GDK_PIXBUF_CSOURCE
 gnubg-stock-pixbufs.h: stock-icons.list
 	$(GDK_PIXBUF_CSOURCE) --raw --build-list `cat $<` > $(@F)
+else
+gnubg-stock-pixbufs.h: stock-icons.list
+	@echo ' ****************************'
+	@echo ' ** unable to rebuild pixmaps'
+	@echo ' ****************************'
+endif
+
 
 nobase_dist_gnubgicons_DATA = \
 			      $(ICONS_16) \

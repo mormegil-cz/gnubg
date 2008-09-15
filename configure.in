@@ -223,10 +223,11 @@ AM_CONDITIONAL(USE_GTK, test "$no_gtk" != "yes" )
 AM_CONDITIONAL(USE_BOARD3D, test "$no_board3d" != "yes" )
 
 if test "$no_gtk" == "no"; then
-  AC_PATH_PROG(GDK_PIXBUF_CSOURCE, gdk-pixbuf-csource, true)
+  AC_PATH_PROG(GDK_PIXBUF_CSOURCE, gdk-pixbuf-csource, no)
   if test "x$GDK_PIXBUF_CSOURCE" = xno; then
     AC_MSG_WARN(Could not find gdk-pixbuf-csource in your PATH, cannot rebuild pixmaps)
   fi
+  AM_CONDITIONAL(FOUND_GDK_PIXBUF_CSOURCE, test "x$GDK_PIXBUF_CSOURCE" != xno )
 fi
 
 dnl

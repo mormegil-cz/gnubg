@@ -1,3 +1,8 @@
+Mon Sep 15 21:20:28 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* configure.in, pixmaps/Makefile.am: allow building even if
+	gdk-pixbuf-csource is not found
+
 Sun Sep 14 22:32:57 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* : update danish translation and adjust a few strings
