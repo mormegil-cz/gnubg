@@ -50,7 +50,6 @@
 
 #if USE_BOARD3D
 #include "fun3d.h"
-#include "misc3d.h"
 #define NUM_NONPREVIEW_PAGES 2
 #else
 #define NUM_NONPREVIEW_PAGES 1
@@ -658,15 +657,15 @@ extern void gtk_color_button_get_array(GtkColorButton *button, double array[4])
 
 }
 
-extern void gtk_color_button_set_from_array(GtkColorButton *button, double array[4])
+extern void gtk_color_button_set_from_array(GtkColorButton *button, double colarray[4])
 {
 	GdkColor color;
 	guint16 alpha;
 
-	color.red = array[0]*65535;
-	color.green = array[1]*65535;
-	color.blue = array[2]*65535;
-	alpha = array[3]*65535;
+	color.red = (int)(colarray[0] * 65535);
+	color.green = (int)(colarray[1] * 65535);
+	color.blue = (int)(colarray[2] * 65535);
+	alpha = (int)(colarray[3] * 65535);
 
 	gtk_color_button_set_color(button, &color);
 	gtk_color_button_set_alpha(button, alpha);

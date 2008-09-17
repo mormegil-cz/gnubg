@@ -1,7 +1,4 @@
-#include "types3d.h"
-#include "inc3d.h"
 
-extern GtkWidget* gtk_colour_picker_new3d(Material* pMat, int opacity, TextureType textureType);
 extern float getDiceSize(const renderdata* prd);
 extern void SetupFlag(void);
 extern void setupDicePaths(const BoardData* bd, Path dicePaths[2], float diceMovingPos[2][3], DiceRotation diceRotation[2]);

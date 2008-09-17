@@ -149,4 +149,6 @@ extern void RerenderBase(BoardData3d* bd3d);
 extern int setVSync(int state);
 extern int extensionSupported(const char *extension);
 
+extern GtkWidget* gtk_colour_picker_new3d(Material* pMat, int opacity, TextureType textureType);
+
 #endif

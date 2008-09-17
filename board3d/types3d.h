@@ -63,4 +63,8 @@ typedef struct _DiceRotation
 	float xRotFactor, yRotFactor;
 } DiceRotation;
 
+#define DF_VARIABLE_OPACITY 1
+#define DF_NO_ALPHA 2
+#define DF_FULL_ALPHA 4
+
 #endif
