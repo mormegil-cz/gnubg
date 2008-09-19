@@ -132,6 +132,7 @@ typedef struct _BoardData {
     gint redoubles; /* number of instant redoubles allowed */
 	int DragTargetHelp;	/* Currently showing draw targets? */
 	int iTargetHelpPoints[4];	/* Drag target position */
+	int grayBoard;	/* Show board grayed when editing */
 
 #if USE_BOARD3D
 	BoardData3d *bd3d;	/* extra members for 3d board */

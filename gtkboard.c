@@ -89,6 +89,7 @@ extern GtkWidget *board_new(renderdata* prd)
 	bd->cube_owner = 0;
 	bd->resigned = 0;
 	bd->diceShown = DICE_NOT_SHOWN;
+	bd->grayBoard = FALSE;
 
 	bd->x_dice[ 0 ] = bd->y_dice[ 0 ] = 0;
 	bd->x_dice[ 1 ] = bd->y_dice[ 1 ] = 0;
@@ -3515,7 +3516,6 @@ static void board_set_crawford( GtkWidget *pw, BoardData *bd )
 
 extern void board_edit( BoardData *bd )
 {
-
     int f = ToolbarIsEditing( pwToolbar );
 									
     update_move( bd );
@@ -3523,7 +3523,13 @@ extern void board_edit( BoardData *bd )
 
     if (!bd->crawford_game)
 	gtk_widget_set_sensitive(bd->crawford, f);
-    
+
+	bd->grayBoard = f;
+#if USE_BOARD3D
+	RerenderBase(bd->bd3d);
+	DrawScene3d(bd->bd3d);
+#endif
+
     if( f ) {
 	/* Close hint window */
 	DestroyPanel(WINDOW_HINT);
