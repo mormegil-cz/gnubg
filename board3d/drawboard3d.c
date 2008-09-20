@@ -2287,37 +2287,29 @@ NTH_STATIC void drawTable(const BoardData3d *bd3d, const renderdata *prd)
 	glPopMatrix();
 }
 
-void GrayScaleCol(float *pCols)
+static void GrayScaleCol(float *pCols)
 {
 	float gs = (pCols[0] + pCols[1] + pCols[2]) / 2.5f;	/* Slightly lighter gray */
 	pCols[0] = pCols[1] = pCols[2] = gs;
 }
 
-void GrayScale(Material *pMat)
+static void GrayScale3D(Material *pMat)
 {
 	GrayScaleCol(pMat->ambientColour);
 	GrayScaleCol(pMat->diffuseColour);
 	GrayScaleCol(pMat->specularColour);
 }
 
-static void drawTableGrayed(const BoardData3d *bd3d, const renderdata *prd)
+static void drawTableGrayed(const BoardData3d *bd3d, renderdata tmp)
 {
-	Material BoxMatTemp, BaseMatTemp, PointMatTemp[2];
-	memcpy(&BoxMatTemp, &prd->BoxMat, sizeof(Material));
-	memcpy(&BaseMatTemp, &prd->BaseMat, sizeof(Material));
-	memcpy(&PointMatTemp[0], &prd->PointMat[0], sizeof(Material));
-	memcpy(&PointMatTemp[1], &prd->PointMat[1], sizeof(Material));
-	GrayScale((Material*)&prd->BaseMat);
-	GrayScale((Material*)&prd->PointMat[0]);
-	GrayScale((Material*)&prd->PointMat[1]);
-	GrayScale((Material*)&prd->BoxMat);
 
-	drawTable(bd3d, prd);
+	GrayScale3D(&tmp.BaseMat);
+	GrayScale3D(&tmp.PointMat[0]);
+	GrayScale3D(&tmp.PointMat[1]);
+	GrayScale3D(&tmp.BoxMat);
 
-	memcpy((Material*)&prd->BoxMat, &BoxMatTemp, sizeof(Material));
-	memcpy((Material*)&prd->BaseMat, &BaseMatTemp, sizeof(Material));
-	memcpy((Material*)&prd->PointMat[0], &PointMatTemp[0], sizeof(Material));
-	memcpy((Material*)&prd->PointMat[1], &PointMatTemp[1], sizeof(Material));
+	drawTable(bd3d, &tmp);
+
 }
 
 static int DiceShowing(const BoardData* bd)
@@ -3774,7 +3766,7 @@ static void drawBoardBase(const BoardData *bd, const BoardData3d *bd3d, const re
 	if (!bd->grayBoard)
 		drawTable(bd3d, prd);
 	else
-		drawTableGrayed(bd3d, prd);
+		drawTableGrayed(bd3d, *prd);
 
 	if (prd->fLabels && !prd->fDynamicLabels)
 		drawNumbers(bd);

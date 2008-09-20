@@ -731,8 +731,11 @@ extern void CommandSetClockwise( char *sz ) {
 	BoardData *bd = BOARD(pwBoard)->board_data;
 	ShowBoard();
 #if USE_BOARD3D
-	RestrictiveRedraw();
-	RerenderBase(bd->bd3d);
+	if (display_is_3d(bd->rd))
+	{
+		RestrictiveRedraw();
+		RerenderBase(bd->bd3d);
+	}
 #endif
     }
 #endif /* USE_GTK */

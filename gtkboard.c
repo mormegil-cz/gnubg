@@ -3526,8 +3526,11 @@ extern void board_edit( BoardData *bd )
 
 	bd->grayBoard = f;
 #if USE_BOARD3D
-	RerenderBase(bd->bd3d);
-	DrawScene3d(bd->bd3d);
+	if (display_is_3d(bd->rd))
+	{
+		RerenderBase(bd->bd3d);
+		DrawScene3d(bd->bd3d);
+	}
 #endif
 
     if( f ) {
