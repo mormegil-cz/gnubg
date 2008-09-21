@@ -3204,16 +3204,32 @@ else
     return 0;
 }
 
+int showingGray;
+void GrayScaleColC(char *pCols)
+{
+	float gs;
+	pCols[0] += 128;
+	pCols[1] += 128;
+	pCols[2] += 128;
+	gs = ((pCols[0] + pCols[1] + pCols[2]) / 3.0f) * 2;
+	pCols[0] = (char)((pCols[0] + gs) / 3);
+	pCols[1] = (char)((pCols[1] + gs) / 3);
+	pCols[2] = (char)((pCols[2] + gs) / 3);
+	pCols[0] -= 128;
+	pCols[1] -= 128;
+	pCols[2] -= 128;
+}
+
 /* Create all of the size/colour-dependent pixmaps. */
 extern void board_create_pixmaps( GtkWidget *board, BoardData *bd )
 {
-
     unsigned char auch[ 20 * 20 * 3 ],
 	auchBoard[ BOARD_WIDTH * 3 * BOARD_HEIGHT * 3 * 3 ],
 	auchChequers[ 2 ][ CHEQUER_WIDTH * 3 * CHEQUER_HEIGHT * 3 * 4 ];
     unsigned short asRefract[ 2 ][ CHEQUER_WIDTH * 3 * CHEQUER_HEIGHT * 3 ];
     int i, nSizeReal;
 
+	double aanBoardTemp[4][4];
 #if USE_BOARD3D
 	int j;
 	double aarColourTemp[ 2 ][ 4 ];
@@ -3243,8 +3259,17 @@ extern void board_create_pixmaps( GtkWidget *board, BoardData *bd )
 			}
 		}
 	}
+	else
 #endif
-
+	{
+		if (bd->grayBoard)
+		{
+			showingGray = bd->grayBoard;
+			memcpy(aanBoardTemp, bd->rd->aanBoardColour, sizeof(aanBoardTemp));
+			for (i = 0; i < 4; i++)
+				GrayScaleColC(bd->rd->aanBoardColour[i]);
+		}
+	}
     RenderImages( bd->rd, &bd->ri );
     nSizeReal = bd->rd->nSize;
     bd->rd->nSize = 3;
@@ -3287,7 +3312,15 @@ extern void board_create_pixmaps( GtkWidget *board, BoardData *bd )
 		memcpy(bd->rd->aarDiceColour, aarDiceColourTemp, sizeof(bd->rd->aarDiceColour));
 		memcpy(bd->rd->aarDiceDotColour, aarDiceDotColourTemp, sizeof(bd->rd->aarDiceDotColour));
 	}
+	else
 #endif
+	{
+		if (bd->grayBoard)
+		{
+			showingGray = FALSE;
+			memcpy(bd->rd->aanBoardColour, aanBoardTemp, sizeof(aanBoardTemp));
+		}
+	}
 }
 
 extern void board_free_pixmaps( BoardData *bd )
@@ -3525,13 +3558,20 @@ extern void board_edit( BoardData *bd )
 	gtk_widget_set_sensitive(bd->crawford, f);
 
 	bd->grayBoard = f;
+
 #if USE_BOARD3D
 	if (display_is_3d(bd->rd))
 	{
 		RerenderBase(bd->bd3d);
 		DrawScene3d(bd->bd3d);
 	}
+	else
 #endif
+	{
+		board_free_pixmaps(bd);
+		board_create_pixmaps(pwBoard, bd);
+		gtk_widget_queue_draw(bd->drawing_area);
+	}
 
     if( f ) {
 	/* Close hint window */

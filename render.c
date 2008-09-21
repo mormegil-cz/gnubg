@@ -657,8 +657,8 @@ static void RenderBorder( unsigned char *puch, int nStride, int x0, int y0,
     }
 }
 
-static void RenderFramePainted( renderdata *prd, unsigned char *puch,
-				int nStride ) {
+static void RenderFramePainted(renderdata *prd, unsigned char *puch, int nStride)
+{
     int i;
     unsigned int ix;
     float x, z, cos_theta, diffuse, specular;
@@ -746,6 +746,9 @@ static float WoodHash( float r ) {
 
     return fabs( frexp( x * 131073.1294427 + n, &n ) ) * 2 - 1;
 }
+
+extern void GrayScaleColC(char *pCols);
+extern int showingGray;
 
 static void WoodPixel( float x, float y, float z, unsigned char auch[ 3 ],
 		       woodtype wt ) {
@@ -1031,6 +1034,9 @@ static void WoodPixel( float x, float y, float z, unsigned char auch[ 3 ],
     default:
 	g_assert( FALSE );
     }
+
+	if (showingGray)
+		GrayScaleColC(auch);
 }
 
 static void RenderFrameWood( renderdata *prd, unsigned char *puch,
@@ -1560,9 +1566,8 @@ RenderLabels( renderdata *prd, unsigned char *puch, int nStride,
 
 }
 
-static unsigned char BoardPixel( renderdata *prd, int i, int antialias,
-				  int j ) {
-
+static unsigned char BoardPixel(renderdata *prd, int i, int antialias, int j)
+{
     return clamp( ( ( (int) prd->aanBoardColour[ 0 ][ j ] -
 		      (int) prd->aSpeckle[ 0 ] / 2 +
 		      (int) RAND % ( prd->aSpeckle[ 0 ] + 1 ) ) *

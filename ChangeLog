@@ -1,3 +1,6 @@
+Sun Sep 29 19:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
+	* gtkboard.c, render.c: Attempt to gray board in edit mode
+
 Mon Sep 15 21:20:28 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* configure.in, pixmaps/Makefile.am: allow building even if
