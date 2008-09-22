@@ -3205,19 +3205,17 @@ else
 }
 
 int showingGray;
-void GrayScaleColC(char *pCols)
+void GrayScaleColC(unsigned char *pCols)
 {
+	float tmp[3];
 	float gs;
-	pCols[0] += 128;
-	pCols[1] += 128;
-	pCols[2] += 128;
-	gs = ((pCols[0] + pCols[1] + pCols[2]) / 3.0f) * 2;
-	pCols[0] = (char)((pCols[0] + gs) / 3);
-	pCols[1] = (char)((pCols[1] + gs) / 3);
-	pCols[2] = (char)((pCols[2] + gs) / 3);
-	pCols[0] -= 128;
-	pCols[1] -= 128;
-	pCols[2] -= 128;
+	tmp[0] = pCols[0] + 128.0f;
+	tmp[1] = pCols[1] + 128.0f;
+	tmp[2] = pCols[2] + 128.0f;
+	gs = ((tmp[0] + tmp[1] + tmp[2]) / 3.0f) * 2.0f;
+	pCols[0] = (tmp[0] + gs) / 3.0f - 128.0f;
+	pCols[1] = (tmp[1] + gs) / 3.0f - 128.0f;
+	pCols[2] = (tmp[2] + gs) / 3.0f - 128.0f;
 }
 
 /* Create all of the size/colour-dependent pixmaps. */

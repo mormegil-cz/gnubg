@@ -747,9 +747,6 @@ static float WoodHash( float r ) {
     return fabs( frexp( x * 131073.1294427 + n, &n ) ) * 2 - 1;
 }
 
-extern void GrayScaleColC(char *pCols);
-extern int showingGray;
-
 static void WoodPixel( float x, float y, float z, unsigned char auch[ 3 ],
 		       woodtype wt ) {
     float r;
