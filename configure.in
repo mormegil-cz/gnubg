@@ -189,14 +189,14 @@ dnl *******************
 
 AC_MSG_CHECKING([wether deprecated glib functions are enabled])
 AC_ARG_ENABLE( gdeprecated, [  --enable-gdeprecated  enable deprecated glib functions], gdeprecated=$enableval)
-if test "x$gdeprecated" == "xno"; then
+if test "x$gdeprecated" = "xno"; then
 	AC_DEFINE(G_DISABLE_DEPRECATED, 1, Define if you want to disable deprecated glib functions)
 fi
 AC_MSG_RESULT($gdeprecated)
 
 AC_MSG_CHECKING([wether deprecated gtk functions are enabled])
 AC_ARG_ENABLE( gtkdeprecated, [  --enable-gtkdeprecated  enable deprecated gtk functions], gtkdeprecated=$enableval)
-if test "x$gtkdeprecated" == "xno"; then
+if test "x$gtkdeprecated" = "xno"; then
 	AC_DEFINE(GTK_DISABLE_DEPRECATED, 1, Define if you want to disable deprecated gtk functions)
 fi
 AC_MSG_RESULT($gtkprecated)
@@ -221,9 +221,9 @@ fi
 AM_CONDITIONAL(USE_GTK, test "$no_gtk" != "yes" )
 AM_CONDITIONAL(USE_BOARD3D, test "$no_board3d" != "yes" )
 
-if test "$no_gtk" == "no"; then
+if test "$no_gtk" = "no"; then
   AC_PATH_PROG(GDK_PIXBUF_CSOURCE, gdk-pixbuf-csource, no)
-  if test "x$GDK_PIXBUF_CSOURCE" == "xno"; then
+  if test "x$GDK_PIXBUF_CSOURCE" = "xno"; then
     AC_MSG_WARN(Could not find gdk-pixbuf-csource in your PATH, cannot rebuild pixmaps)
   fi
 fi
@@ -249,7 +249,7 @@ dnl
 
 AC_MSG_CHECKING([for sse cpu])
 AC_ARG_ENABLE( sse, [  --enable-sse=TYPE  enable SSE for newer cpus(TYPE=yes,no,cputest, default cputest)], ssecpu=$enableval, ssecpu="undef")
-if test "x$ssecpu" == "xundef"; then
+if test "x$ssecpu" = "xundef"; then
 	case "$host" in
 		x86-* | i586-* | i686-* )
         	if test x"$GCC" = xyes; then
