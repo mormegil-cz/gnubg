@@ -74,7 +74,7 @@ typedef struct _optionswidget {
 
   GtkWidget *pwIllegal, *pwUseDiceIcon, *pwShowIDs, *pwShowPips, *pwShowEPCs, *pwShowWastage,
       *pwAnimateNone, *pwAnimateBlink, *pwAnimateSlide,
-      *pwHigherDieFirst, *pwSetWindowPos, *pwDragTargetHelp;
+      *pwHigherDieFirst, *pwGrayEdit, *pwSetWindowPos, *pwDragTargetHelp;
   GtkAdjustment *padjSpeed;
 
   GtkWidget *pwCheat, *pwCheatRollBox, *apwCheatRoll[ 2 ];
@@ -868,6 +868,15 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 			G_CALLBACK( ToggleAnimation ), pwSpeed );
     ToggleAnimation( pow->pwAnimateNone, pwSpeed );
 
+    pow->pwGrayEdit = gtk_check_button_new_with_label(
+	_("Gray board in edit mode") );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwGrayEdit ),
+				  fGUIGrayEdit );
+    gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwGrayEdit, FALSE, FALSE,
+			0 );
+    gtk_widget_set_tooltip_text(pow->pwGrayEdit,
+			  _("Gray board in edit mode to make it clearer"));
+    
     pow->pwDragTargetHelp = gtk_check_button_new_with_label(
 	_("Show target help when dragging a chequer") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwDragTargetHelp ),
@@ -1563,10 +1572,10 @@ static void OptionsOK(GtkWidget *pw, optionswidget *pow)
   CHECKUPDATE( pow->pwShowPips, fGUIShowPips, "set gui showpips %s" )
   CHECKUPDATE( pow->pwShowEPCs, fGUIShowEPCs, "set gui showepcs %s" )
   CHECKUPDATE( pow->pwShowWastage, fGUIShowWastage, "set gui showwastage %s" )
-  CHECKUPDATE( pow->pwHigherDieFirst, fGUIHighDieFirst,
-	       "set gui highdiefirst %s" )
+  CHECKUPDATE( pow->pwHigherDieFirst, fGUIHighDieFirst, "set gui highdiefirst %s" )
   CHECKUPDATE( pow->pwSetWindowPos, fGUISetWindowPos,
 	       "set gui windowpositions %s" )
+  CHECKUPDATE( pow->pwGrayEdit, fGUIGrayEdit, "set gui grayedit %s" )
   CHECKUPDATE( pow->pwDragTargetHelp, fGUIDragTargetHelp,
 	       "set gui dragtargethelp %s" )
 

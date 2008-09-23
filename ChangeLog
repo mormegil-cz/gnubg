@@ -1,3 +1,8 @@
+Tue Sep 23 12:44:36 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, commands.inc, gnubg.c, gtkboard.c, gtkboard.h,
+	gtkoptions.c, set.c: add option to disable boardgraying
+
 Sun Sep 29 19:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 	* gtkboard.c, render.c: Attempt to gray board in edit mode
 

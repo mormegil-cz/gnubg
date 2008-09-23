@@ -1152,7 +1152,7 @@ extern int SetToggle( const char *szName, int *pf, char *sz, const char *szOn, c
     int cch;
     
     if( !pch ) {
-	outputf( _("You must specify whether to set %s on or off.\n"), szName );
+	outputf( _("You must specify whether to set '%s' on or off.\n"), szName );
 
 	return -1;
     }
@@ -3296,31 +3296,20 @@ extern void CommandSaveSettings( char *szParam )
 	if (fFullScreen)
 		GetFullscreenWindowSettings(&dummy, &GetMainAppearance()->fShowIDs, &dummy);
 
-    fprintf( pf, "set gui animation %s\n"
-	     "set gui animation speed %d\n"
-	     "set gui beep %s\n"
-	     "set gui dicearea %s\n"
-	     "set gui highdiefirst %s\n"
-	     "set gui illegal %s\n"
-	     "set gui showids %s\n"
-	     "set gui showpips %s\n"
-	     "set gui showepc %s\n"
-	     "set gui showwastage %s\n"
-	     "set gui dragtargethelp %s\n"
-		 "set gui usestatspanel %s\n"
-		 "set gui movelistdetail %s\n",
-	     aszAnimation[ animGUI ], nGUIAnimSpeed,
-	     fGUIBeep ? "on" : "off",
-	     GetMainAppearance()->fDiceArea ? "on" : "off",
-	     fGUIHighDieFirst ? "on" : "off",
-	     fGUIIllegal ? "on" : "off",
-	     GetMainAppearance()->fShowIDs ? "on" : "off",
-	     fGUIShowPips ? "on" : "off",
-	     fGUIShowEPCs ? "on" : "off",
-	     fGUIShowWastage ? "on" : "off",
-	     fGUIDragTargetHelp ? "on" : "off",
-		 fGUIUseStatsPanel ? "on" : "off",
-		 showMoveListDetail ? "on" : "off");
+	fprintf(pf, "set gui animation %s\n", aszAnimation[animGUI]);
+	fprintf(pf, "set gui animation speed %d\n", nGUIAnimSpeed);
+	fprintf(pf, "set gui beep %s\n", fGUIBeep ? "on" : "off");
+	fprintf(pf, "set gui dicearea %s\n", GetMainAppearance()->fDiceArea ? "on" : "off");
+	fprintf(pf, "set gui highdiefirst %s\n", fGUIHighDieFirst ? "on" : "off");
+	fprintf(pf, "set gui illegal %s\n", fGUIIllegal ? "on" : "off");
+	fprintf(pf, "set gui showids %s\n", GetMainAppearance()->fShowIDs ? "on" : "off");
+	fprintf(pf, "set gui showpips %s\n", fGUIShowPips ? "on" : "off");
+	fprintf(pf, "set gui showepc %s\n", fGUIShowEPCs ? "on" : "off");
+	fprintf(pf, "set gui showwastage %s\n", fGUIShowWastage ? "on" : "off");
+	fprintf(pf, "set gui dragtargethelp %s\n", fGUIDragTargetHelp ? "on" : "off");
+	fprintf(pf, "set gui usestatspanel %s\n", fGUIUseStatsPanel ? "on" : "off");
+	fprintf(pf, "set gui movelistdetail %s\n", showMoveListDetail ? "on" : "off");
+	fprintf(pf, "set gui grayedit %s\n", fGUIGrayEdit ? "on" : "off");
 
 	if (fFullScreen)
 		GetMainAppearance()->fShowIDs = FALSE;

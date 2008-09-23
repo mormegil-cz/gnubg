@@ -59,9 +59,15 @@
 #define HINT_TIME 150
 
 animation animGUI = ANIMATE_SLIDE;
-int fGUIBeep = TRUE,
-    fGUIHighDieFirst = TRUE, fGUIIllegal = FALSE,
-    fGUIShowPips = TRUE, fGUIShowWastage=FALSE, fGUIDragTargetHelp = TRUE, fGUIShowEPCs = TRUE;
+int fGUIBeep = TRUE;
+int fGUIHighDieFirst = TRUE;
+int fGUIIllegal = FALSE;
+int fGUIShowPips = TRUE;
+int fGUIShowWastage=FALSE;
+int fGUIDragTargetHelp = TRUE;
+int fGUIShowEPCs = TRUE;
+int fGUIGrayEdit = TRUE;
+
 unsigned int nGUIAnimSpeed = 4;
 int animate_player, *animate_move_list, animation_finished;
 
@@ -3555,7 +3561,10 @@ extern void board_edit( BoardData *bd )
     if (!bd->crawford_game)
 	gtk_widget_set_sensitive(bd->crawford, f);
 
-	bd->grayBoard = f;
+    if (fGUIGrayEdit)
+	    bd->grayBoard = f;
+    else
+	    bd->grayBoard = FALSE;
 
 #if USE_BOARD3D
 	if (display_is_3d(bd->rd))

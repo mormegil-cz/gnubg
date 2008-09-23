@@ -1165,6 +1165,14 @@ extern void CommandSetGUIBeep( char *sz ) {
 	       _("GNU Backgammon will not beep on illegal input.") );
 }
 
+extern void CommandSetGUIGrayEdit( char *sz ) {
+
+    SetToggle( "gui grayedit", &fGUIGrayEdit, sz,
+	       _("Board will be grayedit in edit mode."),
+	       _("Board will not change color in edit mode.") );
+}
+
+
 extern void CommandSetGUIDiceArea( char *sz ) {
 
     if( SetToggle( "gui dicearea", &GetMainAppearance()->fDiceArea, sz,

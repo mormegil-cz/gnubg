@@ -537,6 +537,8 @@ command cER = {
       N_("Show statistics in a panel"), szONOFF, NULL },
     { "movelistdetail", CommandSetGUIMoveListDetail,
       N_("Show win/loss stats in move list"), szONOFF, NULL },
+    { "grayedit", CommandSetGUIGrayEdit,
+      N_("Gray board in edit mode"), szONOFF, NULL },
 #endif
     { "highdiefirst", CommandSetGUIHighDieFirst,
       N_("Show the higher die on the left"), szONOFF, NULL },
