@@ -215,7 +215,7 @@ if test "$with_gtk" != "no"; then
   PKG_CHECK_MODULES(GTK, [gtk+-2.0 >= 2.6.0], AC_DEFINE(USE_GTK, 1, Define if you want to use the gtk gui), no_gtk=yes)
   if test  "$with_board3d" != "no"; then
     no_board3d="no"
-    PKG_CHECK_MODULES(GTKGLEXT, [gtkglext-1.0 >= 2.0], AC_DEFINE(USE_BOARD3D,1,[Define if you want to use the 3d boards]), no_board3d="yes")
+    PKG_CHECK_MODULES(GTKGLEXT, [gtkglext-1.0 >= 1.0], AC_DEFINE(USE_BOARD3D,1,[Define if you want to use the 3d boards]), no_board3d="yes")
   fi
 fi
 AM_CONDITIONAL(USE_GTK, test "$no_gtk" != "yes" )
