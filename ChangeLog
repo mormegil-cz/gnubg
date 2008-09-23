@@ -1,3 +1,8 @@
+Tue Sep 23 21:59:02 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtkmovefilter.c, gtkrace.c, gtkrelational.c, gtkwindows.c,
+	gtkwindows.h: remove GtkSignalFunc as it will be deprecated
+
 Tue Sep 23 17:41:15 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* text.c: fix minor \n output bug

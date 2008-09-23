@@ -20,7 +20,6 @@
  */
 
 #include "config.h"
-#define GTK_DISABLE_DEPRECATED 1
 #include <gtk/gtk.h>
 
 #include <stdio.h>

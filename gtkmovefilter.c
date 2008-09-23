@@ -45,7 +45,7 @@ typedef struct _movefilterwidget {
 
   /* callback for the parent */
 
-  GtkSignalFunc pfChanged;
+  GCallback pfChanged;
   gpointer userdata;
 
 } movefilterwidget;
@@ -507,7 +507,7 @@ ModifyClickButton ( GtkWidget *pw, movefilterwidget *pmfw ) {
 
 extern GtkWidget *
 MoveFilterWidget ( movefilter *pmf, int *pfOK,
-                   GtkSignalFunc pfChanged, gpointer userdata ) {
+                   GCallback pfChanged, gpointer userdata ) {
 
   GtkWidget *pwFrame;
   movefilterwidget *pmfw;

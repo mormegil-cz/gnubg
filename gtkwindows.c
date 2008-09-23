@@ -147,8 +147,8 @@ static void dialog_mapped(GtkWidget *window, gpointer data)
 	}
 }
 
-extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt, 
-	 GtkWidget *parent, int flags, GtkSignalFunc okFun, void *okFunData)
+extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt,
+				  GtkWidget * parent, int flags, GCallback okFun, void *okFunData)
 {
 	CallbackStruct* cbData;
     GtkWidget *pwDialog, *pwHbox, *pwPixmap;

@@ -47,7 +47,7 @@ typedef enum _dialogtype {
 } dialogtype;
 
 extern GtkWidget *GTKCreateDialog( const char *szTitle, const dialogtype dt, 
-                                   GtkWidget *parent, int flags, GtkSignalFunc pf, void *p );
+                                   GtkWidget *parent, int flags, GCallback okFun, void *p );
 extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da );
 extern void GTKRunDialog(GtkWidget *dialog);
     
