@@ -1,3 +1,8 @@
+Tue Sep 23 17:29:17 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* configure.in, render.c, pixmaps/Makefile.am: fix a few minor without
+	gtk issues
+
 Tue Sep 23 12:44:36 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, commands.inc, gnubg.c, gtkboard.c, gtkboard.h,

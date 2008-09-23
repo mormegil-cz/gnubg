@@ -218,7 +218,6 @@ if test "$with_gtk" != "no"; then
     PKG_CHECK_MODULES(GTKGLEXT, [gtkglext-1.0 >= 1.0], AC_DEFINE(USE_BOARD3D,1,[Define if you want to use the 3d boards]), no_board3d="yes")
   fi
 fi
-
 AM_CONDITIONAL(USE_GTK, test "$no_gtk" != "yes" )
 AM_CONDITIONAL(USE_BOARD3D, test "$no_board3d" != "yes" )
 
@@ -227,8 +226,8 @@ if test "$no_gtk" == "no"; then
   if test "x$GDK_PIXBUF_CSOURCE" = xno; then
     AC_MSG_WARN(Could not find gdk-pixbuf-csource in your PATH, cannot rebuild pixmaps)
   fi
-  AM_CONDITIONAL(FOUND_GDK_PIXBUF_CSOURCE, test "x$GDK_PIXBUF_CSOURCE" != xno )
 fi
+AM_CONDITIONAL(FOUND_GDK_PIXBUF_CSOURCE, test "x$GDK_PIXBUF_CSOURCE" != xno )
 
 dnl
 dnl Check for Python

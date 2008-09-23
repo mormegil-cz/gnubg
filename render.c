@@ -1031,9 +1031,10 @@ static void WoodPixel( float x, float y, float z, unsigned char auch[ 3 ],
     default:
 	g_assert( FALSE );
     }
-
+#if USE_GTK
 	if (showingGray)
 		GrayScaleColC(auch);
+#endif
 }
 
 static void RenderFrameWood( renderdata *prd, unsigned char *puch,

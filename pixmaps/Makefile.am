@@ -47,7 +47,7 @@ stock-icons.list: $(STOCK_IMAGES) Makefile.am
               sed -e 's|.*/||' -e 's|-|_|g' -e 's|\.png$$||' >> $@; \
 	    echo "  $(srcdir)/$$image" >> $@; \
 	  done )
-
+if USE_GTK
 if FOUND_GDK_PIXBUF_CSOURCE
 gnubg-stock-pixbufs.h: stock-icons.list
 	$(GDK_PIXBUF_CSOURCE) --raw --build-list `cat $<` > $(@F)
@@ -56,6 +56,7 @@ gnubg-stock-pixbufs.h: stock-icons.list
 	@echo ' ****************************'
 	@echo ' ** unable to rebuild pixmaps'
 	@echo ' ****************************'
+endif
 endif
 
 
