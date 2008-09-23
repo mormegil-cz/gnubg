@@ -1,3 +1,7 @@
+Tue Sep 23 17:41:15 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* text.c: fix minor \n output bug
+
 Tue Sep 23 17:29:17 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* configure.in, render.c, pixmaps/Makefile.am: fix a few minor without

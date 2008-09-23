@@ -180,7 +180,7 @@ TextBoardHeader ( GString *gsz, const matchstate *pms,
     /* take decision */
 
     g_string_append_printf(gsz,
-              _(" %s doubles to %d"),
+              _(" %s doubles to %d\n\n"),
               ap[ !(pms->fTurn) ].szName,
               pms->nCube * 2
             );
@@ -190,7 +190,7 @@ TextBoardHeader ( GString *gsz, const matchstate *pms,
     /* cube decision */
 
     g_string_append_printf(gsz,
-              _(" %s on roll, cube decision?"),
+              _(" %s on roll, cube decision?\n\n"),
               ap[ pms->fMove ].szName );
 
 }
