@@ -28,10 +28,6 @@
 #include <errno.h>
 #include <cache.h>
 #include <fcntl.h>
-#if HAVE_SYS_MMAN_H
-#include <sys/mman.h>
-#endif
-
 #include "isaac.h"
 #include <md5.h>
 #include "bearoffgammon.h"
