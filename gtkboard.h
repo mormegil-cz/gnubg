@@ -71,8 +71,6 @@ typedef struct _BoardClass {
     GtkVBoxClass parent_class;
 } BoardClass;
 
-extern void GrayScaleColC(unsigned char *pCols);
-extern int showingGray;
 extern GtkType board_get_type( void );    
 extern GtkWidget *board_new(renderdata* prd);
 extern GtkWidget *board_cube_widget( Board *board );

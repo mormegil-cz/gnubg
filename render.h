@@ -117,6 +117,9 @@ typedef struct _renderimages {
     unsigned char *achLabels[ 2 ];
 } renderimages;
 
+extern void GrayScaleColC(unsigned char *pCols);
+extern int showingGray;
+
 extern void RenderInitialise( void );
 extern void RenderFinalise( void );
 

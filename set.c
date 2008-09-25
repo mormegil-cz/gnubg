@@ -728,14 +728,16 @@ extern void CommandSetClockwise( char *sz ) {
 #if USE_GTK
     if( fX )
     {
+#if USE_BOARD3D
 	BoardData *bd = BOARD(pwBoard)->board_data;
 	ShowBoard();
-#if USE_BOARD3D
 	if (display_is_3d(bd->rd))
 	{
 		RestrictiveRedraw();
 		RerenderBase(bd->bd3d);
 	}
+#else
+	ShowBoard();
 #endif
     }
 #endif /* USE_GTK */
