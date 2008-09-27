@@ -1,3 +1,9 @@
+Sat Sep 27 22:27:05 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* lib/Makefile.am, lib/neuralnet.c, lib/neuralnet.h,
+	lib/neuralnetsse.c, lib/sigmoid.h: allow a small speedup by inlining
+	the sigmoid function again.
+
 Tue Sep 23 21:59:02 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtkmovefilter.c, gtkrace.c, gtkrelational.c, gtkwindows.c,
