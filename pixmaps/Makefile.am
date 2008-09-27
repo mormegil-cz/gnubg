@@ -51,6 +51,7 @@ if USE_GTK
 if FOUND_GDK_PIXBUF_CSOURCE
 gnubg-stock-pixbufs.h: stock-icons.list
 	$(GDK_PIXBUF_CSOURCE) --raw --build-list `cat $<` > $(@F)
+CLEANFILES=stock-icons.list gnubg-stock-pixbufs.h
 else
 gnubg-stock-pixbufs.h: stock-icons.list
 	@echo ' ****************************'
@@ -70,4 +71,3 @@ nobase_dist_gnubgicons_DATA = \
 dist_gnubgpixmaps_DATA = $(PIXMAPS)
 
 noinst_DATA = gnubg-stock-pixbufs.h
-CLEANFILES=stock-icons.list gnubg-stock-pixbufs.h
