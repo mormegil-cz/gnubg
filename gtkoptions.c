@@ -1178,7 +1178,7 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 			  _("Now it's proven! GNU Backgammon is able to "
                             "manipulate the dice. This is meant as a "
                             "learning tool. Examples of use: (a) learn "
-                            "how to double aggresively after a good opening "
+                            "how to double aggressively after a good opening "
                             "sequence, (b) learn to control your temper "
                             "while things are going bad, (c) learn to play "
                             "very good or very bad rolls, or "
@@ -1342,7 +1342,7 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 			FALSE, FALSE, 0);
     gtk_widget_set_tooltip_text( pwev,
 			  _("The number of threads to use in multi-threaded operations,"
-			  " this should be set to the number of logical processing units avaliable"));
+			  " this should be set to the number of logical processing units available"));
 #endif
     /* return notebook */
 

@@ -39,7 +39,6 @@ static char *aszInclude[] = {
     N_("Annotations"), 
     N_("Analysis"), 
     N_("Statistics"), 
-    N_("Legend"),
     N_("Match Information") };
 
 #define NUM_INCLUDE (sizeof(aszInclude)/sizeof(aszInclude[0]))
@@ -124,11 +123,8 @@ ExportGetValues ( exportwidget *pew, exportsetup *pexs ) {
   pexs->fIncludeStatistics = 
     gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pew->apwInclude[ 2 ] ) );
 
-  pexs->fIncludeLegend = 
-    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pew->apwInclude[ 3 ] ) );
-
   pexs->fIncludeMatchInfo = 
-    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pew->apwInclude[ 4 ] ) );
+    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pew->apwInclude[ 3 ] ) );
 
 
   /* board */
@@ -233,7 +229,6 @@ SetExportCommands ( const exportsetup *pexsOrig,
   CHECKFLAG ( pexsOrig, pexsNew, fIncludeAnnotation, "include annotation" );
   CHECKFLAG ( pexsOrig, pexsNew, fIncludeAnalysis, "include analysis" );
   CHECKFLAG ( pexsOrig, pexsNew, fIncludeStatistics, "include statistics" );
-  CHECKFLAG ( pexsOrig, pexsNew, fIncludeLegend, "include legend" );
   CHECKFLAG ( pexsOrig, pexsNew, fIncludeMatchInfo, "include matchinfo" );
 
   /* board */
@@ -367,13 +362,7 @@ ExportSet ( exportwidget *pew ) {
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->apwInclude[ 2 ] ),
                                 pexs->fIncludeStatistics );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->apwInclude[ 3 ] ),
-                                pexs->fIncludeLegend );
-  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->apwInclude[ 4 ] ),
                                 pexs->fIncludeMatchInfo );
-
-  /* FIXME: legend is not implemented */
-
-  gtk_widget_set_sensitive( GTK_WIDGET( pew->apwInclude[ 3 ] ), FALSE );
 
   /* board */
 

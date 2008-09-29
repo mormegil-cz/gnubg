@@ -1,3 +1,12 @@
+Mon Sep 29 11:59:31 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h commands.inc export.h gnubg.c gtkexport.c, gtkoptions.c
+	gtkrolls.c html.c import.c makebearoff.c, makehyper.c play.c record.c
+	rollout.c set.c show.c text.c, po/Makefile.in.in po/cs.po po/da.po
+	po/de.po po/en_US.po, po/fr.po po/gnubg.pot po/is.po po/it.po po/ja.po
+	po/ru.po, po/tr.po: completed the danish translation and updated a
+	number of strings
+	
 Sat Sep 27 22:27:05 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* lib/Makefile.am, lib/neuralnet.c, lib/neuralnet.h,

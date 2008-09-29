@@ -113,8 +113,8 @@ SetSeed ( const rng rngx, void *rngctx, char *sz ) {
     if( *sz ) {
 #if HAVE_LIBGMP
 	if( InitRNGSeedLong( sz, rngx, rngctx ) )
-	    outputl( _("You must specify a valid seed -- try `help set "
-		       "seed'.") );
+	    outputl( _("You must specify a valid seed (see `help set "
+		       "seed').") );
 	else
 	    outputf( _("Seed set to %s.\n"), sz );
 #else
@@ -123,7 +123,7 @@ SetSeed ( const rng rngx, void *rngctx, char *sz ) {
 	n = ParseNumber( &sz );
 
 	if( n < 0 ) {
-	    outputl( _("You must specify a valid seed -- try `help set seed'.") );
+	    outputl( _("You must specify a valid seed (see `help set seed').") );
 
 	    return;
 	}
@@ -283,14 +283,14 @@ SetMoveFilter(char* sz,
   }
 
   if ( ! ( 0 < ply &&  ply <= MAX_FILTER_PLIES ) ) {
-	outputf( _("You must specify a valid ply for setting move filters -- try "
-			   "help set %s movefilter"), szSetCommand );
+	outputf( _("You must specify a valid ply for setting move filters "
+			   "(see `help set %s movefilter')"), szSetCommand );
 	return;
   }
 
   if (((level = ParseNumber( &sz ) ) < 0) || (level >= ply)) {
-	outputf( _("You must specify a valid level 0..%d for the filter -- try "
-			   "help set %s movefilter"), ply - 1, szSetCommand );
+	outputf( _("You must specify a valid level 0..%d for the filter "
+			   "(see `help set %s movefilter')"), ply - 1, szSetCommand );
 	return;
   }
 
@@ -298,7 +298,7 @@ SetMoveFilter(char* sz,
 
   if ((accept = ParseNumber( &sz ) ) == INT_MIN ) {
 	outputf (N_("You must specify a number of moves to accept (or a negative number to skip "
-			 "this level) -- try help set %s movefilter"), szSetCommand);
+			 "this level) (see `help set %s movefilter')"), szSetCommand);
 	return;
   }
 
@@ -311,8 +311,8 @@ SetMoveFilter(char* sz,
 
   if ( ( ( extras = ParseNumber( &sz ) ) < 0 )  || 
 	   ( ( tolerance = (float)ParseReal( &sz ) ) < 0.0 )) {
-	outputf (N_("You must set a count of extra moves and a search tolerance "
-				 "-- try help set %s movefilter"), 
+	outputf (_("You must set a count of extra moves and a search tolerance "
+				 "(see `help set %s movefilter')."), 
 			 szSetCommand);
 	return;
   }
@@ -350,8 +350,8 @@ extern void CommandSetAnalysisLimit( char *sz ) {
     }
 
     if( !fAnalyseMove )
-	outputl( _("(Note that no moves will be analysed until enable chequer "
-		 "play analysis -- see\n`help set analysis moves'.)") );
+	outputl( _("Note that no moves will be analysed until chequer "
+		 "play analysis is enabled\n(see `help set analysis moves').") );
 }
 
 extern void CommandSetAnalysisLuck( char *sz ) {
@@ -498,7 +498,7 @@ extern void CommandSetAutoDoubles( char *sz ) {
     
     if( ( n = ParseNumber( &sz ) ) < 0 ) {
 	outputl( _("You must specify how many automatic doubles to use "
-	      "(try `help set automatic double').") );
+	      "(see `help set automatic double').") );
 	return;
     }
 
@@ -524,9 +524,9 @@ extern void CommandSetAutoDoubles( char *sz ) {
                        "no effect until you "
                        "start session play.)") );
 	else if( !ms.fCubeUse )
-	    outputl( _("(Note that automatic doubles will have no effect "
+	    outputl( _("Note that automatic doubles will have no effect "
                        "until you "
-                       "enable cube use --\nsee `help set cube use'.)") );
+                       "enable cube use\n(see `help set cube use').") );
     }
 }
 
@@ -581,7 +581,7 @@ extern void CommandSetBoard( char *sz ) {
     }
 
     if( !*sz ) {
-	outputl( _("You must specify a position -- see `help set board'.") );
+	outputl( _("You must specify a position (see `help set board').") );
 
 	return;
     }
@@ -635,14 +635,9 @@ extern void CommandSetCache( char *sz ) {
     }
 
     if( EvalCacheResize( n ) )
-	outputerr( "EvalCacheResize" );
-    else {
-      if ( n == 1 )
-	outputf( _("The position cache has been sized to %d entry.\n"), n );
-      else
-	outputf( _("The position cache has been sized to %d entries.\n"), n );
-    }
-
+	    outputerr( "EvalCacheResize" );
+    else 
+	    outputf(ngettext("The position cache has been sized to %d entry.\n", "The position cache has been sized to %d entries.\n", n), n);
 }
 
 #if USE_MULTITHREAD
@@ -866,9 +861,9 @@ extern void CommandSetCubeUse( char *sz ) {
 	return;
 
     if( !ms.nMatchTo && ms.fJacoby && !fCubeUse )
-	outputl( _("(Note that you'll have to disable the Jacoby rule "
+	outputl( _("Note that you'll have to disable the Jacoby rule "
                    "if you want gammons and\nbackgammons to be scored "
-                   "-- see `help set jacoby').") );
+                   "(see `help set jacoby').") );
     
     if( ms.fCrawford && fCubeUse )
 	outputl( _("(But the Crawford rule is in effect, "
@@ -937,13 +932,11 @@ extern void CommandSetDelay( char *sz ) {
 	}
 
 	if( n ) {
-	    outputf(( n == 1
-		      ? _("All moves will be shown for at least %d millisecond.\n")
-		      : _("All moves will be shown for at least %d milliseconds.\n")),
-		    n );
+	    outputf(ngettext("All moves will be shown for at least %d millisecond.\n", 
+		      "All moves will be shown for at least %d milliseconds.\n", n), n);
 	    if( !fDisplay )
-		outputl( _("(You will also need to use `set display' to turn "
-		      "board updates on -- see `help set display'.)") );
+		outputl( _("You will also need to use `set display' to turn "
+		      "board updates on (see `help set display').") );
 	} else
 	    outputl( _("Moves will not be delayed.") );
 	
@@ -1056,8 +1049,8 @@ extern void CommandSetEvalNoise( char *sz ) {
     double r = ParseReal( &sz );
 
     if( r < 0.0 ) {
-	outputf( _("You must specify a valid amount of noise to use -- "
-		"try `help set\n%s noise'.\n"), szSetCommand );
+	outputf( _("You must specify a valid amount of noise to use "
+		"(see `help set\n%s noise').\n"), szSetCommand );
 
 	return;
     }
@@ -1076,8 +1069,8 @@ extern void CommandSetEvalPlies( char *sz ) {
     int n = ParseNumber( &sz );
 
     if( n < 0 || n > 7 ) {
-	outputf( _("You must specify a valid number of plies to look ahead -- "
-		"try `help set %s plies'.\n"), szSetCommand );
+	outputf( _("You must specify a valid number of plies to look ahead "
+		"(see `help set %s plies').\n"), szSetCommand );
 
 	return;
     }
@@ -1112,8 +1105,8 @@ extern void CommandSetEvalReduced( char *sz ) {
       pecSet->nReduced = 3;
       break;
     default:
-      outputf( _("You must specify a valid number -- "
-                 "try `help set %s reduced'.\n"), szSetCommand );
+      outputf( _("You must specify a valid number "
+                 "(see `help set %s reduced').\n"), szSetCommand );
       return;
       break;
     }
@@ -1149,8 +1142,8 @@ extern void CommandSetGUIAnimationSpeed( char *sz ) {
     unsigned int n = ParseNumber( &sz );
 
     if (n > 7) {
-	outputl( _("You must specify a speed between 0 and 7 -- try "
-		   "`help set speed'.") );
+	outputl( _("You must specify a speed between 0 and 7 "
+		   "(see `help set speed').") );
 
 	return;
     }
@@ -1170,7 +1163,7 @@ extern void CommandSetGUIBeep( char *sz ) {
 extern void CommandSetGUIGrayEdit( char *sz ) {
 
     SetToggle( "gui grayedit", &fGUIGrayEdit, sz,
-	       _("Board will be grayedit in edit mode."),
+	       _("Board will be grayed in edit mode."),
 	       _("Board will not change color in edit mode.") );
 }
 
@@ -1396,7 +1389,7 @@ extern void CommandSetPlayerExternal( char *sz ) {
     
     if( !sz || !*sz ) {
 	outputl( _("You must specify the name of the socket to the external\n"
-		 "player -- try `help set player external'.") );
+		 "player (see `help set player external').") );
 	return;
     }
 
@@ -1518,7 +1511,7 @@ extern void CommandSetPlayer( char *sz ) {
     char szTemp[ 32 ];
 
     if( !pch ) {
-	outputl( _("You must specify a player -- try `help set player'.") );
+	outputl( _("You must specify a player (see `help set player').") );
 	
 	return;
     }
@@ -1563,7 +1556,7 @@ extern void CommandSetPlayer( char *sz ) {
 	return;
     }
     
-    outputf( _("Unknown player `%s' -- try `help set player'.\n"), pch );
+    outputf( _("Unknown player `%s' (see `help set player').\n"), pch );
 }
 
 extern void CommandSetPrompt( char *szParam ) {
@@ -1656,7 +1649,7 @@ extern void CommandSetRNGUser( char *sz ) {
 #if HAVE_LIBDL
     SetRNG( rngSet, rngctxSet, RNG_USER, sz );
 #else
-    outputl( _("This installation of GNU Backgammon was compiled without the"
+    outputl( _("This installation of GNU Backgammon was compiled without the "
                "dynamic linking library needed for user RNG's.") );
 #endif /* HAVE_LIBDL */
 
@@ -1704,7 +1697,7 @@ extern void CommandSetRolloutLatePlies ( char *sz ) {
 
     if( n < 1 ) {
 	outputl( _("You must specify a valid ply at which to change evaluations "
-        "-- try `help set rollout late plies'.") );
+        "(see `help set rollout late plies').") );
 
 	return;
     }
@@ -1747,7 +1740,7 @@ extern void CommandSetRolloutLimitMinGames ( char *sz ) {
 
   if (n < 1) {
     outputl( _("You must specify a valid minimum number of games to rollout "
-               "-- try 'help set rollout limit minimumgames'.") );
+               "(see `help set rollout limit minimumgames').") );
     return;
   }
 
@@ -1764,7 +1757,7 @@ extern void CommandSetRolloutMaxError ( char *sz ) {
     if( r < 0.0001 ) {
       outputl( _("You must set a valid fraction for the ratio "
 		 "STD/value where rollouts can stop "
-		 "-- try 'help set rollout limit maxerror'." ) );
+		 "(see `help set rollout limit maxerror')." ) );
       return;
     }
 
@@ -1787,8 +1780,8 @@ CommandSetRolloutJsdEnable ( char *sz )
   int s = prcSet->fStopOnJsd;
   if( SetToggle( "stop rollout when one move appears "
 		 "to have a higher equity", &s, sz,
-	     _("Stop rollout based on J.S.D.s"),
-		 _("Do not stop rollout based on J.S.D.s")) != -1 ) {
+	     _("Stop rollout based on JSDs"),
+		 _("Do not stop rollout based on JSDs")) != -1 ) {
     prcSet->fStopOnJsd = s;
   }
 }
@@ -1798,8 +1791,8 @@ extern void CommandSetRolloutJsdMoveEnable ( char *sz ) {
   
   if( SetToggle( "stop rollout of moves which appear to  "
 		 "to have a lowerer equity", &s, sz,
-		 _("Stop rollout of moves based on J.S.D.s"),
-		 _("Do not stop rollout of moves based on J.S.D.s")) != -1 ) {
+		 _("Stop rollout of moves based on JSDs"),
+		 _("Do not stop rollout of moves based on JSDs")) != -1 ) {
     prcSet->fStopMoveOnJsd = s;
   }
 }
@@ -1810,12 +1803,12 @@ extern void CommandSetRolloutJsdMinGames ( char *sz ) {
 
   if (n < 1) {
     outputl( _("You must specify a valid minimum number of games to rollout "
-               "-- try 'help set rollout jsd minimumgames'.") );
+               "(see `help set rollout jsd minimumgames').") );
     return;
   }
   prcSet->nMinimumJsdGames = n;
 
-  outputf( _("After %d games, rollouts will stop if the J.S.D.s are large enough"
+  outputf( _("After %d games, rollouts will stop if the JSDs are large enough"
 	     ".\n"), n);
 }
 
@@ -1828,7 +1821,7 @@ extern void CommandSetRolloutJsdLimit ( char *sz ) {
       outputl( 
   _("You must set a number of joint standard deviations for the equity"
     " difference with the best move being rolled out "
-   "-- try 'help set rollout jsd limit'." ) );
+   "(see `help set rollout jsd limit')." ) );
       return;
     }
 
@@ -2102,7 +2095,7 @@ extern void CommandSetRolloutSeed( char *sz ) {
 	n = ParseNumber( &sz );
 
 	if( n < 0 ) {
-	    outputl( _("You must specify a valid seed -- try `help set seed'.") );
+	    outputl( _("You must specify a valid seed (see `help set seed').") );
 
 	    return;
 	}
@@ -2116,23 +2109,20 @@ extern void CommandSetRolloutSeed( char *sz ) {
 
 }
 
-extern void CommandSetRolloutTrials( char *sz ) {
-    
-    int n = ParseNumber( &sz );
+extern void CommandSetRolloutTrials(char *sz)
+{
 
-    if( n < 1 ) {
-	outputl( _("You must specify a valid number of trials to make -- "
-		"try `help set rollout trials'.") );
+	int n = ParseNumber(&sz);
 
-	return;
-    }
+	if (n < 1) {
+		outputl(_("You must specify a valid number of trials to make (see `help set rollout trials')."));
 
-    prcSet->nTrials = n;
+		return;
+	}
 
-    if ( n == 1 )
-      outputf( _("%d game will be played per rollout.\n"), n );
-    else
-      outputf( _("%d games will be played per rollout.\n"), n );
+	prcSet->nTrials = n;
+
+	outputf(ngettext("%d game will be played per rollout.\n", "%d games will be played per rollout.\n", n), n);
 
 }
 
@@ -2174,8 +2164,8 @@ extern void CommandSetRolloutTruncationPlies ( char *sz ) {
     int n = ParseNumber( &sz );
 
     if( n < 0 ) {
-       outputl( _("You must specify a valid ply at which to truncate rollouts -- "
-		"try `help set rollout'.") );
+       outputl( _("You must specify a valid ply at which to truncate rollouts "
+		"(see `help set rollout').") );
 
 	return;
     }
@@ -2184,10 +2174,8 @@ extern void CommandSetRolloutTruncationPlies ( char *sz ) {
 
     if( ( n == 0 ) || !prcSet->fDoTruncate )
 	outputl( _("Rollouts will not be truncated.") );
-    else if ( n == 1 )
-      outputf( _("Rollouts will be truncated after %d ply.\n"), n );
     else
-      outputf( _("Rollouts will be truncated after %d plies.\n"), n );
+      outputf( ngettext("Rollouts will be truncated after %d ply.\n", "Rollouts will be truncated after %d plies.\n", n), n);
 
 }
 
@@ -2260,7 +2248,7 @@ CommandSetRolloutPlayer ( char *sz ) {
     int i;
 
     if( !pch ) {
-	outputf( _("You must specify a player -- try `help set %s player'.\n"),
+	outputf( _("You must specify a player (see `help set %s player').\n"),
 		 szSetCommand );
 	
 	return;
@@ -2298,8 +2286,8 @@ CommandSetRolloutPlayer ( char *sz ) {
 	return;
     }
     
-    outputf( _("Unknown player `%s' -- try\n"
-             "`help set %s player'.\n"), pch, szSetCommand );
+    outputf( _("Unknown player `%s'\n"
+             "(see `help set %s player').\n"), pch, szSetCommand );
 }
 
 extern void
@@ -2309,7 +2297,7 @@ CommandSetRolloutLatePlayer ( char *sz ) {
     int i;
 
     if( !pch ) {
-	outputf( _("You must specify a player -- try `help set %s player'.\n"),
+	outputf( _("You must specify a player (see `help set %s player').\n"),
 		 szSetCommand );
 	
 	return;
@@ -2347,8 +2335,8 @@ CommandSetRolloutLatePlayer ( char *sz ) {
 	return;
     }
     
-    outputf( _("Unknown player `%s' -- try\n"
-             "`help set %s player'.\n"), pch, szSetCommand );
+    outputf( _("Unknown player `%s'\n"
+             "(see `help set %s player').\n"), pch, szSetCommand );
 }
 
 extern void CommandSetScore( char *sz ) {
@@ -2569,7 +2557,7 @@ extern void CommandSetTurn( char *sz ) {
     }
 
     if( ( i = ParsePlayer( pch ) ) < 0 ) {
-	outputf( _("Unknown player `%s' -- try `help set turn'.\n"), pch );
+	outputf( _("Unknown player `%s' (see `help set turn').\n"), pch );
 
 	return;
     }
@@ -2607,9 +2595,9 @@ extern void CommandSetJacoby( char *sz ) {
 	return;
 
     if( fJacoby && !ms.fCubeUse )
-	outputl( _("(Note that you'll have to enable the cube if you want "
-		 "gammons and backgammons\nto be scored -- see `help set "
-		 "cube use'.)") );
+	outputl( _("Note that you'll have to enable the cube if you want "
+		 "gammons and backgammons\nto be scored (see `help set "
+		 "cube use').") );
 
     ms.fJacoby = fJacoby;
 
@@ -2724,7 +2712,7 @@ extern void CommandSetWarning( char *sz )
 		outputl(buf);
 		return;
 	}
-	sprintf(buf, _("Warning %s set %s."), sz, pValue);
+	sprintf(buf, _("Warning %s set to %s."), sz, pValue);
 	outputl(buf);
 }
 
@@ -2887,8 +2875,8 @@ const char *aszEvalType[] =
     break;
 
   default:
-    outputf (_("Unknown evaluation type: %s -- see\n"
-             "`help set %s type'\n"), sz, szSetCommand );
+    outputf (_("Unknown evaluation type: %s (see\n"
+             "`help set %s type').\n"), sz, szSetCommand );
     return;
     break;
 
@@ -2936,7 +2924,7 @@ CommandSetAnalysisPlayer( char *sz ) {
 
   if( !pch ) {
     outputl( _("You must specify a player "
-               "-- try `help set analysis player'.") );
+               "(see `help set analysis player').") );
     return;
   }
 
@@ -2972,8 +2960,8 @@ CommandSetAnalysisPlayer( char *sz ) {
     return;
   }
   
-  outputf( _("Unknown player `%s' -- try\n"
-             "`help set analysis player'.\n"), pch );
+  outputf( _("Unknown player `%s'\n"
+             "(see `help set analysis player').\n"), pch );
 
 }
 
@@ -3141,8 +3129,8 @@ extern void CommandSetMatchLength( char *sz ) {
 
     nDefaultLength = n;
 
-    outputf( n == 1 ? _("New matches will default to %d point.\n") :
-	     _("New matches will default to %d points.\n"), n );
+    outputf( ngettext("New matches default to %d point.\n", "New matches default to %d points.\n", nDefaultLength), nDefaultLength);
+
 }
 
 extern void CommandSetMatchPlace( char *sz ) {
@@ -3206,15 +3194,6 @@ CommandSetExportIncludeStatistics ( char *sz ) {
 }
 
 extern void
-CommandSetExportIncludeLegend ( char *sz ) {
-
-  SetToggle( "annotations", &exsExport.fIncludeLegend, sz,
-             _("Include legend in exports"),
-             _("Do not include legend in exports") );
-
-}
-
-extern void
 CommandSetExportIncludeMatchInfo ( char *sz ) {
 
   SetToggle( "matchinfo", &exsExport.fIncludeMatchInfo, sz,
@@ -3251,7 +3230,7 @@ CommandSetExportShowPlayer ( char *sz ) {
 
   if( ( i = ParsePlayer( sz ) ) < 0 ) {
     outputf( _("Unknown player `%s' "
-             "-- try `help set export show player'.\n"), sz );
+             "(see `help set export show player').\n"), sz );
     return;
   }
 
@@ -3874,7 +3853,7 @@ CommandSetCheatPlayer( char *sz ) {
 
     if( !pch ) {
 	outputl( _("You must specify a player "
-                   "-- try `help set cheat player'.") );
+                   "(see `help set cheat player').") );
 	return;
     }
 
@@ -3910,8 +3889,8 @@ CommandSetCheatPlayer( char *sz ) {
 	return;
     }
     
-    outputf( _("Unknown player `%s' -- try\n"
-             "`help set %s player'.\n"), pch, szSetCommand );
+    outputf( _("Unknown player `%s'\n"
+             "(see `help set %s player').\n"), pch, szSetCommand );
 
 }
 

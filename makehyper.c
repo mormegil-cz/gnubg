@@ -201,16 +201,12 @@ StartGuessHyper ( hyperequity ahe[], const int nC, bearoffcontext *pbc ) {
     }
   }
 
-  printf( _("Number of game-over positions:   %10d\n"
-            "Number of non-contact positions: %10d\n"
-            "Number of contact positions:     %10d\n"
-            "Total number of legal positions: %10d\n"
-            "Number of illegal positions:     %10d\n"
-            "Total number of positions in file%10d\n"),
-          ai[ 0 ], ai[ 2 ], ai[ 1 ], 
-          ai[ 0 ] + ai[ 2 ] + ai[ 1 ], 
-          ai[ 3 ],
-          nPos * nPos );
+  printf("%-25s: %10d\n", _("Number of game-over positions"), ai[ 0 ]);
+  printf("%-25s: %10d\n", _("Number of non-contact positions"), ai[ 2 ]);
+  printf("%-25s: %10d\n", _("Number of contact positions"), ai[ 1 ]);
+  printf("%-25s: %10d\n", _("Total number of legal positions"), ai[ 0 ] + ai[ 2 ] + ai[ 1 ]);
+  printf("%-25s: %10d\n", _("Number of illegal positions"), ai[ 3 ]);
+  printf("%-25s: %10d\n", _("Total number of positions in file"), nPos * nPos );
             
 }
 
@@ -677,12 +673,11 @@ main ( int argc, char **argv ) {
   
   nPos = Combination( 25 + nC, nC );
 
-  printf ( _("Total number of one sided positions: %d\n"), nPos );
-  printf ( _("Total number of two sided positions: %d\n"), nPos * nPos );
-  printf ( _("Estimated size of file             : %d bytes\n"),
-           nPos * nPos * 28 + 40 );
-  printf ( _("Output file                        : '%s'\n"), szOutput );
-  printf ( _("Convergens threshold               : %e\n"), rEpsilon );
+  printf ("%-40s: %d\n", _("Total number of one sided positions"), nPos );
+  printf ("%-40s: %d\n", _("Total number of two sided positions"), nPos * nPos );
+  printf ("%-40s: %s %d\n", _("Estimated size of file"), _("bytes"), nPos * nPos * 28 + 40 );
+  printf ("%-40s: %s\n", _("Output file"), szOutput );
+  printf ("%-40s: %e\n", _("Convergens threshold"), rEpsilon );
 
   /* Iteration 0 */
 

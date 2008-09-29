@@ -2442,9 +2442,7 @@ extern void CommandDrop( char *sz ) {
 
 
     if( fDisplay )
-       outputf((ms.nCube == 1
-		? _("%s refuses the cube and gives up %d point.\n")
-		: _("%s refuses the cube and gives up %d points.\n")),
+       outputf(ngettext("%s refuses the cube and gives up %d point.\n", "%s refuses the cube and gives up %d points.\n", ms.nCube),
 	       ap[ ms.fTurn ].szName, ms.nCube);
     
 
@@ -3522,7 +3520,7 @@ extern void CommandRedouble( char *sz ) {
     moverecord *pmr;
 
     if( ms.nMatchTo > 0 ) {
-	outputl( _("Redoubles are not permitted during match play.") );
+	outputl( _("Beavers and Raccoons are not permitted during match play.") );
 
 	return;
     }
@@ -3639,7 +3637,7 @@ extern void CommandResign( char *sz ) {
     if( ms.fResigned < 1 || ms.fResigned > 3 ) {
 	ms.fResigned = 0;
 
-	outputf( _("Unknown keyword `%s' -- try `help resign'.\n"), pch );
+	outputf( _("Unknown keyword `%s' (see `help resign').\n"), pch );
 	
 	return;
     }
@@ -3923,15 +3921,19 @@ SetMatchID ( const char *szMatchID ) {
                      &nMatchTo, anScore, &nCube, &gs, 
                      szMatchID ) < 0 ) {
 
-    outputf( _("Illegal match ID '%s'\n"), szMatchID );
-    outputf( _("Dice %d %d, player on roll %d (turn %d), resigned %d,\n"
-               "doubled %d, cube owner %d, crawford game %d,\n"
-               "match length %d, score %d-%d, cube %d, game state %d\n"),
-             anDice[ 0 ], anDice[ 1 ], fMove, fTurn, fResigned, fDoubled,
-             fCubeOwner, fCrawford, nMatchTo, anScore[ 0 ], anScore[ 1 ],
-             nCube, (int) gs );
-    outputx();
-    return;
+	  outputf( _("Illegal match ID '%s'\n"), szMatchID );
+	  outputf( _("Dice %d %d, "), anDice[ 0 ], anDice[ 1 ]);
+	  outputf(_("player on roll %d (turn %d), "), fMove, fTurn);
+	  outputf(_("resigned %d,\n"), fResigned);
+	  outputf(_("doubled %d, "), fDoubled);
+	  outputf(_("cube owner %d, "), fCubeOwner);
+	  outputf(_("crawford game %d,\n"), fCrawford);
+	  outputf(_("match length %d, "), nMatchTo);
+	  outputf(_("score %d-%d, "), anScore[ 0 ], anScore[ 1 ]);
+	  outputf(_("cube %d, "), nCube);
+	  outputf(_("game state %d\n"), (int) gs);
+	  outputx();
+	  return;
 
   }
 

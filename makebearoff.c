@@ -1598,27 +1598,16 @@ extern int main( int argc, char **argv )
     dlgprintf(130, "Generating one-sided bearoff database. Please wait." );
     dlgprintf(131, "makebearoff $Revision$" );
 #else
-    fprintf ( stderr, 
-              _("One-sided database:\n"
-                "Number of points                  : %12d\n"
-                "Number of chequers                : %12d\n"
-                "Number of positions               : %12d\n"
-                "Approximate by normal distribution: %s\n"
-                "Include gammon distributions      : %s\n"
-                "Use compression scheme            : %s\n"
-                "Write header                      : %s\n"
-                "Size of cache                     : %12d\n"
-                "Reuse old bearoff database        : %s %s\n"),
-              nOS, 
-              15, 
-              Combination ( nOS + 15, nOS ),
-              fND ? "yes" : "no",
-              fGammon ? "yes" : "no", 
-              fCompress ? "yes" : "no", 
-              fHeader ? "yes" : "no", 
-              nHashSize,
-              szOldBearoff ? "yes" : "no",
-              szOldBearoff ? szOldBearoff : "" );
+    fprintf ( stderr, "%-37s\n", _("One-sided database"));
+    fprintf ( stderr, "%-37s: %12d\n", _("Number of points"), nOS);
+    fprintf ( stderr, "%-37s: %12d\n", _("Number of chequers"), 15);
+    fprintf ( stderr, "%-37s: %12d\n", _("Number of positions"), Combination ( nOS + 15, nOS ));
+    fprintf ( stderr, "%-37s: %12s\n", _("Approximate by normal distribution"), fND ? _("yes") : _("no"));
+    fprintf ( stderr, "%-37s: %12s\n", _("Include gammon distributions"), fGammon ? _("yes") : _("no"));
+    fprintf ( stderr, "%-37s: %12s\n", _("Use compression scheme"), fCompress ? _("yes") : _("no"));
+    fprintf ( stderr, "%-37s: %12s\n", _("Write header"), fHeader ? _("yes") : _("no"));
+    fprintf ( stderr, "%-37s: %12d\n", _("Size of cache"), nHashSize);
+    fprintf ( stderr, "%-37s: %12s %s\n", _("Reuse old bearoff database"), szOldBearoff ? _("yes") : _("no"), szOldBearoff ? szOldBearoff : "" );
 #endif
 
     if ( fND ) {
@@ -1629,9 +1618,7 @@ extern int main( int argc, char **argv )
       dlgprintf(125, "%.0f (%.1f MB)", r, r / 1048576.0);
       dlgprintf(126, "");
 #else
-      fprintf ( stderr, 
-                _("Size of database                  : %.0f (%.1f MB)\n"), 
-                r, r / 1048576.0 );
+      fprintf ( stderr, "%-37s: %.0f (%.1f MB)\n", _("Size of database"), r, r / 1048576.0 );
 #endif
     }
     else {
@@ -1640,9 +1627,7 @@ extern int main( int argc, char **argv )
       dlgprintf(110, "Size of database (uncompressed):");
       dlgprintf(125, "%.0f (%.1f MB)", r, r / 1048576.0);
 #else
-      fprintf ( stderr, 
-                _("Size of database (uncompressed)   : %.0f (%.1f MB)\n"), 
-                r, r / 1048576.0 );
+      fprintf ( stderr, "%-37s: %.0f (%.1f MB)\n", _("Size of database (uncompressed)"), r, r / 1048576.0 );
 #endif
       if ( fCompress ) {
         r = Combination ( nOS + 15, nOS ) * ( fGammon ? 32.0f : 16.0f );
@@ -1650,9 +1635,7 @@ extern int main( int argc, char **argv )
         dlgprintf(111, "Estimated size of compressed db:");
         dlgprintf(126, "%.0f (%.1f MB)", r, r / 1048576.0);
 #else
-        fprintf ( stderr, 
-                  _("Estimated size of compressed db   : %.0f (%.1f MB)\n"), 
-                  r, r / 1048576.0 );
+	fprintf ( stderr, "%-37s: %.0f (%.1f MB)\n", _("Estimated size of compressed db"), r, r / 1048576.0 );
 #endif
       }
     }
@@ -1726,26 +1709,16 @@ extern int main( int argc, char **argv )
     dlgprintf(130, "Generating two-sided bearoff database. Please wait." );
     dlgprintf(131, "makebearoff $Revision$" );
 #else 
-    fprintf ( stderr,
-              _("Two-sided database:\n"
-                "Number of points             : %12d\n"
-                "Number of chequers           : %12d\n"
-                "Calculate equities           : %s\n"
-                "Write header                 : %s\n"
-                "Number of one-sided positions: %12d\n"
-                "Total number of positions    : %12d\n"
-                "Size of resulting file       : %.0f bytes (%.1f MB)\n"
-                "Size of xhash                : %12d bytes\n"
-                "Reuse old bearoff database   : %s %s\n"),
-              nTSP, nTSC,
-              fCubeful ? _("cubeless and cubeful") : _("cubeless only"),
-              fHeader ? _("yes") : ("no"),
-              n,
-              n * n,
-              r, r / 1048576.0,
-              nHashSize,
-              szOldBearoff ? "yes" : "no",
-              szOldBearoff ? szOldBearoff : "" );
+    fprintf ( stderr, "%-37s\n", _("Two-sided database:\n"));
+    fprintf ( stderr, "%-37s: %12d\n", _("Number of points"), nTSP);
+    fprintf ( stderr, "%-37s: %12d\n", _("Number of chequers"), nTSC);
+    fprintf ( stderr, "%-37s: %12s\n", _("Calculate equities"), fCubeful ? _("cubeless and cubeful") : _("cubeless only"));
+    fprintf ( stderr, "%-37s: %12s\n", _("Write header"), fHeader ? _("yes") : _("no"));
+    fprintf ( stderr, "%-37s: %12d\n", _("Number of one-sided positions"), n);
+    fprintf ( stderr, "%-37s: %12d\n", _("Total number of positions"), n*n);
+    fprintf ( stderr, "%-37s: %.0f bytes (%.1f MB)\n", _("Size of resulting file"), r, r / 1048576.0);
+    fprintf ( stderr, "%-37s: %12d\n", _("Size of xhash"), nHashSize);
+    fprintf ( stderr, "%-37s: %12s %s\n", _("Reuse old bearoff database"), szOldBearoff ? _("yes") : _("no"), szOldBearoff ? szOldBearoff : "" );
 #endif
     /* initialise old bearoff database */
 #ifdef WIN32

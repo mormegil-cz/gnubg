@@ -167,13 +167,13 @@ WriteStyleSheet ( FILE *pf, const htmlexportcss hecss ) {
            "/* $Id$ */\n",
            pf );
 
-    fputs( _("/* This file is distributed as a part of the "
+    fputs( "/* This file is distributed as a part of the "
              "GNU Backgammon program. */\n"
              "/* Copying and distribution of verbatim and modified "
              "versions of this file */\n"
              "/* is permitted in any medium provided the copyright notice "
              "and this */\n"
-             "/* permission notice are preserved. */\n\n"),
+             "/* permission notice are preserved. */\n\n",
            pf );
 
   for ( i = 0; i < NUM_CLASSES; ++i )
@@ -186,8 +186,8 @@ WriteStyleSheet ( FILE *pf, const htmlexportcss hecss ) {
   if ( hecss == HTML_EXPORT_CSS_HEAD )
     fputs ( "</style>\n", pf );
   else if ( hecss == HTML_EXPORT_CSS_EXTERNAL )
-    fputs( _("\n"
-             "/* end of file */\n"), pf );
+    fputs( "\n"
+             "/* end of file */\n", pf );
 
 }
 
@@ -273,14 +273,6 @@ GetStyleGeneral( const htmlexportcss hecss, ... ) {
 
 }
 
-
-static void
-HTMLPrintLegend( FILE *pf, const htmlexportcss hecss ) {
-
-  /* WRITE ME */
-
-
-}
 
 static void
 printRolloutTable ( FILE *pf, 
@@ -727,8 +719,10 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
   fprintf( pf, "<span %s>", 
            GetStyle ( CLASS_POSITIONID, hecss ) );
 
-  fprintf ( pf, _("Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br /></span></table>\n"),
+  fprintf ( pf, "%s <tt>%s</tt> %s <tt>%s</tt><br /></span></table>\n",
+	  _("Position ID:"),
             PositionID ( (ConstTanBoard)pms->anBoard ),
+	  _("Match ID:"),
             MatchIDFromMatchState ( pms ) );
 
 
@@ -3383,11 +3377,6 @@ static void ExportGameHTML ( FILE *pf, listOLD *plGame, const char *szImageDir,
 
       fprintf ( pf, "<hr />\n" );
       HTMLDumpStatcontext ( pf, &scTotal, &msOrig, -1, hecss );
-
-      /* legend */
-
-      if ( exsExport.fIncludeLegend )
-        HTMLPrintLegend( pf, hecss );
 
     }
 

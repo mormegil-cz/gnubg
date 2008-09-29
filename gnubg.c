@@ -523,7 +523,6 @@ exportsetup exsExport = {
   TRUE, /* include annotations */
   TRUE, /* include analysis */
   TRUE, /* include statistics */
-  TRUE, /* include legend */
   TRUE, /* include match information */
 
   1, /* display board for all moves */
@@ -3378,12 +3377,10 @@ extern void CommandSaveSettings( char *szParam )
               "set export include annotations %s\n"
               "set export include analysis %s\n"
               "set export include statistics %s\n"
-              "set export include legend %s\n"
               "set export include matchinfo %s\n",
               exsExport.fIncludeAnnotation ? "yes" : "no",
               exsExport.fIncludeAnalysis ? "yes" : "no",
               exsExport.fIncludeStatistics ? "yes" : "no",
-              exsExport.fIncludeLegend ? "yes" : "no",
               exsExport.fIncludeMatchInfo ? "yes" : "no" );
 
     fprintf ( pf, "set export show board %d\n", exsExport.fDisplayBoard );
@@ -4926,7 +4923,7 @@ int main(int argc, char *argv[])
 		{"splash", 'S', 0, G_OPTION_ARG_NONE, &fSplash,
 		 N_("Don't show gtk splash screen"), NULL},
 		{"tty", 't', 0, G_OPTION_ARG_NONE, &fNoX,
-		 N_("Start on tty instead of using the graphical interface"), NULL},
+		 N_("Start the command line instead of using the graphical interface"), NULL},
 		{"version", 'v', 0, G_OPTION_ARG_NONE, &show_version,
 		 N_("Show version information and exit"), NULL},
 		{"window-system-only", 'w', 0, G_OPTION_ARG_NONE, &fNoTTY,

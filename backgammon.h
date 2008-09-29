@@ -764,7 +764,6 @@ extern void CommandSetExportHTMLTypeFibs2html(char *);
 extern void CommandSetExportHTMLTypeGNU(char *);
 extern void CommandSetExportIncludeAnalysis(char *);
 extern void CommandSetExportIncludeAnnotations(char *);
-extern void CommandSetExportIncludeLegend(char *);
 extern void CommandSetExportIncludeMatchInfo(char *);
 extern void CommandSetExportIncludeStatistics(char *);
 extern void CommandSetExportMovesDisplayBad(char *);

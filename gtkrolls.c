@@ -106,7 +106,7 @@ add_level ( GtkTreeStore *model, GtkTreeIter *iter,
       if ( fInvert )
         InvertEvaluationR ( ar, &ci );
 
-      sprintf ( szRoll, _("%d%d"), n0 + 1, n1 + 1 );
+      sprintf ( szRoll, "%d%d", n0 + 1, n1 + 1 );
       FormatMove ( szMove, anBoard, anMove );
 
       szEquity = OutputMWC ( ar[ OUTPUT_CUBEFUL_EQUITY ], 

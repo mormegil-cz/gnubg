@@ -756,17 +756,14 @@ TextDumpPlayerRecords ( FILE *pf ) {
 
   fputs ( _("Statistics from player records:\n\n" ), pf );
   
-  fputs ( _("                                Short-term  "
-            "Long-term   Total        Total\n"
-            "                                error rate  "
-            "error rate  error rate   luck\n"
-            "Name                            Cheq. Cube  "
-            "Cheq. Cube  Cheq. Cube   rate Games\n"), pf );
+  fprintf(pf, "%-31s %-11s %-11s %-12s %-6s %10s\n", "", _("Short-term"), _("Long-term"), _("Total"), _("Total"), "");
+  fprintf(pf, "%-31s %-11s %-11s %-12s %-6s %10s\n", "", _("error rate"), _("error rate"), _("error rate"), _("luck"), "");
+  fprintf(pf, "%-31s %-11s %-11s %-12s %-6s %10s\n", "Name", _("Cheq. Cube"),_("Cheq. Cube"),_("Cheq. Cube"), _("rate"), _("Games"));
 
   for ( i = 0; i < 2; ++i ) 
     if ( af[ i ] ) 
       fprintf( pf, 
-               "%-31s %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %6.3f %4d\n",
+	      "%-31s %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %6.3f %11d\n",
                apr[ i ].szName, apr[ i ].arErrorChequerplay[ EXPAVG_20 ],
                apr[ i ].arErrorCube[ EXPAVG_20 ],
                apr[ i ].arErrorChequerplay[ EXPAVG_100 ],

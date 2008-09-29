@@ -460,11 +460,8 @@ extern void CommandRecordAddMatch( char *notused )
     if( RecordWrite( pf, pch, apr ) )
 		return;
 
-    if( c == 1 )
-		outputl( _("Statistics from 1 game were saved to player records.") );
-    else
-		outputf( _("Statistics from %d games were saved to player "
-		   "records.\n"), c );
+    outputf(ngettext("Statistics from %d game were saved to player records.",
+			    "Statistics from %d games were saved to player records.", c), c);
 }
 
 extern void CommandRecordAddSession( char *sz )
@@ -564,15 +561,12 @@ extern void CommandRecordShow( char *szPlayer )
 		{
 			if( !f )
 			{
-				outputl( _("                                Short-term  "
-					"Long-term   Total        Total\n"
-					"                                error rate  "
-					"error rate  error rate   luck\n"
-					"Name                            Cheq. Cube  "
-					"Cheq. Cube  Cheq. Cube   rate Games\n") );
+				outputf("%-31s %-11s %-11s %-12s %-6s %10s\n", "", _("Short-term"), _("Long-term"), _("Total"), _("Total"), "");
+				outputf("%-31s %-11s %-11s %-12s %-6s %10s\n", "", _("error rate"), _("error rate"), _("error rate"), _("luck"), "");
+				outputf("%-31s %-11s %-11s %-12s %-6s %10s\n", "Name", _("Cheq. Cube"),_("Cheq. Cube"),_("Cheq. Cube"), _("rate"), _("Games"));
 				f = TRUE;
 			}
-			outputf( "%-31s %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %6.3f %4d\n",
+			outputf( "%-31s %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %6.3f %11d\n",
 				pr.szName, pr.arErrorChequerplay[ EXPAVG_20 ],
 				pr.arErrorCube[ EXPAVG_20 ],
 				pr.arErrorChequerplay[ EXPAVG_100 ],

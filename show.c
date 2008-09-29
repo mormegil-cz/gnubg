@@ -129,9 +129,9 @@ ShowEvaluation( const evalcontext *pec ) {
            pec->fCubeful ? _("Cubeful") : _("Cubeless") );
 
   if( pec->rNoise )
-    outputf( _("        Noise standard deviation %5.3f"), pec->rNoise );
+    outputf( "%s%s %5.3f", ("        "), _("Noise standard deviation"), pec->rNoise );
   else
-    output( _("        Noiseless evaluations") );
+    outputf( "%s%s", "        ", _("Noiseless evaluations") );
   
   outputl( pec->fDeterministic ? _(" (deterministic noise).\n") :
            _(" (pseudo-random noise).\n") );
@@ -228,19 +228,13 @@ ShowRollout ( const rolloutcontext *prc ) {
       (!fDoTruncate || ((nTruncate > nLate) && (nLate > 2))))
     fLateEvals = 1;
 
-  if ( prc->nTrials == 1 )
-    outputf ( _("%d game will be played per rollout.\n"),
-              prc->nTrials );
-  else
-    outputf ( _("%d games will be played per rollout.\n"),
-              prc->nTrials );
+  outputf ( ngettext("%d game will be played per rollout.\n",
+			  "%d games will be played per rollout.\n", prc->nTrials), prc->nTrials );
 
-  if( fDoTruncate && (nTruncate > 1 ) )
-      outputf( _("Truncation after %d plies.\n"), nTruncate );
-  else if( fDoTruncate && (nTruncate == 1) )
-      outputl( _("Truncation after 1 ply.") );
+  if (!fDoTruncate || nTruncate < 1)
+      outputl(_("No truncation."));
   else
-      outputl( _("No truncation.") );
+      outputf(ngettext("Truncation after %d ply.\n", "Truncation after %d plies.\n", nTruncate ), nTruncate );
 
   outputl ( prc->fTruncBearoff2 ?
             _("Will truncate cubeful money game rollouts when reaching "
@@ -778,7 +772,7 @@ extern void CommandShowMatchInfo( char *sz ) {
 	     _("unknown rating") );
 
     if( mi.nYear )
-	outputf( _(", %04d-%02d-%02d\n"), mi.nYear, mi.nMonth, mi.nDay );
+	outputf( ", %04d-%02d-%02d\n", mi.nYear, mi.nMonth, mi.nDay );
     else
 	outputc( '\n' );
 
@@ -800,8 +794,7 @@ extern void CommandShowMatchInfo( char *sz ) {
 
 extern void CommandShowMatchLength( char *sz ) {
     
-    outputf( nDefaultLength == 1 ? _("New matches default to %d point.\n") :
-	     _("New matches default to %d points.\n"), nDefaultLength );
+    outputf( ngettext("New matches default to %d point.\n", "New matches default to %d points.\n", nDefaultLength), nDefaultLength);
 }
 
 extern void CommandShowPipCount( char *sz )
@@ -1153,11 +1146,7 @@ extern void CommandShowKleinman(char *sz)
 extern void CommandShowThreads(char *sz)
 {
 	int c = MT_GetNumThreads();
-	if (c == 1)
-		outputf(_("1 calculation thread."));
-	else
-		outputf(_("%d calculation threads."), c);
-	output ( "\n" );
+	outputf(ngettext("%d calculation thread.\n", "%d calculation threads.\n", c), c);
 }
 #endif
 
@@ -1325,7 +1314,7 @@ extern void CommandShowGammonValues ( char *sz ) {
 
   GetMatchStateCubeInfo( &ci, &ms );
 
-  output ( _("Player        Gammon value    Backgammon value\n") );
+  outputf ("%-12s     %7s    %s\n", _("Player"), _("Gammon value"), _("Backgammon value"));
 
   for ( i = 0; i < 2; i++ ) {
 
@@ -1374,10 +1363,9 @@ EffectivePipCount( const float arMu[ 2 ], const unsigned int anPips[ 2 ] ) {
   outputl ( "" );
   outputl ( _("Effective pip count:") );
 
-  outputl ( _("                       "
-              "EPC      Wastage") );
+  outputf ( "%-20.20s   %7s  %7s\n", "", _("EPC"), _("Wastage") );
   for ( i = 0; i < 2; ++i )
-    outputf ( _("%-20.20s   %7.3f  %7.3f\n"),
+    outputf ( "%-20.20s   %7.3f  %7.3f\n",
               ap[ i ].szName,
               arMu[ ms.fMove ? i : !i ] * x,
               arMu[ ms.fMove ? i : !i ] * x - anPips[ ms.fMove ? i : !i ] );
@@ -1822,7 +1810,7 @@ extern void CommandShowMarketWindow ( char * sz ) {
     for ( i = 0; i < 2; i++ ) {
 
       outputf (_("\nPlayer %s cube parameters:\n\n"), ap[ i ].szName );
-      outputl ( _("Cube parameter               Dead Cube    Live Cube\n") );
+        outputf ( "%-27s  %7s      %s\n", _("Cube parameter"), _("Dead Cube"), _("Live Cube") );
 
       for ( j = 0; j < 7; j++ ) 
         outputf ( "%-27s  %7.3f%%     %7.3f%%\n",
@@ -1865,8 +1853,6 @@ CommandShowExport ( char *sz ) {
   outputf ( "\r\t\t\t\t\t\t: %s\n",
             exsExport.fIncludeStatistics ? _("yes") : _("no") );
   output ( _("- legend") );
-  outputf ( "\r\t\t\t\t\t\t: %s\n\n",
-            exsExport.fIncludeLegend ? _("yes") : _("no") );
   output ( _("- match information") );
   outputf ( "\r\t\t\t\t\t\t: %s\n\n",
             exsExport.fIncludeMatchInfo ? _("yes") : _("no") );
@@ -2067,7 +2053,7 @@ CommandShowSound ( char *sz ) {
       outputf ( _("   %-30.30s : no sound\n"),
                 gettext ( sound_description[ i ] ) );
     else
-      outputf ( _("   %-30.30s : \"%s\"\n"),
+      outputf ("   %-30.30s : \"%s\"\n",
                 gettext ( sound_description[ i ] ),
                 sound);
     g_free(sound);
@@ -2187,19 +2173,14 @@ CommandShowCheat( char *sz ) {
 }
 
 
-extern void
-CommandShowCubeEfficiency( char *sz ) {
-
-
-  outputf( _("Parameters for cube evaluations:\n"
-             "Cube efficiency for crashed positions           : %7.4f\n"
-             "Cube efficiency for contact positions           : %7.4f\n"
-             "Cube efficiency for one sided bearoff positions : %7.4f\n"
-             "Cube efficiency for race: x = pips * %.5f + %.5f\n"
-             "(min value %.4f, max value %.4f)\n"),
-           rCrashedX, rContactX, rOSCubeX,
-           rRaceFactorX, rRaceCoefficientX, rRaceMin, rRaceMax );
-
+extern void CommandShowCubeEfficiency(char *sz)
+{
+	outputf(_("Parameters for cube evaluations:\n"));
+	outputf("%s :7.4f\n", _("Cube efficiency for crashed positions"), rCrashedX);
+	outputf("%s :7.4f\n", _("Cube efficiency for contact positions"), rContactX);
+	outputf("%s :7.4f\n", _("Cube efficiency for one sided bearoff positions"), rOSCubeX);
+	outputf("%s * %.5f + %.5f\n", _("Cube efficiency for race: x = pips"), rRaceFactorX, rRaceCoefficientX);
+	outputf(_("(min value %.4f, max value %.4f)\n"), rRaceMin, rRaceMax);
 }
 
 extern void show_bearoff( TanBoard an, char *szTemp)
@@ -2275,9 +2256,8 @@ CommandShowMatchResult( char *sz ) {
 
   updateStatisticsMatch ( &lMatch );
 
-  outputf( _("Actual and luck adjusted results for %s\n\n"),
-           ap[ 0 ].szName );
-  outputl( _("Game   Actual     Luck adj.\n") );
+  outputf( _("Actual and luck adjusted results for %s\n\n"), ap[ 0 ].szName );
+  outputf( "%-10s %-10s %-10s\n\n", _("Game"), _("Actual"), _("Luck adj.") );
 
   for( pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext, ++n ) {
   
@@ -2289,20 +2269,20 @@ CommandShowMatchResult( char *sz ) {
       
       if ( psc->fDice ) {
         if ( ms.nMatchTo ) 
-          outputf( "%4d   %8.2f%%    %8.2f%%\n",
+          outputf( "%10d %9.2f%% %9.2f%%\n",
                    n,
                    100.0 * ( 0.5f + psc->arActualResult[ 0 ] ),
                    100.0 * ( 0.5f + psc->arActualResult[ 0 ] - 
                              psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ] ) );
         else
-          outputf( "%4d   %+9.3f   %+9.3f\n",
+          outputf( "%10d %9.3f%% %9.3f%%\n",
                    n, 
                    psc->arActualResult[ 0 ],
                    psc->arActualResult[ 0 ] - 
                    psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ] );
       }
       else
-        outputf( _("%d   no info avaiable\n"), n );
+        outputf( _("%10d no info avaiable\n"), n );
       
       r = psc->arActualResult[ 0 ];
       arSum[ 0 ] += r;
@@ -2317,17 +2297,17 @@ CommandShowMatchResult( char *sz ) {
   }
 
   if ( ms.nMatchTo )
-    outputf( _("Final  %8.2f%%   %8.2f%%\n"),
+    outputf( "%10s %9.2f%% %9.2f%%\n", _("Final"),
              100.0 * ( 0.5f + arSum[ 0 ] ),
              100.0 * ( 0.5f + arSum[ 1 ] ) );
   else
-    outputf( _("Sum    %+9.3f   %+9.3f\n"),
+    outputf( "%10s %+9.3f %+9.3f\n", _("Sum"),
              arSum[ 0 ], arSum[ 1 ] );
 
   if ( n && ! ms.nMatchTo ) {
-    outputf( _("Ave.   %+9.3f   %+9.3f\n"),
+    outputf( "%10s %+9.3f %+9.3f\n", _("Average"),
              arSum[ 0 ] / n , arSum[ 1 ] / n );
-    outputf( _("95%%CI  %9.3f   %9.3f\n" ),
+    outputf( "%10s %9.3f %9.3f\n" , "95%CI",
              1.95996f *
              sqrt ( arSumSquared[ 0 ] / n - 
                     arSum[ 0 ] * arSum[ 0 ] / ( n * n ) ) / sqrt( n ),
