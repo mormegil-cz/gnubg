@@ -3458,6 +3458,7 @@ GtkItemFactoryEntry aife[] = {
 		"<StockItem>", GTK_STOCK_ADD
 	},
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>", NULL },
+        { N_("/_Analyse/Relational database"), NULL, NULL, 0, "<Branch>", NULL },
     { N_("/_Analyse/Relational database/Add match or session"), NULL,
         GtkRelationalAddMatch, 0,
 	"<StockItem>", GTK_STOCK_ADD},
