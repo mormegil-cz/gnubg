@@ -2176,9 +2176,9 @@ CommandShowCheat( char *sz ) {
 extern void CommandShowCubeEfficiency(char *sz)
 {
 	outputf(_("Parameters for cube evaluations:\n"));
-	outputf("%s :7.4f\n", _("Cube efficiency for crashed positions"), rCrashedX);
-	outputf("%s :7.4f\n", _("Cube efficiency for contact positions"), rContactX);
-	outputf("%s :7.4f\n", _("Cube efficiency for one sided bearoff positions"), rOSCubeX);
+	outputf("%s :%7.4f\n", _("Cube efficiency for crashed positions"), rCrashedX);
+	outputf("%s :%7.4f\n", _("Cube efficiency for contact positions"), rContactX);
+	outputf("%s :%7.4f\n", _("Cube efficiency for one sided bearoff positions"), rOSCubeX);
 	outputf("%s * %.5f + %.5f\n", _("Cube efficiency for race: x = pips"), rRaceFactorX, rRaceCoefficientX);
 	outputf(_("(min value %.4f, max value %.4f)\n"), rRaceMin, rRaceMax);
 }
