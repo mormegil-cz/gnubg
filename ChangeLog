@@ -1,3 +1,8 @@
+Fri Oct  3 11:44:47 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gnubgmodule.c: fix a couple of sizeof usage errors introduced by
+	TanBoard
+
 Mon Sep 29 11:59:31 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h commands.inc export.h gnubg.c gtkexport.c, gtkoptions.c
