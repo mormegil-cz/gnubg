@@ -20,6 +20,10 @@
  * $Id$
  */
 
+/*! \file gtkboard.c
+    \brief gtk board for playing in the GUI
+*/
+
 #include "config.h"
 
 #include <glib.h>
@@ -2173,115 +2177,95 @@ extern gboolean board_button_press(GtkWidget *board, GdkEventButton *event,
 	return FALSE;
 }
 
+/*! \brief callback for release of mouse button
+ * \param board the GtkBoard
+ * \param event the event containing the xy pos
+ * \param bd board data
+ */
 extern gboolean board_button_release(GtkWidget *board, GdkEventButton *event,
 		BoardData* bd)
 {
 	int x = (int)event->x;
 	int y = (int)event->y;
 	int editing = ToolbarIsEditing( pwToolbar );
-	int dest;
-
-#if USE_BOARD3D
-	if (display_is_3d(bd->rd))
-	{	/* Reverse screen y coords for OpenGL */
-		y = board->allocation.height - y;
-	}
-#endif
+	int release_point;
+	int drag_time;
+	int legal_point = -1;
+	int i, j;
 
 	if (bd->drag_point < 0)
 		return TRUE;
 
 #if USE_BOARD3D
 	if (display_is_3d(bd->rd))
-		dest = BoardPoint3d(bd, bd->bd3d, bd->rd, x, y, -1);
+	{	/* Reverse screen y coords for OpenGL */
+		y = board->allocation.height - y;
+		release_point = BoardPoint3d(bd, bd->bd3d, bd->rd, x, y, -1);
+	}
 	else
 #endif
 	{
 		board_end_drag( board, bd );
-		dest = board_point(board, bd, x, y);
+		release_point = board_point(board, bd, x, y);
 	}
 
-	if (!editing && dest == bd->drag_point &&
-		gdk_event_get_time( (GdkEvent*)event ) - bd->click_time < CLICK_TIME)
-	{	/* Automatically place chequer on destination point */
-		if( bd->drag_colour != bd->turn )
+	drag_time = gdk_event_get_time( (GdkEvent*)event ) - bd->click_time; 
+	if (!editing && release_point == bd->drag_point && drag_time < CLICK_TIME)
+	{
+		int dests[2] = {-1, -1};
+		if( bd->drag_colour == bd->turn )
 		{
-			/* can't move the opponent's chequers */
-			board_beep(bd);
-			dest = bd->drag_point;
-			place_chequer_or_revert(bd, dest);
-#if USE_BOARD3D
-			if (display_is_3d(bd->rd) && bd->rd->quickDraw)
-				RestrictiveEndMouseMove(bd->drag_point, abs(bd->points[bd->drag_point]));
-#endif
-		}
-		else
-		{
-			gint left = bd->diceRoll[0];
-			gint right = bd->diceRoll[1];
-
 			/* Button 1 tries the left roll first.
 			   other buttons try the right dice roll first */
-			dest = bd->drag_point - ( bd->drag_button == 1 ? 
-						  left :
-						  right ) * bd->drag_colour;
+			if (bd->drag_button == 1)
+			{
+				dests[0] = bd->drag_point - bd->diceRoll[0] * bd->drag_colour;
+				dests[1] = bd->drag_point - bd->diceRoll[1]  * bd->drag_colour;
+			}
+			else
+			{
+				dests[1] = bd->drag_point - bd->diceRoll[0] * bd->drag_colour;
+				dests[0] = bd->drag_point - bd->diceRoll[1]  * bd->drag_colour;
+			}
+		}
+		LegalDestPoints(bd, bd->iTargetHelpPoints);
 
+		for (i = 0; i < 2; ++i)
+		{
+			int dest = dests[i];
 			if( ( dest <= 0 ) || ( dest >= 25 ) )
 				/* bearing off */
 				dest = bd->drag_colour > 0 ? 26 : 27;
 			
-			if( place_chequer_or_revert(bd, dest ) )
-				playSound( SOUND_CHEQUER );
-			else
+			for (j = 0; j < 4; j++)
 			{
-				/* First roll was illegal.  We are going to 
-				   try the second roll next. First, we have 
-				   to redo the pickup since we got reverted. */
-				bd->points[ bd->drag_point ] -= bd->drag_colour;
-#if USE_BOARD3D
-				if (display_is_2d(bd->rd))
-#endif
-					board_invalidate_point(bd, bd->drag_point);
-				
-				/* Now we try the other die roll. */
-				dest = bd->drag_point - ( bd->drag_button == 1 ?
-							  right :
-							  left ) * bd->drag_colour;
-				
-				if( ( dest <= 0 ) || ( dest >= 25 ) )
-				/* bearing off */
-				dest = bd->drag_colour > 0 ? 26 : 27;
-				
-				if (place_chequer_or_revert(bd, dest))
-					playSound( SOUND_CHEQUER );
-				else 
+				if (bd->iTargetHelpPoints[j] < 0)
+					continue;
+				if (dest == bd->iTargetHelpPoints[j])
 				{
-#if USE_BOARD3D
-					if (display_is_3d(bd->rd))
-					{
-						if (bd->rd->quickDraw)
-							RestrictiveEndMouseMove(bd->drag_point, abs(bd->points[bd->drag_point]));
-					}
-					else
-#endif
-						board_invalidate_point(bd, bd->drag_point);
-					board_beep(bd);
+					legal_point = dest;
+					goto move_chequer;
 				}
 			}
 		}
 	}
+	/* if we haven't found a legal move yet we parse the release point
+	 * to place_chequer_or revert. That is either an illegal move or a
+	 * drag n' drop */
+	if (legal_point < 0)
+		legal_point = release_point;
+
+move_chequer:
+	if (place_chequer_or_revert(bd, legal_point))
+		playSound(SOUND_CHEQUER);
 	else
-	{	/* This is from a normal drag release */
-		if (place_chequer_or_revert(bd, dest))
-			playSound(SOUND_CHEQUER);
-		else
-		{
-			board_beep(bd);
+	{
+		board_invalidate_point(bd, release_point);
+		board_beep(bd);
 #if USE_BOARD3D
-			if (display_is_3d(bd->rd) && bd->rd->quickDraw)
-				RestrictiveEndMouseMove(bd->drag_point, abs(bd->points[bd->drag_point]));
+		if (display_is_3d(bd->rd) && bd->rd->quickDraw)
+			RestrictiveEndMouseMove(bd->drag_point, abs(bd->points[bd->drag_point]));
 #endif
-		}
 	}
 
 #if USE_BOARD3D

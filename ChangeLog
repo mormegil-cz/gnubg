@@ -1,3 +1,7 @@
+Sun Oct  5 07:52:09 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtkboard.c: check for legal dest points for normal click moves.
+
 Fri Oct  3 11:44:47 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gnubgmodule.c: fix a couple of sizeof usage errors introduced by
