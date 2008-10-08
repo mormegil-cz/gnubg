@@ -742,13 +742,6 @@ void Set3dSettings(renderdata *prdnew, const renderdata *prd)
 	memcpy(&prdnew->BackGroundMat, &prd->BackGroundMat, sizeof(Material));
 }
 
-void CopySettings3d(const BoardData* from, BoardData* to)
-{	/* Just copy the whole thing (for now?) */
-	memcpy(to, from, sizeof(BoardData));
-	/* Shallow copy, so reset allocated data */
-	to->bd3d->boardPoints = 0;
-}
-
 /* Return v position, d distance along path segment */
 static float moveAlong(float d, PathType type, const float start[3], const float end[3], float v[3], float* rotate)
 {

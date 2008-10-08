@@ -590,46 +590,6 @@ OutputEquityDiff ( const float r1, const float r2, const cubeinfo *pci ) {
 
 }
 
-
-/*
- * Return formatted string with equity or MWC for an equity difference.
- *
- * Input:
- *    r: equity (either money equity or MWC for match play
- *    pci: cubeinfo
- *    f: indicates equity (TRUE) or std. error (FALSE)
- *    
- *
- * Important: function is not re-entrant. Caller must save output
- * if needed.
- */
-
-extern char *
-OutputMWCDiff ( const float r1, const float r2, const cubeinfo *pci ) {
-
-  static char sz[ 9 ];
-  char fmt[ 32 ];
-
-  if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) {
-    if ( pci->nMatchTo ) 
-      sprintf ( sz, "%+*.*f", fOutputDigits + 4, fOutputDigits, r1 - r2 );
-    else
-      sprintf ( sz, "%+*.*f", fOutputDigits + 4, fOutputDigits, mwc2eq( r1, pci ) - mwc2eq( r2, pci ) );
-  }
-  else {
-    if ( fOutputMatchPC ) {
-      sprintf ( sz, "%*.*f%%", fOutputDigits + 3, fOutputDigits > 1 ? fOutputDigits - 1 : 0,
-                100.0f * r1 - 100.0f * r2 );
-    }
-    else {
-      sprintf( fmt, "%*.*f", fOutputDigits + 3, fOutputDigits + 1, r1 - r2 );
-    }
-  }
-
-  return sz;
-
-}
-
 /*
  * Return formatted string with equity or MWC.
  *

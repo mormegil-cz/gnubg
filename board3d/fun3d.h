@@ -89,7 +89,6 @@ extern void RenderToBuffer3d(const BoardData* bd, BoardData3d* bd3d, unsigned in
 extern void Tidy3dObjects(BoardData3d* bd3d, const renderdata *prd);
 extern float TestPerformance3d(BoardData* bd);
 extern void Set3dSettings(renderdata *prdnew, const renderdata *prd);
-extern void CopySettings3d(const BoardData* from, BoardData* to);
 extern void MakeCurrent3d(const BoardData3d *bd3d);
 extern void GetTextures(BoardData3d* bd3d, renderdata *prd);
 extern void ClearTextures(BoardData3d* bd3d);

@@ -100,7 +100,4 @@ BearoffHyper( const bearoffcontext *pbc,
               const unsigned int iPos,
               float arOutput[], float arEquity[] );
 
-extern bearoffcontext *
-BearoffAlloc( void );
-
 #endif /* _BEAROFF_H_ */

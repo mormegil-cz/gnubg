@@ -611,14 +611,6 @@ SetMovefilterCommands ( const char *sz,
 }
 
 extern void
-MoveFilterOK ( GtkWidget *pw, GtkWidget *pwMoveFilter ) {
-
-
-
-}
-
-
-extern void
 MoveFilterSetPredefined ( GtkWidget *pwMoveFilter,
                           const int i ) {
 

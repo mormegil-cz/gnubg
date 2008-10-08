@@ -829,23 +829,6 @@ static void ReadIntoMemory ( bearoffcontext *pbc )
  *
  */
 
-extern bearoffcontext *
-BearoffAlloc( void ) {
-
-  bearoffcontext *pbc;
-
-  pbc = g_new0(bearoffcontext, 1);
-  pbc->fCompressed = TRUE;
-  pbc->fGammon = TRUE;
-  pbc->fND = FALSE;
-  pbc->fCubeful = TRUE;
-  pbc->map = NULL;
-  pbc->p = NULL;
-
-  return pbc;
-
-}
-
 static unsigned int MakeInt(unsigned char a, unsigned char b, unsigned char c, unsigned char d)
 {
 	return (a | (unsigned char)b << 8 | (unsigned char)c << 16 | (unsigned char)d << 24);

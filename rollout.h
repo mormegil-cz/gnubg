@@ -123,10 +123,6 @@ GeneralCubeDecisionR ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
 /* operations on rolloutstat */
 
-extern char *
-printRolloutstat ( char *sz, const rolloutstat *prs,
-                   const int cGames );
-
 /* Resignations */
 
 extern int
@@ -145,10 +141,6 @@ extern int
 ScoreMoveRollout ( move **ppm, const cubeinfo** ppci, int cMoves,
                    rolloutprogressfunc *pfRolloutProgress,
                    void *pUserData );
-
-extern int
-ScoreMoveGeneral ( move *pm, const cubeinfo* pci, const evalsetup* pes,
-                   rolloutprogressfunc* pfRolloutProgress, void* pUserData );
 
 extern void RolloutLoopMT(void *unused);
 #endif

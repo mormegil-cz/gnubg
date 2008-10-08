@@ -33,9 +33,6 @@ SetMovefilterCommands ( const char *sz,
                   movefilter aamfOld[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] );
 
 extern void
-MoveFilterOK ( GtkWidget *pw, GtkWidget *pwMoveFilter );
-
-extern void
 MoveFilterSetPredefined ( GtkWidget *pwMoveFilter, 
                           const int i );
 
