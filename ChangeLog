@@ -1,3 +1,8 @@
+Thu Oct  9 22:44:44 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* play.c: add safeguard questions to avoid accidental destruction of
+	the match when "playing from here"
+
 Wed Oct  8 12:16:04 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* bearoff.c, bearoff.h, format.c, format.h, gtkgame.c,

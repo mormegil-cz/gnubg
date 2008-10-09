@@ -644,6 +644,10 @@ fAddingMoveRecord=0;
 #endif
 }
 
+static gboolean move_is_last_in_match(void)
+{
+	return (!plLastMove || !plLastMove->plNext || !plLastMove->plNext->p);
+}
 
 extern void SetMoveRecord( void *pv ) {
 
@@ -1776,6 +1780,14 @@ extern void CommandAgree( char *sz ) {
 	return;
     }
 
+    if (!move_is_last_in_match())
+    {
+	    int answer = GetInputYN(_("The resignation is not the last move in the match.\n"
+				    "Continuing will destroy the remainder of the match. Continue?"));
+	    if (!answer)
+		    return;
+    }
+
     if( fDisplay )
 	outputf( _("%s accepts and wins a %s.\n"), ap[ ms.fTurn ].szName,
 		gettext ( aszGameResult[ ms.fResigned - 1 ] ) );
@@ -2236,6 +2248,14 @@ extern void CommandDouble( char *sz ) {
 	return;
     }
 
+    if (!move_is_last_in_match())
+    {
+	    int answer = GetInputYN(_("The double is not the last move in the match.\n"
+				    "Continuing will destroy the remainder of the match. Continue?"));
+	    if (!answer)
+		    return;
+    }
+
     if (ms.fDoubled) {
 	    CommandRedouble(NULL);
 	    return;
@@ -2422,6 +2442,14 @@ extern void CommandDrop( char *sz ) {
 	outputl( _("It is the computer's turn -- type `play' to force it to "
 		 "move immediately.") );
 	return;
+    }
+
+    if (!move_is_last_in_match())
+    {
+	    int answer = GetInputYN(_("The drop is not the last move in the match.\n"
+				    "Continuing will destroy the remainder of the match. Continue?"));
+	    if (!answer)
+		    return;
     }
 
     playSound ( SOUND_DROP );
@@ -2658,6 +2686,14 @@ CommandMove( char *sz ) {
 	return;
     }
     
+    if (!move_is_last_in_match())
+    {
+	    int answer = GetInputYN(_("The move is not the last in the match.\n"
+				    "Continuing will destroy the remainder of the match. Continue?"));
+	    if (!answer)
+		    return;
+    }
+
     if( !*sz ) {
 	GenerateMoves( &ml, msBoard(), ms.anDice[ 0 ], ms.anDice[ 1 ],
 		       FALSE );
@@ -3560,7 +3596,15 @@ extern void CommandRedouble( char *sz ) {
                  MAX_CUBE );
 	return;
     }
-    
+     
+    if (!move_is_last_in_match())
+    {
+	    int answer = GetInputYN(_("The redouble is not the last move in the match.\n"
+				    "Continuing will destroy the remainder of the match. Continue?"));
+	    if (!answer)
+		    return;
+    }
+
     pmr = NewMoveRecord();
 
 #if 0
@@ -3775,6 +3819,14 @@ CommandRoll( char *sz ) {
     return;
   }
     
+  if (!move_is_last_in_match())
+  {
+	  int answer = GetInputYN(_("The move is not the last in the match.\n"
+				  "Continuing will destroy the remainder of the match. Continue?"));
+	  if (!answer)
+		  return;
+  }
+
   if ( fTutor && fTutorCube && !GiveAdvice( ShouldDouble() ))
 	  return;
 
@@ -3864,6 +3916,14 @@ extern void CommandTake( char *sz ) {
 	outputl( _("It is the computer's turn -- type `play' to force it to "
 		 "move immediately.") );
 	return;
+    }
+
+    if (!move_is_last_in_match())
+    {
+	    int answer = GetInputYN(_("The take is not the last move in the match.\n"
+				    "Continuing will destroy the remainder of the match. Continue?"));
+	    if (!answer)
+		    return;
     }
 
     playSound ( SOUND_TAKE );
