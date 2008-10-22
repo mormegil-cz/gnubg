@@ -285,15 +285,6 @@ ApplyMoveRecord(matchstate* pms, const listOLD* plGame, const moverecord* pmr)
     xmovegameinfo* pmgi;
     /* FIXME this is wrong -- plGame is not necessarily the right game */
 
-#ifdef TCDEBUG
-printf("ApplyMoveRecord(%d, %d.%d): state:%d, turn: %d, ts0: (%d.%d), ts1: (%d.%d)\n",
-	pmr->mt,
-	pmr->a.tl[0].tv_sec % 1000, pmr->a.tl[1].tv_sec % 1000,
-	pms->gs, pms->fTurn,
-	pms->gc.pc[0].tvStamp.tv_sec %1000, pms->gc.pc[0].tvStamp.tv_usec / 1000, 
-	pms->gc.pc[1].tvStamp.tv_sec %1000, pms->gc.pc[1].tvStamp.tv_usec / 1000); 
-#endif
-
     g_assert( pmr->mt == MOVE_GAMEINFO || pmrx->mt == MOVE_GAMEINFO );
 
     pmgi = &pmrx->g;
@@ -560,15 +551,7 @@ static int PopMoveRecord( listOLD *plDelete ) {
     return 0;
 }
 
-#ifdef TCDEBUG
-int fAddingMoveRecord=0;
-#endif
-
 extern void AddMoveRecord( void *pv ) {
-#ifdef TCDEBUG
-fAddingMoveRecord=1;
-#endif
-
     moverecord *pmr = pv, *pmrOld;
 
     g_assert( pmr->fPlayer >= 0 && pmr->fPlayer <= 1 );
@@ -639,9 +622,6 @@ fAddingMoveRecord=1;
     plLastMove = ListInsert( plGame, pmr );
 
     SetMoveRecord( pmr );
-#ifdef TCDEBUG
-fAddingMoveRecord=0;
-#endif
 }
 
 static gboolean move_is_last_in_match(void)

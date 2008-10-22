@@ -1,3 +1,7 @@
+Wed Oct 22 22:20:42 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* play.c: delete some debug code that doesn't work anymore
+
 Wed Oct 22 22:17:53 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtkboard.c: set the page-size to zero in gtkadjustment for
