@@ -824,184 +824,197 @@ extern void CommandExportPositionSnowieTxt (char *sz)
 }
 
 
-static void
-WriteInt16 (FILE * pf, int n)
+static int WriteInt16(FILE * pf, int n)
 {
 
-  /* Write a little-endian, signed (2's complement) 16-bit integer.
-     This is inefficient on hardware which is already little-endian
-     or 2's complement, but at least it's portable. */
+	/* Write a little-endian, signed (2's complement) 16-bit integer. This is inefficient on hardware which is
+	   already little-endian or 2's complement, but at least it's portable. */
 
-  /*  Let's just make things simple right now! */
-
-  /* FIXME what about error handling? */
-
-  fwrite (&n, 2, 1, pf);
-  return;
-#if 0
-
-  fread (auch, 2, 1, pf);
-  n = auch[0] | (auch[1] << 8);
-
-  if (n >= 0x8000)
-    n -= 0x10000;
-
-  return n;
-#endif
+	return (fwrite(&n, 2, 1, pf) == 1);
 }
 
-extern void CommandExportPositionJF (char *sz)
+extern void CommandExportPositionJF(char *sz)
 {
-  /* I think this function works now correctly. If there is some
-   * inconsistencies between import pos and export pos, it's probably a
-   * bug in the import code. --Oystein
-   */
+	/* I think this function works now correctly. If there is some inconsistencies between import pos and export
+	   pos, it's probably a bug in the import code. --Oystein */
 
-  FILE *fp;
-  int i;
-  unsigned char c;
-  TanBoard anBoard;
+	FILE *fp;
+	int i;
+	unsigned char c;
+	TanBoard anBoard;
+	int tmp;
 
-  sz = NextToken (&sz);
+	sz = NextToken(&sz);
 
-  if (!CheckGameExists())
+	if (!CheckGameExists())
+		return;
+
+	if (!sz || !*sz) {
+		outputl(_("You must specify a file to export to."));
+		return;
+	}
+
+
+	if (!confirmOverwrite(sz, fConfirmSave))
+		return;
+
+	if (!strcmp(sz, "-"))
+		fp = stdout;
+	else if (!(fp = g_fopen(sz, "wb"))) {
+		outputerr(sz);
+		return;
+	}
+
+	if (!WriteInt16(fp, 126))	/* Always write in JellyFish 3.0 format */
+		goto write_failed;
+	if (!WriteInt16(fp, 0))	/* Never save with Caution */
+		goto write_failed;
+	if (!WriteInt16(fp, 0))	/* This is unused */
+		goto write_failed;
+
+	if (!WriteInt16(fp, fCubeUse))
+		goto write_failed;
+	if (!WriteInt16(fp, fJacoby))
+		goto write_failed;
+	if (!WriteInt16(fp, (nBeavers != 0)))
+		goto write_failed;
+
+	if (!WriteInt16(fp, ms.nCube))
+		goto write_failed;
+	if (!WriteInt16(fp, ms.fCubeOwner + 1))
+		goto write_failed;
+
+	if ((ms.gs == GAME_OVER) || (ms.gs == GAME_NONE)) {
+		if (!WriteInt16(fp, 0))
+			goto write_failed;
+	} else {
+		tmp = ms.anDice[0] > 0 ? ms.fTurn + 1 : ms.fTurn + 3;
+		if (!WriteInt16(fp, tmp))
+			goto write_failed;
+	}
+	/* 0 means starting position. If you add 2 to the player (to get 3 or 4) Sure? it means that the player is on
+	   roll but the dice have not been rolled yet. */
+
+	if (!WriteInt16(fp, 0))
+		goto write_failed;
+	if (!WriteInt16(fp, 0))	/* FIXME Test this! */
+		goto write_failed;
+	/* These two variables are used when you use movement #1, (two buttons) and tells how many moves you have left
+	   to play with the left and the right die, respectively. Initialized to 1 (if you roll a double, left = 4 and
+	   right = 0). If movement #2 (one button), only the first one (left) is used to store both dice.  */
+
+	if (!WriteInt16(fp, 0))	/* Not in use */
+		goto write_failed;
+
+	tmp = ms.nMatchTo ? 1 : 3;
+	if (!WriteInt16(fp, tmp))
+		goto write_failed;
+	/* 1 = match, 3 = game */
+
+	if (!WriteInt16(fp, 2))	/* FIXME */
+		goto write_failed;
+	/* 1 = 2 players, 2 = JF plays one side */
+
+	if (!WriteInt16(fp, 7))	/* Use level 7 */
+		goto write_failed;
+
+	if (!WriteInt16(fp, ms.nMatchTo))
+		goto write_failed;
+	/* 0 if single game */
+
+	if (ms.nMatchTo == 0) {
+		if (!WriteInt16(fp, 0))
+			goto write_failed;
+		if (!WriteInt16(fp, 0))
+			goto write_failed;
+	} else {
+		if (!WriteInt16(fp, ms.anScore[0]))
+			goto write_failed;
+		if (!WriteInt16(fp, ms.anScore[1]))
+			goto write_failed;
+	}
+
+	c = (unsigned char) strlen(ap[0].szName);
+	if (fwrite(&c, 1, 1, fp) != 1)
+		goto write_failed;
+	for (i = 0; i < c; i++)
+	{
+		if (fwrite(&ap[0].szName[i], 1, 1, fp) != 1)
+			goto write_failed;
+	}
+
+	c = (unsigned char) strlen(ap[1].szName);
+	if (fwrite(&c, 1, 1, fp) != 1)
+		goto write_failed;
+	for (i = 0; i < c; i++)
+	{
+		if (fwrite(&ap[1].szName[i], 1, 1, fp) != 1)
+			goto write_failed;
+	}
+
+	if (!WriteInt16(fp, 0))	/* FIXME Check gnubg setting */
+		goto write_failed;
+	/* TRUE if lower die is to be drawn to the left */
+
+	if ((ms.fPostCrawford == FALSE) && (ms.fCrawford == TRUE))
+		tmp = 2;
+	else if ((ms.fPostCrawford == TRUE) && (ms.fCrawford == FALSE))
+		tmp = 3;
+	else
+		tmp = 1;
+	if (!WriteInt16(fp, tmp))
+		goto write_failed;
+
+	if (!WriteInt16(fp, 0))	/* JF played last. Must be FALSE */
+		goto write_failed;
+
+	c = 0;
+	if (fwrite(&c, 1, 1, fp) != 1)
+		goto write_failed;	/* Length of "last move" string */
+
+	if (!WriteInt16(fp, ms.anDice[0]))
+		goto write_failed;
+	if (!WriteInt16(fp, ms.anDice[1]))
+		goto write_failed;
+
+	/* The Jellyfish format saves the current board and the board before the move was done, such that undo should
+	   be possible. It's possible to save just the current board twice as done below. */
+
+	memcpy(anBoard, msBoard(), sizeof(TanBoard));
+
+	if (!ms.fMove)
+		SwapSides(anBoard);
+
+	/* Player 0 on bar */
+	if (!WriteInt16(fp, anBoard[1][24] + 20))
+		goto write_failed;
+	if (!WriteInt16(fp, anBoard[1][24] + 20))
+		goto write_failed;
+
+	/* Board */
+	for (i = 24; i > 0; i--) {
+		int point = (int) anBoard[0][24 - i];
+		if (!WriteInt16(fp, (point > 0 ? -point : (int) anBoard[1][i - 1]) + 20))
+			goto write_failed;
+		if (!WriteInt16(fp, (point > 0 ? -point : (int) anBoard[1][i - 1]) + 20))
+			goto write_failed;
+	}
+	/* Player on bar */
+	if (!WriteInt16(fp, -(int) anBoard[0][24] + 20))
+		goto write_failed;
+	if (!WriteInt16(fp, -(int) anBoard[0][24] + 20))
+		goto write_failed;
+
+	fclose(fp);
+
+	setDefaultFileName(sz);
+
 	return;
 
-  if (!sz || !*sz)
-    {
-      outputl (_("You must specify a file to export to."));
-      return;
-    }
-
-
-  if (!confirmOverwrite (sz, fConfirmSave))
-    return;
-
-  if (!strcmp (sz, "-"))
-    fp = stdout;
-  else if (!(fp = g_fopen (sz, "wb")))
-    {
-      outputerr (sz);
-      return;
-    }
-
-  WriteInt16 (fp, 126);		/* Always write in JellyFish 3.0 format */
-  WriteInt16 (fp, 0);		/* Never save with Caution */
-  WriteInt16 (fp, 0);		/* This is unused */
-
-  WriteInt16 (fp, fCubeUse);
-  WriteInt16 (fp, fJacoby);
-  WriteInt16 (fp, (nBeavers != 0));
-
-  WriteInt16 (fp, ms.nCube);
-  WriteInt16 (fp, ms.fCubeOwner + 1);
-
-  if ((ms.gs == GAME_OVER) || (ms.gs == GAME_NONE))
-    {
-      WriteInt16 (fp, 0);
-    }
-  else
-    {
-      ms.anDice[0] > 0 ? WriteInt16 (fp, ms.fTurn + 1) : WriteInt16 (fp,
-								     ms.
-								     fTurn +
-								     3);
-    }
-  /* 0 means starting position.
-     If you add 2 to the player (to get 3 or 4)   Sure?
-     it means that the player is on roll
-     but the dice have not been rolled yet. */
-
-  WriteInt16 (fp, 0);
-  WriteInt16 (fp, 0);		/* FIXME Test this! */
-  /* These two variables are used when you use movement #1,
-     (two buttons) and tells how many moves you have left
-     to play with the left and the right die, respectively.
-     Initialized to 1 (if you roll a double, left = 4 and
-     right = 0). If movement #2 (one button), only the first
-     one (left) is used to store both dice.  */
-
-  WriteInt16 (fp, 0);		/* Not in use */
-
-  ms.nMatchTo ? WriteInt16 (fp, 1) : WriteInt16 (fp, 3);
-  /* 1 = match, 3 = game */
-
-  WriteInt16 (fp, 2);		/* FIXME */
-  /* 1 = 2 players, 2 = JF plays one side */
-
-  WriteInt16 (fp, 7);		/* Use level 7 */
-
-  WriteInt16 (fp, ms.nMatchTo);
-  /* 0 if single game  */
-
-  if (ms.nMatchTo == 0)
-    {
-      WriteInt16 (fp, 0);
-      WriteInt16 (fp, 0);
-    }
-  else
-    {
-      WriteInt16 (fp, ms.anScore[0]);
-      WriteInt16 (fp, ms.anScore[1]);
-    }
-
-  c = (unsigned char)strlen (ap[0].szName);
-  fwrite (&c, 1, 1, fp);
-  for (i = 0; i < c; i++)
-    fwrite (&ap[0].szName[i], 1, 1, fp);
-
-  c = (unsigned char)strlen (ap[1].szName);
-  fwrite (&c, 1, 1, fp);
-  for (i = 0; i < c; i++)
-    fwrite (&ap[1].szName[i], 1, 1, fp);
-
-  WriteInt16 (fp, 0);		/* FIXME Check gnubg setting */
-  /* TRUE if lower die is to be drawn to the left  */
-
-  if ((ms.fPostCrawford == FALSE) && (ms.fCrawford == TRUE))
-    WriteInt16 (fp, 2);
-  else if ((ms.fPostCrawford == TRUE) && (ms.fCrawford == FALSE))
-    WriteInt16 (fp, 3);
-  else
-    WriteInt16 (fp, 1);
-
-  WriteInt16 (fp, 0);		/* JF played last. Must be FALSE */
-
-  c = 0;
-  fwrite (&c, 1, 1, fp);	/* Length of "last move" string */
-
-  WriteInt16 (fp, ms.anDice[0]);
-  WriteInt16 (fp, ms.anDice[1]);
-
-  /* The Jellyfish format saves the current board and the board
-   * before the move was done, such that undo should be possible. It's
-   * possible to save just the current board twice as done below. */
-
-  memcpy (anBoard, msBoard(), sizeof(TanBoard));
-
-  if (!ms.fMove)
-    SwapSides (anBoard);
-
-  /* Player 0 on bar */
-  WriteInt16 (fp, anBoard[1][24] + 20);
-  WriteInt16 (fp, anBoard[1][24] + 20);
-
-  /* Board */
-  for (i = 24; i > 0; i--)
-    {
-		int point = (int)anBoard[0][24 - i];
-		WriteInt16 (fp, (point > 0 ? -point : (int)anBoard[1][i - 1]) + 20);
-		WriteInt16 (fp, (point > 0 ? -point : (int)anBoard[1][i - 1]) + 20);
-    }
-  /* Player on bar */
-  WriteInt16 (fp, -(int)anBoard[0][24] + 20);
-  WriteInt16 (fp, -(int)anBoard[0][24] + 20);
-
-  fclose (fp);
-
-  setDefaultFileName (sz);
-
-  return;
+write_failed:
+	outputerr(sz);
+	fclose(fp);
+	return;
 }
 
 static void ExportGameJF( FILE *pf, listOLD *plGame, int iGame,
