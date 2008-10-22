@@ -365,19 +365,14 @@ int CreateDatabase(DBProvider *pdb)
 	char *pBuf = buffer;
 	char *szFile = BuildFilename("gnubg.sql");
 	FILE *fp = g_fopen(szFile, "r");
-	g_free(szFile);
+	char line[1024];
 	if (!fp)
 		return FALSE;
 
 	buffer[0] = '\0';
-	while (!feof(fp))
+	while (fgets(line, sizeof(line), fp) != NULL)
 	{
-		char line[1024];
-		char *pLine;
-		line[0] = '\0';
-		fgets(line, sizeof(line), fp);
-		
-		pLine = line + strlen(line) - 1;
+		char *pLine = line + strlen(line) - 1;
 		while (pLine >= line && isspace(*pLine))
 		{
 			*pLine = '\0';
@@ -405,6 +400,12 @@ int CreateDatabase(DBProvider *pdb)
 			}
 		}
 	}
+	if (ferror(fp))
+	{
+		outputerr(szFile);
+		return FALSE;
+	}
+	g_free(szFile);
 	fclose(fp);
 
 	pBuf = g_strdup_printf("INSERT INTO control VALUES ('version', %d)", DB_VERSION);
