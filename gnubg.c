@@ -2713,24 +2713,15 @@ static void LoadCommands(FILE * pf, char *szFile)
 
 	outputpostpone();
 
-	for (;;) {
-		sz[0] = 0;
-
-		/* FIXME shouldn't restart sys calls on signals during this fgets */
-		fgets(sz, sizeof(sz), pf);
+	/* FIXME shouldn't restart sys calls on signals during this fgets */
+	while (fgets(sz, sizeof(sz), pf) != NULL) {
 
 		if ((pch = strchr(sz, '\n')))
 			*pch = 0;
 		if ((pch = strchr(sz, '\r')))
 			*pch = 0;
 
-		if (ferror(pf)) {
-			outputerr(szFile);
-			outputresume();
-			return;
-		}
-
-		if (feof(pf) || fInterrupt) {
+		if (fInterrupt) {
 			outputresume();
 			return;
 		}
@@ -2744,10 +2735,10 @@ static void LoadCommands(FILE * pf, char *szFile)
 
 			/* Python escape. */
 
-			/* Ideally we should be able to handle both > print 1+1 and > print 1+1 sys.exit() but so far
-			   we only handle the latter... */
+			/* Ideally we should be able to handle both > print 1+1 sys.exit() and > print 1+1
+			   currently we only handle the latter... */
 
-			g_assert(FALSE);	/* FIXME... */
+			outputerrf("%s", _("Only Python commands supported, not multiline code"));
 
 			continue;
 
@@ -2757,6 +2748,9 @@ static void LoadCommands(FILE * pf, char *szFile)
 		HandleCommand(sz, acTop);
 
 		/* FIXME handle NextTurn events? */
+	}
+	if (ferror(pf)) {
+		outputerr(szFile);
 	}
 
 	outputresume();
@@ -4498,7 +4492,19 @@ static char *get_stdin_line(void)
 
 	/* FIXME shouldn't restart sys calls on signals during this
 	   fgets */
-	fgets(sz, sizeof(sz), stdin);
+	if (fgets(sz, sizeof(sz), stdin) == NULL)
+	{
+		if (ferror(stdin))
+		{
+			outputerr("stdin");
+			exit(EXIT_FAILURE);
+		}
+		else
+		{
+			Shutdown();
+			exit(EXIT_SUCCESS);
+		}
+	}
 
 	if ((pch = strchr(sz, '\n')))
 		*pch = 0;
@@ -4555,28 +4561,18 @@ static void init_language(char **lang)
 
 	if (!*lang && (pf = g_fopen(szFile, "r"))) {
 
-		for (;;) {
-
-			szTemp[0] = 0;
-			fgets(szTemp, sizeof(szTemp), pf);
-
+		while (fgets(szTemp, sizeof(szTemp), pf) != NULL)
+		{
 			if ((pch = strchr(szTemp, '\n'))) *pch = 0;
 			if ((pch = strchr(szTemp, '\r'))) *pch = 0;
-
-			if (ferror(pf)) {
-				outputerr(szFile);
-				break;
-			}
-
-			if (feof(pf)) {
-				break;
-			}
 
 			if (!strncmp("set lang", szTemp, 8)) {
 				*lang = g_strdup(szTemp+9);
 				break;
 			}
 		}
+		if (ferror(pf))
+			outputerr(szFile);
 
 		fclose(pf);
 	}
