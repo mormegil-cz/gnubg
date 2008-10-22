@@ -78,7 +78,7 @@ AC_ARG_VAR([DBLATEX], [path for dblatex used to build pdf documentation])
 AC_ARG_VAR([XSLTPROC], [path for xsltproc used to build html documentation])
 
 dnl
-dnl Setup libtooltexi
+dnl Setup libtool
 dnl
 
 AC_CONFIG_MACRO_DIR([m4])
