@@ -234,7 +234,11 @@ StartFromDatabase( hyperequity ahe[], const int nC,
   for ( i = 0; i < nPos; ++i )
     for ( j = 0; j < nPos; ++j ) {
 
-      fread( ac, 1, 28, pf );
+      if (fread( ac, 1, 28, pf ) != 28)
+      {
+	      perror(szFilename);
+	      exit(EXIT_FAILURE);
+      }
 
       for ( k = 0; k < NUM_OUTPUTS; ++k ) {
         us = ac[ 3 * k ] | ( ac[ 3 * k + 1 ] ) << 8 | ( ac[ 3 * k + 2 ] ) << 16;

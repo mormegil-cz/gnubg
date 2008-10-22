@@ -1,3 +1,9 @@
+Wed Oct 22 21:42:38 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtkgame.c, html.c, import.c, makebearoff.c, makehyper.c,
+	makeweights.c, record.c: check the return value of fread, fwrite, and
+	fscanf
+
 Wed Oct 22 21:21:45 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* export.c: check the return value of fwrite to silence a compiler

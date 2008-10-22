@@ -94,7 +94,11 @@ extern int main( int argc, char *argv[] )
 		return EXIT_FAILURE;
     }
 	
-    fwrite( ar, sizeof( ar[ 0 ] ), 2, output );
+    if (fwrite( ar, sizeof( ar[ 0 ] ), 2, output ) != 2)
+    {
+	    fprintf(stderr, "Failed to write neural net!");
+	    return EXIT_FAILURE;
+    }
 
     for( c = 0; !feof(input); c++ )
 	{

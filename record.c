@@ -127,7 +127,8 @@ extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr ) {
 	} while( i < 31 && !isspace( ch = getc( pf ) ) );
     ppr->szName[ i ] = 0;
 
-    fscanf( pf, " %d ", &ppr->cGames );
+    if (fscanf( pf, " %d ", &ppr->cGames ) < 1)
+	    goto record_read_failed;
     if( ppr->cGames < 0 )
 		ppr->cGames = 0;
     
@@ -141,16 +142,7 @@ extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr ) {
 		gchar str4[G_ASCII_DTOSTR_BUF_SIZE];
 
 		if( fscanf( pf, "%s %s %s %s ", str1, str2, str3, str4) < 4)
-		{
-			if( ferror( pf ) )
-				outputerr( pch );
-			else
-				outputerrf( _("%s: invalid record file"), pch );
-
-			nVersion = 0;
-
-			return -1;
-		}
+			goto record_read_failed;
 		ppr->arErrorChequerplay[ ea ] = g_ascii_strtod(str1, NULL);
 		ppr->arErrorCube[ ea ] = g_ascii_strtod(str2, NULL);
 		ppr->arErrorCombined[ ea ] = g_ascii_strtod(str3, NULL);
@@ -158,6 +150,16 @@ extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr ) {
 	}
 
     return 0;
+record_read_failed:
+    if( ferror( pf ) )
+	    outputerr( pch );
+    else
+	    outputerrf( _("%s: invalid record file"), pch );
+
+    nVersion = 0;
+
+    return -1;
+
 }
 
 static int RecordWriteItem( FILE *pf, const char *pch, playerrecord *ppr ) {

@@ -351,22 +351,19 @@ static void StdinReadNotify( gpointer p, gint h, GdkInputCondition cond ) {
     while( nNextTurn )
 	NextTurnNotify( NULL );
     
-    sz[ 0 ] = 0;
-	
-    fgets( sz, sizeof( sz ), stdin );
-
-    if( ( pch = strchr( sz, '\n' ) ) )
-	*pch = 0;
-    
-	
-    if( feof( stdin ) ) {
+    if (fgets( sz, sizeof( sz ), stdin ) == NULL)
+    {
 	if( !isatty( STDIN_FILENO ) )
 	    exit( EXIT_SUCCESS );
 	
 	PromptForExit();
 	return;
-    }	
+    }
 
+    if( ( pch = strchr( sz, '\n' ) ) )
+	*pch = 0;
+    
+	
     fInterrupt = FALSE;
 
     HandleCommand( sz, acTop );

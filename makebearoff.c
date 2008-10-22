@@ -762,7 +762,7 @@ generate_os ( const int nOS, const int fHeader,
   if ( fCompress ) {
 
     char ac[ 256 ];
-    int n;
+    unsigned int n;
 #ifdef WIN32
     dlgprintf(127, "Rewriting to compressed database." );
 #endif
@@ -772,7 +772,16 @@ generate_os ( const int nOS, const int fHeader,
     rewind ( pfTmp );
 
     while ( ! feof ( pfTmp ) && ( n = fread ( ac, 1, sizeof ( ac ), pfTmp ) ) )
-      fwrite ( ac, 1, n, output );
+    {
+	    if (fwrite ( ac, 1, n, output ) != n)
+	    {
+		    fprintf(stderr, "failed writing to '%s'\n", tmpfile);
+		    exit(3);
+	    }
+    }
+
+    if (ferror( pfTmp))
+	    exit(3);
 
     fclose ( pfTmp );
 
@@ -1434,12 +1443,16 @@ generate_ts ( const int nTSP, const int nTSC,
 
     for ( i = 0; i < n; ++i ){ 
       for ( j = 0; j < n; ++j ) {
+	      unsigned int count = fCubeful ? 8 : 2;
 
         k = CalcPosition ( i, j, n );
 
-        fseek ( pfTmp, ( fCubeful ? 8 : 2 ) * k, SEEK_SET );
-        fread ( ac, 1, fCubeful ? 8 : 2, pfTmp );
-        fwrite ( ac, 1, fCubeful ? 8 : 2, output );
+        fseek ( pfTmp, count * k, SEEK_SET );
+        if (fread ( ac, 1, count, pfTmp ) != count || fwrite ( ac, 1, count, output ) != count)
+	{
+		fprintf(stderr, "failed to read from or write to database file\n");
+		exit(3);
+	}
       }
 #ifdef WIN32
       SendMessage(hwndPB, PBM_STEPIT, 0, 0);
