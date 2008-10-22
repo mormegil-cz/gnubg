@@ -3925,7 +3925,7 @@ static void board_init( Board *board )
     bd->mscore0 = gtk_multiview_new();
     gtk_box_pack_start ( GTK_BOX ( pw ), bd->mscore0, FALSE, FALSE, 8 );
 
-    bd->ascore0 = GTK_ADJUSTMENT( gtk_adjustment_new( 0, 0, 65535, 1, 1, 1 ) );
+    bd->ascore0 = GTK_ADJUSTMENT( gtk_adjustment_new( 0, 0, 65535, 1, 1, 0 ) );
     bd->score0 = gtk_spin_button_new( GTK_ADJUSTMENT( bd->ascore0 ), 1, 0 );
     gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( bd->score0 ), TRUE );
     bd->lscore0 = gtk_label_new( NULL );
@@ -3998,7 +3998,7 @@ static void board_init( Board *board )
     bd->mscore1 = gtk_multiview_new();
     gtk_box_pack_start ( GTK_BOX ( pw ), bd->mscore1, FALSE, FALSE, 8 );
 
-    bd->ascore1 = GTK_ADJUSTMENT( gtk_adjustment_new( 0, 0, 65535, 1, 1, 1 ) );
+    bd->ascore1 = GTK_ADJUSTMENT( gtk_adjustment_new( 0, 0, 65535, 1, 1, 0 ) );
     bd->score1 = gtk_spin_button_new( GTK_ADJUSTMENT( bd->ascore1 ), 1, 0 );
     gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( bd->score1 ), TRUE );
     bd->lscore1 = gtk_label_new( NULL );
@@ -4055,7 +4055,7 @@ static void board_init( Board *board )
                        bd->lmatch = gtk_label_new( NULL ) );
 
     bd->amatch = 
-      GTK_ADJUSTMENT( gtk_adjustment_new( 0, 0, MAXSCORE, 1, 1, 1 ) );
+      GTK_ADJUSTMENT( gtk_adjustment_new( 0, 0, MAXSCORE, 1, 1, 0 ) );
     bd->match = gtk_spin_button_new( GTK_ADJUSTMENT( bd->amatch ), 1, 0 );
     gtk_container_add( GTK_CONTAINER( bd->mmatch ), bd->match );
 
@@ -4103,6 +4103,7 @@ static void board_init( Board *board )
                         G_CALLBACK( score_changed ), bd );
     g_signal_connect( G_OBJECT( bd->ascore1 ), "value-changed",
                         G_CALLBACK( score_changed ), bd );
+
 
 }
 

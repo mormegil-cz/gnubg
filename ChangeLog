@@ -1,3 +1,8 @@
+Wed Oct 22 22:17:53 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtkboard.c: set the page-size to zero in gtkadjustment for
+	gtkspinbutton to silence a gtk warning in 2.14.3
+
 Wed Oct 22 21:42:38 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtkgame.c, html.c, import.c, makebearoff.c, makehyper.c,
