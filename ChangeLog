@@ -1,3 +1,8 @@
+Wed Oct 22 21:10:02 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c:  check the return value of fgets to silence a compiler
+	warning.
+
 Wed Oct 22 20:50:55 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* relational.c: check the return value of fgets to silence a compiler
