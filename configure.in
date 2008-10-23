@@ -111,31 +111,32 @@ PKG_CHECK_MODULES(GSTREAMER, [gstreamer-0.10], have_gstreamer="yes", AC_MSG_WARN
 PKG_CHECK_MODULES(GTK, [gtk+-2.0 >= 2.6.0], have_gtk="yes" , AC_MSG_WARN([no gtk support]))
 PKG_CHECK_MODULES(GTKGLEXT, [gtkglext-1.0 >= 1.0], have_gtkglext="yes" , AC_MSG_WARN([no gtkglext support]))
 
-if test "x$have_libxml"="xyes"; then
+if test "x$have_libxml" = "xyes"; then
 	AC_DEFINE(HAVE_LIBXML2,1, [Define if you have libxml2.])
 fi
 
-if test "x$have_freetype"="xyes"; then
+if test "x$have_freetype" = "xyes"; then
 	AC_DEFINE(HAVE_FREETYPE, 1, [Define if you have freetype2])
 fi
 
-if test "x$have_linpng"="xyes"; then
+if test "x$have_linpng" = "xyes"; then
 	AC_DEFINE(HAVE_LIBPNG, 1, [Define if you have libpng])
 fi
 
-if test "x$have_cairo"="xyes"; then
+if test "x$have_cairo" = "xyes"; then
 	AC_DEFINE(HAVE_CAIRO,1, [Define if you want to use libcairo])
 fi
 
-if test "x$have_pangocairo"="xyes"; then
+if test "x$have_pangocairo" = "xyes"; then
 	AC_DEFINE(HAVE_PANGOCAIRO,1, [Define if you want to use pangocairo])
 fi
 
-if test "x$have_sqlite"="xyes"; then
+if test "x$have_sqlite" = "xyes"; then
 	AC_DEFINE(HAVE_SQLITE,1, [Define if you want to use sqlite])
 fi
 
-if test "x$have_gstreamer"="xyes"; then
+if test "x$have_gstreamer" = "xyes"; then
+	echo "gstreamer x$have_streamer"
 	AC_DEFINE(HAVE_GSTREAMER,1, [Define if you want to use gstreamer])
 fi
 
