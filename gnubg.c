@@ -174,10 +174,10 @@ int fReadingCommand;
 #endif
 #endif
 
-const gchar *intro_string = N_("This program comes with ABSOLUTELY NO WARRANTY; for details type `show warranty'.\n"
-				"This is free software, and you are welcome to redistribute it\n"
-				"under certain conditions; type `show copying' for details.\n");
-
+const gchar *intro_string = N_("This program comes with ABSOLUTELY NO WARRANTY; for details type\n"
+			       "`show warranty'.\n"
+			       "This is free software, and you are welcome to redistribute it\n"
+			       "under certain conditions; type `show copying' for details.\n");
 char *szLang=NULL;
 
 const char szDefaultPrompt[] = "(\\p) ",
