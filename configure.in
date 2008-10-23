@@ -136,7 +136,6 @@ if test "x$have_sqlite" = "xyes"; then
 fi
 
 if test "x$have_gstreamer" = "xyes"; then
-	echo "gstreamer x$have_streamer"
 	AC_DEFINE(HAVE_GSTREAMER,1, [Define if you want to use gstreamer])
 fi
 
