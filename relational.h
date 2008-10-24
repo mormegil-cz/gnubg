@@ -22,24 +22,14 @@
 #ifndef _RELATIONAL_H_
 #define _RELATIONAL_H_
 
+#include <dbprovider.h>
 #include <stddef.h>
 #include <sys/types.h>
 
 #define DB_VERSION 1
 
-typedef struct _RowSet
-{
-	size_t cols, rows;
-	char ***data;
-	size_t *widths;
-} RowSet;
 
-extern RowSet* RunQuery(char *sz);
-extern RowSet* MallocRowset(size_t rows, size_t cols);
-extern void SetRowsetData(RowSet *rs, size_t row, size_t col, const char *data);
-extern void FreeRowset(RowSet* pRow);
 extern int RelationalUpdatePlayerDetails(const char* oldName, const char* newName, const char* newNotes);
-
 extern float Ratio(float a, int b);
 
 #endif /* _RELATIONAL_H_ */

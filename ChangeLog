@@ -1,3 +1,10 @@
+Fri Oct 24 17:07:03 CEST 2008 Christian Anthon <anthon@kiku.dk>
+
+	* dbprovider.c, dbprovider.h, gnubg.c, gnubgmodule.c, gnubgmodule.h,
+	gtkrelational.c, relational.c, relational.h: improve on the
+	inter-dependencies a bit by moving pure database functions to
+	dbprovider.c
+
 Wed Oct 22 22:20:42 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* play.c: delete some debug code that doesn't work anymore

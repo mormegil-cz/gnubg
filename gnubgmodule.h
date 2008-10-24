@@ -22,6 +22,16 @@
 #ifndef _PYTHONMODULE_H_
 #define _PYTHONMODULE_H_
 
+#if USE_PYTHON
+#ifdef WIN32
+/* needed for mingw inclusion of Python.h */
+#ifndef _MSC_VER
+#include <stdint.h>
+#endif
+#endif
+#include <Python.h>
+#endif
+
 extern void PythonInitialise(void);
 extern void PythonShutdown(void);
 extern void PythonRun(const char *sz);

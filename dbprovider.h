@@ -1,8 +1,18 @@
-#include "relational.h"
+#ifndef _DBPROVIDER_H_
+#define _DBPROVIDER_H_
+
+#include "gnubgmodule.h"
 #include <stdio.h>
 #include <glib.h>
 
 extern int storeGameStats;
+
+typedef struct _RowSet
+{
+	size_t cols, rows;
+	char ***data;
+	size_t *widths;
+} RowSet;
 
 typedef struct _DBProvider
 {
@@ -53,6 +63,11 @@ void SetDBType(const char *type);
 void SetDBSettings(DBProviderType dbType, const char *database, const char *user, const char *password);
 void RelationalSaveSettings(FILE *pf);
 void SetDBParam(const char *db, const char *key, const char *value);
-extern int RunQueryValue(DBProvider *pdb, const char *query);
 extern int CreateDatabase(DBProvider *pdb);
 const char *GetProviderName(int i);
+extern RowSet* RunQuery(char *sz);
+extern int RunQueryValue(DBProvider *pdb, const char *query);
+extern RowSet* MallocRowset(size_t rows, size_t cols);
+extern void SetRowsetData(RowSet *rs, size_t row, size_t col, const char *data);
+extern void FreeRowset(RowSet* pRow);
+#endif

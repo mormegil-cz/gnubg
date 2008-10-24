@@ -25,11 +25,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "common.h"
 #include "gtkrelational.h"
-#include "relational.h"
 #include "gtkwindows.h"
-#include "dbprovider.h"
 
 enum {
 	COLUMN_NICK,
