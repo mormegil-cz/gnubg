@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnubg 0.14\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-09-29 12:11+0200\n"
+"POT-Creation-Date: 2008-10-29 15:09+0100\n"
 "PO-Revision-Date: 2008-03-19 01:31+0100\n"
 "Last-Translator: Renzo Campagna <renzo.camp@tin.it>\n"
 "Language-Team: Italiano <renzo.camp@tin.it>\n"
@@ -127,7 +127,7 @@ msgstr "Statistiche del cubo"
 msgid "Overall statistics"
 msgstr "Statistiche complessive"
 
-#: analysis.c:1617 gtkgame.c:6641
+#: analysis.c:1617 gtkgame.c:6617
 msgid "Statistics for all games"
 msgstr "Statistiche di tutti i games"
 
@@ -255,12 +255,12 @@ msgid "Rolls"
 msgstr "Lancia"
 
 #. don't show pip count
-#: bearoff.c:686 bearoff.c:707 bearoff.c:721 format.c:910 formatgs.c:230
+#: bearoff.c:686 bearoff.c:707 bearoff.c:721 format.c:870 formatgs.c:230
 #: formatgs.c:346 formatgs.c:399 formatgs.c:414 formatgs.c:468 formatgs.c:483
-#: formatgs.c:523 formatgs.c:549 formatgs.c:564 formatgs.c:579 gtkboard.c:647
-#: gtkboard.c:648 gtkgame.c:7242 gtkgame.c:7248 gtkgame.c:7254 gtkgame.c:7260
-#: gtkgame.c:7266 gtkgame.c:7272 gtkgame.c:7278 gtkgame.c:7284 gtkgame.c:7290
-#: gtkgame.c:7305 gtkgame.c:7311 gtkgame.c:7317 html.c:2149 html.c:3131
+#: formatgs.c:523 formatgs.c:549 formatgs.c:564 formatgs.c:579 gtkboard.c:651
+#: gtkboard.c:652 gtkgame.c:7218 gtkgame.c:7224 gtkgame.c:7230 gtkgame.c:7236
+#: gtkgame.c:7242 gtkgame.c:7248 gtkgame.c:7254 gtkgame.c:7260 gtkgame.c:7266
+#: gtkgame.c:7281 gtkgame.c:7287 gtkgame.c:7293 html.c:2149 html.c:3131
 #: progress.c:867 progress.c:873 progress.c:887
 #, c-format
 msgid "n/a"
@@ -316,46 +316,46 @@ msgstr "Cubo al centro (regola Jacoby)"
 msgid "%s: Failed to map bearoffdatabase %s\n"
 msgstr "%s: database uscita pedine incompleto\n"
 
-#: bearoff.c:887
+#: bearoff.c:870
 msgid "No database filename provided"
 msgstr ""
 
-#: bearoff.c:900
+#: bearoff.c:883
 #, fuzzy
 msgid "Invalid or nonexistent database"
 msgstr "Ambiente non presente nel database"
 
-#: bearoff.c:910
+#: bearoff.c:893
 #, fuzzy
 msgid "Database read failed"
 msgstr "Nome Database:"
 
-#: bearoff.c:917
+#: bearoff.c:900
 #, fuzzy
 msgid "Unknown bearoff database"
 msgstr "Database uscita pedine sconosciuto\n"
 
-#: bearoff.c:930 bearoff.c:942 bearoff.c:951
+#: bearoff.c:913 bearoff.c:925 bearoff.c:934
 #, fuzzy
 msgid "incomplete bearoff database"
 msgstr "%s: database uscita pedine incompleto\n"
 
-#: bearoff.c:930
+#: bearoff.c:913
 #, fuzzy
 msgid "illegal bearoff type"
 msgstr "Tavola illegale"
 
-#: bearoff.c:943
+#: bearoff.c:926
 #, fuzzy
 msgid "illegal number of points"
 msgstr "numero non valido di pedine o punti"
 
-#: bearoff.c:952
+#: bearoff.c:935
 #, fuzzy
 msgid "illegal number of chequers"
 msgstr "numero non valido di pedine o punti"
 
-#: bearoff.c:994
+#: bearoff.c:977
 #, fuzzy
 msgid "Bearoff Database"
 msgstr "Database uscita pedine"
@@ -426,39 +426,39 @@ msgstr "Manuale"
 msgid "Tutorial"
 msgstr "Tutore"
 
-#: non-src/credits.c:56 gtkgame.c:2957
+#: non-src/credits.c:56 gtkgame.c:2933
 msgid "Czech"
 msgstr "Cecoslovacco"
 
-#: non-src/credits.c:57 gtkgame.c:2958
+#: non-src/credits.c:57 gtkgame.c:2934
 msgid "Danish"
 msgstr "Danese"
 
-#: non-src/credits.c:58 gtkgame.c:2961
+#: non-src/credits.c:58 gtkgame.c:2937
 msgid "French"
 msgstr "Francese"
 
-#: non-src/credits.c:59 gtkgame.c:2962
+#: non-src/credits.c:59 gtkgame.c:2938
 msgid "German"
 msgstr "Tedesco"
 
-#: non-src/credits.c:60 gtkgame.c:2963
+#: non-src/credits.c:60 gtkgame.c:2939
 msgid "Icelandic"
 msgstr "Islandese"
 
-#: non-src/credits.c:61 gtkgame.c:2964
+#: non-src/credits.c:61 gtkgame.c:2940
 msgid "Italian"
 msgstr "Italiano"
 
-#: non-src/credits.c:62 gtkgame.c:2965
+#: non-src/credits.c:62 gtkgame.c:2941
 msgid "Japanese"
 msgstr "Giapponese"
 
-#: non-src/credits.c:63 gtkgame.c:2967
+#: non-src/credits.c:63 gtkgame.c:2943
 msgid "Turkish"
 msgstr "Turco"
 
-#: non-src/credits.c:64 gtkgame.c:2966
+#: non-src/credits.c:64 gtkgame.c:2942
 msgid "Russian"
 msgstr "Russo"
 
@@ -478,39 +478,39 @@ msgstr "Traduttori"
 msgid "Support"
 msgstr "Supporto"
 
-#: dbprovider.c:171
+#: dbprovider.c:242
 #, fuzzy
 msgid "Error importing 'main' module"
 msgstr "Errore importando __main__"
 
-#: dbprovider.c:253
+#: dbprovider.c:324
 msgid "Error connecting to database"
 msgstr "Errore di connessione al database"
 
-#: dbprovider.c:326 dbprovider.c:337
+#: dbprovider.c:397 dbprovider.c:408
 #, fuzzy, c-format
 msgid "invalid Python return"
 msgstr "tipo di record non valido"
 
-#: dbprovider.c:351
+#: dbprovider.c:422
 #, fuzzy, c-format
 msgid "Error getting item %zu\n"
 msgstr "Errore prendendo l'argomento no %d\n"
 
-#: dbprovider.c:365
+#: dbprovider.c:436
 #, fuzzy, c-format
 msgid "Error getting sub item (%zu, %zu)\n"
 msgstr "Errore prendendo il sotto argomento (%d, %d)\n"
 
-#: dbprovider.c:378
+#: dbprovider.c:449
 msgid "none"
 msgstr "nessuno"
 
-#: dbprovider.c:380
+#: dbprovider.c:451
 msgid "unknown type"
 msgstr "tipo sconosciuto"
 
-#: dbprovider.c:389
+#: dbprovider.c:460
 #, fuzzy, c-format
 msgid "Item %zu is not a list\n"
 msgstr "Argomento no %d non è una sequenza\n"
@@ -631,17 +631,17 @@ msgstr "Non ho potuto caricare gli oggetti condivisi %s."
 msgid "Rewinding dice file (%s)"
 msgstr "Rivedo il file dei dadi (%s)\n"
 
-#: drawboard.c:72 drawboard.c:304 gnubg.c:5342 gtkexport.c:775 gtkgame.c:2764
-#: gtkgame.c:3564 gtkgame.c:6249
+#: drawboard.c:72 drawboard.c:304 gnubg.c:5331 gtkexport.c:775 gtkgame.c:2740
+#: gtkgame.c:3540 gtkgame.c:6225
 msgid "GNU Backgammon"
 msgstr "GNU Backgammon"
 
-#: drawboard.c:72 drawboard.c:304 format.c:1225
+#: drawboard.c:72 drawboard.c:304 format.c:1185
 #, fuzzy
 msgid "Position ID"
 msgstr "ID Posizione:"
 
-#: drawboard.c:91 drawboard.c:323 format.c:1229
+#: drawboard.c:91 drawboard.c:323 format.c:1189
 #, fuzzy
 msgid "Match ID"
 msgstr "ID Match:"
@@ -674,7 +674,7 @@ msgstr "Nessuna valutazione"
 msgid "Neural net evaluation"
 msgstr "Valutazione della rete neurale"
 
-#: eval.c:266 eval.c:5112 format.c:918 gtkchequer.c:431 gtkcube.c:905
+#: eval.c:266 eval.c:5112 format.c:878 gtkchequer.c:431 gtkcube.c:905
 #: gtkrace.c:245 html.c:2157 set.c:2864
 msgid "Rollout"
 msgstr "Rollout"
@@ -779,23 +779,23 @@ msgstr ""
 msgid "trained on %d positions"
 msgstr "appreso da %d posizioni"
 
-#: eval.c:4047 format.c:1218
+#: eval.c:4047 format.c:1178
 msgid "Race"
 msgstr "Corsa"
 
-#: eval.c:4052 format.c:1219
+#: eval.c:4052 format.c:1179
 msgid "Crashed"
 msgstr "Rotto"
 
-#: eval.c:4057 format.c:1220
+#: eval.c:4057 format.c:1180
 msgid "Contact"
 msgstr "Contatto"
 
-#: eval.c:4094 format.c:892 gtkcube.c:408 html.c:1964
+#: eval.c:4094 format.c:852 gtkcube.c:408 html.c:1964
 msgid "Double, take"
 msgstr "Doppia, accetta"
 
-#: eval.c:4096 format.c:893 gtkcube.c:409 html.c:1965
+#: eval.c:4096 format.c:853 gtkcube.c:409 html.c:1965
 msgid "Double, pass"
 msgstr "Doppia, passa"
 
@@ -876,7 +876,7 @@ msgstr "Riraddoppio opzionale, passa"
 msgid "Unknown cube decision"
 msgstr "Totale decisioni di cubo"
 
-#: eval.c:5108 format.c:1246 gtkgame.c:4915 html.c:317 progress.c:773
+#: eval.c:5108 format.c:1206 gtkgame.c:4891 html.c:317 progress.c:773
 #: show.c:129
 msgid "Cubeful"
 msgstr "Con il cubo in gioco"
@@ -885,13 +885,13 @@ msgstr "Con il cubo in gioco"
 msgid "Cubeless"
 msgstr "Senza il cubo in gioco"
 
-#: eval.c:5109 format.c:122 format.c:915 format.c:1265
+#: eval.c:5109 format.c:122 format.c:875 format.c:1225
 #, fuzzy
 msgid "ply"
 msgstr "Applica"
 
-#: export.c:97 export.c:655 export.c:802 export.c:872 export.c:1130
-#: export.c:1167
+#: export.c:97 export.c:655 export.c:802 export.c:853 export.c:1143
+#: export.c:1180
 #, fuzzy
 msgid "You must specify a file to export to."
 msgstr "Devi specificare un file nel quale esportare (guarda `%s')\n"
@@ -902,7 +902,7 @@ msgstr "Devi specificare un file nel quale esportare (guarda `%s')\n"
 msgid "Failed to create cairo surface for %s"
 msgstr "Fallita creazione del supporto PS per %s"
 
-#: export.c:1082
+#: export.c:1095
 msgid ""
 "Warning: this game was edited during play and cannot be recorded in this "
 "format."
@@ -1075,8 +1075,8 @@ msgid "Play"
 msgstr "Ply"
 
 #. table with results
-#: format.c:329 gnubg.c:1551 gnubg.c:1559 gnubg.c:2850 gnubg.c:2860
-#: gtkgame.c:7163 gtkoptions.c:552 gtkprefs.c:2964 gtkprefs.c:2981
+#: format.c:329 gnubg.c:1550 gnubg.c:1558 gnubg.c:2837 gnubg.c:2847
+#: gtkgame.c:7139 gtkoptions.c:552 gtkprefs.c:2964 gtkprefs.c:2981
 #: gtktheory.c:740 progress.c:201 progress.c:294
 msgid "Cube"
 msgstr "Cubo"
@@ -1150,173 +1150,173 @@ msgstr ""
 msgid "Different evaluations after %d plies:"
 msgstr "Differenti valutazioni dopo %d plies:\n"
 
-#: format.c:778 html.c:2013
+#: format.c:738 html.c:2013
 msgid "Alert: missed double"
 msgstr "Attenzione: mancato raddoppio"
 
-#: format.c:801 html.c:2038
+#: format.c:761 html.c:2038
 msgid "Alert: wrong take"
 msgstr "Attenzione: sbagliato accettare"
 
-#: format.c:821 html.c:2060
+#: format.c:781 html.c:2060
 msgid "Alert: wrong pass"
 msgstr "Attenzione: sbagliato passare"
 
-#: format.c:845 html.c:2086
+#: format.c:805 html.c:2086
 msgid "Alert: wrong double"
 msgstr "Attenzione: sbagliato raddoppio"
 
-#: format.c:862 html.c:2106
+#: format.c:822 html.c:2106
 #, c-format
 msgid "Alert: double decision marked %s"
 msgstr "Attenzione: decisione di raddoppio segnata %s"
 
-#: format.c:868 html.c:2114
+#: format.c:828 html.c:2114
 #, c-format
 msgid "Alert: take decision marked %s"
 msgstr "Attenzione: decisione di accettare segnata %s"
 
-#: format.c:891 gtkcube.c:407 html.c:1963
+#: format.c:851 gtkcube.c:407 html.c:1963
 msgid "No double"
 msgstr "Non raddoppiare"
 
 #. header
-#: format.c:904 gtkcube.c:429
+#: format.c:864 gtkcube.c:429
 msgid "Cube analysis"
 msgstr "Analisi sul cubo"
 
-#: format.c:925 format.c:930 html.c:2169
+#: format.c:885 format.c:890 html.c:2169
 msgid "cubeless equity"
 msgstr "equity senza il cubo"
 
-#: format.c:925 html.c:2169
+#: format.c:885 html.c:2169
 msgid "cubeless MWC"
 msgstr "MWC senza il cubo"
 
-#: format.c:927 html.c:2173
+#: format.c:887 html.c:2173
 msgid "Money"
 msgstr "Money"
 
 #. equities
-#: format.c:949
+#: format.c:909
 #, fuzzy
 msgid "Cubeful equities"
 msgstr "Equities con il cubo:"
 
-#: format.c:982
+#: format.c:942
 #, fuzzy
 msgid "Proper cube action"
 msgstr "Corretta azione di cubo:"
 
-#: format.c:1010 html.c:2263
+#: format.c:970 html.c:2263
 msgid "Rollout details"
 msgstr "Dettagli dei rollout"
 
-#: format.c:1048
+#: format.c:1008
 #, c-format
 msgid "Centered %d-cube"
 msgstr "Cubo %d al centro"
 
-#: format.c:1050
+#: format.c:1010
 #, c-format
 msgid "Player %s owns %d-cube"
 msgstr "Il giocatore %s possiede %d-cubo"
 
-#: format.c:1067 format.c:1244 gtkcube.c:61 gtkmovelist.c:61 gtkrace.c:236
+#: format.c:1027 format.c:1204 gtkcube.c:61 gtkmovelist.c:61 gtkrace.c:236
 #: html.c:308 progress.c:767
 msgid "Win"
 msgstr "Vince"
 
-#: format.c:1069
+#: format.c:1029
 #, fuzzy
 msgid "Loss"
 msgstr "Perso "
 
-#: format.c:1074 play.c:52
+#: format.c:1034 play.c:52
 msgid "backgammon"
 msgstr "backgammon"
 
-#: format.c:1076 play.c:51
+#: format.c:1036 play.c:51
 msgid "gammon"
 msgstr "gammon"
 
-#: format.c:1078
+#: format.c:1038
 #, fuzzy
 msgid "single"
 msgstr "(singolo)\n"
 
-#: format.c:1210
+#: format.c:1170
 #, fuzzy
 msgid "Over"
 msgstr "In generale"
 
-#: format.c:1211
+#: format.c:1171
 #, fuzzy
 msgid "Hypergammon-1"
 msgstr "gammon"
 
-#: format.c:1212
+#: format.c:1172
 #, fuzzy
 msgid "Hypergammon-2"
 msgstr "gammon"
 
-#: format.c:1213
+#: format.c:1173
 #, fuzzy
 msgid "Hypergammon-3"
 msgstr "gammon"
 
-#: format.c:1214
+#: format.c:1174
 #, fuzzy
 msgid "Bearoff2"
 msgstr "Bearoff"
 
-#: format.c:1215
+#: format.c:1175
 #, fuzzy
 msgid "Bearoff-TS"
 msgstr "Bearoff"
 
-#: format.c:1216
+#: format.c:1176
 #, fuzzy
 msgid "Bearoff1"
 msgstr "Bearoff"
 
-#: format.c:1217
+#: format.c:1177
 #, fuzzy
 msgid "Bearoff-OS"
 msgstr "Bearoff"
 
-#: format.c:1235
+#: format.c:1195
 #, fuzzy
 msgid "Evaluator"
 msgstr "Valutatore: \t"
 
-#: format.c:1244 gtkcube.c:61
+#: format.c:1204 gtkcube.c:61
 msgid "W(g)"
 msgstr "V(g)"
 
-#: format.c:1244 gtkcube.c:61
+#: format.c:1204 gtkcube.c:61
 msgid "W(bg)"
 msgstr "V(bg)"
 
-#: format.c:1244 gtkcube.c:62
+#: format.c:1204 gtkcube.c:62
 msgid "L(g)"
 msgstr "P(g)"
 
-#: format.c:1244 gtkcube.c:62
+#: format.c:1204 gtkcube.c:62
 msgid "L(bg)"
 msgstr "P(bg)"
 
-#: format.c:1246 gtkmovelist.c:196 gtkrolls.c:225 html.c:2514
+#: format.c:1206 gtkmovelist.c:196 gtkrolls.c:225 html.c:2514
 msgid "Equity"
 msgstr "Equity"
 
-#: format.c:1246 formatgs.c:40 formatgs.c:57 gnubg.c:1882 gtkchequer.c:433
+#: format.c:1206 formatgs.c:40 formatgs.c:57 gnubg.c:1881 gtkchequer.c:433
 #: gtkcube.c:146 gtkcube.c:160 gtkcube.c:448 gtkcube.c:462 gtkcube.c:908
 #: gtkmovelist.c:196 html.c:2514
 msgid "MWC"
 msgstr "MWC"
 
-#: format.c:1263
+#: format.c:1223
 msgid "static"
 msgstr "statico"
 
@@ -1499,56 +1499,56 @@ msgstr "95 %% intervallo di riservatezza (ppg)"
 msgid "Advantage (luck adjusted) in ppg"
 msgstr "Vantaggio (corretto dalla fortuna) in ppg"
 
-#: gnubg.c:177
+#: gnubg.c:176
 msgid ""
-"This program comes with ABSOLUTELY NO WARRANTY; for details type `show "
-"warranty'.\n"
+"This program comes with ABSOLUTELY NO WARRANTY; for details type\n"
+"`show warranty'.\n"
 "This is free software, and you are welcome to redistribute it\n"
 "under certain conditions; type `show copying' for details.\n"
 msgstr ""
 
 #. Usage strings
-#: gnubg.c:564
+#: gnubg.c:563
 msgid "<die> <die>"
 msgstr "<dado> <dado>"
 
-#: gnubg.c:565
+#: gnubg.c:564
 msgid "<command>"
 msgstr "<comando>"
 
-#: gnubg.c:566
+#: gnubg.c:565
 msgid "<comment>"
 msgstr "<commento>"
 
-#: gnubg.c:567
+#: gnubg.c:566
 msgid "evaluation|rollout"
 msgstr "valutazione|rollout"
 
-#: gnubg.c:568
+#: gnubg.c:567
 msgid "<filename>"
 msgstr "<nome file>"
 
-#: gnubg.c:569
+#: gnubg.c:568
 msgid "[<key>=<value> ...]"
 msgstr "[<tasto>=<valore> ...]"
 
-#: gnubg.c:570
+#: gnubg.c:569
 msgid "<length>"
 msgstr "<lunghezza>"
 
-#: gnubg.c:571
+#: gnubg.c:570
 msgid "<limit>"
 msgstr "<limite>"
 
-#: gnubg.c:572
+#: gnubg.c:571
 msgid "<milliseconds>"
 msgstr "<millisecondi>"
 
-#: gnubg.c:573
+#: gnubg.c:572
 msgid "<from> <to> ..."
 msgstr "<da> <a> ..."
 
-#: gnubg.c:574
+#: gnubg.c:573
 msgid ""
 "<ply> <num.xjoin to accept (0 = skip)> [<num. of extra moves to accept> "
 "<tolerance>]"
@@ -1556,472 +1556,472 @@ msgstr ""
 "<ply> <num.xjoin da accettare (0 = salti)> [<num. di mosse extra da "
 "accettare> <tolleranza>]"
 
-#: gnubg.c:576
+#: gnubg.c:575
 msgid "<name>"
 msgstr "<nome>"
 
-#: gnubg.c:577
+#: gnubg.c:576
 msgid "<name> [env]"
 msgstr "<nome> [ambiente]"
 
-#: gnubg.c:578
+#: gnubg.c:577
 msgid "system|<language code>"
 msgstr "sistema|<codice lingua>"
 
-#: gnubg.c:579
+#: gnubg.c:578
 msgid "on|off"
 msgstr "on|off"
 
-#: gnubg.c:580
+#: gnubg.c:579
 msgid "[command]"
 msgstr "[comando]"
 
-#: gnubg.c:581
+#: gnubg.c:580
 msgid "[env [force]]"
 msgstr "[env [force]]"
 
-#: gnubg.c:582
+#: gnubg.c:581
 msgid "[depth]"
 msgstr "[profondità]"
 
-#: gnubg.c:583
+#: gnubg.c:582
 msgid "[filename]"
 msgstr "[nome file]"
 
-#: gnubg.c:584
+#: gnubg.c:583
 msgid "[generator] [seed]"
 msgstr "[generatore] [seed]"
 
-#: gnubg.c:585
+#: gnubg.c:584
 msgid "[length]"
 msgstr "[lunghezza]"
 
-#: gnubg.c:586
+#: gnubg.c:585
 msgid "[limit]"
 msgstr "[limite]"
 
-#: gnubg.c:587
+#: gnubg.c:586
 msgid "[modulus <modulus>|factors <factor> <factor>] [seed]"
 msgstr "[modulo <modulo>|fattore <fattore> <fattore>] [origine]"
 
-#: gnubg.c:589
+#: gnubg.c:588
 msgid "[name]"
 msgstr "[nome]"
 
-#: gnubg.c:590
+#: gnubg.c:589
 msgid "[position]"
 msgstr "[posizione]"
 
-#: gnubg.c:591
+#: gnubg.c:590
 msgid "[seed]"
 msgstr "[seed]"
 
-#: gnubg.c:592
+#: gnubg.c:591
 msgid "[value]"
 msgstr "[valore]"
 
-#: gnubg.c:593
+#: gnubg.c:592
 msgid "<player>"
 msgstr "<giocatore>"
 
-#: gnubg.c:594
+#: gnubg.c:593
 msgid "<player> [rating]"
 msgstr "<giocatore> [rating]"
 
-#: gnubg.c:595
+#: gnubg.c:594
 msgid "<plies>"
 msgstr "<plies>"
 
-#: gnubg.c:596
+#: gnubg.c:595
 msgid "<position>"
 msgstr "<posizione>"
 
-#: gnubg.c:597
+#: gnubg.c:596
 msgid "<priority>"
 msgstr "<priorità>"
 
-#: gnubg.c:598
+#: gnubg.c:597
 msgid "<prompt>"
 msgstr "<prompt>"
 
-#: gnubg.c:599
+#: gnubg.c:598
 msgid "<score>"
 msgstr "<punteggio>"
 
-#: gnubg.c:600
+#: gnubg.c:599
 msgid "<size>"
 msgstr "<misura>"
 
-#: gnubg.c:601
+#: gnubg.c:600
 #, fuzzy
 msgid "[game|roll|rolled|marked] <count>"
 msgstr "[game|lancio|lanciato|marcato] [conteggio]"
 
-#: gnubg.c:602
+#: gnubg.c:601
 msgid "<trials>"
 msgstr "<tentativi>"
 
-#: gnubg.c:603
+#: gnubg.c:602
 msgid "<value>"
 msgstr "<valore>"
 
-#: gnubg.c:604
+#: gnubg.c:603
 msgid "<matchid>"
 msgstr "<matchid>"
 
-#: gnubg.c:605
+#: gnubg.c:604
 #, fuzzy
 msgid "<gnubgid>"
 msgstr "gnubg:\n"
 
-#: gnubg.c:606
+#: gnubg.c:605
 msgid "<URL>"
 msgstr "<URL>"
 
-#: gnubg.c:607
+#: gnubg.c:606
 msgid "<fraction>"
 msgstr "<frazione>"
 
-#: gnubg.c:608
+#: gnubg.c:607
 msgid "<minimum games to rollout>"
 msgstr "<minimo di games per i rollout>"
 
-#: gnubg.c:609
+#: gnubg.c:608
 msgid "<folder>"
 msgstr "<cartella>"
 
-#: gnubg.c:611
+#: gnubg.c:610
 msgid "[<warning>]"
 msgstr "[<attenzione>]"
 
-#: gnubg.c:612
+#: gnubg.c:611
 msgid "<warning> on|off"
 msgstr "<attenzione> on|off"
 
-#: gnubg.c:614
+#: gnubg.c:613
 msgid "<joint standard deviations>"
 msgstr "<raggiunge deviazioni standard>"
 
-#: gnubg.c:616
+#: gnubg.c:615
 msgid "<number>"
 msgstr "<numero>"
 
-#: gnubg.c:618
+#: gnubg.c:617
 msgid "<std dev>"
 msgstr "<std dev>"
 
-#: gnubg.c:634
+#: gnubg.c:633
 msgid "Python supported."
 msgstr "Python supportato."
 
-#: gnubg.c:637
+#: gnubg.c:636
 msgid "SQLite database supported."
 msgstr "Database SQLite supportato."
 
-#: gnubg.c:640
+#: gnubg.c:639
 msgid "GTK graphical interface supported."
 msgstr ""
 
-#: gnubg.c:643
+#: gnubg.c:642
 msgid "External players supported."
 msgstr "Giocatori esterni supportati."
 
-#: gnubg.c:646
+#: gnubg.c:645
 msgid "XML match equity files supported."
 msgstr "Files XML dell'equity del match supportati."
 
-#: gnubg.c:649
+#: gnubg.c:648
 msgid "Long RNG seeds supported."
 msgstr "Origini RNG lunghe supportate."
 
-#: gnubg.c:652
+#: gnubg.c:651
 msgid "3d Boards supported."
 msgstr "Tavole 3D supportate."
 
-#: gnubg.c:655
+#: gnubg.c:654
 msgid "External commands supported."
 msgstr "Comandi esterni supportati."
 
-#: gnubg.c:658
+#: gnubg.c:657
 msgid "Windows sound system supported."
 msgstr "Sistema suoni di Windows supportato."
 
-#: gnubg.c:660
+#: gnubg.c:659
 #, fuzzy
 msgid "Apple QuickTime sound system supported."
 msgstr "Sistema suoni ESD supportato."
 
-#: gnubg.c:662
+#: gnubg.c:661
 #, fuzzy
 msgid "Gstreamer sound system supported."
 msgstr "Sistema suoni ESD supportato."
 
-#: gnubg.c:665
+#: gnubg.c:664
 msgid "Multiple threads supported."
 msgstr "Processori multipli supportati."
 
-#: gnubg.c:682
+#: gnubg.c:681
 msgid "SSE supported and available."
 msgstr "SSE supportato e disponibile."
 
-#: gnubg.c:684
+#: gnubg.c:683
 msgid "SSE supported but not available."
 msgstr "SSE supportato ma non disponibile."
 
-#: gnubg.c:981
+#: gnubg.c:980
 msgid "Current position"
 msgstr "Posizione corrente"
 
-#: gnubg.c:1001
+#: gnubg.c:1000
 #, c-format
 msgid "`simple' must be followed by 26 integers; found only %d\n"
 msgstr "`semplice' deve essere seguito da 26 interi; trovato solo %d\n"
 
-#: gnubg.c:1038
+#: gnubg.c:1037
 msgid "You must specify the number of the move to apply."
 msgstr "Devi specificare il numero della mossa da applicare."
 
-#: gnubg.c:1043
+#: gnubg.c:1042
 msgid "There is no valid move list."
 msgstr "Non c'è una lista di mosse valida."
 
-#: gnubg.c:1048
+#: gnubg.c:1047
 #, fuzzy, c-format
 msgid "Move =%d is out of range."
 msgstr "Mossa =%d è fuori range.\n"
 
-#: gnubg.c:1065
+#: gnubg.c:1064
 msgid "Illegal position."
 msgstr "Posizione illegale"
 
-#: gnubg.c:1154
+#: gnubg.c:1153
 #, fuzzy, c-format
 msgid "You must specify whether to set '%s' on or off.\n"
 msgstr "Devi specificare se impostare %s on o off (guarda 'help set %s').\n"
 
-#: gnubg.c:1185
+#: gnubg.c:1184
 #, fuzzy, c-format
 msgid "Illegal keyword `%s'.\n"
 msgstr "Parola chiave illegale '%s' -- prova 'help set %s'.\n"
 
-#: gnubg.c:1239
+#: gnubg.c:1238
 #, fuzzy
 msgid "Interrupted"
 msgstr "Interrotto!"
 
-#: gnubg.c:1288
+#: gnubg.c:1287
 #, fuzzy
 msgid "Incomplete command."
 msgstr "Comando incompleto -- prova 'aiuto'."
 
-#: gnubg.c:1312
+#: gnubg.c:1311
 #, fuzzy, c-format
 msgid "Unknown keyword `%s'."
 msgstr "Parola chiave sconosciuta: %s\n"
 
-#: gnubg.c:1422 gnubg.c:1455 gnubg.c:1537 gnubg.c:2836 play.c:2503
+#: gnubg.c:1421 gnubg.c:1454 gnubg.c:1536 gnubg.c:2823 play.c:2511
 msgid "Rolled"
 msgstr "Lanciato"
 
-#: gnubg.c:1488 gnubg.c:2546 gnubg.c:5828
+#: gnubg.c:1487 gnubg.c:2545 gnubg.c:5818
 msgid "No game in progress."
 msgstr "Nessun game in corso."
 
-#: gnubg.c:1516 gnubg.c:1520 gnubg.c:2813 gnubg.c:2817 text.c:60 text.c:65
+#: gnubg.c:1515 gnubg.c:1519 gnubg.c:2800 gnubg.c:2804 text.c:60 text.c:65
 #, c-format
 msgid "%d point"
 msgid_plural "%d points"
 msgstr[0] "%d punto"
 msgstr[1] "%d punti"
 
-#: gnubg.c:1528 gnubg.c:2826 text.c:74
+#: gnubg.c:1527 gnubg.c:2813 text.c:74
 #, c-format
 msgid "Cube offered at %d"
 msgstr "Cubo offerto a %d"
 
-#: gnubg.c:1537
+#: gnubg.c:1536
 #, fuzzy, c-format
 msgid "%s %d%d"
 msgstr "%d%d"
 
-#: gnubg.c:1539 gnubg.c:2838 text.c:85
+#: gnubg.c:1538 gnubg.c:2825 text.c:85
 msgid "On roll"
 msgstr "Al lancio"
 
-#: gnubg.c:1548 gnubg.c:2847 text.c:94
+#: gnubg.c:1547 gnubg.c:2834 text.c:94
 #, c-format
 msgid "%d point match (Cube: %d)"
 msgstr "match a %d punti (Cubo a: %d)"
 
-#: gnubg.c:1564 gnubg.c:2865 text.c:112
+#: gnubg.c:1563 gnubg.c:2852 text.c:112
 #, c-format
 msgid "%d point match"
 msgstr "match a %d punti"
 
 #. FIXME it's not necessarily the player on roll that resigned
-#: gnubg.c:1570
+#: gnubg.c:1569
 #, fuzzy
 msgid "resigns"
 msgstr "Disegni"
 
-#: gnubg.c:1601
+#: gnubg.c:1600
 #, fuzzy
 msgid "MatchID"
 msgstr "ID Match:"
 
-#: gnubg.c:1626 gnubg.c:1638
+#: gnubg.c:1625 gnubg.c:1637
 msgid "No game"
 msgstr "Nessun game"
 
-#: gnubg.c:1648
+#: gnubg.c:1647
 msgid "Game over"
 msgstr "Game over"
 
-#: gnubg.c:1691 gnubg.c:2517 show.c:482 show.c:513 show.c:806 show.c:1128
+#: gnubg.c:1690 gnubg.c:2516 show.c:482 show.c:513 show.c:806 show.c:1128
 #: show.c:1180 show.c:1226 show.c:1270 show.c:1389
 msgid "No position specified and no game in progress."
 msgstr "Nessuna posizione specificata e nessun game in corso."
 
-#: gnubg.c:1715
+#: gnubg.c:1714
 msgid "Evaluating position..."
 msgstr "Sto valutando la posizione..."
 
-#: gnubg.c:1805
+#: gnubg.c:1804
 #, fuzzy, c-format
 msgid "No help available for topic `%s'"
 msgstr ""
 "Nessun aiuto disponibile per '%s' -- prova 'help' per la lista di tutti i "
 "disponibili.\n"
 
-#: gnubg.c:1830
+#: gnubg.c:1829
 #, fuzzy
 msgid "Usage"
 msgstr "Utente"
 
-#: gnubg.c:1833
+#: gnubg.c:1832
 #, fuzzy
 msgid "subcommand"
 msgstr "<sottocomando>\n"
 
-#: gnubg.c:1839
+#: gnubg.c:1838
 #, fuzzy
 msgid "Available commands"
 msgstr "Comandi disponibili:"
 
-#: gnubg.c:1840
+#: gnubg.c:1839
 #, fuzzy
 msgid "Available subcommands"
 msgstr "Sottocomandi disponibili:"
 
-#: gnubg.c:1882
+#: gnubg.c:1881
 msgid "Eq."
 msgstr "Eq."
 
-#: gnubg.c:2105 gnubg.c:2197 gtkcube.c:759 play.c:965 play.c:1175 play.c:2163
-#: play.c:2345 play.c:3706
+#: gnubg.c:2104 gnubg.c:2196 gtkcube.c:759 play.c:949 play.c:1159 play.c:2155
+#: play.c:2345 play.c:3730
 msgid "Considering cube action..."
 msgstr "Sto considerando la azione di cubo..."
 
-#: gnubg.c:2112
+#: gnubg.c:2111
 msgid "You cannot double."
 msgstr "Non puoi raddoppiare."
 
 #. Opponent has rolled the dice and then resigned. We
 #. want to find out if the resignation is OK after the roll
-#: gnubg.c:2140 play.c:893 play.c:905
+#: gnubg.c:2139 play.c:877 play.c:889
 msgid "Considering resignation..."
 msgstr "Sto considerando il rifiuto..."
 
-#: gnubg.c:2159 gnubg.c:2173 gtkgame.c:5501
+#: gnubg.c:2158 gnubg.c:2172 gtkgame.c:5477
 msgid "Equity before resignation"
 msgstr "Equity prima del rifiuto"
 
-#: gnubg.c:2161 gnubg.c:2175 gtkgame.c:5518
+#: gnubg.c:2160 gnubg.c:2174 gtkgame.c:5494
 msgid "Equity after resignation"
 msgstr "Equity dopo il rifiuto"
 
-#: gnubg.c:2163 gnubg.c:2178
+#: gnubg.c:2162 gnubg.c:2177
 #, fuzzy
 msgid "Correct resign decision"
 msgstr ""
 "Corretta decisione di rifiuto  : %s\n"
 "\n"
 
-#: gnubg.c:2165 gnubg.c:2180 gtkgame.c:1122
+#: gnubg.c:2164 gnubg.c:2179 gtkgame.c:1098
 msgid "Accept"
 msgstr "Accetta"
 
-#: gnubg.c:2165 gnubg.c:2180
+#: gnubg.c:2164 gnubg.c:2179
 msgid "Reject"
 msgstr "Rifiuta"
 
-#: gnubg.c:2210
+#: gnubg.c:2209
 #, fuzzy
 msgid "Take decision:"
 msgstr "Decisione di accettare:\n"
 
-#: gnubg.c:2215
+#: gnubg.c:2214
 #, fuzzy
 msgid "Equity for take"
 msgstr "Equity per accettare: %+6.3f\n"
 
-#: gnubg.c:2216
+#: gnubg.c:2215
 #, fuzzy
 msgid "Equity for pass"
 msgstr ""
 "Equity per passare: %+6.3f\n"
 "\n"
 
-#: gnubg.c:2220
+#: gnubg.c:2219
 #, fuzzy
 msgid "MWC for take"
 msgstr "Mwc per accettare: %6.2f%%\n"
 
-#: gnubg.c:2222
+#: gnubg.c:2221
 #, fuzzy
 msgid "MWC for pass"
 msgstr "Mwc per passare: %6.2f%%\n"
 
-#: gnubg.c:2227 gnubg.c:2229 gnubg.c:2231
+#: gnubg.c:2226 gnubg.c:2228 gnubg.c:2230
 #, fuzzy
 msgid "Your proper cube action"
 msgstr "La tua corretta azione di cubo: Accetta.\n"
 
-#: gnubg.c:2227 gtkcube.c:352
+#: gnubg.c:2226 gtkcube.c:352
 msgid "Beaver!"
 msgstr "Beaver!"
 
-#: gnubg.c:2229 gtkcube.c:115 gtkcube.c:336 gtkgame.c:1063 gtkrelational.c:61
-#: latex.c:495 play.c:4397 sound.c:254
+#: gnubg.c:2228 gtkcube.c:115 gtkcube.c:336 gtkgame.c:1039 gtkrelational.c:58
+#: latex.c:495 play.c:4437 sound.c:254
 msgid "Take"
 msgstr "Accetta"
 
-#: gnubg.c:2231 gtkcube.c:116 gtkcube.c:345 gtkrelational.c:60
+#: gnubg.c:2230 gtkcube.c:116 gtkcube.c:345 gtkrelational.c:57
 msgid "Pass"
 msgstr "Rifiuta"
 
-#: gnubg.c:2287 play.c:1284 play.c:2604
+#: gnubg.c:2286 play.c:1268 play.c:2612
 msgid "Considering move..."
 msgstr "Sto considerando la mossa..."
 
-#: gnubg.c:2300
+#: gnubg.c:2299
 msgid "There are no legal moves."
 msgstr "Non ci sono mosse legali."
 
-#: gnubg.c:2324
+#: gnubg.c:2323
 msgid "You must set up a board first."
 msgstr "Devi prima sistemare la tavola"
 
-#: gnubg.c:2408
+#: gnubg.c:2407
 #, fuzzy
 msgid "Are you sure you want to exit and abort the game in progress?"
 msgstr "Sei sicuro di voler uscire e abortire il game che stai giocando? "
 
-#: gnubg.c:2470
+#: gnubg.c:2469
 msgid "That command is not yet implemented."
 msgstr "Questo comando non è stato ancora implementato."
 
-#: gnubg.c:2525
+#: gnubg.c:2524
 msgid ""
 "You cannot do a cube decision rollout for the initial position.\n"
 "Please 'set rollout initial off'."
@@ -2029,7 +2029,7 @@ msgstr ""
 "Non puoi fare il rollout del cubo per la posizione iniziale.\n"
 "Per favore 'imposta rollout iniziale off'."
 
-#: gnubg.c:2529
+#: gnubg.c:2528
 msgid ""
 "You cannot rollout moves as initial position.\n"
 "Please 'set rollout initial off'."
@@ -2037,272 +2037,279 @@ msgstr ""
 "Non puoi fare il rollout sulle mosse per la posizione iniziale.\n"
 "Per favore 'imposta rollout iniziale off'."
 
-#: gnubg.c:2778 gnubg.c:2788
+#. Python escape.
+#. Ideally we should be able to handle both > print 1+1 sys.exit() and > print 1+1
+#. currently we only handle the latter...
+#: gnubg.c:2740
+msgid "Only Python commands supported, not multiline code"
+msgstr ""
+
+#: gnubg.c:2765 gnubg.c:2775
 #, fuzzy
 msgid "You must specify a file to load from."
 msgstr "Devi specificare un file da caricare (vedi `aiuto caricamento game')."
 
-#: gnubg.c:3521
+#: gnubg.c:3508
 #, fuzzy, c-format
 msgid "Settings saved to %s."
 msgstr "Le impostazioni sono state salvate in %s.\n"
 
-#: gnubg.c:3522
+#: gnubg.c:3509
 msgid "standard output stream"
 msgstr "flusso standard di uscita"
 
-#: gnubg.c:3985 makebearoff.c:1605 makebearoff.c:1606 makebearoff.c:1607
-#: makebearoff.c:1608 makebearoff.c:1610 makebearoff.c:1701 makebearoff.c:1716
-#: makebearoff.c:1721 show.c:413 show.c:1848 show.c:1851 show.c:1854
+#: gnubg.c:3972 makebearoff.c:1618 makebearoff.c:1619 makebearoff.c:1620
+#: makebearoff.c:1621 makebearoff.c:1623 makebearoff.c:1714 makebearoff.c:1729
+#: makebearoff.c:1734 show.c:413 show.c:1848 show.c:1851 show.c:1854
 #: show.c:1858 show.c:1885 show.c:1889 show.c:1893 show.c:1902 show.c:1910
 #: show.c:1914 show.c:1918 show.c:1928 show.c:1935 show.c:1940 show.c:1945
 #: show.c:2045
 msgid "yes"
 msgstr "sì"
 
-#: gnubg.c:3985 makebearoff.c:1605 makebearoff.c:1606 makebearoff.c:1607
-#: makebearoff.c:1608 makebearoff.c:1610 makebearoff.c:1716 makebearoff.c:1721
+#: gnubg.c:3972 makebearoff.c:1618 makebearoff.c:1619 makebearoff.c:1620
+#: makebearoff.c:1621 makebearoff.c:1623 makebearoff.c:1729 makebearoff.c:1734
 #: show.c:413 show.c:1848 show.c:1851 show.c:1854 show.c:1858 show.c:1885
 #: show.c:1889 show.c:1893 show.c:1902 show.c:1910 show.c:1914 show.c:1918
 #: show.c:1928 show.c:1935 show.c:1940 show.c:1945 show.c:2045
 msgid "no"
 msgstr "no"
 
-#: gnubg.c:4020 gnubg.c:5448
+#: gnubg.c:4007 gnubg.c:5437
 msgid "Please answer `y' or `n'."
 msgstr "Prego rispondi 'y' o 'n'."
 
-#: gnubg.c:4656
+#: gnubg.c:4645
 msgid "Enter dice: "
 msgstr "Inserisci i dadi:"
 
-#: gnubg.c:4675
+#: gnubg.c:4664
 msgid "You must enter two numbers between 1 and 6."
 msgstr "Devi inserire due numeri compresi fra 1 e 6"
 
-#: gnubg.c:4728
+#: gnubg.c:4717
 #, c-format
 msgid "Fetching %d random numbers from <www.random.org>\n"
 msgstr "Sto prelevando %d numeri casuali da <www.random.org>\n"
 
 #. parse string
-#: gnubg.c:4782
+#: gnubg.c:4771
 msgid "Done."
 msgstr "Fatto."
 
-#: gnubg.c:4809
+#: gnubg.c:4798
 #, fuzzy
 msgid "Failure setting up RNG"
 msgstr "Fallito il setup di RNG\n"
 
-#: gnubg.c:4814
+#: gnubg.c:4803
 #, fuzzy
 msgid "Failure setting up RNG for rollout."
 msgstr "Fallito il setup di RNG per i rollout.\n"
 
-#: gnubg.c:4909
+#: gnubg.c:4898
 msgid "Do not use bearoff database"
 msgstr "Non utilizza il database uscita pedine"
 
-#: gnubg.c:4911
+#: gnubg.c:4900
 msgid "Evaluate commands in FILE and exit"
 msgstr "I comandi di valutazione nel FILE e esci"
 
-#: gnubg.c:4913
+#: gnubg.c:4902
 msgid "Set language to LANG"
 msgstr "Imposta la lingua a LANG"
 
-#: gnubg.c:4915
+#: gnubg.c:4904
 msgid "Create new neural net (of size N)"
 msgstr "Crea una nuova rete neurale (di dimensione N)"
 
-#: gnubg.c:4917
+#: gnubg.c:4906
 msgid "Evaluate Python code in FILE and exit"
 msgstr "Codice di valutazione Python nel FILE e esci"
 
-#: gnubg.c:4919
+#: gnubg.c:4908
 msgid "Disable sound effects"
 msgstr "Disabilita gli effetti sonori"
 
-#: gnubg.c:4921
+#: gnubg.c:4910
 msgid "Do not read .gnubgrc and .gnubgautorc commands"
 msgstr "Non leggere i comandi di .gnubgrc e .gnubgautorc"
 
-#: gnubg.c:4924
+#: gnubg.c:4913
 msgid "Don't show gtk splash screen"
 msgstr "Non visualizzare il gtk splash screen"
 
-#: gnubg.c:4926
+#: gnubg.c:4915
 #, fuzzy
 msgid "Start the command line instead of using the graphical interface"
 msgstr "Parti in tty al posto di usare il sistema a finestra"
 
-#: gnubg.c:4928
+#: gnubg.c:4917
 msgid "Show version information and exit"
 msgstr "Mostra le informazioni della versione e esci"
 
-#: gnubg.c:4930
+#: gnubg.c:4919
 #, fuzzy
 msgid "Ignore tty input when using the graphical interface"
 msgstr "Ignora gli input tty quando usi il sistema a finestre"
 
-#: gnubg.c:4932
+#: gnubg.c:4921
 msgid "Turn on debug"
 msgstr "Attiva il debug"
 
-#: gnubg.c:5024 gnubg.c:5027 gnubg.c:5032 gnubg.c:5036 gnubg.c:5041
+#: gnubg.c:5013 gnubg.c:5016 gnubg.c:5021 gnubg.c:5025 gnubg.c:5030
 msgid "Initialising"
 msgstr "Inizializzo"
 
-#: gnubg.c:5024
+#: gnubg.c:5013
 msgid "Random number generator"
 msgstr "Generatore di numeri casuale"
 
-#: gnubg.c:5027
+#: gnubg.c:5016
 msgid "match equity table"
 msgstr "tavola delle match equity"
 
-#: gnubg.c:5032
+#: gnubg.c:5021
 msgid "neural nets"
 msgstr "rete neurale"
 
-#: gnubg.c:5036
+#: gnubg.c:5025
 msgid "Windows sockets"
 msgstr "Windows sockets"
 
-#: gnubg.c:5041
+#: gnubg.c:5030
 msgid "Python"
 msgstr "Python"
 
-#: gnubg.c:5049
+#: gnubg.c:5038
 msgid "Loading"
 msgstr "Sto caricando"
 
-#: gnubg.c:5049
+#: gnubg.c:5038
 msgid "User Settings"
 msgstr "Impostazioni dell'Utente"
 
-#: gnubg.c:5095
+#: gnubg.c:5084
 #, fuzzy, c-format
 msgid "GNU Backgammon build without Python."
 msgstr "GNU Backgammon realizzato senza Python.\n"
 
-#: gnubg.c:5126 gnubg.c:5170
+#: gnubg.c:5115 gnubg.c:5159
 msgid "Command only valid in match play"
 msgstr "Comando valido solo nei match"
 
-#: gnubg.c:5137 gnubg.c:5139 gnubg.c:5142
+#: gnubg.c:5126 gnubg.c:5128 gnubg.c:5131
 #, fuzzy
 msgid "MWC for equity"
 msgstr "MWC prima del rifiuto"
 
-#: gnubg.c:5141 gnubg.c:5186
+#: gnubg.c:5130 gnubg.c:5175
 #, fuzzy
 msgid "By linear interpolation"
 msgstr "Per interpolazione lineare:\n"
 
-#: gnubg.c:5182 gnubg.c:5184 gnubg.c:5187
+#: gnubg.c:5171 gnubg.c:5173 gnubg.c:5176
 #, fuzzy
 msgid "Equity for MWC"
 msgstr "Match equity in MWC"
 
-#: gnubg.c:5320
+#: gnubg.c:5309
 #, c-format
 msgid "File \"%s\" exists. Overwrite? "
 msgstr "Il file \"%s\" esiste già. Lo sovrascrivo? "
 
-#: gnubg.c:5464
+#: gnubg.c:5453
 #, fuzzy
 msgid "You may be about to make a very bad play"
 msgstr "Stai per giocare una mossa molto brutta. Sei sicuro? "
 
-#: gnubg.c:5468
+#: gnubg.c:5457
 #, fuzzy
 msgid "You may be about to make a bad play"
 msgstr "Stai per giocare una mossa brutta. Sei sicuro? "
 
-#: gnubg.c:5472
+#: gnubg.c:5461
 #, fuzzy
 msgid "You may be about to make a doubtful play"
 msgstr "Stai per giocare una mossa dubbia. Sei sicuro? "
 
-#: gnubg.c:5484
+#: gnubg.c:5473
 msgid "Are you sure?"
 msgstr ""
 
-#: gnubg.c:5545
+#: gnubg.c:5534
 msgid "Analysis used for `hint' has been cleared"
 msgstr "Le analisi utilizzate per 'suggerimento' sono state cancellate"
 
-#: gnubg.c:5710
+#: gnubg.c:5700
 #, c-format
 msgid ""
 "Locale in your environment not supported by C library. Falling back to C "
 "locale.\n"
 msgstr ""
 
-#: gnubgmodule.c:195
+#: gnubgmodule.c:186
 msgid "invalid dict value in cubeinfo (see gnubg.setcubeinfo() for an example)"
 msgstr ""
 "valore non valido nel dict di cubeinfo (guarda gnubg.impostacubeinfo() per "
 "un esempio)"
 
-#: gnubgmodule.c:213
+#: gnubgmodule.c:204
 msgid "invalid value cubeinfo (see gnubg.setcubeinfo() for an example)"
 msgstr ""
 "valore non valido nel cubeinfo (guarda gnubg.impostacubeinfo() per un "
 "esempio)"
 
-#: gnubgmodule.c:293
+#: gnubgmodule.c:284
 msgid ""
 "invalid dict value in evalcontext (see gnubg.evalcontext() for an example)"
 msgstr ""
 "valore non valido nel dict di evalcontext (guarda gnubg.evalcontext() per un "
 "esempio)"
 
-#: gnubgmodule.c:307
+#: gnubgmodule.c:298
 msgid "invalid value evalcontext (see gnubg.evalcontext() for an example)"
 msgstr ""
 "valore non valido in evalcontext (guarda gnubg.evalcontext() per un esempio)"
 
-#: gnubgmodule.c:332
+#: gnubgmodule.c:323
 msgid "invalid value in evalcontext (see gnubg.evalcontext() for an example)"
 msgstr ""
 "valore non valido in evalcontext (guarda gnubg.evalcontext() per un esempio)"
 
-#: gnubgmodule.c:524
+#: gnubgmodule.c:515
 #, fuzzy
 msgid "interupted/errno in GeneralEvaluateE"
 msgstr "interrotto/errore in GeneralEvaluateE"
 
-#: gnubgmodule.c:570
+#: gnubgmodule.c:561
 msgid "interupted/errno in GeneralCubeDecisionE"
 msgstr "interrotto/errore in GeneralCubeDecisionE"
 
-#: gnubgmodule.c:706
+#: gnubgmodule.c:697
 msgid "invalid matchlength"
 msgstr "lunghezza del match non valida"
 
-#: gnubgmodule.c:811
+#: gnubgmodule.c:802
 msgid "invalid positionid"
 msgstr "ID posizione non valida."
 
-#: gnubgmodule.c:918
+#: gnubgmodule.c:909
 msgid "invalid number of chequers or points"
 msgstr "numero non valido di pedine o punti"
 
-#: gnubgmodule.c:926
+#: gnubgmodule.c:917
 msgid "invalid position number"
 msgstr "numero di posizione non valido"
 
-#: gnubgmodule.c:2401
+#: gnubgmodule.c:2392
 msgid ""
 "This installation of GNU Backgammon was compiled without Python support."
 msgstr ""
 "Questa installazione di GNU Backgammon è stata compilata senza il supporto "
 "della GUI."
 
-#: gnubgmodule.c:2410
+#: gnubgmodule.c:2401
 msgid "This build of GNU Backgammon does not support Python"
 msgstr "Questa installazione di GNU Backgammon non supporta Pythondella GUI."
 
@@ -2326,78 +2333,78 @@ msgstr "Suggerimento"
 msgid "_Double"
 msgstr "Doppio"
 
-#: gtkboard.c:559
+#: gtkboard.c:563
 #, c-format
 msgid "(no hit: %d roll)"
 msgid_plural "(no hit: %d rolls)"
 msgstr[0] "(non colpisce: %d lancio)"
 msgstr[1] "(non colpisce: %d lanci)"
 
-#: gtkboard.c:622 gtkboard.c:624
+#: gtkboard.c:626 gtkboard.c:628
 msgid "EPC: "
 msgstr "EPC:"
 
-#: gtkboard.c:640 gtkboard.c:642 gtkboard.c:650 gtkboard.c:652
+#: gtkboard.c:644 gtkboard.c:646 gtkboard.c:654 gtkboard.c:656
 msgid "Pips: "
 msgstr "Pips:"
 
-#: gtkboard.c:662
+#: gtkboard.c:666
 msgid "Illegal move"
 msgstr "Mossa illegale"
 
-#: gtkboard.c:675
+#: gtkboard.c:679
 msgid "(Editing)"
 msgstr "(Sto editando)"
 
-#: gtkboard.c:703
+#: gtkboard.c:707
 #, c-format
 msgid "Return hits: %s\n"
 msgstr "Colpi di ritorno: %s\n"
 
-#: gtkboard.c:1980 play.c:1768 play.c:2099 play.c:2220 play.c:2422 play.c:2636
-#: play.c:3553 play.c:3614 play.c:3754 play.c:3864
+#: gtkboard.c:1984 play.c:1752 play.c:2091 play.c:2212 play.c:2422 play.c:2644
+#: play.c:3569 play.c:3638 play.c:3778 play.c:3896
 msgid ""
 "It is the computer's turn -- type `play' to force it to move immediately."
 msgstr ""
 "E' il turno del computer -- scrivi 'play' per forzarlo a muovere "
 "immediatamente."
 
-#: gtkboard.c:2413 gtkboard.c:2420
+#: gtkboard.c:2397 gtkboard.c:2404
 #, c-format
 msgid "%d (won match)"
 msgstr "%d (match vinto)"
 
-#: gtkboard.c:2415 gtkboard.c:2422
+#: gtkboard.c:2399 gtkboard.c:2406
 #, c-format
 msgid "%d (%d-away)"
 msgstr "%d (%d-away)"
 
-#: gtkboard.c:2651
+#: gtkboard.c:2635
 msgid "unlimited"
 msgstr "illimitato"
 
-#: gtkboard.c:3549
+#: gtkboard.c:3533
 msgid "You can only change whether this is the Crawford game when editing"
 msgstr "Puoi solo cambiare se questo è il Crawford game quando editi"
 
-#: gtkboard.c:3804
+#: gtkboard.c:3788
 #, c-format
 msgid "Set player %d on roll."
 msgstr "Metti il giocatore %d al lancio."
 
-#: gtkboard.c:3884
+#: gtkboard.c:3868
 msgid "GNUBg ID: "
 msgstr ""
 
-#: gtkboard.c:3937 gtkboard.c:4010
+#: gtkboard.c:3921 gtkboard.c:3994
 msgid "Score:"
 msgstr "Punteggio:"
 
-#: gtkboard.c:4064
+#: gtkboard.c:4048
 msgid "Match:"
 msgstr "Match:"
 
-#: gtkboard.c:4082 gtktheory.c:735
+#: gtkboard.c:4066 gtktheory.c:735
 msgid "Crawford game"
 msgstr "Crawford game"
 
@@ -2546,7 +2553,7 @@ msgstr "Valuta la decisione di cubo con le impostazioni correnti"
 msgid "Annotations"
 msgstr "Annotazioni"
 
-#: gtkexport.c:40 gtkgame.c:2460
+#: gtkexport.c:40 gtkgame.c:2436
 msgid "Analysis"
 msgstr "Analisi"
 
@@ -2642,7 +2649,7 @@ msgid "Include"
 msgstr "Incluso"
 
 #. show stuff
-#: gtkexport.c:570 gtkexport.c:585 gtkgame.c:3785 gtkprefs.c:2956
+#: gtkexport.c:570 gtkexport.c:585 gtkgame.c:3761 gtkprefs.c:2956
 #: gtkprefs.c:2973
 msgid "Board"
 msgstr "Tavola"
@@ -2651,7 +2658,7 @@ msgstr "Tavola"
 msgid "move(s) between board shown"
 msgstr "mossa(e) nella tavola visualizzata"
 
-#: gtkexport.c:615 gtkrelational.c:806
+#: gtkexport.c:615 gtkrelational.c:803
 msgid "Players"
 msgstr "Giocatori"
 
@@ -2843,111 +2850,111 @@ msgstr "Stop"
 msgid "Select files to analyse"
 msgstr "Scegli i files da analizzare"
 
-#: gtkgame.c:486
+#: gtkgame.c:462
 msgid "GNU Backgammon - Dice"
 msgstr "GNU Backgammon - Dadi"
 
-#: gtkgame.c:525
+#: gtkgame.c:501
 msgid "GNU Backgammon - Cube"
 msgstr "GNU Backgammon - Cubo"
 
 #. First column with text
-#: gtkgame.c:668
+#: gtkgame.c:644
 msgid "Equity before resignation: "
 msgstr "Equity prima del rifiuto: "
 
-#: gtkgame.c:676
+#: gtkgame.c:652
 msgid "Equity after resignation: "
 msgstr "Equity dopo il rifiuto: "
 
-#: gtkgame.c:684
+#: gtkgame.c:660
 msgid "Difference: "
 msgstr "Differenza: "
 
-#: gtkgame.c:766 gtkgame.c:902 play.c:4416 text.c:83 text.c:490
+#: gtkgame.c:742 gtkgame.c:878 play.c:4456 text.c:83 text.c:490
 #, c-format
 msgid "Rolled %d%d"
 msgstr "Lanciato %d%d"
 
-#: gtkgame.c:881
+#: gtkgame.c:857
 msgid "Didn't double"
 msgstr "Non raddoppia"
 
 #. chequer play skill
-#: gtkgame.c:941 gtkgame.c:942
+#: gtkgame.c:917 gtkgame.c:918
 msgid "Moved "
 msgstr "Mosso "
 
-#: gtkgame.c:988 gtkgame.c:2390 gtkgame.c:2467 gtkgame.c:2563 gtkgame.c:2769
-#: gtkgame.c:4589 gtkgame.c:6915 gtkoptions.c:660
+#: gtkgame.c:964 gtkgame.c:2366 gtkgame.c:2443 gtkgame.c:2539 gtkgame.c:2745
+#: gtkgame.c:4565 gtkgame.c:6891 gtkoptions.c:660
 msgid "Chequer play"
 msgstr "Mossa"
 
-#: gtkgame.c:992 html.c:2132
+#: gtkgame.c:968 html.c:2132
 msgid "Cube decision"
 msgstr "Decisione di cubo"
 
-#: gtkgame.c:1047 gtkgame.c:1084
+#: gtkgame.c:1023 gtkgame.c:1060
 msgid "GNU Backgammon cannot analyse neither beavers nor raccoons yet"
 msgstr "GNU Backgammon non può ancora analizzare nè beavers nè raccoons"
 
-#: gtkgame.c:1064 latex.c:511 play.c:4404 sound.c:248
+#: gtkgame.c:1040 latex.c:511 play.c:4444 sound.c:248
 msgid "Drop"
 msgstr "Rifiuta"
 
 #. Resign button
-#: gtkgame.c:1106 gtkgame.c:7684 gtktoolbar.c:348 sound.c:252
+#: gtkgame.c:1082 gtkgame.c:7660 gtktoolbar.c:348 sound.c:252
 msgid "Resign"
 msgstr "Rifiuta"
 
-#: gtkgame.c:1149
+#: gtkgame.c:1125
 msgid "No analysis available."
 msgstr "Nessuna analisi disponibile"
 
-#: gtkgame.c:1477 html.c:723
+#: gtkgame.c:1453 html.c:723
 msgid "Position ID:"
 msgstr "ID Posizione:"
 
-#: gtkgame.c:1478 html.c:725
+#: gtkgame.c:1454 html.c:725
 msgid "Match ID:"
 msgstr "ID Match:"
 
-#: gtkgame.c:1551
+#: gtkgame.c:1527
 msgid "Switch to 3D view"
 msgstr "Passa a visualizzazione 3D"
 
-#: gtkgame.c:1553
+#: gtkgame.c:1529
 msgid "Switch to 2D view"
 msgstr "Passa a visualizzazione 2D"
 
-#: gtkgame.c:1973
+#: gtkgame.c:1949
 msgid "No reduction"
 msgstr "Niente riduzione"
 
-#: gtkgame.c:1975
+#: gtkgame.c:1951
 #, c-format
 msgid "50%% speed"
 msgstr "50%% velocità"
 
-#: gtkgame.c:1976
+#: gtkgame.c:1952
 #, c-format
 msgid "33%% speed"
 msgstr "33%% velocità"
 
-#: gtkgame.c:1977
+#: gtkgame.c:1953
 #, c-format
 msgid "25%% speed"
 msgstr "25%% velocità"
 
-#: gtkgame.c:2000
+#: gtkgame.c:1976
 msgid "Predefined settings"
 msgstr "Impostazioni predefinite"
 
-#: gtkgame.c:2010
+#: gtkgame.c:1986
 msgid "Select a predefined setting:"
 msgstr "Seleziona le impostazioni predefinite:"
 
-#: gtkgame.c:2013
+#: gtkgame.c:1989
 msgid ""
 "Select a predefined setting, ranging from beginner's play to the grandmaster "
 "setting that will test your patience"
@@ -2955,18 +2962,18 @@ msgstr ""
 "Seleziona le impostazioni predefinite, dalla gamma delle impostazioni da "
 "beginner a grandmaster che testerà la tua pazienza"
 
-#: gtkgame.c:2028 gtkmovefilter.c:351 gtkmovefilter.c:543 gtkprefs.c:239
+#: gtkgame.c:2004 gtkmovefilter.c:351 gtkmovefilter.c:543 gtkprefs.c:239
 msgid "user defined"
 msgstr "definiti dall'utilizzatore"
 
 #.
 #. * Frame with user settings
 #.
-#: gtkgame.c:2053
+#: gtkgame.c:2029
 msgid "User defined settings"
 msgstr "Impostazioni definite dall'utilizzatore"
 
-#: gtkgame.c:2067
+#: gtkgame.c:2043
 msgid ""
 "Specify how many rolls GNU Backgammon should lookahead. Each ply costs "
 "approximately a factor of 21 in computational time. Also note that 2-ply is "
@@ -2976,15 +2983,15 @@ msgstr ""
 "approssimativamente un fattore di 21 nel tempo di computazione. Nota anche "
 "che 2-ply è equivalente al 3-ply di Snowie."
 
-#: gtkgame.c:2072
+#: gtkgame.c:2048
 msgid "Lookahead"
 msgstr "Guarda avanti"
 
-#: gtkgame.c:2081
+#: gtkgame.c:2057
 msgid "Plies:"
 msgstr "Lati:"
 
-#: gtkgame.c:2097
+#: gtkgame.c:2073
 #, no-c-format
 msgid ""
 "Instead of averaging over all 21 possible dice rolls it is possible to "
@@ -2997,29 +3004,29 @@ msgstr ""
 "al 33%. La velocità al 33% sarà tipicamente tre volte più veloce che la "
 "ricerca completa senza la riduzione."
 
-#: gtkgame.c:2104
+#: gtkgame.c:2080
 msgid "Reduced evaluations"
 msgstr "Valutazioni ridotte"
 
 #. Use pruning neural nets
-#: gtkgame.c:2143
+#: gtkgame.c:2119
 msgid "Pruning neural nets"
 msgstr "Rete neurale troncata"
 
-#: gtkgame.c:2148
+#: gtkgame.c:2124
 msgid "Use neural net pruning"
 msgstr "Usa la rete neurale troncata"
 
 #. cubeful
-#: gtkgame.c:2157
+#: gtkgame.c:2133
 msgid "Cubeful evaluations"
 msgstr "Valutazioni con il cubo"
 
-#: gtkgame.c:2162
+#: gtkgame.c:2138
 msgid "Cubeful chequer evaluation"
 msgstr "Valutazione mosse con il cubo in gioco"
 
-#: gtkgame.c:2169
+#: gtkgame.c:2145
 msgid ""
 "Instruct GNU Backgammon to use cubeful evaluations, i.e., include the value "
 "of cube ownership in the evaluations. It is recommended to enable this "
@@ -3029,7 +3036,7 @@ msgstr ""
 "valore del possesso del cubo nelle valutazioni. E' raccomandato abilitare "
 "questa opzione."
 
-#: gtkgame.c:2176
+#: gtkgame.c:2152
 msgid ""
 "GNU Backgammon will always perform cubeful evaluations for cube decisions. "
 "Disabling this option will make GNU Backgammon use cubeless evaluations in "
@@ -3041,7 +3048,7 @@ msgstr ""
 "nell'intervallo dei nodi nelle più alte valutazioni di ply. E' raccomandato "
 "abilitare questa opzione."
 
-#: gtkgame.c:2190
+#: gtkgame.c:2166
 msgid ""
 "You can use this option to introduce noise or errors in the evaluations. "
 "This is useful for introducing levels below 0-ply. The lower rated bots (e."
@@ -3055,19 +3062,19 @@ msgstr ""
 "L'introduzione di rumore può essere deterministica, per es. lo stesso rumore "
 "per la stessa posizione, o può essere random."
 
-#: gtkgame.c:2199
+#: gtkgame.c:2175
 msgid "Noise"
 msgstr "Rumore"
 
-#: gtkgame.c:2211
+#: gtkgame.c:2187
 msgid "Noise:"
 msgstr "Rumore:"
 
-#: gtkgame.c:2217
+#: gtkgame.c:2193
 msgid "Deterministic noise"
 msgstr "Rumore deterministico"
 
-#: gtkgame.c:2242
+#: gtkgame.c:2218
 msgid ""
 "GNU Backgammon will evaluate all moves at 0-ply. The move filter controls "
 "how many moves to be evaluted at higher plies. A \"smaller\" filter will be "
@@ -3080,581 +3087,581 @@ msgstr ""
 "mossa. Gli utenti esperti possono impostare il proprio filtro cliccando sul "
 "pulsante [Modifica]."
 
-#: gtkgame.c:2394 gtkgame.c:2470 gtkgame.c:2572 gtkgame.c:2780 gtkgame.c:4601
-#: gtkgame.c:6918
+#: gtkgame.c:2370 gtkgame.c:2446 gtkgame.c:2548 gtkgame.c:2756 gtkgame.c:4577
+#: gtkgame.c:6894
 msgid "Cube decisions"
 msgstr "Decisioni di cubo"
 
-#: gtkgame.c:2400
+#: gtkgame.c:2376
 msgid "GNU Backgammon - Evaluation settings"
 msgstr "GNU Backgammon - Impostazioni di valutazione"
 
-#: gtkgame.c:2442
+#: gtkgame.c:2418
 msgid "Doubtful:"
 msgstr "Dubbia:"
 
-#: gtkgame.c:2442
+#: gtkgame.c:2418
 msgid "Bad:"
 msgstr "Brutta:"
 
-#: gtkgame.c:2442
+#: gtkgame.c:2418
 msgid "Very bad:"
 msgstr "Molto brutta:"
 
-#: gtkgame.c:2443
+#: gtkgame.c:2419
 msgid "Very lucky:"
 msgstr "Molto fortunato:"
 
-#: gtkgame.c:2443
+#: gtkgame.c:2419
 msgid "Lucky:"
 msgstr "Fortunato:"
 
-#: gtkgame.c:2444
+#: gtkgame.c:2420
 msgid "Unlucky:"
 msgstr "Sfortunato:"
 
-#: gtkgame.c:2444
+#: gtkgame.c:2420
 msgid "Very unlucky:"
 msgstr "Molto sfortunato:"
 
-#: gtkgame.c:2473 gtkgame.c:6921 gtkgame.c:7168 gtkrelational.c:66
+#: gtkgame.c:2449 gtkgame.c:6897 gtkgame.c:7144 gtkrelational.c:63
 msgid "Luck"
 msgstr "Fortuna"
 
-#: gtkgame.c:2478
+#: gtkgame.c:2454
 #, c-format
 msgid "Analyse player %s"
 msgstr "Analisi del giocatore %s"
 
-#: gtkgame.c:2496
+#: gtkgame.c:2472
 msgid "Move limit:"
 msgstr "Limite di mossa:"
 
-#: gtkgame.c:2506
+#: gtkgame.c:2482
 msgid "Skill thresholds"
 msgstr "Soglia di abilità"
 
-#: gtkgame.c:2534
+#: gtkgame.c:2510
 msgid "Luck thresholds"
 msgstr "Soglia di fortuna"
 
-#: gtkgame.c:2700
+#: gtkgame.c:2676
 msgid "GNU Backgammon - Analysis Settings"
 msgstr "GNU Backgammon - Impostazioni di Analisi"
 
-#: gtkgame.c:2750 gtkgame.c:7188
+#: gtkgame.c:2726 gtkgame.c:7164
 msgid "Name:"
 msgstr "Nome:"
 
-#: gtkgame.c:2758
+#: gtkgame.c:2734
 msgid "Human"
 msgstr "Umano"
 
-#: gtkgame.c:2799
+#: gtkgame.c:2775
 msgid "External"
 msgstr "Esterno"
 
-#: gtkgame.c:2805
+#: gtkgame.c:2781
 msgid "Socket:"
 msgstr "Socket:"
 
-#: gtkgame.c:2864
+#: gtkgame.c:2840
 msgid "GNU Backgammon - Players"
 msgstr "GNU Backgammon - Giocatori"
 
-#: gtkgame.c:2873
+#: gtkgame.c:2849
 msgid "Player 0"
 msgstr "Giocatore 0"
 
-#: gtkgame.c:2876
+#: gtkgame.c:2852
 msgid "Player 1"
 msgstr "Giocatore 1"
 
-#: gtkgame.c:2956 gtkgame.c:3139
+#: gtkgame.c:2932 gtkgame.c:3115
 msgid "System default"
 msgstr "Imposta il predefinito"
 
-#: gtkgame.c:2959
+#: gtkgame.c:2935
 msgid "English (GB)"
 msgstr "Inglese (UK)"
 
-#: gtkgame.c:2960
+#: gtkgame.c:2936
 msgid "English (US)"
 msgstr "Inglese (US)"
 
-#: gtkgame.c:2992 gtkgame.c:3141
+#: gtkgame.c:2968 gtkgame.c:3117
 msgid "Select language"
 msgstr "Seleziona la lingua"
 
-#: gtkgame.c:3036
+#: gtkgame.c:3012
 #, c-format
 msgid "Locale '%s' not supported by C library."
 msgstr ""
 
-#: gtkgame.c:3185 gtkrolls.c:392 gtkwindows.c:210
+#: gtkgame.c:3161 gtkrolls.c:392 gtkwindows.c:210
 msgid "Cancel"
 msgstr "Cancella"
 
-#: gtkgame.c:3186 gtkwindows.c:202 gtkwindows.c:240
+#: gtkgame.c:3162 gtkwindows.c:202 gtkwindows.c:240
 msgid "OK"
 msgstr "OK"
 
-#: gtkgame.c:3307
+#: gtkgame.c:3283
 msgid "/_File"
 msgstr "/_File"
 
-#: gtkgame.c:3308
+#: gtkgame.c:3284
 msgid "/_File/_New..."
 msgstr "/_File/_Nuovo..."
 
-#: gtkgame.c:3311
+#: gtkgame.c:3287
 msgid "/_File/_Open..."
 msgstr "/_File/_Apri..."
 
-#: gtkgame.c:3314
+#: gtkgame.c:3290
 msgid "/_File/_Save..."
 msgstr "/_File/_Salva..."
 
-#: gtkgame.c:3317 gtkgame.c:3320
+#: gtkgame.c:3293 gtkgame.c:3296
 msgid "/_File/-"
 msgstr "/_File/-"
 
-#: gtkgame.c:3318
+#: gtkgame.c:3294
 msgid "/_File/Match information..."
 msgstr "/_File/Informazioni del match..."
 
-#: gtkgame.c:3323
+#: gtkgame.c:3299
 msgid "/_File/E_xit"
 msgstr "/_File/C_hiudi"
 
-#: gtkgame.c:3325
+#: gtkgame.c:3301
 msgid "/_File/_Quit"
 msgstr "/_File/_Chiudi"
 
-#: gtkgame.c:3329
+#: gtkgame.c:3305
 msgid "/_Edit"
 msgstr "/_Edita"
 
-#: gtkgame.c:3330
+#: gtkgame.c:3306
 msgid "/_Edit/_Undo"
 msgstr "/_Edita/_Annulla"
 
-#: gtkgame.c:3333 gtkgame.c:3350
+#: gtkgame.c:3309 gtkgame.c:3326
 msgid "/_Edit/-"
 msgstr "/_Edita/-"
 
-#: gtkgame.c:3335
+#: gtkgame.c:3311
 msgid "/_Edit/_Copy"
 msgstr "/_Edita/_Copia"
 
-#: gtkgame.c:3339
+#: gtkgame.c:3315
 msgid "/_Edit/Copy as"
 msgstr "/_Edita/C_opia come"
 
-#: gtkgame.c:3340
+#: gtkgame.c:3316
 msgid "/_Edit/Copy as/Position as ASCII"
 msgstr "/_Edita/Copia come/Posizione come ASCII"
 
-#: gtkgame.c:3342
+#: gtkgame.c:3318
 msgid "/_Edit/Copy as/GammOnLine (HTML)"
 msgstr "/_Edita/Copia come/GammOnLine (HTML)"
 
-#: gtkgame.c:3344
+#: gtkgame.c:3320
 msgid "/_Edit/Copy as/Position and Match IDs"
 msgstr "/_Edita/Copia come/Posizione e Match ID"
 
-#: gtkgame.c:3347
+#: gtkgame.c:3323
 msgid "/_Edit/_Paste"
 msgstr "/_Edita/_Incolla"
 
-#: gtkgame.c:3351
+#: gtkgame.c:3327
 msgid "/_Edit/_Edit Position"
 msgstr "/_Edita/_Edita Posizione"
 
-#: gtkgame.c:3354
+#: gtkgame.c:3330
 msgid "/_View"
 msgstr "/_Visualizza"
 
-#: gtkgame.c:3355
+#: gtkgame.c:3331
 msgid "/_View/_Panels"
 msgstr "/_Visualizza/_Pannelli"
 
-#: gtkgame.c:3356
+#: gtkgame.c:3332
 msgid "/_View/_Panels/_Game record"
 msgstr "/_Visualizza/_Pannelli/_Registrazioni del game"
 
-#: gtkgame.c:3358
+#: gtkgame.c:3334
 msgid "/_View/_Panels/_Analysis"
 msgstr "/_Visualizza/_Pannelli/_Analisi"
 
-#: gtkgame.c:3360
+#: gtkgame.c:3336
 msgid "/_View/_Panels/_Commentary"
 msgstr "/_Visualizza/_Pannelli/_Commenti"
 
-#: gtkgame.c:3362
+#: gtkgame.c:3338
 msgid "/_View/_Panels/_Message"
 msgstr "/_Visualizza/_Pannelli/_Messaggi"
 
-#: gtkgame.c:3364
+#: gtkgame.c:3340
 msgid "/_View/_Panels/_Theory"
 msgstr "/_Visualizza/_Pannelli/_Teoria"
 
-#: gtkgame.c:3366
+#: gtkgame.c:3342
 msgid "/_View/_Panels/_Command"
 msgstr "/_Visualizza/_Pannelli/C_omandi"
 
-#: gtkgame.c:3368
+#: gtkgame.c:3344
 msgid "/_View/_Dock panels"
 msgstr "/_Visualizza/_Blocca i pannelli"
 
-#: gtkgame.c:3369
+#: gtkgame.c:3345
 msgid "/_View/Restore panels"
 msgstr "/_Visualizza/Ripristina i pannelli"
 
-#: gtkgame.c:3370
+#: gtkgame.c:3346
 msgid "/_View/Hide panels"
 msgstr "/_Visualizza/Chiudi i pannelli"
 
-#: gtkgame.c:3371 gtkgame.c:3384 gtkgame.c:3387
+#: gtkgame.c:3347 gtkgame.c:3360 gtkgame.c:3363
 msgid "/_View/-"
 msgstr "/_Visualizza/-"
 
-#: gtkgame.c:3372
+#: gtkgame.c:3348
 msgid "/_View/Show _IDs above board"
 msgstr "/_Visualizza/Mostra_ID sotto la tavola"
 
-#: gtkgame.c:3373
+#: gtkgame.c:3349
 msgid "/_View/_Toolbar"
 msgstr "/_Visualizza/_Barra pulsanti"
 
-#: gtkgame.c:3374
+#: gtkgame.c:3350
 msgid "/_View/_Toolbar/_Hide Toolbar"
 msgstr "/_Visualizza/_Barra pulsanti/_Nascondi barra pulsanti"
 
-#: gtkgame.c:3375
+#: gtkgame.c:3351
 msgid "/_View/_Toolbar/_Show Toolbar"
 msgstr "/_Visualizza/_Barra pulsanti/_Mostra barra pulsanti"
 
-#: gtkgame.c:3376
+#: gtkgame.c:3352
 msgid "/_View/_Toolbar/-"
 msgstr "/_Visualizza/_Barra pulsanti/-"
 
-#: gtkgame.c:3377
+#: gtkgame.c:3353
 msgid "/_View/_Toolbar/_Text only"
 msgstr "/_Visualizza/_Barra pulsanti/_Solo testo"
 
-#: gtkgame.c:3379
+#: gtkgame.c:3355
 msgid "/_View/_Toolbar/_Icons only"
 msgstr "/_Visualizza/_Barra pulsanti/S_olo icone"
 
-#: gtkgame.c:3381
+#: gtkgame.c:3357
 msgid "/_View/_Toolbar/_Both"
 msgstr "/_Visualizza/_Barra pulsanti/_Entrambe"
 
-#: gtkgame.c:3383
+#: gtkgame.c:3359
 msgid "/_View/Full screen"
 msgstr "/_Visualizza/Schermo intero"
 
-#: gtkgame.c:3385
+#: gtkgame.c:3361
 msgid "/_View/Play _Clockwise"
 msgstr "/_Visualizza/Gioca_in senso orario"
 
-#: gtkgame.c:3388
+#: gtkgame.c:3364
 msgid "/_View/Switch to xD view"
 msgstr "/_Visualizza/Passa a visualizzazione xD"
 
-#: gtkgame.c:3390
+#: gtkgame.c:3366
 msgid "/_Game"
 msgstr "/_Game"
 
-#: gtkgame.c:3391
+#: gtkgame.c:3367
 msgid "/_Game/_Roll"
 msgstr "/_Game/_Lancia"
 
-#: gtkgame.c:3392
+#: gtkgame.c:3368
 msgid "/_Game/_Finish move"
 msgstr "/_Game/_Termina mossa"
 
-#: gtkgame.c:3393 gtkgame.c:3396 gtkgame.c:3399 gtkgame.c:3402 gtkgame.c:3405
+#: gtkgame.c:3369 gtkgame.c:3372 gtkgame.c:3375 gtkgame.c:3378 gtkgame.c:3381
 msgid "/_Game/-"
 msgstr "/_Game/-"
 
-#: gtkgame.c:3394
+#: gtkgame.c:3370
 msgid "/_Game/_Double"
 msgstr "/_Game/_Raddoppia"
 
-#: gtkgame.c:3395
+#: gtkgame.c:3371
 msgid "/_Game/Re_sign"
 msgstr "/_Game/Ri_fiuta"
 
-#: gtkgame.c:3397
+#: gtkgame.c:3373
 msgid "/_Game/_Accept"
 msgstr "/_Game/_Accetta"
 
-#: gtkgame.c:3398
+#: gtkgame.c:3374
 #, fuzzy
 msgid "/_Game/Re_ject"
 msgstr "/_Game/Ri_fiuta"
 
-#: gtkgame.c:3400
+#: gtkgame.c:3376
 msgid "/_Game/Play computer turn"
 msgstr "/_Game/Gioca il turno del computer"
 
-#: gtkgame.c:3403
+#: gtkgame.c:3379
 msgid "/_Game/Swap players"
 msgstr "/_Game/Scambia i giocatori"
 
-#: gtkgame.c:3406
+#: gtkgame.c:3382
 msgid "/_Game/Set cube..."
 msgstr "/_Game/Imposta il cubo..."
 
-#: gtkgame.c:3407
+#: gtkgame.c:3383
 msgid "/_Game/Set _dice..."
 msgstr "/_Game/Imposta i _dadi..."
 
-#: gtkgame.c:3408
+#: gtkgame.c:3384
 msgid "/_Game/Set _turn"
 msgstr "/_Game/Imposta il _turno"
 
-#: gtkgame.c:3409
+#: gtkgame.c:3385
 msgid "/_Game/Set turn/0"
 msgstr "/_Game/Imposta il turno/0"
 
-#: gtkgame.c:3411
+#: gtkgame.c:3387
 msgid "/_Game/Set turn/1"
 msgstr "/_Game/Imposta il turno/1"
 
-#: gtkgame.c:3413
+#: gtkgame.c:3389
 msgid "/_Analyse"
 msgstr "/_Analisi"
 
-#: gtkgame.c:3414
+#: gtkgame.c:3390
 msgid "/_Analyse/_Evaluate"
 msgstr "/_Analisi/_Valuta"
 
-#: gtkgame.c:3415
+#: gtkgame.c:3391
 msgid "/_Analyse/_Hint"
 msgstr "/_Analisi/_Suggerimento"
 
-#: gtkgame.c:3417
+#: gtkgame.c:3393
 msgid "/_Analyse/_Rollout"
 msgstr "/_Analisi/_Rollout"
 
-#: gtkgame.c:3418
+#: gtkgame.c:3394
 msgid "/_Analyse/Rollout _cube decision"
 msgstr "/_Analizza/_Rollout _decisione di cubo"
 
-#: gtkgame.c:3420 gtkgame.c:3427 gtkgame.c:3430 gtkgame.c:3444 gtkgame.c:3447
-#: gtkgame.c:3460 gtkgame.c:3467 gtkgame.c:3474 gtkgame.c:3477 gtkgame.c:3482
+#: gtkgame.c:3396 gtkgame.c:3403 gtkgame.c:3406 gtkgame.c:3420 gtkgame.c:3423
+#: gtkgame.c:3436 gtkgame.c:3443 gtkgame.c:3450 gtkgame.c:3453 gtkgame.c:3458
 msgid "/_Analyse/-"
 msgstr "/_Analisi/-"
 
-#: gtkgame.c:3421
+#: gtkgame.c:3397
 msgid "/_Analyse/Analyse move"
 msgstr "/_Analisi/Analizza mossa"
 
-#: gtkgame.c:3423
+#: gtkgame.c:3399
 msgid "/_Analyse/Analyse game"
 msgstr "/_Analisi/Analizza game"
 
-#: gtkgame.c:3425
+#: gtkgame.c:3401
 #, fuzzy
 msgid "/_Analyse/Analyse match or session"
 msgstr "/_Analisi/Analizza match\\\\sessione"
 
-#: gtkgame.c:3428
+#: gtkgame.c:3404
 msgid "/_Analyse/Batch analyse..."
 msgstr "/_Analisi/Analisi in sequenza"
 
-#: gtkgame.c:3431
+#: gtkgame.c:3407
 msgid "/_Analyse/Clear analysis"
 msgstr "/_Analisi/Cancella le analisi"
 
-#: gtkgame.c:3432
+#: gtkgame.c:3408
 msgid "/_Analyse/Clear analysis/Move"
 msgstr "/_Analisi/Cancella le analisi/Mossa"
 
-#: gtkgame.c:3436
+#: gtkgame.c:3412
 msgid "/_Analyse/Clear analysis/_Game"
 msgstr "/_Analisi/Cancella le analisi/_Game"
 
-#: gtkgame.c:3440
+#: gtkgame.c:3416
 #, fuzzy
 msgid "/_Analyse/Clear analysis/_Match or session"
 msgstr "/_Analisi/Cancella le analisi/_Sessione"
 
-#: gtkgame.c:3445
+#: gtkgame.c:3421
 #, fuzzy
 msgid "/_Analyse/Match or session statistics"
 msgstr "/_Analisi/Match\\\\statistiche della sessione"
 
-#: gtkgame.c:3448
+#: gtkgame.c:3424
 msgid "/_Analyse/Player records"
 msgstr "/_Analisi/Statistiche del giocatore"
 
-#: gtkgame.c:3450
+#: gtkgame.c:3426
 msgid "/_Analyse/Add to player records"
 msgstr "/_Analisi/Aggiungi alle statistiche del giocatore"
 
-#: gtkgame.c:3452
+#: gtkgame.c:3428
 msgid "/_Analyse/Add to player records/Game statistics"
 msgstr "/_Analisi/Aggiungi alle statistiche del giocatore/Statistiche del game"
 
-#: gtkgame.c:3456
+#: gtkgame.c:3432
 #, fuzzy
 msgid "/_Analyse/Add to player records/Match or session statistics"
 msgstr ""
 "/_Analisi/Aggiungi alle registrazioni del giocatore/Statistiche della "
 "sessione"
 
-#: gtkgame.c:3461
+#: gtkgame.c:3437
 #, fuzzy
 msgid "/_Analyse/Relational database"
 msgstr "/_Analisi/Database relazionale/Test..."
 
-#: gtkgame.c:3462
+#: gtkgame.c:3438
 msgid "/_Analyse/Relational database/Add match or session"
 msgstr "/_Analisi/Database relazionale/Aggiungi match o sessione..."
 
-#: gtkgame.c:3465
+#: gtkgame.c:3441
 msgid "/_Analyse/Relational database/Show Records"
 msgstr "/_Analisi/Database relazionale/Mostra Registrazioni"
 
-#: gtkgame.c:3468
+#: gtkgame.c:3444
 msgid "/_Analyse/Distribution of rolls"
 msgstr "/_Analisi/Distribuzione dei lanci"
 
-#: gtkgame.c:3470
+#: gtkgame.c:3446
 msgid "/_Analyse/Temperature Map"
 msgstr "/_Analisi/Temperature Map"
 
-#: gtkgame.c:3472
+#: gtkgame.c:3448
 msgid "/_Analyse/Temperature Map (cube decision)"
 msgstr "/_Analisi/Temperature Map (decisioni di cubo)"
 
-#: gtkgame.c:3475
+#: gtkgame.c:3451
 msgid "/_Analyse/_Race Theory"
 msgstr "/_Analisi/_Teorie di Corsa"
 
-#: gtkgame.c:3478
+#: gtkgame.c:3454
 msgid "/_Analyse/_Market window"
 msgstr "/_Analisi/_Finestra del mercato"
 
-#: gtkgame.c:3480
+#: gtkgame.c:3456
 msgid "/_Analyse/M_atch equity table"
 msgstr "/_Analisi/M_atch equity table"
 
-#: gtkgame.c:3483
+#: gtkgame.c:3459
 msgid "/_Analyse/Evaluation speed"
 msgstr "/_Analisi/Velocità di valutazione"
 
-#: gtkgame.c:3485
+#: gtkgame.c:3461
 msgid "/_Settings"
 msgstr "/_Impostazioni"
 
-#: gtkgame.c:3486
+#: gtkgame.c:3462
 msgid "/_Settings/Analysis..."
 msgstr "/_Impostazioni/Analisi..."
 
-#: gtkgame.c:3487
+#: gtkgame.c:3463
 msgid "/_Settings/Appearance..."
 msgstr "/_Impostazioni/Aspetto..."
 
-#: gtkgame.c:3489
+#: gtkgame.c:3465
 msgid "/_Settings/_Evaluation..."
 msgstr "/_Impostazioni/_Valutazione..."
 
-#: gtkgame.c:3491
+#: gtkgame.c:3467
 msgid "/_Settings/E_xport..."
 msgstr "/_Impostazioni/Esportazione..."
 
-#: gtkgame.c:3493
+#: gtkgame.c:3469
 msgid "/_Settings/_Players..."
 msgstr "/_Impostazioni/_Giocatori..."
 
-#: gtkgame.c:3494
+#: gtkgame.c:3470
 msgid "/_Settings/_Rollouts..."
 msgstr "/_Impostazioni/_Rollouts..."
 
-#: gtkgame.c:3495 gtkgame.c:3498
+#: gtkgame.c:3471 gtkgame.c:3474
 msgid "/_Settings/-"
 msgstr "/_Impostazioni/-"
 
-#: gtkgame.c:3496
+#: gtkgame.c:3472
 msgid "/_Settings/Options..."
 msgstr "/_Impostazioni/Opzioni..."
 
-#: gtkgame.c:3497
+#: gtkgame.c:3473
 msgid "/_Settings/_Language..."
 msgstr "/_Impostazioni/_Lingua..."
 
-#: gtkgame.c:3499
+#: gtkgame.c:3475
 msgid "/_Settings/Save settings"
 msgstr "/_Impostazioni/Salva le impostazioni"
 
-#: gtkgame.c:3501
+#: gtkgame.c:3477
 msgid "/G_o"
 msgstr "/_Naviga"
 
-#: gtkgame.c:3502
+#: gtkgame.c:3478
 msgid "/G_o/Pre_vious game"
 msgstr "/_Naviga/Game p_recedente"
 
-#: gtkgame.c:3506
+#: gtkgame.c:3482
 msgid "/G_o/Previous rol_l"
 msgstr "/_Naviga/_Lancio precedente"
 
-#: gtkgame.c:3510
+#: gtkgame.c:3486
 msgid "/G_o/Next _roll"
 msgstr "/_Naviga/L_ancio successivo"
 
-#: gtkgame.c:3514
+#: gtkgame.c:3490
 msgid "/G_o/Next _game"
 msgstr "/_Naviga/Game s_uccessivo"
 
-#: gtkgame.c:3518
+#: gtkgame.c:3494
 msgid "/G_o/-"
 msgstr "/_Naviga/-"
 
-#: gtkgame.c:3519
+#: gtkgame.c:3495
 msgid "/G_o/Previous marke_d move"
 msgstr "/_Naviga/Mossa segnata _precedente"
 
-#: gtkgame.c:3521
+#: gtkgame.c:3497
 msgid "/G_o/Next mar_ked move"
 msgstr "/_Naviga/Mossa segnata _successiva"
 
-#: gtkgame.c:3523
+#: gtkgame.c:3499
 msgid "/_Help"
 msgstr "/_Aiuto"
 
-#: gtkgame.c:3524
+#: gtkgame.c:3500
 msgid "/_Help/_Commands"
 msgstr "/_Aiuto/_Comandi"
 
-#: gtkgame.c:3525 gtkgame.c:3530
+#: gtkgame.c:3501 gtkgame.c:3506
 msgid "/_Help/-"
 msgstr "/_Aiuto/-"
 
-#: gtkgame.c:3526
+#: gtkgame.c:3502
 #, fuzzy
 msgid "/_Help/M_anual (all about)"
 msgstr "/_Aiuto/_Manuale GNU BG (tutto)"
 
-#: gtkgame.c:3528
+#: gtkgame.c:3504
 #, fuzzy
 msgid "/_Help/_Manual (web)"
 msgstr "/_Aiuto/_Manuale GNU BG (web)"
 
-#: gtkgame.c:3531
+#: gtkgame.c:3507
 msgid "/_Help/_About gnubg"
 msgstr "/_Aiuto/_Su gnubg"
 
-#: gtkgame.c:3785
+#: gtkgame.c:3761
 msgid "Rendering"
 msgstr "Rendendo"
 
-#: gtkgame.c:3876
+#: gtkgame.c:3852
 #, fuzzy, c-format
 msgid ""
 "The MS windows GTK interface doesn't support the '-p' option. Use the cl "
@@ -3663,352 +3670,352 @@ msgstr ""
 "L' interfaccia windows gtk non supporta l' opzione '-p'. Utilizza al suo "
 "posto l' interfaccia cl"
 
-#: gtkgame.c:3970
+#: gtkgame.c:3946
 msgid "GNU Backgammon - Tutor"
 msgstr "GNU Backgammon - Tutore"
 
-#: gtkgame.c:3974
+#: gtkgame.c:3950
 msgid "Play Anyway"
 msgstr "Gioca comunque"
 
-#: gtkgame.c:3976
+#: gtkgame.c:3952
 msgid "Rethink"
 msgstr "Ripensa"
 
-#: gtkgame.c:3977
+#: gtkgame.c:3953
 msgid "End Tutor Mode"
 msgstr "Chiudi il modo Tutor"
 
-#: gtkgame.c:3978
+#: gtkgame.c:3954
 msgid "Hint"
 msgstr "Suggerimento"
 
-#: gtkgame.c:4197
+#: gtkgame.c:4173
 #, c-format
 msgid "Edit new position only allowed with human and computer players"
 msgstr ""
 "L' editazione di una nuova posizione è possibile solo fra giocatore umano e "
 "computer"
 
-#: gtkgame.c:4234
+#: gtkgame.c:4210
 msgid "Shortcut buttons"
 msgstr "Pulsanti diretti"
 
-#: gtkgame.c:4245
+#: gtkgame.c:4221
 msgid "Edit position"
 msgstr "Edita la posizione"
 
-#: gtkgame.c:4253
+#: gtkgame.c:4229
 msgid "Start a new money game session"
 msgstr "Inizia una nuova sessione (money)"
 
-#: gtkgame.c:4274
+#: gtkgame.c:4250
 #, c-format
 msgid "Start a new %d point match"
 msgstr "Inizia un nuovo match a %d punti"
 
-#: gtkgame.c:4289
+#: gtkgame.c:4265
 msgid "Match settings"
 msgstr "Impostazioni del match"
 
-#: gtkgame.c:4292
+#: gtkgame.c:4268
 msgid "Length:"
 msgstr "Lunghezza:"
 
 #. Here the simplified player settings starts
-#: gtkgame.c:4304
+#: gtkgame.c:4280
 msgid "Player settings"
 msgstr "Impostazione giocatore"
 
-#: gtkgame.c:4311
+#: gtkgame.c:4287
 msgid "Current player settings"
 msgstr "Impostazione corrente del giocatore"
 
-#: gtkgame.c:4314
+#: gtkgame.c:4290
 msgid "GNU Backgammon vs. Human"
 msgstr "GNU Backgammon vs. Umano"
 
-#: gtkgame.c:4315
+#: gtkgame.c:4291
 msgid "Human vs. Human"
 msgstr "Umano vs. Umano"
 
-#: gtkgame.c:4319
+#: gtkgame.c:4295
 msgid "Modify player settings..."
 msgstr "Modifica le impostazioni dei giocatori..."
 
-#: gtkgame.c:4331 gtkoptions.c:1068
+#: gtkgame.c:4307 gtkoptions.c:1068
 msgid "Manual dice"
 msgstr "Dadi manuali"
 
-#: gtkgame.c:4332 gtkoptions.c:645
+#: gtkgame.c:4308 gtkoptions.c:645
 msgid "Tutor mode"
 msgstr "Modalità tutore"
 
-#: gtkgame.c:4371
+#: gtkgame.c:4347
 msgid "GNU Backgammon - New"
 msgstr "GNU Backgammon - Nuovo"
 
-#: gtkgame.c:4391
+#: gtkgame.c:4367
 msgid "Set match equity table"
 msgstr "imposta la tavola delle match equity"
 
-#: gtkgame.c:4738
+#: gtkgame.c:4714
 msgid "First Play Both"
 msgstr "First Play Both"
 
-#: gtkgame.c:4738 gtkgame.c:5133
+#: gtkgame.c:4714 gtkgame.c:5109
 msgid "First Play (0) "
 msgstr "First Play (0) "
 
-#: gtkgame.c:4742
+#: gtkgame.c:4718
 msgid "Later Play Both"
 msgstr "Later Play Both"
 
-#: gtkgame.c:4742 gtkgame.c:5141
+#: gtkgame.c:4718 gtkgame.c:5117
 msgid "Later Play (0) "
 msgstr "Later Play (0) "
 
-#: gtkgame.c:4763 gtkrace.c:273
+#: gtkgame.c:4739 gtkrace.c:273
 msgid "Trials:"
 msgstr "Prove:"
 
-#: gtkgame.c:4767
+#: gtkgame.c:4743
 msgid "Truncation"
 msgstr "Troncamento"
 
-#: gtkgame.c:4775
+#: gtkgame.c:4751
 msgid "Truncate Rollouts"
 msgstr "Rollouts troncati"
 
-#: gtkgame.c:4785
+#: gtkgame.c:4761
 msgid "Truncate at ply:"
 msgstr "Troncati al lato:"
 
-#: gtkgame.c:4793
+#: gtkgame.c:4769
 msgid "Evaluation for later plies"
 msgstr "Valutazione per gli ultimi lati"
 
-#: gtkgame.c:4801
+#: gtkgame.c:4777
 msgid "Enable separate evaluations "
 msgstr "Abilita valutazioni separate"
 
-#: gtkgame.c:4812
+#: gtkgame.c:4788
 msgid "Change eval after ply:"
 msgstr "Cambia valutazione dopo il lato:"
 
-#: gtkgame.c:4819
+#: gtkgame.c:4795
 msgid "Stop when result is accurate"
 msgstr "Ferma quando il risultato è accurato"
 
-#: gtkgame.c:4828
+#: gtkgame.c:4804
 msgid "Stop when STDs are small enough "
 msgstr "Ferma quando gli STD sono abbastanza piccoli"
 
-#: gtkgame.c:4844 gtkgame.c:4894
+#: gtkgame.c:4820 gtkgame.c:4870
 msgid "Minimum Trials:"
 msgstr "Prove minime:"
 
-#: gtkgame.c:4856
+#: gtkgame.c:4832
 msgid "Ratio |Standard Deviation/Value|:"
 msgstr "Rateo |Deviazione Standard/Valore|:"
 
-#: gtkgame.c:4866
+#: gtkgame.c:4842
 #, fuzzy
 msgid "Stop Rollouts of multiple moves based on JSD"
 msgstr "Ferma i rollouts sulle mosse multiple basandoti su j.s.d."
 
-#: gtkgame.c:4878
+#: gtkgame.c:4854
 msgid "Stop rollout when one move appears to be best "
 msgstr "Ferma il rollout quando una mossa sembra la migliore"
 
-#: gtkgame.c:4883
+#: gtkgame.c:4859
 #, fuzzy
 msgid "Stop rollout of move when best move JSD appears better "
 msgstr "Ferma il rollout quando la mossa j.s.d. sembra la migliore"
 
-#: gtkgame.c:4905
+#: gtkgame.c:4881
 #, fuzzy
 msgid "No of JSDs from best move"
 msgstr "No j.s.d.s dalla moglior mossa"
 
-#: gtkgame.c:4923
+#: gtkgame.c:4899
 msgid "Bearoff Truncation"
 msgstr "Uscita pedine troncata"
 
-#: gtkgame.c:4930
+#: gtkgame.c:4906
 msgid "Truncate cubeless (and cubeful money) at exact bearoff database"
 msgstr ""
 "Tronca senza il cubo (con il cubo per il money game) all'esatto database "
 "uscita pedine"
 
-#: gtkgame.c:4937
+#: gtkgame.c:4913
 msgid "Truncate cubeless at one-sided bearoff database"
 msgstr "Tronca senza il cubo al esatto database uscita pedine di un solo lato"
 
-#: gtkgame.c:4945
+#: gtkgame.c:4921
 msgid "Variance reduction"
 msgstr "Riduzione della variazione"
 
-#: gtkgame.c:4951
+#: gtkgame.c:4927
 msgid "Use quasi-random dice"
 msgstr "Usa dadi quasi-casuali"
 
-#: gtkgame.c:4957
+#: gtkgame.c:4933
 msgid "Rollout as initial position"
 msgstr "Rollout come posizione iniziale"
 
-#: gtkgame.c:4965
+#: gtkgame.c:4941
 msgid "Seed:"
 msgstr "Seed:"
 
-#: gtkgame.c:4972
+#: gtkgame.c:4948
 msgid "Cube decisions use same settings as Chequer play"
 msgstr "Usa per le decisioni di cubo le stesse impostazioni delle mosse"
 
-#: gtkgame.c:4980
+#: gtkgame.c:4956
 msgid "Use same settings for both players"
 msgstr "Usa le stesse impostazioni per entrambi i giocatori"
 
-#: gtkgame.c:4988
+#: gtkgame.c:4964
 msgid "Use player0 setting for truncation point"
 msgstr "Usa le impostazioni del giocatore 0 per il punto di troncamento"
 
-#: gtkgame.c:5007
+#: gtkgame.c:4983
 #, c-format
 msgid "Failed to create %s"
 msgstr "Fallito nel creare %s"
 
-#: gtkgame.c:5012
+#: gtkgame.c:4988
 msgid "Save Rollout Settings As (*.rol)"
 msgstr "Salva le impostazioni di Rollout come (*.rol)"
 
-#: gtkgame.c:5045
+#: gtkgame.c:5021
 msgid "Open rollout settings (*.rol)"
 msgstr "Apri le impostazioni di rollout (*.rol)"
 
-#: gtkgame.c:5111
+#: gtkgame.c:5087
 msgid "GNU Backgammon - Rollouts"
 msgstr "GNU Backgammon - Rollouts"
 
-#: gtkgame.c:5115
+#: gtkgame.c:5091
 msgid "Save As"
 msgstr "Salva Come"
 
-#: gtkgame.c:5119
+#: gtkgame.c:5095
 msgid "Load"
 msgstr "Carica"
 
-#: gtkgame.c:5129
+#: gtkgame.c:5105
 msgid "General Settings"
 msgstr "Impostazioni Generali"
 
-#: gtkgame.c:5137
+#: gtkgame.c:5113
 msgid "First Play (1) "
 msgstr "First Play (1) "
 
-#: gtkgame.c:5145
+#: gtkgame.c:5121
 msgid "Later Play (1) "
 msgstr "Later Play (1) "
 
-#: gtkgame.c:5149
+#: gtkgame.c:5125
 msgid "Truncation Pt."
 msgstr "Punto di troncamento"
 
-#: gtkgame.c:5419
+#: gtkgame.c:5395
 msgid "GNU Backgammon - Evaluation"
 msgstr "GNU Backgammon - Valutazione"
 
 #. create dialog
-#: gtkgame.c:5453 gtkgame.c:5491 gtkgame.c:5571
+#: gtkgame.c:5429 gtkgame.c:5467 gtkgame.c:5547
 msgid "GNU Backgammon - Hint"
 msgstr "GNU Backgammon - Suggerimento"
 
-#: gtkgame.c:5501
+#: gtkgame.c:5477
 msgid "MWC before resignation"
 msgstr "MWC prima del rifiuto"
 
-#: gtkgame.c:5518
+#: gtkgame.c:5494
 msgid "MWC after resignation"
 msgstr "MWC dopo il rifiuto"
 
-#: gtkgame.c:5534
+#: gtkgame.c:5510
 msgid "You should accept the resignation!"
 msgstr "Dovresti accettare il rifiuto!"
 
-#: gtkgame.c:5536
+#: gtkgame.c:5512
 msgid "You should reject the resignation!"
 msgstr "Dovresti respingere il rifiuto!"
 
-#: gtkgame.c:5685 show.c:999
+#: gtkgame.c:5661 show.c:999
 #, c-format
 msgid "Score Sheet - "
 msgstr "Punteggio - "
 
-#: gtkgame.c:5688 show.c:1002
+#: gtkgame.c:5664 show.c:1002
 #, c-format
 msgid "Match to %d point"
 msgid_plural "Match to %d points"
 msgstr[0] "Match a %d punto"
 msgstr[1] "Match a %d punti"
 
-#: gtkgame.c:5693 show.c:1006
+#: gtkgame.c:5669 show.c:1006
 msgid "Money Session"
 msgstr "Sessione money"
 
-#: gtkgame.c:5796 show.c:649
+#: gtkgame.c:5772 show.c:649
 msgid "Copying"
 msgstr "Copia"
 
-#: gtkgame.c:5801 gtkgame.c:5851 show.c:1088
+#: gtkgame.c:5777 gtkgame.c:5827 show.c:1088
 msgid "Warranty"
 msgstr "Garanzia"
 
-#: gtkgame.c:5810
+#: gtkgame.c:5786
 msgid "Evaluation engine"
 msgstr "Motore di valutazione"
 
-#: gtkgame.c:5819
+#: gtkgame.c:5795
 msgid "About GNU Backgammon"
 msgstr "Su GNU Backgammon"
 
-#: gtkgame.c:5833
+#: gtkgame.c:5809
 msgid "Credits"
 msgstr "Crediti"
 
-#: gtkgame.c:5839
+#: gtkgame.c:5815
 msgid "Build Info"
 msgstr "Info versione"
 
-#: gtkgame.c:5845
+#: gtkgame.c:5821
 msgid "Copying conditions"
 msgstr "Codizioni di copia"
 
-#: gtkgame.c:5857
+#: gtkgame.c:5833
 msgid "Report Bug"
 msgstr "Bugs report"
 
-#: gtkgame.c:5863
+#: gtkgame.c:5839
 msgid "Evaluation Engine"
 msgstr "Motore di valutazione"
 
-#: gtkgame.c:5882
+#: gtkgame.c:5858
 msgid "GNU Backgammon - Build Info"
 msgstr "GNU Backgammon - Info versione"
 
-#: gtkgame.c:5975
+#: gtkgame.c:5951
 msgid "GNU Backgammon - Credits"
 msgstr "GNU Backgammon - Crediti"
 
-#: gtkgame.c:6011
+#: gtkgame.c:5987
 msgid "Special thanks"
 msgstr "Ringraziamenti speciali a:"
 
-#: gtkgame.c:6028
+#: gtkgame.c:6004
 #, fuzzy
 msgid "Contributers"
 msgstr "Contributi al codice"
 
-#: gtkgame.c:6096
+#: gtkgame.c:6072
 #, c-format
 msgid ""
 "%s- %s\n"
@@ -4019,74 +4026,74 @@ msgstr ""
 "\n"
 "Uso: %s%s\n"
 
-#: gtkgame.c:6133 gtkgame.c:6135
+#: gtkgame.c:6109 gtkgame.c:6111
 msgid "Help - command reference"
 msgstr "Help - command reference"
 
-#: gtkgame.c:6479
+#: gtkgame.c:6455
 msgid "Chequer Play Statistics:"
 msgstr "Ststistiche delle mosse:"
 
-#: gtkgame.c:6480
+#: gtkgame.c:6456
 msgid "Cube Statistics:"
 msgstr "Statistiche del cubo"
 
-#: gtkgame.c:6481
+#: gtkgame.c:6457
 msgid "Luck Statistics:"
 msgstr "Statistiche sulla fortuna"
 
-#: gtkgame.c:6482
+#: gtkgame.c:6458
 msgid "Overall Statistics:"
 msgstr "Statistiche complessive:"
 
-#: gtkgame.c:6646
+#: gtkgame.c:6622
 msgid "Statistics for game "
 msgstr "Statistiche del game "
 
-#: gtkgame.c:6723
+#: gtkgame.c:6699
 msgid "Show all games"
 msgstr "Mostra tutti i games"
 
-#: gtkgame.c:6727
+#: gtkgame.c:6703
 msgid "Move to first game"
 msgstr "Vai al primo game"
 
-#: gtkgame.c:6731 gtkpanels.c:824
+#: gtkgame.c:6707 gtkpanels.c:824
 msgid "Move back to the previous game"
 msgstr "Torna al game precedente"
 
-#: gtkgame.c:6735 gtkpanels.c:839
+#: gtkgame.c:6711 gtkpanels.c:839
 msgid "Move ahead to the next game"
 msgstr "Vai al game successivo"
 
-#: gtkgame.c:6739
+#: gtkgame.c:6715
 msgid "Move ahead to last game"
 msgstr "Vai all' ultimo game"
 
-#: gtkgame.c:6747
+#: gtkgame.c:6723
 #, c-format
 msgid "All games: %s %d, %s %d"
 msgstr "Tutti i games: %s %d, %s %d"
 
-#: gtkgame.c:6750
+#: gtkgame.c:6726
 #, c-format
 msgid "All games: %s, %s"
 msgstr "Tutti i games: %s, %s"
 
-#: gtkgame.c:6767
+#: gtkgame.c:6743
 #, c-format
 msgid "Game %d: %s %d, %s %d"
 msgstr "Game %d: %s %d, %s %d"
 
-#: gtkgame.c:6912 gtkgame.c:7166
+#: gtkgame.c:6888 gtkgame.c:7142
 msgid "Overall"
 msgstr "In generale"
 
-#: gtkgame.c:6952
+#: gtkgame.c:6928
 msgid "Graph"
 msgstr "Grafico"
 
-#: gtkgame.c:6953
+#: gtkgame.c:6929
 msgid ""
 "This graph shows the total error rates per game for each player. The games "
 "are along the bottom and the error rates up the side. Chequer error in "
@@ -4096,146 +4103,146 @@ msgstr ""
 "games sono lungo le ascisse (orizzontale) e i ratei d'errore nelle ordinate "
 "(verticale). Gli errori di mossa in verde, errori di cubo in blu."
 
-#: gtkgame.c:6958
+#: gtkgame.c:6934
 msgid "Split statistics into panels"
 msgstr "Dividi le statistiche nei pannelli"
 
-#: gtkgame.c:7138
+#: gtkgame.c:7114
 msgid "GNU Backgammon - Player records"
 msgstr "GNU Backgammon - Registrazioni del giocatore"
 
-#: gtkgame.c:7158
+#: gtkgame.c:7134
 msgid "Name"
 msgstr "Nome"
 
-#: gtkgame.c:7161
+#: gtkgame.c:7137
 msgid "Chequer"
 msgstr "Pedina"
 
-#: gtkgame.c:7170 record.c:566 text.c:761
+#: gtkgame.c:7146 record.c:568 text.c:761
 msgid "Games"
 msgstr "Games"
 
-#: gtkgame.c:7191
+#: gtkgame.c:7167
 msgid "Games:"
 msgstr "Games:"
 
-#: gtkgame.c:7194
+#: gtkgame.c:7170
 msgid "Chequer:"
 msgstr "Pedina:"
 
-#: gtkgame.c:7197
+#: gtkgame.c:7173
 msgid "Cube:"
 msgstr "Cubo:"
 
-#: gtkgame.c:7200
+#: gtkgame.c:7176
 msgid "Overall:"
 msgstr "In generale:"
 
-#: gtkgame.c:7203
+#: gtkgame.c:7179
 msgid "Luck:"
 msgstr "Fortuna:"
 
-#: gtkgame.c:7206
+#: gtkgame.c:7182
 msgid "20"
 msgstr "20"
 
-#: gtkgame.c:7209
+#: gtkgame.c:7185
 msgid "100"
 msgstr "100"
 
-#: gtkgame.c:7212
+#: gtkgame.c:7188
 msgid "500"
 msgstr "500"
 
-#: gtkgame.c:7215 progress.c:255 progress.c:349 record.c:564 text.c:759
+#: gtkgame.c:7191 progress.c:255 progress.c:349 record.c:566 text.c:759
 #, c-format
 msgid "Total"
 msgstr "Totale"
 
-#: gtkgame.c:7224
+#: gtkgame.c:7200
 msgid "Erase"
 msgstr "Cancella"
 
-#: gtkgame.c:7229
+#: gtkgame.c:7205
 msgid "Erase All"
 msgstr "Cancella tutto"
 
-#: gtkgame.c:7348 record.c:543 record.c:587
+#: gtkgame.c:7324 record.c:545 record.c:589
 msgid "No player records found."
 msgstr "Non ho trovato registrazioni del giocatore."
 
-#: gtkgame.c:7440
+#: gtkgame.c:7416
 msgid "GNU Backgammon - Match information"
 msgstr "GNU Backgammon - Informazioni sul match"
 
-#: gtkgame.c:7447 gtkgame.c:7450
+#: gtkgame.c:7423 gtkgame.c:7426
 #, c-format
 msgid "%s's rating:"
 msgstr "rating di %s:"
 
-#: gtkgame.c:7453
+#: gtkgame.c:7429
 msgid "Date:"
 msgstr "Data:"
 
-#: gtkgame.c:7454
+#: gtkgame.c:7430
 msgid "Event:"
 msgstr "Evento:"
 
-#: gtkgame.c:7455
+#: gtkgame.c:7431
 msgid "Round:"
 msgstr "Turno:"
 
-#: gtkgame.c:7456
+#: gtkgame.c:7432
 msgid "Place:"
 msgstr "Luogo:"
 
-#: gtkgame.c:7457
+#: gtkgame.c:7433
 msgid "Annotator:"
 msgstr "Note di:"
 
-#: gtkgame.c:7460
+#: gtkgame.c:7436
 msgid "Comments:"
 msgstr "Commenti:"
 
 #. FIXME should be modal but presently causes crash and/or killing of the main window
-#: gtkgame.c:7567
+#: gtkgame.c:7543
 msgid "GNU Backgammon - Speed estimate"
 msgstr "GNU Backgammon - Velocità stimata"
 
-#: gtkgame.c:7576
+#: gtkgame.c:7552
 msgid "Speed recorded:"
 msgstr "Velocità registrata:"
 
-#: gtkgame.c:7584 gtkgame.c:7621
+#: gtkgame.c:7560 gtkgame.c:7597
 msgid "static evaluations/second"
 msgstr "valutazioni statiche/secondo"
 
-#: gtkgame.c:7588
+#: gtkgame.c:7564
 msgid "Calibrate"
 msgstr "Calibrazione"
 
-#: gtkgame.c:7611
+#: gtkgame.c:7587
 msgid "GNU Backgammon - Calibration"
 msgstr "GNU Backgammon - Calibrazione"
 
-#: gtkgame.c:7617
+#: gtkgame.c:7593
 msgid "Calibrating:"
 msgstr "Calibratura:"
 
-#: gtkgame.c:7619
+#: gtkgame.c:7595
 msgid "       (n/a)       "
 msgstr "       (n/d)       "
 
-#: gtkgame.c:7675
+#: gtkgame.c:7651
 msgid "Resign normal"
 msgstr "Rifiuta singola"
 
-#: gtkgame.c:7676
+#: gtkgame.c:7652
 msgid "Resign gammon"
 msgstr "Rifiuta gammon"
 
-#: gtkgame.c:7677
+#: gtkgame.c:7653
 msgid "Resign backgammon"
 msgstr "Rifiuta backgammon"
 
@@ -6232,104 +6239,104 @@ msgstr "Database di rollout ad un lato"
 msgid "Two-Sided Database"
 msgstr "Database di rollout ad due lati"
 
-#: gtkrelational.c:53
+#: gtkrelational.c:50
 msgid "Nick"
 msgstr "Nick"
 
-#: gtkrelational.c:54
+#: gtkrelational.c:51
 msgid ""
 "Gnu\n"
 "Err"
 msgstr ""
 "Gnu\n"
+"Err"
+
+#: gtkrelational.c:52
+msgid ""
+"Gnu\n"
+"Move"
+msgstr ""
+"Gnu\n"
+"Mossa"
+
+#: gtkrelational.c:53
+msgid ""
+"Gnu\n"
+"Cube"
+msgstr ""
+"Gnu\n"
+"Cubo"
+
+#: gtkrelational.c:54
+msgid ""
+"Snw\n"
+"Err"
+msgstr ""
+"Snw\n"
 "Err"
 
 #: gtkrelational.c:55
 msgid ""
-"Gnu\n"
+"Snw\n"
 "Move"
 msgstr ""
-"Gnu\n"
+"Snw\n"
 "Mossa"
 
 #: gtkrelational.c:56
 msgid ""
-"Gnu\n"
+"Snw\n"
 "Cube"
 msgstr ""
-"Gnu\n"
+"Snw\n"
 "Cubo"
-
-#: gtkrelational.c:57
-msgid ""
-"Snw\n"
-"Err"
-msgstr ""
-"Snw\n"
-"Err"
-
-#: gtkrelational.c:58
-msgid ""
-"Snw\n"
-"Move"
-msgstr ""
-"Snw\n"
-"Mossa"
 
 #: gtkrelational.c:59
 msgid ""
-"Snw\n"
-"Cube"
+"WDb\n"
+"Pass"
 msgstr ""
-"Snw\n"
-"Cubo"
+"WDb\n"
+"Passa"
+
+#: gtkrelational.c:60
+msgid ""
+"WDb\n"
+"Take"
+msgstr ""
+"WDb\n"
+"Accetta"
+
+#: gtkrelational.c:61
+msgid ""
+"MDb\n"
+"Pass"
+msgstr ""
+"MDb\n"
+"Passa"
 
 #: gtkrelational.c:62
 msgid ""
-"WDb\n"
-"Pass"
-msgstr ""
-"WDb\n"
-"Passa"
-
-#: gtkrelational.c:63
-msgid ""
-"WDb\n"
-"Take"
-msgstr ""
-"WDb\n"
-"Accetta"
-
-#: gtkrelational.c:64
-msgid ""
-"MDb\n"
-"Pass"
-msgstr ""
-"MDb\n"
-"Passa"
-
-#: gtkrelational.c:65
-msgid ""
 "MDb\n"
 "Take"
 msgstr ""
 "MDb\n"
 "Accetta"
 
-#: gtkrelational.c:136 gtkrelational.c:785
+#: gtkrelational.c:133 gtkrelational.c:782
 msgid "No data in database"
 msgstr "Nessun dato nel database"
 
-#: gtkrelational.c:356
+#: gtkrelational.c:353
 msgid "Search failed or empty."
 msgstr ""
 
-#: gtkrelational.c:384
+#: gtkrelational.c:381
 #, c-format
 msgid "Remove all data for %s?"
 msgstr "Rimuovo tutti i dati di %s?"
 
-#: gtkrelational.c:565
+#: gtkrelational.c:562
 #, fuzzy
 msgid ""
 "This database is from an old version of GNU Backgammon and cannot be used"
@@ -6337,31 +6344,31 @@ msgstr ""
 "Questo database è di una vecchia versione di gnubg e non può essere "
 "utilizzato"
 
-#: gtkrelational.c:567
+#: gtkrelational.c:564
 #, fuzzy
 msgid ""
 "This database is from a new version of GNU Backgammon and cannot be used"
 msgstr ""
 "Questo database è di una nuova versione di gnubg e non può essere utilizzato"
 
-#: gtkrelational.c:571
+#: gtkrelational.c:568
 msgid "This database structure is invalid"
 msgstr "La struttura del database non è valida"
 
-#: gtkrelational.c:576
+#: gtkrelational.c:573
 msgid "This database contains no matches"
 msgstr "Il database non contiene matches"
 
-#: gtkrelational.c:578
+#: gtkrelational.c:575
 msgid "This database contains 1 match"
 msgstr "Il database contiene 1 match"
 
-#: gtkrelational.c:581
+#: gtkrelational.c:578
 #, c-format
 msgid "This database contains %d matches\n"
 msgstr "Il database contiene %d matches\n"
 
-#: gtkrelational.c:586
+#: gtkrelational.c:583
 #, c-format
 msgid ""
 "Database connection successful\n"
@@ -6370,63 +6377,63 @@ msgstr ""
 "Connessione al database riuscita\n"
 "%s\n"
 
-#: gtkrelational.c:622
+#: gtkrelational.c:619
 msgid "Add Database"
 msgstr "Aggiungi Database"
 
-#: gtkrelational.c:622
+#: gtkrelational.c:619
 msgid "Database Name:"
 msgstr "Nome Database:"
 
-#: gtkrelational.c:637
+#: gtkrelational.c:634
 msgid "Failed to create database!"
 msgstr "Fallito nel creare il database!"
 
-#: gtkrelational.c:646
+#: gtkrelational.c:643
 msgid "Are you sure you want to delete all the matches in this database?"
 msgstr "Sei sicuro di voler cancellare tutti i matches in questo database?"
 
-#: gtkrelational.c:655
+#: gtkrelational.c:652
 msgid "Database successfully removed"
 msgstr "Database rimosso"
 
-#: gtkrelational.c:658
+#: gtkrelational.c:655
 msgid "Failed to delete database!"
 msgstr "Fallito nel cancellare il database!"
 
-#: gtkrelational.c:688
+#: gtkrelational.c:685
 msgid "Databases"
 msgstr "Databases"
 
-#: gtkrelational.c:705
+#: gtkrelational.c:702
 msgid "DB Type"
 msgstr "Tipo DB"
 
-#: gtkrelational.c:711
+#: gtkrelational.c:708
 msgid "Username"
 msgstr "Nome Utente"
 
-#: gtkrelational.c:719
+#: gtkrelational.c:716
 msgid "Password"
 msgstr "Password"
 
-#: gtkrelational.c:737
+#: gtkrelational.c:734
 msgid "Store game stats"
 msgstr "Archivio le statistiche del game"
 
-#: gtkrelational.c:743
+#: gtkrelational.c:740
 msgid "Info"
 msgstr "Info"
 
-#: gtkrelational.c:790
+#: gtkrelational.c:787
 msgid "GNU Backgammon - Relational Database"
 msgstr "GNU Backgammon - Database Relazionale"
 
-#: gtkrelational.c:879
+#: gtkrelational.c:876
 msgid "Query"
 msgstr "Interrogazione"
 
-#: gtkrelational.c:943
+#: gtkrelational.c:940
 msgid "GNU Backgammon - Database Result"
 msgstr "GNU Backgammon - Risultati Database"
 
@@ -7035,9 +7042,9 @@ msgstr[1] "<p %s>%s vince %d punti</p>\n"
 msgid "gnubg.css is not written since it already exist in \"%s\"\n"
 msgstr "gnubg.css non è stato scritto poichè esiste già in \"%s\"\n"
 
-#: html.c:3445 html.c:3597 html.c:3741 html.c:3777 latex.c:551 play.c:1762
-#: play.c:2093 play.c:2214 play.c:2551 play.c:2630 play.c:3047 play.c:3292
-#: play.c:3332 play.c:3450 play.c:3748 sgf.c:2375 sgf.c:2413 sgf.c:2459
+#: html.c:3445 html.c:3597 html.c:3741 html.c:3777 latex.c:551 play.c:1746
+#: play.c:2085 play.c:2206 play.c:2559 play.c:2638 play.c:3063 play.c:3308
+#: play.c:3348 play.c:3466 play.c:3772 sgf.c:2375 sgf.c:2413 sgf.c:2459
 #: show.c:987 show.c:1303 show.c:1522 show.c:2073 show.c:2101 text.c:929
 #: text.c:1026
 msgid "No game in progress (type `new game' to start one)."
@@ -7086,165 +7093,170 @@ msgstr ""
 msgid "File not recognised as Jellyfish file."
 msgstr "File non riconosciuto come Jellyfish file."
 
-#: import.c:359 import.c:992 import.c:1505 import.c:2260 import.c:2942
-#: import.c:3147
+#: import.c:373
+#, fuzzy
+msgid "Failed reading jellyfish file"
+msgstr "File non riconosciuto come Jellyfish file."
+
+#: import.c:400 import.c:1033 import.c:1550 import.c:2305 import.c:2994
+#: import.c:3199
 msgid ""
 "Are you sure you want to import a saved match, and discard the game in "
 "progress? "
 msgstr ""
 "Sei sicuro di voler importare un match salvato, e scartare il game in corso? "
 
-#: import.c:375
+#: import.c:416
 msgid "This file is not a valid Jellyfish .pos file!\n"
 msgstr "Questo non è un valido file Jellyfish .pos!\n"
 
-#: import.c:586 import.c:755 import.c:1197 import.c:1699 import.c:1748
-#: import.c:1841 import.c:2643 import.c:2890
+#: import.c:627 import.c:796 import.c:1238 import.c:1744 import.c:1793
+#: import.c:1886 import.c:2688 import.c:2938
 msgid "Take record found but doesn't follow a double"
 msgstr "Registrazione di take trovata ma non segue ad un raddoppio"
 
-#: import.c:603
+#: import.c:644
 msgid "No '(' following text 'Illegal play'"
 msgstr "No '(' segue il testo 'Illegal play'"
 
-#: import.c:613
+#: import.c:654
 msgid "Illegal Snowie position format for illegal play."
 msgstr "Formato di posizione illegale in Snowie per gioco illegale."
 
-#: import.c:662
+#: import.c:703
 #, c-format
 msgid "WARNING: Expand move failed. This file contains garbage!"
 msgstr "ATTENZIONE: Espansione mossa fallita. Questo file contiene errori!"
 
 #. only give warning if Nack didn't work either
-#: import.c:675
+#: import.c:716
 #, c-format
 msgid "WARNING: Invalid move: \"%s\" encountered\n"
 msgstr "ATTENZIONE: Mossa non valida:\"%s\" incontrata\n"
 
-#: import.c:766 import.c:1210 import.c:1856 import.c:2659
+#: import.c:807 import.c:1251 import.c:1901 import.c:2704
 msgid "Drop record found but doesn't follow a double"
 msgstr "Registrazione di drop trovata ma non segue ad un raddoppio"
 
-#: import.c:791
+#: import.c:832
 #, c-format
 msgid "Unrecognised move \"%s\" in .mat file.\n"
 msgstr "Mossa non riconosciuta \"%s\" nel .mat file.\n"
 
-#: import.c:961
+#: import.c:1002
 #, c-format
 msgid "%s: not a valid .mat file"
 msgstr "%s: non è un valido .mat file"
 
-#: import.c:1025
+#: import.c:1066
 #, c-format
 msgid "WARNING! Unrecognized line in mat file: '%s'\n"
 msgstr "ATTENZIONE! Linea non riconosciuta nel mat file:'%s'\n"
 
-#: import.c:1165
+#: import.c:1206
 #, c-format
 msgid "WARNING! Illegal or invalid move: '%s'\n"
 msgstr "ATTENZIONE!: Mossa non valida o illegale: '%s'\n"
 
-#: import.c:1236
+#: import.c:1277
 #, c-format
 msgid "Unrecognised move \"%s\" in oldmoves file.\n"
 msgstr "Mossa non riconosciuta \"%s\" nel file oldmoves.\n"
 
-#: import.c:1485 import.c:1491
+#: import.c:1530 import.c:1536
 #, c-format
 msgid "%s: not a valid oldmoves file"
 msgstr "%s: non è un valido file oldmoves"
 
-#: import.c:1631
+#: import.c:1676
 msgid "Beaver record found but doesn't follow a double"
 msgstr "Registrazione di beaver trovata ma non segue ad un raddoppio"
 
-#: import.c:1803
+#: import.c:1848
 msgid "Beaver found but doesn't follow a double"
 msgstr "Beaver trovato ma non segue ad un raddoppio"
 
-#: import.c:1823
+#: import.c:1868
 msgid "Raccoon found but doesn't follow a double"
 msgstr "Raccoon trovato ma non segue ad un raddoppio"
 
 #. No player line found
-#: import.c:2252
+#: import.c:2297
 #, c-format
 msgid "%s: not a valid SGG file"
 msgstr "%s: non è un valido file SGG"
 
-#: import.c:2344
+#: import.c:2389
 #, c-format
 msgid "TMG MatchID: %s"
 msgstr "TMG MatchID: %s"
 
-#: import.c:3542
+#: import.c:3596
 msgid "You must specify a BKG session file to import (see `help import bkg')."
 msgstr ""
 "Devi specificare una sessione BKG per il file da importare (vedi 'aiuto "
 "importa bkg')."
 
-#: import.c:3568
+#: import.c:3622
 msgid "You must specify a position file to import (see `help import pos')."
 msgstr ""
 "Devi specificare un file-posizione per importarlo (vedi 'aiuto importa "
 "posizione')."
 
-#: import.c:3594
+#: import.c:3648
 msgid "You must specify a match file to import (see `help import mat')."
 msgstr ""
 "Devi specificare un file-match per importarlo (vedi 'aiuto importa mat'). "
 
-#: import.c:3620
+#: import.c:3674
 msgid ""
 "You must specify an oldmoves file to import (see `help import oldmoves')."
 msgstr ""
 "Devi specificare un file-oldmoves per importarlo (vedi 'aiuto importa "
 "oldmoves')."
 
-#: import.c:3647
+#: import.c:3701
 msgid "You must specify an SGG file to import (see `help import sgg')."
 msgstr ""
 "Devi specificare un file-SGG per importarlo (vedi 'aiuto importa sgg')."
 
-#: import.c:3673
+#: import.c:3727
 msgid "You must specify an TMG file to import (see `help import tmg')."
 msgstr ""
 "Devi specificare un file-TMG per importarlo (vedi 'aiuto importa tmg')."
 
-#: import.c:3699
+#: import.c:3753
 msgid ""
 "You must specify a Snowie Text file to import (see `help import snowietxt')."
 msgstr ""
 "Devi specificare un file Snowie txt per importarlo (vedi 'aiuto importa "
 "snowietxt')."
 
-#: import.c:3723
+#: import.c:3777
 msgid ""
 "You must specify a GammonEmpire file to import (see `help import empire')."
 msgstr ""
 "Devi specificare un file GammonEmpire per importarlo (vedi 'aiuto importa "
 "empire')."
 
-#: import.c:3751
+#: import.c:3805
 msgid ""
 "You must specify a PartyGammon file to import (see `help import party')."
 msgstr ""
 "Devi specificare un file PartyGammon per importarlo (vedi 'aiuto importa "
 "party'). "
 
-#: import.c:3804
+#: import.c:3858
 #, c-format
 msgid "You must specify a file to import (see `help import auto')."
 msgstr "Devi specificare un file per importarlo (vedi 'aiuto importa auto'). "
 
-#: import.c:3810
+#: import.c:3864
 #, c-format
 msgid "%s is not a backgammon file"
 msgstr "%s non è un file di backgammon"
 
-#: import.c:3975
+#: import.c:4051
 msgid ""
 "You must specify a BackGammonRoom file to import (see `help import bgroom')."
 msgstr ""
@@ -7279,122 +7291,122 @@ msgid "You must specify a file to export to (see `help export match latex')."
 msgstr ""
 "Devi specificare un file da esportare a (guarda 'aiuto esporta match latex')."
 
-#: makebearoff.c:692 makebearoff.c:1331
+#: makebearoff.c:692 makebearoff.c:1340
 #, c-format
 msgid "Error creating xhash with %d elements\n"
 msgstr "Errore creando xhash con %d elementi\n"
 
-#: makebearoff.c:1579
+#: makebearoff.c:1592
 msgid "Size of one-sided bearoff database must be between 0 and 18\n"
 msgstr ""
 "La dimensione del database one-sided bearoff deve essere compresa fra 0 e "
 "18\n"
 
-#: makebearoff.c:1601
+#: makebearoff.c:1614
 #, fuzzy
 msgid "One-sided database"
 msgstr "Database di rollout ad un lato"
 
-#: makebearoff.c:1602 makebearoff.c:1713
+#: makebearoff.c:1615 makebearoff.c:1726
 #, fuzzy
 msgid "Number of points"
 msgstr "numero non valido di pedine o punti"
 
-#: makebearoff.c:1603 makebearoff.c:1714
+#: makebearoff.c:1616 makebearoff.c:1727
 #, fuzzy
 msgid "Number of chequers"
 msgstr "Numero di pedine: %d\n"
 
-#: makebearoff.c:1604
+#: makebearoff.c:1617
 #, fuzzy
 msgid "Number of positions"
 msgstr "Numero di decisioni ravvicinate"
 
-#: makebearoff.c:1605
+#: makebearoff.c:1618
 #, fuzzy
 msgid "Approximate by normal distribution"
 msgstr ""
 "   - le distribuzioni sono approssimate con una normale distribuzione\n"
 
-#: makebearoff.c:1606
+#: makebearoff.c:1619
 #, fuzzy
 msgid "Include gammon distributions"
 msgstr "il database include la distribuzione dei gammons"
 
-#: makebearoff.c:1607
+#: makebearoff.c:1620
 msgid "Use compression scheme"
 msgstr ""
 
-#: makebearoff.c:1608 makebearoff.c:1716
+#: makebearoff.c:1621 makebearoff.c:1729
 msgid "Write header"
 msgstr ""
 
-#: makebearoff.c:1609
+#: makebearoff.c:1622
 #, fuzzy
 msgid "Size of cache"
 msgstr "Dimensione delle immagini PNG:"
 
-#: makebearoff.c:1610 makebearoff.c:1721
+#: makebearoff.c:1623 makebearoff.c:1734
 #, fuzzy
 msgid "Reuse old bearoff database"
 msgstr "Non utilizza il database uscita pedine"
 
-#: makebearoff.c:1621
+#: makebearoff.c:1634
 #, fuzzy
 msgid "Size of database"
 msgstr "Database uscita pedine"
 
-#: makebearoff.c:1630
+#: makebearoff.c:1643
 #, fuzzy
 msgid "Size of database (uncompressed)"
 msgstr "Dimensione del database (non compresso)   : %.0f (%.1f MB)\n"
 
-#: makebearoff.c:1638
+#: makebearoff.c:1651
 #, fuzzy
 msgid "Estimated size of compressed db"
 msgstr "Stima della dimensione compressa del db   : %.0f (%.1f MB)\n"
 
-#: makebearoff.c:1645 makebearoff.c:1729
+#: makebearoff.c:1658 makebearoff.c:1742
 msgid "Error initialising old bearoff database!\n"
 msgstr "Errore di inizializzazione del vecchio bearoff database!\n"
 
-#: makebearoff.c:1655 makebearoff.c:1737
+#: makebearoff.c:1668 makebearoff.c:1750
 msgid "The old database is not of the same kind as the requested database\n"
 msgstr "Il vecchio database non è dello stesso tipo del database richiesto\n"
 
-#: makebearoff.c:1700 makebearoff.c:1715
+#: makebearoff.c:1713 makebearoff.c:1728
 msgid "cubeless and cubeful"
 msgstr "senza cubo e con il cubo"
 
-#: makebearoff.c:1700 makebearoff.c:1715
+#: makebearoff.c:1713 makebearoff.c:1728
 msgid "cubeless only"
 msgstr "solo senza il cubo"
 
-#: makebearoff.c:1712
+#: makebearoff.c:1725
 #, fuzzy
 msgid "Two-sided database:\n"
 msgstr "Database di rollout ad due lati"
 
-#: makebearoff.c:1715
+#: makebearoff.c:1728
 #, fuzzy
 msgid "Calculate equities"
 msgstr "Calcolo le equities"
 
-#: makebearoff.c:1717
+#: makebearoff.c:1730
 #, fuzzy
 msgid "Number of one-sided positions"
 msgstr "Numero totale posizioni a un lato: %d\n"
 
-#: makebearoff.c:1718
+#: makebearoff.c:1731
 #, fuzzy
 msgid "Total number of positions"
 msgstr "Numero totale posizioni a un lato: %d\n"
 
-#: makebearoff.c:1719
+#: makebearoff.c:1732
 msgid "Size of resulting file"
 msgstr ""
 
-#: makebearoff.c:1720
+#: makebearoff.c:1733
 #, fuzzy
 msgid "Size of xhash"
 msgstr "Dimensione delle immagini PNG:"
@@ -7429,82 +7441,82 @@ msgstr "Posizione illegale"
 msgid "Total number of positions in file"
 msgstr "Numero totale posizioni a un lato: %d\n"
 
-#: makehyper.c:672
+#: makehyper.c:676
 #, c-format
 msgid "Number of chequers: %d\n"
 msgstr "Numero di pedine: %d\n"
 
-#: makehyper.c:676
+#: makehyper.c:680
 #, fuzzy
 msgid "Total number of one sided positions"
 msgstr "Numero totale posizioni a un lato: %d\n"
 
-#: makehyper.c:677
+#: makehyper.c:681
 #, fuzzy
 msgid "Total number of two sided positions"
 msgstr "Numero totale posizioni a due lati: %d\n"
 
-#: makehyper.c:678
+#: makehyper.c:682
 #, fuzzy
 msgid "Estimated size of file"
 msgstr "Stima tempo rimanente"
 
-#: makehyper.c:678
+#: makehyper.c:682
 #, fuzzy
 msgid "bytes"
 msgstr "sì"
 
-#: makehyper.c:679
+#: makehyper.c:683
 #, fuzzy
 msgid "Output file"
 msgstr "Files supportati"
 
-#: makehyper.c:680
+#: makehyper.c:684
 #, fuzzy
 msgid "Convergens threshold"
 msgstr "Soglia convergenza                 : %e\n"
 
-#: makehyper.c:686
+#: makehyper.c:690
 #, c-format
 msgid "*** Obtain start guess ***\n"
 msgstr "*** Obtain start guess ***\n"
 
-#: makehyper.c:697
+#: makehyper.c:701
 #, c-format
 msgid "0-vector start guess\n"
 msgstr "0-vector start guess\n"
 
-#: makehyper.c:701
+#: makehyper.c:705
 #, c-format
 msgid "Start from file\n"
 msgstr "Parti da un file\n"
 
-#: makehyper.c:707
+#: makehyper.c:711
 #, c-format
 msgid "Time for start guess: %d seconds\n"
 msgstr "Time for start guess: %d seconds\n"
 
-#: makehyper.c:715
+#: makehyper.c:719
 #, c-format
 msgid "*** Iteration %03d *** \n"
 msgstr "*** Iteration %03d *** \n"
 
-#: makehyper.c:725
+#: makehyper.c:729
 #, c-format
 msgid "norm of delta: %f\n"
 msgstr "norm of delta: %f\n"
 
-#: makehyper.c:738
+#: makehyper.c:742
 #, c-format
 msgid "Time for iteration %03d: %d seconds\n"
 msgstr "Tempo per l'iteratzione %03d: %d secondi\n"
 
-#: makehyper.c:750
+#: makehyper.c:754
 #, c-format
 msgid "Time for writing final file: %d seconds\n"
 msgstr "Tempo per la scrittura finale del file: %d secondi\n"
 
-#: makehyper.c:754
+#: makehyper.c:758
 #, c-format
 msgid "Total time: %d seconds\n"
 msgstr "Tempo totale: %d secondi\n"
@@ -7523,7 +7535,7 @@ msgstr ""
 "%s: versione incorretta di weights \n"
 "(è richiesta la versione %s, questa è invece %s)\n"
 
-#: makeweights.c:113
+#: makeweights.c:117
 #, c-format
 msgid "%d nets converted\n"
 msgstr "%d nets convertiti\n"
@@ -7623,141 +7635,153 @@ msgstr "fortunato"
 msgid "very lucky"
 msgstr "molto fortunato"
 
-#: play.c:732 play.c:2840
+#: play.c:716 play.c:2856
 msgid ""
 "Are you sure you want to start a new game, and discard the one in progress? "
 msgstr ""
 "Sei sicuro di voler cominciare un nuovo game, ed eliminare quello in corso?"
 
-#: play.c:793
+#: play.c:777
 #, c-format
 msgid "%s rolls %d, %s rolls %d.\n"
 msgstr "%s lancia %d, %s lancia %d.\n"
 
-#: play.c:802
+#: play.c:786
 #, c-format
 msgid "The cube is now at %d.\n"
 msgstr "Il cubo è ora a %d.\n"
 
-#: play.c:849
+#: play.c:833
 #, c-format
 msgid "%s cannot move.\n"
 msgstr "%s non può muovere.\n"
 
-#: play.c:851
+#: play.c:835
 #, c-format
 msgid "%s moves %s.\n"
 msgstr "%s muove %s.\n"
 
-#: play.c:1248 play.c:3802
+#: play.c:1232 play.c:3834
 #, c-format
 msgid "%s rolls %1i and %1i.\n"
 msgstr "%s lancia %1i e %1i.\n"
 
-#: play.c:1369
+#: play.c:1353
 msgid "Warning: badly formed resignation response from external player"
 msgstr "Attenzione: il responso di rifiuto del giocatore esterno è sbagliato"
 
-#: play.c:1402
+#: play.c:1386
 msgid "Warning: badly formed cube response from external player"
 msgstr "Attenzione: il responso di cubo del giocatore esterno è sbagliato"
 
-#: play.c:1447
+#: play.c:1431
 msgid "Warning: badly formed move from external player"
 msgstr "Attenzione: mossa sbagliata del giocatore esterno"
 
-#: play.c:1496
+#: play.c:1480
 #, c-format
 msgid "(%s's double has been cancelled.)\n"
 msgstr "(%s's il raddoppio è stato cancellato.)\n"
 
-#: play.c:1636
+#: play.c:1620
 #, c-format
 msgid "%s wins a %s and %d point.\n"
 msgid_plural "%s wins a %s and %d points.\n"
 msgstr[0] "%s vince una %s e %d punto.\n"
 msgstr[1] "%s vince una %s e %d punti.\n"
 
-#: play.c:1678
+#: play.c:1662
 #, c-format
 msgid "%s has won the match.\n"
 msgstr "%s ha vinto il match.\n"
 
-#: play.c:1753
+#: play.c:1737
 msgid "You can only accept if the cube or a resignation has been offered."
 msgstr "Puoi solo accettare se il cubo o un rifiuto è stato offerto."
 
-#: play.c:1774 play.c:2105
+#: play.c:1758 play.c:2097
 msgid "No resignation was offered."
 msgstr "Non è stato offerto alcun rifiuto."
 
-#: play.c:1780
+#: play.c:1765
+msgid ""
+"The resignation is not the last move in the match.\n"
+"Continuing will destroy the remainder of the match. Continue?"
+msgstr ""
+
+#: play.c:1772
 #, c-format
 msgid "%s accepts and wins a %s.\n"
 msgstr "%s accetta e vince un %s.\n"
 
-#: play.c:1805 play.c:1910
+#: play.c:1797 play.c:1902
 msgid "You must select a move to annotate first."
 msgstr "Devi prima selezionare una mossa per annotare."
 
-#: play.c:1821 play.c:1835 play.c:1849 play.c:1864 play.c:1881
+#: play.c:1813 play.c:1827 play.c:1841 play.c:1856 play.c:1873
 msgid "Invalid annotation"
 msgstr "Annotazione non valida."
 
-#: play.c:1888 play.c:1924
+#: play.c:1880 play.c:1916
 msgid "You cannot annotate this move."
 msgstr "Non puoi annotare questa mossa."
 
-#: play.c:1893
+#: play.c:1885
 msgid "Skill annotation cleared."
 msgstr "Annotazione di abilità eliminata "
 
-#: play.c:1895
+#: play.c:1887
 #, c-format
 msgid "Move marked as %s.\n"
 msgstr "Mossa segnata come %s.\n"
 
-#: play.c:1929
+#: play.c:1921
 msgid "Luck annotation cleared."
 msgstr "Annotazione di fortuna eliminata."
 
-#: play.c:1931
+#: play.c:1923
 #, c-format
 msgid "Roll marked as %s.\n"
 msgstr "Lancio segnato come %s.\n"
 
-#: play.c:2008
+#: play.c:2000
 msgid "You must select a move to which to add the comment."
 msgstr "Devi selezionare la mossa per aggiungerne il commento."
 
-#: play.c:2017
+#: play.c:2009
 msgid "Commentary for this move added."
 msgstr "Commento per questa mossa aggiunto."
 
-#: play.c:2032
+#: play.c:2024
 msgid "You must select a move to clear the comment from."
 msgstr "Devi selezionare la mossa per eliminarne il commento."
 
-#: play.c:2041
+#: play.c:2033
 msgid "Commentary for this move cleared."
 msgstr "Commento per questa mossa cancellato."
 
-#: play.c:2111
+#: play.c:2103
 #, c-format
 msgid "%s declines the %s.\n"
 msgstr "%s rifiuta il %s.\n"
 
-#: play.c:2226
+#: play.c:2218
 msgid "Doubling is forbidden by the Crawford rule (see `help set crawford')."
 msgstr ""
 "Il raddoppio è impedito dalla regola di Crawford (guarda 'aiuto imposta il "
 "crawford')."
 
-#: play.c:2233
+#: play.c:2225
 msgid "The doubling cube has been disabled (see `help set cube use')."
 msgstr ""
 "Il cubo del raddoppio è stato disabilitato (guarda 'aiuto imposta l'uso del "
 "cubo)."
+
+#: play.c:2233
+msgid ""
+"The double is not the last move in the match.\n"
+"Continuing will destroy the remainder of the match. Continue?"
+msgstr ""
 
 #: play.c:2245
 msgid "You are only allowed to double if you are on roll."
@@ -7773,7 +7797,7 @@ msgstr ""
 msgid "You do not own the cube."
 msgstr "Non possiedi il cubo."
 
-#: play.c:2264 play.c:3559
+#: play.c:2264 play.c:3575
 #, c-format
 msgid "The cube is already at %d; you can't double any more.\n"
 msgstr "Il cubo è già a %d; non puoi più raddoppiare.\n"
@@ -7787,59 +7811,71 @@ msgstr "%s raddoppia.\n"
 msgid "The cube must have been offered before you can drop it."
 msgstr "Il cubo deve prima esserti stato offerto perchè tu possa rifiutarlo."
 
-#: play.c:2445
+#: play.c:2429
+msgid ""
+"The drop is not the last move in the match.\n"
+"Continuing will destroy the remainder of the match. Continue?"
+msgstr ""
+
+#: play.c:2453
 #, fuzzy, c-format
 msgid "%s refuses the cube and gives up %d point.\n"
 msgid_plural "%s refuses the cube and gives up %d points.\n"
 msgstr[0] "%s rifiuta il cubo e concede %d punto.\n"
 msgstr[1] "%s rifiuta il cubo e concede %d punto.\n"
 
-#: play.c:2485
+#: play.c:2493
 #, c-format
 msgid "      Doubles to %d"
 msgstr "      Raddoppia a %d"
 
-#: play.c:2488
+#: play.c:2496
 msgid "      Takes"
 msgstr "      Accetta"
 
-#: play.c:2491
+#: play.c:2499
 #, c-format
 msgid "      Drop"
 msgstr "      Passa"
 
-#: play.c:2496
+#: play.c:2504
 #, c-format
 msgid "      Resigns"
 msgstr "      Rifiuta"
 
-#: play.c:2642
+#: play.c:2650
 msgid "You must roll the dice before you can move."
 msgstr "Devi prima lanciare i dadi per muovere."
 
-#: play.c:2648
+#: play.c:2656
 #, c-format
 msgid "Please wait for %s to consider the resignation before moving.\n"
 msgstr "Attendi per %s per valutare il rifiuto prima di lanciare.\n"
 
-#: play.c:2655 play.c:3760
+#: play.c:2663 play.c:3784
 #, c-format
 msgid "Please wait for %s to consider the cube before moving.\n"
 msgstr "Attendi per %s per valutare il cubo prima di muovere.\n"
 
-#: play.c:2721
+#: play.c:2671 play.c:3804
+msgid ""
+"The move is not the last in the match.\n"
+"Continuing will destroy the remainder of the match. Continue?"
+msgstr ""
+
+#: play.c:2737
 msgid "You must specify a move (type `help move' for instructions)."
 msgstr "Devi specificare la mossa (scrivi ' aiuto mossa' per istruzioni)."
 
-#: play.c:2823
+#: play.c:2839
 msgid "Illegal move."
 msgstr "Mossa illegale."
 
-#: play.c:2830
+#: play.c:2846
 msgid "The match is already over."
 msgstr "Il match è già finito."
 
-#: play.c:2924
+#: play.c:2940
 #, c-format
 msgid ""
 "GNU Backgammon is compiled with support only for matches of length %i\n"
@@ -7848,19 +7884,19 @@ msgstr ""
 "GNU Backgammon è compilato col supporto solo per matches di lunghezza %i\n"
 "o inferiore\n"
 
-#: play.c:2935
+#: play.c:2951
 msgid ""
 "Are you sure you want to start a new match, and discard the game in "
 "progress? "
 msgstr ""
 "Sei sicuro di voler iniziare un nuovo match, ed eliminare il game in corso? "
 
-#: play.c:2957
+#: play.c:2973
 #, c-format
 msgid "A new %d point match has been started.\n"
 msgstr "Un nuovo match di %d punti è iniziato.\n"
 
-#: play.c:2974
+#: play.c:2990
 msgid ""
 "Are you sure you want to start a new session, and discard the game in "
 "progress? "
@@ -7868,11 +7904,11 @@ msgstr ""
 "Sei sicuro di voler iniziare una nuova sessione, ed eliminare il game in "
 "corso? "
 
-#: play.c:2995
+#: play.c:3011
 msgid "A new session has been started."
 msgstr "Una nuova sessione è iniziata."
 
-#: play.c:3088
+#: play.c:3104
 msgid ""
 "If you specify a parameter to the `next game' command, it must be a positive "
 "number (the count of games to step ahead)."
@@ -7880,7 +7916,7 @@ msgstr ""
 "Se specifichi il parametro al comando 'prossimo game', deve essere un numero "
 "positivo (il conteggio dei giochi al passo successivo)."
 
-#: play.c:3321
+#: play.c:3337
 msgid ""
 "If you specify a parameter to the `next' command, it must be a positive "
 "number (the count of moves to step ahead)."
@@ -7888,11 +7924,11 @@ msgstr ""
 "Se specifichi il parametro al comando 'prossimo', deve essere un numero "
 "positivo (il conteggio delle mosse al passo successivo)."
 
-#: play.c:3338
+#: play.c:3354
 msgid "It's not the computer's turn to play."
 msgstr "Non è il turno di gioco del computer."
 
-#: play.c:3363
+#: play.c:3379
 msgid ""
 "If you specify a parameter to the `previous game' command, it must be a "
 "positive number (the count of games to step back)."
@@ -7900,7 +7936,7 @@ msgstr ""
 "Se specifichi il parametro al comando 'game precedente', deve essere un "
 "numero positivo (il conteggio dei giochi al passo precedente)."
 
-#: play.c:3480
+#: play.c:3496
 msgid ""
 "If you specify a parameter to the `previous' command, it must be a positive "
 "number (the count of moves to step back)."
@@ -7908,152 +7944,164 @@ msgstr ""
 "Se specifichi il parametro al comando 'precedente', deve essere un numero "
 "positivo (il conteggio delle mosse al passo precedente)."
 
-#: play.c:3523
+#: play.c:3539
 #, fuzzy
 msgid "Beavers and Raccoons are not permitted during match play."
 msgstr "Raddoppi non permessi durante il match play."
 
-#: play.c:3529
+#: play.c:3545
 msgid "Beavers are disabled (see `help set beavers')."
 msgstr "I beavers sono disabilitati (guarda 'aiuto settaggio beavers')."
 
-#: play.c:3536
+#: play.c:3552
 msgid "Only one beaver is permitted (see `help set beavers')."
 msgstr "Solo un beaver è permesso (guarda 'aiuto settaggio beavers')."
 
-#: play.c:3539
+#: play.c:3555
 #, c-format
 msgid "Only %d beavers are permitted (see `help set beavers').\n"
 msgstr "Solo %d beavers sono permessi (guarda 'aiuto settaggio beavers').\n"
 
-#: play.c:3546
+#: play.c:3562
 msgid "The cube must have been offered before you can redouble it."
 msgstr ""
 "Il cubo deve prima esserti stato offerto perchè tu possa riraddoppiare."
 
-#: play.c:3577
+#: play.c:3582
+msgid ""
+"The redouble is not the last move in the match.\n"
+"Continuing will destroy the remainder of the match. Continue?"
+msgstr ""
+
+#: play.c:3601
 #, c-format
 msgid "%s accepts and immediately redoubles to %d.\n"
 msgstr "%s accetta e immediatamente riraddoppia a %d.\n"
 
-#: play.c:3598
+#: play.c:3622
 msgid "You can only reject if the cube or a resignation has been offered."
 msgstr "Puoi solo rifiutare se il cubo o un rifiuto è stato offerto."
 
-#: play.c:3608
+#: play.c:3632
 msgid "You must be playing a game if you want to resign it."
 msgstr "Devi stare giocando un game per poterlo resignare."
 
-#: play.c:3640
+#: play.c:3664
 #, fuzzy, c-format
 msgid "Unknown keyword `%s' (see `help resign').\n"
 msgstr "Prola chiave sconosciuta '%s' --prova 'aiuto rifiuto'.\n"
 
-#: play.c:3648
+#: play.c:3672
 #, c-format
 msgid "%s has already declined your offer of a %s.\n"
 msgstr "%s ha già rifiutato la tua offerta a un %s.\n"
 
-#: play.c:3656
+#: play.c:3680
 #, c-format
 msgid "%s offers to resign a %s.\n"
 msgstr "%s offre di resignare un %s.\n"
 
-#: play.c:3767 set.c:2548
+#: play.c:3791 set.c:2548
 msgid "Please resolve the resignation first."
 msgstr "Prima rispondi al rifiuto."
 
-#: play.c:3773
+#: play.c:3797
 msgid "You have already rolled the dice."
 msgstr "Hai già lanciato i dadi."
 
-#: play.c:3858
+#: play.c:3890
 msgid "The cube must have been offered before you can take it."
 msgstr "Il cubo deve esserti prima offerto perchè tu lo possa accettare."
 
-#: play.c:3888
+#: play.c:3903
+msgid ""
+"The take is not the last move in the match.\n"
+"Continuing will destroy the remainder of the match. Continue?"
+msgstr ""
+
+#: play.c:3928
 #, c-format
 msgid "%s accepts the cube at %d.\n"
 msgstr "%s accetta il cubo a %d.\n"
 
-#: play.c:3924
+#: play.c:3964
 #, c-format
 msgid "Illegal match ID '%s'\n"
 msgstr "Match ID illegale '%s'\n"
 
-#: play.c:3925
+#: play.c:3965
 #, fuzzy, c-format
 msgid "Dice %d %d, "
 msgstr "Game %d: %d, %d"
 
-#: play.c:3926
+#: play.c:3966
 #, c-format
 msgid "player on roll %d (turn %d), "
 msgstr ""
 
-#: play.c:3927
+#: play.c:3967
 #, fuzzy, c-format
 msgid "resigned %d,\n"
 msgstr ", rifiuta %s"
 
-#: play.c:3928
+#: play.c:3968
 #, fuzzy, c-format
 msgid "doubled %d, "
 msgstr "Riraddoppia, "
 
-#: play.c:3929
+#: play.c:3969
 #, fuzzy, c-format
 msgid "cube owner %d, "
 msgstr "Cubo offerto a %d"
 
-#: play.c:3930
+#: play.c:3970
 #, fuzzy, c-format
 msgid "crawford game %d,\n"
 msgstr "Crawford game"
 
-#: play.c:3931
+#: play.c:3971
 #, fuzzy, c-format
 msgid "match length %d, "
 msgstr "Lunghezza match:"
 
-#: play.c:3932
+#: play.c:3972
 #, fuzzy, c-format
 msgid "score %d-%d, "
 msgstr "%d%d"
 
-#: play.c:3933
+#: play.c:3973
 #, fuzzy, c-format
 msgid "cube %d, "
 msgstr "(Cubo a: %d)"
 
-#: play.c:3934
+#: play.c:3974
 #, fuzzy, c-format
 msgid "game state %d\n"
 msgstr ""
 "Statistiche per il game %d\n"
 "\n"
 
-#: play.c:4380
+#: play.c:4420
 #, c-format
 msgid "Double to %d"
 msgstr "Raddoppia a %d"
 
-#: play.c:4380
+#: play.c:4420
 #, c-format
 msgid "Redouble to %d"
 msgstr "Riraddoppia a %d"
 
-#: play.c:4386
+#: play.c:4426
 #, c-format
 msgid "Beaver to %d"
 msgstr "Beaver a %d"
 
-#: play.c:4386
+#: play.c:4426
 #, c-format
 msgid "Raccoon to %d"
 msgstr "Raccoon a %d"
 
-#: play.c:4411
+#: play.c:4451
 msgid " Resigns"
 msgstr " Rifiuta"
 
@@ -8268,28 +8316,28 @@ msgstr "Rollout: %d/%d prove"
 msgid "%s: invalid record file version"
 msgstr "%s: file record versione non valida"
 
-#: record.c:110 record.c:148
+#: record.c:110 record.c:157
 #, c-format
 msgid "%s: invalid record file"
 msgstr "%s: file record non valido"
 
-#: record.c:411 show.c:924 show.c:2228
+#: record.c:413 show.c:924 show.c:2228
 msgid "No game is being played."
 msgstr "Non è stato giocato un game."
 
-#: record.c:422 record.c:455
+#: record.c:424 record.c:457
 msgid "No game statistics are available."
 msgstr "Non sono disponibili statistiche del game."
 
-#: record.c:427
+#: record.c:429
 msgid "Game statistics saved to player records."
 msgstr "Statistiche del game salvate nelle registrazioni del giocatore."
 
-#: record.c:440 relational.c:469 show.c:664 show.c:865
+#: record.c:442 relational.c:455 show.c:664 show.c:865
 msgid "No match is being played."
 msgstr "Non è stato giocato un match."
 
-#: record.c:463
+#: record.c:465
 #, fuzzy, c-format
 msgid "Statistics from %d game were saved to player records."
 msgid_plural "Statistics from %d games were saved to player records."
@@ -8300,74 +8348,74 @@ msgstr[1] ""
 "Le statistiche di %d games sono state salvate nelle registrazioni del "
 "giocatore.\n"
 
-#: record.c:471
+#: record.c:473
 msgid "No session is being played."
 msgstr "Non è stata giocata alcuna sessione."
 
-#: record.c:486
+#: record.c:488
 msgid "You must specify which player's record to erase."
 msgstr "Devi specificare la registrazione di quale giocatore cancellare."
 
-#: record.c:499
+#: record.c:501
 #, c-format
 msgid "No record exists for player %s.\n"
 msgstr "Non ci sono registrazioni del giocatore %s.\n"
 
-#: record.c:510
+#: record.c:512
 #, c-format
 msgid "Record for player %s erased.\n"
 msgstr "Rgistrazioni del giocatore %s cancellate.\n"
 
-#: record.c:517 relational.c:796
+#: record.c:519 relational.c:747
 msgid "Are you sure you want to erase all player records?"
 msgstr "Sei sicuro di voler cancellare tutte le registrazioni?"
 
-#: record.c:530
+#: record.c:532
 msgid "All player records erased."
 msgstr "Tutte le registrazioni cancellate."
 
-#: record.c:564 text.c:759
+#: record.c:566 text.c:759
 msgid "Short-term"
 msgstr ""
 
-#: record.c:564 text.c:759
+#: record.c:566 text.c:759
 msgid "Long-term"
 msgstr ""
 
-#: record.c:565 text.c:760
+#: record.c:567 text.c:760
 #, fuzzy
 msgid "error rate"
 msgstr "Rateo di errore %s"
 
-#: record.c:565 text.c:760
+#: record.c:567 text.c:760
 #, fuzzy
 msgid "luck"
 msgstr "fortunato"
 
-#: record.c:566 text.c:761
+#: record.c:568 text.c:761
 #, fuzzy
 msgid "Cheq. Cube"
 msgstr "Pedina"
 
-#: record.c:566 text.c:761
+#: record.c:568 text.c:761
 #, fuzzy
 msgid "rate"
 msgstr "<percentuale>"
 
-#: record.c:585
+#: record.c:587
 #, c-format
 msgid "No record for player `%s' found.\n"
 msgstr "Non ci sono registrazioni per il giocatore %s.\n"
 
-#: relational.c:475
+#: relational.c:461
 msgid "The match is not finished\n"
 msgstr "Il match non è finito\n"
 
-#: relational.c:477
+#: relational.c:463
 msgid "All of the match is not analyzed\n"
 msgstr "Non tutto il match è analizzato\n"
 
-#: relational.c:481
+#: relational.c:467
 msgid ""
 "\n"
 "Add match anyway?"
@@ -8375,19 +8423,19 @@ msgstr ""
 "\n"
 "Aggiungo il match comunque?"
 
-#: relational.c:492
+#: relational.c:478
 msgid "Match exists, overwrite?"
 msgstr "Il match esiste già, sovrascrivo? "
 
-#: relational.c:519
+#: relational.c:505
 msgid "Error adding match."
 msgstr "Errore aggiungendo il match."
 
-#: relational.c:593
+#: relational.c:544
 msgid "Database connection test failed, installation problem!\n"
 msgstr "Test del database fallito, problema di installazione!\n"
 
-#: relational.c:602
+#: relational.c:553
 msgid ""
 "Database table check failed!\n"
 "The session table is missing."
@@ -8395,11 +8443,11 @@ msgstr ""
 "Controllo tavole database fallito!\n"
 "La tabella della sessione è mancante."
 
-#: relational.c:613
+#: relational.c:564
 msgid "Database test is successful!"
 msgstr "Test database riscito!"
 
-#: relational.c:628
+#: relational.c:579
 msgid ""
 "You must specify a player name to list the details for (see `help relational "
 "show details')."
@@ -8407,19 +8455,19 @@ msgstr ""
 "Devi specificare il nome di un giocatore per vederne i dettagli (guarda "
 "`help relational show details')."
 
-#: relational.c:639 relational.c:684 relational.c:760
+#: relational.c:590 relational.c:635 relational.c:711
 msgid "Player not found or player stats empty"
 msgstr "Giocatore non trovato o statistiche vuote"
 
-#: relational.c:722
+#: relational.c:673
 msgid "Opponents"
 msgstr "Avversari"
 
-#: relational.c:726
+#: relational.c:677
 msgid "Player statistics"
 msgstr "Statistiche del giocatore"
 
-#: relational.c:731
+#: relational.c:682
 msgid ""
 "Player statistics\n"
 "\n"
@@ -8427,7 +8475,7 @@ msgstr ""
 "Statistiche del giocatore\n"
 "\n"
 
-#: relational.c:750
+#: relational.c:701
 msgid ""
 "You must specify a player name to remove (see `help relational erase "
 "player')."
@@ -8435,21 +8483,21 @@ msgstr ""
 "Devi specificare il nome di un giocatore da rimuovere (guarda `help "
 "relational erase player')."
 
-#: relational.c:857
+#: relational.c:776
 msgid "You must specify a sql query to run."
 msgstr "Devi specificare una interrogazione sql da eseguire."
 
-#: relational.c:867
+#: relational.c:786
 msgid "No rows found.\n"
 msgstr "Righe non trovate.\n"
 
 #. Can't change the name to an existing one
-#: relational.c:926
+#: relational.c:845
 #, c-format
 msgid "New player name already exists."
 msgstr "Il nome del giocatore è già presente."
 
-#: relational.c:938
+#: relational.c:857
 #, c-format
 msgid "Error running database command"
 msgstr "Errore lanciando comando al database"
@@ -8473,88 +8521,6 @@ msgstr "Cubo non disponibile!"
 #: rollout.c:2192
 msgid "Setting cubeful on"
 msgstr "Setto il cubo on"
-
-#: rollout.c:2266
-#, c-format
-msgid ""
-"Points won:\n"
-"\n"
-msgstr ""
-"Punti vinti:\n"
-"\n"
-
-#: rollout.c:2277
-#, fuzzy, c-format
-msgid "Number of wins %4d-cube            %8d   %7.3f%%     %8d\n"
-msgstr "Numero di vittorie %4d-cube          %8d   %7.3f%%     %8d\n"
-
-#: rollout.c:2293 rollout.c:2390
-#, fuzzy
-msgid "Total number of wins"
-msgstr "numero non valido di pedine o punti"
-
-#: rollout.c:2308
-#, fuzzy, c-format
-msgid "Number of gammon wins %4d-cube     %8d   %7.3f%%     %8d\n"
-msgstr "Numero di gammon vinti %4d-cube   %8d   %7.3f%%     %8d\n"
-
-#: rollout.c:2323
-#, fuzzy
-msgid "Total number of gammon wins"
-msgstr "numero non valido di pedine o punti"
-
-#: rollout.c:2337
-#, fuzzy, c-format
-msgid "Number of bg wins %4d-cube         %8d   %7.3f%%     %8d\n"
-msgstr "Numero di bg vinti %4d-cubo       %8d   %7.3f%%     %8d\n"
-
-#: rollout.c:2351
-#, fuzzy
-msgid "Total number of bg wins"
-msgstr "numero non valido di pedine o punti"
-
-#: rollout.c:2366
-#, fuzzy, c-format
-msgid "Number of %4d-cube double, drop    %8d   %7.3f%%    %8d\n"
-msgstr "Numero di %4d-cube doppi, passati  %8d   %7.3f%%    %8d\n"
-
-#: rollout.c:2381
-#, fuzzy
-msgid "Total number of double, drop"
-msgstr "Numero totale posizioni a un lato: %d\n"
-
-#. double take statistics
-#: rollout.c:2397
-#, c-format
-msgid ""
-"\n"
-"\n"
-"Other statistics:\n"
-"\n"
-msgstr ""
-"\n"
-"\n"
-"Altre statistiche:\n"
-"\n"
-
-#: rollout.c:2406
-#, fuzzy, c-format
-msgid "Number of %4d-cube double, take    %8d   %7.3f%%\n"
-msgstr "Numero di %4d-cube doppi, accetta  %8d   %7.3f%%\n"
-
-#: rollout.c:2429
-#, c-format
-msgid "Number of hits move %4d          %8d   %7.3f%%\n"
-msgstr "Numero di mosse a colpire %4d          %8d   %7.3f%%\n"
-
-#: rollout.c:2439
-#, c-format
-msgid ""
-"Total number of hits              %8d   %7.3f%%\n"
-"\n"
-msgstr ""
-"Numero totale dei colpi              %8d   %7.3f%%\n"
-"\n"
 
 #: set.c:108
 msgid ""
@@ -12168,6 +12134,70 @@ msgid "You must specify a file to export to (see `help export position text')."
 msgstr ""
 "Devi specificare un file da esportare a (guarda 'aiuto esporta posizione "
 "testo')."
+
+#~ msgid ""
+#~ "Points won:\n"
+#~ "\n"
+#~ msgstr ""
+#~ "Punti vinti:\n"
+#~ "\n"
+
+#, fuzzy
+#~ msgid "Number of wins %4d-cube            %8d   %7.3f%%     %8d\n"
+#~ msgstr "Numero di vittorie %4d-cube          %8d   %7.3f%%     %8d\n"
+
+#, fuzzy
+#~ msgid "Total number of wins"
+#~ msgstr "numero non valido di pedine o punti"
+
+#, fuzzy
+#~ msgid "Number of gammon wins %4d-cube     %8d   %7.3f%%     %8d\n"
+#~ msgstr "Numero di gammon vinti %4d-cube   %8d   %7.3f%%     %8d\n"
+
+#, fuzzy
+#~ msgid "Total number of gammon wins"
+#~ msgstr "numero non valido di pedine o punti"
+
+#, fuzzy
+#~ msgid "Number of bg wins %4d-cube         %8d   %7.3f%%     %8d\n"
+#~ msgstr "Numero di bg vinti %4d-cubo       %8d   %7.3f%%     %8d\n"
+
+#, fuzzy
+#~ msgid "Total number of bg wins"
+#~ msgstr "numero non valido di pedine o punti"
+
+#, fuzzy
+#~ msgid "Number of %4d-cube double, drop    %8d   %7.3f%%    %8d\n"
+#~ msgstr "Numero di %4d-cube doppi, passati  %8d   %7.3f%%    %8d\n"
+
+#, fuzzy
+#~ msgid "Total number of double, drop"
+#~ msgstr "Numero totale posizioni a un lato: %d\n"
+
+#~ msgid ""
+#~ "\n"
+#~ "\n"
+#~ "Other statistics:\n"
+#~ "\n"
+#~ msgstr ""
+#~ "\n"
+#~ "\n"
+#~ "Altre statistiche:\n"
+#~ "\n"
+
+#, fuzzy
+#~ msgid "Number of %4d-cube double, take    %8d   %7.3f%%\n"
+#~ msgstr "Numero di %4d-cube doppi, accetta  %8d   %7.3f%%\n"
+
+#~ msgid "Number of hits move %4d          %8d   %7.3f%%\n"
+#~ msgstr "Numero di mosse a colpire %4d          %8d   %7.3f%%\n"
+
+#~ msgid ""
+#~ "Total number of hits              %8d   %7.3f%%\n"
+#~ "\n"
+#~ msgstr ""
+#~ "Numero totale dei colpi              %8d   %7.3f%%\n"
+#~ "\n"
 
 #~ msgid "Legend"
 #~ msgstr "Legenda"
