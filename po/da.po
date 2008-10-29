@@ -24,7 +24,7 @@ msgstr ""
 "Project-Id-Version: gnubg 0.12\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-10-29 15:09+0100\n"
-"PO-Revision-Date: 2008-10-21 11:16+0100\n"
+"PO-Revision-Date: 2008-10-29 19:41+0100\n"
 "Last-Translator: Christian Anthon <christian.anthon@gmail.com>\n"
 "Language-Team: American English <kde-i18n-doc@lists.kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -1425,14 +1425,14 @@ msgid "Advantage (luck adjusted) in ppg"
 msgstr "Fordel (heldjusteret) i ppg"
 
 #: gnubg.c:176
-#, fuzzy
 msgid ""
 "This program comes with ABSOLUTELY NO WARRANTY; for details type\n"
 "`show warranty'.\n"
 "This is free software, and you are welcome to redistribute it\n"
 "under certain conditions; type `show copying' for details.\n"
 msgstr ""
-"Dette program er ABSOLUT UDEN GARANTI; for detaljer skriv `show warrenty`.\n"
+"Dette program er ABSOLUT UDEN GARANTI; for detaljer skriv\n"
+"`show warrenty`.\n"
 "Dette er fri software og du er velkommen til at videregive det\n"
 "under visse betingelse; skriv `show copying` for detaljer.\n"
 
@@ -1946,7 +1946,7 @@ msgstr ""
 #. currently we only handle the latter...
 #: gnubg.c:2740
 msgid "Only Python commands supported, not multiline code"
-msgstr ""
+msgstr "Kun Python kommandoer understøttet, ikke flerlinjet kode"
 
 #: gnubg.c:2765 gnubg.c:2775
 msgid "You must specify a file to load from."
@@ -6923,9 +6923,8 @@ msgid "File not recognised as Jellyfish file."
 msgstr "Genkendes ikke som en Jellyfish fil."
 
 #: import.c:373
-#, fuzzy
 msgid "Failed reading jellyfish file"
-msgstr "Genkendes ikke som en Jellyfish fil."
+msgstr "Fejlede under læsning af Jellyfish fil."
 
 #: import.c:400 import.c:1033 import.c:1550 import.c:2305 import.c:2994
 #: import.c:3199
