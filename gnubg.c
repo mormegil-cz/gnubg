@@ -20,6 +20,7 @@
  */
 
 #include "config.h"
+#include "gnubgmodule.h"
 
 #include <sys/types.h>
 #include <stdlib.h>
@@ -83,7 +84,6 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "credits.h"
 #include "external.h"
 #include "neuralnet.h"
-#include "gnubgmodule.h"
 #include "util.h"
 
 #if HAVE_SOCKETS

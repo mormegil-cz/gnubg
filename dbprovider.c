@@ -23,6 +23,12 @@
  */
 
 #include "config.h"
+
+#if USE_PYTHON
+#include "gnubgmodule.h"
+#endif
+
+#include <stdlib.h>
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <string.h>

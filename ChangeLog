@@ -1,3 +1,8 @@
+Sat Nov  1 14:31:07 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* dbprovider.c, dbprovider.h, gnubg.c: fix minor compile problems with
+	and without python
+
 Fri Oct 24 17:07:03 CEST 2008 Christian Anthon <anthon@kiku.dk>
 
 	* dbprovider.c, dbprovider.h, gnubg.c, gnubgmodule.c, gnubgmodule.h,

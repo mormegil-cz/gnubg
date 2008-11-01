@@ -1,7 +1,6 @@
 #ifndef _DBPROVIDER_H_
 #define _DBPROVIDER_H_
 
-#include "gnubgmodule.h"
 #include <stdio.h>
 #include <glib.h>
 
