@@ -6222,7 +6222,7 @@ extern void GTKBearoffProgress( int i ) {
     gchar *gsz;
     
     if( !pwDialog ) {
-		pwDialog = GTKCreateDialog( _("GNU Backgammon"), DT_INFO, NULL, DIALOG_FLAG_MODAL, NULL, NULL );
+		pwDialog = GTKCreateDialog( _("GNU Backgammon"), DT_INFO, NULL, DIALOG_FLAG_MODAL|DIALOG_FLAG_NOTIDY, NULL, NULL );
 	gtk_window_set_role( GTK_WINDOW( pwDialog ), "progress" );
 	gtk_window_set_type_hint( GTK_WINDOW(pwDialog), GDK_WINDOW_TYPE_HINT_DIALOG );
 	g_signal_connect( G_OBJECT( pwDialog ), "destroy",
