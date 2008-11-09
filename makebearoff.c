@@ -38,17 +38,6 @@
 #include "backgammon.h"
 #include "multithread.h"
 
-#ifdef WIN32
-#include <windows.h>
-#include <commctrl.h>
-#define DLG_MAKEBEAROFF 100
-BOOL CALLBACK
-DlgProc (HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
-
-HWND hdlg;
-int CancelPressed = FALSE;
-#endif
-
 #if USE_MULTITHREAD
 extern int MT_GetThreadID(void)
 {
@@ -80,36 +69,6 @@ typedef struct _xhash {
 } xhash;
 
 
-#ifdef WIN32
-static void
-dlgprintf(int id, const char *fmt, ... ){
-
-    va_list val;
-    char buf[256]; /* FIXME allocate with malloc */
-    
-    va_start( val, fmt );
-    vsprintf(buf, fmt, val);
-    SendDlgItemMessage(hdlg, id, WM_SETTEXT, 0, (LPARAM) buf);
-    
-    va_end( val );
-}
-#endif
-
-static void dsplerr ( const char *fmt, ... ){
-
-    va_list val;
-
-    char buf[256]; /* FIXME allocate with malloc */
-    va_start( val, fmt );
-    vsprintf(buf, fmt, val);
-#ifdef WIN32
-    MessageBox (NULL, buf, "Makebearoff", MB_ICONERROR | MB_OK);
-#else
-    fprintf( stderr, "%s", buf);
-#endif
-    va_end( val );
-}
-
 static long cLookup;
 
 static long int
@@ -123,13 +82,11 @@ XhashPosition ( xhash *ph, const int iKey ) {
 static void
 XhashStatus ( xhash *ph ) {
 
-#ifndef WIN32
   fprintf ( stderr, "Xhash status:\n" );
   fprintf ( stderr, "Size:    %d elements\n", ph->nHashSize );
   fprintf ( stderr, "Queries: %lu (hits: %ld)\n", ph->nQueries, ph->nHits );
   fprintf ( stderr, "Entries: %lu (overwrites: %lu)\n",
             ph->nEntries, ph->nOverwrites );
-#endif
 
 }
 
@@ -248,7 +205,7 @@ OSLookup ( const unsigned int iPos,
       if ( errno )
         perror ( "output file" );
       else
-        dsplerr (  "error reading output file\n" );
+        fprintf (stderr,  "error reading output file\n" );
       exit(-1);
     }
 
@@ -287,7 +244,7 @@ OSLookup ( const unsigned int iPos,
       if ( errno )
         perror ( "reading temp file" );
       else
-        dsplerr ( "error reading temp file" );
+        fprintf (stderr, "error reading temp file" );
       exit(-1);
     }
     
@@ -319,7 +276,7 @@ OSLookup ( const unsigned int iPos,
 
     if ( fseek ( pfOutput, 
                  40 + iPos * ( fGammon ? 128 : 64 ), SEEK_SET ) < 0 ) {
-      dsplerr (  "error seeking in pfOutput\n" );
+      fprintf (stderr,  "error seeking in pfOutput\n" );
       exit(-1);
     }
 
@@ -327,7 +284,7 @@ OSLookup ( const unsigned int iPos,
 
     if ( fread ( ac, 1, fGammon ? 128 : 64, pfOutput ) < 
          ( fGammon ? 128 : 64 ) ) {
-      dsplerr (  "error readung from pfOutput\n" );
+      fprintf(stderr,  "error readung from pfOutput\n" );
       exit(-1);
     }
 
@@ -344,7 +301,7 @@ OSLookup ( const unsigned int iPos,
     /* position cursor at end of file */
 
     if ( fseek ( pfOutput, 0L, SEEK_END ) < 0 ) {
-      dsplerr (  "error seeking to end!\n" );
+      fprintf(stderr,  "error seeking to end!\n" );
       exit(-1);
     }
 
@@ -664,32 +621,12 @@ generate_os ( const int nOS, const int fHeader,
   FILE *pfTmp = NULL;
   unsigned int npos;
   char *tmpfile;
-#ifndef WIN32
   int fTTY = isatty(STDERR_FILENO);
-#endif
-
-#ifdef WIN32
-  HINSTANCE hInstance = (HINSTANCE) GetModuleHandle(NULL);
-  HWND hwndPB;
-  INITCOMMONCONTROLSEX InitCtrlEx;
-  if( hdlg != NULL)
-    ShowWindow(hdlg, SW_SHOW);
-
-  InitCtrlEx.dwSize = sizeof(INITCOMMONCONTROLSEX);
-  InitCtrlEx.dwICC  = ICC_PROGRESS_CLASS;
-  InitCommonControlsEx(&InitCtrlEx);
-
-  hwndPB = CreateWindowEx(0, PROGRESS_CLASS, NULL, WS_CHILD | WS_VISIBLE,
-		  12, 300, 470, 20, hdlg, NULL, hInstance, NULL);
-#endif
 
   /* initialise xhash */
 
-#ifdef WIN32
-  dlgprintf(127, "Creating cache memory." );
-#endif
   if ( XhashCreate ( &h, nHashSize /  ( fGammon ? 128 : 64 ) ) ) {
-    dsplerr (  _("Error creating xhash with %d elements\n"),
+    fprintf(stderr,  _("Error creating xhash with %d elements\n"),
               nHashSize /  fGammon ? 128 : 64 );
     exit(2);
   }
@@ -700,18 +637,12 @@ generate_os ( const int nOS, const int fHeader,
 
   if ( fHeader ) {
     char sz[ 41 ];
-#ifdef WIN32
-    dlgprintf(127, "Writing header information." );
-#endif
     sprintf ( sz, "gnubg-OS-%02d-15-%1d-%1d-0xxxxxxxxxxxxxxxxxxx\n", 
               nOS, fGammon, fCompress );
     fputs ( sz, output );
   }
 
   if ( fCompress ) {
-#ifdef WIN32
-    dlgprintf(127, "Opening temporary file." );
-#endif
 	pfTmp = GetTemporaryFile(NULL, &tmpfile);
 	if (pfTmp == NULL)
       exit(2);
@@ -723,11 +654,6 @@ generate_os ( const int nOS, const int fHeader,
   n = Combination ( nOS + 15, nOS );
   npos = 0;
   
-#ifdef WIN32
-  SendMessage(hwndPB, PBM_SETRANGE, 0, MAKELPARAM(0, n / 100));
-  SendMessage(hwndPB, PBM_SETSTEP, (WPARAM) 1, 0);
-  dlgprintf(127, "Calculating bearoff data." );
-#endif
 
   for ( i = 0; i < n; ++i ) {
     
@@ -738,15 +664,8 @@ generate_os ( const int nOS, const int fHeader,
       aus[  0 ] = 0xFFFF;
       aus[ 32 ] = 0xFFFF;
     }
-#ifdef WIN32
-    if (!((i+1) % 100))
-      SendMessage(hwndPB, PBM_STEPIT, 0, 0);
-    if (CancelPressed)
-      break;
-#else
     if (!(i % 100) && fTTY)
       fprintf (stderr, "1:%d/%d        \r", i, n);
-#endif
 
     WriteOS ( aus, fCompress, fCompress ? pfTmp : output );
     if ( fGammon )
@@ -763,10 +682,6 @@ generate_os ( const int nOS, const int fHeader,
 
     char ac[ 256 ];
     unsigned int n;
-#ifdef WIN32
-    dlgprintf(127, "Rewriting to compressed database." );
-#endif
-
     /* write contents of pfTmp to output */
 
     rewind ( pfTmp );
@@ -788,11 +703,7 @@ generate_os ( const int nOS, const int fHeader,
     g_unlink ( tmpfile );
 
   }
-#ifndef WIN32
   putc ( '\n', stderr );
-#else
-  dlgprintf(127, "Clearing cache memory." );
-#endif
 
   XhashStatus ( &h );
 
@@ -948,52 +859,25 @@ generate_nd ( const int nPoints,const int nHashSize, const int fHeader,
   int i, j;
   char sz[ 41 ];
   float ar[ 4 ];
-#ifndef WIN32
   int fTTY = isatty(STDERR_FILENO);
-#endif
 
   xhash h;
-#ifdef WIN32
-  HINSTANCE hInstance = (HINSTANCE) GetModuleHandle(NULL);
-  HWND hwndPB;
-  INITCOMMONCONTROLSEX InitCtrlEx;
-  if( hdlg != NULL)
-    ShowWindow(hdlg, SW_SHOW);
-
-  InitCtrlEx.dwSize = sizeof(INITCOMMONCONTROLSEX);
-  InitCtrlEx.dwICC  = ICC_PROGRESS_CLASS;
-  InitCommonControlsEx(&InitCtrlEx);
-
-  hwndPB = CreateWindowEx(0, PROGRESS_CLASS, NULL, WS_CHILD | WS_VISIBLE,
-		  12, 300, 470, 20, hdlg, NULL, hInstance, NULL);
-#endif
 
   /* initialise xhash */
   
-#ifdef WIN32
-    dlgprintf(127, "Creating cache memory." );
-#endif
  
   if ( XhashCreate ( &h, nHashSize / ( 4 * sizeof ( float ) ) ) ) {
-    dsplerr (  "Error creating cache\n" );
+    fprintf(stderr,  "Error creating cache\n" );
     return;
   }
 
   XhashStatus ( &h );
 
   if ( fHeader ) {
-#ifdef WIN32
-    dlgprintf(127, "Writing header information." );
-#endif
     sprintf ( sz, "gnubg-OS-%02d-15-1-0-1xxxxxxxxxxxxxxxxxxx\n", nPoints );
     fputs ( sz, output );
   }
 
-#ifdef WIN32
-  SendMessage(hwndPB, PBM_SETRANGE, 0, MAKELPARAM(0, n / 100));
-  SendMessage(hwndPB, PBM_SETSTEP, (WPARAM) 1, 0);
-  dlgprintf(127, "Calculating bearoff data." );
-#endif
 
   for ( i = 0; i < n; ++i ) {
 
@@ -1006,20 +890,11 @@ generate_nd ( const int nPoints,const int nHashSize, const int fHeader,
       WriteFloat ( ar[ j ], output );
 
     XhashAdd ( &h, i, ar, 16 );
-#ifdef WIN32
-    if (!((i+1) % 100))
-      SendMessage(hwndPB, PBM_STEPIT, 0, 0);
-#else
     if (!(i % 100) && fTTY)
       fprintf (stderr, "1:%d/%d        \r", i, n);
-#endif
 
   }
-#ifndef WIN32
   putc ( '\n', stderr );
-#else
-  dlgprintf(127, "Clearing cache memory." );
-#endif
   XhashStatus ( &h );
 
   XhashDestroy ( &h );
@@ -1100,7 +975,7 @@ TSLookup ( const int nUs, const int nThem,
       if ( errno )
         perror ( "temp file" );
       else
-        dsplerr (  "error reading temp file\n" );
+        fprintf(stderr,  "error reading temp file\n" );
       exit(-1);
   }
 
@@ -1307,24 +1182,7 @@ generate_ts ( const int nTSP, const int nTSC,
     FILE *pfTmp;
     unsigned char ac[ 8 ];
     char *tmpfile;
-#ifndef WIN32
   int fTTY = isatty(STDERR_FILENO);
-#endif
-
-#ifdef WIN32
-  HINSTANCE hInstance = (HINSTANCE) GetModuleHandle(NULL);
-  HWND hwndPB;
-  INITCOMMONCONTROLSEX InitCtrlEx;
-  if( hdlg != NULL)
-    ShowWindow(hdlg, SW_SHOW);
-
-  InitCtrlEx.dwSize = sizeof(INITCOMMONCONTROLSEX);
-  InitCtrlEx.dwICC  = ICC_PROGRESS_CLASS;
-  InitCommonControlsEx(&InitCtrlEx);
-
-  hwndPB = CreateWindowEx(0, PROGRESS_CLASS, NULL, WS_CHILD | WS_VISIBLE,
-		  12, 300, 470, 20, hdlg, NULL, hInstance, NULL);
-#endif
 
 	pfTmp = GetTemporaryFile(NULL, &tmpfile);
 	if (pfTmp == NULL)
@@ -1332,12 +1190,8 @@ generate_ts ( const int nTSP, const int nTSC,
 
     /* initialise xhash */
     
-#ifdef WIN32
-    dlgprintf(127, "Initialising xhash." );
-#endif
-    
     if ( XhashCreate ( &h, nHashSize /  ( fCubeful ? 8 : 2 ) ) ) {
-      dsplerr (  _("Error creating xhash with %d elements\n"),
+      fprintf(stderr,  _("Error creating xhash with %d elements\n"),
                 nHashSize /  fCubeful ? 8 : 2 );
       exit(2);
     }
@@ -1348,9 +1202,6 @@ generate_ts ( const int nTSP, const int nTSC,
 
     if ( fHeader ) {
       char sz[ 41 ];
-#ifdef WIN32
-      dlgprintf(127, "Writing header information." );
-#endif
       sprintf ( sz, "gnubg-TS-%02d-%02d-%1dxxxxxxxxxxxxxxxxxxxxxxx\n", 
                 nTSP, nTSC, fCubeful );
       fputs ( sz, output );
@@ -1362,15 +1213,8 @@ generate_ts ( const int nTSP, const int nTSC,
     n = Combination ( nTSP + nTSC, nTSC );
     iPos = 0;
     
-#ifdef WIN32
-    SendMessage(hwndPB, PBM_SETRANGE, 0, MAKELPARAM(0, n ));
-    SendMessage(hwndPB, PBM_SETSTEP, (WPARAM) 1, 0);
-#endif
 
     /* positions above diagonal */
-#ifdef WIN32
-    dlgprintf(127, "Calculating positions above diagonal." );
-#endif
 
     for( i = 0; i < n; i++ ) {
       for( j = 0; j <= i; j++, ++iPos ) {
@@ -1384,20 +1228,11 @@ generate_ts ( const int nTSP, const int nTSC,
         XhashAdd ( &h, ( i - j ) * n + j, asiEquity, fCubeful ? 8 : 2 );
 
       }
-#ifdef WIN32
-      SendMessage(hwndPB, PBM_STEPIT, 0, 0);
-#else
       if (fTTY)
 	      fprintf( stderr, "%d/%d     \r", iPos, n * n );
-#endif
     }
 
     /* positions below diagonal */
-#ifdef WIN32
-    dlgprintf(127, "Calculating positions below diagonal." );
-    SendMessage(hwndPB, PBM_SETRANGE, 0, MAKELPARAM(0, n ));
-    SendMessage(hwndPB, PBM_SETSTEP, (WPARAM) 1, 0);
-#endif
 
     for( i = 0; i < n; i++ ) {
       for( j = i + 1; j < n; j++, ++iPos ) {
@@ -1411,19 +1246,11 @@ generate_ts ( const int nTSP, const int nTSC,
         XhashAdd ( &h, ( i + n - j ) * n + j, asiEquity, fCubeful ? 8 : 2 );
         
       }
-#ifdef WIN32
-      SendMessage(hwndPB, PBM_STEPIT, 0, 0);
-#else
       if (fTTY)
 	      fprintf( stderr, "%d/%d     \r", iPos, n * n );
-#endif
     }
 
-#ifndef WIN32
     putc ( '\n', stderr );
-#else
-    dlgprintf(127, "Clearing xhash." );
-#endif
     XhashStatus ( &h );
     
     XhashDestroy ( &h );
@@ -1435,11 +1262,6 @@ generate_ts ( const int nTSP, const int nTSC,
        479       789 
 
     */
-#ifdef WIN32
-    dlgprintf(127, "Sorting file." );
-    SendMessage(hwndPB, PBM_SETRANGE, 0, MAKELPARAM(0, n ));
-    SendMessage(hwndPB, PBM_SETSTEP, (WPARAM) 1, 0);
-#endif
 
     for ( i = 0; i < n; ++i ){ 
       for ( j = 0; j < n; ++j ) {
@@ -1454,15 +1276,9 @@ generate_ts ( const int nTSP, const int nTSC,
 		exit(3);
 	}
       }
-#ifdef WIN32
-      SendMessage(hwndPB, PBM_STEPIT, 0, 0);
-#endif
 
     }
 
-#ifdef WIN32
-    dlgprintf(127, "Closing and unlinking." );
-#endif
     fclose ( pfTmp );
 
     g_unlink ( tmpfile ); 
@@ -1474,11 +1290,7 @@ generate_ts ( const int nTSP, const int nTSC,
 
 static void
 version ( void ) {
-#ifndef WIN32
   printf ( "makebearoff $Revision$\n" );
-#else
-  MessageBox( NULL, "makebearoff $Revision$\n", "Makebearoff", MB_OK );
-#endif
 }
 
 
@@ -1502,30 +1314,6 @@ extern int main( int argc, char **argv )
   double r;
   int nTSP = 0, nTSC = 0;
 
-#ifdef WIN32
-  int i;
-  char *aszOS[] = {"Number of points:",
-		 "Number of chequers:",
-		 "Number of positions:",
-		 "Approximate by normal distribution:",
-		 "Include gammon distributions:",
-		 "Use compression scheme:",
-		 "Write header:",
-		 "Size of cache:",
-		 "Reuse old bearoff database:"};
-		 
-  char *aszTS[]= { "Number of points:", 
-                "Number of chequers:",
-                "Calculate equities:",
-                "Write header:",
-                "Number of one-sided positions:",
-                "Total number of positions:",
-                "Size of resulting file:",
-                "Size of xhash:",
-                "Reuse old bearoff database:",
-                " ", " "};
-#endif
-           
   GOptionEntry ao[] = {
 	  { "two-sided", 't',  0, G_OPTION_ARG_STRING, &szTwoSided,
 		  "Number of points (P) and number of chequers (C) for two-sided database", "PxC"},
@@ -1589,28 +1377,10 @@ extern int main( int argc, char **argv )
   if ( nOS ) {
 
     if ( nOS > 18 ) {
-      dsplerr (  _("Size of one-sided bearoff database must be between "
+      fprintf(stderr,  _("Size of one-sided bearoff database must be between "
                   "0 and 18\n") );
       exit ( 2 );
     }
-#ifdef WIN32 
-    hdlg = CreateDialog(NULL, MAKEINTRESOURCE (DLG_MAKEBEAROFF), NULL, (DLGPROC)DlgProc);
-    /* error if NULL */
-    for (i = 0; i < 9; i++)
-       SendDlgItemMessage(hdlg, 101 + i, WM_SETTEXT, 0, (LPARAM) aszOS[i]);
-      
-    dlgprintf( 116, "%d", nOS);
-    dlgprintf( 117, "%d", 15); 
-    dlgprintf( 118, "%d", Combination ( nOS + 15, nOS ));
-    dlgprintf( 119, "%s", fND ? "yes" : "no");
-    dlgprintf( 120, "%s", fGammon ? "yes" : "no"); 
-    dlgprintf( 121, "%s", fCompress ? "yes" : "no"); 
-    dlgprintf( 122, "%s", fHeader ? "yes" : "no");
-    dlgprintf( 123, "%d", nHashSize);
-    dlgprintf( 124, "%s", szOldBearoff ? "yes" : "no");
-    dlgprintf(130, "Generating one-sided bearoff database. Please wait." );
-    dlgprintf(131, "makebearoff $Revision$" );
-#else
     fprintf ( stderr, "%-37s\n", _("One-sided database"));
     fprintf ( stderr, "%-37s: %12d\n", _("Number of points"), nOS);
     fprintf ( stderr, "%-37s: %12d\n", _("Number of chequers"), 15);
@@ -1621,41 +1391,23 @@ extern int main( int argc, char **argv )
     fprintf ( stderr, "%-37s: %12s\n", _("Write header"), fHeader ? _("yes") : _("no"));
     fprintf ( stderr, "%-37s: %12d\n", _("Size of cache"), nHashSize);
     fprintf ( stderr, "%-37s: %12s %s\n", _("Reuse old bearoff database"), szOldBearoff ? _("yes") : _("no"), szOldBearoff ? szOldBearoff : "" );
-#endif
 
     if ( fND ) {
       r = Combination ( nOS + 15, nOS ) * 16.0;
-#ifdef WIN32
-      dlgprintf(110, "Size of database:");
-      dlgprintf(111, "");
-      dlgprintf(125, "%.0f (%.1f MB)", r, r / 1048576.0);
-      dlgprintf(126, "");
-#else
       fprintf ( stderr, "%-37s: %.0f (%.1f MB)\n", _("Size of database"), r, r / 1048576.0 );
-#endif
     }
     else {
       r = Combination ( nOS + 15, nOS ) * ( fGammon ? 128.0f : 64.0f );
-#ifdef WIN32
-      dlgprintf(110, "Size of database (uncompressed):");
-      dlgprintf(125, "%.0f (%.1f MB)", r, r / 1048576.0);
-#else
       fprintf ( stderr, "%-37s: %.0f (%.1f MB)\n", _("Size of database (uncompressed)"), r, r / 1048576.0 );
-#endif
       if ( fCompress ) {
         r = Combination ( nOS + 15, nOS ) * ( fGammon ? 32.0f : 16.0f );
-#ifdef WIN32
-        dlgprintf(111, "Estimated size of compressed db:");
-        dlgprintf(126, "%.0f (%.1f MB)", r, r / 1048576.0);
-#else
 	fprintf ( stderr, "%-37s: %.0f (%.1f MB)\n", _("Estimated size of compressed db"), r, r / 1048576.0 );
-#endif
       }
     }
 
     if ( szOldBearoff &&
          ! ( pbc = BearoffInit ( szOldBearoff, BO_NONE, NULL ) ) ) {
-      dsplerr ( _("Error initialising old bearoff database!\n" ) );
+      fprintf(stderr, _("Error initialising old bearoff database!\n" ) );
       exit( 2 );
     }
 
@@ -1665,7 +1417,7 @@ extern int main( int argc, char **argv )
     if ( pbc && 
          ( pbc->bt != BEAROFF_ONESIDED || pbc->fND != fND || 
            pbc->fGammon < fGammon ) ) {
-      dsplerr ( _("The old database is not of the same kind as the"
+      fprintf(stderr, _("The old database is not of the same kind as the"
                   " requested database\n") );
       exit( 2 );
     }
@@ -1678,17 +1430,13 @@ extern int main( int argc, char **argv )
     }
 
     if ( pbc ) {
-#ifndef WIN32
       fprintf ( stderr, "Number of reads in old database: %lu\n",
                 pbc->nReads );
-#endif
       BearoffClose ( pbc );
     }
 
-#ifndef WIN32
     fprintf ( stderr, "Number of re-reads while generating: %ld\n", 
               cLookup );
-#endif
   }
   
   /*
@@ -1701,27 +1449,6 @@ extern int main( int argc, char **argv )
 
     r = n;
     r = r * r * ( fCubeful ? 8.0 : 2.0 );
-#ifdef WIN32 
-    hdlg = CreateDialog(NULL, MAKEINTRESOURCE (DLG_MAKEBEAROFF), NULL, (DLGPROC)DlgProc);
-    /* error if NULL */
-    for (i = 0; i < 11; i++)
-       SendDlgItemMessage(hdlg, 101 + i, WM_SETTEXT, 0, (LPARAM) aszTS[i]);
-      
-    dlgprintf(116, "%d", nTSP);
-    dlgprintf(117, "%d", nTSC);
-    dlgprintf(118, "%s", 
-	fCubeful ? _("cubeless and cubeful") : _("cubeless only"));
-    dlgprintf(119, "%s",  fHeader ? _("yes") : ("no"));
-    dlgprintf(120, "%d",  n);
-    dlgprintf(121, "%d",  n * n);
-    dlgprintf(122, "%.0f bytes (%.1f MB)", r, r / 1048576.0);
-    dlgprintf(123, "%d bytes",  nHashSize);
-    dlgprintf(124, "%s",  szOldBearoff ? szOldBearoff : "No" );
-    dlgprintf(125, "" );
-    dlgprintf(126, "" );
-    dlgprintf(130, "Generating two-sided bearoff database. Please wait." );
-    dlgprintf(131, "makebearoff $Revision$" );
-#else 
     fprintf ( stderr, "%-37s\n", _("Two-sided database:\n"));
     fprintf ( stderr, "%-37s: %12d\n", _("Number of points"), nTSP);
     fprintf ( stderr, "%-37s: %12d\n", _("Number of chequers"), nTSC);
@@ -1732,14 +1459,10 @@ extern int main( int argc, char **argv )
     fprintf ( stderr, "%-37s: %.0f bytes (%.1f MB)\n", _("Size of resulting file"), r, r / 1048576.0);
     fprintf ( stderr, "%-37s: %12d\n", _("Size of xhash"), nHashSize);
     fprintf ( stderr, "%-37s: %12s %s\n", _("Reuse old bearoff database"), szOldBearoff ? _("yes") : _("no"), szOldBearoff ? szOldBearoff : "" );
-#endif
     /* initialise old bearoff database */
-#ifdef WIN32
-    dlgprintf(127, "Initialising old bearoff database." );
-#endif
     if ( szOldBearoff &&
          ! ( pbc = BearoffInit ( szOldBearoff, BO_NONE, NULL ) ) ) {
-      dsplerr ( _("Error initialising old bearoff database!\n" ) );
+      fprintf(stderr, _("Error initialising old bearoff database!\n" ) );
       exit( 2 );
     }
     
@@ -1747,7 +1470,7 @@ extern int main( int argc, char **argv )
        database */
     
     if ( pbc && ( pbc->bt != BEAROFF_TWOSIDED || pbc->fCubeful != fCubeful ) ) {
-      dsplerr ( _("The old database is not of the same kind as the"
+      fprintf(stderr, _("The old database is not of the same kind as the"
                   " requested database\n") );
       exit( 2 );
     }
@@ -1757,23 +1480,16 @@ extern int main( int argc, char **argv )
     /* close old bearoff database */
 
     if ( pbc ) {
-#ifndef WIN32
       fprintf ( stderr, "Number of reads in old database: %lu\n",
                 pbc->nReads );
-#endif
       BearoffClose ( pbc );
     }
-#ifndef WIN32
     fprintf ( stderr, "Number of re-reads while generating: %ld\n", 
               cLookup );
-#endif
 
   }
 
   fclose ( output );
-#ifdef WIN32
-  EndDialog(hdlg, 0);
-#endif
   return 0;
 
 }
@@ -1786,26 +1502,3 @@ BearoffInitBuiltin ( void ) {
 
 }
 
-#ifdef WIN32
-BOOL CALLBACK
-DlgProc (HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam){
-  
-   switch (Message)
-   {
-   case WM_INITDIALOG:
-	   return TRUE;
-
-   case WM_COMMAND:
-	switch ( LOWORD(wParam) )
-	{
-	case IDCANCEL:
-           CancelPressed = TRUE;		
-	   EndDialog(hwnd, 0);
-	   exit(2);
-	   return TRUE;
-	}
-	break;
-   }
-   return FALSE;
-}
-#endif
