@@ -1,3 +1,8 @@
+Mon Nov 10 23:39:32 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtkboard.c: fix a bug in LegalDestPoints when skipping pips during
+	bearoff
+
 Mon Nov 10 00:18:25 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtkgame.c: add notidy flag to the bearoff database creation window

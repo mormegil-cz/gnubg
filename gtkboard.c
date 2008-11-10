@@ -845,15 +845,12 @@ gboolean LegalDestPoints( BoardData *bd, int iDestPoints[4] )
 	int i;
 	unsigned int anPipsBeforeMove[ 2 ];
 	unsigned int anCurPipCount[ 2 ];
+	unsigned int iUnusedPips;
 	int iCanMove = 0;		/* bits set => could make a move with this die */
 	int iDestCount = 0;
 	int iDestPt = -1;
 	int iDestLegal = TRUE;
 	int bar = bd->drag_colour == bd->colour ? bd->bar : 25 - bd->bar; /* determine point number of bar */
-
-	if (bd->valid_move && bd->valid_move->cMoves == bd->move_list.cMaxMoves
-		    && bd->valid_move->cPips == bd->move_list.cMaxPips)
-		return FALSE;	/* Complete move already made */
 
 	/* initialise */
 	for (i = 0; i <= 3; ++i)
@@ -870,10 +867,16 @@ gboolean LegalDestPoints( BoardData *bd, int iDestPoints[4] )
 	/* current pip count */
 	CurrentPipCount( bd, anCurPipCount );
 
+	iUnusedPips = anCurPipCount[ bd->drag_colour == -1 ? 0 : 1 ] - anPipsBeforeMove[ bd->drag_colour == -1 ? 0 : 1 ] + bd->move_list.cMaxPips;
+	/* we use iUnused pips to make this check since valid_move->cPips
+	 * is wrong when we skip pips during bearoff */
+	if (bd->valid_move && bd->valid_move->cMoves == bd->move_list.cMaxMoves && !iUnusedPips)
+		return FALSE;	
+
 	if ( bd->diceRoll[0] == bd->diceRoll[1] ) {
 	/* double roll: up to 4 possibilities to move, but only in multiples of dice[0] */
 		for ( i = 0; i <= 3; ++i ) {
-			if ( ( (i + 1) * bd->diceRoll[0] > anCurPipCount[ bd->drag_colour == -1 ? 0 : 1 ] - anPipsBeforeMove[ bd->drag_colour == -1 ? 0 : 1 ] + bd->move_list.cMaxPips )	/* no moves left*/
+			if ( ( (i + 1) * bd->diceRoll[0] > iUnusedPips )	/* no moves left*/
 			     || ( i && bd->points[ bar ] ) )		/* moving with chequer just entered not allowed if more chequers on the bar */
 				break;
 			iDestLegal = TRUE;
@@ -962,16 +965,15 @@ gboolean LegalDestPoints( BoardData *bd, int iDestPoints[4] )
 	}
 	else {
 	/* normal roll: up to 3 possibilities */
-		unsigned int iUnusedPips = anCurPipCount[ bd->drag_colour == -1 ? 0 : 1 ] - anPipsBeforeMove[ bd->drag_colour == -1 ? 0 : 1 ] + bd->move_list.cMaxPips;
 		for ( i = 0; i <= 1; ++i ) {
 			if (
 					/* not possible to move with this die (anymore) */
-					(iUnusedPips < bd->diceRoll[i]) ||
-					/* this die has been used already */
-					((bd->valid_move) && ((int)bd->diceRoll[i] == (bd->valid_move->anMove[0] - bd->valid_move->anMove[1]))) ||
-					/* move already completed */
-					((bd->valid_move) && (bd->valid_move->cMoves > 1))
-			   )
+					(iUnusedPips < bd->diceRoll[i])
+					/* we don't want to check if the
+					 * move is complete, since we may
+					 * be wrong in case of pip
+					 * skipping during bearoff */
+					)
 				continue;
 			iDestLegal = TRUE;
 			iDestPt = bd->drag_point - bd->diceRoll[i] * bd->drag_colour;
