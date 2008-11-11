@@ -316,6 +316,11 @@ static gboolean board_expose( GtkWidget *drawing_area, GdkEventExpose *event,
     return TRUE;
 }
 
+extern void stop_board_expose(BoardData *bd)
+{
+	g_signal_handlers_disconnect_by_func(G_OBJECT( bd->drawing_area ), G_CALLBACK( board_expose ), bd );    
+}
+
 static void board_invalidate_rect( GtkWidget *drawing_area, int x, int y, int
 		cx, int cy, BoardData *bd )
 {
@@ -3849,11 +3854,11 @@ static void board_init( Board *board )
 
 #if USE_BOARD3D
 	/* 3d board drawing area */
-    if (gtk_gl_init_success)
-    {
-	    CreateGLWidget(bd);
-	    gtk_container_add(GTK_CONTAINER(board), GetDrawingArea3d(bd->bd3d));
-    }
+    	gtk_gl_init_success = gtk_gl_init_success ? CreateGLWidget(bd) : FALSE;
+    	if (gtk_gl_init_success)
+    	{
+		gtk_container_add(GTK_CONTAINER(board), GetDrawingArea3d(bd->bd3d));
+	}
 	else
 		bd->bd3d = NULL;
 #endif

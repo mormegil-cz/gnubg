@@ -2441,7 +2441,11 @@ extern void PromptForExit( void )
     
 #if USE_GTK
 	if (fX)
+	{
+		stop_board_expose(bd);
 		board_free_pixmaps(bd);
+	}
+
 #if USE_BOARD3D
 	if (fX && gtk_gl_init_success)
 		Tidy3dObjects(bd->bd3d, bd->rd);

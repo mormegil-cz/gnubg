@@ -185,5 +185,6 @@ DrawDie( GdkDrawable *pd,
          const int s, GdkGC *gc, int x, int y, int fColour, int n );
 
 extern int UpdateMove( BoardData *bd, TanBoard anBoard );
+extern void stop_board_expose(BoardData *bd);
 
 #endif
