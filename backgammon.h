@@ -236,7 +236,7 @@ typedef struct _decisionData
 	rolloutstat aarsStatistics[ 2 ][ 2 ];
 	float aarRates[ 2 ][ 2 ];
     cubeinfo* pci;
-	evalcontext *pec;
+	const evalcontext *pec;
 	evalsetup   *pes;
 	ConstTanBoard pboard;
 	char *szOutput;

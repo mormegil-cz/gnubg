@@ -6152,7 +6152,7 @@ getCurrentGammonRates ( float aarRates[ 2 ][ 2 ],
                         float arOutput[],
                         const TanBoard anBoard,
                         cubeinfo *pci,
-                        evalcontext *pec ) {
+                        const evalcontext *pec ) {
 
   if( EvaluatePosition( NULL, anBoard, arOutput, pci, pec ) < 0 )
       return -1;

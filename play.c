@@ -861,14 +861,15 @@ static int ComputerTurn( void ) {
 	  decisionData dd;
 
 #if defined (REDUCTION_CODE)
-      evalcontext ecResign = { FALSE, 0, 0, TRUE, 0.0 };
+      const evalcontext ecResign = { FALSE, 2, 0, TRUE, 0.0 };
 #else
-      evalcontext ecResign = { FALSE, 0, FALSE, TRUE, 0.0 };
+      const evalcontext ecResign = { FALSE, 2, FALSE, TRUE, 0.0 };
 #endif
      
 	  dd.pboard = msBoard();
 	  dd.pci = &ci;
 	  dd.pec = &ecResign;
+	  
       if (ms.anDice[0] > 0)
 	  {
           float t;

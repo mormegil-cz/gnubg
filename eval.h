@@ -541,7 +541,7 @@ getCurrentGammonRates ( float aarRates[ 2 ][ 2 ],
                         float arOutput[], 
                         const TanBoard anBoard,
                         cubeinfo *pci,
-                        evalcontext *pec );
+                        const evalcontext *pec );
 
 extern void
 calculate_gammon_rates( float aarRates[ 2 ][ 2 ],

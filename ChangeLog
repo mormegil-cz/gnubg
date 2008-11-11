@@ -1,3 +1,8 @@
+Tue Nov 11 11:59:52 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, eval.c, eval.h, play.c: Evaluate accept resign at
+	2ply. Const a few evalcontext's.
+
 Mon Nov 10 23:39:32 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtkboard.c: fix a bug in LegalDestPoints when skipping pips during
