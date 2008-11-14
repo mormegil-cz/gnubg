@@ -4262,10 +4262,6 @@ extern void CommandSetGNUBgID(char *sz)
 		outputerrf(_("No valid GNUBG id's found"));
 		return;
 	}
-	if (!posid && !matchid) {
-		outputerrf(_("No valid GNUBG id's found"));
-		return;
-	}
 	outputf(_("Setting GNUBG id %s:%s\n"), posid ? posid : "",
 		matchid ? matchid : "");
 	g_free(posid);
