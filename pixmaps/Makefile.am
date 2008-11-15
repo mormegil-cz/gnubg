@@ -16,12 +16,14 @@ STOCK_MENU_IMAGES = \
 		    16x16/actions/cancel_16.png \
 		    16x16/actions/ok_16.png \
 		    16x16/actions/hint_16.png \
+		    16x16/actions/resign_16.png \
 		    16x16/actions/double_16.png
 
 STOCK_BUTTON_IMAGES = \
 		      24x24/actions/ok_24.png \
 		      24x24/actions/cancel_24.png \
 		      24x24/actions/hint_24.png \
+		      24x24/actions/resign_24.png \
 		      24x24/actions/double_24.png
 
 STOCK_IMAGES = \

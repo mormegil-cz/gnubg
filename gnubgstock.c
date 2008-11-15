@@ -90,6 +90,7 @@ static const GtkStockItem gnubg_stock_items[] = {
 	{GNUBG_STOCK_REJECT, N_("_Reject"), 0, 0, NULL},
 	{GNUBG_STOCK_HINT, N_("_Hint"), 0, 0, NULL},
 	{GNUBG_STOCK_DOUBLE, N_("_Double"), 0, 0, NULL},
+	{GNUBG_STOCK_RESIGN, N_("_Resign"), 0, 0, NULL},
 };
 
 static const struct {
@@ -105,6 +106,8 @@ static const struct {
 	GNUBG_STOCK_REJECT, cancel_24, NULL, GTK_ICON_SIZE_LARGE_TOOLBAR}, {
 	GNUBG_STOCK_HINT, hint_16, NULL, GTK_ICON_SIZE_MENU}, {
 	GNUBG_STOCK_HINT, hint_24, NULL, GTK_ICON_SIZE_LARGE_TOOLBAR}, {
+	GNUBG_STOCK_RESIGN, resign_16, NULL, GTK_ICON_SIZE_MENU}, {
+	GNUBG_STOCK_RESIGN, resign_24, NULL, GTK_ICON_SIZE_LARGE_TOOLBAR}, {
 	GNUBG_STOCK_DOUBLE, double_16, NULL, GTK_ICON_SIZE_MENU}, {
 	GNUBG_STOCK_DOUBLE, double_24, NULL, GTK_ICON_SIZE_LARGE_TOOLBAR}
 };

@@ -266,7 +266,6 @@ ToolbarUpdate ( GtkWidget *pwToolbar,
 
 }
 
-
 extern GtkWidget *
 ToolbarNew ( void ) {
 
@@ -284,7 +283,6 @@ ToolbarNew ( void ) {
 
 #include "xpm/tb_anticlockwise.xpm"
 #include "xpm/tb_clockwise.xpm"
-#include "xpm/resign.xpm"
     
   /* 
    * Create tool bar 
@@ -314,22 +312,6 @@ ToolbarNew ( void ) {
   ptw -> pwOpen = gtk_toolbar_insert_stock( GTK_TOOLBAR ( pwToolbar ), GTK_STOCK_OPEN, _("Open game, match, session or position"), NULL, G_CALLBACK( GTKOpen ), NULL, -1 );
   gtk_button_set_relief( GTK_BUTTON(ptw -> pwOpen), GTK_RELIEF_NONE);
 
-#define TB_BUTTON_ADD(pointer,icon,label,cb,arg,tooltip,tooltip2) \
-  pointer = gtk_button_new(); \
-  pwvbox = gtk_vbox_new(FALSE, 0); \
-  gtk_container_add(GTK_CONTAINER(pwvbox), \
-		  image_from_xpm_d (icon, pwToolbar)); \
-  gtk_container_add(GTK_CONTAINER(pwvbox), \
-		  gtk_label_new(label)); \
-  gtk_container_add(GTK_CONTAINER(pointer), pwvbox); \
-  g_signal_connect(G_OBJECT(pointer), "clicked", \
-		  G_CALLBACK( cb ), arg ); \
-  gtk_toolbar_append_widget( GTK_TOOLBAR ( pwToolbar ), \
-			    pointer, tooltip, tooltip2 ); \
-  gtk_button_set_relief( GTK_BUTTON(pointer), \
-		  GTK_RELIEF_NONE);
-
-  
   /* Save button */
   ptw->pwSave = gtk_toolbar_insert_stock(GTK_TOOLBAR(pwToolbar), GTK_STOCK_SAVE, _("Save match, session, game or position"),  NULL, G_CALLBACK(GTKSave), NULL, -1);
   gtk_button_set_relief( GTK_BUTTON(ptw -> pwSave), GTK_RELIEF_NONE);
@@ -345,10 +327,7 @@ ToolbarNew ( void ) {
 	ptw->pwDouble = gtk_toolbar_insert_stock(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_DOUBLE, _("Double or redouble(beaver)"), NULL, G_CALLBACK(ButtonClicked), "double", -1);
   
   /* Resign button */
-  TB_BUTTON_ADD(ptw->pwResign, resign_xpm, _("Resign"), GTKResign,
-		  NULL, 
-                  _("Resign the current game"),
-		  NULL) ;
+	ptw->pwResign = gtk_toolbar_insert_stock(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_RESIGN, _("Resign the current game"), NULL, G_CALLBACK(GTKResign), NULL, -1);
 
   /* play button */
   
@@ -389,8 +368,6 @@ ToolbarNew ( void ) {
 		  GTK_RELIEF_NONE);
 
   gtk_toolbar_append_space(GTK_TOOLBAR(pwToolbar));
-  
-#undef TB_BUTTON_ADD
   
   return vbox_toolbar;
 
