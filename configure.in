@@ -119,7 +119,7 @@ if test "x$have_freetype" = "xyes"; then
 	AC_DEFINE(HAVE_FREETYPE, 1, [Define if you have freetype2])
 fi
 
-if test "x$have_linpng" = "xyes"; then
+if test "x$have_libpng" = "xyes"; then
 	AC_DEFINE(HAVE_LIBPNG, 1, [Define if you have libpng])
 fi
 
