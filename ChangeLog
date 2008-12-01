@@ -1,3 +1,7 @@
+Mon Dec  1 23:07:43 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtktempmap.c: make "show equities" more readable
+
 Sun Sep 29 19:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, flags/spain.png: add a spanish flag

@@ -45,7 +45,7 @@
 #include "gtkwindows.h"
 
 #define SIZE_DIE 4
-#define SIZE_QUADRANT 40
+#define SIZE_QUADRANT 52
 
 
 typedef struct _tempmap {
@@ -311,77 +311,91 @@ UpdateTempMapEquities( tempmapwidget *ptmw ) {
 
 } 
 
-static void
-ExposeQuadrant( GtkWidget *pw, GdkEventExpose *pev, tempmapwidget *ptmw ) {
-  
-  int *pi = (int *) g_object_get_data( G_OBJECT( pw ), "user_data" );
-  int i = 0;
-  int j = 0;
-  int m = 0;
-  float r = 0.0f;
-  cubeinfo ci;
-  PangoLayout *layout1, *layout2;
-  char font1[20], font2[20];
-  float y1, y2;
+static void ExposeQuadrant(GtkWidget * pw, GdkEventExpose * pev, tempmapwidget * ptmw)
+{
+	int *pi = (int *) g_object_get_data(G_OBJECT(pw), "user_data");
+	int i = 0;
+	int j = 0;
+	int m = 0;
+	float r = 0.0f;
+	cubeinfo ci;
+	PangoLayout *layout;
+	char font[20];
+	float y;
+	GString *str;
+	char *pch, *tmp;
+
+	gtk_paint_box(pw->style, pw->window, GTK_STATE_NORMAL, GTK_SHADOW_IN, NULL, NULL, NULL,
+		      0, 0, pw->allocation.width, pw->allocation.height);
+	if (pi == NULL)
+		return;
+
+	if (*pi >= 0) {
+		i = (*pi % 100) / 6;
+		j = (*pi % 100) % 6;
+		m = *pi / 100;
+	} else {
+		m = -(*pi + 1);
+		j = -1;
+	}
+
+	str = g_string_new("");
+
+	if (ptmw->fShowEquity) {
+		if (j >= 0)
+			r = ptmw->atm[m].aarEquity[i][j];
+		else if (j == -1)
+			r = ptmw->atm[m].rAverage;
+		GetMatchStateCubeInfo(&ci, ptmw->atm[m].pms);
+		tmp = GetEquityString( r, &ci, ptmw->fInvert );
+		while (*tmp == ' ')
+			tmp++;
+		g_string_append(str, tmp);
+	}
 
 
-  gtk_paint_box( pw->style, pw->window, GTK_STATE_NORMAL, GTK_SHADOW_IN, NULL, NULL, NULL,
-                0, 0, pw->allocation.width, pw->allocation.height );
+	/* move */
 
-  sprintf(font1, "sans %.2f", pw->allocation.width/8.0);
-  sprintf(font2, "sans %.2f", pw->allocation.width/15.0);
-  y1 = pw->allocation.height / 3.0f;
-  y2 = 2.0f * pw->allocation.height / 3.0f;
+	if (j >= 0 && ptmw->fShowBestMove) {
+		char szMove[100];
+		FormatMovePlain(szMove, ptmw->atm[m].pms->anBoard, ptmw->atm[m].aaanMove[i][j]);
+		if (ptmw->fShowEquity)
+			g_string_append_printf(str, " %s", szMove);
+		else
+			g_string_append(str, szMove);
+	}
 
-  if ( pi ) {
-    if ( *pi >= 0 ) {
-      i = ( *pi % 100 ) / 6;
-      j = ( *pi % 100 ) % 6;
-      m = *pi / 100;
-    }
-    else {
-      m = -(*pi+1);
-      j = -1;
-    }
-  }
-  else 
-    m = -1;
-    
+	if (str->len == 0)
+	{
+		g_string_free(str, TRUE);
+		return;
+	}
 
-  if ( m >= 0 && ptmw->fShowEquity ) {
-    if ( j >= 0 )
-      r = ptmw->atm[ m ].aarEquity[ i ][ j ];
-    else if ( j == -1 ) 
-      r = ptmw->atm[ m ].rAverage;
-    
-    GetMatchStateCubeInfo( &ci, ptmw->atm[ m ].pms );
-    layout1 = gtk_widget_create_pango_layout(pw, NULL);
-    pango_layout_set_font_description(layout1,pango_font_description_from_string(font1));
-    pango_layout_set_text(layout1, GetEquityString( r, &ci, ptmw->fInvert ), -1);
-    gtk_paint_layout( pw->style, pw->window, GTK_STATE_NORMAL, TRUE, NULL, pw, NULL, 10, (int)y1, layout1 );
+	pch = str->str;
+	if (ptmw->fShowEquity && j >= 0 && ptmw->fShowBestMove)
+		y = 2;
+	else if (ptmw->fShowEquity)
+		y = (pw->allocation.height - 4) / 2.0f;
+	else
+		y = 2 +(pw->allocation.height - 4) / 10.0f;
 
-  }
+	sprintf(font, "sans %.2f", pw->allocation.width / 8.0);
+	layout = gtk_widget_create_pango_layout(pw, NULL);
+	pango_layout_set_font_description(layout, pango_font_description_from_string(font));
+	do
+	{
+		tmp = strchr(pch, ' ');
+		if (tmp)
+			*tmp = 0;
+		pango_layout_set_text(layout, pch, -1);
+		gtk_paint_layout(pw->style, pw->window, GTK_STATE_NORMAL, TRUE, NULL, pw, NULL, 2, (int) y, layout);
+		pch = tmp + 1;
+		y += (pw->allocation.height - 4) / 5.0f;
+	} while (tmp);
 
-
-  /* move */
-
-  if ( m >= 0 && j >= 0 && ptmw->fShowBestMove ) {
-
-    char szMove[ 100 ];
-
-    FormatMove( szMove, (ConstTanBoard)ptmw->atm[ m ].pms->anBoard, 
-                ptmw->atm[ m ].aaanMove[ i ][ j ] );
-
-    layout2 = gtk_widget_create_pango_layout(pw, NULL);
-    pango_layout_set_font_description(layout2,pango_font_description_from_string(font2));
-    pango_layout_set_text(layout2, szMove, -1);
-    gtk_paint_layout( pw->style, pw->window, GTK_STATE_NORMAL, TRUE, NULL, pw, NULL, 10, (int)y2, layout2 );
-
-  }
-
-
+	g_object_unref(layout);
+	g_string_free(str, TRUE);
 }
-
 
 static void
 ExposeDie( GtkWidget *pw, GdkEventExpose *pev,
@@ -741,6 +755,7 @@ GTKShowTempMap( const matchstate ams[], const int n,
       pw = 
         gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( pwx ),
                                                      sz );
+    g_free(sz);
       
     gtk_box_pack_start( GTK_BOX( pwh ), pw, FALSE, FALSE, 0 );
 
