@@ -2332,14 +2332,13 @@ PyMethodDef gnubgMethods[] = {
 
 };
 
-extern void PythonInitialise(void)
+extern void PythonInitialise(char *argv0)
 {
-  char *working_dir = g_get_current_dir();
 
 #ifdef WIN32
 {	/* Setup python to look in the pythonlib directory if present */
-	char *python_dir;
-	python_dir = g_build_filename(working_dir, "/PythonLib", NULL);
+	char *working_dir = g_get_current_dir();
+	char *python_dir = g_build_filename(working_dir, "/PythonLib", NULL);
 	if (access(python_dir, F_OK) == 0)
 	{	/* Set Pyton to use this directory */
 		char *buf;
@@ -2351,12 +2350,11 @@ extern void PythonInitialise(void)
 		g_free(buf);
 	}
 	g_free(python_dir);
+	g_free(working_dir);
 }
 
 #endif
-
-  Py_SetProgramName(working_dir);
-  g_free(working_dir);
+  Py_SetProgramName(argv0);
   Py_Initialize();
 
   /* ensure that python know about our gnubg module */

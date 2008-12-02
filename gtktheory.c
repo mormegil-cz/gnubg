@@ -530,6 +530,7 @@ static void GraphExpose( GtkWidget *pwGraph, GdkEventExpose *pev,
 			      x + cx * i / 20 - width/2 /* FIXME */, y-height-1, layout );
 	}
     }
+    g_object_unref(layout);
 
     for( i = 0; i < 3; i++ )
 	ax[ i ] = (int)(x + cx * ptw->aar[ iPlayer ][ i ]);

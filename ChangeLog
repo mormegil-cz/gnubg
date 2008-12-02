@@ -1,3 +1,10 @@
+Tue Dec  2 01:19:31 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c, gnubgmodule.c, gnubgmodule.h: Py_SetProgramname should be
+	parsed argv[0];
+	* gtkboard.c: init bd->turn to avoid a warning from valgrind
+	* gtktheory.c: small memory leak caused by missing g_objec_unref
+
 Mon Dec  1 23:07:43 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtktempmap.c: make "show equities" more readable

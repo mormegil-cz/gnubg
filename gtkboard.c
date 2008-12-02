@@ -100,6 +100,7 @@ extern GtkWidget *board_new(renderdata* prd)
 	bd->resigned = 0;
 	bd->diceShown = DICE_NOT_SHOWN;
 	bd->grayBoard = FALSE;
+	bd->turn = 0;
 
 	bd->x_dice[ 0 ] = bd->y_dice[ 0 ] = 0;
 	bd->x_dice[ 1 ] = bd->y_dice[ 1 ] = 0;

@@ -5032,7 +5032,7 @@ int main(int argc, char *argv[])
 
 #if USE_PYTHON
 	PushSplash(pwSplash, _("Initialising"), _("Python"), 250);
-	PythonInitialise();
+	PythonInitialise(argv[0]);
 #endif
 
 	SetExitSoundOff();

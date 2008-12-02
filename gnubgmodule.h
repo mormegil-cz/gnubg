@@ -32,7 +32,7 @@
 #include <Python.h>
 #endif
 
-extern void PythonInitialise(void);
+extern void PythonInitialise(char *argv0);
 extern void PythonShutdown(void);
 extern void PythonRun(const char *sz);
 extern int LoadPythonFile(const char *sz);
