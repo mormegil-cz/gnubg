@@ -1,3 +1,15 @@
+Wed Dec  3 11:51:33 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* dice.c, dice.h, gnubg.c: free gmp random data
+	* gtkboard.c: init bd->cube and remove unused widget from board_init
+	* gtkgame.c: the list returned by gtk_container_get_children should be
+	freed
+	* gtkgamelist.c: widget destroy doesn't work (gtk bug)
+	* gtkprefs.c: free the xml parser context
+	* gtkwindows.c: we cannot rely on the response cb to free the data as
+	the widget may be destroyed in other ways
+	* board3d/drawboard3d.c, board3d/misc3d.c: simple frees
+
 Tue Dec  2 01:19:31 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c, gnubgmodule.c, gnubgmodule.h: Py_SetProgramname should be

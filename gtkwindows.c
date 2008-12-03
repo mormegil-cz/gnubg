@@ -106,8 +106,6 @@ static void DialogResponse(GtkWidget *dialog, gint response, CallbackStruct *dat
 	else
 	{	/* Ignore response */
 	}
-	if (data)
-		free(data);
 }
 
 static void dialog_mapped(GtkWidget *window, gpointer data)
@@ -188,11 +186,12 @@ extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt,
 	    gtk_box_pack_start(GTK_BOX(pwHbox), pwPixmap, FALSE, FALSE, 0);
     }
 
-	cbData = (CallbackStruct*)malloc(sizeof(CallbackStruct));
+	cbData = g_new0(CallbackStruct, 1);
 
     cbData->DialogFun = (dialog_func_ty) okFun;
 
 	cbData->data = okFunData;
+	g_object_set_data_full(G_OBJECT(pwDialog), "cbData", cbData, g_free);
 	g_signal_connect(pwDialog, "response", G_CALLBACK(DialogResponse), cbData);
 
 	if ((flags & DIALOG_FLAG_NOOK) == 0)
@@ -219,7 +218,7 @@ extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt,
 
 extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da )
 {
-    GList *pl;
+    GList *pl, *pl_org;
     GtkWidget *pwChild=NULL;
 
 	switch( da ) {
@@ -233,7 +232,7 @@ extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da )
 		return GTK_DIALOG( pw )->action_area;
 
     case DA_OK:
-		pl = gtk_container_get_children( GTK_CONTAINER( GTK_DIALOG( pw )->action_area ) );
+		pl = pl_org = gtk_container_get_children( GTK_CONTAINER( GTK_DIALOG( pw )->action_area ) );
 		while (pl)
 		{
 			pwChild = pl->data;
@@ -241,7 +240,7 @@ extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da )
 				break;
 			pl = pl->next;
 		}
-		g_list_free( pl );
+		g_list_free( pl_org );
 		return pwChild;
 	
     default:

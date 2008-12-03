@@ -686,6 +686,13 @@ extern void dice_init_callback(int (*rdo_callback) (void),
 	GetManualDice = gmd_callback;
 }
 
+extern void free_rngctx(rngcontext * rngctx)
+{
+#if HAVE_LIBGMP
+	mpz_clear(rngctx->nz);
+#endif
+	g_free(rngctx);
+}
 extern void *InitRNG( unsigned long *pnSeed, int *pfInitFrom,
 		const int fSet, const rng rngx)
 {

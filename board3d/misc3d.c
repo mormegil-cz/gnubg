@@ -2376,8 +2376,14 @@ void ClearTextures(BoardData3d* bd3d)
 	bd3d->numTextures = 0;
 }
 
+static void
+free_texture( gpointer data, gpointer userdata ) {
+	free(data);
+}
+
 void DeleteTextureList(void)
 {
+	g_list_foreach(textures, free_texture, NULL);
 	g_list_free(textures);
 }
 

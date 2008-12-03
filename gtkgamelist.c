@@ -209,7 +209,8 @@ void GetStyleFromRCFile(GtkStyle** ppStyle, char* name, GtkStyle* psBase)
 
 	/* Remove useless widgets */
 	gtk_widget_destroy(dummy);
-	gtk_widget_destroy(temp);
+	g_object_ref_sink(G_OBJECT(temp));
+	g_object_unref(G_OBJECT(temp));
 }
 
 extern GtkWidget* GL_Create(void)

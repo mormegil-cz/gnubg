@@ -2360,8 +2360,8 @@ Shutdown( void ) {
 
   RenderFinalise();
 
-  g_free(rngctxCurrent);
-  g_free(rngctxRollout);
+  free_rngctx(rngctxCurrent);
+  free_rngctx(rngctxRollout);
 
   FreeMatch();
   ClearMatch();
@@ -4979,6 +4979,7 @@ int main(int argc, char *argv[])
 	xmlMemSetup(g_free, wrap_xml_g_malloc, wrap_xml_g_realloc, g_strdup);
 #endif
 #endif
+
 
 	/* print version and exit if -v option given */
 	version();

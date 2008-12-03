@@ -1279,7 +1279,10 @@ static gchar *GTKTranslate ( const gchar *path, gpointer func_data ) {
 
 static GtkWidget* firstChild(GtkWidget* widget)
 {
-	return g_list_nth_data(gtk_container_get_children(GTK_CONTAINER(widget)), 0);
+	GList *list = gtk_container_get_children(GTK_CONTAINER(widget));
+	GtkWidget *child = g_list_nth_data(list, 0);
+	g_list_free(list);
+	return child;
 }
 
 static void SetToolbarItemStyle(gpointer data, gpointer user_data)
@@ -1299,6 +1302,7 @@ static void SetToolbarItemStyle(gpointer data, gpointer user_data)
 	buttonParts = gtk_container_get_children(GTK_CONTAINER(buttonParent));
 	icon = g_list_nth_data(buttonParts, 0);
 	text = g_list_nth_data(buttonParts, 1);
+	g_list_free(buttonParts);
 
 	if (!icon || !text)
 		return;	/* Didn't find them */

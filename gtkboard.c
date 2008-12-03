@@ -94,6 +94,7 @@ extern GtkWidget *board_new(renderdata* prd)
 	bd->rd->nSize = -1;
 
 	bd->crawford_game = 0;
+	bd->cube = 1;
 	bd->cube_use = 0;
 	bd->doubled = 0;
 	bd->cube_owner = 0;
@@ -3837,10 +3838,6 @@ static void board_init( Board *board )
 
     bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -10;    
     bd->diceRoll[0] = bd->diceRoll[1] = 0;
-
-    /* horizontal separator */
-
-    pw = gtk_hseparator_new ();
 
     /* board drawing area */
 

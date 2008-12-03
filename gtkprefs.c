@@ -146,6 +146,8 @@ read_board_designs ( void ) {
 
   plFinal = g_list_concat ( plSystem, plUser );
 
+  g_list_free(plUser);
+
   return plFinal;
 
 }
@@ -3461,9 +3463,11 @@ ParseBoardDesigns ( const char *szFile, const int fDeletable ) {
           return NULL;
 
   pxpc = xmlCreateMemoryParserCtxt ( contents, (int)size );
+  g_free(contents);
   if ( ! pxpc )
           return NULL;
 
+  xmlFree(pxpc->sax);
   pxpc->sax = &xsaxScan;
   pxpc->userData = &pc;
 
@@ -3473,6 +3477,9 @@ ParseBoardDesigns ( const char *szFile, const int fDeletable ) {
 
   if ( pc.err )
     free_board_designs ( pc.pl );
+
+  pxpc -> sax = NULL;
+  xmlFreeParserCtxt(pxpc);
 
   return pc.err ? NULL : pc.pl;
 

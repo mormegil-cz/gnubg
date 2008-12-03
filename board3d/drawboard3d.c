@@ -181,6 +181,8 @@ static void preDrawPiece0(const renderdata* prd, int display)
 	else
 	{
 		circleSloped(radius, 0.f, PIECE_DEPTH, prd->curveAccuracy);
+		Free3d(p, prd->curveAccuracy + 1, prd->curveAccuracy / 4 + 1);
+		Free3d(n, prd->curveAccuracy + 1, prd->curveAccuracy / 4 + 1);
 		return;
 	}
 	/* Draw side of piece */

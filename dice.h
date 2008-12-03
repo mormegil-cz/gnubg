@@ -39,6 +39,7 @@ extern rngcontext *rngctxCurrent;
 
 rngcontext *CopyRNGContext(rngcontext *rngctx);
 
+extern void free_rngctx(rngcontext * rngctx);
 extern void *InitRNG( unsigned long *pnSeed, int *pfInitFrom, const int fSet, const rng rngx );
 extern void CloseRNG( const rng rngx, rngcontext *rngctx );
 extern void DestroyRNG( const rng rngx, rngcontext **rngctx );
