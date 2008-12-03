@@ -239,7 +239,6 @@ static void do_mw_views(theorywidget * ptw)
 	GtkCellRenderer *renderer;
 
 	for (i = 0; i < 2; i++) {
-		g_print("adding store %i\n", i);
 		store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 		ptw->apwMW[i] = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 		g_object_unref(store);
@@ -373,10 +372,6 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
   gtk_widget_show ( ptw->apwFrame[ 0 ] );
   gtk_widget_show ( ptw->apwFrame[ 1 ] );
   gtk_widget_hide ( ptw->apwFrame[ ci.nMatchTo != 0 ] );
-  g_print("matchto %d ", ci.nMatchTo);
-  g_print("show %d ", ! ci.nMatchTo);
-  g_print("hide %d\n", ci.nMatchTo != 0);
-  //gtk_widget_show ( ptw->apwFrame[ ! ci.nMatchTo ] );
 
   /* update match play widget */
 

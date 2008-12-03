@@ -1,3 +1,7 @@
+Wed Dec  3 12:06:57 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtktheory.c: remove missed debug stuff
+
 Wed Dec  3 11:51:33 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* dice.c, dice.h, gnubg.c: free gmp random data
