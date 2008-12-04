@@ -622,6 +622,7 @@ CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
       sz = g_strdup_printf ( "(%.1f%%)", 100.0 * r );
       pw = gtk_label_new ( sz );
+      g_free(sz);
       gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
 
       gtk_table_attach ( GTK_TABLE ( pwTable ), pw,

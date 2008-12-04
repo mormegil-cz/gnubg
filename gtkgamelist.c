@@ -47,6 +47,7 @@ static int gtk_compare_fonts(GtkStyle* psOne, GtkStyle* psTwo)
 
 static void gtk_set_font(GtkStyle* psStyle, GtkStyle* psValue)
 {
+	pango_font_description_free(psStyle->font_desc);
 	psStyle->font_desc = pango_font_description_copy(psValue->font_desc);
 }
 

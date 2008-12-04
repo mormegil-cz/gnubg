@@ -2237,7 +2237,7 @@ static void HintChequer( char *sz )
   char szBuf[ 1024 ];
   int parse_n = ParseNumber ( &sz );
   unsigned int n = (parse_n <= 0) ? 10 : parse_n;
-  int anMove[ 8 ];
+  int anMove[ 8 ] = {-1, -1, -1, -1, -1, -1, -1, -1};
   moverecord *pmr;
   unsigned char auch[ 10 ];
   int fHasMoved;

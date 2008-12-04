@@ -70,7 +70,7 @@ typedef struct _FileHelper {
 static FileHelper *OpenFileHelper(const char *filename)
 {
 	FileHelper *fh;
-	if (!g_file_test(filename, G_FILE_TEST_EXISTS) || g_file_test(filename, G_FILE_TEST_IS_DIR))
+	if (!filename || !g_file_test(filename, G_FILE_TEST_EXISTS) || g_file_test(filename, G_FILE_TEST_IS_DIR))
 		return NULL;	/* File not found */
 
 	fh = g_new(FileHelper, 1);
