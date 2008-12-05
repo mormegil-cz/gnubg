@@ -47,7 +47,9 @@ typedef struct _bearoffcontext
   int fHeuristic;  /* heuristic database? */
   /* two sided dbs */
   int fCubeful;    /* cubeful equities included */
+#if (GLIB_MAJOR_VERSION > 2) || ((GLIB_MAJOR_VERSION > 1) && (GLIB_MINOR_VERSION > 7))
   GMappedFile *map;
+#endif
   unsigned char *p;        /* pointer to data in memory */
 
   unsigned long int nReads; /* number of reads */

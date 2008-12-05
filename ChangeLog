@@ -1,3 +1,8 @@
+Fri Dec  5 10:30:38 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* bearoff.c, bearoff.h: disable gmappedfile code when glib is old, and
+	fix a bug causing a crash when mapping of the bearoffdb fails.
+
 Thu Dec  4 23:11:23 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* file.c, gnubg.c, gtkcube.c, gtkgamelist.c: more minor memory errors

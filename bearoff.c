@@ -794,11 +794,13 @@ extern void BearoffClose(bearoffcontext * pbc)
 	if (pbc->pf)
 		fclose(pbc->pf);
 
+#if (GLIB_MAJOR_VERSION > 2) || ((GLIB_MAJOR_VERSION > 1) && (GLIB_MINOR_VERSION > 7))
 	if (pbc->map)
 	{
 		 g_mapped_file_free(pbc->map);
 		 pbc->p = NULL;
 	}
+#endif
 
 	if (pbc->p)
 		free(pbc->p);
@@ -809,7 +811,8 @@ extern void BearoffClose(bearoffcontext * pbc)
 	g_free(pbc);
 }
 
-static void ReadIntoMemory ( bearoffcontext *pbc )
+#if (GLIB_MAJOR_VERSION > 2) || ((GLIB_MAJOR_VERSION > 1) && (GLIB_MINOR_VERSION > 7))
+static unsigned char *ReadIntoMemory ( bearoffcontext *pbc )
 {
 	GError *error = NULL;
 	pbc->map = g_mapped_file_new(pbc->szFilename, FALSE, &error);
@@ -817,9 +820,12 @@ static void ReadIntoMemory ( bearoffcontext *pbc )
 	{
 		g_printerr(_("%s: Failed to map bearoffdatabase %s\n"), pbc->szFilename, error->message);
 		g_error_free(error);
+		return NULL;
 	}
 	pbc->p = (unsigned char *)g_mapped_file_get_contents(pbc->map);
+	return pbc->p;
 }
+#endif
 
 /*
  * Check whether this is a exact bearoff file 
@@ -964,11 +970,17 @@ extern bearoffcontext *BearoffInit(const char *szFilename, const int bo, void (*
 	 * read database into memory if requested 
 	 */
 
+#if (GLIB_MAJOR_VERSION > 2) || ((GLIB_MAJOR_VERSION > 1) && (GLIB_MINOR_VERSION > 7))
 	if (bo & (int) BO_IN_MEMORY) {
 		fclose(pbc->pf);
 		pbc->pf = NULL;
-		ReadIntoMemory(pbc);
+		if (ReadIntoMemory(pbc) == NULL)
+			if (!(pbc->pf = g_fopen(szFilename, "rb"))) {
+				g_printerr("%s\n", _("Invalid or nonexistent database"));
+				goto invaliddb;
+			}
 	}
+#endif
 	return pbc;
       invaliddb:
 	if (errno)
