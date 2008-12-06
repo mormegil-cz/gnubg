@@ -24,6 +24,7 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <stdio.h>
+#include <io.h>
 #include <stdlib.h>
 #include <string.h>
 #if HAVE_UNISTD_H
