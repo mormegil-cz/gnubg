@@ -144,9 +144,8 @@ read_board_designs ( void ) {
   plUser = ParseBoardDesigns ( sz, TRUE );
   g_free ( sz );
 
+  /* Add user list to system list (doesn't copy the user list) */
   plFinal = g_list_concat ( plSystem, plUser );
-
-  g_list_free(plUser);
 
   return plFinal;
 
