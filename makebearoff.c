@@ -24,7 +24,9 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <stdio.h>
+#ifdef WIN32
 #include <io.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #if HAVE_UNISTD_H
