@@ -1,4 +1,11 @@
-Mon Dec  8 21:29:12 CET 2008 Christian Anthon <anthon@kiku.dk>
+Mon Dec  8 22:22:19 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, commands.inc, gnubgstock.c, gnubgstock.h, gtkgame.c,
+	gtktoolbar.c, play.c, pixmaps/Makefile.am,
+	pixmaps/gnubg-stock-pixbufs.h, pixmaps/16x16/actions/runit_16.png,
+	pixmaps/24x24/actions/runit_24.png: Add a quickgame button
+
+Mon Dec  8 21:29:12 CET 2008 Christian Anthon <anthon@kiku.dk>: 
 
 	* gtkgame.c: UserCommand("set ..."); may have strange sideeffects
 	through GTKSet, and cannot be used in edit_new

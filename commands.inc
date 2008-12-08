@@ -54,6 +54,9 @@ command cER = {
       N_("Compute analysis and annotate every "
       "game in the session"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
+}, acQuick[] = {
+    { "game", CommandQuickGame, N_("Automatically finish current game"), NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acAnnotateClear[] = {
     { "comment", CommandAnnotateClearComment, 
       N_("Erase commentary about a move"),
@@ -1330,6 +1333,7 @@ command cER = {
     { "analysis", NULL, NULL, NULL, acAnalyse },
     { "analyze", NULL, NULL, NULL, acAnalyse },
     { "annotate", NULL, N_("Record notes about a game"), NULL, acAnnotate },
+    { "quick", NULL, N_("Automatically make plays"), NULL, acQuick },
     { "beaver", CommandRedouble, N_("Synonym for `redouble'"), NULL, NULL },
     { "calibrate", CommandCalibrate,
       N_("Measure evaluation speed, for later time estimates"), szOPTVALUE,

@@ -52,8 +52,9 @@ typedef struct _toolbarwidget {
   GtkWidget *pwDouble;
   GtkWidget *pwTake;       /* button for "Take" */
   GtkWidget *pwDrop;       /* button for "Drop" */
-  GtkWidget *pwResign;       /* button for "Play" */
-  GtkWidget *pwHint;      /* button for "Reset" */
+  GtkWidget *pwResign;       /* button for "Resign" */
+  GtkWidget *pwFinishGame;       /* button for "play game" */
+  GtkWidget *pwHint;      /* button for "Hint" */
   GtkWidget *pwReset;      /* button for "Reset" */
   GtkWidget *pwEdit;       /* button for "Edit" */
   GtkWidget *pwHideShowPanel; /* button hide/show panel */
@@ -329,11 +330,10 @@ ToolbarNew ( void ) {
   /* Resign button */
 	ptw->pwResign = gtk_toolbar_insert_stock(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_RESIGN, _("Resign the current game"), NULL, G_CALLBACK(GTKResign), NULL, -1);
 
-  /* play button */
-  
-  /* How often do you use the "play" button? I guess it's so seldom
-   * you won't mind using the pulldown menues */
-  
+  /* drop button */
+	ptw->pwFinishGame = gtk_toolbar_insert_stock(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_QUICK_GAME, _("Let computer finish the game"), NULL, G_CALLBACK(ButtonClicked), "quick game", -1);
+
+
   gtk_toolbar_append_space(GTK_TOOLBAR(pwToolbar));
   
   /* reset button */

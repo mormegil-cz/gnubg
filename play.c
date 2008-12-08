@@ -82,6 +82,7 @@ const char *aszLuckTypeAbbr[] = { "--", "-", "", "+", "++" };
 listOLD lMatch, *plGame, *plLastMove;
 statcontext scMatch;
 static int fComputerDecision = FALSE;
+static int fQuickGame = FALSE;
 
 typedef enum _annotatetype {
   ANNOTATE_ACCEPT, ANNOTATE_CUBE, ANNOTATE_DOUBLE, ANNOTATE_DROP,
@@ -275,6 +276,8 @@ ApplyGameOver(matchstate* pms, const listOLD* plGame)
     
   pms->anScore[ pmgi->fWinner ] += pmgi->nPoints;
   pms->cGames++;
+  if (fQuickGame)
+	  outputf(ngettext("Quick Game done.\n%s wins %d point\n", "Quick Game done.\n%s wins %d points\n", pmgi->nPoints), ap[pmgi->fWinner].szName, pmgi->nPoints);
 }
 
 extern void
@@ -3341,6 +3344,61 @@ CommandNext( char* sz )
   }
     
   InternalCommandNext(fMarkedMoves, n);
+}
+
+extern void CommandQuickGame(char *sz)
+{
+	playertype pt_store[2] = { ap[0].pt, ap[1].pt };
+	int fAutoGame_store = fAutoGame;
+	int fDisplay_store = fDisplay;
+	int fQuiet_store = fQuiet;
+	evalcontext ec_cheq_store[2] = {ap[0].esChequer.ec, ap[1].esChequer.ec};
+	evalcontext ec_cube_store[2] = {ap[0].esCube.ec, ap[1].esCube.ec};
+#if defined (REDUCTION_CODE)
+      const evalcontext ec_quick = { FALSE, 0, 0, TRUE, 0.0 };
+#else
+      const evalcontext ec_quick = { FALSE, 0, FALSE, TRUE, 0.0 };
+#endif
+
+
+	if (ms.gs != GAME_PLAYING) {
+		outputl(_("No game in progress (type `new game' to start one)."));
+
+		return;
+	}
+	ap[0].pt = PLAYER_GNU;
+	ap[1].pt = PLAYER_GNU;
+	ap[0].esChequer.ec = ec_quick;
+	ap[1].esChequer.ec = ec_quick;
+	ap[0].esCube.ec = ec_quick;
+	ap[1].esCube.ec = ec_quick;
+
+	fAutoGame = FALSE;
+	fQuiet = TRUE;
+	fDisplay = FALSE;
+	fInterrupt = FALSE;
+	fQuickGame = TRUE;
+	outputnew();
+	while (ms.gs == GAME_PLAYING && !fInterrupt ) {
+		UserCommand("play");
+		while (nNextTurn)
+			NextTurnNotify(NULL);
+	}
+	outputx();
+	ap[0].pt = pt_store[0];
+	ap[1].pt = pt_store[1];
+	ap[0].esChequer.ec = ec_cheq_store[0];
+	ap[1].esChequer.ec = ec_cheq_store[1];
+	ap[0].esCube.ec = ec_cube_store[0];
+	ap[1].esCube.ec = ec_cube_store[1];
+
+	fAutoGame = fAutoGame_store;
+	fDisplay = fDisplay_store;
+	fQuiet = fQuiet_store;
+	fQuickGame = FALSE;
+	if (fAutoGame && (!ms.nMatchTo || (ms.anScore[0] < ms.nMatchTo && ms.anScore[1] < ms.nMatchTo))) {
+		NewGame();
+	}
 }
 
 extern void CommandPlay( char *sz ) {
