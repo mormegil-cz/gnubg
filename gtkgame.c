@@ -4132,54 +4132,23 @@ static void ToolButtonPressed( GtkWidget *pw, newwidget *pnw ) {
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
   UserCommand(sz);
 }
-static const char *get_player_type (int i) {
-	switch( ap[ i ].pt ) {
-	case PLAYER_GNU:
-            return("gnubg");
-	    break;
-	case PLAYER_HUMAN:
-            return("human");
-        default:
-            return(NULL);
-	}
-}
-
 extern int edit_new(unsigned int length)
 {
 	char sz[40];
-	const char *pt[2];
-	int i;
-	int err = 0;
-	int fDisplay_save;
+	playertype pt_store[2] = { ap[0].pt, ap[1].pt };
+	int fDisplay_store = fDisplay;
 
-	outputoff();
-	for (i = 0; i < 2; i++) {
-		pt[i] = get_player_type(i);
-		if (!pt[i])
-			err = 1;
-		sprintf(sz, "set player %d human", i);
-		UserCommand(sz);
-	}
-	outputon();
-	if (!err) {
-		fDisplay_save = fDisplay;
-		fDisplay = 0;
-		sprintf(sz, "new match %d", length);
-		UserCommand(sz);
-		fDisplay = fDisplay_save;
-	} else {
-		outputerrf(_
-			   ("Edit new position only allowed with human and computer players"));
-	}
-	outputoff();
-	for (i = 0; i < 2; i++) {
-		if (pt[i]) {
-			sprintf(sz, "set player %d %s", i, pt[i]);
-			UserCommand(sz);
-		}
-	}
-	outputon();
-	return (err);
+	ap[0].pt = PLAYER_HUMAN;
+	ap[1].pt = PLAYER_HUMAN;
+	fDisplay = 0;
+
+	sprintf(sz, "new match %d", length);
+	UserCommand(sz);
+
+	ap[0].pt = pt_store[0];
+	ap[1].pt = pt_store[1];
+	fDisplay = fDisplay_store;
+	return 0;
 }
 
 static void edit_new_clicked(GtkWidget * pw, newwidget * pnw)

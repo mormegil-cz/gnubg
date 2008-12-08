@@ -1,4 +1,9 @@
-Fri Dec  5 10:30:38 CET 2008 Christian Anthon <anthon@kiku.dk>
+Mon Dec  8 21:29:12 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtkgame.c: UserCommand("set ..."); may have strange sideeffects
+	through GTKSet, and cannot be used in edit_new
+
+Dec  5 10:30:38 CET 2008 Christian Anthon <anthon@kiku.dk>: 
 
 	* bearoff.c, bearoff.h: disable gmappedfile code when glib is old, and
 	fix a bug causing a crash when mapping of the bearoffdb fails.
