@@ -210,8 +210,10 @@ static void PlaySoundGst(const char *fn, gboolean sync)
 		outputerrf("Failed to play sound file '%s'", fn);
 		gst_element_set_state(play, GST_STATE_NULL);
 		gst_object_unref(GST_OBJECT(play));
+		g_free(uri);
 		return;
 	}
+	g_free(uri);
 
 
 	bus = gst_pipeline_get_bus (GST_PIPELINE (play));

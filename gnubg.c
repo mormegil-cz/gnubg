@@ -4396,15 +4396,19 @@ move_rc_files (void)
 
   newfile = g_build_filename (szHomeDirectory, "gnubgautorc", NULL);
   oldfile = g_build_filename (olddir, ".gnubgautorc", NULL);
-  g_rename (oldfile, newfile);
+  if (g_file_test(oldfile, G_FILE_TEST_IS_REGULAR) && !g_file_test(newfile, G_FILE_TEST_EXISTS))
+	  g_rename (oldfile, newfile);
   g_free (oldfile);
   g_free (newfile);
 
   newfile = g_build_filename (szHomeDirectory, "gnubgrc", NULL);
   oldfile = g_build_filename (olddir, ".gnubgrc", NULL);
-  g_rename (oldfile, newfile);
+  if (g_file_test(oldfile, G_FILE_TEST_IS_REGULAR) && !g_file_test(newfile, G_FILE_TEST_EXISTS))
+	  g_rename (oldfile, newfile);
   g_free (oldfile);
   g_free (newfile);
+
+  g_free(olddir);
 
 }
 
