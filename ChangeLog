@@ -1,3 +1,7 @@
+Tue Dec  9 14:03:52 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* analysis.c: fix a bug causing wrong luck stats in matches as reported on savannah 
+
 Tue Dec  9 01:32:30 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c, sound.c: missing frees

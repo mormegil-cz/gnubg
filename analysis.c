@@ -1164,7 +1164,7 @@ AddStatcontext ( const statcontext *pscA, statcontext *pscB ) {
     for ( j = 0; j < N_SKILLS; j++ )
       pscB->anMoves[ i ][ j ] += pscA->anMoves[ i ][ j ];
 
-    for ( j = 0; j < N_SKILLS; j++ )
+    for ( j = 0; j < N_LUCKS; j++ )
       pscB->anLuck[ i ][ j ] += pscA->anLuck[ i ][ j ];
 
     pscB->anCubeMissedDoubleDP [ i ] += pscA->anCubeMissedDoubleDP [ i ];
