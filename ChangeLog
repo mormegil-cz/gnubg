@@ -1,3 +1,10 @@
+Tue Dec  9 16:59:54 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* import.c: do not try to import failed formats
+	* gtkfile.c: output not recognized format in batch analyse, when
+	appropriate. Do not try to set non-valid files and directories in the
+	file selection dialog (Savannah bug).
+
 Tue Dec  9 14:03:52 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* analysis.c: fix a bug causing wrong luck stats in matches as reported on savannah 

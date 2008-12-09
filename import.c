@@ -3854,9 +3854,7 @@ extern void CommandImportAuto(char *sz)
 	sz = NextToken(&sz);
 
 	if (!sz || !*sz) {
-		outputerrf(_
-			   ("You must specify a file to import (see `help "
-			    "import auto')."));
+		outputerrf(_("You must specify a file to import (see `help " "import auto')."));
 		return;
 	}
 	fdp = ReadFilePreview(sz);
@@ -3864,8 +3862,11 @@ extern void CommandImportAuto(char *sz)
 		outputerrf(_("%s is not a backgammon file"), sz);
 		g_free(fdp);
 		return;
-	}
-	if (fdp->type == IMPORT_SGF)
+	} else if (fdp->type == N_IMPORT_TYPES) {
+		outputf(_("The format of '%s' is not recognized"), sz);
+		g_free(fdp);
+		return;
+	} else if (fdp->type == IMPORT_SGF)
 		cmd = g_strdup_printf("load match \"%s\"", sz);
 	else
 		cmd = g_strdup_printf("import %s \"%s\"", import_format[fdp->type].clname, sz);
