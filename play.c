@@ -3352,12 +3352,12 @@ extern void CommandQuickGame(char *sz)
 	int fAutoGame_store = fAutoGame;
 	int fDisplay_store = fDisplay;
 	int fQuiet_store = fQuiet;
-	evalcontext ec_cheq_store[2] = {ap[0].esChequer.ec, ap[1].esChequer.ec};
-	evalcontext ec_cube_store[2] = {ap[0].esCube.ec, ap[1].esCube.ec};
+	evalcontext ec_cheq_store[2] = { ap[0].esChequer.ec, ap[1].esChequer.ec };
+	evalcontext ec_cube_store[2] = { ap[0].esCube.ec, ap[1].esCube.ec };
 #if defined (REDUCTION_CODE)
-      const evalcontext ec_quick = { FALSE, 0, 0, TRUE, 0.0 };
+	const evalcontext ec_quick = { FALSE, 0, 0, TRUE, 0.0 };
 #else
-      const evalcontext ec_quick = { FALSE, 0, FALSE, TRUE, 0.0 };
+	const evalcontext ec_quick = { FALSE, 0, FALSE, TRUE, 0.0 };
 #endif
 
 
@@ -3379,7 +3379,7 @@ extern void CommandQuickGame(char *sz)
 	fInterrupt = FALSE;
 	fQuickGame = TRUE;
 	outputnew();
-	while (ms.gs == GAME_PLAYING && !fInterrupt ) {
+	while (ms.gs == GAME_PLAYING && !fInterrupt) {
 		UserCommand("play");
 		while (nNextTurn)
 			NextTurnNotify(NULL);
@@ -3396,8 +3396,16 @@ extern void CommandQuickGame(char *sz)
 	fDisplay = fDisplay_store;
 	fQuiet = fQuiet_store;
 	fQuickGame = FALSE;
+	if (fInterrupt)
+		return;
 	if (fAutoGame && (!ms.nMatchTo || (ms.anScore[0] < ms.nMatchTo && ms.anScore[1] < ms.nMatchTo))) {
+		fComputing = TRUE;
 		NewGame();
+		if (ap[ms.fTurn].pt == PLAYER_HUMAN)
+			ShowBoard();
+		else if (!ComputerTurn())
+			TurnDone();
+		fComputing = FALSE;
 	}
 }
 
