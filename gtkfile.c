@@ -534,7 +534,6 @@ static GtkTreeModel *batch_create_model(GSList * filenames)
 		char *folder;
 		char *file;
 		char *filename = (char *) iter->data;
-		int ftype = N_IMPORT_TYPES;
 
 		gtk_list_store_append(store, &tree_iter);
 
