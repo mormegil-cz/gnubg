@@ -3352,13 +3352,17 @@ extern void CommandQuickGame(char *sz)
 	int fAutoGame_store = fAutoGame;
 	int fDisplay_store = fDisplay;
 	int fQuiet_store = fQuiet;
-	evalcontext ec_cheq_store[2] = { ap[0].esChequer.ec, ap[1].esChequer.ec };
-	evalcontext ec_cube_store[2] = { ap[0].esCube.ec, ap[1].esCube.ec };
 #if defined (REDUCTION_CODE)
 	const evalcontext ec_quick = { FALSE, 0, 0, TRUE, 0.0 };
 #else
 	const evalcontext ec_quick = { FALSE, 0, FALSE, TRUE, 0.0 };
 #endif
+	evalcontext ec_cheq_store[2];
+	evalcontext ec_cube_store[2];
+	ec_cheq_store[0] = ap[0].esChequer.ec;
+	ec_cheq_store[1] = ap[1].esChequer.ec;
+	ec_cube_store[0] = ap[0].esCube.ec;
+	ec_cube_store[1] = ap[1].esCube.ec;
 
 
 	if (ms.gs != GAME_PLAYING) {
