@@ -53,7 +53,7 @@ typedef struct _toolbarwidget {
   GtkWidget *pwTake;       /* button for "Take" */
   GtkWidget *pwDrop;       /* button for "Drop" */
   GtkWidget *pwResign;       /* button for "Resign" */
-  GtkWidget *pwFinishGame;       /* button for "play game" */
+  GtkWidget *pwEndGame;       /* button for "play game" */
   GtkWidget *pwHint;      /* button for "Hint" */
   GtkWidget *pwReset;      /* button for "Reset" */
   GtkWidget *pwEdit;       /* button for "Edit" */
@@ -244,12 +244,6 @@ ToolbarUpdate ( GtkWidget *pwToolbar,
 
   if( fEdit || ! fPlaying )
     c = C_NONE;
-#if 0
-  gtk_widget_set_sensitive ( ptw->pwRoll, c == C_ROLLDOUBLE );
-  gtk_widget_set_sensitive ( ptw->pwDouble, c == C_ROLLDOUBLE );
-
-  gtk_widget_set_sensitive ( ptw->pwPlay, c == C_PLAY );
-#endif
 
   gtk_widget_set_sensitive ( ptw->pwTake,
                              c == C_TAKEDROP || c == C_AGREEDECLINE );
@@ -261,6 +255,7 @@ ToolbarUpdate ( GtkWidget *pwToolbar,
   gtk_widget_set_sensitive ( ptw->pwSave,  plGame != NULL );
   gtk_widget_set_sensitive ( ptw->pwResign, fPlaying  && !fEdit);
   gtk_widget_set_sensitive ( ptw->pwHint, fPlaying  && !fEdit);
+  gtk_widget_set_sensitive ( ptw->pwEndGame, fPlaying  && !fEdit);
   gtk_widget_set_sensitive ( ptw->pwEdit, TRUE );
 
   return c;
@@ -331,7 +326,7 @@ ToolbarNew ( void ) {
 	ptw->pwResign = gtk_toolbar_insert_stock(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_RESIGN, _("Resign the current game"), NULL, G_CALLBACK(GTKResign), NULL, -1);
 
   /* drop button */
-	ptw->pwFinishGame = gtk_toolbar_insert_stock(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_QUICK_GAME, _("Let computer finish the game"), NULL, G_CALLBACK(ButtonClicked), "quick game", -1);
+	ptw->pwEndGame = gtk_toolbar_insert_stock(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_END_GAME, _("Let the computer end the game"), NULL, G_CALLBACK(ButtonClicked), "end game", -1);
 
 
   gtk_toolbar_append_space(GTK_TOOLBAR(pwToolbar));

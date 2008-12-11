@@ -650,7 +650,7 @@ extern void CommandNewMatch(char *);
 extern void CommandNewSession(char *);
 extern void CommandNext(char *);
 extern void CommandNotImplemented(char *);
-extern void CommandQuickGame(char *);
+extern void CommandEndGame(char *);
 extern void CommandPlay(char *);
 extern void CommandPrevious(char *);
 extern void CommandQuit(char *);

@@ -1,3 +1,8 @@
+Thu Dec 11 23:11:16 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, commands.inc, gnubgstock.c, gnubgstock.h, gtkgame.c,
+	gtktoolbar.c, play.c, set.c: minor changes to the end-game button.
+
 Tue Dec  9 16:59:54 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* import.c: do not try to import failed formats

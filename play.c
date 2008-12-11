@@ -82,7 +82,7 @@ const char *aszLuckTypeAbbr[] = { "--", "-", "", "+", "++" };
 listOLD lMatch, *plGame, *plLastMove;
 statcontext scMatch;
 static int fComputerDecision = FALSE;
-static int fQuickGame = FALSE;
+static int fEndGame = FALSE;
 
 typedef enum _annotatetype {
   ANNOTATE_ACCEPT, ANNOTATE_CUBE, ANNOTATE_DOUBLE, ANNOTATE_DROP,
@@ -276,8 +276,8 @@ ApplyGameOver(matchstate* pms, const listOLD* plGame)
     
   pms->anScore[ pmgi->fWinner ] += pmgi->nPoints;
   pms->cGames++;
-  if (fQuickGame)
-	  outputf(ngettext("Quick Game done.\n%s wins %d point\n", "Quick Game done.\n%s wins %d points\n", pmgi->nPoints), ap[pmgi->fWinner].szName, pmgi->nPoints);
+  if (fEndGame)
+	  outputf(ngettext("End Game done.\n%s wins %d point\n", "End Game done.\n%s wins %d points\n", pmgi->nPoints), ap[pmgi->fWinner].szName, pmgi->nPoints);
 }
 
 extern void
@@ -3346,7 +3346,7 @@ CommandNext( char* sz )
   InternalCommandNext(fMarkedMoves, n);
 }
 
-extern void CommandQuickGame(char *sz)
+extern void CommandEndGame(char *sz)
 {
 	playertype pt_store[2] = { ap[0].pt, ap[1].pt };
 	int fAutoGame_store = fAutoGame;
@@ -3357,6 +3357,7 @@ extern void CommandQuickGame(char *sz)
 #else
 	const evalcontext ec_quick = { FALSE, 0, FALSE, TRUE, 0.0 };
 #endif
+	int manual_dice = (rngCurrent == RNG_MANUAL); 
 	evalcontext ec_cheq_store[2];
 	evalcontext ec_cube_store[2];
 	ec_cheq_store[0] = ap[0].esChequer.ec;
@@ -3370,6 +3371,12 @@ extern void CommandQuickGame(char *sz)
 
 		return;
 	}
+	if (!move_is_last_in_match()) {
+		int answer = GetInputYN(_("The resignation is not the last move in the match.\n"
+					  "Continuing will destroy the remainder of the match. Continue?"));
+		if (!answer)
+			return;
+	}
 	ap[0].pt = PLAYER_GNU;
 	ap[1].pt = PLAYER_GNU;
 	ap[0].esChequer.ec = ec_quick;
@@ -3377,11 +3384,18 @@ extern void CommandQuickGame(char *sz)
 	ap[0].esCube.ec = ec_quick;
 	ap[1].esCube.ec = ec_quick;
 
+	if (manual_dice)
+	{
+		outputoff();
+		CommandSetRNGMersenne(NULL);
+		outputon();
+	}
+
 	fAutoGame = FALSE;
 	fQuiet = TRUE;
 	fDisplay = FALSE;
 	fInterrupt = FALSE;
-	fQuickGame = TRUE;
+	fEndGame = TRUE;
 	outputnew();
 	while (ms.gs == GAME_PLAYING && !fInterrupt) {
 		UserCommand("play");
@@ -3399,7 +3413,14 @@ extern void CommandQuickGame(char *sz)
 	fAutoGame = fAutoGame_store;
 	fDisplay = fDisplay_store;
 	fQuiet = fQuiet_store;
-	fQuickGame = FALSE;
+	fEndGame = FALSE;
+	if (manual_dice)
+	{
+		outputoff();
+		CommandSetRNGManual(NULL);
+		outputon();
+	}
+
 	if (fInterrupt)
 		return;
 	if (fAutoGame && (!ms.nMatchTo || (ms.anScore[0] < ms.nMatchTo && ms.anScore[1] < ms.nMatchTo))) {

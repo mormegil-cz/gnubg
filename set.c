@@ -110,7 +110,7 @@ SetSeed ( const rng rngx, void *rngctx, char *sz ) {
 	return;
     }
 
-    if( *sz ) {
+    if( sz && *sz ) {
 #if HAVE_LIBGMP
 	if( InitRNGSeedLong( sz, rngx, rngctx ) )
 	    outputl( _("You must specify a valid seed (see `help set "
