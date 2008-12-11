@@ -597,7 +597,7 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 			FALSE, FALSE, 0);
 
     pow->padjCubeBeaver = GTK_ADJUSTMENT( gtk_adjustment_new (1, 0, 12, 
-							      1, 1, 1 ) );
+							      1, 1, 0 ) );
     pow->pwBeavers = gtk_spin_button_new (GTK_ADJUSTMENT (pow->padjCubeBeaver),
 					  1, 0);
     gtk_box_pack_start (GTK_BOX (pwhbox), pow->pwBeavers, TRUE, TRUE, 0);
@@ -620,7 +620,7 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 			FALSE, FALSE, 0);
     
     pow->padjCubeAutomatic = GTK_ADJUSTMENT( gtk_adjustment_new (0, 0, 12, 1,
-								 1, 1 ) );
+								 1, 0 ) );
     pow->pwAutomatic = gtk_spin_button_new (GTK_ADJUSTMENT (
 						pow->padjCubeAutomatic),
 					    1, 0);
@@ -737,7 +737,7 @@ static GtkWidget *OptionsPages( optionswidget *pow )
     gtk_box_pack_start (GTK_BOX (pwhbox), gtk_label_new( _("Move delay:") ),
 			FALSE, FALSE, 0);
     pow->padjDelay = GTK_ADJUSTMENT (gtk_adjustment_new (nDelay, 0,
-							 3000, 1, 10, 10) );
+							 3000, 1, 10, 0) );
     pw = gtk_spin_button_new (GTK_ADJUSTMENT (pow->padjDelay), 1, 0);
     gtk_box_pack_start (GTK_BOX (pwhbox), pw, TRUE, TRUE, 0);
     gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pw), TRUE);
@@ -953,7 +953,7 @@ static GtkWidget *OptionsPages( optionswidget *pow )
     gtk_box_pack_start (GTK_BOX (pwhbox), pw, FALSE, FALSE, 0);
 
     pow->padjDigits = GTK_ADJUSTMENT( gtk_adjustment_new (1, 0, 6, 
-							      1, 1, 1 ) );
+							      1, 1, 0 ) );
     pow->pwDigits = gtk_spin_button_new (GTK_ADJUSTMENT (pow->padjDigits),
 					  1, 0);
     gtk_box_pack_start (GTK_BOX (pwhbox), pow->pwDigits, TRUE, TRUE, 0);
@@ -996,7 +996,7 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 			FALSE, FALSE, 0);
 
     pow->padjLength = GTK_ADJUSTMENT( gtk_adjustment_new (nDefaultLength, 0,
-							  99, 1, 1, 1 ) );
+							  99, 1, 1, 0 ) );
     pw = gtk_spin_button_new (GTK_ADJUSTMENT (pow->padjLength),
 			      1, 0);
     gtk_box_pack_start (GTK_BOX (pwhbox), pw, TRUE, TRUE, 0);
@@ -1239,7 +1239,7 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 			FALSE, FALSE, 0);
     EvalCacheStats( NULL, &cCache, NULL, NULL );
     pow->padjCache = GTK_ADJUSTMENT (gtk_adjustment_new (cCache, 0, 1<<30,
-							  128, 512, 512) );
+							  128, 512, 0) );
     pw = gtk_spin_button_new (GTK_ADJUSTMENT (pow->padjCache), 128, 0);
     gtk_box_pack_start (GTK_BOX (pwhbox), pw, TRUE, TRUE, 0);
     gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pw), TRUE);
@@ -1334,7 +1334,7 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 
     gtk_box_pack_start (GTK_BOX (pwhbox), gtk_label_new( _("Eval Threads:") ),
 			FALSE, FALSE, 0);
-    pow->padjThreads = GTK_ADJUSTMENT(gtk_adjustment_new (MT_GetNumThreads(), 1, MAX_NUMTHREADS, 1, 1, 1));
+    pow->padjThreads = GTK_ADJUSTMENT(gtk_adjustment_new (MT_GetNumThreads(), 1, MAX_NUMTHREADS, 1, 1, 0));
     pw = gtk_spin_button_new (GTK_ADJUSTMENT (pow->padjThreads), 1, 0);
     gtk_box_pack_start (GTK_BOX (pwhbox), pw, TRUE, TRUE, 0);
     gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pw), TRUE);

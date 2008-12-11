@@ -2497,7 +2497,7 @@ static GtkWidget *AnalysisPage( analysiswidget *paw ) {
   
   for (i = 0; i < 3; i++){
     paw->apadjSkill[i] = 
-	  GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1, 0.01, 10, 10 ) );
+	  GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1, 0.01, 10, 0 ) );
 
     pwSpin = 
 	    gtk_spin_button_new (GTK_ADJUSTMENT (paw->apadjSkill[i]), 1, 2);
@@ -2525,7 +2525,7 @@ static GtkWidget *AnalysisPage( analysiswidget *paw ) {
   
   for (i = 0; i < 4; i++){
     paw->apadjLuck[i] = 
-	  GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1, 0.01, 10, 10 ) );
+	  GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1, 0.01, 10, 0 ) );
 
     pwSpin = 
 	    gtk_spin_button_new (GTK_ADJUSTMENT (paw->apadjLuck[i]), 1, 2);
@@ -4803,7 +4803,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
                    gtk_label_new( _("Ratio |Standard Deviation/Value|:" ) ) );
 
   prpw->padjMaxError = GTK_ADJUSTMENT( gtk_adjustment_new( 
-                       prw->rcRollout.rStdLimit, 0, 1, .0001, .0001, 0.001 ) );
+                       prw->rcRollout.rStdLimit, 0, 1, .0001, .0001, 0 ) );
 
   prpw->pwMaxError = gtk_spin_button_new(prpw->padjMaxError, .0001, 4 );
 
@@ -4852,7 +4852,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
                    gtk_label_new( _("No of JSDs from best move" ) ) );
 
   prpw->padjJsdLimit = GTK_ADJUSTMENT( gtk_adjustment_new( 
-                       prw->rcRollout.rJsdLimit, 0, 8, .0001, .0001, 0.001 ) );
+                       prw->rcRollout.rJsdLimit, 0, 8, .0001, .0001, 0 ) );
 
   prpw->pwJsdAdjLimit = gtk_spin_button_new(prpw->padjJsdLimit, .0001, 4 );
 
