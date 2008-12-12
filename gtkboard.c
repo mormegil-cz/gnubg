@@ -4118,7 +4118,8 @@ static void board_init( Board *board )
 static void board_class_init( BoardClass *c )
 {
 
-    parent_class = gtk_type_class( GTK_TYPE_VBOX );
+    parent_class = g_type_class_peek_parent(c);
+    g_assert(parent_class);
     
     ( (GtkWidgetClass *) c )->size_allocate = board_size_allocate;
     ( (GtkWidgetClass *) c )->size_request = board_size_request;
