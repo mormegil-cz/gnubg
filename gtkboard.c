@@ -3846,8 +3846,7 @@ static void board_init( Board *board )
 
     bd->drawing_area = gtk_drawing_area_new();
     /* gtk_widget_set_name(GTK_WIDGET(bd->drawing_area), "background"); */
-    gtk_drawing_area_size( GTK_DRAWING_AREA( bd->drawing_area ), BOARD_WIDTH,
-			   BOARD_HEIGHT );
+    gtk_widget_set_size_request( bd->drawing_area, BOARD_WIDTH, BOARD_HEIGHT );
     gtk_widget_add_events( GTK_WIDGET( bd->drawing_area ), GDK_EXPOSURE_MASK |
 			   GDK_BUTTON_MOTION_MASK | GDK_BUTTON_PRESS_MASK |
 			   GDK_BUTTON_RELEASE_MASK | GDK_STRUCTURE_MASK );
@@ -4082,7 +4081,7 @@ static void board_init( Board *board )
     gtk_container_add ( GTK_CONTAINER ( board ),
                         bd->dice_area = gtk_drawing_area_new() );
     /* gtk_widget_set_name( GTK_WIDGET(bd->dice_area), "dice_area"); */
-    gtk_drawing_area_size( GTK_DRAWING_AREA( bd->dice_area ), 2 * DIE_WIDTH + 1, DIE_HEIGHT );
+    gtk_widget_set_size_request(bd->dice_area , 2 * DIE_WIDTH + 1, DIE_HEIGHT );
     gtk_widget_add_events( GTK_WIDGET( bd->dice_area ), GDK_EXPOSURE_MASK |
 			   GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK );
 
@@ -4228,9 +4227,7 @@ extern GtkWidget *board_cube_widget( Board *board )
 			pwCube = gtk_drawing_area_new();
 			g_object_set_data( G_OBJECT( pwCube ), "user_data",
 							GINT_TO_POINTER(( y * N_CUBES_IN_WIDGET + x )));
-			gtk_drawing_area_size( GTK_DRAWING_AREA( pwCube ),
-						CUBE_WIDTH * setSize,
-						CUBE_HEIGHT * setSize );
+			gtk_widget_set_size_request( pwCube, CUBE_WIDTH * setSize, CUBE_HEIGHT * setSize );
 			gtk_widget_add_events( pwCube, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK );
 			g_signal_connect( G_OBJECT( pwCube ), "expose_event",
 					G_CALLBACK( cube_widget_expose ), bd );
@@ -4339,9 +4336,7 @@ extern GtkWidget *board_dice_widget( Board *board )
 			pwDice = gtk_drawing_area_new();
 			g_object_set_data( G_OBJECT( pwDice ), "user_data",
 							GINT_TO_POINTER(( y * 6 + x )));
-			gtk_drawing_area_size( GTK_DRAWING_AREA( pwDice ),
-						2 * DIE_WIDTH * setSize,
-						DIE_HEIGHT * setSize );
+			gtk_widget_set_size_request(pwDice, 2 * DIE_WIDTH * setSize, DIE_HEIGHT * setSize );
 			gtk_widget_add_events( pwDice, GDK_EXPOSURE_MASK |
 						GDK_BUTTON_PRESS_MASK |
 						GDK_STRUCTURE_MASK );

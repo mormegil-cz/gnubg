@@ -1,3 +1,6 @@
+Fri Dec 12 14:57:42 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtkboard.c: remove deprecate gtk_drawing_area_size
 Fri Dec 12 14:05:30 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtk-multiview.c, gtk-multiview.h, gtkboard.c, gtkboard.h: remove the
