@@ -36,7 +36,7 @@ static void    gtk_multiview_size_allocate (GtkWidget         *widget,
 					    GtkAllocation     *allocation);
 static void    gtk_multiview_map           (GtkWidget         *widget);
 static void    gtk_multiview_unmap         (GtkWidget         *widget);
-static GtkType gtk_multiview_child_type    (GtkContainer      *container);
+static GType gtk_multiview_child_type    (GtkContainer      *container);
 static void    gtk_multiview_forall        (GtkContainer      *container,
 					    gboolean           include_internals,
 					    GtkCallback        callback,
@@ -173,7 +173,7 @@ gtk_multiview_unmap (GtkWidget *widget)
     }
 }
 
-static GtkType
+static GType
 gtk_multiview_child_type (GtkContainer *container)
 {
   return gtk_widget_get_type ();

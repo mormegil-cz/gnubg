@@ -1,3 +1,8 @@
+Fri Dec 12 14:05:30 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtk-multiview.c, gtk-multiview.h, gtkboard.c, gtkboard.h: remove the
+	deprecated use of GtkType
+
 Thu Dec 11 23:11:16 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, commands.inc, gnubgstock.c, gnubgstock.h, gtkgame.c,

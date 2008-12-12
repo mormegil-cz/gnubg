@@ -50,7 +50,7 @@ struct _GtkMultiviewClass
   GtkContainerClass parent_class;
 };
 
-GtkType    gtk_multiview_get_type      (void);
+GType    gtk_multiview_get_type      (void);
 GtkWidget *gtk_multiview_new           (void);
 void       gtk_multiview_prepend_child (GtkMultiview *multiview,
 					GtkWidget    *child);

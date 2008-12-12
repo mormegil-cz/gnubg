@@ -62,6 +62,7 @@
 /* After this time show drag target help */
 #define HINT_TIME 150
 
+
 animation animGUI = ANIMATE_SLIDE;
 int fGUIBeep = TRUE;
 int fGUIHighDieFirst = TRUE;
@@ -84,10 +85,12 @@ static gint board_set( Board *board, const gchar *board_text,
                        const gint resigned, const gint cube_use );
 static void InitialPos(BoardData *bd);
 
+
+G_DEFINE_TYPE (Board, board, GTK_TYPE_VBOX)
 extern GtkWidget *board_new(renderdata* prd)
 {
 	/* Create widget */
-	GtkWidget* board = GTK_WIDGET( gtk_type_new( board_get_type() ) );
+	GtkWidget* board = g_object_new(TYPE_BOARD, NULL);
 	/* Initialize board data members */
 	BoardData *bd = BOARD(board)->board_data;
 	bd->rd = prd;
@@ -4123,26 +4126,6 @@ static void board_class_init( BoardClass *c )
     ( (GtkWidgetClass *) c )->show_all = board_show_all;
 }
 
-extern GtkType board_get_type( void )
-{
-
-    static GtkType board_type = 0;
-    static const GtkTypeInfo board_info = {
-        "Board",
-	sizeof( Board ),
-	sizeof( BoardClass ),
-	(GtkClassInitFunc) board_class_init,
-	(GtkObjectInitFunc) board_init,
-	NULL, NULL, NULL
-    };
-    
-    if( !board_type ) {
-	irandinit( &rc, FALSE );
-	board_type = gtk_type_unique( GTK_TYPE_VBOX, &board_info );
-    }
-    
-    return board_type;
-}
 
 #define N_CUBES_IN_WIDGET 8
 static gboolean cube_widget_expose( GtkWidget *cube, GdkEventExpose *event,

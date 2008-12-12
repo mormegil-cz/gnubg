@@ -33,16 +33,90 @@
 #include "types3d.h"
 #endif
 
-#define TYPE_BOARD ( board_get_type() )
-#define BOARD( obj ) ( GTK_CHECK_CAST( (obj), TYPE_BOARD, Board ) )
-#define BOARD_CLASS( c ) ( GTK_CHECK_CLASS_CAST( (c), TYPE_BOARD, \
-	BoardClass ) )
-#define IS_BOARD( obj ) ( GTK_CHECK_TYPE( (obj), TYPE_BOARD ) )
-#define IS_BOARD_CLASS( c ) ( GTK_CHECK_CLASS_TYPE( (c), TYPE_BOARD ) )
+#define TYPE_BOARD			(board_get_type ())
+#define BOARD(obj)			(G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_BOARD, Board))
+#define BOARD_CLASS(klass)		(G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_BOARD, BoardClass))
+#define IS_BOARD(obj)			(G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_BOARD))
+#define IS_BOARD_CLASS(klass)		(G_TYPE_CHECK_CLASS_TYPE ((obj), TYPE_BOARD))
+#define BOARD_GET_CLASS(obj)  		(G_TYPE_INSTANCE_GET_CLASS((obj), TYPE_BOARD, BoardClass))
+
+typedef struct _BoardData BoardData;	/* Forward declaration for use in Board */
+typedef struct _Board Board;
+typedef struct _BoardClass BoardClass;
+
+struct _BoardClass {
+	GtkVBoxClass parent_class;
+};
+
+struct _Board {
+	GtkVBox vbox;
+/* private data */
+	BoardData *board_data;
+};
 
 typedef enum _DiceShown {
 	DICE_NOT_SHOWN = 0, DICE_BELOW_BOARD, DICE_ON_BOARD, DICE_ROLLING
-} DiceShown;
+}DiceShown;
+
+/* private data */
+struct _BoardData {
+	GtkWidget *drawing_area, *dice_area, *table, *wmove,
+	    *gnubg_id, *reset, *edit, *name0, *name1, *score0, *score1,
+	    *crawford, *widget, *key0, *key1, *stop, *stopparent,
+	    *doub, *lname0, *lname1, *lscore0, *lscore1, *mname0, *mname1, *mscore0, *mscore1, *play;
+	GtkWidget *mmatch, *lmatch, *match;
+	GtkAdjustment *amatch, *ascore0, *ascore1;
+	GtkWidget *roll;
+	GtkWidget *take, *drop, *redouble;
+	GtkWidget *vbox_ids;
+	GtkWidget *pipcount0, *pipcount1;
+	GtkWidget *pipcountlabel0, *pipcountlabel1;
+
+	GdkGC *gc_and, *gc_or, *gc_copy, *gc_cube;
+	GdkPixmap *appmKey[2];
+
+	gboolean playing, computer_turn;
+	gint drag_point, drag_colour, x_drag, y_drag, x_dice[2], y_dice[2],
+	     drag_button, click_time, cube_use;	/* roll showing on the off-board dice */
+	DiceShown diceShown;
+	TanBoard old_board;
+
+	gint cube_owner;	/* -1 = bottom, 0 = centred, 1 = top */
+	gint qedit_point;	/* used to remember last point in quick edit mode */
+	gint resigned;
+	gint nchequers;
+	move *all_moves, *valid_move;
+	movelist move_list;
+
+	renderimages ri;
+
+	/* remainder is from FIBS board: data */
+	char name[MAX_NAME_LEN], name_opponent[MAX_NAME_LEN];
+	gint match_to, score, score_opponent;
+	gint points[28];	/* 0 and 25 are the bars */
+	gint turn;		/* -1 is X, 1 is O, 0 if game over */
+	unsigned int diceRoll[2];	/* 0, 0 if not rolled */
+	gint cube;
+	gint can_double, opponent_can_double;	/* allowed to double */
+	gint doubled;		/* -1 if X is doubling, 1 if O is doubling */
+	gint colour;		/* -1 for player X, 1 for player O */
+	gint direction;		/* -1 playing from 24 to 1, 1 playing from 1 to 24 */
+	gint home, bar;		/* 0 or 25 depending on fDirection */
+	gint off, off_opponent;	/* number of men borne off */
+	gint on_bar, on_bar_opponent;	/* number of men on bar */
+	gint to_move;		/* 0 to 4 -- number of pieces to move */
+	gint forced, crawford_game;	/* unused, Crawford game flag */
+	gint redoubles;		/* number of instant redoubles allowed */
+	int DragTargetHelp;	/* Currently showing draw targets? */
+	int iTargetHelpPoints[4];	/* Drag target position */
+	int grayBoard;		/* Show board grayed when editing */
+
+#if USE_BOARD3D
+	BoardData3d *bd3d;	/* extra members for 3d board */
+#endif
+	renderdata *rd;		/* The board colour settings */
+};
+
 
 typedef enum _animation {
     ANIMATE_NONE, ANIMATE_BLINK, ANIMATE_SLIDE
@@ -61,17 +135,7 @@ extern int fGUIShowWastage;
 extern int fGUIGrayEdit;
 extern unsigned int nGUIAnimSpeed;
 
-struct _BoardData;      /* Forward declaration for use in Board */
-typedef struct _Board {
-    GtkVBox vbox;
-    struct _BoardData *board_data;
-} Board;
-
-typedef struct _BoardClass {
-    GtkVBoxClass parent_class;
-} BoardClass;
-
-extern GtkType board_get_type( void );    
+extern GType board_get_type( void );    
 extern GtkWidget *board_new(renderdata* prd);
 extern GtkWidget *board_cube_widget( Board *board );
 extern void DestroySetCube(GtkObject *po, GtkWidget *pw);
@@ -86,66 +150,6 @@ extern void board_set_playing( Board *board, gboolean f );
 extern void board_animate( Board *board, int move[ 8 ], int player );
 extern unsigned int convert_point( int i, int player );
 
-/* private data */
-typedef struct _BoardData {
-    GtkWidget *drawing_area, *dice_area, *table, *wmove,
-	*gnubg_id, *reset, *edit, *name0, *name1, *score0, *score1, 
-	*crawford, *widget, *key0, *key1, *stop, *stopparent, 
-	*doub, *lname0, *lname1,
-	*lscore0, *lscore1, *mname0, *mname1, *mscore0, *mscore1, *play;
-    GtkWidget *mmatch, *lmatch, *match;
-    GtkAdjustment *amatch, *ascore0, *ascore1;
-    GtkWidget *roll;
-    GtkWidget *take, *drop, *redouble;
-    GtkWidget *vbox_ids;
-    GtkWidget *pipcount0, *pipcount1;
-    GtkWidget *pipcountlabel0, *pipcountlabel1;
-
-    GdkGC *gc_and, *gc_or, *gc_copy, *gc_cube;
-    GdkPixmap *appmKey[ 2 ];
-    
-    gboolean playing, computer_turn;
-    gint drag_point, drag_colour, x_drag, y_drag, x_dice[ 2 ], y_dice[ 2 ],
-	drag_button, click_time,
-	cube_use; /* roll showing on the off-board dice */
-	DiceShown diceShown;
-	TanBoard old_board;
-
-    gint cube_owner; /* -1 = bottom, 0 = centred, 1 = top */
-    gint qedit_point; /* used to remember last point in quick edit mode */
-    gint resigned;
-    gint nchequers;
-    move *all_moves, *valid_move;
-    movelist move_list;
-
-    renderimages ri;
-    
-    /* remainder is from FIBS board: data */
-    char name[ MAX_NAME_LEN ], name_opponent[ MAX_NAME_LEN ];
-    gint match_to, score, score_opponent;
-    gint points[ 28 ]; /* 0 and 25 are the bars */
-    gint turn; /* -1 is X, 1 is O, 0 if game over */
-    unsigned int diceRoll[ 2 ]; /* 0, 0 if not rolled */
-    gint cube;
-    gint can_double, opponent_can_double; /* allowed to double */
-    gint doubled; /* -1 if X is doubling, 1 if O is doubling */
-    gint colour; /* -1 for player X, 1 for player O */
-    gint direction; /* -1 playing from 24 to 1, 1 playing from 1 to 24 */
-    gint home, bar; /* 0 or 25 depending on fDirection */
-    gint off, off_opponent; /* number of men borne off */
-    gint on_bar, on_bar_opponent; /* number of men on bar */
-    gint to_move; /* 0 to 4 -- number of pieces to move */
-    gint forced, crawford_game; /* unused, Crawford game flag */
-    gint redoubles; /* number of instant redoubles allowed */
-	int DragTargetHelp;	/* Currently showing draw targets? */
-	int iTargetHelpPoints[4];	/* Drag target position */
-	int grayBoard;	/* Show board grayed when editing */
-
-#if USE_BOARD3D
-	BoardData3d *bd3d;	/* extra members for 3d board */
-#endif
-	renderdata* rd;	/* The board colour settings */
-} BoardData;
 
 extern void board_create_pixmaps( GtkWidget *board, BoardData *bd );
 extern void board_free_pixmaps( BoardData *bd );
