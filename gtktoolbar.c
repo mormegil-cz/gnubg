@@ -325,7 +325,7 @@ ToolbarNew ( void ) {
   /* Resign button */
 	ptw->pwResign = gtk_toolbar_insert_stock(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_RESIGN, _("Resign the current game"), NULL, G_CALLBACK(GTKResign), NULL, -1);
 
-  /* drop button */
+  /* End game button */
 	ptw->pwEndGame = gtk_toolbar_insert_stock(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_END_GAME, _("Let the computer end the game"), NULL, G_CALLBACK(ButtonClicked), "end game", -1);
 
 

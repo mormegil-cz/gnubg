@@ -114,6 +114,9 @@ extern void RestrictiveDrawBoardNumbers(const BoardData3d *bd3d);
 extern void setDicePos(BoardData *bd, BoardData3d *bd3d);
 extern int DiceTooClose(const BoardData3d *bd3d, const renderdata *prd);
 
+void SuspendDiceRolling(renderdata *prd);
+void ResumeDiceRolling(renderdata *prd);
+
 extern int ShadowsInitilised(const BoardData3d *bd3d);
 void shadowInit(BoardData3d *bd3d, renderdata *prd);
 void shadowDisplay(void (*drawScene)(const BoardData *, const BoardData3d *, const renderdata *), const BoardData* bd, const BoardData3d *bd3d, const renderdata *prd);

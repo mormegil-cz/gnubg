@@ -60,7 +60,7 @@ extern GtkWidget *GTKGetCurrentParent(void);
 
 typedef enum _warningType { 
   WARN_FULLSCREEN_EXIT=0, WARN_QUICKDRAW_MODE, WARN_SET_SHADOWS, 
-	  WARN_UNACCELERATED, WARN_STOP, WARN_NUM_WARNINGS
+	  WARN_UNACCELERATED, WARN_STOP, WARN_ENDGAME, WARN_NUM_WARNINGS
 } warningType;
 
 extern int GTKShowWarning(warningType warning, GtkWidget *pwParent);

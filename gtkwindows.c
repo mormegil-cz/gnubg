@@ -62,6 +62,10 @@ Warning warnings[WARN_NUM_WARNINGS] =
 	{
 		N_("Interupt the current process?"),
 		"stop", TRUE, TRUE
+	},
+	{
+		N_("This will play to the end of the game automatically, do you want to continue?"),
+		"endgame", TRUE, TRUE
 	}
 };
 

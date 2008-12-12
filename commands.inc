@@ -55,7 +55,7 @@ command cER = {
       "game in the session"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acEnd[] = {
-{ "game", CommandEndGame, N_("Let the computer end the game"), NULL, NULL },
+{ "game", CommandEndGame, N_("Let the computer play to the end of the game"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acAnnotateClear[] = {
     { "comment", CommandAnnotateClearComment, 

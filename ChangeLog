@@ -1,3 +1,7 @@
+Fri Dec 12 22:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* play.c: Add warning when end game clicked.
+
 Fri Dec 12 14:57:42 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtkboard.c: remove deprecate gtk_drawing_area_size

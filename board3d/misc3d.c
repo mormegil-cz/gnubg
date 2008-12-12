@@ -2537,3 +2537,14 @@ extern void Draw3d(const BoardData* bd)
 			drawBoard(bd, bd->bd3d, bd->rd);
 	}
 }
+
+int diceRollingSave;
+void SuspendDiceRolling(renderdata *prd)
+{
+	diceRollingSave = prd->animateRoll;
+	prd->animateRoll = FALSE;
+}
+void ResumeDiceRolling(renderdata *prd)
+{
+	prd->animateRoll = diceRollingSave;
+}

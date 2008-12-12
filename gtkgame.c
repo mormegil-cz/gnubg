@@ -3511,9 +3511,13 @@ GtkItemFactoryEntry aife[] = {
 	}
 };
 
+extern int automaticTask;
+
 static void Stop( GtkWidget *pw, gpointer unused )
 {
-	if (!GTKShowWarning(WARN_STOP, pw))
+	if (automaticTask)
+		automaticTask = FALSE;
+	else if (!GTKShowWarning(WARN_STOP, pw))
 		return;
 
 	fInterrupt = TRUE;

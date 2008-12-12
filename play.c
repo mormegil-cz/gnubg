@@ -41,6 +41,7 @@
 #include "md5.h"
 #if USE_GTK
 #include "gtkboard.h"
+#include "gtkwindows.h"
 #endif
 #if USE_BOARD3D
 #include "fun3d.h"
@@ -3346,12 +3347,17 @@ CommandNext( char* sz )
   InternalCommandNext(fMarkedMoves, n);
 }
 
+int automaticTask = FALSE;
+
 extern void CommandEndGame(char *sz)
 {
 	playertype pt_store[2] = { ap[0].pt, ap[1].pt };
 	int fAutoGame_store = fAutoGame;
 	int fDisplay_store = fDisplay;
 	int fQuiet_store = fQuiet;
+#if USE_BOARD3D
+	BoardData *bd = BOARD(pwBoard)->board_data;
+#endif
 #if defined (REDUCTION_CODE)
 	const evalcontext ec_quick = { FALSE, 0, 0, TRUE, 0.0 };
 #else
@@ -3365,18 +3371,22 @@ extern void CommandEndGame(char *sz)
 	ec_cube_store[0] = ap[0].esCube.ec;
 	ec_cube_store[1] = ap[1].esCube.ec;
 
-
-	if (ms.gs != GAME_PLAYING) {
+	if (ms.gs != GAME_PLAYING)
+	{
 		outputl(_("No game in progress (type `new game' to start one)."));
-
 		return;
 	}
-	if (!move_is_last_in_match()) {
-		int answer = GetInputYN(_("The resignation is not the last move in the match.\n"
+	if (!move_is_last_in_match())
+	{
+		int answer = GetInputYN(_("The current move is not the last move in the match.\n"
 					  "Continuing will destroy the remainder of the match. Continue?"));
 		if (!answer)
 			return;
 	}
+#if USE_GTK
+	else if (!GTKShowWarning(WARN_ENDGAME, NULL))
+		return;
+#endif
 	ap[0].pt = PLAYER_GNU;
 	ap[1].pt = PLAYER_GNU;
 	ap[0].esChequer.ec = ec_quick;
@@ -3391,17 +3401,33 @@ extern void CommandEndGame(char *sz)
 		outputon();
 	}
 
+#if USE_BOARD3D
+	SuspendDiceRolling(bd->rd);
+#endif
+
 	fAutoGame = FALSE;
 	fQuiet = TRUE;
 	fDisplay = FALSE;
 	fInterrupt = FALSE;
 	fEndGame = TRUE;
 	outputnew();
-	while (ms.gs == GAME_PLAYING && !fInterrupt) {
+
+	automaticTask = TRUE;
+#if USE_GTK
+	GTKSuspendInput();
+#endif
+
+	while (ms.gs == GAME_PLAYING && automaticTask)
+	{
 		UserCommand("play");
-		while (nNextTurn)
+		while (nNextTurn && automaticTask)
 			NextTurnNotify(NULL);
 	}
+
+#if USE_GTK
+	GTKResumeInput();
+#endif
+
 	outputx();
 	ap[0].pt = pt_store[0];
 	ap[1].pt = pt_store[1];
@@ -3421,8 +3447,14 @@ extern void CommandEndGame(char *sz)
 		outputon();
 	}
 
-	if (fInterrupt)
+#if USE_BOARD3D
+	ResumeDiceRolling(bd->rd);
+#endif
+
+	if (!automaticTask)
 		return;
+	automaticTask = FALSE;
+
 	if (fAutoGame && (!ms.nMatchTo || (ms.anScore[0] < ms.nMatchTo && ms.anScore[1] < ms.nMatchTo))) {
 		fComputing = TRUE;
 		NewGame();
