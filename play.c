@@ -1766,7 +1766,7 @@ extern void CommandAgree( char *sz ) {
 
     if (!move_is_last_in_match())
     {
-	    int answer = GetInputYN(_("The resignation is not the last move in the match.\n"
+	    int answer = GetInputYN(_("This is not the last move in the match.\n"
 				    "Continuing will destroy the remainder of the match. Continue?"));
 	    if (!answer)
 		    return;
