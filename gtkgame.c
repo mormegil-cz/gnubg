@@ -297,7 +297,10 @@ extern void GTKSuspendInput(void)
 		call, and won't allow commands like roll, move or double. */
 		grabbedWidget = pwGrab;
 		if (pwGrab == pwStopTest)
+		{
 			gtk_widget_set_sensitive(pwStopTest, TRUE);
+			gtk_widget_grab_focus(pwStopTest);
+		}
 		gtk_grab_add(pwGrab);
 		grabIdSignal = g_signal_connect_after(G_OBJECT(pwGrab),
 				"key-press-event", G_CALLBACK(gtk_true), NULL);

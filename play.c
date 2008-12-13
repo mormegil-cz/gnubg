@@ -3415,6 +3415,7 @@ extern void CommandEndGame(char *sz)
 	automaticTask = TRUE;
 #if USE_GTK
 	GTKSuspendInput();
+	ProcessGtkEvents();
 #endif
 
 	while (ms.gs == GAME_PLAYING && automaticTask)
