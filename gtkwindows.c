@@ -64,7 +64,7 @@ Warning warnings[WARN_NUM_WARNINGS] =
 		"stop", TRUE, TRUE
 	},
 	{
-		N_("This will play to the end of the game automatically, do you want to continue?"),
+		N_("Play to the end of the game automatically?"),
 		"endgame", TRUE, TRUE
 	}
 };
