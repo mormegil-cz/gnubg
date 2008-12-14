@@ -87,7 +87,6 @@
 #define KEY_ESCAPE -229
 
 /* Offset action to avoid predefined values */
-#define TOOLBAR_ACTION_OFFSET 10000
 #define MENU_OFFSET 50
 
 char *newLang;
@@ -1280,61 +1279,6 @@ static gchar *GTKTranslate ( const gchar *path, gpointer func_data ) {
 
   return (gchar *) gettext ( (const char *) path );
 
-}
-
-static GtkWidget* firstChild(GtkWidget* widget)
-{
-	GList *list = gtk_container_get_children(GTK_CONTAINER(widget));
-	GtkWidget *child = g_list_nth_data(list, 0);
-	g_list_free(list);
-	return child;
-}
-
-static void SetToolbarItemStyle(gpointer data, gpointer user_data)
-{
-	GtkWidget* widget = GTK_WIDGET(data);
-	int style = GPOINTER_TO_INT(user_data);
-	/* Find icon and text widgets from parent object */
-	GList* buttonParts;
-	GtkWidget *icon, *text;
-	GtkWidget* buttonParent;
-	if (!GTK_IS_CONTAINER(widget))
-		return;
-	/* Stop button has event box parent - skip */
-	if (GTK_IS_EVENT_BOX(widget))
-		widget = firstChild(widget);
-	buttonParent = firstChild(widget);
-	buttonParts = gtk_container_get_children(GTK_CONTAINER(buttonParent));
-	icon = g_list_nth_data(buttonParts, 0);
-	text = g_list_nth_data(buttonParts, 1);
-	g_list_free(buttonParts);
-
-	if (!icon || !text)
-		return;	/* Didn't find them */
-
-	/* Hide correct parts dependent on style value */
-	if (style == GTK_TOOLBAR_ICONS || style == GTK_TOOLBAR_BOTH)
-		gtk_widget_show(icon);
-	else
-		gtk_widget_hide(icon);
-	if (style == GTK_TOOLBAR_TEXT || style == GTK_TOOLBAR_BOTH)
-		gtk_widget_show(text);
-	else
-		gtk_widget_hide(text);
-}
-
-extern void SetToolbarStyle(int value)
-{
-	GtkWidget* pwMainToolbar = firstChild(pwToolbar);
-	/* Set each toolbar item separately */
-	GList* toolbarItems = gtk_container_get_children(GTK_CONTAINER(pwMainToolbar));
-	g_list_foreach(toolbarItems, SetToolbarItemStyle, GINT_TO_POINTER(value));
-	g_list_free(toolbarItems);
-
-	/* Resize handle box parent */
-	gtk_widget_queue_resize(gtk_widget_get_parent(pwToolbar));
-	nToolbarStyle = value;
-	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget_by_action(pif, value + TOOLBAR_ACTION_OFFSET)), TRUE);
 }
 
 static void ToolbarStyle(gpointer    callback_data,
@@ -3785,7 +3729,11 @@ extern void RunGTK( GtkWidget *pwSplash, char *commands, char *python_script, ch
 		gtk_widget_show_all( pwMain );
 
 		/* Make sure toolbar looks correct */
-		SetToolbarStyle(nToolbarStyle);
+		{
+			int style = nToolbarStyle;
+			nToolbarStyle = 2;	/* Default style is fine */
+			SetToolbarStyle(style);
+		}
 
 #if USE_BOARD3D
 	{

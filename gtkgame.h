@@ -26,6 +26,8 @@
 #include "gtkpanels.h"
 #include "gtkchequer.h"
 
+#define TOOLBAR_ACTION_OFFSET 10000
+
 extern GdkColor wlCol;
 extern GtkAccelGroup *pagMain;
 #if (GTK_MAJOR_VERSION < 3) && (GTK_MINOR_VERSION < 12)
