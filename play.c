@@ -1103,8 +1103,8 @@ static int ComputerTurn( void ) {
       /* Consider resigning -- no point wasting time over the decision,
          so only evaluate at 0 plies. */
 
-      if( ClassifyPosition( msBoard(), ms.bgv ) <= CLASS_RACE ) {
-
+      if( ClassifyPosition( msBoard(), ms.bgv ) <= CLASS_RACE )
+	  {
 #if defined(REDUCTION_CODE)
           evalcontext ecResign = { FALSE, 0, 0, TRUE, 0.0 };
 #else
@@ -1127,9 +1127,7 @@ static int ComputerTurn( void ) {
 	      fComputerDecision = FALSE;
 	      
 	      return 0;
-
           }
-          
       }
       
       /* Consider doubling */
@@ -1495,6 +1493,31 @@ extern void CancelCubeAction( void ) {
     }
 }
 
+int automaticTask = FALSE;
+
+void StartAutomaicPlay()
+{
+	if (ap[0].pt == PLAYER_GNU && ap[1].pt == PLAYER_GNU)
+	{
+		automaticTask = TRUE;
+#if USE_GTK
+		GTKSuspendInput();
+		ProcessGtkEvents();
+#endif
+	}
+}
+
+void StopAutomaticPlay()
+{
+	if (automaticTask)
+	{
+#if USE_GTK
+		GTKResumeInput();
+#endif
+		automaticTask = FALSE;
+	}
+}
+
 /* Try to automatically bear off as many chequers as possible.  Only do it
    if it's a non-contact position, and each die can be used to bear off
    a chequer. */
@@ -1600,91 +1623,98 @@ extern int NextTurn( int fPlayNext ) {
     UpdateSetting( &ms.fTurn );
     UpdateSetting( &ms.gs );
 
-    if ( GameStatus( msBoard(), ms.bgv )  ||
-	ms.gs == GAME_DROP ||
-	ms.gs == GAME_RESIGNED)  {
-	moverecord *pmr = (moverecord *) plGame->plNext->p;
-	xmovegameinfo *pmgi = &pmr->g;
+    if ( GameStatus( msBoard(), ms.bgv ) || ms.gs == GAME_DROP || ms.gs == GAME_RESIGNED)
+	{
+		moverecord *pmr = (moverecord *) plGame->plNext->p;
+		xmovegameinfo *pmgi = &pmr->g;
 
-	if( ms.fJacoby && ms.fCubeOwner == -1 && !ms.nMatchTo )
-	    /* gammons do not count on a centred cube during money
-	       sessions under the Jacoby rule */
-	    n = 1;
-    else if (ms.gs == GAME_DROP)
-        n = 1;
-    else if ( ms.gs == GAME_RESIGNED)
-        n = ms.fResigned;
-    else
-        n = GameStatus( msBoard(), ms.bgv );
-
+		if( ms.fJacoby && ms.fCubeOwner == -1 && !ms.nMatchTo )
+			/* gammons do not count on a centred cube during money
+			   sessions under the Jacoby rule */
+			n = 1;
+		else if (ms.gs == GAME_DROP)
+			n = 1;
+		else if ( ms.gs == GAME_RESIGNED)
+			n = ms.fResigned;
+		else
+			n = GameStatus( msBoard(), ms.bgv );
 
 
-	playSound ( ap[ pmgi->fWinner ].pt == PLAYER_HUMAN ?
-		    SOUND_HUMAN_WIN_GAME : SOUND_BOT_WIN_GAME );
 
-	outputf( ngettext( "%s wins a %s and %d point.\n",
-			   "%s wins a %s and %d points.\n",
-			   pmgi->nPoints ),
-		ap[ pmgi->fWinner ].szName,
-		gettext ( aszGameResult[ n - 1 ] ), pmgi->nPoints);
+		playSound ( ap[ pmgi->fWinner ].pt == PLAYER_HUMAN ?
+				SOUND_HUMAN_WIN_GAME : SOUND_BOT_WIN_GAME );
+
+		outputf( ngettext( "%s wins a %s and %d point.\n",
+				   "%s wins a %s and %d points.\n",
+				   pmgi->nPoints ),
+			ap[ pmgi->fWinner ].szName,
+			gettext ( aszGameResult[ n - 1 ] ), pmgi->nPoints);
 
 
-#if USE_GTK
-	if( fX ) {
-	    if( fDisplay )
+		#if USE_GTK
+		if( fX ) {
+			if( fDisplay )
+			{
+		#if USE_BOARD3D
+				BoardData *bd = BOARD( pwBoard )->board_data;
+				if (ms.fResigned && display_is_3d(bd->rd))
+					StopIdle3d(bd, bd->bd3d);	/* Stop flag waving */
+		#endif
+				ShowBoard();
+			}
+			else
+			outputx();
+		}
+		#endif
+
+		if( ms.nMatchTo && fAutoCrawford ) {
+			ms.fPostCrawford |= ms.fCrawford &&
+			ms.anScore[ pmgi->fWinner ] < ms.nMatchTo;
+			ms.fCrawford = !ms.fPostCrawford && !ms.fCrawford &&
+			ms.anScore[ pmgi->fWinner ] == ms.nMatchTo - 1 &&
+			ms.anScore[ !pmgi->fWinner ] != ms.nMatchTo - 1;
+		}
+
+		#if USE_GTK
+		if( !fX || fDisplay )
+		#endif
+			CommandShowScore( NULL );
+
+		if( ms.nMatchTo && ms.anScore[ pmgi->fWinner ] >= ms.nMatchTo )
 		{
-#if USE_BOARD3D
-			BoardData *bd = BOARD( pwBoard )->board_data;
-			if (ms.fResigned && display_is_3d(bd->rd))
-				StopIdle3d(bd, bd->bd3d);	/* Stop flag waving */
-#endif
+			playSound ( ap[ pmgi->fWinner ].pt == PLAYER_HUMAN ? 
+							SOUND_HUMAN_WIN_MATCH : SOUND_BOT_WIN_MATCH );
+		      
+			outputf( _("%s has won the match.\n"), ap[ pmgi->fWinner ].szName );
+			outputx();
+			fComputing = FALSE;
+
+			ShowBoard();
+
+			StopAutomaticPlay();
+
+			return -1;
+		}
+
+		outputx();
+
+		if( fAutoGame )
+		{
+			if( NewGame() < 0 )
+			{
+				fComputing = FALSE;
+				return -1;
+			}
+		    
+			if( ap[ ms.fTurn ].pt == PLAYER_HUMAN )
 			ShowBoard();
 		}
-	    else
-		outputx();
+		else
+		{
+			fComputing = FALSE;
+			return -1;
+		}
 	}
-#endif
-	
-	if( ms.nMatchTo && fAutoCrawford ) {
-	    ms.fPostCrawford |= ms.fCrawford &&
-		ms.anScore[ pmgi->fWinner ] < ms.nMatchTo;
-	    ms.fCrawford = !ms.fPostCrawford && !ms.fCrawford &&
-		ms.anScore[ pmgi->fWinner ] == ms.nMatchTo - 1 &&
-		ms.anScore[ !pmgi->fWinner ] != ms.nMatchTo - 1;
-	}
-
-#if USE_GTK
-	if( !fX || fDisplay )
-#endif
-	    CommandShowScore( NULL );
-	
-	if( ms.nMatchTo && ms.anScore[ pmgi->fWinner ] >= ms.nMatchTo ) {
-
-            playSound ( ap[ pmgi->fWinner ].pt == PLAYER_HUMAN ? 
-                        SOUND_HUMAN_WIN_MATCH : SOUND_BOT_WIN_MATCH );
-          
-
-	    outputf( _("%s has won the match.\n"), ap[ pmgi->fWinner ].szName );
-	    outputx();
-	    fComputing = FALSE;
-	    return -1;
-	}
-
-	outputx();
-	
-	if( fAutoGame ) {
-	    if( NewGame() < 0 ) {
-		fComputing = FALSE;
-		return -1;
-	    }
-	    
-	    if( ap[ ms.fTurn ].pt == PLAYER_HUMAN )
-		ShowBoard();
-	} else {
-	    fComputing = FALSE;
-	    return -1;
-	}
-    }
 
     g_assert( ms.gs == GAME_PLAYING );
     
@@ -1720,10 +1750,12 @@ extern int NextTurn( int fPlayNext ) {
     }
     
 #if USE_GTK
-    if( fX ) {
-	if( !ComputerTurn() && !nNextTurn )
-	    nNextTurn = g_idle_add( NextTurnNotify, NULL );
-    } else
+    if( fX )
+	{
+		if( !ComputerTurn() && !nNextTurn )
+		    nNextTurn = g_idle_add( NextTurnNotify, NULL );
+    }
+	else
 #endif
 	fNextTurn = !ComputerTurn();
 
@@ -2844,43 +2876,47 @@ CommandMove( char *sz ) {
     outputl( _("Illegal move.") );
 }
 
+static void StartNewGame()
+{
+	fComputing = TRUE;
+	NewGame();
+    if (!fInterrupt)
+	{
+		if (ap[ms.fTurn].pt == PLAYER_HUMAN)
+			ShowBoard();
+		else if (!ComputerTurn())
+			TurnDone();
+	}
+	fComputing = FALSE;
+}
+
 extern void CommandNewGame( char *sz )
 {
-    if( ms.nMatchTo && ( ms.anScore[ 0 ] >= ms.nMatchTo ||
-			 ms.anScore[ 1 ] >= ms.nMatchTo ) ) {
-	outputl( _("The match is already over.") );
-
-	return;
+    if (ms.nMatchTo && ( ms.anScore[ 0 ] >= ms.nMatchTo ||
+			 ms.anScore[ 1 ] >= ms.nMatchTo ))
+	{
+		outputl( _("The match is already over.") );
+		return;
     }
 
-    if( ms.gs == GAME_PLAYING ) {
-	if( fConfirmNew ) {
-	    if( fInterrupt )
-		return;
+    if( ms.gs == GAME_PLAYING )
+	{
+		if( fConfirmNew )
+		{
+		    if( fInterrupt )
+				return;
 	    
-	    if( !GetInputYN( _("Are you sure you want to start a new game, "
+		    if( !GetInputYN( _("Are you sure you want to start a new game, "
 			     "and discard the one in progress? ") ) )
-		return;
-	}
+				return;
+		}
     
         PopGame( plGame, TRUE );
-    
     }
-    
-    fComputing = TRUE;
-    
-    NewGame();
 
-    if( fInterrupt )
-	return;
+	StartAutomaicPlay();
 
-    if( ap[ ms.fTurn ].pt == PLAYER_HUMAN )
-	ShowBoard();
-    else
-	if( !ComputerTurn() )
-	    TurnDone();
-
-    fComputing = FALSE;
+	StartNewGame();
 }
 
 extern void ClearMatch( void )
@@ -3347,8 +3383,6 @@ CommandNext( char* sz )
   InternalCommandNext(fMarkedMoves, n);
 }
 
-int automaticTask = FALSE;
-
 extern void CommandEndGame(char *sz)
 {
 	playertype pt_store[2] = { ap[0].pt, ap[1].pt };
@@ -3412,22 +3446,12 @@ extern void CommandEndGame(char *sz)
 	fEndGame = TRUE;
 	outputnew();
 
-	automaticTask = TRUE;
-#if USE_GTK
-	GTKSuspendInput();
-	ProcessGtkEvents();
-#endif
-
-	while (ms.gs == GAME_PLAYING && automaticTask)
+	do
 	{
 		UserCommand("play");
 		while (nNextTurn && automaticTask)
 			NextTurnNotify(NULL);
-	}
-
-#if USE_GTK
-	GTKResumeInput();
-#endif
+	} while (ms.gs == GAME_PLAYING && automaticTask);
 
 	outputx();
 	ap[0].pt = pt_store[0];
@@ -3454,37 +3478,32 @@ extern void CommandEndGame(char *sz)
 
 	if (!automaticTask)
 		return;
-	automaticTask = FALSE;
+	StopAutomaticPlay();
 
-	if (fAutoGame && (!ms.nMatchTo || (ms.anScore[0] < ms.nMatchTo && ms.anScore[1] < ms.nMatchTo))) {
-		fComputing = TRUE;
-		NewGame();
-		if (ap[ms.fTurn].pt == PLAYER_HUMAN)
-			ShowBoard();
-		else if (!ComputerTurn())
-			TurnDone();
-		fComputing = FALSE;
-	}
+	if (fAutoGame && (!ms.nMatchTo || (ms.anScore[0] < ms.nMatchTo && ms.anScore[1] < ms.nMatchTo)))
+		StartNewGame();
 }
 
-extern void CommandPlay( char *sz ) {
-
-    if( ms.gs != GAME_PLAYING ) {
-	outputl( _("No game in progress (type `new game' to start one).") );
-
-	return;
+extern void CommandPlay( char *sz )
+{
+    if( ms.gs != GAME_PLAYING )
+	{
+		outputl( _("No game in progress (type `new game' to start one).") );
+		return;
     }
 
-    if( ap[ ms.fTurn ].pt == PLAYER_HUMAN ) {
-	outputl( _("It's not the computer's turn to play.") );
+    if( ap[ ms.fTurn ].pt == PLAYER_HUMAN )
+	{
+		outputl( _("It's not the computer's turn to play.") );
+		return;
+	}
 
-	return;
-    }
+	StartAutomaicPlay();
 
     fComputing = TRUE;
     
-    if( !ComputerTurn() )
-	TurnDone();
+    if (!ComputerTurn())
+		TurnDone();
 
     fComputing = FALSE;
 }

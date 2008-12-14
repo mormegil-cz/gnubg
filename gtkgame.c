@@ -3519,7 +3519,7 @@ extern int automaticTask;
 static void Stop( GtkWidget *pw, gpointer unused )
 {
 	if (automaticTask)
-		automaticTask = FALSE;
+		StopAutomaticPlay();
 	else if (!GTKShowWarning(WARN_STOP, pw))
 		return;
 

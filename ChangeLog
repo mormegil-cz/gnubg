@@ -1,3 +1,7 @@
+Sun Dec 14 11:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* play.c: Sort out "stop" button for "end game" and gnubg vs gnubg.
+
 Fri Dec 12 22:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* play.c: Add warning when end game clicked.
