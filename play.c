@@ -2265,7 +2265,7 @@ extern void CommandDouble( char *sz ) {
 	return;
     }
 
-    if (!move_is_last_in_match())
+	if (!move_is_last_in_match() && !automaticTask)
     {
 	    int answer = GetInputYN(_("The double is not the last move in the match.\n"
 				    "Continuing will destroy the remainder of the match. Continue?"));
@@ -2461,7 +2461,7 @@ extern void CommandDrop( char *sz ) {
 	return;
     }
 
-    if (!move_is_last_in_match())
+    if (!move_is_last_in_match() && !automaticTask)
     {
 	    int answer = GetInputYN(_("The drop is not the last move in the match.\n"
 				    "Continuing will destroy the remainder of the match. Continue?"));
@@ -3721,7 +3721,7 @@ extern void CommandRedouble( char *sz ) {
 	return;
     }
      
-    if (!move_is_last_in_match())
+    if (!move_is_last_in_match() && !automaticTask)
     {
 	    int answer = GetInputYN(_("The redouble is not the last move in the match.\n"
 				    "Continuing will destroy the remainder of the match. Continue?"));
@@ -4042,7 +4042,7 @@ extern void CommandTake( char *sz ) {
 	return;
     }
 
-    if (!move_is_last_in_match())
+    if (!move_is_last_in_match() && !automaticTask)
     {
 	    int answer = GetInputYN(_("The take is not the last move in the match.\n"
 				    "Continuing will destroy the remainder of the match. Continue?"));
