@@ -284,7 +284,7 @@ static GtkWidget *pwGameBox;
 static GtkWidget *pwPanelGameBox;
 static GtkWidget *pwEventBox;
 static int panelSize = 325;
-static GtkWidget *pwStopTest;
+static GtkWidget *pwStop;
 
 extern void GTKSuspendInput(void)
 {
@@ -295,10 +295,10 @@ extern void GTKSuspendInput(void)
 	{	/* Grab events so that the board window knows this is a re-entrant
 		call, and won't allow commands like roll, move or double. */
 		grabbedWidget = pwGrab;
-		if (pwGrab == pwStopTest)
+		if (pwGrab == pwStop)
 		{
-			gtk_widget_set_sensitive(pwStopTest, TRUE);
-			gtk_widget_grab_focus(pwStopTest);
+			gtk_widget_set_sensitive(pwStop, TRUE);
+			gtk_widget_grab_focus(pwStop);
 		}
 		gtk_grab_add(pwGrab);
 		grabIdSignal = g_signal_connect_after(G_OBJECT(pwGrab),
@@ -324,8 +324,8 @@ extern void GTKResumeInput(void)
 				g_signal_handler_disconnect (G_OBJECT(grabbedWidget), grabIdSignal);
 			gtk_grab_remove(grabbedWidget);
 		}
-		if (pwGrab == pwStopTest)
-			gtk_widget_set_sensitive(pwStopTest, FALSE);
+		if (pwGrab == pwStop)
+			gtk_widget_set_sensitive(pwStop, FALSE);
 	}
 
 	GTKAllowStdin();
@@ -3556,12 +3556,12 @@ static void CreateMainWindow(void)
     g_signal_connect( G_OBJECT( pwStatus ), "text-popped",
 			G_CALLBACK( TextPopped ), NULL );
 
-	pwStopTest = gtk_button_new();
-	gtk_container_add(GTK_CONTAINER(pwStopTest), gtk_image_new_from_stock(GTK_STOCK_STOP, GTK_ICON_SIZE_SMALL_TOOLBAR));
-	gtk_widget_set_sensitive(pwStopTest, FALSE);
-	gtk_box_pack_start( GTK_BOX( pwHbox ), pwStopTest, FALSE, FALSE, 0 );
-	g_signal_connect(G_OBJECT(pwStopTest), "clicked", G_CALLBACK( Stop ), NULL );
-	pwGrab = pwStopTest;
+	pwStop = gtk_button_new();
+	gtk_container_add(GTK_CONTAINER(pwStop), gtk_image_new_from_stock(GTK_STOCK_STOP, GTK_ICON_SIZE_SMALL_TOOLBAR));
+	gtk_widget_set_sensitive(pwStop, FALSE);
+	gtk_box_pack_start( GTK_BOX( pwHbox ), pwStop, FALSE, FALSE, 0 );
+	g_signal_connect(G_OBJECT(pwStop), "clicked", G_CALLBACK( Stop ), NULL );
+	pwGrab = pwStop;
 
     gtk_box_pack_start( GTK_BOX( pwHbox ),
 			pwProgress = gtk_progress_bar_new(),
