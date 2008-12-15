@@ -315,8 +315,7 @@ AddSoundWidgets (GtkWidget * container)
 	gtk_check_button_new_with_label (_("Enable sound effects"));
     gtk_box_pack_start (GTK_BOX (pwvboxTop), soundsEnabled, FALSE, FALSE, 0);
     gtk_widget_set_tooltip_text( soundsEnabled,
-			  _
-			  ("Have GNU Backgammon make sound effects when various events occur."));
+			  _("Have GNU Backgammon make sound effects when various events occur."));
     g_signal_connect(G_OBJECT (soundsEnabled), "toggled", G_CALLBACK (SoundToggled), NULL);
 #define SOUND_COL 0
     for (i = 0; i < NUM_SOUNDS; i++)
