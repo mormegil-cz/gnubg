@@ -475,10 +475,7 @@ int MT_WaitForTasks(void (*pCallback)(void), int callbackTime)
 
 #if USE_GTK
 		else
-		{
-			while(gtk_events_pending())
-				gtk_main_iteration();
-		}
+			ProcessGtkEvents();
 #endif
 	}
 	multi_debug("done while waiting for all tasks");
