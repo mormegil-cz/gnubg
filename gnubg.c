@@ -2131,6 +2131,14 @@ static void HintResigned( void )
 
   GetMatchStateCubeInfo( &ci, &ms );
 
+#if USE_BOARD3D
+    if (fX)
+	{	/* Stop waving flag, otherwise hangs */
+		BoardData* bd = BOARD(pwBoard)->board_data;
+		StopIdle3d(bd, bd->bd3d);
+	}
+#endif
+
   /* evaluate current position */
 
   dd.pboard = msBoard();
