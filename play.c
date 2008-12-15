@@ -1495,7 +1495,7 @@ extern void CancelCubeAction( void ) {
 
 int automaticTask = FALSE;
 
-void StartAutomaicPlay()
+static void StartAutomaicPlay(void)
 {
 	if (ap[0].pt == PLAYER_GNU && ap[1].pt == PLAYER_GNU)
 	{
@@ -1507,7 +1507,7 @@ void StartAutomaicPlay()
 	}
 }
 
-void StopAutomaticPlay()
+extern void StopAutomaticPlay(void)
 {
 	if (automaticTask)
 	{
@@ -2876,7 +2876,7 @@ CommandMove( char *sz ) {
     outputl( _("Illegal move.") );
 }
 
-static void StartNewGame()
+static void StartNewGame(void)
 {
 	fComputing = TRUE;
 	NewGame();

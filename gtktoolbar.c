@@ -263,7 +263,7 @@ ToolbarUpdate ( GtkWidget *pwToolbar,
 
 static GtkTooltips *ptt;
 
-GtkWidget* ToolbarAddButton(GtkToolbar *pwToolbar, const char *stockID, const char *tooltip, GtkSignalFunc callback, void *data)
+static GtkWidget* ToolbarAddButton(GtkToolbar *pwToolbar, const char *stockID, const char *tooltip, GtkSignalFunc callback, void *data)
 {
 	GtkToolItem* but = gtk_tool_button_new_from_stock(stockID);
 	gtk_tool_item_set_tooltip(but, ptt, tooltip, NULL);
@@ -274,7 +274,7 @@ GtkWidget* ToolbarAddButton(GtkToolbar *pwToolbar, const char *stockID, const ch
 	return GTK_WIDGET(but);
 }
 
-GtkWidget* ToolbarAddWidget(GtkToolbar *pwToolbar, GtkWidget *pWidget, const char *tooltip)
+static GtkWidget* ToolbarAddWidget(GtkToolbar *pwToolbar, GtkWidget *pWidget, const char *tooltip)
 {
 	GtkToolItem* ti = gtk_tool_item_new();
 	gtk_tool_item_set_tooltip(ti, ptt, tooltip, NULL);
@@ -285,7 +285,7 @@ GtkWidget* ToolbarAddWidget(GtkToolbar *pwToolbar, GtkWidget *pWidget, const cha
 	return GTK_WIDGET(pWidget);
 }
 
-void ToolbarAddSeparator(GtkToolbar *pwToolbar)
+static void ToolbarAddSeparator(GtkToolbar *pwToolbar)
 {
 	GtkToolItem *sep = gtk_separator_tool_item_new();
 	gtk_toolbar_insert(GTK_TOOLBAR(pwToolbar), sep, -1);
