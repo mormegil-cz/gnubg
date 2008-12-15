@@ -1628,6 +1628,7 @@ static void DoFullScreenMode(gpointer p, guint n, GtkWidget * pw)
 		gtk_widget_hide(GTK_WIDGET(bd->dice_area));
 		gtk_widget_hide(pwStatus);
 		gtk_widget_hide(pwProgress);
+		gtk_widget_hide(pwStop);
 
 		fFullScreen = FALSE;
 		HideAllPanels(NULL, 0, NULL);
@@ -1662,6 +1663,7 @@ static void DoFullScreenMode(gpointer p, guint n, GtkWidget * pw)
 			gtk_widget_show(GTK_WIDGET(bd->dice_area));
 		gtk_widget_show(pwStatus);
 		gtk_widget_show(pwProgress);
+		gtk_widget_show(pwStop);
 
 		GetFullscreenWindowSettings(&showingPanels,
 					    &bd->rd->fShowIDs, &maximised);
