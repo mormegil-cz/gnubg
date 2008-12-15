@@ -4467,7 +4467,7 @@ static void BearoffProgress( unsigned int i )
     fflush( stdout );
 }
 
-static void version(void)
+static void VersionMessage(void)
 {
 	g_print("%s\n%s\n",_(VERSION_STRING),  _(aszCOPYRIGHT));
 	g_print("%s", _(intro_string));
@@ -4992,9 +4992,8 @@ int main(int argc, char *argv[])
 #endif
 #endif
 
-
 	/* print version and exit if -v option given */
-	version();
+	VersionMessage();
 	if (show_version)
 		exit(EXIT_SUCCESS);
 
@@ -5013,7 +5012,7 @@ int main(int argc, char *argv[])
 	if (fX) {
 		fTTY = !fNoTTY && isatty(STDIN_FILENO) && isatty(STDOUT_FILENO);
 		fInteractive = fShowProgress = TRUE;
-		if (fSplash)
+		if (!fSplash)
 			pwSplash = CreateSplash();
 	} else
 #endif
