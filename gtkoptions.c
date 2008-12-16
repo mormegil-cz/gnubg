@@ -205,6 +205,12 @@ static void SoundEnabledClicked(GtkWidget *widget, gpointer userdata)
 		SoundDefaultClicked(0, 0);
 }
 
+static void SoundGrabFocus(GtkWidget *pw, void *dummy)
+{
+	gtk_widget_grab_focus(soundList);
+	SoundEnabledClicked(0, 0);
+}
+
 static void SoundToggled(GtkWidget *pw, optionswidget *pow)
 {
 	int enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(soundsEnabled));
@@ -216,10 +222,7 @@ static void SoundToggled(GtkWidget *pw, optionswidget *pow)
 	gtk_widget_set_sensitive(soundPlayButton, enabled);
 	gtk_widget_set_sensitive(soundDefaultButton, enabled);
 	if (enabled)
-	{
-		gtk_widget_grab_focus(soundList);
-		SoundEnabledClicked(0, 0);
-	}
+		SoundGrabFocus(0, 0);
 }
 
 static void SoundSelected(GtkTreeView *treeview, gpointer userdata)
@@ -232,12 +235,6 @@ static void SoundSelected(GtkTreeView *treeview, gpointer userdata)
 	SoundSkipUpdate = TRUE;
 	gtk_entry_set_text(GTK_ENTRY(soundPath), soundDetails[selSound].Path);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundEnabled), (*soundDetails[selSound].Path) ? TRUE:FALSE);
-}
-
-static void SoundGrabFocus(GtkWidget *pw, void *dummy)
-{
-	gtk_widget_grab_focus(soundList);
-	SoundEnabledClicked(0, 0);
 }
 
 static void SoundTidy(GtkWidget *pw, void *dummy)
