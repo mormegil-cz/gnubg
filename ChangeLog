@@ -1,3 +1,7 @@
+Tue Dec 16 22:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkmovelist.c, gtkmovelistctrl.c: Draw move analysis lines closer together.
+
 Sun Dec 14 20:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtktoolbar.c: Sort out spacing on toolbar with new "end game" button.

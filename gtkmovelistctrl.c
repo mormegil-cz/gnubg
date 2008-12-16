@@ -273,7 +273,8 @@ custom_cell_renderer_movelist_get_size (GtkCellRenderer *cell,
 		pango_layout_get_pixel_extents (layout, NULL, &logical_rect);
 		g_object_unref (layout);
 		fontheight = logical_rect.height;
-		_s_A = _s_E = _s_B = _s_C = _s_D = fontheight / 5;
+		_s_A = _s_E = _s_C = _s_D = fontheight / 5;
+		_s_B = 0;	/* Pack lines quite closely */
 
 		_s_Z = logical_rect.width;
 
