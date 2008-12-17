@@ -96,6 +96,9 @@ static GtkWidget *pwDesignImport, *pwDesignExport;
 static GtkWidget *pwDesignList;
 static GtkWidget *pwDesignAddAuthor;
 static GtkWidget *pwDesignAddTitle;
+
+GtkListStore *designListStore;
+enum {NAME_COL = 0, DATA_COL = 1};
 #endif /* HAVE_LIBXML2 */
 
 static GtkWidget *apwDiceColour[ 2 ];
@@ -130,9 +133,60 @@ typedef struct _boarddesign {
 
 static boarddesign *pbdeSelected = NULL, *pbdeModified;
 
-static GList *
-read_board_designs ( void ) {
+int FindDesgin(GtkTreeModel *model, boarddesign *pbde, GtkTreeIter *pIter)
+{
+	if (gtk_tree_model_get_iter_first(model, pIter))
+	{
+		do
+		{
+			boarddesign *testPtr;
+			gtk_tree_model_get(model, pIter, DATA_COL, &testPtr, -1);
+			if (testPtr == pbde)
+				return TRUE;
+		} while (gtk_tree_model_iter_next(model, pIter));
+	}
+	return FALSE;
+}
 
+void SelectRow(boarddesign *pbde)
+{
+	GtkTreeIter iter;
+	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(pwDesignList));
+	if (FindDesgin(model, pbde, &iter))
+	{	/* Select row */
+		GtkTreePath *start, *end;
+		GtkTreeSelection *sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(pwDesignList));
+		gtk_tree_selection_select_iter(sel, &iter);
+
+		/* Make sure selection is visible */
+		if (!gtk_tree_view_get_visible_range(GTK_TREE_VIEW(pwDesignList), &start, &end))
+			return;
+		do
+		{
+			boarddesign *testPtr;
+			GtkTreeIter testIter;
+			gtk_tree_model_get_iter(model, &testIter, start);
+			gtk_tree_model_get(model, &testIter, DATA_COL, &testPtr, -1);
+			if (testPtr == pbde)
+				return;	/* Visible */
+			gtk_tree_path_next(start);
+		} while (gtk_tree_path_compare(start, end) != 0);
+
+		/* Scroll list so item is visible */
+		gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(pwDesignList),
+			gtk_tree_model_get_path(model, &iter), NULL, TRUE, 1, 0);
+	}
+}
+
+void RemoveListDesign(boarddesign *pbdeSelected)
+{
+	GtkTreeIter iter;
+	if (FindDesgin(gtk_tree_view_get_model(GTK_TREE_VIEW(pwDesignList)), pbdeSelected, &iter))
+		gtk_list_store_remove(designListStore, &iter);
+}
+
+static GList *read_board_designs ( void )
+{
   GList *plUser, *plSystem, *plFinal;
   gchar *sz;
 
@@ -172,11 +226,6 @@ free_board_designs ( GList *pl ) {
   g_list_free ( pl );
 
 }
-
-static void DesignSelect( GtkCList *pw, gint nRow, gint nCol,
-			  GdkEventButton *pev, gpointer unused );
-static void DesignUnselect( GtkCList *pw, gint nRow, gint nCol,
-			  GdkEventButton *pev, gpointer unused );
 
 static void ParsePreferences(boarddesign *pbde, renderdata* prdNew)
 {
@@ -227,12 +276,7 @@ static void SetTitle(void)
 	if (pbde)
 	{
 		char design[1024];
-		int row = gtk_clist_find_row_from_data ( GTK_CLIST ( pwDesignList ), pbde);
-		g_signal_handlers_block_by_func(G_OBJECT(pwDesignList), G_CALLBACK( DesignSelect ), 0);
-		g_signal_handlers_block_by_func(G_OBJECT(pwDesignList), G_CALLBACK( DesignUnselect ), 0);
-		gtk_clist_select_row( GTK_CLIST( pwDesignList ), row, 0);
-		g_signal_handlers_unblock_by_func(G_OBJECT(pwDesignList), G_CALLBACK( DesignSelect ), 0);
-		g_signal_handlers_unblock_by_func(G_OBJECT(pwDesignList), G_CALLBACK( DesignUnselect ), 0);
+		SelectRow(pbde);
 
 		gtk_widget_set_sensitive ( GTK_WIDGET ( pwDesignRemove ), pbde->fDeletable );
 
@@ -1718,9 +1762,8 @@ static GtkWidget *GeneralPage( BoardData *bd, GtkWidget* bdMain ) {
 
 /* functions for board design */
 
-static void
-UseDesign ( void ) {
-
+static void UseDesign ( void )
+{
   int i, j;
   gdouble ar[ 4 ];
   gfloat rAzimuth, rElevation;
@@ -2267,13 +2310,6 @@ static void WriteDesignString(boarddesign *pbde, renderdata *prd)
   strcpy(pbde->szBoardDesign, szTemp);
 }
 
-static void ShowSelectedRow(void)
-{
-	int row = gtk_clist_find_row_from_data ( GTK_CLIST ( pwDesignList ), pbdeSelected);
-	if( gtk_clist_row_is_visible(GTK_CLIST( pwDesignList ), row) == GTK_VISIBILITY_NONE )
-		gtk_clist_moveto(GTK_CLIST( pwDesignList ), row, 0, 1, 0 );
-}
-
 #if USE_BOARD3D
 
 static void Set2dColour(double newcol[4], Material* pMat)
@@ -2348,9 +2384,8 @@ static void CopyNewSettingsToOtherDimension(renderdata* prd)
 }
 #endif
 
-static void
-DesignAdd ( GtkWidget *pw, gpointer data ) {
-
+static void DesignAdd ( GtkWidget *pw, gpointer data )
+{
   boarddesign *pbde;
   GList **pplBoardDesigns = data;
   renderdata rdNew;
@@ -2382,16 +2417,14 @@ DesignAdd ( GtkWidget *pw, gpointer data ) {
 
   pbde->fDeletable = TRUE;
 
-  *pplBoardDesigns = g_list_append ( *pplBoardDesigns, (gpointer) pbde );
-
-  AddDesignRow ( pbde, pwDesignList );
+  *pplBoardDesigns = g_list_append(*pplBoardDesigns, (gpointer)pbde);
+  AddDesignRow(pbde, pwDesignList);
 
   DesignSave(pw, data);
 
   pbdeSelected = pbde;
 
   SetTitle();
-  ShowSelectedRow();
 }
 
 static void ExportDesign ( GtkWidget *pw, gpointer data ) 
@@ -2418,31 +2451,16 @@ static void ExportDesign ( GtkWidget *pw, gpointer data )
 		return;
 	}
 
-	/* get title from current selection if possible */
-
-	if ( g_list_length( GTK_CLIST( pwDesignList )->selection ) == 1 ) {
-		int selrow = 
-		GPOINTER_TO_INT( GTK_CLIST( pwDesignList )->selection->data );
-		boarddesign *pbdeCurrent = 
-		gtk_clist_get_row_data ( GTK_CLIST ( pwDesignList ), selrow );
-		pbde->szTitle = g_strdup( pbdeCurrent->szTitle );
-		pbde->szAuthor = g_strdup( pbdeCurrent->szAuthor );
-	}
-	else {
-		/* user defined */
-		pbde->szTitle = g_strdup( _("User defined") );
-		pbde->szAuthor = g_strdup( _("User" ) );
-	}
-
-	/* get actual board design */
-
 	if (pbdeSelected)
 	{	/* Exporting current design so just get settings */
+		pbde->szTitle = g_strdup( pbdeSelected->szTitle );
+		pbde->szAuthor = g_strdup( pbdeSelected->szAuthor );
 		ParsePreferences(pbdeSelected, &rdNew);
 	}
 	else
-	{
-		/* new design, so get settings and copy to other dimension */
+	{	/* new design, so get settings and copy to other dimension */
+		pbde->szTitle = g_strdup( _("User defined") );
+		pbde->szAuthor = g_strdup( _("User" ) );
 		GetPrefs(&rdPrefs);
 		rdNew = rdPrefs;
 #if USE_BOARD3D
@@ -2527,12 +2545,9 @@ static void ImportDesign ( GtkWidget *pw, gpointer data )
 	}
 }
 
-
 static void RemoveDesign ( GtkWidget *pw, gpointer data )
 {
   GList **pplBoardDesigns = (GList **) data;
-  int i = gtk_clist_find_row_from_data ( GTK_CLIST ( pwDesignList ),
-                                         pbdeSelected );
   char prompt[200];
   sprintf(prompt, _("Permently remove design %s?"), pbdeSelected->szTitle);
   if (!GetInputYN(prompt))
@@ -2542,7 +2557,7 @@ static void RemoveDesign ( GtkWidget *pw, gpointer data )
 
   *pplBoardDesigns = g_list_remove ( *pplBoardDesigns, pbdeSelected );
 
-  gtk_clist_remove ( GTK_CLIST ( pwDesignList ), i );
+  RemoveListDesign(pbdeSelected);
 
   DesignSave(pw, data);
 
@@ -2597,115 +2612,93 @@ static void UpdateDesign( GtkWidget *pw, gpointer data )
 	WriteDesignString(pbdeModified, &newPrefs);
 	DesignSave(pw, data);
 
+	rdPrefs = newPrefs;
 	SetTitle();
 }
 
-static void
-AddDesignRowIfNew( gpointer data, gpointer user_data ) {
+static void AddDesignRow ( gpointer data, gpointer user_data )
+{
+	GtkWidget *pwDesignList = user_data;
+	boarddesign *pbde = data;
+	GtkTreeIter iter;
 
-  renderdata rdNew;
-  GtkWidget *pwList = user_data;
-  boarddesign *pbde = data;
-  char *asz[ 1 ];
-  gint i;
+	if (pbde == NULL)
+		return;
 
-  if (!pbde)
-    return;
-
-  ParsePreferences(pbde, &rdNew);
-  if (FindDesign(&rdNew))
-  {
-    outputf("Design %s already present\n", pbde->szTitle);
-    return;
-  }
-
-  asz[ 0 ] = pbde->szTitle;
-
-  i = gtk_clist_append ( GTK_CLIST ( pwList ), asz );
-  gtk_clist_set_row_data ( GTK_CLIST ( pwList ), i, pbde );
-
-  plBoardDesigns = g_list_append ( plBoardDesigns, (gpointer)pbde );
-  outputf("Design %s added\n", pbde->szTitle);
+	gtk_list_store_append(designListStore, &iter);
+	gtk_list_store_set(designListStore, &iter, NAME_COL, pbde->szTitle, DATA_COL, pbde, -1);
 }
 
-static void
-AddDesignRow ( gpointer data, gpointer user_data ) {
+static void AddDesignRowIfNew( gpointer data, gpointer user_data )
+{
+	renderdata rdNew;
+	boarddesign *pbde = data;
 
-  GtkWidget *pwList = user_data;
-  boarddesign *pbde = data;
-  char *asz[ 1 ];
-  gint i;
-
-  if ( ! pbde )
-    return;
-
-  asz[ 0 ] = pbde->szTitle;
-
-  i = gtk_clist_append ( GTK_CLIST ( pwList ), asz );
-  gtk_clist_set_row_data ( GTK_CLIST ( pwList ), i, pbde );
-}
-
-static void DesignSelect( GtkCList *pw, gint nRow, gint nCol,
-			  GdkEventButton *pev, gpointer unused ) {
-
-    if (GTK_WIDGET_IS_SENSITIVE(pwDesignAdd))
+	ParsePreferences(pbde, &rdNew);
+	if (FindDesign(&rdNew))
 	{
-		GTKSetCurrentParent(GTK_WIDGET(pw));
+		outputf("Design %s already present\n", pbde->szTitle);
+		return;
+	}
+
+	AddDesignRow(data, user_data);
+	plBoardDesigns = g_list_append ( plBoardDesigns, (gpointer)pbde );
+
+	outputf("Design %s added\n", pbde->szTitle);
+}
+
+static void DesignSelectNew(GtkTreeView *treeview, gpointer userdata)
+{
+	GtkTreeIter selected_iter;
+	GtkTreeModel *model;
+	boarddesign *pbde;
+
+	gtk_tree_selection_get_selected(gtk_tree_view_get_selection(treeview), &model, &selected_iter);
+	gtk_tree_model_get(model, &selected_iter, DATA_COL, &pbde, -1);
+
+	if (GTK_WIDGET_IS_SENSITIVE(pwDesignAdd))
+	{
+		GTKSetCurrentParent(GTK_WIDGET(pwDesignList));
     	if (!GetInputYN(_("Select new design and lose current changes?")))
 		{
-			pbdeModified = gtk_clist_get_row_data(GTK_CLIST(pwDesignList), nRow);
+			pbdeModified = pbde;
 			gtk_widget_set_sensitive(GTK_WIDGET(pwDesignUpdate), pbdeModified->fDeletable);
 			return;
 		}
 	}
 
-    pbdeSelected = gtk_clist_get_row_data ( GTK_CLIST ( pwDesignList ),
-                                          nRow );
-
-    UseDesign();
+	pbdeSelected = pbde;
+	UseDesign();
 }
 
-static void DesignUnselect( GtkCList *pw, gint nRow, gint nCol,
-			  GdkEventButton *pev, gpointer unused )
+static GtkWidget *DesignPage ( GList **pplBoardDesigns, BoardData *bd )
 {
-	gtk_widget_set_sensitive ( GTK_WIDGET ( pwDesignRemove ), FALSE );
-	gtk_widget_set_sensitive ( GTK_WIDGET ( pwDesignUpdate ), FALSE );
+	GtkWidget *pwhbox;
+	GtkWidget *pwScrolled;
+	GtkWidget *pwPage;
+	GtkCellRenderer *renderer;
 
-	pbdeSelected = NULL;
+	pwPage = gtk_vbox_new ( FALSE, 4 );
 
-        
-}
+	/* List with board designs */
 
-static GtkWidget *
-DesignPage ( GList **pplBoardDesigns, BoardData *bd ) {
+	renderer = gtk_cell_renderer_text_new ();
+	g_object_set(renderer, "ypad", 0, NULL);
 
-  GtkWidget *pwhbox;
-  GtkWidget *pwScrolled;
-  GtkWidget *pwPage;
-  
-  pwPage = gtk_vbox_new ( FALSE, 4 );
+	designListStore = gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_POINTER);
+	g_list_foreach(*pplBoardDesigns, AddDesignRow, pwDesignList);
 
-  /* CList with board designs */
+	pwDesignList = gtk_tree_view_new_with_model(GTK_TREE_MODEL(designListStore));
+	g_object_unref(G_OBJECT(designListStore));	/* The view now holds a reference.  We can get rid of our own reference */
+	gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(pwDesignList)), GTK_SELECTION_BROWSE);
+	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW(pwDesignList), -1, _("Design"), renderer, "text", NAME_COL, NULL);
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(pwDesignList), FALSE);
+	g_signal_connect(pwDesignList, "cursor-changed", G_CALLBACK(DesignSelectNew), NULL);
 
-  pwScrolled = gtk_scrolled_window_new( NULL, NULL );
-  gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pwScrolled ),
-				GTK_POLICY_AUTOMATIC,
-				GTK_POLICY_AUTOMATIC );
-  gtk_container_add ( GTK_CONTAINER ( pwPage ), pwScrolled );
-
-  pwDesignList = gtk_clist_new( 1 );
-  gtk_clist_set_column_auto_resize( GTK_CLIST( pwDesignList ), 0, TRUE );
-/* Should be set to browse mode really, but gtk gets confused when
-	the "lose current settings" warning is shown (dialog freezes)
-  gtk_clist_set_selection_mode( GTK_CLIST( pwDesignList ), GTK_SELECTION_BROWSE );
-*/
-  g_list_foreach ( *pplBoardDesigns, AddDesignRow, pwDesignList );
-  gtk_container_add ( GTK_CONTAINER ( pwScrolled ), pwDesignList );
-
-  g_signal_connect( G_OBJECT( pwDesignList ), "select-row",
-                      G_CALLBACK( DesignSelect ), NULL );
-  g_signal_connect( G_OBJECT( pwDesignList ), "unselect-row",
-                      G_CALLBACK( DesignUnselect ), NULL );
+	pwScrolled = gtk_scrolled_window_new (NULL, NULL);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (pwScrolled), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+	gtk_container_add (GTK_CONTAINER (pwScrolled), pwDesignList);
+	gtk_container_add ( GTK_CONTAINER ( pwPage ), pwScrolled );
 
   /* button: use design */
 
@@ -3011,10 +3004,6 @@ static void ChangePage(GtkNotebook *notebook, GtkNotebookPage *page,
 
 		option_changed(0, 0);
 	}
-#if HAVE_LIBXML2
-	if (page_num == NUM_NONPREVIEW_PAGES)
-		ShowSelectedRow();
-#endif
 
 #if USE_BOARD3D
 	if (display_is_3d(&rdPrefs) && redrawChange)
@@ -3094,6 +3083,7 @@ extern void BoardPreferences(GtkWidget *pwBoard)
 	g_signal_connect( G_OBJECT( pwDialog ), "destroy",
 			G_CALLBACK( BoardPrefsDestroy ), NULL );
 
+	gtk_widget_show_all(pwDialog);	/* Realise dialog as may need to scroll list in next line */
 	SetTitle();
 
 	gtk_notebook_set_current_page(GTK_NOTEBOOK(pwNotebook), NUM_NONPREVIEW_PAGES);
