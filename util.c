@@ -98,7 +98,13 @@ extern FILE *GetTemporaryFile(const char *nameTemplate, char **retName)
       PrintError("creating temporary file");
       return NULL;
     }
+
+#ifndef WIN32
 	pf = fdopen(tmpd, "w+" );
+#else
+	pf = fopen(*retName, "wb+" );
+#endif
+
 	if (pf == NULL)
 	{
 		g_free(retName);

@@ -1,3 +1,7 @@
+Wed Dec 17 10:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* util.c: Dodgy temp file fix to get export to gol working.
+
 Tue Dec 16 22:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkmovelist.c, gtkmovelistctrl.c: Draw move analysis lines closer together.
