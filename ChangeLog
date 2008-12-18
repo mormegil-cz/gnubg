@@ -1,3 +1,8 @@
+Thu Dec 18 22:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkprogress.c: Fix bug in number of rollouts displayed when alternatives
+			finish early (reported by Bob Koca)
+
 Wed Dec 17 22:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkprefs.c: Replace clist control with tree view

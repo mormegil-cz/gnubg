@@ -909,6 +909,7 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 					const int fShowRanks,
                     rolloutprogress *prp ) {
 
+	static int maxGames = 0;
     char sz[ 32 ];
     int i;
     gchar *gsz;
@@ -963,17 +964,20 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 	} else {
 	  SetRolloutText(prp, iAlternative * 2, i + 1, "n/a");
 	}
-	  
-    frac = (iGame + 1) * 1.0 / (prc->nTrials * 1.0); 
-    /* why doesn't type casting work? */
-    gsz = g_strdup_printf( "%d/%d (%.0f%%)" ,
-		    iGame + 1 , prc->nTrials, 100 * frac );
-    prp->nGamesDone = iGame + 1;
+
+	/* Update progress bar with highest number trials for all the alternatives */
+	if (iAlternative == 0 || iGame > maxGames)
+		maxGames = iGame;
+	if (iAlternative == (prp->n - 1))
+	{
+		frac = (maxGames + 1.0) / (prc->nTrials * 1.0); 
+		gsz = g_strdup_printf( "%d/%d (%d%%)" , maxGames + 1 , prc->nTrials, (int)(100 * frac) );
      
-    gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR( prp->pwRolloutProgress),
-		    frac );
-    gtk_progress_bar_set_text(GTK_PROGRESS_BAR( prp->pwRolloutProgress), gsz );
-    g_free( gsz );
+		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR( prp->pwRolloutProgress), frac );
+		gtk_progress_bar_set_text(GTK_PROGRESS_BAR( prp->pwRolloutProgress), gsz );
+		g_free( gsz );
+		prp->nGamesDone = maxGames + 1;
+	}
     
     /* calculate estimate time left */
 
@@ -1040,8 +1044,7 @@ static void GTKRolloutProgressEnd( void **pp ) {
     gtk_widget_set_sensitive( prp->pwRolloutViewStat, TRUE );
 
     gsz = g_strdup_printf( _("Finished (%d trials)") , prp->nGamesDone);
-    gtk_progress_bar_set_text( GTK_PROGRESS_BAR( prp->pwRolloutProgress ),
-                                    gsz );
+    gtk_progress_bar_set_text( GTK_PROGRESS_BAR( prp->pwRolloutProgress ), gsz );
     g_free( gsz );
 
     g_signal_handler_disconnect( G_OBJECT( prp->pwRolloutDialog ), 
