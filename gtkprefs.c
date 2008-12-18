@@ -159,22 +159,24 @@ void SelectRow(boarddesign *pbde)
 		gtk_tree_selection_select_iter(sel, &iter);
 
 		/* Make sure selection is visible */
-		if (!gtk_tree_view_get_visible_range(GTK_TREE_VIEW(pwDesignList), &start, &end))
-			return;
-		do
+		if (gtk_notebook_get_current_page(GTK_NOTEBOOK(pwNotebook)) == NUM_NONPREVIEW_PAGES
+			&& gtk_tree_view_get_visible_range(GTK_TREE_VIEW(pwDesignList), &start, &end))
 		{
-			boarddesign *testPtr;
-			GtkTreeIter testIter;
-			gtk_tree_model_get_iter(model, &testIter, start);
-			gtk_tree_model_get(model, &testIter, DATA_COL, &testPtr, -1);
-			if (testPtr == pbde)
-				return;	/* Visible */
-			gtk_tree_path_next(start);
-		} while (gtk_tree_path_compare(start, end) != 0);
+			do
+			{
+				boarddesign *testPtr;
+				GtkTreeIter testIter;
+				gtk_tree_model_get_iter(model, &testIter, start);
+				gtk_tree_model_get(model, &testIter, DATA_COL, &testPtr, -1);
+				if (testPtr == pbde)
+					return;	/* Visible */
+				gtk_tree_path_next(start);
+			} while (gtk_tree_path_compare(start, end) != 0);
 
-		/* Scroll list so item is visible */
-		gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(pwDesignList),
-			gtk_tree_model_get_path(model, &iter), NULL, TRUE, 1, 0);
+			/* Scroll list so item is visible */
+			gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(pwDesignList),
+				gtk_tree_model_get_path(model, &iter), NULL, TRUE, 1, 0);
+		}
 	}
 }
 
@@ -1210,8 +1212,7 @@ static void toggle_display_type(GtkWidget *widget, BoardData* bd)
 {
 	int i;
 	int state = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
-	int numPages = 
-	g_list_length(GTK_NOTEBOOK(pwNotebook)->children);
+	int numPages = g_list_length(GTK_NOTEBOOK(pwNotebook)->children);
 	/* Show pages with correct 2d/3d settings */
 	for (i = numPages - 1; i >= NUM_NONPREVIEW_PAGES; i--)
 		gtk_notebook_remove_page(GTK_NOTEBOOK(pwNotebook), i);
