@@ -3873,7 +3873,6 @@ extern void UserCommand(const char *szCommand)
 
 extern gint NextTurnNotify( gpointer p )
 {
-
     NextTurn( TRUE );
 
     ResetInterrupt();
@@ -4618,7 +4617,7 @@ static void setup_readline(void)
 #endif
 }
 
-#ifndef USE_GTK
+#if !USE_GTK
 static void PushSplash(char *unused, char *heading, char *message, int wait)
 {
 }
