@@ -1491,7 +1491,7 @@ SwitchDisplayMode( gpointer p, guint n, GtkWidget *pw )
 		/* Reset 3d settings */
 		MakeCurrent3d(bd3d);
 		preDraw3d(bd, bd3d, prd);
-		updateOccPos(bd);	/* Make sure shadows are in correct place */
+		UpdateShadows(bd->bd3d);
 		if (bd->diceShown == DICE_ON_BOARD)
 			setDicePos(bd, bd3d);	/* Make sure dice appear ok */
 		RestrictiveRedraw();

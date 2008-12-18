@@ -103,6 +103,11 @@ void MakeCurrent3d(const BoardData3d *bd3d)
 		g_print("gdk_gl_drawable_make_current failed!\n");
 }
 
+void UpdateShadows(BoardData3d* bd3d)
+{
+	bd3d->shadowsOutofDate = TRUE;
+}
+
 static gboolean expose_event_3d(GtkWidget *widget, GdkEventExpose *exposeEvent, const BoardData* bd)
 {
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
@@ -110,6 +115,12 @@ static gboolean expose_event_3d(GtkWidget *widget, GdkEventExpose *exposeEvent, 
 		return TRUE;
 
 	CheckOpenglError();
+
+	if (bd->bd3d->shadowsOutofDate)
+	{	/* Update shadow positions */
+		bd->bd3d->shadowsOutofDate = TRUE;
+		updateOccPos(bd);
+	}
 
 #ifdef TEST_HARNESS
 	TestHarnessDraw(bd);

@@ -171,6 +171,7 @@ struct _BoardData3d
 	int shadowsInitialised;
 	int fBasePreRendered;
 	int fBuffers;
+	int shadowsOutofDate;
 
 	float ***boardPoints;	/* Used for rounded corners */
 #ifdef WIN32

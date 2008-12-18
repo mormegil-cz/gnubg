@@ -3116,7 +3116,7 @@ extern void BoardPreferencesDone( GtkWidget *pwBoard )
 
 		DisplayCorrectBoardType(bd, bd3d, prd);
 		if (display_is_3d(prd))
-			updateOccPos(bd);
+			UpdateShadows(bd->bd3d);
 		else
 			StopIdle3d(bd, bd->bd3d);
 

@@ -96,6 +96,7 @@ extern void DeleteTextureList(void);
 
 extern void PlaceMovingPieceRotation(const BoardData *bd, BoardData3d *bd3d, unsigned int dest, unsigned int src);
 extern void SetMovingPieceRotation(const BoardData *bd, BoardData3d *bd3d, unsigned int pt);
+extern void UpdateShadows(BoardData3d* bd3d);
 extern void updateOccPos(const BoardData* bd);
 extern void updateDiceOccPos(const BoardData* bd, BoardData3d* bd3d);
 extern void updatePieceOccPos(const BoardData* bd, BoardData3d* bd3d);
