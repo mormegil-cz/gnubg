@@ -3038,6 +3038,7 @@ extern void BoardPreferences(GtkWidget *pwBoard)
 	pwPrevBoard = board_new(&rdPrefs);
 
 	bd = BOARD(pwPrevBoard)->board_data;
+	InitColourSelectionDialog();
 	InitBoardPreview(bd);
 	RollDice2d(bd);
 

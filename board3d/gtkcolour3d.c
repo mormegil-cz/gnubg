@@ -38,7 +38,7 @@ typedef struct UpdateDetails_T
 	TextureType textureType;
 } UpdateDetails;
 
-static GtkWidget *pcpAmbient, *pcpDiffuse, *pcpSpecular;
+static GtkWidget *pcpAmbient, *pcpDiffuse, *pcpSpecular, *pwColourDialog3d;
 static GtkAdjustment *padjShine, *padjOpacity;
 static GtkWidget *psOpacity, *pOpacitylabel, *pTexturelabel, *pwPreview, *textureComboBox;
 static Material col3d;
@@ -47,6 +47,7 @@ static int useOpacity, useTexture;
 static float opacityValue;
 static int bUpdate = TRUE;
 static GLUquadricObj *qobj;
+static UpdateDetails* curDetails;
 
 /* Store the previews details here */
 #define MAX_DETAILS 15
@@ -71,6 +72,11 @@ static int IsFlagSet(int flags, int bit)
 void SetPreviewLightLevel(const int levels[3])
 {
 	memcpy(previewLightLevels, levels, sizeof(int[3]));
+}
+
+void InitColourSelectionDialog(void)
+{
+	pwColourDialog3d = NULL;
 }
 
 static void SetupLight(void)
@@ -139,10 +145,10 @@ static void Draw(Material* pMat)
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glPushMatrix();
-	glTranslatef(edge, STRIP_HEIGHT / 2, 0.f);
+	glTranslatef(edge * 2, STRIP_HEIGHT / 2, 0.f);
 	glRotatef(90.f, 0.f, 1.f, 0.f);
 	/* -edge to give a black outline */
-	gluCylinder(qobj, (double)STRIP_HEIGHT / 2 - edge, (double)STRIP_HEIGHT / 2 - edge, (double)STRIP_WIDTH - edge * 2, 36, 36);
+	gluCylinder(qobj, (double)STRIP_HEIGHT / 2 - edge, (double)STRIP_HEIGHT / 2 - edge, (double)STRIP_WIDTH - edge * 3, 36, 36);
 	glPopMatrix();
 
 	if (pMat->textureInfo)
@@ -201,6 +207,9 @@ static void SetupColourPreview(void)
 static void TextureChange(GtkComboBox * combo, gpointer data)
 {
 	char *current = gtk_combo_box_get_active_text(combo);
+
+	if (!bUpdate)
+		return;
 
 	if (!strcmp(current, NO_TEXTURE_STRING))
 		col3d.textureInfo = 0;
@@ -347,34 +356,35 @@ static void AddWidgets(GtkWidget *window)
 	gtk_table_attach_defaults(GTK_TABLE (table), pwPreview, 0, 2, 4, 5);
 }
 
-static gboolean OkClicked(GtkWidget *pw, UpdateDetails* pDetails)
-{	/* Apply new settings */
-	char* texStr;
+static void DialogClose(GtkWidget *dialog, gint response, void *unused)
+{
+	if (response == GTK_RESPONSE_OK)
+	{	/* Apply new settings */
+		char* texStr;
 
-	/* Copy new settings to preview material */
-	pDetails->mat = col3d;
-	*pDetails->pBoardMat = col3d;
+		/* Copy new settings to preview material */
+		curDetails->mat = col3d;
+		*curDetails->pBoardMat = col3d;
 
-	if (useTexture)
-	{
-		texStr = gtk_combo_box_get_active_text(GTK_COMBO_BOX(textureComboBox));
-
-		if (!strcmp(texStr, NO_TEXTURE_STRING))
-			col3d.textureInfo = 0;
-		else
+		if (useTexture)
 		{
-			BoardData *bd = (BOARD(pwPrevBoard))->board_data;
-			ClearTextures(bd->bd3d);
-			GetTextures(bd->bd3d, bd->rd);
+			texStr = gtk_combo_box_get_active_text(GTK_COMBO_BOX(textureComboBox));
+
+			if (!strcmp(texStr, NO_TEXTURE_STRING))
+				col3d.textureInfo = 0;
+			else
+			{
+				BoardData *bd = (BOARD(pwPrevBoard))->board_data;
+				ClearTextures(bd->bd3d);
+				GetTextures(bd->bd3d, bd->rd);
+			}
 		}
+		UpdatePreview();
+		gtk_widget_queue_draw(curDetails->preview);
 	}
-	UpdatePreview();
-	gtk_widget_queue_draw(pDetails->preview);
 
-	/* Close dialog */
-    gtk_widget_destroy(gtk_widget_get_toplevel(pw));
-
-	return TRUE;
+	/* Hide dialog so can be reshown quickly */
+	gtk_widget_hide(pwColourDialog3d);
 }
 
 static void append_to_combo_box(gpointer data, gpointer combo)
@@ -391,16 +401,20 @@ static void gtk_color_button_set_from_farray(GtkColorButton *button, float col[4
 	gtk_color_button_set_from_array(button, cold);
 }
 
-
 static void UpdateColour3d(GtkWidget *notused, UpdateDetails* pDetails)
 {
-	GtkWidget* pwColourDialog3d = GTKCreateDialog(_("3d Colour selection"), DT_QUESTION, 
-		pDetails->preview, DIALOG_FLAG_MODAL, G_CALLBACK(OkClicked), pDetails);
-
-	g_signal_connect(G_OBJECT(pwColourDialog3d), "realize", G_CALLBACK(UpdateColourPreview), 0 );
-
+	curDetails = pDetails;
 	col3d = pDetails->mat;
-	AddWidgets(DialogArea(pwColourDialog3d, DA_MAIN));
+
+	if (pwColourDialog3d == NULL)
+	{
+		pwColourDialog3d = GTKCreateDialog(_("3d Colour selection"), DT_QUESTION, 
+			pDetails->preview, DIALOG_FLAG_MODAL | DIALOG_FLAG_NORESPONSE, NULL, NULL);
+		AddWidgets(DialogArea(pwColourDialog3d, DA_MAIN));
+		g_signal_connect(pwColourDialog3d, "response", G_CALLBACK(DialogClose), NULL);
+	}
+	else
+		gtk_widget_show(pwColourDialog3d);
 
 	/* Avoid updating preview */
 	bUpdate = FALSE;

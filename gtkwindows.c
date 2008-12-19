@@ -150,7 +150,7 @@ static void dialog_mapped(GtkWidget *window, gpointer data)
 }
 
 extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt,
-				  GtkWidget * parent, int flags, GCallback okFun, void *okFunData)
+				  GtkWidget *parent, int flags, GCallback okFun, void *okFunData)
 {
 	CallbackStruct* cbData;
     GtkWidget *pwDialog, *pwHbox, *pwPixmap;
@@ -196,7 +196,8 @@ extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt,
 
 	cbData->data = okFunData;
 	g_object_set_data_full(G_OBJECT(pwDialog), "cbData", cbData, g_free);
-	g_signal_connect(pwDialog, "response", G_CALLBACK(DialogResponse), cbData);
+    if (!(flags & DIALOG_FLAG_NORESPONSE))
+		g_signal_connect(pwDialog, "response", G_CALLBACK(DialogResponse), cbData);
 
 	if ((flags & DIALOG_FLAG_NOOK) == 0)
 	{
