@@ -1193,9 +1193,12 @@ extern void CommandSetGUIIllegal( char *sz ) {
 
 extern void CommandSetGUIShowIDs(char *sz)
 {
-    SetToggle("gui showids", &GetMainAppearance()->fShowIDs, sz,
-	      _("The position and match IDs will be shown above the board."),
-	      _("The position and match IDs will not be shown."));
+	if (!inCallback)
+	{
+	    SetToggle("gui showids", &GetMainAppearance()->fShowIDs, sz,
+		      _("The position and match IDs will be shown above the board."),
+			  _("The position and match IDs will not be shown."));
+	}
 }
 
 extern void CommandSetGUIDragTargetHelp( char *sz ) {
