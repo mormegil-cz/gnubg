@@ -340,12 +340,13 @@ void InitGL(const BoardData *bd)
 			static int UseBufferRegions = -1;
 			if (UseBufferRegions == -1)
 				UseBufferRegions = wglBufferInitialize();
-
+#if 0	/* Remove this until option added to control this */
 			if (UseBufferRegions == 1)
 			{
 				bd3d->wglBuffer = CreateBufferRegion(WGL_BACK_COLOR_BUFFER_BIT_ARB | WGL_DEPTH_BUFFER_BIT_ARB);
 				bd3d->fBuffers = (bd->bd3d->wglBuffer != NULL);
 			}
+#endif
 		}
 #endif
 	}
