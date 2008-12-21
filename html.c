@@ -2682,8 +2682,8 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
           break;
 
-        case EVAL_ROLLOUT: {
-
+        case EVAL_ROLLOUT:
+		{
           char *sz = g_strdup ( OutputRolloutContext ( NULL, pes ) );
           char *pcS = sz, *pcE;
           
@@ -2714,7 +2714,7 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
             
           }
 
-          free ( sz );
+          g_free ( sz );
 
           break;
 
