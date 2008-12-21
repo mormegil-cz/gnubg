@@ -27,7 +27,7 @@ marble.png
 Marble
 General
 berch.png
-Berch
+Birch
 General
 swirl.png
 Swirl
