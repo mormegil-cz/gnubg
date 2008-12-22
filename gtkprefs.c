@@ -3022,6 +3022,7 @@ static void pref_dialog_map(GtkWidget *window, BoardData *bd)
 	redrawChange = FALSE;
 	bd->rd->quickDraw = FALSE;
 #endif
+	SetTitle();	/* Make sure title selected properly */
 }
 
 extern void BoardPreferences(GtkWidget *pwBoard)
@@ -3085,8 +3086,6 @@ extern void BoardPreferences(GtkWidget *pwBoard)
 	g_signal_connect( G_OBJECT( pwDialog ), "destroy",
 			G_CALLBACK( BoardPrefsDestroy ), NULL );
 
-	gtk_widget_show_all(pwDialog);	/* Realise dialog as may need to scroll list in next line */
-	SetTitle();
 
 	gtk_notebook_set_current_page(GTK_NOTEBOOK(pwNotebook), NUM_NONPREVIEW_PAGES);
 
