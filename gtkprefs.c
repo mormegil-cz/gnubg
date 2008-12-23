@@ -133,7 +133,7 @@ typedef struct _boarddesign {
 
 static boarddesign *pbdeSelected = NULL, *pbdeModified;
 
-int FindDesgin(GtkTreeModel *model, boarddesign *pbde, GtkTreeIter *pIter)
+static int FindDesgin(GtkTreeModel *model, boarddesign *pbde, GtkTreeIter *pIter)
 {
 	if (gtk_tree_model_get_iter_first(model, pIter))
 	{
@@ -148,7 +148,7 @@ int FindDesgin(GtkTreeModel *model, boarddesign *pbde, GtkTreeIter *pIter)
 	return FALSE;
 }
 
-void SelectRow(boarddesign *pbde)
+static void SelectRow(boarddesign *pbde)
 {
 	GtkTreeIter iter;
 	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(pwDesignList));
@@ -180,7 +180,7 @@ void SelectRow(boarddesign *pbde)
 	}
 }
 
-void RemoveListDesign(boarddesign *pbdeSelected)
+static void RemoveListDesign(boarddesign *pbdeSelected)
 {
 	GtkTreeIter iter;
 	if (FindDesgin(gtk_tree_view_get_model(GTK_TREE_VIEW(pwDesignList)), pbdeSelected, &iter))
@@ -2619,7 +2619,6 @@ static void UpdateDesign( GtkWidget *pw, gpointer data )
 
 static void AddDesignRow ( gpointer data, gpointer user_data )
 {
-	GtkWidget *pwDesignList = user_data;
 	boarddesign *pbde = data;
 	GtkTreeIter iter;
 
@@ -3039,7 +3038,9 @@ extern void BoardPreferences(GtkWidget *pwBoard)
 	pwPrevBoard = board_new(&rdPrefs);
 
 	bd = BOARD(pwPrevBoard)->board_data;
+#if USE_BOARD3D
 	InitColourSelectionDialog();
+#endif
 	InitBoardPreview(bd);
 	RollDice2d(bd);
 

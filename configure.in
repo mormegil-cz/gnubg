@@ -252,7 +252,7 @@ if test "$with_gtk" = "yes" && test "$no_gtk" = "yes"; then
 	AC_MSG_ERROR([gtk requested but not found])
 fi
 
-if test  "$with_board3d" != "no" && test "x$have_gtk" = "xyes" && test "x$have_gtkglext" = "xyes"; then
+if test  "$with_board3d" != "no" && test "$with_gtk" != "no" && test "x$have_gtk" = "xyes" && test "x$have_gtkglext" = "xyes"; then
 	AC_DEFINE(USE_BOARD3D,1, [Define if you want to use the 3d boards])
 	no_board3d="no"
 fi
