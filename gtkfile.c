@@ -84,7 +84,7 @@ char *programdir, *pc, *tmp;
 
   if (folder && *folder && g_file_test(folder, G_FILE_TEST_IS_DIR))
     gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (fc), folder);
-  if (name && *name && g_file_test(name, G_FILE_TEST_EXISTS))
+  if (name && *name)
     gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fc), name);
 
 #ifdef WIN32
