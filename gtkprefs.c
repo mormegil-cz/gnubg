@@ -82,7 +82,6 @@ GtkAdjustment *padjDarkness, *padjAccuracy, *padjBoardAngle, *padjSkewFactor, *p
 	*padjLightLevelAmbient, *padjLightLevelDiffuse, *padjLightLevelSpecular,
 	*padjLightPosY, *padjLightPosZ, *padjDiceSize;
 	int redrawChange;
-	GtkTooltips *ptt;
 
 	int pc3dDiceId[2], pcChequer2;
 #endif

@@ -1,3 +1,7 @@
+Fri Dec 26 00:33:04 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtkprefs.c, gtktoolbar.c: we don't use the old tooltip api anymore
+
 Thu Dec 18 22:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkprogress.c: Fix bug in number of rollouts displayed when alternatives
