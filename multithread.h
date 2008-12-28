@@ -22,7 +22,7 @@
 
 /*#define DEBUG_MULTITHREADED 1*/
 #ifdef DEBUG_MULTITHREADED
-#define multi_debug(x) puts(x)
+void multi_debug(const char *str, ...);
 #else
 #define multi_debug(x)
 #endif

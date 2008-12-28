@@ -37,6 +37,9 @@
 #ifdef TRY_COUNTING_PROCEESING_UNITS
 extern int GetLogicalProcssingUnitCount(void);
 #endif
+#ifdef DEBUG_MULTITHREADED
+unsigned int mainThreadID;
+#endif
 
 #ifdef GLIB_THREADS
 typedef struct _ManualEvent
@@ -162,8 +165,21 @@ static void FreeMutex(Mutex mutex)
     g_mutex_free(mutex);
 }
 
-#define Mutex_Lock(mutex) g_mutex_lock(mutex)
+#ifdef DEBUG_MULTITHREADED
+void Mutex_Lock(Mutex mutex, const char *reason)
+{
+	multi_debug(reason);
+	g_mutex_lock(mutex);
+}
+void Mutex_Release(Mutex mutex)
+{
+	multi_debug("Releasing lock");
+	g_mutex_unlock(mutex);
+}
+#else
+#define Mutex_Lock(mutex, reason) g_mutex_lock(mutex)
 #define Mutex_Release(mutex) g_mutex_unlock(mutex)
+#endif
 
 #else    /* win32 */
 
@@ -218,8 +234,29 @@ static void FreeMutex(Mutex mutex)
     CloseHandle(mutex);
 }
 
-#define Mutex_Lock(mutex) WaitForSingleObject(mutex, INFINITE)
+#ifdef DEBUG_MULTITHREADED
+void Mutex_Lock(Mutex mutex, const char *reason)
+{
+	if (WaitForSingleObject(mutex, 0) == WAIT_OBJECT_0)
+	{	/* Got mutex */
+		multi_debug("%s: lock acquired", reason);
+	}
+	else
+	{
+		multi_debug("%s: waiting on lock", reason);
+		WaitForSingleObject(mutex, INFINITE);
+		multi_debug("lock relinquished");
+	}
+}
+void Mutex_Release(Mutex mutex)
+{
+	multi_debug("Releasing lock");
+	ReleaseMutex(mutex);
+}
+#else
+#define Mutex_Lock(mutex, reason) WaitForSingleObject(mutex, INFINITE)
 #define Mutex_Release(mutex) ReleaseMutex(mutex)
+#endif
 
 #endif
 
@@ -257,8 +294,7 @@ static Task *MT_GetTask(void)
 {
     Task *task = NULL;
 
-    multi_debug("get task: lock");
-    Mutex_Lock(td.queueLock);
+    Mutex_Lock(td.queueLock, "get task");
 
     if (g_list_length(td.tasks) > 0)
     {
@@ -270,8 +306,8 @@ static Task *MT_GetTask(void)
         }
     }
 
-    Mutex_Release(td.queueLock);
     multi_debug("get task: release");
+    Mutex_Release(td.queueLock);
 
     return task;
 }
@@ -328,6 +364,7 @@ static void WaitingForThreads(void)
 static void MT_CreateThreads(void)
 {
     unsigned int i;
+	multi_debug("CreateThreads()");
 	td.result = 0;
 	td.closingThreads = FALSE;
     for (i = 0; i < td.numThreads; i++)
@@ -351,7 +388,8 @@ void MT_SetNumThreads(unsigned int num)
 {
 	if (num != td.numThreads)
 	{
-		MT_CloseThreads();
+		if (td.numThreads != 0)
+			MT_CloseThreads();
 		td.numThreads = num;
 		MT_CreateThreads();
 	}
@@ -371,6 +409,9 @@ extern void MT_InitThreads(void)
     InitManualEvent(&td.activity);
     TLSCreate(&td.tlsItem);
 	TLSSetValue(td.tlsItem, 0);	/* Main thread shares id 0 */
+#ifdef DEBUG_MULTITHREADED
+	mainThreadID = GetCurrentThreadId();
+#endif
     InitMutex(&td.multiLock);
     InitMutex(&td.queueLock);
 	InitManualEvent(&td.syncStart);
@@ -399,8 +440,7 @@ void MT_AddTask(Task *pt, gboolean lock)
 {
 	if (lock)
 	{
-		multi_debug("add task: lock");
-		Mutex_Lock(td.queueLock);
+		Mutex_Lock(td.queueLock, "add task");
 	}
 	if (td.addedTasks == 0)
 		td.result = 0;	/* Reset result for new tasks */
@@ -412,16 +452,23 @@ void MT_AddTask(Task *pt, gboolean lock)
 	}
 	if (lock)
 	{
-		Mutex_Release(td.queueLock);
 		multi_debug("add task: release");
+		Mutex_Release(td.queueLock);
 	}
 }
 
 void mt_add_tasks(int num_tasks, AsyncFun pFun, void *taskData, gpointer linked)
 {
 	int i;
-	multi_debug("add many tasks: lock");
-	Mutex_Lock(td.queueLock);
+	{
+#ifdef DEBUG_MULTITHREADED
+		char buf[20];
+		sprintf(buf, "add %d tasks", num_tasks);
+		Mutex_Lock(td.queueLock, buf);
+#else
+		Mutex_Lock(td.queueLock, NULL);
+#endif
+	}
 	for (i = 0; i < num_tasks; i++)
 	{
 		Task *pt = (Task*)malloc(sizeof(Task));
@@ -430,8 +477,8 @@ void mt_add_tasks(int num_tasks, AsyncFun pFun, void *taskData, gpointer linked)
 		pt->pLinkedTask = linked;
 		MT_AddTask(pt, FALSE);
 	}
-	Mutex_Release(td.queueLock);
 	multi_debug("add many release: lock");
+	Mutex_Release(td.queueLock);
 }
 
 static gboolean WaitForAllTasks(int time)
@@ -454,16 +501,13 @@ int MT_WaitForTasks(void (*pCallback)(void), int callbackTime)
     int waits = 0;
 	int polltime = callbackLoops ? UI_UPDATETIME : callbackTime;
 
-    multi_debug("wait for tasks: lock(1)");
-    Mutex_Lock(td.queueLock);
+	/* Set total tasks to wait for */
     td.totalTasks = td.addedTasks;
-    Mutex_Release(td.queueLock);
-    multi_debug("wait for tasks: release(1)");
 #if USE_GTK
 	GTKSuspendInput();
 #endif
 
-	multi_debug("while waiting for all tasks");
+	multi_debug("Waiting for all tasks");
     while (!WaitForAllTasks(polltime))
     {
         waits++;
@@ -478,7 +522,7 @@ int MT_WaitForTasks(void (*pCallback)(void), int callbackTime)
 			ProcessGtkEvents();
 #endif
 	}
-	multi_debug("done while waiting for all tasks");
+	multi_debug("Done waiting for all tasks");
 
 	td.doneTasks = td.addedTasks = 0;
 	td.totalTasks = -1;
@@ -514,7 +558,7 @@ extern int MT_GetThreadID(void)
 
 extern void MT_Exclusive(void)
 {
-	Mutex_Lock(td.multiLock);
+	Mutex_Lock(td.multiLock, "Exclusive lock");
 }
 
 extern void MT_Release(void)
@@ -577,6 +621,39 @@ extern double MT_SyncEnd(void)
 		return 0;
 	}
 }
+
+#ifdef DEBUG_MULTITHREADED
+void multi_debug(const char *str, ...)
+{
+	int id;
+	va_list vl;
+	char tn[4];
+	char buf[1024];
+	/* Sync output so order makes some sense */
+#ifdef GLIB_THREADS
+	g_mutex_lock(td.multiLock);
+#else
+	WaitForSingleObject(td.multiLock, INFINITE);
+#endif
+
+	va_start(vl, str);
+	vsprintf(buf, str, vl);
+
+	id = MT_GetThreadID();
+	if (id == 0 && GetCurrentThreadId() == mainThreadID)
+		strcpy(tn, "MT");
+	else
+		sprintf(tn, "T%d", id + 1);
+
+	printf("%s: %s\n", tn, buf);
+
+#ifdef GLIB_THREADS
+	g_mutex_unlock(td.multiLock);
+#else
+	ReleaseMutex(td.multiLock);
+#endif
+}
+#endif
 
 #else
 int asyncRet;
