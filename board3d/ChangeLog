@@ -1,3 +1,6 @@
+Sun Dec 28 21:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+	* misc3d.c : Remove old board logo and add a small delay after close board animation
+
 Fri Mar 07 16:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 	* drawboard3d.c : Move cube to side of board
 
