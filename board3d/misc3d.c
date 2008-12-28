@@ -2275,7 +2275,7 @@ void CloseBoard3d(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
 
 	/* Random logo */
 	SetupSimpleMat(&bd3d->logoMat, 1.f, 1.f, 1.f);
-	SetTexture(bd3d, &bd3d->logoMat, TEXTURE_PATH"logo2.bmp");
+	SetTexture(bd3d, &bd3d->logoMat, TEXTURE_PATH"logo.png");
 
 	animStartTime = get_time();
 	bd3d->perOpen = 0;
