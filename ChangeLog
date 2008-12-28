@@ -1,3 +1,8 @@
+Mon Dec 29 00:08:28 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* util.c: fix CreateTempFile to something that hopefully works
+	universally
+
 Thu Dec 28 22:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtktoolbar.c: Fix size of edit button
