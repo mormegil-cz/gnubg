@@ -280,7 +280,7 @@ static GtkWidget* ToolbarAddWidget(GtkToolbar *pwToolbar, GtkWidget *pWidget, co
 
 	gtk_toolbar_insert(GTK_TOOLBAR(pwToolbar), ti, -1);
 
-	return GTK_WIDGET(pWidget);
+	return GTK_WIDGET(ti);
 }
 
 static void ToolbarAddSeparator(GtkToolbar *pwToolbar)
@@ -291,7 +291,7 @@ static void ToolbarAddSeparator(GtkToolbar *pwToolbar)
 
 extern GtkWidget *ToolbarNew(void)
 {
-	GtkWidget *vbox_toolbar;
+	GtkWidget *vbox_toolbar, *ti;
 	GtkWidget *pwToolbar, *pwvbox;
 
 	toolbarwidget *ptw;
@@ -361,7 +361,8 @@ extern GtkWidget *ToolbarNew(void)
 	gtk_container_add(GTK_CONTAINER(pwvbox), gtk_label_new(_("Edit")));
 	gtk_container_add(GTK_CONTAINER(ptw->pwEdit), pwvbox);
 	g_signal_connect(G_OBJECT(ptw->pwEdit), "toggled", G_CALLBACK(ToolbarToggleEdit), NULL);
-	ToolbarAddWidget(GTK_TOOLBAR(pwToolbar), ptw->pwEdit, _("Toggle Edit Mode"));
+	ti = ToolbarAddWidget(GTK_TOOLBAR(pwToolbar), ptw->pwEdit, _("Toggle Edit Mode"));
+	gtk_tool_item_set_homogeneous(GTK_TOOL_ITEM(ti), TRUE);
 
 	/* direction of play */
 	ptw->pwButtonClockwise = toggle_button_from_images ( 

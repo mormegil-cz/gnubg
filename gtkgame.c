@@ -3502,8 +3502,9 @@ static void CreateMainWindow(void)
 
     gtk_item_factory_set_translate_func ( pif, GTKTranslate, NULL, NULL );
 
-    gtk_item_factory_create_items( pif, sizeof( aife ) / sizeof( aife[ 0 ] ),
-				   aife, NULL );
+    gtk_item_factory_create_items( pif, sizeof( aife ) / sizeof( aife[ 0 ] ), aife, NULL );
+	/* Tick default toolbar style */
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget_by_action(pif, nToolbarStyle + TOOLBAR_ACTION_OFFSET)), TRUE);
     gtk_window_add_accel_group( GTK_WINDOW( pwMain ), pagMain );
 
     gtk_box_pack_start( GTK_BOX( pwVbox ),
