@@ -1,3 +1,9 @@
+Sun Dec 28 01:18:17 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* eval.c: fix a bug in eval lookup in hypergammon db. iPos was (by
+	accident) made an unsigned short int in november 2004, but should be
+	at least an int.
+
 Fri Dec 26 00:33:04 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtkprefs.c, gtktoolbar.c: we don't use the old tooltip api anymore

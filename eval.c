@@ -5699,7 +5699,7 @@ EvaluatePositionCubeful4( NNState *nnStates, const TanBoard anBoard,
          pc == CLASS_HYPERGAMMON3 ) {
 
       bearoffcontext *pbc = apbcHyper[ pc - CLASS_HYPERGAMMON1 ];
-      unsigned short int nUs, nThem, iPos;
+      unsigned int nUs, nThem, iPos;
       int n;
 
       if (!pbc)
