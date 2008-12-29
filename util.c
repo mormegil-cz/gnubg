@@ -24,11 +24,6 @@
 #include <glib.h>
 #include <stdlib.h>
 #include <string.h>
-#include <glib/gstdio.h>
-
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 #ifdef WIN32
 #include <windows.h>
@@ -98,19 +93,20 @@ extern FILE *GetTemporaryFile(const char *nameTemplate, char **retName)
 {
 	FILE *pf;
 	int tmpd = g_file_open_tmp(nameTemplate, retName, NULL);
-
 	if (tmpd < 0) {
 		PrintError("creating temporary file");
 		return NULL;
 	}
-	close(tmpd);
-
-	pf = g_fopen(*retName, "wb+");
+#ifndef WIN32
+	pf = fdopen(tmpd, "w+");
+#else
+	pf = fopen(*retName, "wb+");
+#endif
 
 	if (pf == NULL) {
 		g_free(retName);
 		PrintError("opening temporary file");
-	}
-
-	return pf;
+		return NULL;
+	} else
+		return pf;
 }
