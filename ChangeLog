@@ -1,9 +1,18 @@
+
 Tue Dec 30 00:36:27 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c, gtkboard.c, gtkgame.c, play.c: add "resign -1" as a command
 	to guess the resign level and add appropriately (i.e. resign if the
 	error is below 0.05). Use it to autoresign or pop the resign dialog in
 	the gui.
+
+Mon Dec 29 23:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c, gnub.c: Fix rare crash on exit.
+
+Mon Dec 29 23:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* util.c: Hack GetTemporaryFile() so it will work properly.
 
 Mon Dec 29 22:06:40 CET 2008 Christian Anthon <anthon@kiku.dk>
 
