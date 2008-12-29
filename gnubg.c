@@ -2374,6 +2374,10 @@ Shutdown( void ) {
   FreeMatch();
   ClearMatch();
 
+#if USE_GTK
+  MoveListDestroy();
+#endif
+
 #if USE_MULTITHREAD
   MT_Close();
 #endif
