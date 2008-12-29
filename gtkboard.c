@@ -3174,7 +3174,7 @@ extern gint game_set( Board *board, TanBoard points, int roll,
 	       opp_score, die0, die1, ms.nCube, ms.fCubeOwner, ms.fDoubled,
 	       ms.fTurn, ms.fCrawford, nchequers );
 
-    board_set( board, board_str, -bd->turn * ms.fResigned, ms.fCubeUse );
+    board_set( board, board_str, ms.fResigned ==-1 ? 0 : -bd->turn * ms.fResigned, ms.fCubeUse );
 
     /* FIXME update names, score, match length */
     if( bd->rd->nSize <= 0 )

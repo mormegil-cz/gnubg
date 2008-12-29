@@ -1564,7 +1564,7 @@ extern void ShowBoard( void )
 			     ms.nMatchTo );
 	    }
 	}
-	if( ms.fResigned )
+	if( ms.fResigned > 0 )
 	    /* FIXME it's not necessarily the player on roll that resigned */
 	    sprintf( strchr( sz, 0 ), ", %s %s", _("resigns"),
 		     gettext ( aszGameResult[ ms.fResigned - 1 ] ) );

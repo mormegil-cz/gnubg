@@ -1,3 +1,10 @@
+Tue Dec 30 00:36:27 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c, gtkboard.c, gtkgame.c, play.c: add "resign -1" as a command
+	to guess the resign level and add appropriately (i.e. resign if the
+	error is below 0.05). Use it to autoresign or pop the resign dialog in
+	the gui.
+
 Mon Dec 29 22:06:40 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* common.h, configure.in, lib/neuralnet.c, lib/neuralnetsse.c: move

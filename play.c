@@ -840,6 +840,59 @@ static void ShowAutoMove( const TanBoard anBoard, int anMove[ 8 ] ) {
 		 FormatMove( sz, anBoard, anMove ) );
 }
 
+static void get_eq_before_resign(cubeinfo *pci, decisionData *pdd)
+{
+#if defined (REDUCTION_CODE)
+	const evalcontext ecResign = { FALSE, 2, 0, TRUE, 0.0 };
+#else
+	const evalcontext ecResign = { FALSE, 2, FALSE, TRUE, 0.0 };
+#endif
+
+	pdd->pboard = msBoard();
+	pdd->pci = pci;
+	pdd->pec = &ecResign;
+
+	if (ms.anDice[0] > 0) {
+		float t;
+		/* Opponent has rolled the dice and then resigned. We want to find out if the resignation is OK after
+		   the roll */
+		RunAsyncProcess((AsyncFun) asyncEvalRoll, pdd, _("Considering resignation..."));
+		/* Swap the equities as evaluation is for other player */
+		pdd->aarOutput[0][OUTPUT_WIN] = 1 - pdd->aarOutput[0][OUTPUT_WIN];
+		t = pdd->aarOutput[0][OUTPUT_WINGAMMON];
+		pdd->aarOutput[0][OUTPUT_WINGAMMON] = pdd->aarOutput[0][OUTPUT_LOSEGAMMON];
+		pdd->aarOutput[0][OUTPUT_LOSEGAMMON] = t;
+		t = pdd->aarOutput[0][OUTPUT_WINBACKGAMMON];
+		pdd->aarOutput[0][OUTPUT_WINBACKGAMMON] = pdd->aarOutput[0][OUTPUT_LOSEBACKGAMMON];
+		pdd->aarOutput[0][OUTPUT_LOSEBACKGAMMON] = t;
+	} else {
+		RunAsyncProcess((AsyncFun) asyncMoveDecisionE, pdd, _("Considering resignation..."));
+	}
+}
+
+static int check_resigns(cubeinfo * pci, int resigned)
+{
+	float rEqBefore, rEqAfter;
+	const float max_cost = 0.05;
+	const float max_gain = 1e-6;
+	decisionData dd;
+
+	get_eq_before_resign(pci, &dd);
+	do
+	{
+		getResignEquities(dd.aarOutput[0], pci, resigned, &rEqBefore, &rEqAfter);
+		if (rEqBefore - rEqAfter > max_cost)
+		{
+			resigned=4;
+			break;
+		}
+		else if (rEqAfter - rEqBefore < max_gain )
+			break;
+	}
+	while (resigned++ < 3);
+	return resigned == 4 ? -1 : resigned;
+}
+
 static int ComputerTurn( void ) {
 
   moverecord *pmr;
@@ -858,53 +911,36 @@ static int ComputerTurn( void ) {
 
   switch( ap[ ms.fTurn ].pt ) {
   case PLAYER_GNU:
-    if( ms.fResigned ) {
+	  if( ms.fResigned ) {
+		  int resign;
+		  if (ms.fResigned ==-1)
+			  resign = check_resigns(&ci, 1.0);
+		  else
+		  {
+			  float rEqBefore, rEqAfter;
+			  const float max_gain = 1e-6;
+			  decisionData dd;
+			  get_eq_before_resign(&ci, &dd);
+			  getResignEquities(dd.aarOutput[0], &ci, ms.fResigned, &rEqBefore, &rEqAfter);
+			  if (rEqAfter - rEqBefore < max_gain )
+				  resign = ms.fResigned;
+			  else
+				  resign = -1;
+		  }
 
-      float rEqBefore, rEqAfter;
-      const float epsilon = 1.0e-6f;
-	  decisionData dd;
+		  fComputerDecision = TRUE;
+		  if (resign > 0)
+		  {
+			  ms.fResigned = resign;
+			  CommandAgree(NULL);
+		  }
+		  else
+		  {
+			  CommandDecline(NULL);
+		  }
 
-#if defined (REDUCTION_CODE)
-      const evalcontext ecResign = { FALSE, 2, 0, TRUE, 0.0 };
-#else
-      const evalcontext ecResign = { FALSE, 2, FALSE, TRUE, 0.0 };
-#endif
-     
-	  dd.pboard = msBoard();
-	  dd.pci = &ci;
-	  dd.pec = &ecResign;
-	  
-      if (ms.anDice[0] > 0)
-	  {
-          float t;
-          /* Opponent has rolled the dice and then resigned. We
-             want to find out if the resignation is OK after the roll */
-		  RunAsyncProcess((AsyncFun)asyncEvalRoll, &dd, _("Considering resignation..."));
-          /* Swap the equities as evaluation is for other player */
-          dd.aarOutput[0][OUTPUT_WIN] = 1 - dd.aarOutput[0][OUTPUT_WIN];
-          t = dd.aarOutput[0][OUTPUT_WINGAMMON];
-          dd.aarOutput[0][OUTPUT_WINGAMMON] = dd.aarOutput[0][OUTPUT_LOSEGAMMON];
-          dd.aarOutput[0][OUTPUT_LOSEGAMMON] = t;
-          t = dd.aarOutput[0][OUTPUT_WINBACKGAMMON];
-          dd.aarOutput[0][OUTPUT_WINBACKGAMMON] = dd.aarOutput[0][OUTPUT_LOSEBACKGAMMON];
-          dd.aarOutput[0][OUTPUT_LOSEBACKGAMMON] = t;
-      }
-	  else
-	  { 
-		RunAsyncProcess((AsyncFun)asyncMoveDecisionE, &dd, _("Considering resignation..."));
-      }
-
-      getResignEquities ( dd.aarOutput[0], &ci, ms.fResigned, &rEqBefore, &rEqAfter );
-
-      fComputerDecision = TRUE;
-
-      if( ( rEqAfter - epsilon ) < rEqBefore )
-        CommandAgree( NULL );
-      else
-        CommandDecline( NULL );
-      
-      fComputerDecision = FALSE;
-      return 0;
+		  fComputerDecision = FALSE;
+		  return 0;
     }
 	else if( ms.fDoubled )
 	{
@@ -2137,8 +2173,14 @@ extern void CommandDecline( char *sz ) {
     }
 
     if( fDisplay )
-	outputf( _("%s declines the %s.\n"), ap[ ms.fTurn ].szName,
-		gettext ( aszGameResult[ ms.fResigned - 1 ] ) );
+    {
+	    {
+		    if (ms.fResigned > 0)
+			    outputf( _("%s declines the %s.\n"), ap[ ms.fTurn ].szName, gettext ( aszGameResult[ ms.fResigned - 1 ] ) );
+		    else
+			    outputf(_("%s declines the resignation\n"), ap[ ms.fTurn ].szName) ;
+	    }
+    }
 
     ms.fResignationDeclined = ms.fResigned;
     ms.fResigned = FALSE;
@@ -3812,7 +3854,7 @@ extern void CommandResign( char *sz ) {
     } else
 	ms.fResigned = 1;
 
-    if( ms.fResigned < 1 || ms.fResigned > 3 ) {
+    if( ms.fResigned != -1 && (ms.fResigned < 1 || ms.fResigned > 3) ) {
 	ms.fResigned = 0;
 
 	outputf( _("Unknown keyword `%s' (see `help resign').\n"), pch );
@@ -3820,7 +3862,7 @@ extern void CommandResign( char *sz ) {
 	return;
     }
 
-    if( ms.fResigned <= ms.fResignationDeclined ) {
+    if( ms.fResigned >= 0 && ms.fResigned <= ms.fResignationDeclined ) {
 	ms.fResigned = 0;
 	
 	outputf( _("%s has already declined your offer of a %s.\n"),
@@ -3831,8 +3873,13 @@ extern void CommandResign( char *sz ) {
     }
     
     if( fDisplay )
-	outputf( _("%s offers to resign a %s.\n"), ap[ ms.fTurn ].szName,
-		gettext ( aszGameResult[ ms.fResigned - 1 ] ) );
+    {
+	    if (ms.fResigned > 0 )
+		    outputf( _("%s offers to resign a %s.\n"), ap[ ms.fTurn ].szName, gettext ( aszGameResult[ ms.fResigned - 1 ] ) );
+	    else
+		    outputf( _("%s offers to resign.\n"), ap[ ms.fTurn ].szName);
+    }
+
 
     ms.fTurn = !ms.fTurn;
 

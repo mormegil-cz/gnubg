@@ -7572,37 +7572,41 @@ static void CallbackResign(GtkWidget *pw, gpointer data)
     return;
 }
     
-extern void GTKResign( gpointer p, guint n, GtkWidget *pw )
+extern void GTKResign(gpointer p, guint n, GtkWidget * pw)
 {
-    GtkWidget *pwDialog, *pwVbox, *pwHbox, *pwButtons;
-    int i;
-    char **apXPM[3];
-    const char *asz[3] = { N_("Resign normal"),
-		 N_("Resign gammon"),
-		 N_("Resign backgammon") };
-		 
-#include "xpm/resigns.xpm"
-    apXPM[0] = resign_n_xpm;
-    apXPM[1] = resign_g_xpm;
-    apXPM[2] = resign_bg_xpm;
+	GtkWidget *pwDialog, *pwVbox, *pwHbox, *pwButtons;
+	int i;
+	char **apXPM[3];
+	const char *asz[3] = { N_("Resign normal"),
+		N_("Resign gammon"),
+		N_("Resign backgammon")
+	};
 
+#include "xpm/resigns.xpm"
+	apXPM[0] = resign_n_xpm;
+	apXPM[1] = resign_g_xpm;
+	apXPM[2] = resign_bg_xpm;
+
+	UserCommand("resign -1");
+	while (nNextTurn)
+		NextTurnNotify(NULL);
+	if (!ms.fResignationDeclined)
+		return;
 	pwDialog = GTKCreateDialog(_("Resign"), DT_QUESTION, NULL, DIALOG_FLAG_MODAL | DIALOG_FLAG_NOOK, NULL, NULL);
 
-    pwVbox = gtk_vbox_new(TRUE, 5);
+	pwVbox = gtk_vbox_new(TRUE, 5);
 
-    for (i = 0; i < 3 ; i++){
-	pwButtons = gtk_button_new();
-	pwHbox = gtk_hbox_new(FALSE, 0);
-	gtk_container_add(GTK_CONTAINER(pwButtons), pwHbox); 
-    	gtk_box_pack_start(GTK_BOX(pwHbox), 
-		image_from_xpm_d(apXPM[i], pwButtons), FALSE,FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pwHbox), gtk_label_new(_(asz[i])), TRUE, TRUE, 10);
-	gtk_container_add(GTK_CONTAINER(pwVbox), pwButtons);
-	g_signal_connect(G_OBJECT(pwButtons), "clicked",
-		G_CALLBACK( CallbackResign ), GINT_TO_POINTER(i) );
-    }
+	for (i = 0; i < 3; i++) {
+		pwButtons = gtk_button_new();
+		pwHbox = gtk_hbox_new(FALSE, 0);
+		gtk_container_add(GTK_CONTAINER(pwButtons), pwHbox);
+		gtk_box_pack_start(GTK_BOX(pwHbox), image_from_xpm_d(apXPM[i], pwButtons), FALSE, FALSE, 0);
+		gtk_box_pack_start(GTK_BOX(pwHbox), gtk_label_new(_(asz[i])), TRUE, TRUE, 10);
+		gtk_container_add(GTK_CONTAINER(pwVbox), pwButtons);
+		g_signal_connect(G_OBJECT(pwButtons), "clicked", G_CALLBACK(CallbackResign), GINT_TO_POINTER(i));
+	}
 
-    gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), pwVbox);
+	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), pwVbox);
 
 	GTKRunDialog(pwDialog);
 }
