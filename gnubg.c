@@ -4925,7 +4925,7 @@ int main(int argc, char *argv[])
 		 N_("Do not read .gnubgrc and .gnubgautorc commands"),
 		 NULL},
 		{"splash", 'S', 0, G_OPTION_ARG_NONE, &fSplash,
-		 N_("Don't show gtk splash screen"), NULL},
+		 N_("Show gtk splash screen"), NULL},
 		{"tty", 't', 0, G_OPTION_ARG_NONE, &fNoX,
 		 N_("Start the command line instead of using the graphical interface"), NULL},
 		{"version", 'v', 0, G_OPTION_ARG_NONE, &show_version,
@@ -5011,7 +5011,7 @@ int main(int argc, char *argv[])
 	if (fX) {
 		fTTY = !fNoTTY && isatty(STDIN_FILENO) && isatty(STDOUT_FILENO);
 		fInteractive = fShowProgress = TRUE;
-		if (!fSplash)
+		if (fSplash)
 			pwSplash = CreateSplash();
 	} else
 #endif
