@@ -207,14 +207,14 @@ dnl
 dnl Checks for declarations
 dnl
 
-AC_CHECK_DECLS(signbit,, AC_DEFINE([signbit(x)], [((x) < 0.0)], [define signbit]), [#include <math.h>])
-AC_CHECK_DECLS(lrint,, AC_DEFINE([lrint(x)], [((long) ((x)+0.5))], [define lrint]), [#include <math.h>])
 AC_CHECK_DECLS(acosf,, AC_DEFINE(acosf, acos, [set acosf to acos if undefined]), [#include <math.h>])
 AC_CHECK_DECLS(asinf,, AC_DEFINE(asinf, asin, [set asinf to asin if undefined]), [#include <math.h>])
 AC_CHECK_DECLS(atanf,, AC_DEFINE(atanf, atan, [set atanf to atan if undefined]), [#include <math.h>])
 AC_CHECK_DECLS(cosf,, AC_DEFINE(cosf, cos, [set cosf to cos if undefined]), [#include <math.h>])
 AC_CHECK_DECLS(sinf,, AC_DEFINE(sinf, sin, [set sinf to sin if undefined]), [#include <math.h>])
 AC_CHECK_DECLS(tanf,, AC_DEFINE(tanf, tan, [set tanf to tan if undefined]), [#include <math.h>])
+AC_CHECK_DECLS(signbit, , , [#include <math.h>])
+AC_CHECK_DECLS(lrint, , , [#include <math.h>])
 
 dnl *******************
 dnl optional components

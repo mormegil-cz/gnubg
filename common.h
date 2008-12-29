@@ -62,4 +62,12 @@ typedef RETSIGTYPE(*psighandler) (int);
 #define strcasecmp strcasecmp_error_use_StrCaseCmp
 #define strncasecmp strncasecmp_error_use_StrNCaseCmp
 
+#ifndef WIN32
+#if defined(HAVE_SIGNBIT) && !HAVE_SIGNBIT
+#define signbit(x) ((x) < 0.0)
+#endif
+#if defined(HAVE_LRINT) && !HAVE_LRINT
+#define lrint(x) ((long) ((x)+0.5))
+#endif
+#endif
 #endif

@@ -21,6 +21,7 @@
  */
 
 #include "config.h"
+#include "common.h"
 
 #if USE_SSE_VECTORIZE
 

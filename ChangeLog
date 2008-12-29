@@ -1,3 +1,11 @@
+Mon Dec 29 22:06:40 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* common.h, configure.in, lib/neuralnet.c, lib/neuralnetsse.c: move
+	replacement declarations of signbit and lrint to common.h
+
+Mon Dec 29 22:03:44 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* common.h, configure.in: 
 Mon Dec 29 21:11:31 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* po/es.po: updated spanish translation
