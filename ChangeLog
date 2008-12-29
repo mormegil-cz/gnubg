@@ -1,3 +1,7 @@
+Mon Dec 29 11:36:28 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* play.c: make end game work without gtk
+
 Mon Dec 29 00:08:28 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* util.c: fix CreateTempFile to something that hopefully works

@@ -3446,14 +3446,22 @@ extern void CommandEndGame(char *sz)
 	fEndGame = TRUE;
 	outputnew();
 
-#if USE_GTK
 	do
 	{
+#if USE_GTK
 		UserCommand("play");
 		while (nNextTurn && automaticTask)
 			NextTurnNotify(NULL);
-	} while (ms.gs == GAME_PLAYING && automaticTask);
+#else
+		{
+		char *line = g_strdup("play");
+		HandleCommand(line, acTop);
+		g_free(line);
+		while (fNextTurn)
+			NextTurn(TRUE);
+		}
 #endif
+	} while (ms.gs == GAME_PLAYING && automaticTask);
 
 	outputx();
 	ap[0].pt = pt_store[0];
