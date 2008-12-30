@@ -2395,6 +2395,14 @@ static void Copy_RGB_to_RGBA( unsigned char *puchDest, int nDestStride,
 }
 
 #if USE_GTK
+double Higlight(double c)
+{
+	if (c < .75)
+		return c + .25;
+	else
+		return c - .25;
+}
+
 static void RenderArrow(unsigned char* puch, double arColour[4], int nSize, int left)
 {
 #if HAVE_CAIRO
@@ -2405,7 +2413,7 @@ static void RenderArrow(unsigned char* puch, double arColour[4], int nSize, int 
 	cairo_t* cr = cairo_create(surface);
 
 #define AR_LINE_WIDTH 0.06
-#define AR_WIDTH 0.4
+#define AR_WIDTH 0.35
 #define AR_HEAD_SIZE 0.35
 
 	cairo_scale(cr, nSize * ARROW_WIDTH, nSize * ARROW_HEIGHT);
@@ -2437,7 +2445,7 @@ static void RenderArrow(unsigned char* puch, double arColour[4], int nSize, int 
 
 	cairo_set_source_rgba (cr, arColour[2], arColour[1], arColour[0], 1);
 	cairo_fill_preserve (cr);
-	cairo_set_source_rgba (cr, 1, 1, 1, 1);
+	cairo_set_source_rgba (cr, Higlight(arColour[2]), Higlight(arColour[1]), Higlight(arColour[0]), 1);
 	cairo_stroke(cr);
 
 	cairo_destroy (cr);
