@@ -1030,3 +1030,4 @@ extern void ProcessGtkEvents(void);
 extern void CallbackProgress( void );
 #endif
 #endif
+extern void SetRNG( rng *prng, void **rngctx, rng rngNew, char *szSeed );

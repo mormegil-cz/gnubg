@@ -137,7 +137,7 @@ SetSeed ( const rng rngx, void *rngctx, char *sz ) {
                _("Seed initialised by system clock.") );
 }
 
-static void SetRNG( rng *prng, void **rngctx, rng rngNew, char *szSeed ) {
+extern void SetRNG( rng *prng, void **rngctx, rng rngNew, char *szSeed ) {
 
     if( *prng == rngNew && !*szSeed ) {
 	outputf( _("You are already using the %s generator.\n"),
