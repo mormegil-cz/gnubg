@@ -873,8 +873,8 @@ static void get_eq_before_resign(cubeinfo *pci, decisionData *pdd)
 static int check_resigns(cubeinfo * pci, int resigned)
 {
 	float rEqBefore, rEqAfter;
-	const float max_cost = 0.05;
-	const float max_gain = 1e-6;
+	const float max_cost = 0.05f;
+	const float max_gain = 1e-6f;
 	decisionData dd;
 
 	get_eq_before_resign(pci, &dd);
@@ -914,11 +914,11 @@ static int ComputerTurn( void ) {
 	  if( ms.fResigned ) {
 		  int resign;
 		  if (ms.fResigned ==-1)
-			  resign = check_resigns(&ci, 1.0);
+			  resign = check_resigns(&ci, 1);
 		  else
 		  {
 			  float rEqBefore, rEqAfter;
-			  const float max_gain = 1e-6;
+			  const float max_gain = 1e-6f;
 			  decisionData dd;
 			  get_eq_before_resign(&ci, &dd);
 			  getResignEquities(dd.aarOutput[0], &ci, ms.fResigned, &rEqBefore, &rEqAfter);
