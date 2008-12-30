@@ -7591,11 +7591,15 @@ extern void GTKResign(gpointer p, guint n, GtkWidget * pw)
 	apXPM[1] = resign_g_xpm;
 	apXPM[2] = resign_bg_xpm;
 
-	UserCommand("resign -1");
-	while (nNextTurn)
-		NextTurnNotify(NULL);
-	if (!ms.fResignationDeclined)
-		return;
+	if (ap[ !ms.fTurn ].pt != PLAYER_HUMAN && check_resigns(NULL) != -1
+		&& GTKShowWarning(WARN_RESIGN, NULL))
+	{	/* Automatically resign for computer */
+		UserCommand("resign -1");
+		while (nNextTurn)
+			NextTurnNotify(NULL);
+		if (!ms.fResignationDeclined)
+			return;
+	}
 	pwDialog = GTKCreateDialog(_("Resign"), DT_QUESTION, NULL, DIALOG_FLAG_MODAL | DIALOG_FLAG_NOOK, NULL, NULL);
 
 	pwVbox = gtk_vbox_new(TRUE, 5);
