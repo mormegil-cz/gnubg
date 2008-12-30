@@ -66,6 +66,10 @@ Warning warnings[WARN_NUM_WARNINGS] =
 	{
 		N_("Play to the end of the game automatically?"),
 		"endgame", TRUE, TRUE
+	},
+	{
+		N_("Automatically perform correct resignation?"),
+		"resign", TRUE, TRUE
 	}
 };
 

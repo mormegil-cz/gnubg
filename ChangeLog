@@ -1,3 +1,6 @@
+Tue Dec 30 11:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c, play.c: Add warning for simplified resign action.
 
 Tue Dec 30 00:36:27 CET 2008 Christian Anthon <anthon@kiku.dk>
 
