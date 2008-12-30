@@ -91,6 +91,9 @@ FILE *fdopen(int, const char *);
 
 /* Temporary version of g_file_open_tmp() as glib version doesn't work
    although this code is copied from glib... */
+#ifndef WIN32
+#define TEMP_g_file_open_tmp g_file_open_tmp
+#else
 #include <fcntl.h>
 #include <errno.h>
 
@@ -157,6 +160,7 @@ int TEMP_g_file_open_tmp (const char *tmpl, char      **name_used, GError    **e
   return TEMP_g_mkstemp(*name_used);
 }
 /* End of temporary copy of glib code, remove when glib version works on windows... */
+#endif
 
 extern FILE *GetTemporaryFile(const char *nameTemplate, char **retName)
 {
