@@ -252,11 +252,11 @@ ImportType lastOpenType;
 GtkWidget *openButton, *selFileType;
 int autoOpen;
 
-static void update_preview_cb (GtkFileChooser *file_chooser, void *notused)
+static void selection_changed_cb (GtkFileChooser *file_chooser, void *notused)
 {
 	const char *label;
 	char *buf;
-	char *filename = gtk_file_chooser_get_preview_filename (file_chooser);
+	char *filename = gtk_file_chooser_get_filename(file_chooser);
 	FilePreviewData *fpd = ReadFilePreview(filename);
 	int openable = FALSE;
 	if (!fpd)
@@ -307,7 +307,7 @@ static void add_import_filters (GtkFileChooser *fc)
 static void OpenTypeChanged(GtkComboBox *widget, gpointer fc)
 {
 	autoOpen = (gtk_combo_box_get_active(widget) == 0);
-	update_preview_cb(fc, NULL);
+	selection_changed_cb(fc, NULL);
 }
 
 static GtkWidget* import_types_combo(void)
@@ -378,7 +378,8 @@ extern void GTKOpen(gpointer p, guint n, GtkWidget * pw)
 	gtk_box_pack_start(GTK_BOX(box2), selFileType, FALSE, FALSE, 0);
 	gtk_widget_show_all(box);
 
-	g_signal_connect(GTK_FILE_CHOOSER(fc), "update-preview", G_CALLBACK(update_preview_cb), NULL);
+	g_signal_connect(GTK_FILE_CHOOSER(fc), "selection-changed", G_CALLBACK(selection_changed_cb), NULL);
+
 	gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(fc), box);
 
 	add_import_filters(GTK_FILE_CHOOSER(fc));
