@@ -775,6 +775,8 @@ static void SelectGame(GtkWidget * pw, void *p)
 	return;
 
     i = gtk_combo_box_get_active(GTK_COMBO_BOX(pw));
+	if (i == -1)
+		return;
     for (pl = lMatch.plNext; i && pl->plNext->p; i--, pl = pl->plNext);
 
     if (pl->p == plGame)
