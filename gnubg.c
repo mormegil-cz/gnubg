@@ -3289,7 +3289,7 @@ extern void CommandSaveSettings( char *szParam )
 
     fprintf( pf, "set cheat enable %s\n", fCheat ? "on" : "off" );
     for ( i = 0; i < 2; ++i )
-      fprintf( pf, "set cheat player %d roll %d\n", i, afCheatRoll[ i ] );
+      fprintf( pf, "set cheat player %d roll %d\n", i, afCheatRoll[ i ] + 1);
                
 
 #if USE_GTK
