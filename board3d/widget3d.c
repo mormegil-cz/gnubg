@@ -118,7 +118,7 @@ static gboolean expose_event_3d(GtkWidget *widget, GdkEventExpose *exposeEvent, 
 
 	if (bd->bd3d->shadowsOutofDate)
 	{	/* Update shadow positions */
-		bd->bd3d->shadowsOutofDate = TRUE;
+		bd->bd3d->shadowsOutofDate = FALSE;
 		updateOccPos(bd);
 	}
 
