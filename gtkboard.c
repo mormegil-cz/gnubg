@@ -111,6 +111,8 @@ extern GtkWidget *board_new(renderdata* prd)
 
 	InitialPos(bd);
 
+	bd->move_list.cMoves = 0;
+
 	return board;
 }
 
