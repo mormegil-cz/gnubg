@@ -1,3 +1,8 @@
+Sat Jan  3 23:53:54 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, gtkgame.c, gtkgame.h, play.c, render.c, set.c: Change
+	confusing use of types in SetRNG, and other minor stuff
+
 Tue Dec 30 18:12:45 2008 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* render.c: Minor adjustment to 2d arrow size and outline colour.

@@ -97,7 +97,7 @@ static rolloutcontext *prcSet;
 static evalsetup *pesSet;
 
 static rng *rngSet;
-static void *rngctxSet;
+static rngcontext *rngctxSet;
 
 movefilter *aamfSet[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
 
@@ -137,7 +137,7 @@ SetSeed ( const rng rngx, void *rngctx, char *sz ) {
                _("Seed initialised by system clock.") );
 }
 
-extern void SetRNG( rng *prng, void **rngctx, rng rngNew, char *szSeed ) {
+extern void SetRNG( rng *prng, rngcontext *rngctx, rng rngNew, char *szSeed ) {
 
     if( *prng == rngNew && !*szSeed ) {
 	outputf( _("You are already using the %s generator.\n"),
@@ -147,7 +147,7 @@ extern void SetRNG( rng *prng, void **rngctx, rng rngNew, char *szSeed ) {
 
     /* Dispose internal paremeters for RNG */
 
-    CloseRNG( *prng, *rngctx );
+    CloseRNG( *prng, rngctx );
     
     switch( rngNew ) {
     case RNG_BBS:
@@ -163,7 +163,7 @@ extern void SetRNG( rng *prng, void **rngctx, rng rngNew, char *szSeed ) {
 												" \t\n\r\v\f" ) ) ) {
 			NextToken( &szSeed ); /* skip "modulus" keyword */
 			if( InitRNGBBSModulus( NextToken( &szSeed ), 
-                                               *rngctx ) ) {
+                                               rngctx ) ) {
 			  outputf( _("You must specify a valid modulus (see `help "
 						 "set rng bbs').") );
 			  return;
@@ -174,7 +174,7 @@ extern void SetRNG( rng *prng, void **rngctx, rng rngNew, char *szSeed ) {
 			NextToken( &szSeed ); /* skip "modulus" keyword */
 			sz = NextToken( &szSeed );
 			sz1 = NextToken( &szSeed );
-			if( InitRNGBBSFactors( sz, sz1, *rngctx ) ) {
+			if( InitRNGBBSFactors( sz, sz1, rngctx ) ) {
 			  outputf( _("You must specify two valid factors (see `help "
 						 "set rng bbs').") );
 			  return;
@@ -188,7 +188,7 @@ extern void SetRNG( rng *prng, void **rngctx, rng rngNew, char *szSeed ) {
 			 148028650191182616877187862194899201391 and
 			 315270837425234199477225845240496832591. */
 		  InitRNGBBSModulus( "46669116508701198206463178178218347698370"
-							 "262771368237383789001446050921334081", *rngctx );
+							 "262771368237383789001446050921334081", rngctx );
 		break;
 	  }
 #else
@@ -232,7 +232,7 @@ extern void SetRNG( rng *prng, void **rngctx, rng rngNew, char *szSeed ) {
           return;
         }
 
-        if ( !OpenDiceFile( *rngctx, sz )) {
+        if ( !OpenDiceFile( rngctx, sz )) {
           outputf( _("File %s does not exist or is not readable"), sz );
           return;
         }
@@ -256,7 +256,7 @@ extern void SetRNG( rng *prng, void **rngctx, rng rngNew, char *szSeed ) {
       break;
 
     default:
-      SetSeed( *prng, *rngctx, szSeed );
+      SetSeed( *prng, rngctx, szSeed );
       break;
     }
 
@@ -1582,7 +1582,7 @@ extern void CommandSetRecord( char *sz ) {
 extern void CommandSetRNG ( char *sz ) {
 
   rngSet = &rngCurrent;
-  rngctxSet = &rngctxCurrent;
+  rngctxSet = rngctxCurrent;
   HandleCommand ( sz, acSetRNG );
 
 }
@@ -1848,7 +1848,7 @@ extern void
 CommandSetRolloutRNG ( char *sz ) {
 
   rngSet = &prcSet->rngRollout;
-  rngctxSet = &rngctxRollout;
+  rngctxSet = rngctxRollout;
   HandleCommand ( sz, acSetRNG );
 
 }

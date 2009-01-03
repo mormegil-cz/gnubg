@@ -7615,7 +7615,7 @@ extern void GTKResign(gpointer p, guint n, GtkWidget * pw)
 	GTKRunDialog(pwDialog);
 }
 
-extern void MoveListDestroy()
+extern void MoveListDestroy(void)
 {
 	if (pwMoveAnalysis)
 	{

@@ -1030,4 +1030,5 @@ extern void ProcessGtkEvents(void);
 extern void CallbackProgress( void );
 #endif
 #endif
-extern void SetRNG( rng *prng, void **rngctx, rng rngNew, char *szSeed );
+extern void SetRNG( rng *prng, rngcontext *rngctx, rng rngNew, char *szSeed );
+extern int check_resigns(cubeinfo * pci);

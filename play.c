@@ -3481,7 +3481,7 @@ extern void CommandEndGame(char *sz)
 	if (manual_dice)
 	{
 		outputoff();
-	    SetRNG( &rngCurrent, &rngctxCurrent, RNG_MERSENNE, "" );
+		SetRNG( &rngCurrent, &rngctxCurrent, RNG_MERSENNE, "" );
 		outputon();
 	}
 
@@ -3528,7 +3528,7 @@ extern void CommandEndGame(char *sz)
 	if (manual_dice)
 	{
 		outputoff();
-		SetRNG( &rngCurrent, &rngctxCurrent, RNG_MANUAL, "" );
+		SetRNG( &rngCurrent, rngctxCurrent, RNG_MANUAL, "" );
 		outputon();
 	}
 

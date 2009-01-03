@@ -178,6 +178,7 @@ extern void GTKUndo(void);
 extern void UserCommand(const char *sz);
 extern void ShowToolbar(void);
 extern void HideToolbar(void);
+extern void MoveListDestroy(void);
 
 #if HAVE_LIBREADLINE
 extern int fReadingCommand;
