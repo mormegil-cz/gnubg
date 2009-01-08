@@ -84,6 +84,7 @@ listOLD lMatch, *plGame, *plLastMove;
 statcontext scMatch;
 static int fComputerDecision = FALSE;
 static int fEndGame = FALSE;
+int automaticTask = FALSE;
 
 typedef enum _annotatetype {
   ANNOTATE_ACCEPT, ANNOTATE_CUBE, ANNOTATE_DOUBLE, ANNOTATE_DROP,
@@ -631,6 +632,17 @@ extern void AddMoveRecord( void *pv ) {
 static gboolean move_is_last_in_match(void)
 {
 	return (!plLastMove || !plLastMove->plNext || !plLastMove->plNext->p);
+}
+
+static gboolean move_not_last_in_match_ok(void)
+{
+	if (automaticTask)
+		return TRUE;
+	if (!move_is_last_in_match())
+		return TRUE;
+
+	return GetInputYN(_("The current move is not the last in the match.\n"
+			      "Continuing will destroy the remainder of the match. Continue?"));
 }
 
 extern void SetMoveRecord( void *pv ) {
@@ -1537,7 +1549,6 @@ extern void CancelCubeAction( void ) {
     }
 }
 
-int automaticTask = FALSE;
 
 static void StartAutomaicPlay(void)
 {
@@ -1841,13 +1852,8 @@ extern void CommandAgree( char *sz ) {
 	return;
     }
 
-    if (!move_is_last_in_match())
-    {
-	    int answer = GetInputYN(_("This is not the last move in the match.\n"
-				    "Continuing will destroy the remainder of the match. Continue?"));
-	    if (!answer)
-		    return;
-    }
+    if (!move_not_last_in_match_ok())
+	    return;
 
     if( fDisplay )
 	outputf( _("%s accepts and wins a %s.\n"), ap[ ms.fTurn ].szName,
@@ -2315,13 +2321,8 @@ extern void CommandDouble( char *sz ) {
 	return;
     }
 
-	if (!move_is_last_in_match() && !automaticTask)
-    {
-	    int answer = GetInputYN(_("The double is not the last move in the match.\n"
-				    "Continuing will destroy the remainder of the match. Continue?"));
-	    if (!answer)
-		    return;
-    }
+    if (!move_not_last_in_match_ok())
+	    return;
 
     if (ms.fDoubled) {
 	    CommandRedouble(NULL);
@@ -2511,13 +2512,8 @@ extern void CommandDrop( char *sz ) {
 	return;
     }
 
-    if (!move_is_last_in_match() && !automaticTask)
-    {
-	    int answer = GetInputYN(_("The drop is not the last move in the match.\n"
-				    "Continuing will destroy the remainder of the match. Continue?"));
-	    if (!answer)
-		    return;
-    }
+    if (!move_not_last_in_match_ok())
+	    return;
 
     playSound ( SOUND_DROP );
 
@@ -2753,13 +2749,8 @@ CommandMove( char *sz ) {
 	return;
     }
     
-    if (!move_is_last_in_match())
-    {
-	    int answer = GetInputYN(_("The move is not the last in the match.\n"
-				    "Continuing will destroy the remainder of the match. Continue?"));
-	    if (!answer)
-		    return;
-    }
+    if (!move_not_last_in_match_ok())
+	    return;
 
     if( !*sz ) {
 	GenerateMoves( &ml, msBoard(), ms.anDice[ 0 ], ms.anDice[ 1 ],
@@ -3460,13 +3451,10 @@ extern void CommandEndGame(char *sz)
 		outputl(_("No game in progress (type `new game' to start one)."));
 		return;
 	}
-	if (!move_is_last_in_match())
-	{
-		int answer = GetInputYN(_("The current move is not the last move in the match.\n"
-					  "Continuing will destroy the remainder of the match. Continue?"));
-		if (!answer)
-			return;
-	}
+
+	if (!move_not_last_in_match_ok())
+		return;
+
 #if USE_GTK
 	else if (!GTKShowWarning(WARN_ENDGAME, NULL))
 		return;
@@ -3781,13 +3769,8 @@ extern void CommandRedouble( char *sz ) {
 	return;
     }
      
-    if (!move_is_last_in_match() && !automaticTask)
-    {
-	    int answer = GetInputYN(_("The redouble is not the last move in the match.\n"
-				    "Continuing will destroy the remainder of the match. Continue?"));
-	    if (!answer)
+    if (!move_not_last_in_match_ok())
 		    return;
-    }
 
     pmr = NewMoveRecord();
 
@@ -4008,13 +3991,8 @@ CommandRoll( char *sz ) {
     return;
   }
     
-  if (!move_is_last_in_match())
-  {
-	  int answer = GetInputYN(_("The move is not the last in the match.\n"
-				  "Continuing will destroy the remainder of the match. Continue?"));
-	  if (!answer)
-		  return;
-  }
+  if (!move_not_last_in_match_ok())
+	  return;
 
   if ( fTutor && fTutorCube && !GiveAdvice( ShouldDouble() ))
 	  return;
@@ -4107,13 +4085,7 @@ extern void CommandTake( char *sz ) {
 	return;
     }
 
-    if (!move_is_last_in_match() && !automaticTask)
-    {
-	    int answer = GetInputYN(_("The take is not the last move in the match.\n"
-				    "Continuing will destroy the remainder of the match. Continue?"));
-	    if (!answer)
-		    return;
-    }
+    if (!move_not_last_in_match_ok())
 
     playSound ( SOUND_TAKE );
 

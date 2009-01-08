@@ -3989,7 +3989,7 @@ extern int GetInputYN( char *szPrompt )
     }
 
     if (!fInteractive)
-	    return FALSE;
+	    return TRUE;
 
 #if USE_GTK
     if( fX )
