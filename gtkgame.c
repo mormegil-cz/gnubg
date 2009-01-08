@@ -3794,7 +3794,7 @@ extern void RunGTK( GtkWidget *pwSplash, char *commands, char *python_script, ch
 
         if (match)
         {
-                CommandLoadMatch(match);
+                CommandImportAuto(match);
                 g_free(match);
                 match = NULL;
         }
@@ -4093,6 +4093,7 @@ static void ToolButtonPressed( GtkWidget *pw, newwidget *pnw ) {
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
   UserCommand(sz);
 }
+
 extern int edit_new(unsigned int length)
 {
 	char sz[40];

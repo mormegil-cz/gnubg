@@ -5082,7 +5082,7 @@ int main(int argc, char *argv[])
 #endif
 
 	if (pchMatch)
-		CommandLoadMatch(pchMatch);
+		CommandImportAuto(pchMatch);
 
 	/* -c option given */
 	if (pchCommands) {

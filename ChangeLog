@@ -1,3 +1,7 @@
+Thu Jan  8 21:32:44 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c, gtkgame.c: use autoimport for loading from commandline
+
 Thu Jan  8 12:25:27 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c, play.c, po/cs.po, po/da.po, po/de.po,
