@@ -638,7 +638,7 @@ static gboolean move_not_last_in_match_ok(void)
 {
 	if (automaticTask)
 		return TRUE;
-	if (!move_is_last_in_match())
+	if (move_is_last_in_match())
 		return TRUE;
 
 	return GetInputYN(_("The current move is not the last in the match.\n"
