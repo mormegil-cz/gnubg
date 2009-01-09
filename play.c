@@ -4212,6 +4212,7 @@ SetMatchID ( const char *szMatchID ) {
   pmr->g.fCubeUse = ms.fCubeUse;
   IniStatcontext( &pmr->g.sc );
   AddMoveRecord( pmr );
+  AddGame(pmr);
 
   ms.gs = gs;
   ms.fMove = fMove;
