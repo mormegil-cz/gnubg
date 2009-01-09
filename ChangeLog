@@ -1,3 +1,8 @@
+Fri Jan  9 13:00:25 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* set.c: set turn should invalidate the gtk dice as well as the match
+	state ones.
+
 Fri Jan  9 11:29:14 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* bearoff.c: fix bug also printing 1-sided in bearoffstatus

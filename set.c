@@ -2577,6 +2577,12 @@ extern void CommandSetTurn( char *sz ) {
     ms.fTurn = ms.fMove = i;
     CancelCubeAction();
     fNextTurn = FALSE;
+#if USE_GTK
+    if (fX) {
+	    BoardData *bd = BOARD(pwBoard)->board_data;
+	    bd->diceRoll[0] = bd->diceRoll[1] = 0;
+    }
+#endif
     ms.anDice[ 0 ] = ms.anDice[ 1 ] = 0;
 
 
