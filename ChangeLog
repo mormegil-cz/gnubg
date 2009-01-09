@@ -1,3 +1,7 @@
+Fri Jan  9 11:29:14 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* bearoff.c: fix bug also printing 1-sided in bearoffstatus
+
 Thu Jan  8 21:32:44 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c, gtkgame.c: use autoimport for loading from commandline

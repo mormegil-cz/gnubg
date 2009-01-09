@@ -544,9 +544,9 @@ extern void BearoffStatus(const bearoffcontext *pbc, char *sz)
 	else
 	{
 		if (pbc->p)
-			sprintf(buf, _("In memory %d-sided bearoff database evaluator"), BEAROFF_ONESIDED ? 1 : 2);
+			sprintf(buf, _("In memory %d-sided bearoff database evaluator"), pbc->bt);
 		else
-			sprintf(buf, _("On disk %d-sided bearoff database evaluator"), BEAROFF_ONESIDED ? 1 : 2);
+			sprintf(buf, _("On disk %d-sided bearoff database evaluator"), pbc->bt);
 
 	}
 	sz += sprintf(sz, " * %s\n", buf);
