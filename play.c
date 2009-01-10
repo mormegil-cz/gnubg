@@ -720,8 +720,9 @@ static void DiceRolled(void)
 static int NewGame( void )
 {
 	moverecord *pmr;
+	listOLD *plLastMove_store = plLastMove;
+	listOLD *plGame_store = lMatch.plNext->p;
 	int fError;
-	listOLD *plOldGame = plGame;
     
     if( !fRecord && !ms.nMatchTo && lMatch.plNext->p ) {
 	/* only recording the active game of a session; discard any others */
@@ -775,17 +776,23 @@ static int NewGame( void )
     }
 #endif
 
+    AddGame( pmr );
+    
  reroll:
     fError = RollDice( ms.anDice, rngCurrent, rngctxCurrent );
 
     if( fInterrupt || fError ) {
-	PopMoveRecord( plGame->plNext );
-
-	free( plGame );
-	ListDelete( lMatch.plPrev );
-	plGame = plOldGame;
-	plLastMove = 0;
-	return -1;
+	    PopGame(plGame, TRUE);
+	    plGame = plGame_store;
+	    ChangeGame( plGame );
+	    if (plLastMove_store)
+	    {
+		    plLastMove = plLastMove_store;
+		    CalculateBoard();
+		    SetMoveRecord(plLastMove ->p);
+	    }
+	    ShowBoard();
+	    return -1;
     }
     
     if( fDisplay ) {
@@ -811,8 +818,6 @@ static int NewGame( void )
 
     outputx();
 
-    AddGame( pmr );
-    
     pmr = NewMoveRecord();
     pmr->mt = MOVE_SETDICE;
 
@@ -1550,7 +1555,7 @@ extern void CancelCubeAction( void ) {
 }
 
 
-static void StartAutomaicPlay(void)
+static void StartAutomaticPlay(void)
 {
 	if (ap[0].pt == PLAYER_GNU && ap[1].pt == PLAYER_GNU)
 	{
@@ -2955,7 +2960,7 @@ extern void CommandNewGame( char *sz )
         PopGame( plGame, TRUE );
     }
 
-	StartAutomaicPlay();
+	StartAutomaticPlay();
 
 	StartNewGame();
 }
@@ -3546,7 +3551,7 @@ extern void CommandPlay( char *sz )
 		return;
 	}
 
-	StartAutomaicPlay();
+	StartAutomaticPlay();
 
     fComputing = TRUE;
     
