@@ -1,3 +1,8 @@
+Sat Jan 10 21:16:19 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtkgame.c: Make edit_new more smooth, and work with more obscure
+	options
+
 Fri Jan  9 14:06:05 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* play.c: set matchid was missing a call to AddGame

@@ -113,7 +113,6 @@ typedef enum _gnubgcommand {
     CMD_HELP,
     CMD_HINT,
     CMD_LIST_GAME,
-    CMD_NEW_GAME,
     CMD_NEXT,
     CMD_NEXT_GAME,
     CMD_NEXT_MARKED,
@@ -174,7 +173,6 @@ static const char *aszCommands[ NUM_CMDS ] = {
     "help",
     "hint",
     "list game",
-    "new game",
     "next",
     "next game",
     "next marked",
@@ -4098,18 +4096,51 @@ extern int edit_new(unsigned int length)
 {
 	char sz[40];
 	playertype pt_store[2] = { ap[0].pt, ap[1].pt };
+	int cAutoDoubles_store = cAutoDoubles;
+	int fAutoGame_store = fAutoGame;
 	int fDisplay_store = fDisplay;
+	int manual_dice = (rngCurrent == RNG_MANUAL); 
+	int i;
+	BoardData *bd = BOARD( pwBoard )->board_data;
 
 	ap[0].pt = PLAYER_HUMAN;
 	ap[1].pt = PLAYER_HUMAN;
-	fDisplay = 0;
+	cAutoDoubles = 0;
+	fAutoGame = TRUE;
+	fDisplay = FALSE;
+
+	if (manual_dice)
+	{
+		outputoff();
+		SetRNG( &rngCurrent, rngctxCurrent, RNG_MERSENNE, "" );
+		outputon();
+	}
 
 	sprintf(sz, "new match %d", length);
 	UserCommand(sz);
 
+	if (manual_dice)
+	{
+		outputoff();
+		SetRNG( &rngCurrent, rngctxCurrent, RNG_MANUAL, "" );
+		outputon();
+	}
+
+	sprintf(sz, "set turn 1");
+	UserCommand(sz);
+
+	for( i = 0; i < 26; i++ )
+	{
+		bd->points[i] = 0;
+	}
+	bd->points[26] = bd->nchequers;
+	bd->points[27] = -bd->nchequers;
+
 	ap[0].pt = pt_store[0];
 	ap[1].pt = pt_store[1];
 	fDisplay = fDisplay_store;
+	cAutoDoubles = cAutoDoubles_store;
+	fAutoGame = fAutoGame_store;
 	return 0;
 }
 
