@@ -4163,6 +4163,12 @@ SetMatchID ( const char *szMatchID ) {
 
   }
 
+  if (fDoubled)
+  {
+	  outputerrf(_("I'm sorry, but SetMatchID cannot handle positions where a double has been offered"));
+	  return;
+  }
+
   if (nMatchTo == 1)
     fCrawford = 0;
 
