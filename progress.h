@@ -41,6 +41,7 @@ RolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 				 const float rJsd,
 				 const int fStopped,
 				 const int fShowRanks,
+				 int fCubeRollout,
                  void *pUserData );
 
 extern void

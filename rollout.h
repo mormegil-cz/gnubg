@@ -70,6 +70,7 @@ typedef void
 						const float rJsd,
 						const int fStopped,
 						const int fShowRanks,
+						int fCubeRollout,
                         void *pUserData );
 
 extern int

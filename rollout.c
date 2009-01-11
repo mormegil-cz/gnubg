@@ -1111,25 +1111,18 @@ extern void RolloutLoopMT(void *unused)
 					v = aarMu[alt][OUTPUT_EQUITY];
 					s = aarSigma[alt][OUTPUT_EQUITY];
 
-					if (!ms.nMatchTo) {
-						if (ro_fCubeRollout) {
-							v *= aciLocal[alt].nCube / aciLocal[0].nCube;
-							s *= aciLocal[alt].nCube / aciLocal[0].nCube;
-						}
-					} else {
+					if (ms.nMatchTo && fOutputMWC) {
 						v = eq2mwc(v, &aciLocal[(ro_fCubeRollout ? 0 : alt)]);
 						s = se_eq2mwc(s, &aciLocal[(ro_fCubeRollout ? 0 : alt)]);
 
-						if (!fOutputMWC) {
-							v = mwc2eq(v, &aciLocal[(ro_fCubeRollout ? 0 : alt)]);
-							s = se_mwc2eq(s, &aciLocal[(ro_fCubeRollout ? 0 : alt)]);
-						}
 					}
 				}
 				ajiJSD[alt].rEquity = v;
 				ajiJSD[alt].rJSD = s;
 			}
 
+			if (!ro_fCubeRollout)
+			{
 			/* 2 sort the list in order of decreasing equity (best move first) */
 			qsort((void *) ajiJSD, ro_alternatives, sizeof(jsdinfo), comp_jsdinfo_equity);
 
@@ -1182,6 +1175,39 @@ extern void RolloutLoopMT(void *unused)
 			/* rearrange ajiJSD in move order rather than equity order */
 			qsort((void *) ajiJSD, ro_alternatives, sizeof(jsdinfo), comp_jsdinfo_order);
 
+			}
+			else
+			{
+				float eq_dp = fOutputMWC ? eq2mwc(1.0, &aciLocal[0]) : 1.0;
+				float eq_dt = ajiJSD[1].rEquity;
+				
+				if (eq_dp < eq_dt)
+				{
+					/* compare nd to dp */
+					ajiJSD[0].rEquity = ajiJSD[0].rEquity - eq_dp;
+					ajiJSD[0].rJSD = fabs(ajiJSD[0].rEquity / ajiJSD[0].rJSD);
+				}
+				else
+				{
+					/* compare nd to dt */
+					ajiJSD[0].rEquity = ajiJSD[0].rEquity - ajiJSD[1].rEquity;
+					denominator = (float) sqrt(ajiJSD[0].rJSD * ajiJSD[0].rJSD + ajiJSD[1].rJSD * ajiJSD[1].rJSD);
+					if (denominator < 1e-8f)
+						denominator = 1e-8f;
+					ajiJSD[0].rJSD = fabs(ajiJSD[0].rEquity / denominator);
+				}
+				/* compare dt to dp */
+				ajiJSD[1].rEquity = ajiJSD[1].rEquity - eq_dp;
+				ajiJSD[1].rJSD = fabs(ajiJSD[1].rEquity / ajiJSD[1].rJSD);
+				if (rcRollout.fStopOnJsd &&
+						(altGameCount[0] >= (rcRollout.nMinimumJsdGames - 1)) &&
+						rcRollout.rJsdLimit < MIN(ajiJSD[0].rJSD, ajiJSD[0].rJSD))
+				{ 
+					fNoMore[0] = 1;
+					fNoMore[1] = 1;
+				       	active_alternatives = 0;
+				}
+			}
 		}
 
 		/* see if we can quit because the answers are good enough */
@@ -1262,7 +1288,7 @@ static void UpdateProgress(void)
 		for (alt = 0; alt < ro_alternatives; ++alt) {
 			prc = &ro_apes[alt]->rc;
 			(*ro_pfProgress) (aarMu, aarSigma, prc, aciLocal, altGameCount[alt] - 1, alt,
-					  ajiJSD[alt].nRank + 1, ajiJSD[alt].rJSD, fNoMore[alt], show_jsds,
+					  ajiJSD[alt].nRank + 1, ajiJSD[alt].rJSD, fNoMore[alt], show_jsds, ro_fCubeRollout,
 					  ro_pUserData);
 		}
 
@@ -1770,7 +1796,7 @@ RolloutGeneral( ConstTanBoard *apBoard,
       if( updateProgress) {
         (*pfProgress)( aarMu, aarSigma, prc, aciLocal,
                        i, alt, ajiJSD[ alt ].nRank + 1,
-		       ajiJSD[ alt ].rJSD, fNoMore[ alt ], show_jsds,
+		       ajiJSD[ alt ].rJSD, fNoMore[ alt ], show_jsds, fCubeRollout,
 		       pUserData );
       }
 	  
@@ -1908,7 +1934,7 @@ RolloutGeneral( ConstTanBoard *apBoard,
       for (alt = 0; alt < alternatives; ++alt) {
         (*pfProgress)( aarMu, aarSigma, prc, aciLocal,
                        i, alt, ajiJSD[ alt ].nRank + 1,
-					   ajiJSD[ alt ].rJSD, fNoMore[ alt ], show_jsds,
+					   ajiJSD[ alt ].rJSD, fNoMore[ alt ], show_jsds, fCubeRollout,
 					   pUserData );
       }
 
@@ -1979,7 +2005,7 @@ RolloutGeneral( ConstTanBoard *apBoard,
 	 if (nGamesDone[ alt ] > 0)
 	(*pfProgress)( aarMu, aarSigma, prc, aciLocal,
 					MIN(i, cGames - 1), alt, ajiJSD[ alt ].nRank + 1,
-					ajiJSD[ alt ].rJSD, fNoMore[ alt ], show_jsds,
+					ajiJSD[ alt ].rJSD, fNoMore[ alt ], show_jsds, fCubeRollout,
 					pUserData );
 	}
 
