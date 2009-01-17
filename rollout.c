@@ -364,6 +364,7 @@ BasicCubefulRollout ( unsigned int aanBoard[][ 2 ][ 25 ],
   /* variables for variance reduction */
 
   evalcontext aecVarRedn[ 2 ];
+  evalcontext aecZero[ 2 ];
   float arMean[ NUM_ROLLOUT_OUTPUTS ];
   unsigned int aaanBoard[ 6 ][ 6 ][ 2 ][ 25 ];
   int aanMoves[ 6 ][ 6 ][ 8 ];
@@ -389,19 +390,11 @@ BasicCubefulRollout ( unsigned int aanBoard[][ 2 ][ 25 ],
       for ( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
         aarVarRedn[ ici ][ i ] = 0.0f;
     
-    for ( i = 0; i < 2; i++ ) {
-      
-      memcpy ( &aecVarRedn[ i ], &prc->aecChequer[ i ],
-               sizeof ( evalcontext ) );
-
-      if ( prc->fCubeful )
-        /* other no var. redn. on cubeful equities */
-        aecVarRedn[ i ].fCubeful = TRUE;
-
-      if ( aecVarRedn[ i ].nPlies ) {
-        aecVarRedn[ i ].nPlies--;
-      }
-
+    for (i = 0; i < 2; i++) {
+	    aecZero[i] = aecVarRedn[i] = prc->aecChequer[i];
+	    aecZero[i].nPlies = 0;
+	    if (aecVarRedn[i].nPlies)
+		    aecVarRedn[i].nPlies--;
     }
 
   }
@@ -617,7 +610,7 @@ BasicCubefulRollout ( unsigned int aanBoard[][ 2 ][ 25 ],
 
 		      if (FindBestMove ( aanMoves[ i ][ j ], i + 1, j + 1, 
 				 aaanBoard[ i ][ j ],
-				 pci, NULL, defaultFilters ) < 0 )
+				 pci, &aecZero[pci->fMove], defaultFilters ) < 0 )
                 return -1;
 
               SwapSides ( aaanBoard[ i ][ j ] );
