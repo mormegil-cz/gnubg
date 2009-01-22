@@ -1,3 +1,8 @@
+Thu Jan 22 12:42:57 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* relational.c: Asume that sql always uses . for decimal separator in
+	input/output.
+
 Sat Jan 17 21:57:31 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* rollout.c: Fix a small bug in BasicRollout. The first move (0-ply)

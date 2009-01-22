@@ -149,7 +149,7 @@ float Ratio(float a, int b)
 
 #define NS(x) (x == NULL) ? "NULL" : x
 #define APPENDF(x,y) {g_string_append_printf(column, "%s, ", x); \
-	g_string_append_printf(value, "'%f', ", y);}
+	g_string_append_printf(value, "'%s', ", g_ascii_dtostr(tmpf, G_ASCII_DTOSTR_BUF_SIZE, y));}
 #define APPENDI(x,y) {g_string_append_printf(column, "%s, ", x); \
 	g_string_append_printf(value, "'%i', ", y);}
 
@@ -163,6 +163,7 @@ static int AddStats(DBProvider * pdb, int gm_id, int player_id, int player,
 	float aaaar[3][2][2][2];
 	float r;
 	int ret;
+	char tmpf[G_ASCII_DTOSTR_BUF_SIZE];
 
 	int gms_id = GetNextId(pdb, table);
 	if (gms_id == -1)
@@ -657,14 +658,14 @@ extern void CommandRelationalShowDetails (char *sz)
 		sc.anCubeWrongDoubleTG[i] = strtol (rs->data[1][19], NULL, 0);
 		sc.anCubeWrongTake[i] = strtol (rs->data[1][20], NULL, 0);
 		sc.anCubeWrongPass[i] = strtol (rs->data[1][21], NULL, 0);
-		sc.arErrorCheckerplay[i][0] = (float)g_strtod (rs->data[1][22], NULL);
-		sc.arErrorMissedDoubleDP[i][0] = (float)g_strtod (rs->data[1][23], NULL);
-		sc.arErrorMissedDoubleTG[i][0] = (float)g_strtod (rs->data[1][24], NULL);
-		sc.arErrorWrongDoubleDP[i][0] = (float)g_strtod (rs->data[1][25], NULL);
-		sc.arErrorWrongDoubleTG[i][0] = (float)g_strtod (rs->data[1][26], NULL);
-		sc.arErrorWrongTake[i][0] = (float)g_strtod (rs->data[1][27], NULL);
-		sc.arErrorWrongPass[i][0] = (float)g_strtod (rs->data[1][28], NULL);
-		sc.arLuck[i][0] = (float)g_strtod (rs->data[1][29], NULL);
+		sc.arErrorCheckerplay[i][0] = (float)g_ascii_strtod (rs->data[1][22], NULL);
+		sc.arErrorMissedDoubleDP[i][0] = (float)g_ascii_strtod (rs->data[1][23], NULL);
+		sc.arErrorMissedDoubleTG[i][0] = (float)g_ascii_strtod (rs->data[1][24], NULL);
+		sc.arErrorWrongDoubleDP[i][0] = (float)g_ascii_strtod (rs->data[1][25], NULL);
+		sc.arErrorWrongDoubleTG[i][0] = (float)g_ascii_strtod (rs->data[1][26], NULL);
+		sc.arErrorWrongTake[i][0] = (float)g_ascii_strtod (rs->data[1][27], NULL);
+		sc.arErrorWrongPass[i][0] = (float)g_ascii_strtod (rs->data[1][28], NULL);
+		sc.arLuck[i][0] = (float)g_ascii_strtod (rs->data[1][29], NULL);
 		FreeRowset(rs);
 	}
 	sc.fMoves = 1;
