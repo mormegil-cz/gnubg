@@ -395,6 +395,8 @@ BasicCubefulRollout ( unsigned int aanBoard[][ 2 ][ 25 ],
 	    aecZero[i].nPlies = 0;
 	    if (aecVarRedn[i].nPlies)
 		    aecVarRedn[i].nPlies--;
+	    aecZero[i].fDeterministic = aecVarRedn[i].fDeterministic = 1;
+	    aecZero[i].rNoise = aecVarRedn[i].rNoise = 0.0f;
     }
 
   }
@@ -645,7 +647,8 @@ BasicCubefulRollout ( unsigned int aanBoard[][ 2 ][ 25 ],
           /* Find best move */
 
           if ( pecChequer[ pci->fMove ]->nPlies ||
-               prc->fCubeful != pecChequer[ pci->fMove ]->fCubeful )
+               prc->fCubeful != pecChequer[ pci->fMove ]->fCubeful ||
+	       pecChequer[pci->fMove]->rNoise)
 
             /* the user requested n-ply (n>0). Another call to
                FindBestMove is required */

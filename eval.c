@@ -2876,7 +2876,7 @@ EvaluatePositionFull( NNState *nnStates, const TanBoard anBoard, float arOutput[
     if( acef[ pc ]( anBoard, arOutput, pci->bgv, nnStates ) )
       return -1;
 
-    if( pec->rNoise )
+    if( pec->rNoise && pc != CLASS_OVER )
 	for( i = 0; i < NUM_OUTPUTS; i++ )
 	    arOutput[ i ] += Noise( pec, anBoard, i );
     
@@ -5733,7 +5733,7 @@ EvaluatePositionCubeful4( NNState *nnStates, const TanBoard anBoard,
       if( EvaluatePosition ( nnStates, anBoard, arOutput, pciMove, NULL ) )
         return -1;
       
-      if( pec->rNoise )
+      if( pec->rNoise && pc != CLASS_OVER )
         for( i = 0; i < NUM_OUTPUTS; i++ )
           arOutput[ i ] += Noise( pec, anBoard, i );
 
