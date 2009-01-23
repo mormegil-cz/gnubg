@@ -1,3 +1,8 @@
+Fri Jan 23 09:34:07 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* board3d/drawboard3d.c: Protect some function calls if shadows not
+	initialised.
+
 Thu Jan 22 23:33:24 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* eval.c, rollout.c: Stop adding noise to EvalOver and to the variance
