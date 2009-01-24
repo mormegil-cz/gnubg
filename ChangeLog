@@ -1,3 +1,9 @@
+Sat Jan 24 21:31:10 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* analysis.c, backgammon.h, commands.inc: Add a command to rollout the
+	current analysed move. "analyse rollout move 1 2 3" will rollout the
+	first three candidates in the movelist.
+
 Fri Jan 23 09:34:07 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* board3d/drawboard3d.c: Protect some function calls if shadows not

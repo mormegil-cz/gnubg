@@ -38,6 +38,13 @@ command cER = {
     { "move", CommandAnalyseClearMove, 
       N_("Clear analysis for this move"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
+}, acAnalyseRollout[] = {
+    { "move", CommandAnalyseRolloutMove, 
+      N_("Rollout choices in the analysis movelist.\n"
+	 "\"analyse rollout move 1 2 3\" will rollout the first three choices."),
+	      NULL, NULL },
+	
+    { NULL, NULL, NULL, NULL, NULL }
 }, acAnalyse[] = {
     { "clear", NULL, 
       N_("Clear previous analysis"), NULL, acAnalyseClear },
@@ -50,6 +57,8 @@ command cER = {
     { "move", CommandAnalyseMove, 
       N_("Compute analysis and annotate the current "
       "move"), NULL, NULL },
+    { "rollout", NULL, 
+      N_("Rollout analysis"), NULL, acAnalyseRollout },
     { "session", CommandAnalyseSession, 
       N_("Compute analysis and annotate every "
       "game in the session"), NULL, NULL },

@@ -38,6 +38,7 @@
 #include "matchequity.h"
 #include "export.h"
 #include "formatgs.h"
+#include "progress.h"
 #include "multithread.h"
 
 const char *aszRating [ N_RATINGS ] = {
@@ -2134,4 +2135,87 @@ extern int MatchAnalysed(void)
 			return FALSE;
 	}
 	return TRUE;
+}
+
+extern void CommandAnalyseRolloutMove(char *sz)
+{
+	cubeinfo ci;
+	int c, res;
+	move *m;
+	void *p;
+	move **ppm;
+	cubeinfo **ppci;
+	char (*asz)[40];
+	moverecord *pmr;
+	gint n;
+	GSList *list = NULL, *pl = NULL;
+
+	if (!sz || !*sz) {
+		outputerrf("No moves given");
+		return;
+	}
+
+	if (plLastMove && plLastMove->plNext && plLastMove->plNext->p)
+		pmr = plLastMove->plNext->p;
+	else {
+		outputerrf(_("Missing valid moverecord. You need to have a completed and analysed move."));
+		return;
+	}
+
+	if (pmr->mt != MOVE_NORMAL)
+	{
+		outputerrf(_("This is not a normal chequer move. Cannot rollout."));
+		return;
+	}
+
+	if (!(c = pmr->ml.cMoves)) {
+		outputerrf(_("Please analyse the move first"));
+		return;
+	}
+
+	while ((n = g_ascii_strtoll(sz, &sz, 10))) {
+		if (n > c) {
+			outputerrf("Only %d moves in movelist\n", c);
+			return;
+		}
+		if (g_slist_find(list, GINT_TO_POINTER(n))) {
+			outputerrf("Duplicates in list %d\n", n);
+			return;
+		}
+		list = g_slist_append(list, GINT_TO_POINTER(n));
+	}
+	if (!(c = g_slist_length(list))) {
+		outputerrf("Not a valid list of moves\n");
+		return;
+	}
+
+	ppm = g_new(move *, c);
+	ppci = g_new(cubeinfo *, c);
+	asz = (char (*)[40]) g_malloc(40 * c);
+
+	GetMatchStateCubeInfo(&ci, &ms);
+
+	outputf(_("Rolling out %d moves:"), c);
+
+	for (pl = list; pl; pl = g_slist_next(pl)) {
+		outputf(" %d", c);
+		int i = GPOINTER_TO_INT(pl->data) - 1;
+		m = ppm[i] = &pmr->ml.amMoves[i];
+		ppci[i] = &ci;
+		FormatMove(asz[i], msBoard(), m->anMove);
+	}
+	outputl("");
+
+	RolloutProgressStart(&ci, c, NULL, &rcRollout, asz, &p);
+	res = ScoreMoveRollout(ppm, (const cubeinfo **) ppci, c, RolloutProgress, p);
+	RolloutProgressEnd(&p);
+
+	g_free(asz);
+	g_free(ppm);
+	g_free(ppci);
+
+	if (res < 0)
+		return;
+	RefreshMoveList(&pmr->ml, NULL);
+	ShowBoard();
 }
