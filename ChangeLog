@@ -1,3 +1,9 @@
+Sun Jan 25 16:21:08 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtkboard.c, play.c: Clicking anywhere on the board before first
+	match is started starts a new match. Clicking in the dice area
+	either starts a new game or roll the dice as appropriate.
+
 Sat Jan 24 21:31:10 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* analysis.c, backgammon.h, commands.inc: Add a command to rollout the

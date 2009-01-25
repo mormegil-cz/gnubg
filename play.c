@@ -784,6 +784,8 @@ static int NewGame( void )
     if( fInterrupt || fError ) {
 	    PopGame(plGame, TRUE);
 	    plGame = plGame_store;
+	    if (!plGame)
+		    return -1;
 	    ChangeGame( plGame );
 	    if (plLastMove_store)
 	    {
@@ -3064,8 +3066,7 @@ extern void CommandNewMatch( char *sz )
 	ShowBoard();
 #endif
 
-    if( fAutoGame )
-	CommandNewGame( NULL );
+    CommandNewGame( NULL );
 }
 
 extern void CommandNewSession( char *sz ) {
@@ -3102,8 +3103,7 @@ extern void CommandNewSession( char *sz ) {
 	ShowBoard();
 #endif
     
-    if( fAutoGame )
-	CommandNewGame( NULL );
+    CommandNewGame( NULL );
 }
 
 static void UpdateGame( int fShowBoard ) {

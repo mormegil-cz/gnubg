@@ -1820,6 +1820,26 @@ static void ShowBoardPopup(GdkEventButton* event)
 	gtk_menu_popup(GTK_MENU(boardMenu), NULL, NULL, NULL, NULL, event->button, event->time);
 }
 
+static int board_click_roll(void)
+{
+	if (ms.gs == GAME_NONE)
+	{
+		UserCommand("new match");
+		return (ms.gs != GAME_NONE);
+	}
+	if (ms.gs != GAME_PLAYING)
+	{
+		UserCommand("new game");
+		return (ms.gs!=GAME_PLAYING);
+	}
+	if (!ms.anDice[0])
+	{
+		UserCommand("roll");
+		return (!ms.anDice[0]);
+	}
+	return 1;
+}
+
 extern gboolean board_button_press(GtkWidget *board, GdkEventButton *event,
 		BoardData* bd)
 {
@@ -1829,8 +1849,15 @@ extern gboolean board_button_press(GtkWidget *board, GdkEventButton *event,
 	int numOnPoint;
 
 	/* Ignore double-clicks and multiple presses and any clicks when not playing */
-	if (event->type != GDK_BUTTON_PRESS || bd->drag_point >= 0 || !bd->playing)
+	if (event->type != GDK_BUTTON_PRESS || bd->drag_point >= 0)
 		return TRUE;
+
+	if (!bd->playing)
+	{
+		if (board_click_roll() != 0)
+			board_beep(bd);
+		return TRUE;
+	}
 
 #if USE_BOARD3D
 	if (display_is_3d(bd->rd))
@@ -1938,7 +1965,8 @@ extern gboolean board_button_press(GtkWidget *board, GdkEventButton *event,
 		if (display_is_3d(bd->rd) && bd->diceShown == DICE_BELOW_BOARD)
 		{	/* Click on dice (below board) - shake */
 			bd->drag_point = -1;
-			UserCommand("roll");
+			if (board_click_roll() != 0)
+				board_beep(bd);
 			return TRUE;
 		}
 #endif
@@ -1995,13 +2023,8 @@ extern gboolean board_button_press(GtkWidget *board, GdkEventButton *event,
 
 		if (ap[ms.fTurn].pt != PLAYER_HUMAN && !editing)
 		{
-			outputl( _("It is the computer's turn -- type `play' to force it to "
-				"move immediately.") );
-			outputx();
-
-			board_beep(bd);
+			UserCommand("play");
 			bd->drag_point = -1;
-
 			return TRUE;
 		}
 
