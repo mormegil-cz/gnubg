@@ -1146,7 +1146,7 @@ TextRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
       else
 	      sprintf( pc, " %d%c", nRank, fStopped ? 's' : 'r' );
 
-      if ( nRank != 1 )
+      if ( nRank != 1 || fCubeRollout )
         sprintf( strchr( pc, 0 ), " %5.3f\n", rJsd );
       else
         strcat( pc, "\n" );
