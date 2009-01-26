@@ -989,7 +989,6 @@ extern void RolloutLoopMT(void *unused)
 
 	while (MT_SafeIncValue(&ro_NextTrial) <= (int) cGames) {
 		active_alternatives = ro_alternatives;
-		err_too_big = 1;
 
 		for (alt = 0; alt < ro_alternatives; ++alt) {
 			unsigned int trial = MT_SafeIncValue(&altTrialCount[alt]) - 1;
@@ -1207,12 +1206,12 @@ extern void RolloutLoopMT(void *unused)
 		}
 
 		/* see if we can quit because the answers are good enough */
-		if (rcRollout.fStopOnSTD && (altGameCount[alt] >= (rcRollout.nMinimumGames - 1))) {
-			err_too_big = 0;
-
+		if (rcRollout.fStopOnSTD) {
 			for (alt = 0; alt < ro_alternatives; ++alt) {
 				int output;
-
+				err_too_big = 0;
+				if (fNoMore[alt] || altGameCount[alt] < (rcRollout.nMinimumGames - 1))
+					continue;
 				prc = &ro_apes[alt]->rc;
 				for (output = 0; output < NUM_ROLLOUT_OUTPUTS; output++) {
 					if (output < OUTPUT_EQUITY) {
@@ -1256,14 +1255,23 @@ extern void RolloutLoopMT(void *unused)
 
 				if (!err_too_big) {
 					fNoMore[alt] = 1;
+					active_alternatives--;
 				}
 
 			}	/* alt = 0; alt < ro_alternatives; ++alt) */
+			if (ro_fCubeRollout && (!fNoMore[0] || !fNoMore[1]))
+			{
+				/* cube rollouts should run the same number
+				 * of trials for nd and dt */
+				fNoMore[0] = fNoMore[1] = 0;
+				active_alternatives = 2;
+			}
 
-		}		/* if (rcRollout.fStopOnSTD && (i >= rcRollout.nMinimumGames)) */
+
+		}		/* if (rcRollout.fStopOnSTD) */
 		MT_Release();
 		multi_debug("exclusive release: rollout cycle update");
-		if (((active_alternatives < 2) && rcRollout.fStopOnJsd) || !err_too_big)
+		if (((active_alternatives < 2) && rcRollout.fStopOnJsd) || active_alternatives < 1)
 			break;
 	}
 	free(rngctxMTRollout);

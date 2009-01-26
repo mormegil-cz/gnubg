@@ -1,3 +1,8 @@
+Mon Jan 26 10:49:56 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* rollout.c: fix stop on stds in the MT code. May well be broken in
+	the non-MT code as well.
+
 Sun Jan 25 16:21:08 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gtkboard.c, play.c: Clicking anywhere on the board before first
