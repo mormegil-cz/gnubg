@@ -1,3 +1,10 @@
+Tue Jan 27 14:40:32 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* doc/allabout.xml, doc/gnubgdb.xml, doc/gnubg/allabout.html,
+	doc/gnubg/allabout.pdf, doc/gnubg/gnubg.6, doc/gnubg/gnubg.html,
+	doc/gnubg/gnubg.info, doc/gnubg/gnubg.pdf, doc/gnubg/gnubg.texi:
+	Update document license to GFDL 1.3.
+
 Mon Jan 26 12:09:19 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* progress.c: jSD not printed in text interface for fCubeRollout.
