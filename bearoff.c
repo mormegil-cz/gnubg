@@ -575,7 +575,7 @@ extern void BearoffStatus(const bearoffcontext *pbc, char *sz)
 			: _("database does not include gammon distributions"));
 		break;
 	default:
-		g_assert_not_reached();
+		break;
 	}
 	sprintf(buf, _("number of reads: %lu"), pbc->nReads);
 	sprintf(sz, "   - %s\n", buf);

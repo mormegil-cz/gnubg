@@ -1,3 +1,7 @@
+Thu Jan 29 09:07:26 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* bearoff.c: avoid assert_false when hypergammon db present
+
 Tue Jan 27 14:40:32 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* doc/allabout.xml, doc/gnubgdb.xml, doc/gnubg/allabout.html,
