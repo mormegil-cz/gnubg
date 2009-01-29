@@ -2149,6 +2149,7 @@ extern void CommandAnalyseRolloutMove(char *sz)
 	moverecord *pmr;
 	gint n;
 	GSList *list = NULL, *pl = NULL;
+	int j;
 
 	if (!sz || !*sz) {
 		outputerrf("No moves given");
@@ -2197,12 +2198,12 @@ extern void CommandAnalyseRolloutMove(char *sz)
 
 	outputf(_("Rolling out %d moves:"), c);
 
-	for (pl = list; pl; pl = g_slist_next(pl)) {
-		outputf(" %d", c);
+	for (pl = list, j=0; pl; pl = g_slist_next(pl), j++) {
 		int i = GPOINTER_TO_INT(pl->data) - 1;
-		m = ppm[i] = &pmr->ml.amMoves[i];
-		ppci[i] = &ci;
-		FormatMove(asz[i], msBoard(), m->anMove);
+		outputf(" %d", i+1);
+		m = ppm[j] = &pmr->ml.amMoves[i];
+		ppci[j] = &ci;
+		FormatMove(asz[j], msBoard(), m->anMove);
 	}
 	outputl("");
 

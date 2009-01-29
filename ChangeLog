@@ -1,3 +1,8 @@
+Thu Jan 29 09:09:16 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* analysis.c: use the right index in the new analyse rollout move
+	function
+
 Thu Jan 29 09:07:26 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* bearoff.c: avoid assert_false when hypergammon db present
