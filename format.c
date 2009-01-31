@@ -734,7 +734,7 @@ OutputCubeAnalysisFull ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
     /* missed double */
 
-    sprintf ( pc = strchr ( sz, 0 ), "%s (%s)!",
+    sprintf ( pc = strchr ( sz, 0 ), "%s (%s)!\n",
               _("Alert: missed double"),
               OutputEquityDiff ( arDouble[ OUTPUT_NODOUBLE ], 
                                  ( arDouble[ OUTPUT_TAKE ] > 
@@ -757,7 +757,7 @@ OutputCubeAnalysisFull ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
     /* wrong take */
 
-    sprintf ( pc = strchr ( sz, 0 ), "%s (%s)!",
+    sprintf ( pc = strchr ( sz, 0 ), "%s (%s)!\n",
               _("Alert: wrong take"),
               OutputEquityDiff ( arDouble[ OUTPUT_DROP ],
                                  arDouble[ OUTPUT_TAKE ],
@@ -777,7 +777,7 @@ OutputCubeAnalysisFull ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
     /* wrong pass */
 
-    sprintf ( pc = strchr ( sz, 0 ), "%s (%s)!",
+    sprintf ( pc = strchr ( sz, 0 ), "%s (%s)!\n",
               _("Alert: wrong pass"),
               OutputEquityDiff ( arDouble[ OUTPUT_TAKE ],
                                  arDouble[ OUTPUT_DROP ],
@@ -801,7 +801,7 @@ OutputCubeAnalysisFull ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
     /* wrong double */
 
-    sprintf ( pc = strchr ( sz, 0 ), "%s (%s)!",
+    sprintf ( pc = strchr ( sz, 0 ), "%s (%s)!\n",
               _("Alert: wrong double"),
               OutputEquityDiff ( ( arDouble[ OUTPUT_TAKE ] > 
                                    arDouble[ OUTPUT_DROP ] ) ? 

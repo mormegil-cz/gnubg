@@ -1,3 +1,8 @@
+Sat Jan 31 15:21:55 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* format.c, gtkchequer.c, gtkcube.c: Make the Copy button open a text
+	window for easy display of analysis details.
+
 Thu Jan 29 09:09:16 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* analysis.c: use the right index in the new analyse rollout move

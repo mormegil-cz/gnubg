@@ -419,7 +419,7 @@ static void MoveListCopy(GtkWidget *pw, hintdata *phd)
 {
   char *pc = MoveListCopyData(phd);
   if ( pc )
-    TextToClipboard( pc );
+	  GTKTextWindow(pc, _("Move details"), DT_INFO, NULL);
 }
 
 static GtkWidget *

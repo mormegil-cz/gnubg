@@ -882,7 +882,7 @@ CubeAnalysisCopy ( GtkWidget *pw, cubehintdata *pchd ) {
   char *pc =  GetContent ( pchd );
 
   if ( pc )
-    TextToClipboard( pc );
+	  GTKTextWindow(pc, _("Cube details"), DT_INFO, NULL);
 
 }
 
