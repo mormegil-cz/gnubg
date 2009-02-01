@@ -1,3 +1,8 @@
+Sun Feb  1 16:59:04 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtkboard.c, play.c: New games/matches could be started when
+	ms.gs==GAME_NONE even though the move wasn't the last in the match
+
 Sun Feb  1 16:48:01 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* htmlimages.c: fix creation of htmlimages in the export dialog

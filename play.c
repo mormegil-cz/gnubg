@@ -1825,6 +1825,29 @@ extern int NextTurn( int fPlayNext ) {
     return 0;
 }
 
+extern int quick_roll(void)
+{
+	if (ms.gs == GAME_NONE && move_is_last_in_match())
+	{
+		UserCommand("new match");
+		return (ms.gs != GAME_NONE);
+	}
+	if (ms.gs != GAME_PLAYING && move_is_last_in_match())
+	{
+		UserCommand("new game");
+		return (ms.gs != GAME_PLAYING);
+	}
+	if (ms.gs != GAME_PLAYING)
+		/* we are not playing and the move isn't the last in the match */
+		return 1;
+	if (!ms.anDice[0])
+	{
+		UserCommand("roll");
+		return (!ms.anDice[0]);
+	}
+	return 1;
+}
+
 
 extern void CommandAccept( char *sz ) {
 
@@ -2947,7 +2970,7 @@ extern void CommandNewGame( char *sz )
 		return;
     }
 
-    if( ms.gs == GAME_PLAYING )
+    if( ms.gs == GAME_PLAYING || !move_is_last_in_match() )
 	{
 		if( fConfirmNew )
 		{
@@ -2955,7 +2978,7 @@ extern void CommandNewGame( char *sz )
 				return;
 	    
 		    if( !GetInputYN( _("Are you sure you want to start a new game, "
-			     "and discard the one in progress? ") ) )
+			     "and discard the rest of the match? ") ) )
 				return;
 		}
     
@@ -3033,7 +3056,7 @@ extern void CommandNewMatch( char *sz )
        return;
     }
 
-    if( ms.gs == GAME_PLAYING && fConfirmNew ) {
+    if( (ms.gs == GAME_PLAYING || !move_is_last_in_match()) && fConfirmNew ) {
 	if( fInterrupt )
 	    return;
 
@@ -3071,7 +3094,7 @@ extern void CommandNewMatch( char *sz )
 
 extern void CommandNewSession( char *sz ) {
 
-    if( ms.gs == GAME_PLAYING && fConfirmNew ) {
+    if ((ms.gs == GAME_PLAYING || !move_is_last_in_match()) && fConfirmNew ) {
 	if( fInterrupt )
 	    return;
 	    
