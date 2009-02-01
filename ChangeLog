@@ -1,3 +1,7 @@
+Sun Feb  1 16:48:01 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* htmlimages.c: fix creation of htmlimages in the export dialog
+
 Sat Jan 31 15:21:55 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* format.c, gtkchequer.c, gtkcube.c: Make the Copy button open a text

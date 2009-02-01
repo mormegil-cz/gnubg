@@ -646,18 +646,12 @@ static char* GetFilenameBase(char* sz)
 
 	if( !sz || !*sz )
 	{
-		outputf( _("You must specify a file to export to (see `%s')\n" ),
+		outputf( _("You must specify a directory to export to (see `%s')\n" ),
 			"help export htmlimages" );
 		return 0;
 	}
 
-	if (g_file_test(sz, G_FILE_TEST_EXISTS))
-	{
-		outputerrf(_("Cannot create htmlimages: %s already exists!"), sz);
-		return 0;
-	}
-
-	if( g_mkdir( sz, 0777) < 0 )
+	if (!g_file_test(sz, G_FILE_TEST_IS_DIR) && g_mkdir( sz, 0777) < 0 )
 	{
 		outputerr ( sz );
 		return 0;
