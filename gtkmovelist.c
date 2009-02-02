@@ -185,6 +185,7 @@ if (!psHighlight)
 	/* Also get colour to use for w/l stats in detail view */
     GetStyleFromRCFile(&psTemp, "move-winlossfg", psMoves);
     memcpy(&wlCol, &psTemp->fg[GTK_STATE_NORMAL], sizeof(GdkColor));
+    g_object_unref(psTemp);
 }
 
   /* This function should only be called when the game state matches
