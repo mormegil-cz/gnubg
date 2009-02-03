@@ -1835,9 +1835,8 @@ extern void CommandHelp( char *sz )
     }
 
     if( pc->pc && pc->pc->sz ) {
-	outputl( pc == &cTop ? _("Available commands") :
-		 _("Available subcommands") );
-	outputc(':');
+	outputl( pc == &cTop ? _("Available commands:") :
+		 _("Available subcommands:") );
 
 	pc = pc->pc;
 	
