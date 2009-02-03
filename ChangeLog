@@ -1,4 +1,8 @@
-Sun Feb  1 16:59:04 CET 2009 Christian Anthon <anthon@kiku.dk>
+Tue Feb  3 21:43:32 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, play.c: remove quick_roll from non-gtk code
+
+Sun Feb  1 16:59:04 CET 2009 Christian Anthon <anthon@kiku.dk>: 
 
 	* gtkboard.c, play.c: New games/matches could be started when
 	ms.gs==GAME_NONE even though the move wasn't the last in the match

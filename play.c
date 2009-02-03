@@ -1824,7 +1824,7 @@ extern int NextTurn( int fPlayNext ) {
     fComputing = FALSE;
     return 0;
 }
-
+#if USE_GTK
 extern int quick_roll(void)
 {
 	if (ms.gs == GAME_NONE && move_is_last_in_match())
@@ -1847,6 +1847,7 @@ extern int quick_roll(void)
 	}
 	return 1;
 }
+#endif
 
 
 extern void CommandAccept( char *sz ) {
