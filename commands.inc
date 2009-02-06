@@ -39,6 +39,10 @@ command cER = {
       N_("Clear analysis for this move"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acAnalyseRollout[] = {
+    { "double", CommandAnalyseRolloutDouble, 
+      N_("Rollout an analysed double.\n"),
+	      NULL, NULL },
+	
     { "move", CommandAnalyseRolloutMove, 
       N_("Rollout choices in the analysis movelist.\n"
 	 "\"analyse rollout move 1 2 3\" will rollout the first three choices."),

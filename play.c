@@ -4349,11 +4349,13 @@ getCurrentMoveRecord ( int *pfHistory ) {
   /* FIXME: introduce a mrHint that "Hint" and "Eval" fills */
 
   if ( plLastMove && plLastMove->plNext && plLastMove->plNext->p ) {
-    *pfHistory = TRUE;
+	  if (pfHistory)
+		  *pfHistory = TRUE;
     return plLastMove->plNext->p;
   }
   else {
-    *pfHistory = FALSE;
+	  if (pfHistory)
+		  *pfHistory = FALSE;
 
     if ( ! cmp_matchstate ( &ms, &sm.ms ) ) {
 

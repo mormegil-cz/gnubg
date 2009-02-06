@@ -568,6 +568,7 @@ extern void CommandAnalyseClearMove(char *);
 extern void CommandAnalyseGame(char *);
 extern void CommandAnalyseMatch(char *);
 extern void CommandAnalyseMove(char *);
+extern void CommandAnalyseRolloutDouble(char *);
 extern void CommandAnalyseRolloutMove(char *);
 extern void CommandAnalyseSession(char *);
 extern void CommandAnnotateAccept(char *);

@@ -40,6 +40,7 @@
 #include "formatgs.h"
 #include "progress.h"
 #include "multithread.h"
+#include "format.h"
 
 const char *aszRating [ N_RATINGS ] = {
   N_("rating|Awful!"), 
@@ -1657,35 +1658,36 @@ CommandShowStatisticsGame ( char *sz )
 }
 
 
-extern void
-CommandAnalyseMove ( char *sz )
+extern void CommandAnalyseMove(char *sz)
 {
-  if (!CheckGameExists())
-    return;
+	if (!CheckGameExists())
+		return;
 
-  if ( plLastMove && plLastMove->plNext && plLastMove->plNext->p )
-  {	/* analyse move */
-    moveData md;
-	matchstate msx;
+	if (plLastMove && plLastMove->plNext && plLastMove->plNext->p) {	/* analyse move */
+		moveData md;
+		matchstate msx;
 
-    memcpy ( &msx, &ms, sizeof ( matchstate ) );
+		md.pmr = plLastMove->plNext->p;
 
-	md.pmr = plLastMove->plNext->p;
-	md.pms = &msx;
-	md.pesChequer = &esAnalysisChequer;
-	md.pesCube = &esAnalysisCube;
-	md.aamf = aamfAnalysis;
-	RunAsyncProcess((AsyncFun)asyncAnalyzeMove, &md, _("Analysing move..."));
+		if (md.pmr->mt == MOVE_TAKE) {
+			outputerrf("%s", _("Please use 'analyse move' on the double decision"));
+			return;
+		}
+
+		memcpy(&msx, &ms, sizeof(matchstate));
+		md.pms = &msx;
+		md.pesChequer = &esAnalysisChequer;
+		md.pesCube = &esAnalysisCube;
+		md.aamf = aamfAnalysis;
+		RunAsyncProcess((AsyncFun) asyncAnalyzeMove, &md, _("Analysing move..."));
 
 #if USE_GTK
-  if( fX )
-    GTKUpdateAnnotations();
+		if (fX)
+			GTKUpdateAnnotations();
 #endif
-  }
-  else
-    outputl ( _("Sorry, cannot analyse move!") );
+	} else
+		outputerrf("%s", _("Please use hint on unfinished moves"));
 }
-
 
 static void
 updateStatisticsMove( const moverecord* pmr,
@@ -2137,6 +2139,70 @@ extern int MatchAnalysed(void)
 	return TRUE;
 }
 
+extern void CommandAnalyseRolloutDouble(char *sz)
+{
+
+	cubeinfo ci;
+	float aarOutput[2][NUM_ROLLOUT_OUTPUTS];
+	float aarStdDev[2][NUM_ROLLOUT_OUTPUTS];
+	rolloutstat aarsStatistics[2][2];
+	evalsetup *pes;
+	char asz[2][40];
+	void *p;
+
+	moverecord *pmr;
+
+	pmr = getCurrentMoveRecord(NULL);
+	if (!pmr) {
+		outputerrf(_("Missing valid moverecord. You need to have a completed double."));
+		return;
+	}
+
+	if (pmr->mt != MOVE_DOUBLE || DoubleType(ms.fDoubled, ms.fMove, ms.fTurn) != DT_NORMAL) {
+		outputerrf(_("This is not normal double. Cannot rollout."));
+		return;
+	}
+	pes = &pmr->CubeDecPtr->esDouble;
+	if (pes->et != EVAL_ROLLOUT) {
+		pes->rc = rcRollout;
+		pes->rc.nGamesDone = 0;
+	} else {
+		pes->rc.nTrials = rcRollout.nTrials;
+		pes->rc.fStopOnSTD = rcRollout.fStopOnSTD;
+		pes->rc.nMinimumGames = rcRollout.nMinimumGames;
+		pes->rc.rStdLimit = rcRollout.rStdLimit;
+		memcpy(aarOutput, pmr->CubeDecPtr->aarOutput, 2 * NUM_ROLLOUT_OUTPUTS * sizeof(float));
+		memcpy(aarStdDev, pmr->CubeDecPtr->aarStdDev, 2 * NUM_ROLLOUT_OUTPUTS * sizeof(float));
+	}
+
+	GetMatchStateCubeInfo(&ci, &ms);
+
+	FormatCubePositions(&ci, asz);
+	RolloutProgressStart(&ci, 2, aarsStatistics, &pes->rc, asz, &p);
+	if (GeneralCubeDecisionR(aarOutput, aarStdDev, aarsStatistics,
+				 (ConstTanBoard) msBoard(), &ci, &pes->rc, pes, RolloutProgress, p) < 0) {
+		RolloutProgressEnd(&p);
+		return;
+	}
+
+	RolloutProgressEnd(&p);
+
+	memcpy(pmr->CubeDecPtr->aarOutput, aarOutput, 2 * NUM_ROLLOUT_OUTPUTS * sizeof(float));
+	memcpy(pmr->CubeDecPtr->aarStdDev, aarStdDev, 2 * NUM_ROLLOUT_OUTPUTS * sizeof(float));
+
+	if (pes->et != EVAL_ROLLOUT)
+		memcpy(&pmr->CubeDecPtr->esDouble.rc, &rcRollout, sizeof(rcRollout));
+
+	pmr->CubeDecPtr->esDouble.et = EVAL_ROLLOUT;
+
+#if USE_GTK
+	if (fX)
+		GTKUpdateAnnotations();
+#endif
+	ShowBoard();
+
+}
+
 extern void CommandAnalyseRolloutMove(char *sz)
 {
 	cubeinfo ci;
@@ -2156,21 +2222,19 @@ extern void CommandAnalyseRolloutMove(char *sz)
 		return;
 	}
 
-	if (plLastMove && plLastMove->plNext && plLastMove->plNext->p)
-		pmr = plLastMove->plNext->p;
-	else {
+	pmr = getCurrentMoveRecord(NULL);
+	if (!pmr) {
 		outputerrf(_("Missing valid moverecord. You need to have a completed and analysed move."));
 		return;
 	}
 
-	if (pmr->mt != MOVE_NORMAL)
-	{
+	if (pmr->mt != MOVE_NORMAL) {
 		outputerrf(_("This is not a normal chequer move. Cannot rollout."));
 		return;
 	}
 
 	if (!(c = pmr->ml.cMoves)) {
-		outputerrf(_("Please analyse the move first"));
+		outputerrf(_("No moves to analyse"));
 		return;
 	}
 
@@ -2198,9 +2262,9 @@ extern void CommandAnalyseRolloutMove(char *sz)
 
 	outputf(_("Rolling out %d moves:"), c);
 
-	for (pl = list, j=0; pl; pl = g_slist_next(pl), j++) {
+	for (pl = list, j = 0; pl; pl = g_slist_next(pl), j++) {
 		int i = GPOINTER_TO_INT(pl->data) - 1;
-		outputf(" %d", i+1);
+		outputf(" %d", i + 1);
 		m = ppm[j] = &pmr->ml.amMoves[i];
 		ppci[j] = &ci;
 		FormatMove(asz[j], msBoard(), m->anMove);
@@ -2218,5 +2282,10 @@ extern void CommandAnalyseRolloutMove(char *sz)
 	if (res < 0)
 		return;
 	RefreshMoveList(&pmr->ml, NULL);
-	ShowBoard();
+#if USE_GTK
+	if (fX)
+		GTKUpdateAnnotations();
+	else
+#endif
+		ShowBoard();
 }
