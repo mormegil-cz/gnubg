@@ -70,6 +70,10 @@ Warning warnings[WARN_NUM_WARNINGS] =
 	{
 		N_("Automatically perform correct resignation?"),
 		"resign", TRUE, TRUE
+	},
+	{
+		N_("This action will roll out the current position before the dice are rolled. It is not possible to extend nor save this rollout?"),
+		"rollout", TRUE, FALSE
 	}
 };
 

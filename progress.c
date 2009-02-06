@@ -1121,9 +1121,13 @@ TextRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
   char *pch, *pc;
   time_t t;
 
-  /* write progress 1/10th trial */
-
-  if ( fInterrupt || (iGame >= prp->iNextGame && iAlternative == prp->iNextAlternative )) {
+  /* write progress 1/10th trial or just when called if mt */
+#if USE_MULTITHREAD
+  if (TRUE)
+#else
+  if ( fInterrupt || (iGame >= prp->iNextGame && iAlternative == prp->iNextAlternative ))
+#endif
+  {
 
     if ( ! iAlternative )
       outputl( "" );

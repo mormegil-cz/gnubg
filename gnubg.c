@@ -2491,235 +2491,36 @@ extern void CommandQuit( char *sz )
 }
 
 
-static move *
-GetMove ( const TanBoard anBoard ) {
+extern void CommandRollout(char *sz)
+{
+	float arOutput [ NUM_ROLLOUT_OUTPUTS ];
+	float arStdDev [ NUM_ROLLOUT_OUTPUTS ];
+	rolloutstat arsStatistics[ 2 ];
+	const TanBoard anBoard;
+	cubeinfo ci;
+	char asz[1][40];
+	void *p;
 
-  unsigned int i;
-  unsigned char auch[ 10 ];
-  TanBoard an;
-
-  if ( memcmp ( &ms, &sm.ms, sizeof ( matchstate ) ) )
-    return NULL;
-
-  memcpy ( an, anBoard, sizeof ( an ) );
-  SwapSides ( an );
-  PositionKey ( (ConstTanBoard)an, auch );
-
-  for ( i = 0; i < sm.ml.cMoves; ++i ) 
-    if ( EqualKeys ( auch, sm.ml.amMoves[ i ].auch ) ) 
-      return &sm.ml.amMoves[ i ];
-
-  return NULL;
-
-}
-
-
-extern void 
-CommandRollout( char *sz ) {
-    
-    int i, c, n, fOpponent = FALSE, cGames;
-    cubeinfo ci;
-    move *pm = 0;
-    int num_args;
-
-    unsigned int ( *aan )[ 2 ][ 25 ];
-    char ( *asz )[ 40 ];
-
-    num_args = c = CountTokens( sz );
-  if( !c ) {
-    if( ms.gs != GAME_PLAYING ) {
-      outputl( _("No position specified and no game in progress.") );
-      return;
-    } else
-      c = 1; /* current position */
-  }
-  else if ( rcRollout.fInitial ) {
-
-    if ( c == 1 && ! strncmp ( sz, "=cube", 5 ) )
-      outputl ( _("You cannot do a cube decision rollout for the initial"
-                  " position.\n"
-                  "Please 'set rollout initial off'.") );
-      else
-        outputl ( _("You cannot rollout moves as initial position.\n"
-                  "Please 'set rollout initial off'.") );
-      
-      return;
-  }
-
-  /* check for `rollout =cube' */    
-  if ( c == 1 && ! strncmp ( sz, "=cube", 5 ) ) {
-    float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-    float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-    rolloutstat aarsStatistics[ 2 ][ 2 ];
-    void *p;
-    char aszCube[ 2 ][ 40 ];
-
-    evalsetup es;
-
-    if( ms.gs != GAME_PLAYING ) {
-      outputl( _("No game in progress.") );
-      return;
-    }
-
-    es.et = EVAL_NONE;
-    memcpy (&es.rc, &rcRollout, sizeof (rcRollout));
-
-    GetMatchStateCubeInfo( &ci, &ms );
-
-    FormatCubePositions( &ci, aszCube );
-
-    RolloutProgressStart( &ci, 2, aarsStatistics, &es.rc, aszCube, &p );
-    
-    GeneralCubeDecisionR ( aarOutput, aarStdDev, aarsStatistics,
-			   msBoard(), &ci, &es.rc, &es, RolloutProgress, p );
-
-    UpdateStoredCube ( aarOutput, aarStdDev, &es, &ms );
-
-    RolloutProgressEnd( &p );
-
-    /* bring up Hint-dialog with cube rollout */
-    HintCube();
-
-    return;
-
-  }
-
-
-    aan = g_alloca( 50 * c * sizeof( int ) );
-    asz = g_alloca( 40 * c );
-
-    for( i = 0; i < c; i++ ) {
-      if( ( n = ParsePosition( aan[ i ], &sz, asz[ i ] ) ) < 0 )
+	if (CountTokens(sz) > 0) {
+		outputerrf("%s", _("The rollout command takes no arguments and only rollouts the current position"));
 		return;
-      else if( n ) {
-		if( ms.fMove )
-		  SwapSides( aan[ i ] );
-	    
-		fOpponent = TRUE;
-      }
-
-      if( !sz ) {
-		/* that was the last parameter */
-		c = i + 1;
-		break;
-      }
-    }
-
-    /*
-      if( fOpponent ) {
-      an[ 0 ] = ms.anScore[ 1 ];
-      an[ 1 ] = ms.anScore[ 0 ];
-    } else {
-    an[ 0 ] = ms.anScore[ 0 ];
-    an[ 1 ] = ms.anScore[ 1 ];
-    }
-    */
-    
-    SetCubeInfo ( &ci, ms.nCube, ms.fCubeOwner, fOpponent ? !ms.fMove :
-		  ms.fMove, ms.nMatchTo, ms.anScore, ms.fCrawford, ms.fJacoby,
-                  nBeavers, ms.bgv );
-
-    {
-      /* create all the explicit pointer arrays for RolloutGeneral */
-      /* cdecl is your friend */
-      float aarNoOutput[ NUM_ROLLOUT_OUTPUTS ];
-      float aarNoStdDev[ NUM_ROLLOUT_OUTPUTS ];
-      evalsetup NoEs;
-
-      /* only allow doubling before first dice roll when rolling out moves*/
-      int fCubeDecTop = num_args ? TRUE : FALSE;
-
-      void *p;
-	  ConstTanBoard *apBoard;
-      float       (** apOutput)[ NUM_ROLLOUT_OUTPUTS ];
-      float       (** apStdDev)[ NUM_ROLLOUT_OUTPUTS ];
-      evalsetup   (** apes);
-      const cubeinfo    (** apci);
-      int         (** apCubeDecTop);
-      move	  (** apMoves);
-
-      apBoard = g_alloca (c * sizeof (int *));
-      apOutput = g_alloca (c * sizeof (float *));
-      apStdDev = g_alloca (c * sizeof (float *));
-      apes = g_alloca (c * sizeof (evalsetup *));
-      apci = g_alloca (c * sizeof (cubeinfo *));
-      apCubeDecTop = g_alloca (c * sizeof (int *));
-      apMoves = g_alloca (c * sizeof (move *));
-
-      for( i = 0; i < c; i++ ) {
-	/* set up to call RolloutGeneral for all the moves at once */
-	if ( fOpponent ) 
-	  apMoves[ i ] = pm = GetMove ( (ConstTanBoard)aan[ i ] );
-    
-	apBoard[ i ] = (ConstTanBoard)(aan + i);
-	if (pm) {
-	  apOutput[ i ] = &pm->arEvalMove;
-	  apStdDev[ i ] = &pm->arEvalStdDev;
-	  apes[ i ] = &pm->esMove;
-	} else {
-	  apOutput[ i ] = &aarNoOutput;
-	  apStdDev[ i ] = &aarNoStdDev;
-	  apes[ i ] = &NoEs;
-	  memcpy (&NoEs.rc, &rcRollout, sizeof (rolloutcontext));
 	}
-	apci[ i ] = &ci;
-	apCubeDecTop[ i ] = &fCubeDecTop;
-      }
-
-      RolloutProgressStart (&ci, c, NULL, &rcRollout, asz, &p);
-
-      if( ( cGames = 
-	    RolloutGeneral( apBoard, apOutput, apStdDev,
-			    NULL, apes, apci,
-			    apCubeDecTop, c, fOpponent, FALSE,
-                           RolloutProgress, p )) <= 0 ) {
-        RolloutProgressEnd( &p );
-	return;
-      }
-      
-      RolloutProgressEnd( &p );
-
-      /* save in current movelist */
-
-      if ( fOpponent ) {
-        for (i = 0; i < c; ++i) {
-          
-          move *pm = apMoves[ i ];
-          /* it was the =1 =2 notation */
-          
-          cubeinfo cix;
-          
-          memcpy( &cix, &ci, sizeof( cubeinfo ) );
-          cix.fMove = ! cix.fMove;
-          
-          /* Score for move:
-             rScore is the primary score (cubeful/cubeless)
-             rScore2 is the secondary score (cubeless) */
-          
-          if ( pm->esMove.rc.fCubeful ) {
-            if ( cix.nMatchTo )
-              pm->rScore = 
-                mwc2eq ( pm->arEvalMove[ OUTPUT_CUBEFUL_EQUITY ], &cix );
-            else
-              pm->rScore = pm->arEvalMove[ OUTPUT_CUBEFUL_EQUITY ];
-          }
-          else
-            pm->rScore = pm->arEvalMove[ OUTPUT_EQUITY ];
-          
-          pm->rScore2 = pm->arEvalMove[ OUTPUT_EQUITY ];
-          
-        }
-        
-        /* bring up Hint-dialog with chequerplay rollout */
-        HintChequer( NULL );
-      
-      }
-
-
-    }
+	if (ms.gs != GAME_PLAYING) {
+		outputerrf("%s", _("No position specified and no game in progress."));
+		return;
+	}
+#if USE_GTK
+	if (fX)
+		GTKShowWarning(WARN_ROLLOUT, NULL);
+#endif
+	sprintf(asz[0], _("Current Position"));
+	memcpy(anBoard, msBoard(), sizeof(TanBoard));
+	SetCubeInfo(&ci, ms.nCube, ms.fCubeOwner, ms.fMove, ms.nMatchTo, ms.anScore, ms.fCrawford, ms.fJacoby, nBeavers, ms.bgv);
+	RolloutProgressStart(&ci, 1, NULL, &rcRollout, asz, &p);
+	GeneralEvaluationR(arOutput, arStdDev, arsStatistics, anBoard, &ci, &rcRollout, RolloutProgress, p);
+	RolloutProgressEnd(&p);
 
 }
-
 
 static void LoadCommands(FILE * pf, char *szFile)
 {
