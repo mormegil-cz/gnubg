@@ -233,9 +233,9 @@ if (!psHighlight)
 	}
 
 	if (rankKnown)
-      sprintf( sz, "%d", i + 1 );
+      sprintf( sz, "%s%d", pml->amMoves[i].cmark ? "+" : "", i + 1 );
     else
-      strcpy( sz, "??" );
+      sprintf( sz, "%s??", pml->amMoves[i].cmark ? "+" : "" );
 
 	if (showWLTree)
 	{

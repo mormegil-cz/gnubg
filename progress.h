@@ -45,7 +45,7 @@ RolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                  void *pUserData );
 
 extern void
-RolloutProgressEnd( void **pp );
+RolloutProgressEnd( void **pp, gboolean destroy );
 
 #endif /* _PROGRESS_H_ */
 

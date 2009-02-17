@@ -2110,7 +2110,7 @@ static int MoveAnalysed(moverecord * pmr, matchstate * pms, listOLD * plGame,
 	return TRUE;
 }
 
-static int GameAnalysed(listOLD * plGame)
+static int GameAnalysed(listOLD *plGame)
 {
 	listOLD *pl;
 	moverecord *pmrx = (moverecord *) plGame->plNext->p;
@@ -2139,30 +2139,249 @@ extern int MatchAnalysed(void)
 	return TRUE;
 }
 
-extern void CommandAnalyseRolloutDouble(char *sz)
+static void cmark_cube_show(GString *gsz, const matchstate *pms,
+			    const moverecord *pmr, int movenr)
 {
+	g_return_if_fail(pmr);
+	g_return_if_fail(pmr->mt == MOVE_NORMAL || pmr->mt == MOVE_DOUBLE
+			 || pmr->mt == MOVE_TAKE || pmr->mt == MOVE_DROP);
+	g_return_if_fail(pmr->CubeDecPtr);
 
-	cubeinfo ci;
-	float aarOutput[2][NUM_ROLLOUT_OUTPUTS];
-	float aarStdDev[2][NUM_ROLLOUT_OUTPUTS];
-	rolloutstat aarsStatistics[2][2];
-	evalsetup *pes;
-	char asz[2][40];
-	void *p;
+	if (pmr->CubeDecPtr->cmark)
+		g_string_append_printf(gsz, _("Move %d\nCube marked\n"),
+				       movenr);
+}
 
+static void cmark_cube_set(moverecord *pmr, CMark cmark)
+{
+	g_return_if_fail(pmr);
+	g_return_if_fail(pmr->mt == MOVE_NORMAL || pmr->mt == MOVE_DOUBLE
+			 || pmr->mt == MOVE_TAKE || pmr->mt == MOVE_DROP);
+	g_return_if_fail(pmr->CubeDecPtr);
+
+	pmr->CubeDecPtr->cmark = cmark;
+}
+
+static void cmark_move_show(GString *gsz, const matchstate *pms,
+			    const moverecord *pmr, int movenr)
+{
+	guint i;
+	gchar sz[40];
+	int found = 0;
+
+	g_return_if_fail(pmr);
+	g_return_if_fail(gsz);
+
+	for (i = 0; i < pmr->ml.cMoves; i++) {
+		if (pmr->ml.amMoves[i].cmark) {
+			if (!found++)
+				g_string_append_printf(gsz, _("Move %d\n"),
+						       movenr);
+			FormatMove(sz, msBoard(), pmr->ml.amMoves[i].anMove);
+			g_string_append_printf(gsz, _("%i (%s) marked\n"),
+					       i + 1, sz);
+		}
+	}
+}
+
+static void cmark_game_show(GString *gsz, const listOLD *game, int game_number)
+{
+	matchstate ms_local;
+	listOLD *pl;
 	moverecord *pmr;
+	int movenr = 1;
 
-	pmr = getCurrentMoveRecord(NULL);
-	if (!pmr) {
-		outputerrf(_("Missing valid moverecord. You need to have a completed double."));
+	g_return_if_fail(gsz);
+	g_return_if_fail(game);
+
+	g_string_append_printf(gsz, _("Game %d\n"), game_number);
+	for (pl = game->plNext; pl != game; pl = pl->plNext) {
+		pmr = pl->p;
+		FixMatchState(&ms_local, pmr);
+		switch (pmr->mt) {
+		case MOVE_GAMEINFO:
+			ApplyMoveRecord(&ms_local, game, pmr);
+			break;
+		case MOVE_NORMAL:
+			if (pmr->fPlayer != ms_local.fMove) {
+				SwapSides(ms_local.anBoard);
+				ms_local.fMove = pmr->fPlayer;
+			}
+			ms_local.fTurn = ms_local.fMove = pmr->fPlayer;
+			cmark_cube_show(gsz, &ms_local, pmr, movenr);
+			ms_local.anDice[0] = pmr->anDice[0];
+			ms_local.anDice[1] = pmr->anDice[1];
+			cmark_move_show(gsz, &ms_local, pmr, movenr);
+			movenr++;
+			ApplyMoveRecord(&ms_local, game, pmr);
+			break;
+		case MOVE_DOUBLE:
+			cmark_cube_show(gsz, &ms_local, pmr, movenr);
+			movenr++;
+			ApplyMoveRecord(&ms_local, game, pmr);
+			break;
+		case MOVE_TAKE:
+		case MOVE_DROP:
+			movenr++;
+			ApplyMoveRecord(&ms_local, game, pmr);
+			break;
+		default:
+			ApplyMoveRecord(&ms_local, game, pmr);
+			break;
+		}
+	}
+}
+
+static void cmark_match_show(GString *gsz, const listOLD *match)
+{
+	listOLD *pl;
+	int game_number = 1;
+
+	for (pl = match->plNext; pl != match; pl = pl->plNext) {
+		cmark_game_show(gsz, pl->p, game_number++);
+	}
+}
+
+static void cmark_move_set(moverecord *pmr, gchar *sz, CMark cmark)
+{
+	gint c;
+	gint n;
+	GSList *list = NULL, *pl = NULL;
+
+	g_return_if_fail(sz);
+	g_return_if_fail(pmr);
+	g_return_if_fail(pmr->ml.cMoves);
+
+	c = pmr->ml.cMoves;
+
+	while ((n = g_ascii_strtoll(sz, &sz, 10))) {
+		if (n > c) {
+			outputerrf("Only %d moves in movelist\n", c);
+			g_slist_free(list);
+			return;
+		}
+		if (!g_slist_find(list, GINT_TO_POINTER(n)))
+			list = g_slist_append(list, GINT_TO_POINTER(n));
+	}
+	if (!(c = g_slist_length(list))) {
+		outputerrf("Not a valid list of moves\n");
 		return;
 	}
 
-	if (pmr->mt != MOVE_DOUBLE || DoubleType(ms.fDoubled, ms.fMove, ms.fTurn) != DT_NORMAL) {
-		outputerrf(_("This is not normal double. Cannot rollout."));
-		return;
+	for (pl = list; pl; pl = g_slist_next(pl)) {
+		gint i = GPOINTER_TO_INT(pl->data) - 1;
+		pmr->ml.amMoves[i].cmark = cmark;
 	}
-	pes = &pmr->CubeDecPtr->esDouble;
+	g_slist_free(list);
+}
+
+static void cmark_move_clear(moverecord *pmr)
+{
+	guint j;
+	g_return_if_fail(pmr);
+
+	for (j = 0; j < pmr->ml.cMoves; j++)
+		pmr->ml.amMoves[j].cmark = CMARK_NONE;
+}
+
+static void cmark_game_clear(listOLD *game)
+{
+	listOLD *pl;
+
+	g_return_if_fail(game);
+
+	for (pl = game->plNext; pl != game; pl = pl->plNext) {
+		moverecord *pmr = pl->p;
+
+		if (!pmr)
+			continue;
+
+		switch (pmr->mt) {
+		case MOVE_NORMAL:
+			cmark_move_clear(pmr);
+			cmark_cube_set(pmr, CMARK_NONE);
+			break;
+		case MOVE_DOUBLE:
+			cmark_cube_set(pmr, CMARK_NONE);
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+static void cmark_match_clear(listOLD *match)
+{
+	listOLD *pl;
+
+	for (pl = match->plNext; pl != match; pl = pl->plNext) {
+		cmark_game_clear(pl->p);
+	}
+}
+
+static int cmark_move_rollout(moverecord *pmr, gboolean destroy)
+{
+	gchar (*asz)[40];
+	cubeinfo ci;
+	cubeinfo **ppci;
+	GSList *pl = NULL;
+	gint c;
+	guint j;
+	gint res;
+	move *m;
+	move **ppm;
+	void *p;
+	GSList *list = NULL;
+
+	g_return_val_if_fail(pmr, -1);
+
+	for (j = 0; j < pmr->ml.cMoves; j++) {
+		if (pmr->ml.amMoves[j].cmark == CMARK_ROLLOUT)
+			list = g_slist_append(list, GINT_TO_POINTER(j));
+	}
+
+	if (!(c = g_slist_length(list))) {
+		return 0;
+	}
+
+	ppm = g_new(move *, c);
+	ppci = g_new(cubeinfo *, c);
+	asz = (char (*)[40])g_malloc(40 * c);
+
+	GetMatchStateCubeInfo(&ci, &ms);
+
+	for (pl = list, j = 0; pl; pl = g_slist_next(pl), j++) {
+		gint i = GPOINTER_TO_INT(pl->data);
+		m = ppm[j] = &pmr->ml.amMoves[i];
+		ppci[j] = &ci;
+		FormatMove(asz[j], msBoard(), m->anMove);
+	}
+
+	RolloutProgressStart(&ci, c, NULL, &rcRollout, asz, &p);
+	res = ScoreMoveRollout(ppm, (const cubeinfo **)ppci,
+			       c, RolloutProgress, p);
+	RolloutProgressEnd(&p, destroy);
+
+	g_free(asz);
+	g_free(ppm);
+	g_free(ppci);
+
+	if (res < 0)
+		return -1;
+	RefreshMoveList(&pmr->ml, NULL);
+#if USE_GTK
+	if (fX)
+		GTKUpdateAnnotations();
+	else
+#endif
+		ShowBoard();
+	return c;
+}
+
+static evalsetup *setup_cube_rollout(evalsetup *pes, moverecord *pmr,
+				     float aarOutput[][NUM_ROLLOUT_OUTPUTS],
+				     float aarStdDev[][NUM_ROLLOUT_OUTPUTS])
+{
 	if (pes->et != EVAL_ROLLOUT) {
 		pes->rc = rcRollout;
 		pes->rc.nGamesDone = 0;
@@ -2171,27 +2390,50 @@ extern void CommandAnalyseRolloutDouble(char *sz)
 		pes->rc.fStopOnSTD = rcRollout.fStopOnSTD;
 		pes->rc.nMinimumGames = rcRollout.nMinimumGames;
 		pes->rc.rStdLimit = rcRollout.rStdLimit;
-		memcpy(aarOutput, pmr->CubeDecPtr->aarOutput, 2 * NUM_ROLLOUT_OUTPUTS * sizeof(float));
-		memcpy(aarStdDev, pmr->CubeDecPtr->aarStdDev, 2 * NUM_ROLLOUT_OUTPUTS * sizeof(float));
+		memcpy(aarOutput, pmr->CubeDecPtr->aarOutput,
+		       2 * NUM_ROLLOUT_OUTPUTS * sizeof(float));
+		memcpy(aarStdDev, pmr->CubeDecPtr->aarStdDev,
+		       2 * NUM_ROLLOUT_OUTPUTS * sizeof(float));
 	}
+	return pes;
+}
+
+static void cmark_cube_rollout(moverecord *pmr, gboolean destroy)
+{
+	evalsetup *pes;
+	cubeinfo ci;
+	float aarOutput[2][NUM_ROLLOUT_OUTPUTS];
+	float aarStdDev[2][NUM_ROLLOUT_OUTPUTS];
+	rolloutstat aarsStatistics[2][2];
+	gchar asz[2][40];
+	void *p;
+
+	if (!pmr->CubeDecPtr->cmark == CMARK_ROLLOUT)
+		return;
+	pes = setup_cube_rollout(&pmr->CubeDecPtr->esDouble,
+				 pmr, aarOutput, aarStdDev);
 
 	GetMatchStateCubeInfo(&ci, &ms);
 
 	FormatCubePositions(&ci, asz);
 	RolloutProgressStart(&ci, 2, aarsStatistics, &pes->rc, asz, &p);
 	if (GeneralCubeDecisionR(aarOutput, aarStdDev, aarsStatistics,
-				 (ConstTanBoard) msBoard(), &ci, &pes->rc, pes, RolloutProgress, p) < 0) {
-		RolloutProgressEnd(&p);
+				 (ConstTanBoard) msBoard(), &ci, &pes->rc, pes,
+				 RolloutProgress, p) < 0) {
+		RolloutProgressEnd(&p, destroy);
 		return;
 	}
 
-	RolloutProgressEnd(&p);
+	RolloutProgressEnd(&p, destroy);
 
-	memcpy(pmr->CubeDecPtr->aarOutput, aarOutput, 2 * NUM_ROLLOUT_OUTPUTS * sizeof(float));
-	memcpy(pmr->CubeDecPtr->aarStdDev, aarStdDev, 2 * NUM_ROLLOUT_OUTPUTS * sizeof(float));
+	memcpy(pmr->CubeDecPtr->aarOutput, aarOutput,
+	       2 * NUM_ROLLOUT_OUTPUTS * sizeof(float));
+	memcpy(pmr->CubeDecPtr->aarStdDev, aarStdDev,
+	       2 * NUM_ROLLOUT_OUTPUTS * sizeof(float));
 
 	if (pes->et != EVAL_ROLLOUT)
-		memcpy(&pmr->CubeDecPtr->esDouble.rc, &rcRollout, sizeof(rcRollout));
+		memcpy(&pmr->CubeDecPtr->esDouble.rc, &rcRollout,
+		       sizeof(rcRollout));
 
 	pmr->CubeDecPtr->esDouble.et = EVAL_ROLLOUT;
 
@@ -2200,92 +2442,277 @@ extern void CommandAnalyseRolloutDouble(char *sz)
 		GTKUpdateAnnotations();
 #endif
 	ShowBoard();
-
 }
 
-extern void CommandAnalyseRolloutMove(char *sz)
+static int move_change(const listOLD *new_game, const listOLD *new_move)
 {
-	cubeinfo ci;
-	int c, res;
-	move *m;
-	void *p;
-	move **ppm;
-	cubeinfo **ppci;
-	char (*asz)[40];
-	moverecord *pmr;
-	gint n;
-	GSList *list = NULL, *pl = NULL;
-	int j;
+	g_return_val_if_fail(new_game, FALSE);
+	g_return_val_if_fail(new_move, FALSE);
 
-	if (!sz || !*sz) {
-		outputerrf("No moves given");
-		return;
-	}
+	if (plGame != new_game)
+		ChangeGame(new_game);
 
-	pmr = getCurrentMoveRecord(NULL);
-	if (!pmr) {
-		outputerrf(_("Missing valid moverecord. You need to have a completed and analysed move."));
-		return;
+	if (plLastMove == new_move)
+		return 1;
+	while (plLastMove->plNext->p && plLastMove != new_move) {
+		plLastMove = plLastMove->plNext;
+		FixMatchState(&ms, plLastMove->p);
+		ApplyMoveRecord(&ms, plGame, plLastMove->p);
 	}
+	UpdateGame(FALSE);
+
+	if (plLastMove->plNext && plLastMove->plNext->p)
+		FixMatchState(&ms, plLastMove->plNext->p);
+
+	SetMoveRecord(plLastMove->p);
+	return (plLastMove == new_move);
+}
+
+static void cmark_game_rollout(listOLD *game)
+{
+	listOLD *pl;
+
+	g_return_if_fail(game);
+
+	for (pl = game->plNext; pl != game; pl = pl->plNext) {
+		moverecord *pmr_prev;
+		moverecord *pmr = pl->p;
+
+		if (!pmr)
+			continue;
+
+		switch (pmr->mt) {
+		case MOVE_NORMAL:
+			if (!move_change(game, pl->plPrev))
+				return;
+			cmark_move_rollout(pmr, TRUE);
+			cmark_cube_rollout(pmr, TRUE);
+			break;
+		case MOVE_DOUBLE:
+			pmr_prev = game->plPrev->p;
+			if (pmr_prev->mt == MOVE_DOUBLE)
+				break;
+			if (!move_change(game, pl->plPrev))
+				return;
+			cmark_cube_rollout(pmr, TRUE);
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+static void cmark_match_rollout(listOLD *match)
+{
+	listOLD *pl;
+
+	for (pl = match->plNext; pl != match; pl = pl->plNext) {
+		cmark_game_rollout(pl->p);
+	}
+}
+
+static gint check_cube_in_pmr(const moverecord *pmr)
+{
+	if (!pmr)
+		outputerrf(_("No moverecord stored for this cube."));
+
+	if (pmr->mt != MOVE_NORMAL && pmr->mt != MOVE_DOUBLE
+	    && pmr->mt != MOVE_TAKE && pmr->mt != MOVE_DROP) {
+		outputerrf(_
+			   ("This move doesn't imply a cubeaction. Cannot mark."));
+		return 0;
+	}
+	return 1;
+}
+
+static gint check_cmoves_in_pmr(const moverecord *pmr)
+{
+	gint c;
+
+	if (!pmr)
+		outputerrf(_("No moverecord stored for this move."));
 
 	if (pmr->mt != MOVE_NORMAL) {
-		outputerrf(_("This is not a normal chequer move. Cannot rollout."));
-		return;
+		outputerrf(_("This is not a normal chequer move. "
+			     "Cannot mark."));
+		return 0;
 	}
 
 	if (!(c = pmr->ml.cMoves)) {
 		outputerrf(_("No moves to analyse"));
+		return 0;
+	}
+
+	return c;
+}
+
+extern void CommandCMarkCubeShow(char *sz)
+{
+	GString *gsz;
+	moverecord *pmr = getCurrentMoveRecord(NULL);
+
+	if (!check_cube_in_pmr(pmr))
 		return;
-	}
 
-	while ((n = g_ascii_strtoll(sz, &sz, 10))) {
-		if (n > c) {
-			outputerrf("Only %d moves in movelist\n", c);
-			return;
-		}
-		if (g_slist_find(list, GINT_TO_POINTER(n))) {
-			outputerrf("Duplicates in list %d\n", n);
-			return;
-		}
-		list = g_slist_append(list, GINT_TO_POINTER(n));
-	}
-	if (!(c = g_slist_length(list))) {
-		outputerrf("Not a valid list of moves\n");
+	gsz = g_string_new(NULL);
+	cmark_cube_show(gsz, &ms, pmr, getMoveNumber(plGame, pmr) - 1);
+	outputf(_("%s"), gsz->str);
+	g_string_free(gsz, TRUE);
+}
+
+extern void CommandCMarkCubeSetNone(char *sz)
+{
+	moverecord *pmr = getCurrentMoveRecord(NULL);
+
+	if (!check_cube_in_pmr(pmr))
 		return;
-	}
 
-	ppm = g_new(move *, c);
-	ppci = g_new(cubeinfo *, c);
-	asz = (char (*)[40]) g_malloc(40 * c);
+	cmark_cube_set(pmr, CMARK_NONE);
+}
 
-	GetMatchStateCubeInfo(&ci, &ms);
+extern void CommandCMarkCubeSetRollout(char *sz)
+{
+	moverecord *pmr = getCurrentMoveRecord(NULL);
 
-	outputf(_("Rolling out %d moves:"), c);
-
-	for (pl = list, j = 0; pl; pl = g_slist_next(pl), j++) {
-		int i = GPOINTER_TO_INT(pl->data) - 1;
-		outputf(" %d", i + 1);
-		m = ppm[j] = &pmr->ml.amMoves[i];
-		ppci[j] = &ci;
-		FormatMove(asz[j], msBoard(), m->anMove);
-	}
-	outputl("");
-
-	RolloutProgressStart(&ci, c, NULL, &rcRollout, asz, &p);
-	res = ScoreMoveRollout(ppm, (const cubeinfo **) ppci, c, RolloutProgress, p);
-	RolloutProgressEnd(&p);
-
-	g_free(asz);
-	g_free(ppm);
-	g_free(ppci);
-
-	if (res < 0)
+	if (!check_cube_in_pmr(pmr))
 		return;
-	RefreshMoveList(&pmr->ml, NULL);
-#if USE_GTK
-	if (fX)
-		GTKUpdateAnnotations();
+
+	cmark_cube_set(pmr, CMARK_ROLLOUT);
+}
+
+extern void CommandCMarkMoveClear(char *sz)
+{
+	moverecord *pmr = getCurrentMoveRecord(NULL);
+
+	if (!check_cmoves_in_pmr(pmr))
+		return;
+
+	cmark_move_clear(pmr);
+}
+
+extern void CommandCMarkGameClear(char *sz)
+{
+	if (!CheckGameExists())
+		return;
+
+	cmark_game_clear(plGame);
+}
+
+extern void CommandCMarkMatchClear(char *sz)
+{
+	if (!CheckGameExists())
+		return;
+	cmark_match_clear(&lMatch);
+}
+
+extern void CommandCMarkMoveSetNone(char *sz)
+{
+	moverecord *pmr = getCurrentMoveRecord(NULL);
+
+	if (!check_cmoves_in_pmr(pmr))
+		return;
+
+	if (sz && *sz)
+		cmark_move_set(pmr, sz, CMARK_NONE);
 	else
-#endif
-		ShowBoard();
+		outputerrf(_("cmark move set requires a list of moves to set"));
+}
+
+extern void CommandCMarkMoveSetRollout(char *sz)
+{
+	moverecord *pmr = getCurrentMoveRecord(NULL);
+
+	if (!check_cmoves_in_pmr(pmr))
+		return;
+
+	if (sz && *sz)
+		cmark_move_set(pmr, sz, CMARK_ROLLOUT);
+	else
+		outputerrf(_("cmark move set requires a list of moves to set"));
+}
+
+extern void CommandCMarkMoveShow(char *sz)
+{
+	GString *gsz;
+	moverecord *pmr = getCurrentMoveRecord(NULL);
+
+	if (!check_cmoves_in_pmr(pmr))
+		return;
+
+	gsz = g_string_new(NULL);
+	cmark_move_show(gsz, &ms, pmr, getMoveNumber(plGame, pmr) - 1);
+	outputf(_("%s"), gsz->str);
+	g_string_free(gsz, TRUE);
+}
+
+extern void CommandCMarkGameShow(char *sz)
+{
+	GString *gsz;
+
+	if (!CheckGameExists())
+		return;
+
+	gsz = g_string_new(NULL);
+	cmark_game_show(gsz, plGame, getGameNumber(plGame));
+	outputf(_("%s"), gsz->str);
+	g_string_free(gsz, TRUE);
+}
+
+extern void CommandCMarkMatchShow(char *sz)
+{
+	GString *gsz;
+
+	if (!CheckGameExists())
+		return;
+
+	gsz = g_string_new(NULL);
+	cmark_match_show(gsz, &lMatch);
+	outputf(_("%s"), gsz->str);
+	g_string_free(gsz, TRUE);
+}
+
+extern void CommandAnalyseRolloutCube(char *sz)
+{
+	moverecord *pmr = getCurrentMoveRecord(NULL);
+
+	if (!check_cube_in_pmr(pmr))
+		return;
+
+	cmark_cube_set(pmr, CMARK_ROLLOUT);
+	cmark_cube_rollout(pmr, FALSE);
+	cmark_cube_set(pmr, CMARK_NONE);
+}
+
+extern void CommandAnalyseRolloutMove(char *sz)
+{
+	moverecord *pmr = getCurrentMoveRecord(NULL);
+
+	if (!check_cmoves_in_pmr(pmr))
+		return;
+
+	if (sz && *sz)
+		cmark_move_set(pmr, sz, CMARK_ROLLOUT);
+
+	if (!cmark_move_rollout(pmr, FALSE)) {
+		outputerrf("No moves marked for rollout\n");
+		return;
+	}
+
+	cmark_move_clear(pmr);
+}
+
+extern void CommandAnalyseRolloutGame(char *sz)
+{
+	if (!CheckGameExists())
+		return;
+
+	cmark_game_rollout(plGame);
+}
+
+extern void CommandAnalyseRolloutMatch(char *sz)
+{
+	if (!CheckGameExists())
+		return;
+
+	cmark_match_rollout(&lMatch);
 }

@@ -81,7 +81,7 @@ static void MoveListRolloutClicked(GtkWidget *pw, hintdata *phd)
 
   res = ScoreMoveRollout ( ppm, (const cubeinfo**)ppci, c, RolloutProgress, p );
 
-  RolloutProgressEnd( &p );
+  RolloutProgressEnd( &p, FALSE );
 
 	free(asz);
 	free(ppm);
@@ -190,6 +190,29 @@ static void MoveListTempMapClicked( GtkWidget *pw, hintdata *phd )
   for ( i = 0; i < c; ++i )
     g_free( asz[ i ] );
   g_free( asz );
+}
+
+static void MoveListCmarkClicked(GtkWidget *pw, hintdata *phd)
+{
+	guint new_mark;
+	guint all_marked = TRUE;
+	GList *pl;
+	GList *plSelList = MoveListGetSelectionList(phd);
+	if (!plSelList)
+		return;
+	for (pl = plSelList; pl; pl = pl->next) {
+
+		move *m = MoveListGetMove(phd, pl);
+		all_marked = MIN(m->cmark, all_marked);
+	}
+	new_mark = all_marked ? 0 : 1;
+	for (pl = plSelList; pl; pl = pl->next) {
+
+		move *m = MoveListGetMove(phd, pl);
+		m->cmark = new_mark;
+	}
+	MoveListFreeSelectionList(plSelList);
+	MoveListUpdate(phd);
 }
 
 static void
@@ -434,7 +457,8 @@ CreateMoveListTools ( hintdata *phd )
   GtkWidget *pwMove = gtk_button_new_with_label ( _("Move") );
   GtkWidget *pwShow = gtk_toggle_button_new_with_label ( _("Show") );
   GtkWidget *pwCopy = gtk_button_new_with_label ( _("Copy") );
-  GtkWidget *pwTempMap = gtk_button_new_with_label( _("Temp. Map") );
+  GtkWidget *pwTempMap = gtk_button_new_with_label( _("TM") );
+  GtkWidget *pwCmark = gtk_button_new_with_label( _("Cmark") );
   GtkWidget *pwply;
   int i;
   char *sz;
@@ -449,6 +473,7 @@ CreateMoveListTools ( hintdata *phd )
   phd->pwShow = pwShow;
   phd->pwCopy = pwCopy;
   phd->pwTempMap = pwTempMap;
+  phd->pwCmark = pwCmark;
 
   /* toolbox on the left with buttons for eval, rollout and more */
   
@@ -494,7 +519,7 @@ CreateMoveListTools ( hintdata *phd )
                     (GtkAttachOptions) (0), 0, 0);
 
   if ( !phd->fDetails ) 
-    gtk_table_attach (GTK_TABLE (pwTools), pwDetails, 5, 6, 0, 1,
+    gtk_table_attach (GTK_TABLE (pwTools), pwDetails, 5, 7, 0, 1,
                       (GtkAttachOptions) (GTK_FILL),
                       (GtkAttachOptions) (GTK_FILL), 0, 0);
 
@@ -538,7 +563,11 @@ CreateMoveListTools ( hintdata *phd )
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
-  gtk_table_attach (GTK_TABLE (pwTools), pwTempMap, 5, 6, 1, 2,
+  gtk_table_attach (GTK_TABLE (pwTools), pwCmark, 5, 6, 1, 2,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  
+  gtk_table_attach (GTK_TABLE (pwTools), pwTempMap, 6, 7, 1, 2,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
@@ -573,6 +602,8 @@ CreateMoveListTools ( hintdata *phd )
                       G_CALLBACK( MoveListCopy ), phd );
   g_signal_connect( G_OBJECT( pwTempMap ), "clicked",
                       G_CALLBACK( MoveListTempMapClicked ), phd );
+  g_signal_connect( G_OBJECT( pwCmark ), "clicked",
+                      G_CALLBACK( MoveListCmarkClicked ), phd );
   if ( !phd->fDetails )
     g_signal_connect( G_OBJECT( pwDetails ), "clicked",
                         G_CALLBACK( MoveListDetailsClicked ), phd );
@@ -636,20 +667,22 @@ extern void HintSelect(GtkTreeSelection *selection, hintdata *phd)
 	}
 }
 
-extern int 
-CheckHintButtons( hintdata *phd )
+extern int CheckHintButtons(hintdata * phd)
 {
-    int c = g_list_length(MoveListGetSelectionList(phd));
+	GList *plSelList = MoveListGetSelectionList(phd);
+	int c = g_list_length(plSelList);
+	MoveListFreeSelectionList(plSelList);
 
-    gtk_widget_set_sensitive( phd->pwMove, c == 1 && phd->fButtonsValid );
-    gtk_widget_set_sensitive( phd->pwCopy, c && phd->fButtonsValid );
-    gtk_widget_set_sensitive( phd->pwTempMap, c && phd->fButtonsValid );
-    gtk_widget_set_sensitive( phd->pwRollout, c && phd->fButtonsValid );
-    gtk_widget_set_sensitive( phd->pwRolloutPresets, c && phd->fButtonsValid );
-    gtk_widget_set_sensitive( phd->pwEval, c && phd->fButtonsValid );
-    gtk_widget_set_sensitive( phd->pwEvalPly, c && phd->fButtonsValid );
+	gtk_widget_set_sensitive(phd->pwMove, c == 1 && phd->fButtonsValid);
+	gtk_widget_set_sensitive(phd->pwCopy, c && phd->fButtonsValid);
+	gtk_widget_set_sensitive(phd->pwTempMap, c && phd->fButtonsValid);
+	gtk_widget_set_sensitive(phd->pwCmark, c && phd->fButtonsValid);
+	gtk_widget_set_sensitive(phd->pwRollout, c && phd->fButtonsValid);
+	gtk_widget_set_sensitive(phd->pwRolloutPresets, c && phd->fButtonsValid);
+	gtk_widget_set_sensitive(phd->pwEval, c && phd->fButtonsValid);
+	gtk_widget_set_sensitive(phd->pwEvalPly, c && phd->fButtonsValid);
 
-    return c;
+	return c;
 }
 
 extern GtkWidget *

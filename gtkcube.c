@@ -49,6 +49,7 @@ typedef struct _cubehintdata {
   evalsetup *pes;
   movetype mt;
   matchstate ms;
+  CMark *pcmark;
 } cubehintdata;
 
 
@@ -388,7 +389,7 @@ CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 	      float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 	      const evalsetup *pes,
 	      const matchstate* pms,
-	      const int fDouble ) {
+	      const int fDouble, const CMark *pcmark ) {
 
     cubeinfo ci;
 
@@ -648,7 +649,7 @@ UpdateCubeAnalysis ( cubehintdata *pchd ) {
                          pchd->aarStdDev,
                         pchd->pes,
                         &pchd->ms,
-                        pchd->mt );
+                        pchd->mt, pchd->pcmark );
     break;
 
   case MOVE_DROP:
@@ -726,11 +727,11 @@ CubeAnalysisRollout ( GtkWidget *pw, cubehintdata *pchd ) {
                               (ConstTanBoard)pchd->ms.anBoard, &ci, 
 			      &pes->rc, pes,
                               RolloutProgress, p ) < 0 ) {
-    RolloutProgressEnd( &p );
+    RolloutProgressEnd( &p, FALSE );
     return;
   }
 
-  RolloutProgressEnd( &p );
+  RolloutProgressEnd( &p, FALSE );
   
   memcpy ( pchd->aarOutput, aarOutput, 
            2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
@@ -895,6 +896,11 @@ CubeAnalysisTempMap ( GtkWidget *pw, cubehintdata *pchd ) {
 
 }
 
+static void CubeAnalysisCmark(GtkWidget * pw, cubehintdata * pchd)
+{
+	*pchd->pcmark = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pw));
+}
+
 static GtkWidget *
 CreateCubeAnalysisTools ( cubehintdata *pchd ) {
 
@@ -909,6 +915,7 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
   GtkWidget *pwMWC = gtk_toggle_button_new_with_label( _("MWC") );
   GtkWidget *pwCopy = gtk_button_new_with_label ( _("Copy") );
   GtkWidget *pwTempMap = gtk_button_new_with_label( _("Temp. Map" ) );
+  GtkWidget *pwCmark = gtk_toggle_button_new_with_label( _("Cmark" ) );
   GtkWidget *pw;
   int i;
   char *sz;
@@ -952,9 +959,14 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  gtk_table_attach (GTK_TABLE (pwTools), pwTempMap, 4, 5, 0, 2,
+  gtk_table_attach (GTK_TABLE (pwTools), pwTempMap, 4, 5, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
+
+  gtk_table_attach (GTK_TABLE (pwTools), pwCmark, 4, 5, 1, 2,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  
   
   gtk_table_attach (GTK_TABLE (pwTools), pwRollout, 0, 1, 1, 2,
                     (GtkAttachOptions) (GTK_FILL),
@@ -992,6 +1004,9 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
 
   gtk_widget_set_sensitive( pwMWC, pchd->ms.nMatchTo );
   
+  gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwCmark ),
+                                 *pchd->pcmark );
+
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwMWC ),
                                  fOutputMWC );
 
@@ -1011,6 +1026,8 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
                       G_CALLBACK( CubeAnalysisCopy ), pchd );
   g_signal_connect( G_OBJECT( pwTempMap ), "clicked",
                       G_CALLBACK( CubeAnalysisTempMap ), pchd );
+  g_signal_connect( G_OBJECT( pwCmark ), "toggled",
+                      G_CALLBACK( CubeAnalysisCmark ), pchd );
 
   /* tool tips */
 
@@ -1045,7 +1062,7 @@ extern GtkWidget *
 CreateCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                      float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                      evalsetup *pes,
-                     const movetype mt ) {
+                     const movetype mt, CMark *pcmark ) {
 
   cubehintdata *pchd = (cubehintdata *) malloc ( sizeof ( cubehintdata ) );
 
@@ -1056,6 +1073,7 @@ CreateCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
   pchd->pes = pes;
   pchd->mt = mt;
   pchd->ms = ms;
+  pchd->pcmark = pcmark;
   
   pchd->pw = pw = gtk_hbox_new ( FALSE, 2 );
 
@@ -1067,7 +1085,7 @@ CreateCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     pchd->pwFrame = CubeAnalysis (  aarOutput,
 				    aarStdDev, pes, 
                                    &pchd->ms,
-                                   mt == MOVE_DOUBLE );
+                                   mt == MOVE_DOUBLE, pchd->pcmark );
     break;
 
   case MOVE_TAKE:

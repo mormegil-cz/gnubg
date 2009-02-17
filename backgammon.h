@@ -105,10 +105,11 @@ typedef struct _movegameinfo {
 	statcontext sc;
 } xmovegameinfo;
 
-typedef struct cubedecisiondata {
+typedef struct _cubedecisiondata {
 	float aarOutput[2][NUM_ROLLOUT_OUTPUTS];
 	float aarStdDev[2][NUM_ROLLOUT_OUTPUTS];
 	evalsetup esDouble;
+	CMark cmark;
 } cubedecisiondata;
 
 typedef struct _movenormal {
@@ -514,9 +515,21 @@ extern void ApplyMoveRecord(matchstate * pms, const listOLD * plGame,
 			    const moverecord * pmr);
 extern void CalculateBoard(void);
 extern void CancelCubeAction(void);
-extern void ChangeGame(listOLD * plGameNew);
+extern void ChangeGame(const listOLD * plGameNew);
+extern void UpdateGame( int fShowBoard );
 extern void ClearMatch(void);
 extern void ClearMoveRecord(void);
+extern void CommandCMarkCubeSetNone(char *);
+extern void CommandCMarkCubeSetRollout(char *);
+extern void CommandCMarkCubeShow(char *);
+extern void CommandCMarkMoveClear(char *);
+extern void CommandCMarkGameClear(char *);
+extern void CommandCMarkMatchClear(char *);
+extern void CommandCMarkMoveSetNone(char *);
+extern void CommandCMarkMoveSetRollout(char *);
+extern void CommandCMarkMoveShow(char *);
+extern void CommandCMarkGameShow(char *);
+extern void CommandCMarkMatchShow(char *);
 extern void DisectPath(const char *path, const char *extension, char **name,
 		       char **folder);
 extern void FixMatchState(matchstate * pms, const moverecord * pmr);
@@ -568,8 +581,10 @@ extern void CommandAnalyseClearMove(char *);
 extern void CommandAnalyseGame(char *);
 extern void CommandAnalyseMatch(char *);
 extern void CommandAnalyseMove(char *);
-extern void CommandAnalyseRolloutDouble(char *);
+extern void CommandAnalyseRolloutCube(char *);
 extern void CommandAnalyseRolloutMove(char *);
+extern void CommandAnalyseRolloutGame(char *);
+extern void CommandAnalyseRolloutMatch(char *);
 extern void CommandAnalyseSession(char *);
 extern void CommandAnnotateAccept(char *);
 extern void CommandAnnotateAddComment(char *);

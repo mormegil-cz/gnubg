@@ -39,15 +39,54 @@ command cER = {
       N_("Clear analysis for this move"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acAnalyseRollout[] = {
-    { "double", CommandAnalyseRolloutDouble, 
-      N_("Rollout an analysed double.\n"),
+    { "cube", CommandAnalyseRolloutCube, 
+      N_("Rollout an analysed cube.\n"),
 	      NULL, NULL },
 	
     { "move", CommandAnalyseRolloutMove, 
       N_("Rollout choices in the analysis movelist.\n"
-	 "\"analyse rollout move 1 2 3\" will rollout the first three choices."),
+	 "\"analyse rollout move 1 2 3\" will rollout the first three choices.\n"
+	 "\"analyse rollout move\" will rollout previously marked candidates."),
 	      NULL, NULL },
-	
+    { "game", CommandAnalyseRolloutGame, 
+      N_("Rollout marked candidates in the game.\n"),
+	      NULL, NULL },
+    { "match", CommandAnalyseRolloutMatch, 
+      N_("Rollout marked candidates in the match.\n"),
+	      NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acCmarkCubeSet[] = {
+    { "rollout", CommandCMarkCubeSetRollout, N_("CMark cube for rollout"), NULL, NULL },
+    { "none", CommandCMarkCubeSetNone, N_("CMark cube clear"), NULL, NULL },
+    { "clear", CommandCMarkCubeSetNone, N_("CMark cube clear"), NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acCmarkMoveSet[] = {
+    { "rollout", CommandCMarkMoveSetRollout, N_("CMark moves for rollout"), NULL, NULL },
+    { "none", CommandCMarkMoveSetNone, N_("CMark move clear"), NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acCmarkCube[] = {
+    { "clear", CommandCMarkCubeSetNone, N_("CMark cube clear"), NULL, NULL },
+    { "set", NULL, N_("CMark cube"), NULL, acCmarkCubeSet },
+    { "show", CommandCMarkCubeShow, N_("Show cmarks for cube"), NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acCmarkMatch[] = {
+    { "clear", CommandCMarkMatchClear, N_("CMark move clear all"), NULL, NULL },
+    { "show", CommandCMarkMatchShow, N_("Show cmarks for move"), NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acCmarkGame[] = {
+    { "clear", CommandCMarkGameClear, N_("CMark move clear all"), NULL, NULL },
+    { "show", CommandCMarkGameShow, N_("Show cmarks for move"), NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acCmarkMove[] = {
+    { "clear", CommandCMarkMoveClear, N_("CMark move clear all"), NULL, NULL },
+    { "set", NULL, N_("CMark moves"), NULL, acCmarkMoveSet },
+    { "show", CommandCMarkMoveShow, N_("Show cmarks for move"), NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acCmark[] = {
+    { "match", NULL, N_("CMark moves and cubes in match"), NULL, acCmarkMatch },
+    { "game", NULL, N_("CMark moves and cubes in game"), NULL, acCmarkGame },
+    { "move", NULL, N_("CMark moves in movelist"), NULL, acCmarkMove },
+    { "cube", NULL, N_("CMark cube"), NULL, acCmarkCube },
     { NULL, NULL, NULL, NULL, NULL }
 }, acAnalyse[] = {
     { "clear", NULL, 
@@ -1352,6 +1391,7 @@ command cER = {
       N_("Measure evaluation speed, for later time estimates"), szOPTVALUE,
       NULL },
     { "clear", NULL, N_("Clear information"), NULL, acClear },
+    { "cmark", NULL, N_("Mark candidates"), NULL, acCmark }, 
     { "copy", CommandCopy, N_("Copy current position to clipboard"), 
       NULL, NULL },
     { "decline", CommandDecline, N_("Decline a resignation"), NULL, NULL },

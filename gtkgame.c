@@ -106,6 +106,18 @@ typedef enum _gnubgcommand {
     CMD_ANALYSE_MOVE,
     CMD_ANALYSE_GAME,
     CMD_ANALYSE_MATCH,
+    CMD_ANALYSE_ROLLOUT_CUBE,
+    CMD_ANALYSE_ROLLOUT_MOVE,
+    CMD_ANALYSE_ROLLOUT_GAME,
+    CMD_ANALYSE_ROLLOUT_MATCH,
+    CMD_CMARK_CUBE_CLEAR,
+    CMD_CMARK_CUBE_SHOW,
+    CMD_CMARK_MOVE_CLEAR,
+    CMD_CMARK_MOVE_SHOW,
+    CMD_CMARK_GAME_CLEAR,
+    CMD_CMARK_GAME_SHOW,
+    CMD_CMARK_MATCH_CLEAR,
+    CMD_CMARK_MATCH_SHOW,
     CMD_END_GAME,
     CMD_DECLINE,
     CMD_DOUBLE,
@@ -165,6 +177,18 @@ static const char *aszCommands[ NUM_CMDS ] = {
     "analyse move",
     "analyse game",
     "analyse match",
+    "analyse rollout cube",
+    "analyse rollout move",
+    "analyse rollout game",
+    "analyse rollout match",
+    "cmark cube clear",
+    "cmark cube show",
+    "cmark move clear",
+    "cmark move show",
+    "cmark game clear",
+    "cmark game show",
+    "cmark match clear",
+    "cmark match show",
     "end game",
     "decline",
     "double",
@@ -938,7 +962,7 @@ extern void SetAnnotation( moverecord *pmr ) {
             pwCubeAnalysis = CreateCubeAnalysis( pmr->CubeDecPtr->aarOutput, 
                                                  pmr->CubeDecPtr->aarStdDev,
                                                  &pmr->CubeDecPtr->esDouble, 
-                                                 MOVE_NORMAL );
+                                                 MOVE_NORMAL, &pmr->CubeDecPtr->cmark );
 
 
             /* move */
@@ -1007,7 +1031,7 @@ extern void SetAnnotation( moverecord *pmr ) {
               if ( ( pw = CreateCubeAnalysis ( pmr->CubeDecPtr->aarOutput,
                                                pmr->CubeDecPtr->aarStdDev,
                                                &pmr->CubeDecPtr->esDouble,
-                                               MOVE_DOUBLE ) ) )
+                                               MOVE_DOUBLE, &pmr->CubeDecPtr->cmark ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
 				    FALSE, 0 );
 
@@ -1045,7 +1069,7 @@ extern void SetAnnotation( moverecord *pmr ) {
               if ( ( pw = CreateCubeAnalysis ( pmr->CubeDecPtr->aarOutput,
                                                pmr->CubeDecPtr->aarStdDev,
                                                &pmr->CubeDecPtr->esDouble,
-                                               pmr->mt ) ) )
+                                               pmr->mt, &pmr->CubeDecPtr->cmark ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
 				    FALSE, 0 );
             }
@@ -3346,9 +3370,6 @@ GtkItemFactoryEntry aife[] = {
 	{ N_("/_Analyse/Analyse match or session"), 
           NULL, Command, CMD_ANALYSE_MATCH, NULL, NULL },
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>", NULL },
-	{ N_("/_Analyse/Batch analyse..."), NULL, GTKBatchAnalyse, 0, NULL,
-		NULL },
-	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>", NULL },
         { N_("/_Analyse/Clear analysis"), NULL, NULL, 0, "<Branch>", NULL },
         { N_("/_Analyse/Clear analysis/Move"), 
           NULL, Command, CMD_ANALYSE_CLEAR_MOVE, 
@@ -3362,6 +3383,29 @@ GtkItemFactoryEntry aife[] = {
           NULL, Command, CMD_ANALYSE_CLEAR_MATCH,
 		"<StockItem>", GTK_STOCK_CLEAR
 	},
+	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>", NULL },
+        { N_("/_Analyse/CMark"), NULL, NULL, 0, "<Branch>", NULL },
+        { N_("/_Analyse/CMark/Cube"), NULL, NULL, 0, "<Branch>", NULL },
+        { N_("/_Analyse/CMark/Cube/Clear"), NULL, Command, CMD_CMARK_CUBE_CLEAR, NULL, NULL },
+        { N_("/_Analyse/CMark/Cube/Show"), NULL, Command, CMD_CMARK_CUBE_SHOW, NULL, NULL },
+        { N_("/_Analyse/CMark/Move"), NULL, NULL, 0, "<Branch>", NULL },
+        { N_("/_Analyse/CMark/Move/Clear"), NULL, Command, CMD_CMARK_MOVE_CLEAR, NULL, NULL },
+        { N_("/_Analyse/CMark/Move/Show"), NULL, Command, CMD_CMARK_MOVE_SHOW, NULL, NULL },
+        { N_("/_Analyse/CMark/Game"), NULL, NULL, 0, "<Branch>", NULL },
+        { N_("/_Analyse/CMark/Game/Clear"), NULL, Command, CMD_CMARK_GAME_CLEAR, NULL, NULL },
+        { N_("/_Analyse/CMark/Game/Show"), NULL, Command, CMD_CMARK_GAME_SHOW, NULL, NULL },
+        { N_("/_Analyse/CMark/Match"), NULL, NULL, 0, "<Branch>", NULL },
+        { N_("/_Analyse/CMark/Match/Clear"), NULL, Command, CMD_CMARK_MATCH_CLEAR, NULL, NULL },
+        { N_("/_Analyse/CMark/Match/Show"), NULL, Command, CMD_CMARK_MATCH_SHOW, NULL, NULL },
+	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>", NULL },
+        { N_("/_Analyse/Rollout"), NULL, NULL, 0, "<Branch>", NULL },
+        { N_("/_Analyse/Rollout/Cube"), NULL, Command, CMD_ANALYSE_ROLLOUT_CUBE, NULL, NULL },
+        { N_("/_Analyse/Rollout/Move"), NULL, Command, CMD_ANALYSE_ROLLOUT_MOVE, NULL, NULL },
+        { N_("/_Analyse/Rollout/Game"), NULL, Command, CMD_ANALYSE_ROLLOUT_GAME, NULL, NULL },
+        { N_("/_Analyse/Rollout/Match"), NULL, Command, CMD_ANALYSE_ROLLOUT_MATCH, NULL, NULL },
+	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>", NULL },
+	{ N_("/_Analyse/Batch analyse..."), NULL, GTKBatchAnalyse, 0, NULL,
+		NULL },
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ N_("/_Analyse/Match or session statistics"), NULL, Command,
           CMD_SHOW_STATISTICS_MATCH, NULL, NULL },
@@ -5379,6 +5423,7 @@ extern void GTKCubeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     
     static evalsetup es;
     GtkWidget *pw, *pwHint;
+    CMark fixme;
 
     if (GetPanelWidget(WINDOW_HINT))
 	gtk_widget_destroy(GetPanelWidget(WINDOW_HINT));
@@ -5389,7 +5434,7 @@ extern void GTKCubeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
     memcpy ( &es, pes, sizeof ( evalsetup ) );
 
-    pw = CreateCubeAnalysis ( aarOutput, aarStdDev, &es, MOVE_NORMAL );
+    pw = CreateCubeAnalysis ( aarOutput, aarStdDev, &es, MOVE_NORMAL, &fixme );
 
     gtk_container_add( GTK_CONTAINER( DialogArea( pwHint, DA_MAIN ) ),
                        pw );

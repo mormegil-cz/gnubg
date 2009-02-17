@@ -32,6 +32,7 @@ typedef struct _hintdata {
   GtkWidget *pwRolloutPresets; /* predefined Rollout buttons */
   GtkWidget *pwShow; /* button for showing moves */
   GtkWidget *pwTempMap; /* button for showing temperature map */
+  GtkWidget *pwCmark; /* button for marking*/
   movelist *pml;
   int fButtonsValid;
   int fDestroyOnMove;

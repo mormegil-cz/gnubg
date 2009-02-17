@@ -410,9 +410,9 @@ custom_cell_renderer_movelist_render (GtkCellRenderer *cell,
 	/* First line of control */
 
 	if (cellprogress->rank > 0)
-		sprintf(buf, "%d", cellprogress->rank);
+		sprintf(buf, "%d%s", cellprogress->rank, cellprogress->pml->cmark ? "+" : "");
 	else
-		strcpy(buf, "??");
+		sprintf(buf, "??%s", cellprogress->pml->cmark ? "+" : "");
 
 	pango_layout_set_text(layout, buf, -1);
 	pango_layout_get_pixel_extents (layout, NULL, &logical_rect);

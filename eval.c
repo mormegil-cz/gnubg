@@ -3471,6 +3471,7 @@ static void SaveMoves( movelist *pml, unsigned int cMoves, unsigned int cPip, in
 
     pm->cMoves = cMoves;
     pm->cPips = cPip;
+    pm->cmark = CMARK_NONE;
 
     for ( i = 0; i < NUM_OUTPUTS; i++ )
       pm->arEvalMove[ i ] = 0.0;

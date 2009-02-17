@@ -959,6 +959,17 @@ static void RestoreDoubleAnalysis(property * pp,
 }
 
 
+static void RestoreMarkedMoves(property * pp, movelist * pml)
+{
+	int val;
+	char *pch = pp->pl->plNext->p;
+	while ((val = strtol(pch, &pch, 10))) {
+		if (val >= (int) pml->cMoves || val < 0)
+			continue;
+		pml->amMoves[val-1].cmark = CMARK_ROLLOUT;
+	}
+}
+
 static void RestoreMoveAnalysis(property * pp, int fPlayer,
 				movelist * pml, unsigned int *piMove,
 				evalsetup * pesChequer,
@@ -1107,7 +1118,7 @@ static void PointList(listOLD * pl, int an[])
 static void RestoreNode(listOLD * pl)
 {
 
-    property *pp, *ppDA = NULL, *ppA = NULL, *ppC = NULL;
+    property *pp, *ppDA = NULL, *ppA = NULL, *ppC = NULL, *ppMR = NULL, *ppCR = NULL;
     moverecord *pmr = NULL;
     char *pch;
     int i, fPlayer = 0, fSetBoard = FALSE, an[25];
@@ -1260,6 +1271,12 @@ static void RestoreNode(listOLD * pl)
 	else if (pp->ach[0] == 'A' && !pp->ach[1])
 	    /* move analysis */
 	    ppA = pp;
+	else if (pp->ach[0] == 'M' && pp->ach[1] == 'R')
+	    /* marked moves */
+	    ppMR = pp;
+	else if (pp->ach[0] == 'C' && pp->ach[1] == 'R')
+	    /* marked moves */
+	    ppCR = pp;
 	else if (pp->ach[0] == 'C' && !pp->ach[1])
 	    /* comment */
 	    ppC = pp;
@@ -1309,9 +1326,13 @@ static void RestoreNode(listOLD * pl)
 				      pmr->CubeDecPtr->aarOutput,
 				      pmr->CubeDecPtr->aarStdDev,
 				      &pmr->CubeDecPtr->esDouble);
+	    if (ppCR)
+		    pmr->CubeDecPtr->cmark = CMARK_ROLLOUT;
 	    if (ppA)
 		RestoreMoveAnalysis(ppA, pmr->fPlayer, &pmr->ml,
 				    &pmr->n.iMove, &pmr->esChequer, &ms);
+	    if (ppMR)
+		RestoreMarkedMoves(ppMR, &pmr->ml);
 	    /* FIXME: separate st's */
 	    pmr->n.stMove = ast[0];
 	    pmr->stCube = ast[1];
@@ -1327,6 +1348,8 @@ static void RestoreNode(listOLD * pl)
 				      pmr->CubeDecPtr->aarOutput,
 				      pmr->CubeDecPtr->aarStdDev,
 				      &pmr->CubeDecPtr->esDouble);
+	    if (ppCR)
+		    pmr->CubeDecPtr->cmark = CMARK_ROLLOUT;
 	    pmr->stCube = ast[0];
 	    break;
 
@@ -1779,7 +1802,7 @@ static void WriteRolloutAnalysis(FILE * pf, int fIsMove,
 static void WriteDoubleAnalysis(FILE * pf,
 				float aarOutput[][NUM_ROLLOUT_OUTPUTS],
 				float aarStdDev[][NUM_ROLLOUT_OUTPUTS],
-				evalsetup * pes)
+				evalsetup * pes, int cmark)
 {
 
     gchar buffer[G_ASCII_DTOSTR_BUF_SIZE];
@@ -1828,6 +1851,8 @@ static void WriteDoubleAnalysis(FILE * pf,
     }
 
     fputc(']', pf);
+    if (cmark)
+	    fputs("CR[]", pf);
 
 }
 
@@ -1925,6 +1950,12 @@ static void WriteMoveAnalysis(FILE * pf, int fPlayer, movelist * pml,
 
 	fputc(']', pf);
     }
+    fprintf(pf, "MR[");
+    for (i = 0; i < pml->cMoves; i++) {
+	    if (pml->amMoves[i].cmark)
+		    fprintf(pf, "%d ", i+1);
+    }
+    fputc(']', pf);
 }
 
 static void WriteLuck(FILE * pf, int fPlayer, float rLuck, lucktype lt)
@@ -2247,7 +2278,8 @@ static void SaveGame(FILE * pf, listOLD * plGame)
 		WriteDoubleAnalysis(pf,
 				    pmr->CubeDecPtr->aarOutput,
 				    pmr->CubeDecPtr->aarStdDev,
-				    &pmr->CubeDecPtr->esDouble);
+				    &pmr->CubeDecPtr->esDouble,
+				    pmr->CubeDecPtr->cmark);
 
 	    if (pmr->ml.cMoves)
 		WriteMoveAnalysis(pf, pmr->fPlayer, &pmr->ml,
@@ -2267,7 +2299,8 @@ static void SaveGame(FILE * pf, listOLD * plGame)
 		WriteDoubleAnalysis(pf,
 				    pmr->CubeDecPtr->aarOutput,
 				    pmr->CubeDecPtr->aarStdDev,
-				    &pmr->CubeDecPtr->esDouble);
+				    &pmr->CubeDecPtr->esDouble,
+				    pmr->CubeDecPtr->cmark);
 
 	    WriteSkill(pf, pmr->stCube);
 
@@ -2280,7 +2313,8 @@ static void SaveGame(FILE * pf, listOLD * plGame)
 		WriteDoubleAnalysis(pf,
 				    pmr->CubeDecPtr->aarOutput,
 				    pmr->CubeDecPtr->aarStdDev,
-				    &pmr->CubeDecPtr->esDouble);
+				    &pmr->CubeDecPtr->esDouble,
+				    pmr->CubeDecPtr->cmark);
 
 	    WriteSkill(pf, pmr->stCube);
 
@@ -2293,7 +2327,8 @@ static void SaveGame(FILE * pf, listOLD * plGame)
 		WriteDoubleAnalysis(pf,
 				    pmr->CubeDecPtr->aarOutput,
 				    pmr->CubeDecPtr->aarStdDev,
-				    &pmr->CubeDecPtr->esDouble);
+				    &pmr->CubeDecPtr->esDouble,
+				    pmr->CubeDecPtr->cmark);
 
 
 	    WriteSkill(pf, pmr->stCube);
