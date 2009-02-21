@@ -1,3 +1,7 @@
+Sat Feb 21 22:05:58 CET 2009 Oystein Johansen <oystein@gnubg.org>
+
+	* removed file: makebearoff.rc
+
 Wed Feb 18 00:12:58 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* analysis.c, backgammon.h, commands.inc, eval.c, eval.h, gnubg.c,
