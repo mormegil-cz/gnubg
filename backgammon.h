@@ -218,18 +218,6 @@ typedef struct _matchinfo {	/* SGF match information */
  unsigned int nDay;		/* 0 for nYear means date unknown */
 } matchinfo;
 
-typedef struct _storedmoves {
-	movelist ml;
-	matchstate ms;
-} storedmoves;
-
-typedef struct _storedcube {
-	float aarOutput[2][NUM_ROLLOUT_OUTPUTS];
-	float aarStdDev[2][NUM_ROLLOUT_OUTPUTS];
-	evalsetup es;
-	matchstate ms;
-} storedcube;
-
 typedef struct _decisionData
 {
     float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
@@ -292,14 +280,11 @@ int RunAsyncProcess(AsyncFun fun, void *data, const char *msg);
    Anything that _reads_ stored moves should check that the move is still
    valid (i.e. auchKey matches the current board and anDice matches the
    current dice). */
-extern storedmoves sm;
 
 /*
  * Store cube analysis
  *
  */
-
-extern storedcube sc;
 
 /*  List of moverecords representing the current game. One of the elements in
     lMatch.
@@ -537,8 +522,6 @@ extern void FreeMatch(void);
 extern void GetMatchStateCubeInfo(cubeinfo * pci, const matchstate * pms);
 extern void HandleCommand(char *sz, command * ac);
 extern void InitBoard(TanBoard anBoard, const bgvariation bgv);
-extern void InvalidateStoredCube(void);
-extern void InvalidateStoredMoves(void);
 extern void PortableSignal(int nSignal, RETSIGTYPE(*p) (int),
 			   psighandler * pOld, int fRestart);
 extern void PortableSignalRestore(int nSignal, psighandler * p);
@@ -566,13 +549,6 @@ extern void show_thorp(TanBoard an, char *sz);
 extern void TextToClipboard(const char *sz);
 extern void UpdateSettings(void);
 extern void UpdateSetting(void *p);
-extern void UpdateStoredCube(float aarOutput[2][NUM_ROLLOUT_OUTPUTS],
-			     float aarStdDev[2][NUM_ROLLOUT_OUTPUTS],
-			     const evalsetup * pes,
-			     const matchstate * pms);
-extern void UpdateStoredMoves(const movelist * pml,
-			      const matchstate * pms);
-
 extern void CommandAccept(char *);
 extern void CommandAgree(char *);
 extern void CommandAnalyseClearGame(char *);
@@ -1036,10 +1012,20 @@ extern void CommandShowWarning(char *);
 extern void CommandShowWarranty(char *);
 extern void CommandSwapPlayers(char *);
 extern void CommandTake(char *);
+extern void HintChequer(char *sz, gboolean show);
 
 extern int getGameNumber(const listOLD * plGame);
 extern int getMoveNumber(const listOLD * plGame, const void *p);
 extern int CheckGameExists(void);
+extern void pmr_cubedata_set(moverecord *pmr, evalsetup *es, float output[2][NUM_ROLLOUT_OUTPUTS], float stddev[2][NUM_ROLLOUT_OUTPUTS]);
+extern void pmr_cubedata_copy(const moverecord *source, moverecord *target);
+extern void pmr_movelist_set(moverecord *pmr, evalsetup *pes, movelist *pml);
+extern void pmr_movelist_copy(const moverecord *source, moverecord *target);
+extern void current_pmr_cubedata_update(evalsetup *pes, float output[][NUM_ROLLOUT_OUTPUTS], float stddev[][NUM_ROLLOUT_OUTPUTS]);
+extern listOLD *game_add_pmr_hint(listOLD *plGame);
+extern void game_remove_pmr_hint(listOLD *pl_hint);
+extern gboolean game_is_last(listOLD *plGame);
+extern void pmr_hint_destroy(void);
 extern void StopAutomaticPlay(void);
 
 extern void ProcessGtkEvents(void);

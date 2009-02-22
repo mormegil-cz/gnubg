@@ -22,6 +22,8 @@
 #ifndef _GTKCHEQUER_H_
 #define _GTKCHEQUER_H_
 
+#include "backgammon.h"
+
 typedef struct _hintdata {
   GtkWidget *pwMoves;     /* the movelist */
   GtkWidget *pwRollout, *pwRolloutSettings; /* rollout buttons */
@@ -41,7 +43,7 @@ typedef struct _hintdata {
 } hintdata;
 
 extern GtkWidget *
-CreateMoveList( movelist *pml, unsigned int *piHighlight, 
+CreateMoveList( moverecord *pmr,
                 const int fButtonsValid, const int fDestroyOnMove,
                 const int fDetails );
 

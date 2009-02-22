@@ -2826,8 +2826,7 @@ static void SetInvertMET(void)
     invertMET();
     /* Clear any stored results to stop previous table causing problems */
     EvalCacheFlush();
-    InvalidateStoredMoves();
-    InvalidateStoredCube();
+    pmr_hint_destroy();
 }
 
 extern void CommandSetMET( char *sz ) {

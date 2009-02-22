@@ -3267,11 +3267,15 @@ static void ExportGameHTML ( FILE *pf, listOLD *plGame, const char *szImageDir,
     statcontext *psc = NULL;
     static statcontext scTotal;
     xmovegameinfo *pmgi = NULL;
+    listOLD *pl_hint;
 
     if ( ! iGame )
       IniStatcontext ( &scTotal );
 
     updateStatisticsGame ( plGame );
+
+    if (game_is_last(plGame))
+	    pl_hint = game_add_pmr_hint(plGame);
 
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
 
@@ -3351,6 +3355,9 @@ static void ExportGameHTML ( FILE *pf, listOLD *plGame, const char *szImageDir,
       ApplyMoveRecord ( &msExport, plGame, pmr );
 
     }
+
+    if (pl_hint)
+	    game_remove_pmr_hint(pl_hint);
 
     if( pmgi && pmgi->fWinner != -1 ) {
 

@@ -22,10 +22,6 @@
 #ifndef _GTKCUBE_H_
 #define _GTKCUBE_H_
 
-extern GtkWidget *
-CreateCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                     float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                     evalsetup *pes,
-                     const movetype mt, CMark *pcmark );
+extern GtkWidget *CreateCubeAnalysis (moverecord *pmr, matchstate *pms);
 
 #endif

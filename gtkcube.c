@@ -44,12 +44,8 @@ typedef struct _cubehintdata {
   GtkWidget *pwFrame;   /* the table */
   GtkWidget *pw;        /* the box */
   GtkWidget *pwTools;   /* the tools */
-  float (*aarOutput)[ NUM_ROLLOUT_OUTPUTS ];
-  float (*aarStdDev)[ NUM_ROLLOUT_OUTPUTS ];
-  evalsetup *pes;
-  movetype mt;
+  moverecord *pmr;
   matchstate ms;
-  CMark *pcmark;
 } cubehintdata;
 
 
@@ -94,38 +90,31 @@ OutputPercentsTable( const float ar[] )
 
 
 static GtkWidget*
-TakeAnalysis( const movetype mt, 
-	      float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
-	      float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
-	      const evalsetup* pes,
-	      const matchstate* pms ) {
-
+TakeAnalysis(cubehintdata *pchd) {
     cubeinfo ci;
-
     GtkWidget *pw;
     GtkWidget *pwTable;
     GtkWidget *pwFrame;
-
     int iRow;
     int i;
     cubedecision cd;
-
     int ai[ 2 ];
     const char *aszCube[] = {
       NULL, NULL, 
       N_("Take"), 
       N_("Pass") };
-
     float arDouble[ 4 ];
     gchar *sz;
+    cubedecisiondata *cdec = pchd->pmr->CubeDecPtr;
+    const evalsetup *pes = &cdec->esDouble;
 
 
     if( pes->et == EVAL_NONE )
 	return NULL;
 
-    GetMatchStateCubeInfo( &ci, pms );
+    GetMatchStateCubeInfo( &ci, &pchd->ms );
 
-    cd = FindCubeDecision ( arDouble, aarOutput, &ci );
+    cd = FindCubeDecision ( arDouble, cdec->aarOutput, &ci );
     
     /* header */
 
@@ -145,13 +134,13 @@ TakeAnalysis( const movetype mt,
         sz = g_strdup_printf ( _("Cubeless %d-ply %s: %s (Money: %s)"),
                                pes->ec.nPlies,
                                fOutputMWC ? _("MWC") : _("equity"),
-                               OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ],
+                               OutputEquity ( cdec->aarOutput[ 0 ][ OUTPUT_EQUITY ],
                                               &ci, TRUE ),
-                               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
+                               OutputMoneyEquity ( cdec->aarOutput[ 0 ], TRUE ) );
       else
         sz = g_strdup_printf ( _("Cubeless %d-ply equity: %s"),
                                pes->ec.nPlies,
-                               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
+                               OutputMoneyEquity ( cdec->aarOutput[ 0 ], TRUE ) );
 
       break;
 
@@ -159,12 +148,12 @@ TakeAnalysis( const movetype mt,
       if ( ci.nMatchTo )
         sz = g_strdup_printf ( _("Cubeless rollout %s: %s (Money: %s)"),
                                fOutputMWC ? _("MWC") : _("equity"),
-                               OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ],
+                               OutputEquity ( cdec->aarOutput[ 0 ][ OUTPUT_EQUITY ],
                                               &ci, TRUE ),
-                               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
+                               OutputMoneyEquity ( cdec->aarOutput[ 0 ], TRUE ) );
       else
         sz = g_strdup_printf ( _("Cubeless rollout equity: %s"),
-                               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
+                               OutputMoneyEquity ( cdec->aarOutput[ 0 ], TRUE ) );
 
       break;
 
@@ -191,7 +180,7 @@ TakeAnalysis( const movetype mt,
 
     case EVAL_EVAL:
 
-      pw = OutputPercentsTable( aarOutput[ 0 ] );
+      pw = OutputPercentsTable( cdec->aarOutput[ 0 ] );
       gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
                          0, 4, iRow, iRow + 1, 
                          GTK_EXPAND | GTK_FILL, 
@@ -384,24 +373,15 @@ TakeAnalysis( const movetype mt,
  *
  */
 
-static GtkWidget*
-CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-	      float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-	      const evalsetup *pes,
-	      const matchstate* pms,
-	      const int fDouble, const CMark *pcmark ) {
-
+static GtkWidget* CubeAnalysis(cubehintdata *pchd) {
     cubeinfo ci;
-
     GtkWidget *pw;
     GtkWidget *pwTable;
     GtkWidget *pwFrame;
-
     int iRow;
     int i;
     cubedecision cd;
     float r;
-
     int ai[ 3 ];
     const char *aszCube[] = {
       NULL, 
@@ -409,19 +389,20 @@ CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
       N_("Double, take"), 
       N_("Double, pass") 
     };
-
     float arDouble[ 4 ];
     gchar *sz;
+    cubedecisiondata *cdec = pchd->pmr->CubeDecPtr;
+    const evalsetup *pes = &cdec->esDouble;
 
 
-    if( pes->et == EVAL_NONE )
+    if(pes->et == EVAL_NONE )
 	return NULL;
 
-    GetMatchStateCubeInfo( &ci, pms );
+    GetMatchStateCubeInfo( &ci, &pchd->ms );
 
-    cd = FindCubeDecision ( arDouble, aarOutput, &ci );
+    cd = FindCubeDecision ( arDouble, cdec->aarOutput, &ci );
     
-    if( !GetDPEq( NULL, NULL, &ci ) && ! fDouble )
+    if( !GetDPEq( NULL, NULL, &ci ) && ! pchd->pmr->mt == MOVE_DOUBLE)
 	/* No cube action possible */
 	return NULL;
 
@@ -447,13 +428,13 @@ CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
         sz = g_strdup_printf ( _("Cubeless %d-ply %s: %s (Money: %s)"),
                                pes->ec.nPlies,
                                fOutputMWC ? _("MWC") : _("equity"),
-                               OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ],
+                               OutputEquity ( cdec->aarOutput[ 0 ][ OUTPUT_EQUITY ],
                                               &ci, TRUE ),
-                               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
+                               OutputMoneyEquity ( cdec->aarOutput[ 0 ], TRUE ) );
       else
         sz = g_strdup_printf ( _("Cubeless %d-ply equity: %s"),
                                pes->ec.nPlies,
-                               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
+                               OutputMoneyEquity ( cdec->aarOutput[ 0 ], TRUE ) );
 
       break;
 
@@ -461,12 +442,12 @@ CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
       if ( ci.nMatchTo )
          sz = g_strdup_printf ( _("Cubeless rollout %s: %s (Money: %s)"),
                                fOutputMWC ? _("MWC") : _("equity"),
-                               OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ],
+                               OutputEquity ( cdec->aarOutput[ 0 ][ OUTPUT_EQUITY ],
                                               &ci, TRUE ),
-                               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
+                               OutputMoneyEquity ( cdec->aarOutput[ 0 ], TRUE ) );
       else
         sz = g_strdup_printf ( _("Cubeless rollout equity: %s"),
-                               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
+                               OutputMoneyEquity ( cdec->aarOutput[ 0 ], TRUE ) );
 
       break;
 
@@ -493,7 +474,7 @@ CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
     if ( pes->et == EVAL_EVAL ) {
 
-      pw = OutputPercentsTable(aarOutput[ 0 ] );
+      pw = OutputPercentsTable(cdec->aarOutput[ 0 ] );
 
       gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
                          0, 4, iRow, iRow + 1, 
@@ -515,7 +496,7 @@ CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     iRow++;
     
 
-    getCubeDecisionOrdering ( ai, arDouble, aarOutput, &ci );
+    getCubeDecisionOrdering ( ai, arDouble, cdec->aarOutput, &ci );
 
     for ( i = 0; i < 3; i++ ) {
 
@@ -582,7 +563,7 @@ CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
         /* FIXME: output cubeless euqities and percentages for rollout */
         /*        probably along with rollout details */
         
-        pw = gtk_label_new ( OutputPercents ( aarOutput[ ai [ i ] - 1 ], TRUE ) );
+        pw = gtk_label_new ( OutputPercents ( cdec->aarOutput[ ai [ i ] - 1 ], TRUE ) );
         gtk_misc_set_alignment( GTK_MISC( pw ), 0.5, 0.5 );
         
         gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
@@ -637,54 +618,39 @@ CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     return pwFrame;
 }
 
-static void
-UpdateCubeAnalysis ( cubehintdata *pchd ) {
+static void UpdateCubeAnalysis(cubehintdata * pchd)
+{
 
-  GtkWidget *pw = 0;
+	GtkWidget *pw = 0;
 
-  switch ( pchd->mt ) {
-  case MOVE_NORMAL:
-  case MOVE_DOUBLE:
-    pw = CubeAnalysis (  pchd->aarOutput,
-                         pchd->aarStdDev,
-                        pchd->pes,
-                        &pchd->ms,
-                        pchd->mt, pchd->pcmark );
-    break;
+	switch (pchd->pmr->mt) {
+	case MOVE_NORMAL:
+	case MOVE_DOUBLE:
+		pw = CubeAnalysis(pchd);
+		break;
 
-  case MOVE_DROP:
-  case MOVE_TAKE:
-    pw = TakeAnalysis ( pchd->mt,
-                         pchd->aarOutput,
-                         pchd->aarStdDev,
-                        pchd->pes,
-                        &pchd->ms );
-    break;
+	case MOVE_DROP:
+	case MOVE_TAKE:
+		pw = TakeAnalysis(pchd);
+		break;
 
-  default:
+	default:
 
-    g_assert ( FALSE );
-    break;
+		g_assert(FALSE);
+		break;
 
-  }
+	}
 
-  /* update cache */
+	/* destroy current analysis */
 
-  UpdateStoredCube ( pchd->aarOutput, pchd->aarStdDev, pchd->pes, &pchd->ms ),
+	gtk_container_remove(GTK_CONTAINER(pchd->pw), pchd->pwFrame);
 
-  /* destroy current analysis */
+	/* re-create analysis + tools */
 
-  gtk_container_remove ( GTK_CONTAINER ( pchd->pw ),
-                         pchd->pwFrame );
+	gtk_box_pack_start(GTK_BOX(pchd->pw), pchd->pwFrame = pw,
+			   FALSE, FALSE, 0);
 
-  /* re-create analysis + tools */
-
-  gtk_box_pack_start ( GTK_BOX ( pchd->pw ), pchd->pwFrame = pw, 
-                       FALSE, FALSE, 0 );
-
-
-  gtk_widget_show_all ( pchd->pw );
-  
+	gtk_widget_show_all(pchd->pw);
 
 }
 
@@ -697,8 +663,9 @@ CubeAnalysisRollout ( GtkWidget *pw, cubehintdata *pchd ) {
   cubeinfo ci;
   float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
   float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+  cubedecisiondata *cdec = pchd->pmr->CubeDecPtr;
   rolloutstat aarsStatistics[ 2 ][ 2 ];
-  evalsetup *pes = pchd->pes;
+  evalsetup *pes = &cdec->esDouble;
   char asz[ 2 ][ 40 ];
   void *p;
 
@@ -711,9 +678,9 @@ CubeAnalysisRollout ( GtkWidget *pw, cubehintdata *pchd ) {
     pes->rc.fStopOnSTD = rcRollout.fStopOnSTD;
     pes->rc.nMinimumGames = rcRollout.nMinimumGames;
     pes->rc.rStdLimit = rcRollout.rStdLimit;
-	memcpy (aarOutput, pchd->aarOutput, 
+	memcpy (aarOutput, cdec->aarOutput, 
 			2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-	memcpy (aarStdDev, pchd->aarStdDev,
+	memcpy (aarStdDev, cdec->aarStdDev,
 			2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
   }
 
@@ -733,15 +700,15 @@ CubeAnalysisRollout ( GtkWidget *pw, cubehintdata *pchd ) {
 
   RolloutProgressEnd( &p, FALSE );
   
-  memcpy ( pchd->aarOutput, aarOutput, 
+  memcpy ( cdec->aarOutput, aarOutput, 
            2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-  memcpy ( pchd->aarStdDev, aarStdDev, 
+  memcpy ( cdec->aarStdDev, aarStdDev, 
            2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
 
   if (pes->et != EVAL_ROLLOUT)
-	memcpy ( &pchd->pes->rc, &rcRollout, sizeof ( rcRollout ) );
+	memcpy ( &pes->rc, &rcRollout, sizeof ( rcRollout ) );
 
-  pchd->pes->et = EVAL_ROLLOUT;
+  pes->et = EVAL_ROLLOUT;
 
   UpdateCubeAnalysis ( pchd );
 
@@ -751,6 +718,8 @@ static void EvalCube ( cubehintdata *pchd, evalcontext *pec )
 {
 	cubeinfo ci;
 	decisionData dd;
+	cubedecisiondata *cdec = pchd->pmr->CubeDecPtr;
+	evalsetup *pes = &cdec->esDouble;
 
 	GetMatchStateCubeInfo( &ci, &pchd->ms );
 
@@ -763,11 +732,11 @@ static void EvalCube ( cubehintdata *pchd, evalcontext *pec )
 
   /* save evaluation */
 
-  memcpy ( pchd->aarOutput, dd.aarOutput, 
+  memcpy ( cdec->aarOutput, dd.aarOutput, 
            2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
 
-  pchd->pes->et = EVAL_EVAL;
-  memcpy ( &pchd->pes->ec, dd.pec, sizeof ( evalcontext ) );
+  pes->et = EVAL_EVAL;
+  memcpy ( &pes->ec, dd.pec, sizeof ( evalcontext ) );
 
   UpdateCubeAnalysis ( pchd );
 }
@@ -869,10 +838,11 @@ static char *GetContent ( cubehintdata *pchd )
 {
   static char *pc;
   cubeinfo ci;
+  cubedecisiondata *cdec = pchd->pmr->CubeDecPtr;
 
   GetMatchStateCubeInfo ( &ci, &pchd->ms );
-  pc = OutputCubeAnalysis (  pchd->aarOutput, pchd->aarStdDev,
-                            pchd->pes, &ci );
+  pc = OutputCubeAnalysis (  cdec->aarOutput, cdec->aarStdDev,
+                            &cdec->esDouble, &ci );
 
   return pc;
 }
@@ -898,7 +868,7 @@ CubeAnalysisTempMap ( GtkWidget *pw, cubehintdata *pchd ) {
 
 static void CubeAnalysisCmark(GtkWidget * pw, cubehintdata * pchd)
 {
-	*pchd->pcmark = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pw));
+	pchd->pmr->CubeDecPtr->cmark = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pw));
 }
 
 static GtkWidget *
@@ -1005,7 +975,7 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
   gtk_widget_set_sensitive( pwMWC, pchd->ms.nMatchTo );
   
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwCmark ),
-                                 *pchd->pcmark );
+                                 pchd->pmr->CubeDecPtr->cmark );
 
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwMWC ),
                                  fOutputMWC );
@@ -1058,76 +1028,50 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
 }
 
 
-extern GtkWidget *
-CreateCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                     float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                     evalsetup *pes,
-                     const movetype mt, CMark *pcmark ) {
+extern GtkWidget *CreateCubeAnalysis(moverecord *pmr, matchstate *pms)
+{
 
-  cubehintdata *pchd = (cubehintdata *) malloc ( sizeof ( cubehintdata ) );
+	cubehintdata *pchd = g_new0(cubehintdata, 1);
 
-  GtkWidget *pw, *pwhb, *pwx;
+	GtkWidget *pw, *pwhb, *pwx;
 
-  pchd->aarOutput = aarOutput;
-  pchd->aarStdDev = aarStdDev;
-  pchd->pes = pes;
-  pchd->mt = mt;
-  pchd->ms = ms;
-  pchd->pcmark = pcmark;
-  
-  pchd->pw = pw = gtk_hbox_new ( FALSE, 2 );
+	pchd->pmr = pmr;
+	pchd->pw = pw = gtk_hbox_new(FALSE, 2);
+	switch (pmr->mt) {
 
-  switch ( mt ) {
+	case MOVE_NORMAL:
+	case MOVE_DOUBLE:
+		pchd->pwFrame = CubeAnalysis(pchd);
+		break;
+	case MOVE_TAKE:
+	case MOVE_DROP:
+		pchd->pwFrame = TakeAnalysis(pchd);
+		break;
+	default:
+		g_assert(FALSE);
+		break;
 
-  case MOVE_NORMAL:
-  case MOVE_DOUBLE:
+	}
 
-    pchd->pwFrame = CubeAnalysis (  aarOutput,
-				    aarStdDev, pes, 
-                                   &pchd->ms,
-                                   mt == MOVE_DOUBLE, pchd->pcmark );
-    break;
+	if (!pchd->pwFrame)
+		return NULL;
 
-  case MOVE_TAKE:
-  case MOVE_DROP:
+	gtk_box_pack_start(GTK_BOX(pw), pchd->pwFrame, FALSE, FALSE, 0);
 
-    pchd->pwFrame = TakeAnalysis ( mt, 
-                                    aarOutput,
-                                    aarStdDev,
-                                   pes,
-                                   &pchd->ms );
-    break;
+	pwx = gtk_vbox_new(FALSE, 0);
 
-  default:
+	gtk_box_pack_start(GTK_BOX(pwx), pw, FALSE, FALSE, 0);
 
-    g_assert ( FALSE );
-    break;
+	pwhb = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwhb), CreateCubeAnalysisTools(pchd), FALSE,
+			   FALSE, 8);
 
-  }
+	gtk_box_pack_start(GTK_BOX(pwx), pwhb, FALSE, FALSE, 0);
 
-  if ( ! pchd->pwFrame )
-    return NULL;
+	/* hook to free cubehintdata on widget destruction */
+	g_object_set_data_full(G_OBJECT(pw), "cubehintdata", pchd, g_free);
 
-  gtk_box_pack_start ( GTK_BOX ( pw ), pchd->pwFrame, FALSE, FALSE, 0 );
-
-
-  pwx = gtk_vbox_new ( FALSE, 0 );
-
-  gtk_box_pack_start ( GTK_BOX ( pwx ), pw, FALSE, FALSE, 0 );
-
-  pwhb = gtk_hbox_new(FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(pwhb), CreateCubeAnalysisTools ( pchd ), FALSE, FALSE, 8 );
-
-  gtk_box_pack_start ( GTK_BOX ( pwx ), pwhb,
-                     FALSE, FALSE, 0 );
-
-  /* hook to free cubehintdata on widget destruction */
-  g_object_set_data_full( G_OBJECT( pw ), "cubehintdata", 
-                            pchd, free );
-
-
-  return pwx;
-
+	return pwx;
 
 }
 

@@ -47,6 +47,8 @@
 #include "fun3d.h"
 #endif
 
+moverecord *pmr_hint = NULL;
+
 const char *aszGameResult[] = { 
   N_("single game"), 
   N_("gammon"), 
@@ -150,78 +152,6 @@ ec2es ( evalsetup *pes, const evalcontext *pec ) {
   memcpy ( &pes->ec, pec, sizeof ( evalcontext ) );
 
 }
-
-static int
-cmp_matchstate ( const matchstate *pms1, const matchstate *pms2 ) {
-
-  /* check if the match state is for the same move */
-
-  return memcmp ( pms1, pms2, sizeof ( matchstate ) );
-
-}
-
-
-static int
-cmp_matchstate_cube( const matchstate *pms1, const matchstate *pms2 ) {
-
-  if ( memcmp( pms1->anBoard, pms2->anBoard, sizeof pms1->anBoard ) )
-    return 1;
-  
-  if ( pms1->fTurn != pms2->fTurn )
-    return 1;
-
-  if ( pms1->fMove != pms2->fMove )
-    return 1;
-
-  if ( pms1->fCrawford != pms2->fCrawford )
-    return 1;
-
-  if ( pms1->fPostCrawford != pms2->fPostCrawford )
-    return 1;
-
-  if ( pms1->nMatchTo != pms2->nMatchTo )
-    return 1;
-
-  if ( pms1->nMatchTo &&
-       memcmp( pms1->anScore, pms2->anScore, sizeof pms1->anScore ) )
-    return 1;
-  
-  if ( pms1->nCube != pms2->nCube )
-    return 1;
-
-  if ( pms1->bgv != pms2->bgv )
-    return 1;
-
-  if ( pms1->fCubeOwner != pms2->fCubeOwner )
-    return 1;
-
-  if ( !pms1->nMatchTo && pms1->fJacoby != pms2->fJacoby )
-    return 1;
-
-  if ( !pms1->nMatchTo && pms1->cBeavers != pms2->cBeavers )
-    return 1;
-
-  return 0;
-
-}
-
-static int
-cmp_matchstate_move( const matchstate *pms1, const matchstate *pms2 ) {
-
-  /* check if match state is for same move */
-
-  if ( cmp_matchstate_cube( pms1, pms2 ) )
-    return 1;
-
-  if ( memcmp( pms1->anDice, pms2->anDice, sizeof pms1->anDice ) )
-    return 1;
-
-  return 0;
-
-}
-
-
-
 
 static void
 PlayMove(matchstate* pms, int const anMove[ 8 ], int const fPlayer)
@@ -467,22 +397,25 @@ CalculateBoard( void )
 #endif
 }
 
-static void FreeMoveRecord( moverecord *pmr ) {
+static void FreeMoveRecord(moverecord *pmr)
+{
+	if (!pmr)
+		return;
 
-    switch( pmr->mt ) {
-    case MOVE_NORMAL:
-	if( pmr->ml.cMoves )
-	    free( pmr->ml.amMoves );
-	break;
+	switch (pmr->mt) {
+	case MOVE_NORMAL:
+		if (pmr->ml.cMoves)
+			free(pmr->ml.amMoves);
+		break;
 
-    default:
-	break;
-    }
+	default:
+		break;
+	}
 
-    if( pmr->sz )
-	free( pmr->sz );
-    
-    free( pmr );
+	if (pmr->sz)
+		free(pmr->sz);
+
+	free(pmr);
 }
 
 static void FreeGame( listOLD *pl ) {
@@ -524,6 +457,7 @@ static int PopGame( listOLD *plDelete, int fInclusive ) {
 	ListDelete( pl->plPrev );
     } while( pl->p );
 
+    pmr_hint_destroy();
     return 0;
 }
 
@@ -553,6 +487,7 @@ static int PopMoveRecord( listOLD *plDelete ) {
 	FreeMoveRecord( pl->plNext->p );
 	ListDelete( pl->plNext );
     }
+    pmr_hint_destroy();
 
     return 0;
 }
@@ -600,12 +535,14 @@ extern void AddMoveRecord( void *pv ) {
 	g_assert( FALSE );
     }
     
+    if (pmr->mt != MOVE_SETDICE)
+	    pmr_hint_destroy();
+
     /* Delete all games after plGame, and all records after plLastMove. */
     PopGame( plGame, FALSE );
     /* FIXME when we can handle variations, we should save the old moves
        as an alternate variation. */
     PopMoveRecord( plLastMove->plNext );
-
 
     if( pmr->mt == MOVE_NORMAL &&
 	( pmrOld = plLastMove->p )->mt == MOVE_SETDICE &&
@@ -1018,7 +955,7 @@ static int ComputerTurn( void ) {
 	  if (RunAsyncProcess((AsyncFun)asyncCubeDecision, &dd, _("Considering cube action...")) != 0)
 		  return -1;
 
-      UpdateStoredCube( dd.aarOutput, dd.aarStdDev, &ap[ ms.fTurn ].esCube, &ms );
+	  current_pmr_cubedata_update(dd.pes, dd.aarOutput, dd.aarStdDev);
 
       cd = FindCubeDecision ( arDouble,  dd.aarOutput, &ci );
 
@@ -1226,7 +1163,7 @@ static int ComputerTurn( void ) {
 		  if (RunAsyncProcess((AsyncFun)asyncCubeDecision, &dd, _("Considering cube action...")) != 0)
 			return -1;
 
-          UpdateStoredCube( dd.aarOutput, dd.aarStdDev, &ap[ ms.fTurn ].esCube, &ms );
+	  current_pmr_cubedata_update(dd.pes, dd.aarOutput, dd.aarStdDev);
 
           cd = FindCubeDecision ( arDouble,  dd.aarOutput, &ci );
 
@@ -1316,15 +1253,8 @@ static int ComputerTurn( void ) {
       pmr->fPlayer = ms.fTurn;
       pmr->esChequer = ap[ ms.fTurn ].esChequer;
 
-      if ( !cmp_matchstate_cube( &sc.ms, &ms ) ) {
-        /* use cube analysis from stored cube */
-        memcpy( pmr->CubeDecPtr->aarOutput, sc.aarOutput,
-                sizeof sc.aarOutput );
-        memcpy( pmr->CubeDecPtr->aarStdDev, sc.aarStdDev,
-                sizeof sc.aarStdDev );
-        memcpy( &pmr->CubeDecPtr->esDouble, &sc.es, sizeof sc.es );
-      }
-
+      pmr_cubedata_copy(pmr_hint, pmr);
+      pmr_hint_destroy();
 	  fd.pml = &pmr->ml;
 	  fd.pboard = (ConstTanBoard)anBoardMove;
 	  fd.auchMove = NULL;
@@ -1615,16 +1545,8 @@ static int TryBearoff( void ) {
 		pmr->fPlayer = ms.fTurn;
 		memcpy( pmr->n.anMove, ml.amMoves[ i ].anMove,
 			sizeof( pmr->n.anMove ) );
-                if ( !cmp_matchstate ( &ms, &sm.ms ) ) {
-                  CopyMoveList ( &pmr->ml, &sm.ml );
-                  pmr->n.iMove = locateMove ( msBoard(), pmr->n.anMove, 
-                                            &pmr->ml );
-		  if ( (pmr->n.iMove > pmr->ml.cMoves)) {
-		    free (pmr->ml.amMoves);
-		    pmr->ml.cMoves = 0;
-		    pmr->ml.amMoves = NULL;
-		  }
-                }
+		pmr_movelist_copy(pmr_hint, pmr);
+		pmr_hint_destroy();
 
 		ShowAutoMove( msBoard(), pmr->n.anMove );
 		
@@ -2286,7 +2208,7 @@ static skilltype GoodDouble (int fisRedouble, moverecord *pmr )
   /* update analysis for hint */
 
   ec2es ( &es, dd.pec );
-  UpdateStoredCube ( dd.aarOutput, dd.aarStdDev, &es, &ms );
+  current_pmr_cubedata_update(&es, dd.aarOutput, dd.aarStdDev);
 
   /* store cube decision for annotation */
 
@@ -2392,15 +2314,10 @@ extern void CommandDouble( char *sz ) {
 
     pmr->mt = MOVE_DOUBLE;
     pmr->fPlayer = ms.fTurn;
-    if( !LinkToDouble( pmr ) ) {
-      if ( ! cmp_matchstate_cube( &sc.ms, &ms ) ) {
-        /* use cube analysis from stored cube */
-        memcpy( pmr->CubeDec.aarOutput, sc.aarOutput,
-                sizeof sc.aarOutput );
-        memcpy( pmr->CubeDec.aarStdDev, sc.aarStdDev,
-                sizeof sc.aarStdDev );
-        memcpy( &pmr->CubeDec.esDouble, &sc.es, sizeof sc.es );
-      }
+    if( !LinkToDouble( pmr ) )
+    {
+	    pmr_cubedata_copy(pmr_hint, pmr);
+	    pmr_hint_destroy();
     }
 
     if ( fTutor && fTutorCube && !GiveAdvice( GoodDouble( FALSE, pmr ) ))
@@ -2471,17 +2388,9 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr)
         /* stored cube decision for hint */
 
         ec2es ( &es, dd.pec );
-        UpdateStoredCube ( dd.aarOutput, dd.aarStdDev, &es, &ms );
-	    
-        /* store cube decision for annotation */
-
-        ec2es ( &pmr->CubeDecPtr->esDouble, dd.pec );
-        memcpy ( pmr->CubeDecPtr->aarOutput, dd.aarOutput, 
-                 2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-        memcpy ( pmr->CubeDecPtr->aarStdDev, dd.aarStdDev,
-                 2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-        pmr->stCube = SKILL_NONE;
-
+	  current_pmr_cubedata_update(&es, dd.aarOutput, dd.aarStdDev);
+	pmr_cubedata_copy(pmr_hint, pmr);
+	pmr_hint_destroy();
 	    
 	cd = FindCubeDecision ( arDouble,  dd.aarOutput, &ci );  
 
@@ -2574,111 +2483,94 @@ extern void CommandDrop( char *sz ) {
     TurnDone();
 }
 
-static void DumpGameList(char *szOut, listOLD *plGame) {
+static void DumpGameList(GString *gsz, listOLD *plGame)
+{
 
-    listOLD *pl;
-    moverecord *pmr;
-    char sz[ 128 ];
-    int i = 0, nFileCube = 1, fWarned = FALSE;
+	listOLD *pl;
+	moverecord *pmr;
+	int nFileCube = 1;
 	TanBoard anBoard;
-
-    InitBoard( anBoard, ms.bgv );
-    for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
-	pmr = pl->p;
-
-	switch( pmr->mt ) {
-	case MOVE_GAMEINFO:
-	    /* FIXME */
-          continue;
-	    break;
-	case MOVE_NORMAL:
-	    sprintf( sz, "%d%d%-2s: ", pmr->anDice[ 0 ],
-                     pmr->anDice[ 1 ],
-                     aszLuckTypeAbbr[ pmr->lt ] );
-	    FormatMove( sz + 6, (ConstTanBoard)anBoard, pmr->n.anMove );
-            strcat(sz, " ");
-            strcat(sz, aszSkillTypeAbbr[ pmr->n.stMove ]);
-            strcat(sz, aszSkillTypeAbbr[ pmr->stCube ]);
-	    ApplyMove( anBoard, pmr->n.anMove, FALSE );
-	    SwapSides( anBoard );
-         /*   if (( sz[ strlen(sz)-1 ] == ' ') && (strlen(sz) > 5 ))
-              sz[ strlen(sz) - 1 ] = 0;  Don't need this..  */
-	    break;
-	case MOVE_DOUBLE:
-	    sprintf( sz, _("      Doubles to %d"), nFileCube <<= 1 );
-	    break;
-	case MOVE_TAKE:
-	    strcpy( sz, _("      Takes") ); /* FIXME beavers? */
-	    break;
-	case MOVE_DROP:
-            sprintf( sz, _("      Drop") );
-	  /*  if( anScore )
-		anScore[ ( i + 1 ) & 1 ] += nFileCube / 2; */
-	    break;
-        case MOVE_RESIGN:
-            sprintf( sz, _("      Resigns") );
-            break;
-	case MOVE_SETDICE:
-	    sprintf( sz, "%d%d%-2s: %s", 
-                     pmr->anDice[ 0 ],
-                     pmr->anDice[ 1 ],
-                     aszLuckTypeAbbr[ pmr->lt ],
-                     _("Rolled") );
-	    break;
-	case MOVE_SETBOARD:
-	case MOVE_SETCUBEVAL:
-	case MOVE_SETCUBEPOS:
-	    if( !fWarned ) {
-		fWarned = TRUE;
-		outputl( "FIXME!!! (I'm DumpGameList in play.c)" );
-	    }
-	    break;
-        default:
-            printf("\n");
+	char tmp[100];
+	int column = 0;
+	InitBoard(anBoard, ms.bgv);
+	for (pl = plGame->plNext; pl != plGame; pl = pl->plNext) {
+		pmr = pl->p;
+		if (column == 1)
+			g_string_append(gsz, "\n");
+		if (pmr->fPlayer == 1 && column == 1)
+			g_string_append_printf(gsz, "%42s", "");
+		column = pmr->fPlayer;
+		switch (pmr->mt) {
+		case MOVE_GAMEINFO:
+			column = 0;
+			break;
+		case MOVE_NORMAL:
+			g_string_append_printf(gsz, "%d%d%-5s: ",
+					       pmr->anDice[0], pmr->anDice[1],
+					       aszLuckTypeAbbr[pmr->lt]);
+			FormatMove(tmp, (ConstTanBoard) anBoard, pmr->n.anMove);
+			g_string_append_printf(gsz, "%-15s", tmp);
+			g_string_append_printf(gsz, "%-10s%-10s",
+					       aszSkillTypeAbbr[pmr->n.stMove],
+					       aszSkillTypeAbbr[pmr->stCube]);
+			ApplyMove(anBoard, pmr->n.anMove, FALSE);
+			SwapSides(anBoard);
+			break;
+		case MOVE_DOUBLE:
+			g_string_append_printf(gsz,
+					       _
+					       ("Doubles to %4d                              "),
+					       nFileCube <<= 1);
+			break;
+		case MOVE_TAKE:
+			g_string_append(gsz,
+					_
+					("Takes                                       "));
+			break;
+		case MOVE_DROP:
+			g_string_append(gsz, _("Drops\n"));
+			break;
+		case MOVE_RESIGN:
+			g_string_append(gsz, _("Resigns\n"));
+			break;
+		case MOVE_SETDICE:
+			g_string_append_printf(gsz, "%d%d%-5s: %-33s",
+					       pmr->anDice[0], pmr->anDice[1],
+					       aszLuckTypeAbbr[pmr->lt],
+					       _("Rolled"));
+			break;
+		default:
+			g_string_append_printf(gsz,
+					       _
+					       ("Unhandled movetype %d                      \n"),
+					       pmr->mt);
+			break;
+		}
 	}
-
-	if( !i && pmr->mt == MOVE_NORMAL && pmr->fPlayer ) {
-	    printf( "  1|                                " );
-	    i++;
-	}
-
-	if(( i & 1 ) || (pmr->mt == MOVE_RESIGN)) {
-	    printf( "%s\n", sz );
-	} else 
-	    printf( "%3d| %-30s ", ( i >> 1 ) + 1, sz );
-
-        if ( pmr->mt == MOVE_DROP ) {
-          printf( "\n" );
-          if ( ! ( i & 1 ) )
-            printf( "\n" );
-        }
-
-	i++;
-    }
-
-    printf( "\n" );
 
 }
 
-extern void CommandListGame( char *sz ) {
+extern void CommandListGame(char *sz)
+{
+	GString *gsz = g_string_new(NULL);
 
-    char szOut[4098];
+	if (ms.gs != GAME_PLAYING) {
+		outputl(_
+			("No game in progress (type `new game' to start one)."));
+
+		return;
+	}
+	DumpGameList(gsz, plGame);
 #if USE_GTK
-    if( fX ) {
-	ShowGameWindow();
-	return;
-    }
+	if (fX)
+		GTKTextWindow(gsz->str, _("Game dump"), DT_INFO, NULL);
+	else
 #endif
-    
-    if( ms.gs != GAME_PLAYING ) {
-	outputl( _("No game in progress (type `new game' to start one).") );
-	
-	return;
-    }
-
-    DumpGameList(szOut, plGame);
-    /* FIXME  outputl(szOut);
-       DumpListGame will soon return szOut */
+	{
+		outputl(gsz->str);
+		outputx();
+	}
+	g_string_free(gsz, TRUE);
 }
 
 extern void CommandListMatch( char *sz ) {
@@ -2690,53 +2582,6 @@ extern void CommandListMatch( char *sz ) {
 #endif
 
     /* FIXME */
-}
-
-static skilltype GoodMove (moverecord *pmr)
-{
-  moveData md;
-  matchstate msx;
-  int        fAnalyseMoveSaved = fAnalyseMove;
-  evalsetup *pesCube, *pesChequer;
-
-  /* should never happen, but if it does, tutoring
-   * is a non-starter
-   */
-  if ((pmr == 0) ||
-      (pmr->mt != MOVE_NORMAL) ||
-      (ap[ pmr->fPlayer ].pt != PLAYER_HUMAN))
-    return SKILL_NONE;
-	 
-  /* ensure we're analyzing moves */
-  fAnalyseMove = 1;
-  memcpy ( &msx, &ms, sizeof ( matchstate ) );
-
-  if (fTutorAnalysis) {
-    pesCube = &esAnalysisCube;
-    pesChequer = &esAnalysisChequer;
-  } else {
-    pesCube = &esEvalCube;
-    pesChequer = &esEvalChequer;
-  }
-
-  md.pmr = pmr;
-  md.pms = &msx;
-  md.pesChequer = pesChequer;
-  md.pesCube = pesChequer;
-  md.aamf = fTutorAnalysis ? aamfAnalysis : aamfEval;
-  if (RunAsyncProcess((AsyncFun)asyncAnalyzeMove, &md, _("Considering move...")) != 0)
-  {
-    fAnalyseMove = fAnalyseMoveSaved;
-    return SKILL_NONE;
-  }
-
-  fAnalyseMove = fAnalyseMoveSaved;
-
-  /* update move list for hint */
-
-  UpdateStoredMoves ( &pmr->ml, &ms );
-
-  return pmr->n.stMove;
 }
 
 extern void 
@@ -2808,25 +2653,12 @@ CommandMove( char *sz ) {
 		memcpy( pmr->n.anMove, ml.amMoves[ 0 ].anMove,
 			sizeof( pmr->n.anMove ) );
 	    
-            if ( !cmp_matchstate_move ( &ms, &sm.ms ) ) {
-              CopyMoveList ( &pmr->ml, &sm.ml );
-              pmr->n.iMove = locateMove ( msBoard(), pmr->n.anMove, 
-                                        &pmr->ml );
-              if ( (pmr->n.iMove > pmr->ml.cMoves)) {
-		free (pmr->ml.amMoves);
-		pmr->ml.cMoves = 0;
-		pmr->ml.amMoves = NULL;
-	      }
+	    if (pmr_hint)
+	    {
+		    pmr_movelist_copy(pmr_hint, pmr);
+		    pmr_cubedata_copy(pmr_hint, pmr);
+		    pmr_hint_destroy();
 	    }
-
-            if ( !cmp_matchstate_cube( &sc.ms, &ms ) ) {
-              /* use cube analysis from stored cube */
-              memcpy( pmr->CubeDecPtr->aarOutput, sc.aarOutput,
-                      sizeof sc.aarOutput );
-              memcpy( pmr->CubeDecPtr->aarStdDev, sc.aarStdDev,
-                      sizeof sc.aarStdDev );
-              memcpy( &pmr->CubeDecPtr->esDouble, &sc.es, sizeof sc.es );
-            }
 
 	    ShowAutoMove( msBoard(), pmr->n.anMove );
 	    
@@ -2883,6 +2715,13 @@ CommandMove( char *sz ) {
 		/* we have a legal move! */
                 playSound ( SOUND_MOVE );
 
+		if ( fTutor && fTutorChequer)
+		{
+			HintChequer("", FALSE);
+			if (!GiveAdvice ( pmr_hint->n.stMove ))
+				return;
+		}
+
                 pmr = NewMoveRecord();
 
 		pmr->mt = MOVE_NORMAL;
@@ -2894,30 +2733,12 @@ CommandMove( char *sz ) {
                 memcpy( pmr->n.anMove, ml.amMoves[ i ].anMove, 
                         sizeof pmr->n.anMove );
 
-                if ( !cmp_matchstate_move ( &ms, &sm.ms ) ) {
-                  CopyMoveList ( &pmr->ml, &sm.ml );
-                  pmr->n.iMove = locateMove ( msBoard(), pmr->n.anMove, 
-                                            &pmr->ml );
-		  if ( (pmr->n.iMove > pmr->ml.cMoves)) {
-		    free (pmr->ml.amMoves);
-		    pmr->ml.cMoves = 0;
-		    pmr->ml.amMoves = NULL;
-		  }
-                }
-
-                if ( !cmp_matchstate_cube( &sc.ms, &ms ) ) {
-                  /* use cube analysis from stored cube */
-                  memcpy( pmr->CubeDecPtr->aarOutput, sc.aarOutput,
-                          sizeof sc.aarOutput );
-                  memcpy( pmr->CubeDecPtr->aarStdDev, sc.aarStdDev,
-                          sizeof sc.aarStdDev );
-                  memcpy( &pmr->CubeDecPtr->esDouble, &sc.es, sizeof sc.es );
-                }
-
-		if ( fTutor && fTutorChequer && !GiveAdvice ( GoodMove( pmr ) )) {
-                  free ( pmr ); /* garbage collect */
-                  return;
-                }
+		if (pmr_hint)
+		{
+			pmr_movelist_copy(pmr_hint, pmr);
+			pmr_cubedata_copy(pmr_hint, pmr);
+			pmr_hint_destroy();
+		}
 
 #if USE_GTK
 		/* There's no point delaying here. */
@@ -3017,10 +2838,11 @@ extern void ClearMatch( void )
     mi.nYear = 0;
 }
 
-extern void FreeMatch( void ) {
+extern void FreeMatch(void)
+{
 
-    PopGame( lMatch.plNext->p, TRUE );
-    IniStatcontext( &scMatch );
+	PopGame(lMatch.plNext->p, TRUE);
+	IniStatcontext(&scMatch);
 }
 
 extern void SetMatchDate( matchinfo *pmi ) {
@@ -3957,7 +3779,7 @@ static skilltype ShouldDouble ( void ) {
         /* stored cube decision for hint */
 
         ec2es ( &es, dd.pec );
-        UpdateStoredCube ( dd.aarOutput, dd.aarStdDev, &es, &ms );
+	  current_pmr_cubedata_update(&es, dd.aarOutput, dd.aarStdDev);
 
 	    
 	cd = FindCubeDecision ( arDouble,  dd.aarOutput, &ci );  
@@ -4040,7 +3862,7 @@ CommandRoll( char *sz ) {
 
   AddMoveRecord( pmr );
 
-  InvalidateStoredMoves();
+  //InvalidateStoredMoves();
   
   DiceRolled();      
 
@@ -4341,96 +4163,118 @@ FixMatchState(matchstate* pms, const moverecord* pmr )
     
 }
 
+extern void pmr_cubedata_set(moverecord *pmr, evalsetup *pes, float output[][NUM_ROLLOUT_OUTPUTS], float stddev[][NUM_ROLLOUT_OUTPUTS])
+{
+	pmr->CubeDecPtr->esDouble = *pes;
+	pmr->stCube = SKILL_NONE;
+	memcpy(pmr->CubeDecPtr->aarOutput, output, sizeof(pmr->CubeDecPtr->aarOutput));
+	memcpy(pmr->CubeDecPtr->aarStdDev, stddev, sizeof(pmr->CubeDecPtr->aarStdDev));
+}
 
-extern moverecord *
-getCurrentMoveRecord ( int *pfHistory ) {
+extern void pmr_cubedata_copy(const moverecord *source, moverecord *target)
+{
+	if (!source || source->CubeDecPtr->esDouble.et == EVAL_NONE)
+		return;
+        memcpy( target->CubeDecPtr->aarOutput, source->CubeDecPtr->aarOutput, sizeof target->CubeDecPtr->aarOutput );
+        memcpy( target->CubeDecPtr->aarStdDev, source->CubeDecPtr->aarStdDev, sizeof target->CubeDecPtr->aarStdDev );
+        memcpy( &target->CubeDecPtr->esDouble, &source->CubeDecPtr->esDouble, sizeof target->CubeDecPtr->esDouble );
+}
 
-  static moverecord mrHint;
+extern void pmr_movelist_set(moverecord *pmr, evalsetup *pes, movelist *pml)
+{
+	float skill_score;
+	pmr->esChequer = *pes;
+	pmr->stCube = SKILL_NONE;
+	pmr->ml = *pml;
+	pmr->n.iMove = locateMove ( msBoard(), pmr->n.anMove, &pmr->ml );
+	if (pmr->ml.cMoves > 0)
+		skill_score = pmr->ml.amMoves[ pmr->n.iMove ]. rScore - pmr->ml.amMoves[ 0 ].rScore;
+	else
+		skill_score = 0.0f;
+	pmr->n.stMove = Skill( skill_score );
+}
 
-  /* FIXME: introduce a mrHint that "Hint" and "Eval" fills */
+extern void pmr_movelist_copy(const moverecord *source, moverecord *target)
+{
+	float skill_score;
+	CopyMoveList(&target->ml, &source->ml);
+	target->n.iMove = locateMove ( msBoard(), target->n.anMove, &target->ml );
+	if (target->ml.cMoves > 0)
+		skill_score = target->ml.amMoves[ target->n.iMove ]. rScore - target->ml.amMoves[ 0 ].rScore;
+	else
+		skill_score = 0.0f;
+	target->n.stMove = Skill( skill_score );
+}
 
-  if ( plLastMove && plLastMove->plNext && plLastMove->plNext->p ) {
-	  if (pfHistory)
-		  *pfHistory = TRUE;
-    return plLastMove->plNext->p;
-  }
-  else {
-	  if (pfHistory)
-		  *pfHistory = FALSE;
+extern void current_pmr_cubedata_update(evalsetup *pes, float output[][NUM_ROLLOUT_OUTPUTS], float stddev[][NUM_ROLLOUT_OUTPUTS])
+{
+	moverecord *pmr = getCurrentMoveRecord(NULL);
+	if (pmr->CubeDecPtr->esDouble.et == EVAL_NONE)
+		pmr_cubedata_set(pmr, pes, output, stddev);
+}
 
-    if ( ! cmp_matchstate ( &ms, &sm.ms ) ) {
+extern moverecord *getCurrentMoveRecord(int *pfHistory)
+{
+	if (plLastMove && plLastMove->plNext && plLastMove->plNext->p) {
+		if (pfHistory)
+			*pfHistory = TRUE;
+		return plLastMove->plNext->p;
+	}
 
-      mrHint.mt = MOVE_NORMAL;
-      mrHint.sz = NULL;
-      mrHint.anDice[ 0 ] = ms.anDice[ 0 ];
-      mrHint.anDice[ 1 ] = ms.anDice[ 1 ];
-      mrHint.fPlayer = ms.fTurn;
-      mrHint.ml = sm.ml;
-      mrHint.lt = LUCK_NONE;
-      mrHint.rLuck = (float)ERR_VAL;
-      mrHint.n.stMove = SKILL_NONE;
+	if (pfHistory)
+		*pfHistory = FALSE;
+	if (!pmr_hint)
+	{
+		pmr_hint = NewMoveRecord();
+		pmr_hint->fPlayer = ms.fTurn;
+	}
+	if (ms.anDice[0] > 0)
+	{
+		pmr_hint->mt = MOVE_NORMAL;
+		pmr_hint->anDice[0] = ms.anDice[0];
+		pmr_hint->anDice[1] = ms.anDice[1];
+	}
+	else
+		pmr_hint->mt = MOVE_DOUBLE;
+	return pmr_hint;
+}
 
-      mrHint.n.iMove = UINT_MAX;
-      mrHint.n.anMove[ 0 ] = -1;
+extern gboolean game_is_last(listOLD *plGame)
+{
+	listOLD *pl;
+	for (pl = lMatch.plNext; pl->p != plGame && pl != &lMatch;
+	     pl = pl->plNext) {
+	}
+	if (pl->p != plGame || pl->plNext != &lMatch)
+		return FALSE;
+	else
+		return TRUE;
+}
 
-#if USE_GTK
-      if ( fX )
-        if ( GTKGetMove ( mrHint.n.anMove ) )
-          mrHint.n.iMove = locateMove ( msBoard(), mrHint.n.anMove, &sm.ml );
-#endif
+extern listOLD *game_add_pmr_hint(listOLD *plGame)
+{
+	g_return_val_if_fail(plGame, NULL);
+	g_return_val_if_fail(game_is_last(plGame), NULL);
 
+	if (pmr_hint)
+		return(ListInsert(plGame, pmr_hint));
+	else
+		return NULL;
+}
 
-      /* add cube */
+extern void game_remove_pmr_hint(listOLD *pl_hint)
+{
+	g_return_if_fail(pl_hint);
+	g_return_if_fail(pl_hint->p == pmr_hint);
+	ListDelete(pl_hint);
+}
 
-      mrHint.CubeDecPtr = &mrHint.CubeDec;
-      if ( ! memcmp ( msBoard(), sc.ms.anBoard, sizeof ( ms.anBoard ) ) &&
-           ms.fTurn == sc.ms.fTurn && 
-           ms.fMove == sc.ms.fMove &&
-           ms.fCubeOwner == sc.ms.fCubeOwner &&
-           ms.fCrawford == sc.ms.fCrawford &&
-           ms.fPostCrawford == sc.ms.fPostCrawford &&
-           ms.nCube == sc.ms.nCube &&
-           ms.nMatchTo == sc.ms.nMatchTo &&
-           ( ! ms.nMatchTo || ( ms.anScore[ 0 ] == sc.ms.anScore[ 0 ] &&
-                                ms.anScore[ 1 ] == sc.ms.anScore[ 1 ] ) ) ) {
-
-        mrHint.CubeDecPtr->esDouble = sc.es;
-        mrHint.stCube = SKILL_NONE;
-        memcpy ( mrHint.CubeDecPtr->aarOutput, sc.aarOutput, 
-                 sizeof ( sc.aarOutput ) );
-        memcpy ( mrHint.CubeDecPtr->aarStdDev, sc.aarStdDev, 
-                 sizeof ( sc.aarStdDev ) );
-
-      }
-      else {
-        mrHint.CubeDecPtr->esDouble.et = EVAL_NONE;
-      }
-
-      return &mrHint;
-
-    }
-    else if ( ! cmp_matchstate ( &ms, &sc.ms ) ) {
-
-      mrHint.mt = MOVE_DOUBLE;
-      mrHint.sz = NULL;
-      mrHint.fPlayer = ms.fTurn;
-      mrHint.nAnimals = 0;
-      mrHint.CubeDecPtr = &mrHint.CubeDec;
-      mrHint.CubeDecPtr->esDouble = sc.es;
-      mrHint.stCube = SKILL_NONE;
-      memcpy ( mrHint.CubeDecPtr->aarOutput, sc.aarOutput, 
-               sizeof ( sc.aarOutput ) );
-      memcpy ( mrHint.CubeDecPtr->aarStdDev, sc.aarStdDev, 
-               sizeof ( sc.aarStdDev ) );
-      
-      return &mrHint;
-
-    }
-    else
-      return NULL;
-
-  }
-
+extern void pmr_hint_destroy(void)
+{
+	if (!pmr_hint)
+		return;
+	FreeMoveRecord(pmr_hint);
+	pmr_hint = NULL;
 }
 
 static void

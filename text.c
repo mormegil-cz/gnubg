@@ -799,11 +799,15 @@ static void ExportGameText ( FILE *pf, listOLD *plGame,
     static statcontext scTotal;
     xmovegameinfo *pmgi = NULL;
     GString *gsz;
+    listOLD *pl_hint = NULL;
 
     if ( ! iGame )
       IniStatcontext ( &scTotal );
 
     updateStatisticsGame ( plGame );
+
+    if (game_is_last(plGame))
+	    pl_hint = game_add_pmr_hint(plGame);
 
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
 
@@ -895,6 +899,9 @@ static void ExportGameText ( FILE *pf, listOLD *plGame,
       ApplyMoveRecord ( &msExport, plGame, pmr );
 
     }
+    
+    if (pl_hint)
+	    game_remove_pmr_hint(pl_hint);
 
     if( pmgi && pmgi->fWinner != -1 ) {
 

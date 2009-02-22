@@ -2190,6 +2190,7 @@ static void SaveGame(FILE * pf, listOLD * plGame)
     moverecord *pmr;
     unsigned int i, j;
 	TanBoard anBoard;
+    listOLD *pl_hint = NULL;
 
     updateStatisticsGame(plGame);
 
@@ -2264,6 +2265,9 @@ static void SaveGame(FILE * pf, listOLD * plGame)
 
     if (pmr->g.sc.fMoves || pmr->g.sc.fCube || pmr->g.sc.fDice)
 	WriteStatContext(pf, &pmr->g.sc);
+
+    if (game_is_last(plGame))
+	    pl_hint = game_add_pmr_hint(plGame);
 
     for (pl = pl->plNext; pl != plGame; pl = pl->plNext) {
 	pmr = pl->p;
@@ -2392,6 +2396,9 @@ static void SaveGame(FILE * pf, listOLD * plGame)
 	}
     }
 
+    if (pl_hint)
+	    game_remove_pmr_hint(pl_hint);
+
     /* FIXME if the game is not over and the player on roll is the last
        player to move, add a PL property */
 
@@ -2468,7 +2475,7 @@ extern void CommandSaveMatch(char *sz)
     }
 
     for (pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext)
-	SaveGame(pf, pl->p);
+	    SaveGame(pf, pl->p);
 
     if (pf != stdout)
 	fclose(pf);
@@ -2484,7 +2491,8 @@ extern void CommandSavePosition(char *sz)
     listOLD l;
     moverecord *pmgi;
     moverecord *pmsb;
-    moverecord *pmsd;
+    moverecord *pmsd = NULL;
+    moverecord *pmcu = NULL;
     moverecord *pmscv;
     moverecord *pmscp;
 
@@ -2568,15 +2576,20 @@ extern void CommandSavePosition(char *sz)
     /* FIXME if the dice are not rolled, this should be done with a PL
        property (which is SaveGame()'s job) */
 
-    pmsd = NewMoveRecord();
-
-    pmsd->mt = MOVE_SETDICE;
-    pmsd->fPlayer = ms.fMove;
-    pmsd->anDice[0] = ms.anDice[0];
-    pmsd->anDice[1] = ms.anDice[1];
-    pmsd->lt = LUCK_NONE;
-    pmsd->rLuck = ERR_VAL;
-    ListInsert(&l, pmsd);
+    pmcu = getCurrentMoveRecord(NULL);
+    if (pmcu->ml.cMoves > 0 || pmcu->CubeDecPtr->esDouble.et != EVAL_NONE)
+	    ListInsert(&l, pmcu);
+    else if (ms.anDice[0] > 0)
+    {
+	    pmsd = NewMoveRecord();
+	    pmsd->mt = MOVE_SETDICE;
+	    pmsd->fPlayer = ms.fMove;
+	    pmsd->anDice[0] = ms.anDice[0];
+	    pmsd->anDice[1] = ms.anDice[1];
+	    pmsd->lt = LUCK_NONE;
+	    pmsd->rLuck = ERR_VAL;
+	    ListInsert(&l, pmsd);
+    }
 
     /* FIXME add MOVE_DOUBLE record(s) as appropriate */
 
@@ -2590,7 +2603,8 @@ extern void CommandSavePosition(char *sz)
 
     free(pmgi);
     free(pmsb);
-    free(pmsd);
+    if (pmsd)
+	    free(pmsd);
     free(pmscv);
     free(pmscp);
 

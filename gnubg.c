@@ -551,9 +551,6 @@ exportsetup exsExport = {
   
 #define DEFAULT_NET_SIZE 128
 
-storedmoves sm; /* sm.ml.amMoves is NULL, sm.anDice is [0,0] */
-storedcube  sc; 
-
 player ap[ 2 ] = {
     { "gnubg", PLAYER_GNU, EVALSETUP, EVALSETUP, MOVEFILTER, 0, NULL },
     { "user", PLAYER_HUMAN, EVALSETUP, EVALSETUP, MOVEFILTER, 0, NULL } 
@@ -1029,35 +1026,6 @@ extern int ParsePosition( TanBoard an, char **ppch, char *pchDesc )
        *ppch = NULL;
        
        return CheckPosition((ConstTanBoard)an) ? 0 : -1;
-    }
-
-    if( *pch == '=' ) {
-	    i = atoi( pch + 1 );
-	if( i < 1) {
-	    outputl( _("You must specify the number of the move to apply.") );
-	    return -1;
-	}
-
-        if ( memcmp ( &ms, &sm.ms, sizeof ( matchstate ) ) ) {
-            outputl( _("There is no valid move list.") );
-            return -1;
-	}
-
-	if ((unsigned int)i > sm.ml.cMoves ) {
-	    outputf( _("Move =%d is out of range."), i );
-		output("\n");
-	    return -1;
-	}
-
-	PositionFromKey( an, sm.ml.amMoves[ i - 1 ].auch );
-
-	if( pchDesc )
-	    FormatMove( pchDesc, msBoard(), sm.ml.amMoves[ i - 1 ].anMove );
-	
-	if( !ms.fMove )
-	    SwapSides( an );
-	
-	return 1;
     }
 
     if( !PositionFromID( an, pch ) ) {
@@ -2086,42 +2054,7 @@ extern char *FormatMoveHint( char *sz, const matchstate *pms, movelist *pml,
 #endif
 }
 
-static void HintCube( void )
-{
-	static decisionData dd;
-	static cubeinfo ci;
-	GetMatchStateCubeInfo( &ci, &ms );
 
-	if ( memcmp ( &sc.ms, &ms, sizeof ( matchstate ) ) )
-	{	/* no analysis performed yet */
-		if ( GetDPEq ( NULL, NULL, &ci ) )
-		{	/* calculate cube action */
-			dd.pboard = msBoard();
-			dd.pci = &ci;
-			dd.pec = &esEvalCube.ec;
-			dd.pes = NULL;
-			if (RunAsyncProcess((AsyncFun)asyncCubeDecisionE, &dd, _("Considering cube action...")) != 0)
-				return;
-
-			UpdateStoredCube(dd.aarOutput, dd.aarStdDev, &esEvalCube, &ms);
-		}
-		else 
-		{
-			outputl( _("You cannot double.") );
-			return;
-		}
-	}
-
-#if USE_GTK
-  if ( fX ) {
-    GTKCubeHint( sc.aarOutput, sc.aarStdDev, &sc.es );
-    return;
-  }
-#endif
-
-  outputl( OutputCubeAnalysis(  sc.aarOutput, sc.aarStdDev, &sc.es, &ci ) );
-}
-    
 static void HintResigned( void )
 {
   float rEqBefore, rEqAfter;
@@ -2187,141 +2120,148 @@ static void HintResigned( void )
   }
 }
 
-static void HintTake( void )
+static int hint_cube(moverecord *pmr, cubeinfo *pci)
 {
-	static cubeinfo ci;
 	static decisionData dd;
-	static float arDouble[ 4 ];
+	if (pmr->CubeDecPtr->esDouble.et == EVAL_NONE) {
+		/* no analysis performed yet */
+		dd.pboard = msBoard();
+		dd.pci = pci;
+		dd.pes = &esEvalCube;
+		if (RunAsyncProcess
+		    ((AsyncFun) asyncCubeDecision, &dd,
+		     _("Considering cube action...")) != 0)
+			return -1;
 
-	/* Give hint on take decision */
-	GetMatchStateCubeInfo( &ci, &ms );
-
-	dd.pboard = msBoard();
-	dd.pci = &ci;
-	dd.pec = &esEvalCube.ec;
-	dd.pes = &esEvalCube;
-	if (RunAsyncProcess((AsyncFun)asyncCubeDecisionE, &dd, _("Considering cube action...")) != 0)
-		return;
-
-	FindCubeDecision ( arDouble,  dd.aarOutput, dd.pci );
-	
-#if USE_GTK
-  if ( fX )
-  {
-	GTKCubeHint( dd.aarOutput, dd.aarStdDev, &esEvalCube );
-	return;
-  }
-#endif
-	
-  outputl ( _("Take decision:") );
-  output("\n");
-	
-  if ( ! ms.nMatchTo || ( ms.nMatchTo && ! fOutputMWC ) ) {
-	    
-    outputf ( "%s : %+6.3f\n", _("Equity for take"), -arDouble[ 2 ] );
-    outputf ( "%s : %+6.3f\n\n", _("Equity for pass"), -arDouble[ 3 ] );
-	    
-  }
-  else {
-    outputf ( "%s : %6.2f%%\n", _("MWC for take"),
-              100.0 * ( 1.0 - eq2mwc ( arDouble[ 2 ], &ci ) ) );
-    outputf ( "%s: %6.2f%%\n", _("MWC for pass"),
-              100.0 * ( 1.0 - eq2mwc ( arDouble[ 3 ], &ci ) ) );
-  }
-	
-  if ( arDouble[ 2 ] < 0 && !ms.nMatchTo && ms.cBeavers < nBeavers )
-	  outputf ( "%s: %s\n", _("Your proper cube action"), _("Beaver!") );
-  else if ( arDouble[ 2 ] <= arDouble[ 3 ] )
-	  outputf ( "%s: %s\n", _("Your proper cube action"), _("Take") );
-  else
-	  outputf ( "%s: %s\n", _("Your proper cube action"), _("Pass") );
+		pmr_cubedata_set(pmr, dd.pes, dd.aarOutput, dd.aarStdDev);
+	}
+	return 0;
 }
 
-static void HintChequer( char *sz )
+static void hint_double(int show)
 {
-  movelist ml;
-  unsigned int i;
-  char szBuf[ 1024 ];
-  int parse_n = ParseNumber ( &sz );
-  unsigned int n = (parse_n <= 0) ? 10 : parse_n;
-  int anMove[ 8 ] = {-1, -1, -1, -1, -1, -1, -1, -1};
-  moverecord *pmr;
-  unsigned char auch[ 10 ];
-  int fHasMoved;
-  cubeinfo ci;
-  
-  GetMatchStateCubeInfo( &ci, &ms );
+	static decisionData dd;
+	static cubeinfo ci;
+	moverecord *pmr;
+	int hist;
+	GetMatchStateCubeInfo(&ci, &ms);
 
-  /* 
-   * Find out if a move has been made:
-   * (a) by having moved something in the GUI
-   * (b) by going back in the match and doing a hint on an already
-   *     stored move
-   *
-   */
-     
-  fHasMoved = FALSE;
-
-#if USE_GTK
-
-  if ( fX && GTKGetMove( anMove ) ) {
-    /* we have a legal move in the GUI */
-    /* Note that we override the move from the movelist */
-    MoveKey ( msBoard(), anMove, auch );
-    fHasMoved = TRUE;
-  }
-#endif /* USE_GTK */
-
-  if ( !fHasMoved && plLastMove && ( pmr = plLastMove->plNext->p ) && 
-       pmr->mt == MOVE_NORMAL ) {
-    /* we have an old stored move */
-    memcpy( anMove, pmr->n.anMove, sizeof anMove );
-    MoveKey( msBoard(), anMove, auch );
-    fHasMoved = TRUE;
-  }
-  
-  if ( memcmp ( &sm.ms, &ms, sizeof ( matchstate ) ) )
-  {
-	  findData fd;
-	  fd.pml = &ml;
-	  fd.pboard = msBoard();
-	  fd.auchMove = fHasMoved ? auch : NULL;
-	  fd.rThr = arSkillLevel[ SKILL_DOUBTFUL ];
-	  fd.pci = &ci;
-	  fd.pec = &esEvalChequer.ec;
-	  fd.aamf = aamfEval;
-	  if ((RunAsyncProcess((AsyncFun)asyncFindMove, &fd, _("Considering move...")) != 0) || fInterrupt)
+	if (!GetDPEq(NULL, NULL, &ci)) {
+		outputerrf(_("You cannot double."));
 		return;
-	
-    UpdateStoredMoves ( &ml, &ms );
-
-    if ( ml.amMoves )
-      free ( ml.amMoves );
-
-  }
-
-  n = ( sm.ml.cMoves > n ) ? n : sm.ml.cMoves;
-
-  if( !sm.ml.cMoves ) {
-    outputl( _("There are no legal moves.") );
-    return;
-  }
-
+	}
+	pmr = getCurrentMoveRecord(&hist);
+	if (hint_cube(pmr, &ci) <0)
+		return;
 #if USE_GTK
-  if( fX ) {
-    GTKHint( &sm.ml, locateMove ( msBoard(), anMove, &sm.ml ) );
-    return;
-  }
+	if (fX) {
+		GTKUpdateAnnotations();
+		if (show)
+			GTKCubeHint(pmr, &ms);
+		return;
+	}
 #endif
-	
-  for( i = 0; i < n; i++ )
-    output( FormatMoveHint( szBuf, &ms, &sm.ml, i, 
-                            TRUE, TRUE, TRUE ) );
+		outputl(OutputCubeAnalysis
+			(dd.aarOutput, dd.aarStdDev, dd.pes, dd.pci));
+}
 
+static void hint_take(int show)
+{
+	static decisionData dd;
+	static cubeinfo ci;
+	moverecord *pmr;
+	int hist;
+
+	GetMatchStateCubeInfo(&ci, &ms);
+	pmr = getCurrentMoveRecord(&hist);
+	if (hint_cube(pmr, &ci) <0)
+		return;
+#if USE_GTK
+	if (fX) {
+		GTKUpdateAnnotations();
+		if (show)
+			GTKCubeHint(pmr, &ms);
+		return;
+	}
+#endif
+
+	outputl(OutputCubeAnalysis(dd.aarOutput, dd.aarStdDev, dd.pes, dd.pci));
 }
 
 
 
+
+extern void HintChequer(char *sz, gboolean show)
+{
+	unsigned int i;
+	char szBuf[1024];
+	int parse_n = ParseNumber(&sz);
+	unsigned int n = (parse_n <= 0) ? 10 : parse_n;
+	moverecord *pmr;
+	cubeinfo ci;
+	float rChequerSkill;
+	int hist;
+
+	GetMatchStateCubeInfo(&ci, &ms);
+
+	pmr = getCurrentMoveRecord(&hist);
+
+	if (pmr->esChequer.et == EVAL_NONE) {
+		movelist ml;
+		findData fd;
+		fd.pml = &ml;
+		fd.pboard = msBoard();
+		fd.auchMove = NULL;
+		fd.rThr = arSkillLevel[SKILL_DOUBTFUL];
+		fd.pci = &ci;
+		fd.pec = &esEvalChequer.ec;
+		fd.aamf = aamfEval;
+		if ((RunAsyncProcess
+		     ((AsyncFun) asyncFindMove, &fd,
+		      _("Considering move...")) != 0) || fInterrupt)
+			return;
+
+		pmr_movelist_set(pmr, &esEvalChequer, &ml);
+	}
+#if USE_GTK
+	if (!hist && fX)
+		GTKGetMove(pmr->n.anMove);
+#endif
+	if (pmr->n.anMove[0] == -1 && pmr->ml.cMoves > 0) {
+		memcpy(pmr->n.anMove, pmr->ml.amMoves[0].anMove,
+				sizeof(pmr->n.anMove));
+		pmr->n.iMove = 0;
+	}
+	else if (pmr->n.anMove[0] != -1)
+	{
+		pmr->n.iMove = locateMove(msBoard(), pmr->n.anMove, &pmr->ml);
+		rChequerSkill =
+			pmr->ml.amMoves[pmr->n.iMove].rScore - pmr->ml.amMoves[0].rScore;
+		pmr->n.stMove = Skill(rChequerSkill);
+	}
+
+#if USE_GTK
+	if (fX) {
+		GTKUpdateAnnotations();
+		if (show)
+			GTKHint(pmr);
+		return;
+	} else
+#endif
+	if (!show)
+		return;
+
+	if (!pmr->ml.cMoves) {
+		outputl(_("There are no legal moves."));
+		return;
+	}
+
+	n = MIN(pmr->ml.cMoves, n);
+	for (i = 0; i < n; i++)
+		output(FormatMoveHint
+		       (szBuf, &ms, &pmr->ml, i, TRUE, TRUE, TRUE));
+
+}
 
 extern void CommandHint( char *sz )
 {
@@ -2335,7 +2275,7 @@ extern void CommandHint( char *sz )
   /* hint on cube decision */
   
   if( !ms.anDice[ 0 ] && !ms.fDoubled && ! ms.fResigned ) {
-    HintCube();
+    hint_double(TRUE);
     return;
   }
 
@@ -2349,14 +2289,14 @@ extern void CommandHint( char *sz )
   /* Give hint on take decision */
 
   if ( ms.fDoubled ) {
-    HintTake();
+    hint_take(TRUE);
     return;
   }
 
   /* Give hint on chequer play decision */
 
   if ( ms.anDice[ 0 ] ) {
-    HintChequer( sz );
+    HintChequer( sz, TRUE );
     return;
   }
 
@@ -5174,50 +5114,6 @@ DisectPath (const char *path, const char *extension, char **name, char **folder)
 }
 
 
-extern void
-InvalidateStoredMoves ( void ) {
-
-  sm.ms.nMatchTo = -1;
-
-}
-
-
-extern void
-InvalidateStoredCube ( void ) {
-
-  sc.ms.nMatchTo = -1;
-
-}
-
-
-extern void
-UpdateStoredMoves ( const movelist *pml, const matchstate *pms ) {
-
-  if( sm.ml.amMoves )
-    free( sm.ml.amMoves );
-
-  CopyMoveList ( &sm.ml, pml );
-
-  sm.ms = *pms;
-
-}
-
-
-extern void UpdateStoredCube ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                   float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                   const evalsetup *pes,
-                   const matchstate *pms )
-{
-  memcpy ( sc.aarOutput, aarOutput, 
-           2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-
-  memcpy ( sc.aarStdDev, aarStdDev, 
-           2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-
-  sc.ms = *pms;
-  sc.es = *pes;
-}
-
 /* ask for confirmation if this is a sub-optimal play 
  * returns TRUE if player wants to re-think the move
  */
@@ -5344,14 +5240,10 @@ CommandHistory( char *sz ) {
 
 #endif /* HAVE_LIBREADLINE */
 
-extern void
-CommandClearHint( char *sz ) {
-
-  InvalidateStoredMoves();
-  InvalidateStoredCube();
-
-  outputl( _("Analysis used for `hint' has been cleared") );
-
+extern void CommandClearHint(char *sz)
+{
+	pmr_hint_destroy();
+	outputl(_("Analysis used for `hint' has been cleared"));
 }
 
 

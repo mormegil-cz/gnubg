@@ -1,3 +1,12 @@
+Sun Feb 22 23:38:44 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, export.c, gnubg.c, gtkchequer.c, gtkchequer.h,
+	gtkcube.c, gtkcube.h, gtkgame.c, gtkgame.h, gtkmovelist.c, html.c,
+	latex.c, play.c, set.c, sgf.c, text.c: fix the hint functionality, so
+	that it normally works on the moverecord, or at the end of the game,
+	creates a tmp moverecord. Make sure that it is used in exports and
+	saves.
+
 Sun Feb 22 10:02:42 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* eval.c, eval.h, gtkboard.c: fix the legal dest points function once

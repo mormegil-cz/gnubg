@@ -959,17 +959,14 @@ extern void SetAnnotation( moverecord *pmr ) {
 
             /* cube */
 
-            pwCubeAnalysis = CreateCubeAnalysis( pmr->CubeDecPtr->aarOutput, 
-                                                 pmr->CubeDecPtr->aarStdDev,
-                                                 &pmr->CubeDecPtr->esDouble, 
-                                                 MOVE_NORMAL, &pmr->CubeDecPtr->cmark );
+            pwCubeAnalysis = CreateCubeAnalysis( pmr, &ms );
 
 
             /* move */
 			      
 	    if( pmr->ml.cMoves ) 
-              pwMoveAnalysis = CreateMoveList( &pmr->ml, &pmr->n.iMove,
-                                               TRUE, FALSE, !IsPanelDocked(WINDOW_ANALYSIS));
+              pwMoveAnalysis = CreateMoveList( pmr,
+                                               TRUE, TRUE, !IsPanelDocked(WINDOW_ANALYSIS));
 
             if ( pwMoveAnalysis && pwCubeAnalysis ) {
               /* notebook with analysis */
@@ -1028,10 +1025,7 @@ extern void SetAnnotation( moverecord *pmr ) {
 
             if ( dt == DT_NORMAL ) {
 	    
-              if ( ( pw = CreateCubeAnalysis ( pmr->CubeDecPtr->aarOutput,
-                                               pmr->CubeDecPtr->aarStdDev,
-                                               &pmr->CubeDecPtr->esDouble,
-                                               MOVE_DOUBLE, &pmr->CubeDecPtr->cmark ) ) )
+              if ( ( pw = CreateCubeAnalysis( pmr, &ms ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
 				    FALSE, 0 );
 
@@ -1066,10 +1060,7 @@ extern void SetAnnotation( moverecord *pmr ) {
 				0 );
 
             if ( tt == TT_NORMAL ) {
-              if ( ( pw = CreateCubeAnalysis ( pmr->CubeDecPtr->aarOutput,
-                                               pmr->CubeDecPtr->aarStdDev,
-                                               &pmr->CubeDecPtr->esDouble,
-                                               pmr->mt, &pmr->CubeDecPtr->cmark ) ) )
+              if ( ( pw = CreateCubeAnalysis( pmr, &ms ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
 				    FALSE, 0 );
             }
@@ -5417,24 +5408,18 @@ HintOK ( GtkWidget *pw, void *unused )
 	DestroyPanel(WINDOW_HINT);
 }
 
-extern void GTKCubeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
-			 float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
-			  const evalsetup *pes ) {
+extern void GTKCubeHint(moverecord *pmr, matchstate *pms ) {
     
-    static evalsetup es;
     GtkWidget *pw, *pwHint;
-    CMark fixme;
 
     if (GetPanelWidget(WINDOW_HINT))
 	gtk_widget_destroy(GetPanelWidget(WINDOW_HINT));
 
 	pwHint = GTKCreateDialog( _("GNU Backgammon - Hint"), DT_INFO,
-			   NULL, DIALOG_FLAG_NONE, G_CALLBACK( HintOK ), NULL );
+			   NULL, DIALOG_FLAG_MODAL | DIALOG_FLAG_NOTIDY, G_CALLBACK( HintOK ), NULL );
 	SetPanelWidget(WINDOW_HINT, pwHint);
 
-    memcpy ( &es, pes, sizeof ( evalsetup ) );
-
-    pw = CreateCubeAnalysis ( aarOutput, aarStdDev, &es, MOVE_NORMAL, &fixme );
+    pw = CreateCubeAnalysis (pmr, pms);
 
     gtk_container_add( GTK_CONTAINER( DialogArea( pwHint, DA_MAIN ) ),
                        pw );
@@ -5526,35 +5511,26 @@ GTKResignHint( float arOutput[], float rEqBefore, float rEqAfter,
 }
 
 extern void 
-GTKHint( movelist *pmlOrig, const unsigned int iMove)
+GTKHint( moverecord *pmr)
 {
     GtkWidget *pwMoves, *pwHint;
-    movelist *pml;
-    static unsigned int n;
-    
+
     if (GetPanelWidget(WINDOW_HINT))
 	gtk_widget_destroy(GetPanelWidget(WINDOW_HINT));
 
-    pml = malloc( sizeof( *pml ) );
-    memcpy( pml, pmlOrig, sizeof( *pml ) );
-    
-    pml->amMoves = malloc( pmlOrig->cMoves * sizeof( move ) );
-    memcpy( pml->amMoves, pmlOrig->amMoves, pmlOrig->cMoves * sizeof( move ) );
-
-    n = iMove;
-    pwMoves = CreateMoveList( pml, &n, TRUE, TRUE, TRUE );
+    pwMoves = CreateMoveList( pmr, TRUE, TRUE, TRUE );
 
     /* create dialog */
 
 	pwHint = GTKCreateDialog( _("GNU Backgammon - Hint"), DT_INFO,
-			   NULL, DIALOG_FLAG_NONE, G_CALLBACK( HintOK ), NULL );
+			   NULL, DIALOG_FLAG_MODAL | DIALOG_FLAG_NOTIDY, G_CALLBACK( HintOK ), NULL );
 	SetPanelWidget(WINDOW_HINT, pwHint);
     
     gtk_container_add( GTK_CONTAINER( DialogArea( pwHint, DA_MAIN ) ), 
                        pwMoves );
 
     setWindowGeometry(WINDOW_HINT);
-    g_object_weak_ref( G_OBJECT( pwHint ), DestroyHint, pml );
+    g_object_weak_ref( G_OBJECT( pwHint ), DestroyHint, NULL );
 
 	if (!IsPanelDocked(WINDOW_HINT))
 		gtk_window_set_default_size(GTK_WINDOW(pwHint), 400, 300);

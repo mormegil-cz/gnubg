@@ -384,9 +384,12 @@ static void ExportGameLaTeX( FILE *pf, listOLD *plGame ) {
 	unsigned int i;
     char sz[ 1024 ];
     doubletype dt = DT_NORMAL;
+    listOLD *pl_hint = NULL;
 
     updateStatisticsGame ( plGame );
 
+    if (game_is_last(plGame))
+	    pl_hint = game_add_pmr_hint(plGame);
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
 	pmr = pl->p;
         FixMatchState ( &msExport, pmr );
@@ -538,6 +541,9 @@ static void ExportGameLaTeX( FILE *pf, listOLD *plGame ) {
 	ApplyMoveRecord( &msExport, plGame, pmr );
     }
     
+    if (pl_hint)
+	    game_remove_pmr_hint(pl_hint);
+
 	/* FIXME print game result */
 }
 

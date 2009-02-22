@@ -290,9 +290,6 @@ skipoldcode:	/* Messy as 3 copies of code at moment... */
 	gtk_tree_model_iter_next(GTK_TREE_MODEL(store), &iter);
   }
 
-
-  /* update storedmoves global struct */
-  UpdateStoredMoves ( pml, &ms );
 }
 
 extern GList *MoveListGetSelectionList(const hintdata *phd)

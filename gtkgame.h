@@ -100,16 +100,14 @@ extern void GTKCalibrationUpdate(void *context, float rEvalsPerSec);
 extern void GtkChangeLanguage(void);
 extern void GTKClearMoveRecord(void);
 extern void GTKCommandShowCredits(GtkWidget * pw, GtkWidget * parent);
-extern void GTKCubeHint(float aarOutput[2][NUM_ROLLOUT_OUTPUTS],
-			float aarStdDev[2][NUM_ROLLOUT_OUTPUTS],
-			const evalsetup * pes);
+extern void GTKCubeHint(moverecord *pmr, matchstate *pms );
 extern void GTKDelay(void);
 extern void GTKDisallowStdin(void);
 extern void GTKDumpStatcontext(int game);
 extern void GTKEval(char *szOutput);
 extern void GTKFreeze(void);
 extern void GTKHelp(char *sz);
-extern void GTKHint(movelist * pmlOrig, const unsigned int iMove);
+extern void GTKHint(moverecord *pmr);
 extern void GTKMatchInfo(void);
 extern void GTKNew(void);
 extern void GTKOutput(const char *sz);
