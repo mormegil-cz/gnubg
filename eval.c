@@ -3356,7 +3356,7 @@ se_eq2mwc ( const float rEq, const cubeinfo *pci ) {
 
 
 
-static int 
+extern int 
 ApplySubMove( TanBoard anBoard, 
               const int iSrc, const int nRoll,
               const int fCheckLegal ) {

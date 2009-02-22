@@ -420,9 +420,11 @@ extern int
 GenerateMoves( movelist *pml, const TanBoard anBoard,
                int n0, int n1, int fPartial );
 
-extern int 
-ApplyMove( TanBoard anBoard, const int anMove[ 8 ],
-           const int fCheckLegal );
+extern int ApplySubMove(TanBoard anBoard, const int iSrc, const int nRoll,
+			const int fCheckLegal);
+
+extern int ApplyMove(TanBoard anBoard, const int anMove[8],
+		     const int fCheckLegal);
 
 extern positionclass 
 ClassifyPosition( const TanBoard anBoard, const bgvariation bgv );

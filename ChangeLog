@@ -1,3 +1,8 @@
+Sun Feb 22 10:02:42 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* eval.c, eval.h, gtkboard.c: fix the legal dest points function once
+	and for all
+
 Sat Feb 21 22:05:58 CET 2009 Oystein Johansen <oystein@gnubg.org>
 
 	* removed file: makebearoff.rc

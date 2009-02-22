@@ -786,335 +786,160 @@ static void board_start_drag( GtkWidget *widget, BoardData *bd, int
 	}
 }
 
-/* CurrentPipCount: calculates pip counts for both players
-   count for player 0 (colour == -1) is always in anPips[0],
-   for player 1 (colour == 1) in anPips[1]
-   assumes that a chequer has been picked up already from bd->drag_point,
-   works on board representation in bd->points[] */
-static gboolean CurrentPipCount( BoardData *bd, unsigned int anPips[ 2 ] )
+/*! \brief generates a list of legal (sub)moves
+ * \param dice the dice
+ * \param real_board the board being dragged from
+ * \param old_board the board before the move
+ * \param the output list of moves
+ */
+static void generate_drag_moves(guint *dice, TanBoard real_board,
+				TanBoard old_board, movelist *pml)
 {
+	if (dice[0] != dice[1]
+	    && memcmp(real_board, old_board, sizeof(TanBoard)) != 0) {
+		/* only complete moves to disallow moving, e.g., a 2 twice in a 
+		   42 roll */
+		GenerateMoves(pml, (ConstTanBoard) old_board, dice[0], dice[1],
+			      FALSE);
+	} else {
+		/* complete and partial moves */
+		GenerateMoves(pml, (ConstTanBoard) old_board, dice[0], dice[1],
+			      TRUE);
+	}
+}
 
-	int i;
-	
-	anPips[ 0 ] = 0;
-	anPips[ 1 ] = 0;
-	
-	for( i = 1; i < 25; i++ ) {
-		if ( bd->points[ 25 - i ] < 0 )
-			anPips[ 0 ] -= bd->points[ 25 - i ] * i;
-		if ( bd->points[ i ] > 0 )
-			anPips[ 1 ] += bd->points[ i ] * i;
+/*! \brief the possible legal permutation of dice
+ * \param dice the dice
+ * \param perm the output permutations
+ */
+static void setup_dice_perm(guint *dice, gint perm[][5])
+{
+	/* long but simple */
+	if (dice[0] == dice[1]) {
+		perm[0][0] = dice[0];
+		perm[0][1] = -1;
+
+		perm[1][0] = dice[0];
+		perm[1][1] = dice[0];
+		perm[1][2] = -1;
+
+		perm[2][0] = dice[0];
+		perm[2][1] = dice[0];
+		perm[2][2] = dice[0];
+		perm[2][3] = -1;
+
+		perm[3][0] = dice[0];
+		perm[3][1] = dice[0];
+		perm[3][2] = dice[0];
+		perm[3][3] = dice[0];
+		perm[3][4] = -1;
+
+	} else {
+		perm[0][0] = dice[0];
+		perm[0][1] = -1;
+
+		perm[1][0] = dice[1];
+		perm[1][1] = -1;
+
+		perm[2][0] = dice[0];
+		perm[2][1] = dice[1];
+		perm[2][2] = -1;
+
+		perm[3][0] = dice[1];
+		perm[3][1] = dice[0];
+		perm[3][2] = -1;
+
 	}
-	/* bars */
-	anPips[ 1 ] += bd->points[ 25 ] * 25;
-	anPips[ 0 ] -= bd->points[ 0 ] * 25;
-	/* add count for missing chequer */
-	if ( bd->drag_point != -1 ) {
-		if ( bd->drag_colour < 0 )
-			anPips[ 0 ] += 25 - bd->drag_point;
-		else
-			anPips[ 1 ] += bd->drag_point;
+}
+
+/*! \brief apply a dice permutation to the board
+ * \param board the real board
+ * \param from_point the drag point in, the dest point out
+ * \param permi the dice permutation
+ * \return 1 if the move is legal, 0 otherwise
+ */
+static int apply_perm(TanBoard board, int *from_point, int permi[])
+{
+	int j;
+	for (j = 0; permi[j] > 0; j++) {
+		if (ApplySubMove(board, *from_point, permi[j], TRUE) != 0)
+			return 0;
+		*from_point = MAX(-1, *from_point - permi[j]);
 	}
-	
+	return 1;
+}
+
+/*! \brief finds the new board in the list of moves/
+ * \param pml the list of moves
+ * \param old_board the board before move
+ * \param board the new board 
+ * \return 1 if found, 0 otherwise
+ */
+static int board_in_list(movelist *pml, TanBoard old_board, TanBoard board)
+{
+	guint j;
+	TanBoard list_board;
+	for (j = 0; j < pml->cMoves; j++) {
+		memcpy(list_board, old_board, sizeof(TanBoard));
+		ApplyMove(list_board, pml->amMoves[j].anMove, FALSE);
+		if (memcmp(list_board, board, sizeof(TanBoard)) == 0)
+			return 1;
+	}
 	return 0;
 }
 
-/* PointsAreEmpty: checks if there are chequers of player <iColour> between
- * two points */
-static gboolean PointsAreEmpty( BoardData *bd, int iStartPoint, int iEndPoint, int
-		iColour )
+/*! \brief finds legal destinations for a dragged chequer
+ * \param bd The board with a chequer lifted
+ * \param dest_points the legal destinations if any
+ * \return TRUE when legal destinations are found
+ */
+static gboolean legal_dest_points(BoardData * bd, int dest_points[4])
 {
 
-	int i;
-
-	if ( iColour > 0 ) {
-		if ( iStartPoint > iEndPoint )
-			swap( &iStartPoint, &iEndPoint );
-		for ( i = iStartPoint; i <= iEndPoint; ++i )
-			if ( bd->points[i] > 0 ) {
-				return FALSE;
-			}
-	}
-	else {
-		if ( iStartPoint < iEndPoint )
-			swap( &iStartPoint, &iEndPoint );
-		for ( i = iStartPoint; i >= iEndPoint; --i )
-			if ( bd->points[i] < 0 ) {
-				return FALSE;
-			}
-	}
-	return TRUE;
-}
-
-/* LegalDestPoints: determine destination points for one chequer
-   assumes that a chequer has been picked up already from bd->drag_point,
-   works on board representation in bd->points[],
-   returns TRUE if there are possible moves and fills iDestPoints[] with
-   the destination points or -1 */
-gboolean LegalDestPoints( BoardData *bd, int iDestPoints[4] )
-{
-
-	int i;
-	unsigned int anPipsBeforeMove[ 2 ];
-	unsigned int anCurPipCount[ 2 ];
-	unsigned int iUnusedPips;
-	int iCanMove = 0;		/* bits set => could make a move with this die */
-	int iDestCount = 0;
-	int iDestPt = -1;
-	int iDestLegal = TRUE;
-	int bar = bd->drag_colour == bd->colour ? bd->bar : 25 - bd->bar; /* determine point number of bar */
+	unsigned int i;
+	movelist ml;
+	int count = 0;
+	TanBoard real_board;
+	int player = bd->drag_colour == -1 ? 0 : 1;
+	int drag_point;
+	gint perm[4][5];
 
 	/* initialise */
-	for (i = 0; i <= 3; ++i)
-		iDestPoints[i] = -1;
+	for (i = 0; i < 4; i++)
+		dest_points[i] = -1;
 
-	if ( ap[ bd->drag_colour == -1 ? 0 : 1 ].pt != PLAYER_HUMAN )
-		return FALSE;
+	g_return_val_if_fail(ap[player].pt == PLAYER_HUMAN, FALSE);
 
-	/* pip count before move */
-	PipCount( (ConstTanBoard)bd->old_board, anPipsBeforeMove );
-	if ( bd->turn < 0 )
-		swap_us( &anPipsBeforeMove[ 0 ], &anPipsBeforeMove[ 1 ] );
+	drag_point = player ? bd->drag_point - 1 : 24 - bd->drag_point;
 
-	/* current pip count */
-	CurrentPipCount( bd, anCurPipCount );
+	/* the current board including the dragged chequer */
+	read_board(bd, real_board);
+	real_board[1][drag_point]++;
 
-	iUnusedPips = anCurPipCount[ bd->drag_colour == -1 ? 0 : 1 ] - anPipsBeforeMove[ bd->drag_colour == -1 ? 0 : 1 ] + bd->move_list.cMaxPips;
-	/* we use iUnused pips to make this check since valid_move->cPips
-	 * is wrong when we skip pips during bearoff */
-	if (bd->valid_move && bd->valid_move->cMoves == bd->move_list.cMaxMoves && !iUnusedPips)
-		return FALSE;	
+	generate_drag_moves(bd->diceRoll, real_board, bd->old_board, &ml);
+	setup_dice_perm(bd->diceRoll, perm);
 
-	if ( bd->diceRoll[0] == bd->diceRoll[1] ) {
-	/* double roll: up to 4 possibilities to move, but only in multiples of dice[0] */
-		for ( i = 0; i <= 3; ++i ) {
-			if ( ( (i + 1) * bd->diceRoll[0] > iUnusedPips )	/* no moves left*/
-			     || ( i && bd->points[ bar ] ) )		/* moving with chequer just entered not allowed if more chequers on the bar */
-				break;
-			iDestLegal = TRUE;
-			if ( !i || iCanMove & ( 1 << ( i - 1 ) ) ) {
-			/* only if moving first chequer or if last part-move succeeded */
-				iDestPt = bd->drag_point - bd->diceRoll[0] * ( i + 1 ) * bd->drag_colour;
-				if( ( iDestPt <= 0 ) || ( iDestPt >= 25 ) ) {
-				/* bearing off */
-					/* all chequers in home board? */
-					if ( bd->drag_colour > 0 ) {
-						if ( ! PointsAreEmpty( bd, 7, 25, bd->drag_colour ) ) {
-							iDestPt = -1;
-							iDestLegal = FALSE;
-						}
-					}
-					else {
-						if ( ! PointsAreEmpty( bd, 18, 0, bd->drag_colour ) ) {
-							iDestPt = -1;
-							iDestLegal = FALSE;
-						}
-					}
-					if ( iDestLegal && ( (iDestPt < 0 ) || (iDestPt > 25 ) ) ) {
-					/* bearing off with roll bigger than point */
-						if ( iCanMove ) {
-						/* prevent bearoff in more than 1 move if there are still chequers on points bigger than destination of the part-move before */
-							if ( bd->drag_colour > 0 ) {
-								if ( ! PointsAreEmpty( bd, bd->drag_point - i * bd->diceRoll[0] + 1, 6, bd->drag_colour ) ) {
-									iDestPt = -1;
-									iDestLegal = FALSE;
-								}
-							}
-							else {
-								if ( ! PointsAreEmpty( bd, bd->drag_point + i * bd->diceRoll[0] - 1, 19, bd->drag_colour ) ) {
-									iDestPt = -1;
-									iDestLegal = FALSE;
-								}
-							}
-						}
-						/* chequers on higher points? */
-						if ( bd->drag_colour > 0 ) {
-							if ( ! PointsAreEmpty( bd, bd->drag_point + 1, 6, bd->drag_colour ) ) {
-								iDestPt = -1;
-								iDestLegal = FALSE;
-							}
-						}
-						else {
-							if ( ! PointsAreEmpty( bd, bd->drag_point - 1, 19, bd->drag_colour ) ) {
-								iDestPt = -1;
-								iDestLegal = FALSE;
-							}
-						}
-					}
-					if ( iDestLegal ) {
-						iDestPt = bd->drag_colour > 0 ? 26 : 27;
-					}
-					else {
-						iDestPt = -1;
-					}
-				}
-			}
-			else {
-				iDestPt = -1;
-				iDestLegal = FALSE;
-				break;
-			}
+	for (i = 0; i < 4; i++) {
+		TanBoard board;
+		int from_point = drag_point;
+		memcpy(board, real_board, sizeof(TanBoard));
+		if (!apply_perm(board, &from_point, perm[i]))
+			continue;
+		if (!board_in_list(&ml, bd->old_board, board))
+			continue;
 
-			/* check if destination (il)legal */
-			if ( !iDestLegal
-			    || ( iDestPt == -1 ) || ( iDestPt > 27 )			/* illegal points */
-			    || ( bd->drag_colour > 0 ? bd->points[ iDestPt ] < -1
-						   : bd->points[ iDestPt ] > 1 )		/* blocked by opponent*/
-			    || ( iDestPt == bar )					/* bar */
-			    || ( ( bd->drag_colour > 0 ? bd->points[ bar ] > 0
-			    			       : bd->points[ bar ] < 0 )	/* when on bar ... */
-				&& ( bd->drag_point != bar ) )				/* ... not playing from bar */
-			   )
-			{
-				iDestPoints[ iDestCount ] = -1;
-			}
-			else {		/* legal move */
-				iCanMove |= ( 1 << i );		/* set flag that this move could be made */
-				iDestPoints[ iDestCount++ ] = iDestPt;
-				iDestPt = -1;
-			}
+		/* from_point is now the final dest */
+		if (from_point == -1) {
+			/* bearoff */
+			dest_points[count++] = player ? 26 : 27;
+		} else {
+			dest_points[count++] =
+			    player ? from_point + 1 : 24 - from_point;
 		}
+
 	}
-	else {
-	/* normal roll: up to 3 possibilities */
-		for ( i = 0; i <= 1; ++i ) {
-			if (
-					/* not possible to move with this die (anymore) */
-					(iUnusedPips < bd->diceRoll[i])
-					/* we don't want to check if the
-					 * move is complete, since we may
-					 * be wrong in case of pip
-					 * skipping during bearoff */
-					)
-				continue;
-			iDestLegal = TRUE;
-			iDestPt = bd->drag_point - bd->diceRoll[i] * bd->drag_colour;
-			if( ( iDestPt <= 0 ) || ( iDestPt >= 25 ) ) {
-			/* bearing off */
-				/* all chequers in home board? */
-				if ( bd->drag_colour > 0 ) {
-					if ( ! PointsAreEmpty( bd, 7, 25, bd->drag_colour ) ) {
-						iDestPt = -1;
-						iDestLegal = FALSE;
-					}
-				}
-				else {
-					if ( ! PointsAreEmpty( bd, 18, 0, bd->drag_colour ) ) {
-						iDestPt = -1;
-						iDestLegal = FALSE;
-					}
-				}
-				if ( ( iDestLegal ) && ( (iDestPt < 0 ) || (iDestPt > 25 ) ) ) {
-				/* bearing off with roll bigger than point */
-					if ( bd->drag_colour > 0 ) {
-						if ( ! PointsAreEmpty( bd, bd->drag_point + 1, 6, bd->drag_colour ) ) {
-							iDestPt = -1;
-							iDestLegal = FALSE;
-						}
-					}
-					else {
-						if ( ! PointsAreEmpty( bd, bd->drag_point - 1, 19, bd->drag_colour ) ) {
-							iDestPt = -1;
-							iDestLegal = FALSE;
-						}
-					}
-				}
-				if ( iDestLegal ) {
-					iDestPt = bd->drag_colour > 0 ? 26 : 27;
-				}
-				else {
-					iDestPt = -1;
-				}
-			}
-			/* check if destination (il)legal */
-			if ( !iDestLegal
-			    || ( iDestPt == -1 ) || ( iDestPt > 27 )			/* illegal points */
-			    || ( bd->drag_colour > 0 ? bd->points[ iDestPt ] < -1
-						   : bd->points[ iDestPt ] > 1 )		/* blocked by opponent*/
-			    || ( iDestPt == bar )					/* bar */
-			    || ( ( bd->drag_colour > 0 ? bd->points[ bar ] > 0
-			    			       : bd->points[ bar ] < 0 )	/* when on bar ... */
-				&& ( bd->drag_point != bar ) )				/* ... not playing from bar */
-			   )
-			{
-				iDestPoints[ iDestCount ] = -1;
-			}
-			else {		/* legal move */
-				iCanMove |= ( 1 << i );		/* set flag that this move could be made */
-				iDestPoints[ iDestCount++ ] = iDestPt;
-				iDestPt = -1;
-			}
-		}
-		/* check for moving twice with same chequer */
-		if ( iCanMove &&				/* only if at least one first half-move could be made, */
-		     ( bd->move_list.cMaxMoves > 1 ) &&		/* there is a legal move with 2 half-moves, */
-		     ( anCurPipCount[ bd->drag_colour == -1 ? 0 : 1 ] == anPipsBeforeMove[ bd->drag_colour == -1 ? 0 : 1 ] ) &&		/* we didn't move yet, */
-		     ( ! bd->points[ bar ] ) )			/* and don't have any more chequers on the bar */
-		{
-			iDestLegal = TRUE;
-			iDestPt = bd->drag_point - ( bd->diceRoll[0] + bd->diceRoll[1] ) * bd->drag_colour;
-			if( ( iDestPt <= 0 ) || ( iDestPt >= 25 ) ) {
-			/* bearing off */
-				/* all chequers in home board? */
-				if ( bd->drag_colour > 0 ) {
-					if ( ! PointsAreEmpty( bd, 7, 25, bd->drag_colour ) ) {
-						iDestPt = -1;
-						iDestLegal = FALSE;
-					}
-				}
-				else {
-					if ( ! PointsAreEmpty( bd, 18, 0, bd->drag_colour ) ) {
-						iDestPt = -1;
-						iDestLegal = FALSE;
-					}
-				}
-				if ( iDestLegal && ( (iDestPt < 0 ) || (iDestPt > 25 ) ) ) {
-				/* bearing off with roll bigger than point */
-					/* prevent bearoff in more than 1 move if there are still chequers on points bigger than destination of first half-move */
-					if ( bd->drag_colour > 0 ) {
-						if ( ! PointsAreEmpty( bd, bd->drag_point - ( bd->diceRoll[0] < bd->diceRoll[1] ? bd->diceRoll[0] : bd->diceRoll[1] ) + 1, 6, bd->drag_colour ) ) {
-							iDestPt = -1;
-							iDestLegal = FALSE;
-						}
-					}
-					else {
-						if ( ! PointsAreEmpty( bd, bd->drag_point + ( bd->diceRoll[0] < bd->diceRoll[1] ? bd->diceRoll[0] : bd->diceRoll[1] ) - 1, 19, bd->drag_colour ) ) {
-							iDestPt = -1;
-							iDestLegal = FALSE;
-						}
-					}
-				}
-				if ( iDestLegal ) {
-					iDestPt = bd->drag_colour > 0 ? 26 : 27;
-				}
-				else {
-					iDestPt = -1;
-				}
-			}
-	
-			/* check if destination (il)legal */
-			if ( !iDestLegal
-			    || ( iDestPt == -1 ) || ( iDestPt > 27 )			/* illegal points */
-			    || ( bd->drag_colour > 0 ? bd->points[ iDestPt ] < -1
-						   : bd->points[ iDestPt ] > 1 )		/* blocked by opponent*/
-			    || ( iDestPt == bar )					/* bar */
-			    || ( ( bd->drag_colour > 0 ? bd->points[ bar ] > 0
-			    			       : bd->points[ bar ] < 0 )	/* when on bar ... */
-				&& ( bd->drag_point != bar ) )				/* ... not playing from bar */
-			   )
-			{
-				iDestPoints[ iDestCount ] = -1;
-			}
-			else {		/* legal move */
-				iDestPoints[ iDestCount++ ] = iDestPt;
-				iDestPt = -1;
-			}
-		}
-	}
-
-	return iDestCount ? TRUE : FALSE;
+	return count ? TRUE : FALSE;
 }
-
 static void board_drag( GtkWidget *widget, BoardData *bd, int x, int y )
 {
 
@@ -2245,7 +2070,7 @@ extern gboolean board_button_release(GtkWidget *board, GdkEventButton *event,
 				dests[0] = bd->drag_point - bd->diceRoll[1]  * bd->drag_colour;
 			}
 		}
-		LegalDestPoints(bd, bd->iTargetHelpPoints);
+		legal_dest_points(bd, bd->iTargetHelpPoints);
 
 		for (i = 0; i < 2; ++i)
 		{
@@ -2347,7 +2172,7 @@ extern gboolean board_motion_notify(GtkWidget *board, GdkEventMotion *event,
 		if ((ap[bd->drag_colour == -1 ? 0 : 1].pt == PLAYER_HUMAN)		/* not for computer turn */
 			&& gdk_event_get_time((GdkEvent*)event) - bd->click_time > HINT_TIME)
 		{
-			bd->DragTargetHelp = LegalDestPoints(bd, bd->iTargetHelpPoints);
+			bd->DragTargetHelp = legal_dest_points(bd, bd->iTargetHelpPoints);
 
 #if USE_BOARD3D
 			if (bd->rd->quickDraw && fGUIDragTargetHelp && bd->DragTargetHelp)
@@ -3398,6 +3223,8 @@ static void board_size_allocate( GtkWidget *board, GtkAllocation *allocation )
     && (display_is_2d(bd->rd))
 #endif
 	) {
+    update_move(bd);
+
       new_size = MIN( allocation->width / BOARD_WIDTH,
                       ( allocation->height - 2 ) / (BOARD_HEIGHT + DIE_HEIGHT ));    /* FIXME: is 89 correct? */
 
