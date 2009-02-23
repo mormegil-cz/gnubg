@@ -2457,7 +2457,7 @@ extern void CommandRollout(char *sz)
 	memcpy(anBoard, msBoard(), sizeof(TanBoard));
 	SetCubeInfo(&ci, ms.nCube, ms.fCubeOwner, ms.fMove, ms.nMatchTo, ms.anScore, ms.fCrawford, ms.fJacoby, nBeavers, ms.bgv);
 	RolloutProgressStart(&ci, 1, NULL, &rcRollout, asz, &p);
-	GeneralEvaluationR(arOutput, arStdDev, arsStatistics, anBoard, &ci, &rcRollout, RolloutProgress, p);
+	GeneralEvaluationR(arOutput, arStdDev, arsStatistics, (ConstTanBoard)anBoard, &ci, &rcRollout, RolloutProgress, p);
 	RolloutProgressEnd(&p, FALSE);
 
 }

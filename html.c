@@ -3267,7 +3267,7 @@ static void ExportGameHTML ( FILE *pf, listOLD *plGame, const char *szImageDir,
     statcontext *psc = NULL;
     static statcontext scTotal;
     xmovegameinfo *pmgi = NULL;
-    listOLD *pl_hint;
+    listOLD *pl_hint = NULL;
 
     if ( ! iGame )
       IniStatcontext ( &scTotal );
