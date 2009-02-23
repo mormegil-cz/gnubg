@@ -1173,14 +1173,14 @@ extern void RolloutLoopMT(void *unused)
 			}
 			else
 			{
-				float eq_dp = fOutputMWC ? eq2mwc(1.0, &aciLocal[0]) : 1.0;
+				float eq_dp = fOutputMWC ? eq2mwc(1.0, &aciLocal[0]) : 1.0f;
 				float eq_dt = ajiJSD[1].rEquity;
 				
 				if (eq_dp < eq_dt)
 				{
 					/* compare nd to dp */
 					ajiJSD[0].rEquity = ajiJSD[0].rEquity - eq_dp;
-					ajiJSD[0].rJSD = fabs(ajiJSD[0].rEquity / ajiJSD[0].rJSD);
+					ajiJSD[0].rJSD = (float)fabs(ajiJSD[0].rEquity / ajiJSD[0].rJSD);
 				}
 				else
 				{
@@ -1189,11 +1189,11 @@ extern void RolloutLoopMT(void *unused)
 					denominator = (float) sqrt(ajiJSD[0].rJSD * ajiJSD[0].rJSD + ajiJSD[1].rJSD * ajiJSD[1].rJSD);
 					if (denominator < 1e-8f)
 						denominator = 1e-8f;
-					ajiJSD[0].rJSD = fabs(ajiJSD[0].rEquity / denominator);
+					ajiJSD[0].rJSD = (float)fabs(ajiJSD[0].rEquity / denominator);
 				}
 				/* compare dt to dp */
 				ajiJSD[1].rEquity = ajiJSD[1].rEquity - eq_dp;
-				ajiJSD[1].rJSD = fabs(ajiJSD[1].rEquity / ajiJSD[1].rJSD);
+				ajiJSD[1].rJSD = (float)fabs(ajiJSD[1].rEquity / ajiJSD[1].rJSD);
 				if (rcRollout.fStopOnJsd &&
 						(altGameCount[0] >= (rcRollout.nMinimumJsdGames - 1)) &&
 						rcRollout.rJsdLimit < MIN(ajiJSD[0].rJSD, ajiJSD[0].rJSD))

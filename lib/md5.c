@@ -52,9 +52,9 @@
 
 #define READ( p ) \
     ( ( (unsigned char *) (p) )[ 0 ] | \
-      ( (unsigned char *) (p) )[ 1 ] << 8 | \
-      ( (unsigned char *) (p) )[ 2 ] << 16 | \
-      ( (unsigned char *) (p) )[ 3 ] << 24 )
+      ( (unsigned int)((unsigned char *) (p) )[ 1 ]) << 8 | \
+      ( (unsigned int)((unsigned char *) (p) )[ 2 ]) << 16 | \
+      ( (unsigned int)((unsigned char *) (p) )[ 3 ]) << 24 )
 
 /* This array contains the bytes used to pad the buffer to the next
    64-byte boundary.  (RFC 1321, 3.1: Step 1)  */

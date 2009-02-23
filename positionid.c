@@ -316,8 +316,7 @@ static void InitCombination( void )
 
 extern unsigned int Combination( const unsigned int n, const unsigned int r )
 {
-    g_assert( n <= MAX_N );
-    g_assert( r <= MAX_R );
+    g_assert( n <= MAX_N && r <= MAX_R );
 
     if( !fCalculated )
         InitCombination();
@@ -330,7 +329,7 @@ static unsigned int PositionF( unsigned int fBits, unsigned int n, unsigned int 
     if( n == r )
         return 0;
 
-    return ( fBits & ( 1 << ( n - 1 ) ) ) ? Combination( n - 1, r ) +
+    return ( fBits & ( 1u << ( n - 1 ) ) ) ? Combination( n - 1, r ) +
         PositionF( fBits, n - 1, r - 1 ) : PositionF( fBits, n - 1, r );
 }
 
@@ -341,11 +340,11 @@ extern unsigned int PositionBearoff(const unsigned int anBoard[], unsigned int n
     for( j = nPoints - 1, i = 0; i < nPoints; i++ )
         j += anBoard[ i ];
 
-    fBits = 1 << j;
+    fBits = 1u << j;
     
     for( i = 0; i < nPoints; i++ ) {
         j -= anBoard[ i ] + 1;
-        fBits |= ( 1 << j );
+        fBits |= ( 1u << j );
 
     }
 
@@ -359,11 +358,11 @@ static unsigned int PositionInv( unsigned int nID, unsigned int n, unsigned int 
     if( !r )
         return 0;
     else if( n == r )
-        return ( 1 << n ) - 1;
+        return ( 1u << n ) - 1;
 
     nC = Combination( n - 1, r );
 
-    return ( nID >= nC ) ? ( 1 << ( n - 1 ) ) |
+    return ( nID >= nC ) ? ( 1u << ( n - 1 ) ) |
         PositionInv( nID - nC, n - 1, r - 1 ) : PositionInv( nID, n - 1, r );
 }
 
@@ -379,7 +378,7 @@ extern void PositionFromBearoff( unsigned int anBoard[], unsigned int usID,
     j = nPoints - 1;
     for( i = 0; i < ( nChequers + nPoints ); i++ )
 	{
-        if( fBits & ( 1 << i ) )
+        if( fBits & ( 1u << i ) )
 		{
 			if (j == 0)
 				break;
@@ -398,12 +397,12 @@ extern unsigned short PositionIndex(unsigned int g, const unsigned int anBoard[6
   for(i = 0; i < g; i++ )
     j += anBoard[ i ];
 
-  fBits = 1 << j;
+  fBits = 1u << j;
     
   for(i = 0; i < g; i++)
   {
     j -= anBoard[ i ] + 1;
-    fBits |= ( 1 << j );
+    fBits |= ( 1u << j );
   }
 
   /* FIXME: 15 should be replaced by nChequers, but the function is

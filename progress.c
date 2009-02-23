@@ -1127,9 +1127,7 @@ TextRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
   time_t t;
 
   /* write progress 1/10th trial or just when called if mt */
-#if USE_MULTITHREAD
-  if (TRUE)
-#else
+#if !USE_MULTITHREAD
   if ( fInterrupt || (iGame >= prp->iNextGame && iAlternative == prp->iNextAlternative ))
 #endif
   {
@@ -1208,15 +1206,14 @@ TextRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
     }
 
   }
+#if !USE_MULTITHREAD
   else {
-
     /* To avoid *.po include \r. */
     outputf( _("Rollout: %d/%d trials"), iGame, prc->nTrials );
     output( "      \r" );
     fflush( stdout );
-
   }
-
+#endif
 }
 
 

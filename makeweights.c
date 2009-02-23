@@ -38,7 +38,7 @@ usage (char *prog) {
   exit (1);
 }
 
-extern int main( int argc, char *argv[] )
+extern int main( int argc, /*lint -e{818}*/char *argv[] )
 {
     neuralnet nn;
     char szFileVersion[ 16 ];

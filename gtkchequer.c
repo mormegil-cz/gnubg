@@ -203,7 +203,8 @@ static void MoveListCmarkClicked(GtkWidget *pw, hintdata *phd)
 	for (pl = plSelList; pl; pl = pl->next) {
 
 		move *m = MoveListGetMove(phd, pl);
-		all_marked = MIN(m->cmark, all_marked);
+		if (m->cmark == CMARK_NONE)
+			all_marked = FALSE;
 	}
 	new_mark = all_marked ? 0 : 1;
 	for (pl = plSelList; pl; pl = pl->next) {

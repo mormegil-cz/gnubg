@@ -15,7 +15,6 @@
 #include "config.h"
 #if USE_MULTITHREAD
 #ifdef WIN32
-#include <windows.h>
 #include <process.h>
 #endif
 #include <stdlib.h>

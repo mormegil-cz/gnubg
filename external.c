@@ -129,7 +129,8 @@ void OutputWin32SocketError(const char* action)
 		(LPTSTR) &lpMsgBuf, 0, NULL) != 0)
 	{
 		outputerrf("%s (%s):\n%s", _("Windows socket error"), action, (LPCTSTR)lpMsgBuf);
-		LocalFree(lpMsgBuf);
+		if (LocalFree(lpMsgBuf) != NULL)
+			g_print("LocalFree() failed\n");
 	}
 }
 #endif

@@ -2254,7 +2254,7 @@ static void cmark_move_set(moverecord *pmr, gchar *sz, CMark cmark)
 
 	c = pmr->ml.cMoves;
 
-	while ((n = g_ascii_strtoll(sz, &sz, 10))) {
+	while ((n = (int)g_ascii_strtoll(sz, &sz, 10))) {
 		if (n > c) {
 			outputerrf("Only %d moves in movelist\n", c);
 			g_slist_free(list);

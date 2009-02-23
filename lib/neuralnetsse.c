@@ -21,7 +21,6 @@
  */
 
 #include "config.h"
-#include "common.h"
 
 #if USE_SSE_VECTORIZE
 
@@ -35,7 +34,9 @@
 #endif
 
 #include <xmmintrin.h>
+#ifndef _MSC_VER
 #include <mm_malloc.h>
+#endif
 #include <glib.h>
 #include "sigmoid.h"
 

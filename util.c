@@ -67,7 +67,8 @@ extern void PrintSystemError(const char* message)
 		g_print("** Windows error while %s **\n", message);
 		g_print(": %s", (LPCTSTR)lpMsgBuf);
 
-		LocalFree(lpMsgBuf);
+		if (LocalFree(lpMsgBuf) != NULL)
+			g_print("LocalFree() failed\n");
 	}
 }
 #else
@@ -94,6 +95,7 @@ FILE *fdopen(int, const char *);
 #ifndef WIN32
 #define TEMP_g_file_open_tmp g_file_open_tmp
 #else
+#include <io.h>
 #include <fcntl.h>
 #include <errno.h>
 
@@ -145,15 +147,17 @@ int TEMP_g_mkstemp(char *tmpl)
   return -1;
 }
 
-int TEMP_g_file_open_tmp (const char *tmpl, char      **name_used, GError    **error)
+int TEMP_g_file_open_tmp (const char *tmpl, char      **name_used, GError    **notused)
 {
-  char *sep = "";
+  const char *sep = "";
+  char test;
   const char *tmpdir = g_get_tmp_dir ();
 
   if (tmpl == NULL)
     tmpl = ".XXXXXX";
 
-  if (!G_IS_DIR_SEPARATOR (tmpdir [strlen (tmpdir) - 1]))
+  test = tmpdir [strlen (tmpdir) - 1];
+  if (!G_IS_DIR_SEPARATOR (test))
     sep = G_DIR_SEPARATOR_S;
 
   *name_used = g_strconcat (tmpdir, sep, tmpl, NULL);
