@@ -291,7 +291,6 @@ typedef struct {
   CMark cmark;
 } move;
 
-
 extern int fInterrupt;
 extern cubeinfo ciCubeless;
 extern const char *aszEvalType[ (int)EVAL_ROLLOUT + 1 ];
@@ -414,7 +413,12 @@ extern int
 EvalCacheResize( unsigned int cNew );
 
 extern int 
-EvalCacheStats( unsigned int *pcUsed, unsigned int *pcSize, unsigned int *pcLookup, unsigned int *pcHit );
+EvalCacheStats( unsigned int *pcUsed, unsigned int *pcLookup, unsigned int *pcHit );
+
+extern double GetEvalCacheSize();
+void SetEvalCacheSize(unsigned int size);
+extern unsigned int GetEvalCacheEntries();
+extern int GetCacheMB(double size);
 
 extern int 
 GenerateMoves( movelist *pml, const TanBoard anBoard,

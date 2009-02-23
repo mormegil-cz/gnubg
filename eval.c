@@ -720,17 +720,17 @@ extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 #endif
 			NeuralNetEvaluateFn = NeuralNetEvaluate;
 
-		cCache = 0x1 << 16;
+		cCache = 0x1 << 17;
 		if( CacheCreate( &cEval, cCache ) )
 		{
-			PrintError( "EvalCacheResize" );
+			PrintError( "CacheCreate" );
 			return;
 		}
 
 #if defined( PRUNE_CACHE )
 		if( CacheCreate( &cpEval, 0x1 << 16) )
 		{
-			PrintError( "EvalCacheResize" );
+			PrintError( "CacheCreate" );
 			return;
 		}
 #endif
@@ -2640,8 +2640,9 @@ FindBestMoveInEval(NNState *nnStates, int const nDice0, int const nDice1, const 
 	    }
 #if defined(PRUNE_CACHE)
 	    memcpy( ec.ar, arOutput, sizeof(float) * NUM_OUTPUTS );
+		ec.ar[5] = 0.f;
 	    CacheAdd(&cpEval, &ec, l);
-	  }
+	}
 }
 #endif
 	  pm->rScore = UtilityME(arOutput, pci);
@@ -2716,6 +2717,7 @@ FindBestMoveInEval(NNState *nnStates, int const nDice0, int const nDice1, const 
 	    SanityCheck((ConstTanBoard)anBoardOut, arOutput);
 
 	  memcpy( ec.ar, arOutput, sizeof(float) * NUM_OUTPUTS );
+	  ec.ar[5] = 0.f;
 	  CacheAdd(&cEval, &ec, l);
 	}
 	rScore = UtilityME(arOutput, pci);
@@ -3015,7 +3017,7 @@ EvaluatePositionCache( NNState *nnStates, const TanBoard anBoard, float arOutput
     }
 }
 #endif
-    if( !cCache || ( pecx->rNoise != 0.0f && !pecx->fDeterministic ) )
+    if( !cCache || ( !pecx->fDeterministic && pecx->rNoise != 0.0f ) )
 	/* non-deterministic noisy evaluations; cannot cache */
 	return EvaluatePositionFull( nnStates, anBoard, arOutput, pci, pecx, nPlies,
 				     pc );
@@ -3023,7 +3025,6 @@ EvaluatePositionCache( NNState *nnStates, const TanBoard anBoard, float arOutput
     PositionKey( anBoard, ec.auchKey );
 
     ec.nEvalContext = EvalKey ( pecx, nPlies, pci, FALSE );
-    
 	if ( ( l = CacheLookup( &cEval, &ec, arOutput, NULL ) ) == CACHEHIT ) {
 	return 0;
     }
@@ -3032,6 +3033,7 @@ EvaluatePositionCache( NNState *nnStates, const TanBoard anBoard, float arOutput
 	return -1;
 
     memcpy( ec.ar, arOutput, sizeof ( float ) * NUM_OUTPUTS );
+	ec.ar[5] = 0.f;
     CacheAdd(&cEval, &ec, l);
     return 0;
 }
@@ -4142,18 +4144,50 @@ EvalCacheFlush(void)
   CacheFlush( & cEval );
 }
 
-extern int EvalCacheResize( unsigned int cNew ) {
-
-    cCache = cNew;
-    
-    return CacheResize( &cEval, cNew );
+extern double GetEvalCacheSize()
+{
+	if (cEval.size == 0)
+		return 0;
+	else
+	{
+		double value = log(cEval.size) / log(2);
+		if (value < 15)
+			return 0;
+		if (value < 17)
+			return .5;	/* Special case for old default 65536 */
+		if (value >= 22)
+			return 6;	/* Maximum value */
+		else
+			return value - 16;
+	}
 }
 
-extern int EvalCacheStats( unsigned int *pcUsed, unsigned int *pcSize, unsigned int *pcLookup,
-			   unsigned int *pcHit ) {
-    if( pcSize )
-	*pcSize = cCache;
-	    
+extern void SetEvalCacheSize(unsigned int size)
+{
+	EvalCacheResize((size == 0) ? 0 : (unsigned int)pow(2, size + 16));
+}
+
+extern unsigned int GetEvalCacheEntries()
+{
+	return cCache;
+}
+
+extern int GetCacheMB(double size)
+{
+	if (size == 0)
+		return 0;
+	else
+		return (int)((pow(2, size + 16) * sizeof(cacheNode)) / (1024 * 1024));
+}
+
+extern int EvalCacheResize(unsigned int cNew)
+{
+	cCache = CacheResize(&cEval, cNew);
+	return cCache;
+}
+
+extern int EvalCacheStats( unsigned int *pcUsed, unsigned int *pcLookup, unsigned int *pcHit )
+{
     CacheStats( &cEval, pcLookup, pcHit, pcUsed );
     return 0;
 }
@@ -5889,7 +5923,7 @@ EvaluatePositionCubeful3( NNState *nnStates, const TanBoard anBoard,
   evalcache ec;
   unsigned long l;
 
-  if( !cCache || ( pec->rNoise != 0.0f && !pec->fDeterministic ) )
+  if( !cCache || ( !pec->fDeterministic && pec->rNoise != 0.0f ) )
       /* non-deterministic evaluation; never cache */
 {
       return EvaluatePositionCubeful4( nnStates, anBoard, arOutput, arCubeful,
@@ -5941,11 +5975,10 @@ EvaluatePositionCubeful3( NNState *nnStates, const TanBoard anBoard,
           continue;
         
         memcpy ( ec.ar, arOutput, sizeof ( float ) * NUM_OUTPUTS );
-        ec.ar[ OUTPUT_CUBEFUL_EQUITY ] = arCubeful[ ici ];
-        
+        ec.ar[5] = arCubeful[ ici ];	/* Cubeful equity stored in slot 5 */
         ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ], TRUE );
 
-	CacheAddNoKey( &cEval, &ec);
+	CacheAdd(&cEval, &ec, GetHashKey(cEval.hashMask, &ec));
 
       }
     }

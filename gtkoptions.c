@@ -276,6 +276,12 @@ static void SoundPlayClicked(GtkWidget *widget, gpointer userdata)
         playSoundFile(soundDetails[selSound].Path, TRUE);
 }
 
+static gchar* CacheSizeString(GtkScale *scale, gdouble value)
+{
+  return g_strdup_printf ("%imb", GetCacheMB(value));
+}
+
+
 static void
 AddSoundWidgets (GtkWidget * container)
 {
@@ -441,7 +447,7 @@ static GtkWidget *OptionsPages( optionswidget *pow )
     GtkWidget *pw, *pwn, *pwp, *pwvbox, *pwhbox, *pwev, *pwf, *pwb,
 	*pwAnimBox, *pwFrame, *pwBox, *pwSpeed, *pwScale, *pwhoriz,
 	*pwLabelFile, *table, *label;
-    unsigned int i, cCache;
+    unsigned int i;
     unsigned long nRandom;
 
     BoardData *bd = BOARD( pwBoard )->board_data;
@@ -1231,24 +1237,6 @@ static GtkWidget *OptionsPages( optionswidget *pow )
     pwhbox = gtk_hbox_new( FALSE, 4 );
     gtk_container_add( GTK_CONTAINER( pwev ), pwhbox );
 
-    gtk_box_pack_start (GTK_BOX (pwhbox), gtk_label_new( _("Cache size:") ),
-			FALSE, FALSE, 0);
-    EvalCacheStats( NULL, &cCache, NULL, NULL );
-    pow->padjCache = GTK_ADJUSTMENT (gtk_adjustment_new (cCache, 0, 1<<30,
-							  128, 512, 0) );
-    pw = gtk_spin_button_new (GTK_ADJUSTMENT (pow->padjCache), 128, 0);
-    gtk_box_pack_start (GTK_BOX (pwhbox), pw, TRUE, TRUE, 0);
-    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pw), TRUE);
-    gtk_box_pack_start (GTK_BOX (pwhbox), gtk_label_new( _("entries") ),
-			FALSE, FALSE, 0);
-    gtk_widget_set_tooltip_text( pwev,
-			  _("GNU Backgammon uses a cache of previous "
-			    "evaluations to speed up processing.  Increasing "
-			    "the size may help evaluations complete more "
-			    "quickly, but decreasing the size will use "
-			    "less memory.  Each entry uses around 50 bytes, "
-			    "depending on the platform." ));
-
     /* goto first game upon loading option */
 
     pow->pwGotoFirstGame = gtk_check_button_new_with_label (
@@ -1321,6 +1309,32 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 
     gtk_box_pack_start (GTK_BOX (pwvbox), pwhbox, FALSE, FALSE, 3);
 
+
+    pwev = gtk_event_box_new();
+	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
+    gtk_box_pack_start( GTK_BOX( pwvbox ), pwev, FALSE, FALSE, 0 );    
+    pw = gtk_hbox_new( FALSE, 0 );
+    gtk_container_add( GTK_CONTAINER( pwev ), pw );
+
+	pow->padjCache = GTK_ADJUSTMENT( gtk_adjustment_new( GetEvalCacheSize(), 0, 6, 1, 1, 0 ) );
+    pwScale = gtk_hscale_new( pow->padjCache );
+    gtk_widget_set_size_request( pwScale, 100, -1 );
+    gtk_scale_set_draw_value( GTK_SCALE( pwScale ), TRUE );
+	g_signal_connect(G_OBJECT(pwScale), "format-value", G_CALLBACK(CacheSizeString), NULL);
+    gtk_scale_set_digits( GTK_SCALE( pwScale ), 0 );
+
+    gtk_box_pack_start( GTK_BOX( pw ), gtk_label_new( _("Cache:") ),
+			FALSE, FALSE, 8 );
+    gtk_box_pack_start( GTK_BOX( pw ), gtk_label_new( _("Small") ),
+			FALSE, FALSE, 4 );
+    gtk_box_pack_start( GTK_BOX( pw ), pwScale, TRUE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX( pw ), gtk_label_new( _("Large") ),
+			FALSE, FALSE, 4 );
+    gtk_widget_set_tooltip_text( pwev,
+			  _("GNU Backgammon uses a cache of previous evaluations to speed up processing.  "
+			    "Increasing the size may help evaluations complete more quickly, "
+				"but decreasing the size will use less memory." ));
+
 #if USE_MULTITHREAD
     pwev = gtk_event_box_new();
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
@@ -1332,7 +1346,8 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 			FALSE, FALSE, 0);
     pow->padjThreads = GTK_ADJUSTMENT(gtk_adjustment_new (MT_GetNumThreads(), 1, MAX_NUMTHREADS, 1, 1, 0));
     pw = gtk_spin_button_new (GTK_ADJUSTMENT (pow->padjThreads), 1, 0);
-    gtk_box_pack_start (GTK_BOX (pwhbox), pw, TRUE, TRUE, 0);
+	gtk_widget_set_size_request(GTK_WIDGET(pw), 50, -1);
+    gtk_box_pack_start (GTK_BOX (pwhbox), pw, FALSE, FALSE, 0);
     gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pw), TRUE);
     gtk_box_pack_start (GTK_BOX (pwhbox), gtk_label_new( _("threads") ),
 			FALSE, FALSE, 0);
@@ -1377,7 +1392,6 @@ static void OptionsOK(GtkWidget *pw, optionswidget *pow)
 {
   char sz[128];
   unsigned int n;
-  unsigned int cCache;
   unsigned int i;
   gchar *filename, *command, *tmp, *newfolder;
   const gchar *new_browser;
@@ -1534,11 +1548,8 @@ static void OptionsOK(GtkWidget *pw, optionswidget *pow)
   CHECKUPDATE(pow->pwRecordGames,fRecord, "set record %s" )   
   CHECKUPDATE(pow->pwDisplay,fDisplay, "set display %s" )   
 
-  EvalCacheStats( NULL, &cCache, NULL, NULL );
-
-  if((n = (unsigned int)pow->padjCache->value) != cCache) {
-    sprintf(sz, "set cache %d", n );
-    UserCommand(sz); 
+  if((n = (unsigned int)pow->padjCache->value) != GetEvalCacheSize()) {
+    SetEvalCacheSize(n);
   }
 
 #if USE_MULTITHREAD

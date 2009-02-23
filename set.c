@@ -624,20 +624,20 @@ static int CheckCubeAllowed( void ) {
     return 0;
 }
 
-extern void CommandSetCache( char *sz ) {
+extern void CommandSetCache(char *sz)
+{
+	int n;
+	if ((n = ParseNumber(&sz)) < 0)
+	{
+		outputl( _("You must specify the number of cache entries to use.") );
+		return;
+	}
 
-    int n;
-
-    if( ( n = ParseNumber( &sz ) ) < 0 ) {
-	outputl( _("You must specify the number of cache entries to use.") );
-
-	return;
-    }
-
-    if( EvalCacheResize( n ) )
-	    outputerr( "EvalCacheResize" );
-    else 
-	    outputf(ngettext("The position cache has been sized to %d entry.\n", "The position cache has been sized to %d entries.\n", n), n);
+	n = EvalCacheResize(n);
+	if (n != -1)
+		outputf(ngettext("The position cache has been sized to %d entry.\n", "The position cache has been sized to %d entries.\n", n), n);
+	else 
+		outputerr( "EvalCacheResize" );
 }
 
 #if USE_MULTITHREAD

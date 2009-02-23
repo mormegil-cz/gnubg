@@ -32,11 +32,19 @@
 #if USE_MULTITHREAD
 #include "multithread.h"
 
-#define cache_lock(pc, lock) \
-	if (MT_SafeIncCheck(&pc->locks[lock])) \
-		WaitForLock(&pc->locks[lock])
+/* Macro to copy a CacheNode */
+#if USE_MULTITHREAD
+/* Copy cache node minus the lock parameter in multithreaded */
+#define CopyNodeData(pTo, pFrom) memcpy(pTo, pFrom, sizeof(cacheNode) - sizeof(int))
+#else
+#define CopyNodeData(pTo, pFrom) memcpy(pTo, pFrom, sizeof(cacheNode))
+#endif
 
-#define cache_unlock(pc, l) MT_SafeDec(&pc->locks[l])
+#define cache_lock(pc, k) \
+if (MT_SafeIncCheck(&(pc->m[k].lock))) \
+	WaitForLock(&(pc->m[k].lock))
+
+#define cache_unlock(pc, k) MT_SafeDec(&(pc->m[k].lock))
 
 static void WaitForLock(int *lock)
 {
@@ -74,37 +82,31 @@ typedef  unsigned long   ub4;
   c -= a; c -= b; c ^= (b>>15); \
 }
 
-
-int
-CacheCreate(evalCache* pc, unsigned int s)
+int CacheCreate(evalCache* pc, unsigned int s)
 {
 #if CACHE_STATS
-  pc->cLookup = 0;
-  pc->cHit = 0;
-  pc->nAdds = 0;
+	pc->cLookup = 0;
+	pc->cHit = 0;
+	pc->nAdds = 0;
 #endif
 
-  /* adjust size ot smallest power of 2 GE to s */
-  while( (s & (s-1)) != 0 ) {
-    s &= (s-1);
-  }
+	pc->size = s;
+	/* adjust size to smallest power of 2 GE to s */
+	while ((s & (s-1)) != 0)
+		s &= (s-1);
 
-  pc->size = ( s < pc->size ) ? 2*s : s;
-  pc->hashMask = (pc->size >> 1) - 1;
+	pc->size = (s < pc->size) ? 2 * s : s;
+	pc->hashMask = (pc->size >> 1) - 1;
 
-  pc->m = (cacheNode*)malloc(pc->size * sizeof(*pc->m));
-  pc->locks = (int*)malloc(pc->size * sizeof(*pc->locks));
+	pc->m = (cacheNode*)malloc(pc->size * sizeof(*pc->m));
+	if (pc->m == 0)
+		return -1;
 
-  if( pc->m == 0 ) {
-    return -1;
-  }
-
-  CacheFlush(pc);
-
-  return 0;
+	CacheFlush(pc);
+	return 0;
 }
 
-static unsigned long GetHashKey(unsigned long hashMask, const cacheNode* e)
+extern unsigned long GetHashKey(unsigned long hashMask, const cacheNode* e)
 {
   ub4 a = 0x9e3779b9;  /* the golden ratio; an arbitrary value */
   ub4 b = a;
@@ -152,8 +154,9 @@ unsigned int CacheLookup(evalCache* pc, const cacheNode* e, float *arOut, float 
 		else
 		{	/* Found in second slot, promote "hot" entry */
 			cacheNode tmp = pc->m[l];
-			pc->m[l] = pc->m[l + 1];
-			pc->m[l + 1] = tmp;
+
+			CopyNodeData(&pc->m[l], &pc->m[l + 1]);
+			CopyNodeData(&pc->m[l + 1], &tmp);
 		}
 	}
 	/* Cache hit */
@@ -163,7 +166,7 @@ unsigned int CacheLookup(evalCache* pc, const cacheNode* e, float *arOut, float 
 
 	memcpy(arOut, pc->m[l].ar, sizeof(float) * 5/*NUM_OUTPUTS*/ );
 	if (arCubeful)
-		*arCubeful = pc->m[l].ar[6/*OUTPUT_CUBEFUL_EQUITY*/];
+		*arCubeful = pc->m[l].ar[5];	/* Cubeful equity stored in slot 5 */
 
 #if USE_MULTITHREAD
 	cache_unlock(pc, l);
@@ -178,8 +181,8 @@ void CacheAdd(evalCache* pc, const cacheNode* e, unsigned long l)
 	cache_lock(pc, l);
 #endif
 
-	pc->m[l + 1] = pc->m[l];
-	pc->m[l] = *e;
+	CopyNodeData(&pc->m[l + 1], &pc->m[l]);
+	CopyNodeData(&pc->m[l], e);
 
 #if USE_MULTITHREAD
 	cache_unlock(pc, l);
@@ -190,40 +193,33 @@ void CacheAdd(evalCache* pc, const cacheNode* e, unsigned long l)
 #endif
 }
 
-void CacheAddNoKey(evalCache* pc, const cacheNode* e)
-{
-	CacheAdd(pc, e, GetHashKey(pc->hashMask, e));
-}
-
-void
-CacheDestroy(const evalCache* pc)
+void CacheDestroy(const evalCache* pc)
 {
   free(pc->m);
 }
 
-void
-CacheFlush(const evalCache* pc)
+void CacheFlush(const evalCache* pc)
 {
   unsigned int k;
   for(k = 0; k < pc->size; ++k) {
     pc->m[k].nEvalContext = -1;
-	pc->locks[k] = 0;
+	pc->m[k].lock = 0;
   }
 }
 
-int
-CacheResize( evalCache *pc, unsigned int cNew )
+int CacheResize(evalCache *pc, unsigned int cNew)
 {
-  if( cNew == pc->size ) {
-    return 0;
-  }
-  
-  CacheDestroy(pc);
-  return CacheCreate(pc, cNew);
+	if (cNew != pc->size)
+	{
+		CacheDestroy(pc);
+		if (CacheCreate(pc, cNew) != 0)
+			return -1;
+	}
+
+	return (int)pc->size;
 }
 
-void
-CacheStats(const evalCache* pc, unsigned int* pcLookup, unsigned int* pcHit, unsigned int* pcUsed)
+void CacheStats(const evalCache* pc, unsigned int* pcLookup, unsigned int* pcHit, unsigned int* pcUsed)
 {
 #if CACHE_STATS
    if ( pcLookup )

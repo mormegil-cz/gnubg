@@ -552,7 +552,7 @@ extern void CommandShowCache( char *sz ) {
     unsigned int c, cHit;
     unsigned int cLookup;
 
-    EvalCacheStats( &c, NULL, &cLookup, &cHit );
+    EvalCacheStats( &c, &cLookup, &cHit );
 
     outputf( _("%d cache entries have been used.  %d lookups, %d hits"),
 	    c, cLookup, cHit );
