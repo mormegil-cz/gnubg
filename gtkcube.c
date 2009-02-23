@@ -732,6 +732,7 @@ static void EvalCube ( cubehintdata *pchd, evalcontext *pec )
 
   /* save evaluation */
 
+
   memcpy ( cdec->aarOutput, dd.aarOutput, 
            2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
 
@@ -1036,6 +1037,7 @@ extern GtkWidget *CreateCubeAnalysis(moverecord *pmr, matchstate *pms)
 	GtkWidget *pw, *pwhb, *pwx;
 
 	pchd->pmr = pmr;
+	pchd->ms = *pms;
 	pchd->pw = pw = gtk_hbox_new(FALSE, 2);
 	switch (pmr->mt) {
 
