@@ -24,7 +24,6 @@
 #include "config.h"
 #include "inc3d.h"
 #include "misc3d.h"
-#include <glib/gi18n.h>
 
 #include "gtkprefs.h"
 
@@ -33,7 +32,6 @@ typedef struct UpdateDetails_T
 	Material mat;
 	Material *pBoardMat;
 	GtkWidget* preview;
-	GtkWidget** parentPreview;
 	int opacity;
 	TextureType textureType;
 } UpdateDetails;
@@ -204,7 +202,7 @@ static void SetupColourPreview(void)
 	glLoadIdentity();
 }
 
-static void TextureChange(GtkComboBox * combo, gpointer data)
+static void TextureChange(GtkComboBox* combo, gpointer notused)
 {
 	char *current = gtk_combo_box_get_active_text(combo);
 
@@ -271,7 +269,7 @@ static GtkWidget *CreateGLPreviewWidget(Material* pMat)	// Rename this (and the 
 	return p3dWidget;
 }
 
-static gboolean combo_box_select_text(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer text)
+static gboolean combo_box_select_text(GtkTreeModel *model, GtkTreePath *notused, GtkTreeIter *iter, /*lint -e{818}*/ gpointer text)
 {
 	gchar *value;
 	gtk_tree_model_get(model, iter, 0, &value, -1);
@@ -290,8 +288,7 @@ static void texture_set_active(void)
 	if (col3d.textureInfo)
 	{
 		gtk_tree_model_foreach(gtk_combo_box_get_model(GTK_COMBO_BOX(textureComboBox)),
-				combo_box_select_text,
-				col3d.textureInfo->name);
+				combo_box_select_text, col3d.textureInfo->name);
 	}
 	else
 		gtk_combo_box_set_active(GTK_COMBO_BOX(textureComboBox), 0);
@@ -346,7 +343,7 @@ static void AddWidgets(GtkWidget *window)
 	textureComboBox = gtk_combo_box_new_text();
 	texture_set_active();
 	gtk_widget_set_sensitive(textureComboBox, FALSE);
-	g_signal_connect(textureComboBox, "changed", G_CALLBACK( TextureChange ), NULL );
+	g_signal_connect(textureComboBox, "changed", G_CALLBACK(TextureChange), NULL);
 	gtk_table_attach_defaults(GTK_TABLE (table), textureComboBox, 2, 4, 3, 4);
 
 	label = gtk_label_new(_("Preview:"));
@@ -356,9 +353,9 @@ static void AddWidgets(GtkWidget *window)
 	gtk_table_attach_defaults(GTK_TABLE (table), pwPreview, 0, 2, 4, 5);
 }
 
-static void DialogClose(GtkWidget *dialog, gint response, void *unused)
+static void DialogClose(GtkWidget *notused, gint response, void *notused2)
 {
-	if (response == GTK_RESPONSE_OK)
+	if ((GtkResponseType)response == GTK_RESPONSE_OK)
 	{	/* Apply new settings */
 		char* texStr;
 
@@ -387,12 +384,12 @@ static void DialogClose(GtkWidget *dialog, gint response, void *unused)
 	gtk_widget_hide(pwColourDialog3d);
 }
 
-static void append_to_combo_box(gpointer data, gpointer combo)
+static void append_to_combo_box(/*lint -e{818}*/ gpointer data, gpointer combo)
 {
 	gtk_combo_box_append_text(combo, data);
 }
 
-static void gtk_color_button_set_from_farray(GtkColorButton *button, float col[4])
+static void gtk_color_button_set_from_farray(GtkColorButton *button, const float col[4])
 {
 	int i;
 	double cold[4];

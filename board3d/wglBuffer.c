@@ -26,6 +26,8 @@ int wglBufferInitialize()
 	return wglCreateBufferRegionARB && wglDeleteBufferRegionARB && wglSaveBufferRegionARB && wglRestoreBufferRegionARB;
 }
 
+#if 0	/* Remove this until option added to control this */
+
 HANDLE CreateBufferRegion(unsigned int buffers)
 {
   /* Create the buffer region. */
@@ -36,7 +38,7 @@ HANDLE CreateBufferRegion(unsigned int buffers)
 
   return FBRegion;
 }
-
+#endif
 void SaveBufferRegion(HANDLE region, int x, int y, int width, int height)
 {
 	if (wglSaveBufferRegionARB(region, x, y, width, height) == FALSE)

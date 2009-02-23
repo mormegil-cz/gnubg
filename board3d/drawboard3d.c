@@ -38,13 +38,13 @@ typedef struct _viewArea
 } viewArea;
 
 /* My logcube - more than 32 then return 0 (show 64) */
-static int LogCube( const int n )
+static int LogCube( int n )
 {
-	int i;
+	int i = 1;
+	while (n > (1 << i))
+		i++;
 
-	for( i = 0; ; i++ )
-	if( n <= ( 1 << i ) )
-		return i < 6 ? i : 0;
+	return i < 6 ? i : 0;
 }
 
 /* All the board element sizes - based on base_unit size */
@@ -1109,7 +1109,7 @@ NTH_STATIC void drawPieces(const BoardData *bd, const BoardData3d *bd3d, const r
 			{	/* Make sure texturing is disabled */
 				if (prd->ChequerMat[0].pTexture)
 					glDisable(GL_TEXTURE_2D);
-				drawPiece(bd3d->pieceList, bd3d, (unsigned int)target, abs(bd->points[target]) + 1, TRUE);
+				drawPiece(bd3d->pieceList, bd3d, (unsigned int)target, Abs(bd->points[target]) + 1, TRUE);
 			}
 		}
 		glPolygonMode(GL_FRONT, GL_FILL);
@@ -3264,7 +3264,7 @@ NTH_STATIC void renderFlag(const BoardData *bd, const BoardData3d *bd3d, unsigne
 
 	gluBeginSurface(flag.flagNurb);
 		gluNurbsSurface(flag.flagNurb, S_NUMKNOTS, s_knots, T_NUMKNOTS, t_knots, 3 * T_NUMPOINTS, 3,
-						(float*)flag.ctlpoints, S_NUMPOINTS, T_NUMPOINTS, GL_MAP2_VERTEX_3);
+						&flag.ctlpoints[0][0][0], S_NUMPOINTS, T_NUMPOINTS, GL_MAP2_VERTEX_3);
 	gluEndSurface(flag.flagNurb);
 
 	/* Draw flag pole */

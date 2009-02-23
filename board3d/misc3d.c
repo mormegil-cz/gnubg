@@ -35,7 +35,6 @@
 #endif
 #include "misc3d.h"
 #include "util.h"
-#include <glib/gi18n.h>
 #include <glib/gstdio.h>
 
 #define MAX_FRAMES 10
@@ -1655,13 +1654,13 @@ void SetColour3d(float r, float g, float b, float a)
 
 void SetMovingPieceRotation(const BoardData *bd, BoardData3d *bd3d, unsigned int pt)
 {	/* Make sure piece is rotated correctly while dragging */
-	bd3d->movingPieceRotation = bd3d->pieceRotation[pt][abs(bd->points[pt])];
+	bd3d->movingPieceRotation = bd3d->pieceRotation[pt][Abs(bd->points[pt])];
 }
 
 void PlaceMovingPieceRotation(const BoardData *bd, BoardData3d *bd3d, unsigned int dest, unsigned int src)
 {	/* Make sure rotation is correct in new position */
-	bd3d->pieceRotation[src][abs(bd->points[src])] = bd3d->pieceRotation[dest][abs(bd->points[dest] - 1)];
-	bd3d->pieceRotation[dest][abs(bd->points[dest]) - 1] = bd3d->movingPieceRotation;
+	bd3d->pieceRotation[src][Abs(bd->points[src])] = bd3d->pieceRotation[dest][Abs(bd->points[dest] - 1)];
+	bd3d->pieceRotation[dest][Abs(bd->points[dest]) - 1] = bd3d->movingPieceRotation;
 }
 
 static void getProjectedCoord(const float pos[3], float* x, float* y)
@@ -1963,11 +1962,11 @@ static void SetupMove(BoardData* bd, BoardData3d *bd3d)
 
 	animStartTime = get_time();
 
-	destDepth = abs(bd->points[dest]) + 1;
-	if ((abs(bd->points[dest]) == 1) && (dir != SGN(bd->points[dest])))
+	destDepth = Abs(bd->points[dest]) + 1;
+	if ((Abs(bd->points[dest]) == 1) && (dir != SGN(bd->points[dest])))
 		destDepth--;
 
-	setupPath(bd, &bd3d->piecePath, &bd3d->rotateMovingPiece, target, abs(bd->points[target]) + 1, dest, destDepth);
+	setupPath(bd, &bd3d->piecePath, &bd3d->rotateMovingPiece, target, Abs(bd->points[target]) + 1, dest, destDepth);
 	copyPoint(bd3d->movingPos, bd3d->piecePath.pts[0]);
 
 	SetMovingPieceRotation(bd, bd3d, target);
@@ -2008,7 +2007,7 @@ static int idleAnimate(BoardData3d* bd3d)
 		    unsigned int moveStart = convert_point(animate_move_list[slide_move], animate_player);
 			unsigned int moveDest = convert_point(animate_move_list[slide_move + 1], animate_player);
 
-			if ((abs(bd->points[moveDest]) == 1) && (bd->turn != SGN(bd->points[moveDest])))
+			if ((Abs(bd->points[moveDest]) == 1) && (bd->turn != SGN(bd->points[moveDest])))
 			{	/* huff */
 				unsigned int bar;
 				if (bd->turn == 1)
@@ -2019,7 +2018,7 @@ static int idleAnimate(BoardData3d* bd3d)
 				bd->points[moveDest] = 0;
 
 				if (prd->quickDraw)
-					RestrictiveDrawPiece(bar, abs(bd->points[bar]));
+					RestrictiveDrawPiece(bar, Abs(bd->points[bar]));
 			}
 
 			bd->points[moveDest] += bd->turn;
@@ -2033,7 +2032,7 @@ static int idleAnimate(BoardData3d* bd3d)
 			if (prd->quickDraw && numRestrictFrames != -1)
 			{
 				float new_pos[3];
-				getPiecePos(moveDest, abs(bd->points[moveDest]), new_pos);
+				getPiecePos(moveDest, Abs(bd->points[moveDest]), new_pos);
 				if (moveDest == 26 || moveDest == 27)
 				{
 					new_pos[2] -= PIECE_HOLE / 2.0f;
@@ -2380,8 +2379,8 @@ void ClearTextures(BoardData3d* bd3d)
 	bd3d->numTextures = 0;
 }
 
-static void
-free_texture( gpointer data, gpointer userdata ) {
+static void free_texture(gpointer data, gpointer notused)
+{
 	free(data);
 }
 
@@ -2542,7 +2541,7 @@ extern void Draw3d(const BoardData* bd)
 	}
 }
 
-int diceRollingSave;
+static int diceRollingSave;
 void SuspendDiceRolling(renderdata *prd)
 {
 	diceRollingSave = prd->animateRoll;

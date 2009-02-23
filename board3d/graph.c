@@ -44,7 +44,7 @@ struct _GraphData
 #define NUM_WIDTH_PER .1f
 #define NUM_HEIGHT (modelHeight * NUM_HEIGHT_PER)
 #define NUM_HEIGHT_PER .15f
-#define TOT_WIDTH (NUM_HEIGHT * 3)
+/*#define TOT_WIDTH (NUM_HEIGHT * 3)*/
 
 static float modelWidth, modelHeight;
 static OGLFont *numberFont = NULL, *totalText = NULL;
@@ -294,7 +294,7 @@ static gboolean expose_event(GtkWidget *widget, GdkEventExpose *notused, const G
 	return TRUE;
 }
 
-static void destroy_event (GtkWidget *pw, void *notused)
+static void destroy_event(GtkWidget *notused, void *notused2)
 {
 	if (numberFont != NULL)
 	{
