@@ -2642,7 +2642,7 @@ CommandMove( char *sz ) {
               playSound ( SOUND_MOVE );
 
 
-            pmr = NewMoveRecord();
+	    pmr = NewMoveRecord();
 
 	    pmr->mt = MOVE_NORMAL;
 	    pmr->sz = NULL;
@@ -2682,90 +2682,94 @@ CommandMove( char *sz ) {
 	return;
     }
     
-    if( ( c = ParseMove( sz, an ) ) > 0 ) {
-	for( i = 0; i < 25; i++ ) {
-	    anBoardNew[ 0 ][ i ] = ms.anBoard[ 0 ][ i ];
-	    anBoardNew[ 1 ][ i ] = ms.anBoard[ 1 ][ i ];
-	}
-	
-	for( i = 0; (int)i < c; i++ ) {
-	    anBoardNew[ 1 ][ an[ i << 1 ] - 1 ]--;
-	    if( an[ ( i << 1 ) | 1 ] > 0 ) {
-		anBoardNew[ 1 ][ an[ ( i << 1 ) | 1 ] - 1 ]++;
+    if( ( c = ParseMove( sz, an ) ) > 0 )
+	{
+		for( i = 0; i < 25; i++ ) {
+			anBoardNew[ 0 ][ i ] = ms.anBoard[ 0 ][ i ];
+			anBoardNew[ 1 ][ i ] = ms.anBoard[ 1 ][ i ];
+		}
 		
-		anBoardNew[ 0 ][ 24 ] +=
-		    anBoardNew[ 0 ][ 24 - an[ ( i << 1 ) | 1 ] ];
+		for( i = 0; (int)i < c; i++ ) {
+			anBoardNew[ 1 ][ an[ i << 1 ] - 1 ]--;
+			if( an[ ( i << 1 ) | 1 ] > 0 ) {
+			anBoardNew[ 1 ][ an[ ( i << 1 ) | 1 ] - 1 ]++;
+			
+			anBoardNew[ 0 ][ 24 ] +=
+				anBoardNew[ 0 ][ 24 - an[ ( i << 1 ) | 1 ] ];
+			
+			anBoardNew[ 0 ][ 24 - an[ ( i << 1 ) | 1 ] ] = 0;
+			}
+		}
 		
-		anBoardNew[ 0 ][ 24 - an[ ( i << 1 ) | 1 ] ] = 0;
-	    }
-	}
-	
-	GenerateMoves( &ml, msBoard(), ms.anDice[ 0 ], ms.anDice[ 1 ],
-		       FALSE );
-	
-	for( i = 0; i < ml.cMoves; i++ ) {
-	    PositionFromKey( anBoardTest, ml.amMoves[ i ].auch );
-	    
-	    for( j = 0; j < 25; j++ )
-		if( anBoardTest[ 0 ][ j ] != anBoardNew[ 0 ][ j ] ||
-		    anBoardTest[ 1 ][ j ] != anBoardNew[ 1 ][ j ] )
-		    break;
-	    
-	    if( j == 25 ) {
-		/* we have a legal move! */
-                playSound ( SOUND_MOVE );
-
-		if ( fTutor && fTutorChequer)
+		GenerateMoves( &ml, msBoard(), ms.anDice[ 0 ], ms.anDice[ 1 ],
+				   FALSE );
+		
+		for( i = 0; i < ml.cMoves; i++ )
 		{
-			HintChequer("", FALSE);
-			if (!GiveAdvice ( pmr_hint->n.stMove ))
+			PositionFromKey( anBoardTest, ml.amMoves[ i ].auch );
+		    
+			for( j = 0; j < 25; j++ )
+			if( anBoardTest[ 0 ][ j ] != anBoardNew[ 0 ][ j ] ||
+				anBoardTest[ 1 ][ j ] != anBoardNew[ 1 ][ j ] )
+				break;
+		    
+			if( j == 25 )
+			{	/* we have a legal move! */
+				playSound ( SOUND_MOVE );
+
+				pmr = NewMoveRecord();
+
+				pmr->mt = MOVE_NORMAL;
+				pmr->sz = NULL;
+				pmr->anDice[ 0 ] = ms.anDice[ 0 ];
+				pmr->anDice[ 1 ] = ms.anDice[ 1 ];
+				pmr->fPlayer = ms.fTurn;
+
+				memcpy( pmr->n.anMove, ml.amMoves[ i ].anMove, sizeof pmr->n.anMove );
+
+				if ( fTutor && fTutorChequer)
+				{
+					HintChequer("", FALSE);
+					if (!GiveAdvice ( pmr_hint->n.stMove ))
+					{
+						free(pmr);
+						return;
+					}
+				}
+
+				if (pmr_hint)
+				{
+					pmr_movelist_copy(pmr_hint, pmr);
+					pmr_cubedata_copy(pmr_hint, pmr);
+					pmr_hint_destroy();
+				}
+
+#if USE_GTK
+				/* There's no point delaying here. */
+				if( nTimeout ) {
+					g_source_remove( nTimeout );
+					nTimeout = 0;
+				}
+
+				if ( fX ) {
+					outputnew ();
+					ShowAutoMove( msBoard(), pmr->n.anMove );
+					outputx ();
+				}
+#endif
+
+				AddMoveRecord( pmr );
+
+#if USE_GTK
+				/* Don't animate this move. */
+				fLastMove = FALSE;
+#endif
+				TurnDone();
+
 				return;
+			}
 		}
-
-                pmr = NewMoveRecord();
-
-		pmr->mt = MOVE_NORMAL;
-		pmr->sz = NULL;
-		pmr->anDice[ 0 ] = ms.anDice[ 0 ];
-		pmr->anDice[ 1 ] = ms.anDice[ 1 ];
-		pmr->fPlayer = ms.fTurn;
-
-                memcpy( pmr->n.anMove, ml.amMoves[ i ].anMove, 
-                        sizeof pmr->n.anMove );
-
-		if (pmr_hint)
-		{
-			pmr_movelist_copy(pmr_hint, pmr);
-			pmr_cubedata_copy(pmr_hint, pmr);
-			pmr_hint_destroy();
-		}
-
-#if USE_GTK
-		/* There's no point delaying here. */
-		if( nTimeout ) {
-		    g_source_remove( nTimeout );
-		    nTimeout = 0;
-		}
-		
-		if ( fX ) {
-		    outputnew ();
-		    ShowAutoMove( msBoard(), pmr->n.anMove );
-		    outputx ();
-		}
-#endif
-		
-
-		AddMoveRecord( pmr );
-#if USE_GTK
-		/* Don't animate this move. */
-		fLastMove = FALSE;
-#endif
-		TurnDone();
-		
-		return;
-	    }
 	}
-    }
     
     outputl( _("Illegal move.") );
 }
