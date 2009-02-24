@@ -415,9 +415,9 @@ EvalCacheResize( unsigned int cNew );
 extern int 
 EvalCacheStats( unsigned int *pcUsed, unsigned int *pcLookup, unsigned int *pcHit );
 
-extern double GetEvalCacheSize();
+extern double GetEvalCacheSize(void);
 void SetEvalCacheSize(unsigned int size);
-extern unsigned int GetEvalCacheEntries();
+extern unsigned int GetEvalCacheEntries(void);
 extern int GetCacheMB(double size);
 
 extern int 

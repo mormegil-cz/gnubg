@@ -4144,7 +4144,7 @@ EvalCacheFlush(void)
   CacheFlush( & cEval );
 }
 
-extern double GetEvalCacheSize()
+extern double GetEvalCacheSize(void)
 {
 	if (cEval.size == 0)
 		return 0;
@@ -4167,7 +4167,7 @@ extern void SetEvalCacheSize(unsigned int size)
 	EvalCacheResize((size == 0) ? 0 : (unsigned int)pow(2, size + 16));
 }
 
-extern unsigned int GetEvalCacheEntries()
+extern unsigned int GetEvalCacheEntries(void)
 {
 	return cCache;
 }
