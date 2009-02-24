@@ -4140,6 +4140,10 @@ extern int edit_new(unsigned int length)
 	fAutoGame = TRUE;
 	fDisplay = FALSE;
 
+#if USE_BOARD3D
+	SuspendDiceRolling(bd->rd);
+#endif
+
 	if (manual_dice)
 	{
 		outputoff();
@@ -4149,6 +4153,10 @@ extern int edit_new(unsigned int length)
 
 	sprintf(sz, "new match %d", length);
 	UserCommand(sz);
+
+#if USE_BOARD3D
+	ResumeDiceRolling(bd->rd);
+#endif
 
 	if (manual_dice)
 	{
