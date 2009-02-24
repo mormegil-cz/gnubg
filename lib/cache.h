@@ -25,17 +25,21 @@
 
 #define CACHE_STATS 1	/* Calculate simple cache stats */
 
-typedef struct _cacheNode {
+typedef struct _cacheNodeDetail {
   unsigned char auchKey[10];
   int nEvalContext;
   float ar[6];
+} cacheNodeDetail;
+
+typedef struct _cacheNode {
+  cacheNodeDetail nd;
 #if USE_MULTITHREAD
   int lock;
 #endif
 } cacheNode;
 
 /* name used in eval.c */
-typedef cacheNode evalcache;
+typedef cacheNodeDetail evalcache;
 
 typedef struct _cache
 {
@@ -57,13 +61,13 @@ int CacheResize(evalCache *pc, unsigned int cNew);
 
 #define CACHEHIT ((unsigned int)-1)
 /* returns a value which is passed to CacheAdd (if a miss) */
-unsigned int CacheLookup(evalCache* pc, const cacheNode* e, float *arOut, float *arCubeful);
+unsigned int CacheLookup(evalCache* pc, const cacheNodeDetail* e, float *arOut, float *arCubeful);
 
-void CacheAdd(evalCache* pc, const cacheNode* e, unsigned long l);
+void CacheAdd(evalCache* pc, const cacheNodeDetail* e, unsigned long l);
 void CacheFlush(const evalCache* pc);
 void CacheDestroy(const evalCache* pc);
 void CacheStats(const evalCache* pc, unsigned int* pcLookup, unsigned int* pcHit, unsigned int* pcUsed);
 
-unsigned long GetHashKey(unsigned long hashMask, const cacheNode* e);
+unsigned long GetHashKey(unsigned long hashMask, const cacheNodeDetail* e);
 
 #endif

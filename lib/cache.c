@@ -32,14 +32,6 @@
 #if USE_MULTITHREAD
 #include "multithread.h"
 
-/* Macro to copy a CacheNode */
-#if USE_MULTITHREAD
-/* Copy cache node minus the lock parameter in multithreaded */
-#define CopyNodeData(pTo, pFrom) memcpy(pTo, pFrom, sizeof(cacheNode) - sizeof(int))
-#else
-#define CopyNodeData(pTo, pFrom) memcpy(pTo, pFrom, sizeof(cacheNode))
-#endif
-
 #define cache_lock(pc, k) \
 if (MT_SafeIncCheck(&(pc->m[k].lock))) \
 	WaitForLock(&(pc->m[k].lock))
@@ -106,7 +98,7 @@ int CacheCreate(evalCache* pc, unsigned int s)
 	return 0;
 }
 
-extern unsigned long GetHashKey(unsigned long hashMask, const cacheNode* e)
+extern unsigned long GetHashKey(unsigned long hashMask, const cacheNodeDetail* e)
 {
   ub4 a = 0x9e3779b9;  /* the golden ratio; an arbitrary value */
   ub4 b = a;
@@ -130,7 +122,7 @@ extern unsigned long GetHashKey(unsigned long hashMask, const cacheNode* e)
   return (c & hashMask) << 1;
 }
 
-unsigned int CacheLookup(evalCache* pc, const cacheNode* e, float *arOut, float *arCubeful)
+unsigned int CacheLookup(evalCache* pc, const cacheNodeDetail* e, float *arOut, float *arCubeful)
 {
 	unsigned long l = GetHashKey(pc->hashMask, e);
 
@@ -140,11 +132,11 @@ unsigned int CacheLookup(evalCache* pc, const cacheNode* e, float *arOut, float 
 #if USE_MULTITHREAD
 	cache_lock(pc, l);
 #endif
-	if ((pc->m[l].nEvalContext != e->nEvalContext ||
-		memcmp(pc->m[l].auchKey, e->auchKey, sizeof(e->auchKey)) != 0))
+	if ((pc->m[l].nd.nEvalContext != e->nEvalContext ||
+		memcmp(pc->m[l].nd.auchKey, e->auchKey, sizeof(e->auchKey)) != 0))
 	{	/* Not in first slot */
-		if ((pc->m[l + 1].nEvalContext != e->nEvalContext ||
-			memcmp(pc->m[l + 1].auchKey, e->auchKey, sizeof(e->auchKey)) != 0))
+		if ((pc->m[l + 1].nd.nEvalContext != e->nEvalContext ||
+			memcmp(pc->m[l + 1].nd.auchKey, e->auchKey, sizeof(e->auchKey)) != 0))
 		{	/* Cache miss */
 #if USE_MULTITHREAD
 			cache_unlock(pc, l);
@@ -153,10 +145,10 @@ unsigned int CacheLookup(evalCache* pc, const cacheNode* e, float *arOut, float 
 		}
 		else
 		{	/* Found in second slot, promote "hot" entry */
-			cacheNode tmp = pc->m[l];
+			cacheNodeDetail tmp = pc->m[l].nd;
 
-			CopyNodeData(&pc->m[l], &pc->m[l + 1]);
-			CopyNodeData(&pc->m[l + 1], &tmp);
+			pc->m[l].nd = pc->m[l + 1].nd;
+			pc->m[l + 1].nd = tmp;
 		}
 	}
 	/* Cache hit */
@@ -164,9 +156,9 @@ unsigned int CacheLookup(evalCache* pc, const cacheNode* e, float *arOut, float 
     ++pc->cHit;
 #endif
 
-	memcpy(arOut, pc->m[l].ar, sizeof(float) * 5/*NUM_OUTPUTS*/ );
+	memcpy(arOut, pc->m[l].nd.ar, sizeof(float) * 5/*NUM_OUTPUTS*/ );
 	if (arCubeful)
-		*arCubeful = pc->m[l].ar[5];	/* Cubeful equity stored in slot 5 */
+		*arCubeful = pc->m[l].nd.ar[5];	/* Cubeful equity stored in slot 5 */
 
 #if USE_MULTITHREAD
 	cache_unlock(pc, l);
@@ -175,14 +167,14 @@ unsigned int CacheLookup(evalCache* pc, const cacheNode* e, float *arOut, float 
     return CACHEHIT;
 }
 
-void CacheAdd(evalCache* pc, const cacheNode* e, unsigned long l)
+void CacheAdd(evalCache* pc, const cacheNodeDetail* e, unsigned long l)
 {
 #if USE_MULTITHREAD
 	cache_lock(pc, l);
 #endif
 
-	CopyNodeData(&pc->m[l + 1], &pc->m[l]);
-	CopyNodeData(&pc->m[l], e);
+	pc->m[l + 1].nd = pc->m[l].nd;
+	pc->m[l].nd = *e;
 
 #if USE_MULTITHREAD
 	cache_unlock(pc, l);
@@ -202,8 +194,10 @@ void CacheFlush(const evalCache* pc)
 {
   unsigned int k;
   for(k = 0; k < pc->size; ++k) {
-    pc->m[k].nEvalContext = -1;
+    pc->m[k].nd.nEvalContext = -1;
+#if USE_MULTITHREAD
 	pc->m[k].lock = 0;
+#endif
   }
 }
 
