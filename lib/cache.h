@@ -32,7 +32,8 @@ typedef struct _cacheNodeDetail {
 } cacheNodeDetail;
 
 typedef struct _cacheNode {
-  cacheNodeDetail nd;
+  cacheNodeDetail nd_primary;
+  cacheNodeDetail nd_secondary;
 #if USE_MULTITHREAD
   int lock;
 #endif
@@ -43,7 +44,7 @@ typedef cacheNodeDetail evalcache;
 
 typedef struct _cache
 {
-  cacheNode*	m;
+  cacheNode*	entries;
   
   unsigned int size;
   unsigned long hashMask;

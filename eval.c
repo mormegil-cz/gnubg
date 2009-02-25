@@ -4177,7 +4177,7 @@ extern int GetCacheMB(double size)
 	if (size == 0)
 		return 0;
 	else
-		return (int)((pow(2, size + 16) * sizeof(cacheNode)) / (1024 * 1024));
+		return (int)((pow(2, size + 15) * sizeof(cacheNode)) / (1024 * 1024));
 }
 
 extern int EvalCacheResize(unsigned int cNew)

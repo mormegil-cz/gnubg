@@ -33,10 +33,10 @@
 #include "multithread.h"
 
 #define cache_lock(pc, k) \
-if (MT_SafeIncCheck(&(pc->m[k].lock))) \
-	WaitForLock(&(pc->m[k].lock))
+if (MT_SafeIncCheck(&(pc->entries[k].lock))) \
+	WaitForLock(&(pc->entries[k].lock))
 
-#define cache_unlock(pc, k) MT_SafeDec(&(pc->m[k].lock))
+#define cache_unlock(pc, k) MT_SafeDec(&(pc->entries[k].lock))
 
 static void WaitForLock(int *lock)
 {
@@ -90,8 +90,8 @@ int CacheCreate(evalCache* pc, unsigned int s)
 	pc->size = (s < pc->size) ? 2 * s : s;
 	pc->hashMask = (pc->size >> 1) - 1;
 
-	pc->m = (cacheNode*)malloc(pc->size * sizeof(*pc->m));
-	if (pc->m == 0)
+	pc->entries = (cacheNode*)malloc(pc->size / 2 * sizeof(*pc->entries));
+	if (pc->entries == 0)
 		return -1;
 
 	CacheFlush(pc);
@@ -119,7 +119,7 @@ extern unsigned long GetHashKey(unsigned long hashMask, const cacheNodeDetail* e
 
   hashmix(a,b,c);
 
-  return (c & hashMask) << 1;
+  return (c & hashMask);
 }
 
 unsigned int CacheLookup(evalCache* pc, const cacheNodeDetail* e, float *arOut, float *arCubeful)
@@ -132,11 +132,11 @@ unsigned int CacheLookup(evalCache* pc, const cacheNodeDetail* e, float *arOut, 
 #if USE_MULTITHREAD
 	cache_lock(pc, l);
 #endif
-	if ((pc->m[l].nd.nEvalContext != e->nEvalContext ||
-		memcmp(pc->m[l].nd.auchKey, e->auchKey, sizeof(e->auchKey)) != 0))
-	{	/* Not in first slot */
-		if ((pc->m[l + 1].nd.nEvalContext != e->nEvalContext ||
-			memcmp(pc->m[l + 1].nd.auchKey, e->auchKey, sizeof(e->auchKey)) != 0))
+	if ((pc->entries[l].nd_primary.nEvalContext != e->nEvalContext ||
+		memcmp(pc->entries[l].nd_primary.auchKey, e->auchKey, sizeof(e->auchKey)) != 0))
+	{	/* Not in primary slot */
+		if ((pc->entries[l].nd_secondary.nEvalContext != e->nEvalContext ||
+			memcmp(pc->entries[l].nd_secondary.auchKey, e->auchKey, sizeof(e->auchKey)) != 0))
 		{	/* Cache miss */
 #if USE_MULTITHREAD
 			cache_unlock(pc, l);
@@ -145,10 +145,10 @@ unsigned int CacheLookup(evalCache* pc, const cacheNodeDetail* e, float *arOut, 
 		}
 		else
 		{	/* Found in second slot, promote "hot" entry */
-			cacheNodeDetail tmp = pc->m[l].nd;
+			cacheNodeDetail tmp = pc->entries[l].nd_primary;
 
-			pc->m[l].nd = pc->m[l + 1].nd;
-			pc->m[l + 1].nd = tmp;
+			pc->entries[l].nd_primary = pc->entries[l].nd_secondary;
+			pc->entries[l].nd_secondary = tmp;
 		}
 	}
 	/* Cache hit */
@@ -156,9 +156,9 @@ unsigned int CacheLookup(evalCache* pc, const cacheNodeDetail* e, float *arOut, 
     ++pc->cHit;
 #endif
 
-	memcpy(arOut, pc->m[l].nd.ar, sizeof(float) * 5/*NUM_OUTPUTS*/ );
+	memcpy(arOut, pc->entries[l].nd_primary.ar, sizeof(float) * 5/*NUM_OUTPUTS*/ );
 	if (arCubeful)
-		*arCubeful = pc->m[l].nd.ar[5];	/* Cubeful equity stored in slot 5 */
+		*arCubeful = pc->entries[l].nd_primary.ar[5];	/* Cubeful equity stored in slot 5 */
 
 #if USE_MULTITHREAD
 	cache_unlock(pc, l);
@@ -173,8 +173,8 @@ void CacheAdd(evalCache* pc, const cacheNodeDetail* e, unsigned long l)
 	cache_lock(pc, l);
 #endif
 
-	pc->m[l + 1].nd = pc->m[l].nd;
-	pc->m[l].nd = *e;
+	pc->entries[l].nd_secondary = pc->entries[l].nd_primary;
+	pc->entries[l].nd_primary = *e;
 
 #if USE_MULTITHREAD
 	cache_unlock(pc, l);
@@ -187,16 +187,17 @@ void CacheAdd(evalCache* pc, const cacheNodeDetail* e, unsigned long l)
 
 void CacheDestroy(const evalCache* pc)
 {
-  free(pc->m);
+  free(pc->entries);
 }
 
 void CacheFlush(const evalCache* pc)
 {
   unsigned int k;
-  for(k = 0; k < pc->size; ++k) {
-    pc->m[k].nd.nEvalContext = -1;
+  for(k = 0; k < pc->size / 2; ++k) {
+    pc->entries[k].nd_primary.nEvalContext = -1;
+    pc->entries[k].nd_secondary.nEvalContext = -1;
 #if USE_MULTITHREAD
-	pc->m[k].lock = 0;
+	pc->entries[k].lock = 0;
 #endif
   }
 }
