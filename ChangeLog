@@ -1,3 +1,9 @@
+Sun Mar  1 10:02:02 CET 2009 Øystein Johansen <oystein@gnubg.org>
+
+	* makebearoff.c, bearoff.c: Repair building of onesided
+	bearoff databases w/o gammon distributions. Fixed
+	heuristic bearoff databases. (HEURISTIC_C => 15)
+
 Mon Feb 23 20:55:11 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gtkcube.c: fix a bug in cubehint

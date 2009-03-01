@@ -42,7 +42,7 @@
 #include <sys/stat.h>
 #endif
 
-#define HEURISTIC_C 6
+#define HEURISTIC_C 15
 #define HEURISTIC_P 6
 
 static int setGammonProb(const TanBoard anBoard, unsigned int bp0, unsigned int bp1, float* g0, float* g1)
@@ -1122,16 +1122,17 @@ static unsigned short int *GetDistCompressed ( unsigned short int aus[ 64 ], con
   unsigned char ac[ 128 ];
   unsigned int iOffset;
   unsigned int nBytes;
-  unsigned int ioff, nz, ioffg, nzg;
+  unsigned int ioff, nz, ioffg = 0, nzg = 0;
   unsigned int nPos = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
+  unsigned int index_entry_size = pbc->fGammon ? 8 : 6;
 
   /* find offsets and no. of non-zero elements */
   
   if (pbc->p)
     /* database is in memory */
-    puch = pbc->p + 40 + nPosID * 8;
+    puch = pbc->p + 40 + nPosID * index_entry_size;
   else {
-    ReadBearoffFile(pbc, 40 + nPosID * 8, ac, 8);
+    ReadBearoffFile(pbc, 40 + nPosID * index_entry_size, ac, index_entry_size);
     puch = ac;
   }
     
@@ -1141,9 +1142,10 @@ static unsigned short int *GetDistCompressed ( unsigned short int aus[ 64 ], con
 
   nz = puch[ 4 ];
   ioff = puch[ 5 ];
-  nzg = puch[ 6 ];
-  ioffg = puch[ 7 ];
-
+  if ( pbc->fGammon ){
+    nzg = puch[ 6 ];
+    ioffg = puch[ 7 ];
+  }
   /* Sanity checks */
 
   if ( ( iOffset > 64 * nPos && 64 * nPos > 0 ) || 
@@ -1162,7 +1164,7 @@ static unsigned short int *GetDistCompressed ( unsigned short int aus[ 64 ], con
   /* read prob + gammon probs */
   
   iOffset = 40     /* the header */
-    + nPos * 8     /* the offset data */
+    + nPos * index_entry_size     /* the offset data */
     + 2 * iOffset; /* offset to current position */
   
   /* read values */

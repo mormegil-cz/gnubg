@@ -194,17 +194,18 @@ OSLookup ( const unsigned int iPos,
     unsigned int i, j;
     long iOffset;
     size_t nBytes;
-    unsigned int ioff, nz, ioffg, nzg;
+    unsigned int ioff, nz, ioffg = 0, nzg = 0;
     unsigned short int us;
+    unsigned int index_entry_size = fGammon ? 8 : 6;
 
     /* find offsets and no. of non-zero elements */
 
-    if ( fseek ( pfOutput, 40 + iPos * 8, SEEK_SET ) < 0 ) {
+    if ( fseek ( pfOutput, 40 + iPos * index_entry_size, SEEK_SET ) < 0 ) {
       perror ( "output file" );
       exit(-1);
     }
 
-    if ( fread ( ac, 1, 8, pfOutput ) < 8 ) {
+    if ( fread ( ac, 1, index_entry_size, pfOutput ) < index_entry_size ) {
       if ( errno )
         perror ( "output file" );
       else
@@ -220,8 +221,11 @@ OSLookup ( const unsigned int iPos,
     
     nz = ac[ 4 ];
     ioff = ac[ 5 ];
-    nzg = ac[ 6 ];
-    ioffg = ac[ 7 ];
+    
+    if ( fGammon ){
+      nzg = ac[ 6 ];
+      ioffg = ac[ 7 ];
+    }
 
     /* re-position at EOF */
 
@@ -259,11 +263,11 @@ OSLookup ( const unsigned int iPos,
       aProb[ ioff + j ] = us;
     }
 
-    if ( fGammon ) 
-      for ( j = 0; j < nzg; ++j, i += 2 ) {
-        us = ac[ i ] | ac[ i+1 ] << 8;
-        aProb[ 32 + ioffg + j ] = us;
-      }
+    /* if ( fGammon ) */
+    for ( j = 0; j < nzg; ++j, i += 2 ) {
+      us = ac[ i ] | ac[ i+1 ] << 8;
+      aProb[ 32 + ioffg + j ] = us;
+    }
 
     /* re-position at EOF */
 
@@ -480,7 +484,7 @@ static void BearOff( int nId, unsigned int nPoints,
 	    }
 
 	    g_assert( iBest >= 0 );
-            g_assert( iGammonBest >= 0 );
+            /* g_assert( iGammonBest >= 0 ); */
 
 	    if( anRoll[ 0 ] == anRoll[ 1 ] ) {
               for( i = 0; i < 31; i++ ) {
@@ -567,18 +571,12 @@ WriteIndex ( unsigned int *pnpos,
 
   /* gammon probs: write index and number of non-zero elements */
 
-  if ( fGammon ) 
+  if ( fGammon ){
     CalcIndex ( aus + 32, &iIdx, &nNonZero );
-  else {
-    nNonZero = 0;
-    iIdx = 0;
+    putc ( nNonZero & 0xFF, output );
+    putc ( iIdx & 0xFF, output );
+    *pnpos += nNonZero;
   }
-
-  putc ( nNonZero & 0xFF, output );
-  putc ( iIdx & 0xFF, output );
-
-  *pnpos += nNonZero;
-
 }
 
 static void
