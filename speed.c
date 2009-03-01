@@ -33,17 +33,14 @@
 #include <stdlib.h>
 #endif
 
-#include "speed.h"
-
 #include <isaac.h>
-#include <time.h>
 
 #define EVALS_PER_ITERATION 1024
 
 randctx rc;
 double timeTaken;
 
-extern void RunEvals(void *unused)
+extern void RunEvals(void *notused)
 {
 	int aanBoard[ EVALS_PER_ITERATION ][ 2 ][ 25 ];
     int i, j, k;
@@ -85,7 +82,7 @@ extern void RunEvals(void *unused)
 
 	for( i = 0; i < EVALS_PER_ITERATION; i++ )
 	{
-		EvaluatePosition( NULL, (ConstTanBoard)aanBoard[ i ], ar, &ciCubeless, NULL );
+		(void)EvaluatePosition( NULL, (ConstTanBoard)aanBoard[ i ], ar, &ciCubeless, NULL );
 	}
 
 #if USE_MULTITHREAD
@@ -98,8 +95,8 @@ extern void RunEvals(void *unused)
 
 extern void CommandCalibrate( char *sz )
 {
-	int iIter, n = -1;
-	unsigned int i;
+	int n = -1;
+	unsigned int i, iIter;
 #if USE_GTK
     void *pcc = NULL;
 #endif
@@ -136,7 +133,7 @@ extern void CommandCalibrate( char *sz )
 #endif
     
 	timeTaken = 0;
-    for( iIter = 0; iIter < n || n < 0; )
+    for( iIter = 0; n < 0 || iIter < (unsigned int)n; )
 	{
 		double spd;
 		if (fInterrupt)
@@ -144,7 +141,7 @@ extern void CommandCalibrate( char *sz )
 
 #if USE_MULTITHREAD
 		mt_add_tasks(MT_GetNumThreads(), RunEvals, NULL, NULL);
-		MT_WaitForTasks(NULL, 0);
+		(void)MT_WaitForTasks(NULL, 0);
 		iIter += MT_GetNumThreads();
 #else
 		RunEvals(NULL);

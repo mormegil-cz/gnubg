@@ -21,6 +21,7 @@
 
 #ifndef _GTKGAME_H_
 #define _GTKGAME_H_
+
 #include <gtk/gtk.h>
 #include "backgammon.h"
 #include "gtkpanels.h"

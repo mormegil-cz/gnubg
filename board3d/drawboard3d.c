@@ -3391,7 +3391,7 @@ static void updateDieOccPos(const BoardData* bd, const BoardData3d* bd3d, Occlud
 		}
 	}
 	if (ShadowsInitilised(bd3d))
-	draw_shadow_volume_extruded_edges(pOcc, bd3d->shadow_light_position, GL_QUADS);
+		draw_shadow_volume_extruded_edges(pOcc, bd3d->shadow_light_position, GL_QUADS);
 }
 
 void updateDiceOccPos(const BoardData* bd, BoardData3d* bd3d)
@@ -3413,7 +3413,7 @@ NTH_STATIC void updateCubeOccPos(const BoardData* bd, BoardData3d* bd3d)
 
 	bd3d->Occluders[OCC_CUBE].show = (bd->cube_use && !bd->crawford_game);
 	if (ShadowsInitilised(bd3d))
-	draw_shadow_volume_extruded_edges(&bd3d->Occluders[OCC_CUBE], bd3d->shadow_light_position, GL_QUADS);
+		draw_shadow_volume_extruded_edges(&bd3d->Occluders[OCC_CUBE], bd3d->shadow_light_position, GL_QUADS);
 }
 
 void updateMovingPieceOccPos(const BoardData* bd, BoardData3d* bd3d)
@@ -3441,7 +3441,7 @@ void updateMovingPieceOccPos(const BoardData* bd, BoardData3d* bd3d)
 			makeInverseTransposeMatrix(bd3d->Occluders[LAST_PIECE].invMat, bd3d->Occluders[LAST_PIECE].trans);
 	}
 	if (ShadowsInitilised(bd3d))
-	draw_shadow_volume_extruded_edges(&bd3d->Occluders[LAST_PIECE], bd3d->shadow_light_position, GL_QUADS);
+		draw_shadow_volume_extruded_edges(&bd3d->Occluders[LAST_PIECE], bd3d->shadow_light_position, GL_QUADS);
 }
 
 void updatePieceOccPos(const BoardData* bd, BoardData3d* bd3d)
@@ -3474,8 +3474,8 @@ void updatePieceOccPos(const BoardData* bd, BoardData3d* bd3d)
 				makeInverseTransposeMatrix(bd3d->Occluders[p].invMat, bd3d->Occluders[p].trans);
 				bd3d->Occluders[p].rotator = 0;
 			}
-	if (ShadowsInitilised(bd3d))
-			draw_shadow_volume_extruded_edges(&bd3d->Occluders[p], bd3d->shadow_light_position, GL_QUADS);
+			if (ShadowsInitilised(bd3d))
+				draw_shadow_volume_extruded_edges(&bd3d->Occluders[p], bd3d->shadow_light_position, GL_QUADS);
 
 			p++;
 		}

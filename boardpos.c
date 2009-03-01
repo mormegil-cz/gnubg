@@ -23,7 +23,6 @@
 
 #include <glib.h>
 #include <stdlib.h>
-#include <glib/gi18n.h>
 
 #include "boarddim.h"
 #include "boardpos.h"
@@ -61,17 +60,13 @@ PointArea( const int fClockwise, const int nSize,
     *pcx = CHEQUER_WIDTH * nSize;
     *pcy = positions[ fClockwise ][ n ][ 2 ] * nSize;
     
-    if( *pcy > 0 ) {
-	*pcy = *pcy * ( c_chequer - 1 ) + 
-	  (CHEQUER_HEIGHT + DISPLAY_POINT_EXTRA) * nSize;
-	*py += CHEQUER_HEIGHT * nSize - *pcy;
-    } else
-	*pcy = -*pcy * ( c_chequer - 1 ) + 
-	  (CHEQUER_HEIGHT + DISPLAY_POINT_EXTRA) * nSize;
-
-
-
-
+    if( *pcy > 0 )
+	{
+		*pcy = *pcy * ( c_chequer - 1 ) + (CHEQUER_HEIGHT + DISPLAY_POINT_EXTRA) * nSize;
+		*py += CHEQUER_HEIGHT * nSize - *pcy;
+    }
+	else
+		*pcy = -*pcy * ( c_chequer - 1 ) + (CHEQUER_HEIGHT + DISPLAY_POINT_EXTRA) * nSize;
 }
 
 
@@ -92,7 +87,7 @@ extern void CubePosition( const int crawford_game, const int cube_use,
     }
 	else if( doubled )
 	{
-		if( px ) *px = (doubled > 0) ? CUBE_RIGHT_X: CUBE_LEFT_X;
+		if( px ) *px = (doubled > 0) ? CUBE_RIGHT_X : CUBE_LEFT_X;
 		if( py ) *py = CUBE_CENTRE_Y;
 		if( porient ) *porient = doubled;
     }
@@ -101,7 +96,7 @@ extern void CubePosition( const int crawford_game, const int cube_use,
 		if( px )
 		{
 			if (fClockwise)
-				*px = BOARD_WIDTH - BEAROFF_INSIDE - CUBE_TRAY_X;
+				*px = BOARD_WIDTH - (BEAROFF_INSIDE + CUBE_TRAY_X);
 			else
 				*px = CUBE_TRAY_X;
 		}

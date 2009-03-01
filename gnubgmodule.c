@@ -23,15 +23,11 @@
 
 #include "gnubgmodule.h"
 #include "backgammon.h"
-
-#include <glib.h>
-#include <glib/gstdio.h>
 #include <signal.h>
 
 #include "eval.h"
 #include "matchequity.h"
 #include "positionid.h"
-#include "analysis.h"
 #include "util.h"
 
 #if USE_PYTHON
@@ -2374,9 +2370,9 @@ extern void PythonShutdown( void )
 #endif
 }
 
+#if USE_PYTHON
 extern void PythonRun(const char *sz)
 {
-#if USE_PYTHON
 	if (*sz)
 	{
 		PyRun_SimpleString( sz );
@@ -2386,19 +2382,19 @@ extern void PythonRun(const char *sz)
 		PyRun_SimpleString( "import sys; print 'Python', sys.version" );
 		PyRun_AnyFile( stdin, NULL );
 	}
+}
 #else
+extern void PythonRun(const char *notused)
+{
 	    outputl( _("This installation of GNU Backgammon was compiled "
 		     "without Python support.") );
 	    outputx();
-#endif
 }
+#endif
 
+#if USE_PYTHON
 extern int LoadPythonFile(const char *sz)
 {
-#if !USE_PYTHON
-	output(_("This build of GNU Backgammon does not support Python"));
-	return FALSE;
-#else
 	FILE *pf;
 	char *path = NULL;
 	int ret = FALSE;
@@ -2430,5 +2426,11 @@ extern int LoadPythonFile(const char *sz)
 	g_free(path);
 
 	return ret;
-#endif
 }
+#else
+extern int LoadPythonFile(const char *notused)
+{
+	output(_("This build of GNU Backgammon does not support Python"));
+	return FALSE;
+}
+#endif

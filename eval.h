@@ -275,7 +275,7 @@ extern movefilter aaamfMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ][ MAX_FILTER
 typedef enum
 {
 	CMARK_NONE,
-	CMARK_ROLLOUT,
+	CMARK_ROLLOUT
 } CMark;
 
 typedef struct {
@@ -464,7 +464,7 @@ extern void
 swap_us( unsigned int *p0, unsigned int *p1 );
 
 extern void 
-swap( int *p0, int *p1 );
+swap( unsigned int *p0, unsigned int *p1 );
 
 extern void 
 SanityCheck( const TanBoard anBoard, float arOutput[] );

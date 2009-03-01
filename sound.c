@@ -25,16 +25,15 @@
 
 #include "config.h"
 
-#include <glib.h>
-#include <string.h>
-#include <stdlib.h>
-
-#include "backgammon.h"
-
 #if USE_GTK
 #include "gtkgame.h"
+#else
+#include "backgammon.h"
+#include <glib.h>
 #endif
 
+#include "sound.h"
+#include "util.h"
 
 #if defined(WIN32)
 /* for PlaySound */
@@ -239,9 +238,6 @@ static void PlaySoundGst(const char *fn, gboolean sync)
 }
 #endif
 
-#include "sound.h"
-#include "util.h"
-
 const char *sound_description[ NUM_SOUNDS ] = {
   N_("Starting GNU Backgammon"),
   N_("Exiting GNU Backgammon"),
@@ -289,7 +285,7 @@ int fQuiet = FALSE;
 static char *sound_cmd = NULL;
 
 void
-playSoundFile (char *file, gboolean sync)
+playSoundFile (char *file, /*lint -e{715}*/gboolean sync)
 {
     GError *error = NULL;
     if (!g_file_test(file, G_FILE_TEST_EXISTS))

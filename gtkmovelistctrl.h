@@ -23,9 +23,6 @@
 #ifndef _GTKMOVELISTCTRL_H_
 #define _GTKMOVELISTCTRL_H_
 
-#include <gtk/gtk.h>
-
-#include "eval.h"
 
 /* Some boilerplate GObject type check and type cast macros.
 *  'klass' is used here instead of 'class', because 'class'

@@ -22,6 +22,6 @@
 #ifndef _GTKMET_H_
 #define _GTKMET_H_
 
-extern void GTKShowMatchEquityTable( const int nMatchTo,
-                                     const int anScore[ 2 ] );
+extern void GTKShowMatchEquityTable( const unsigned int nMatchTo,
+                                     const unsigned int anScore[ 2 ] );
 #endif

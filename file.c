@@ -20,7 +20,6 @@
 
 #include "config.h"
 #include "backgammon.h"
-#include <glib.h>
 #include <glib/gstdio.h>
 #ifndef _MSC_VER
 #include <string.h>

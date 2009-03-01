@@ -20,18 +20,20 @@
  */
 
 #include "config.h"
+
+#if USE_GTK
+#include "gtkgame.h"
+#else
 #include "backgammon.h"
+#include <glib.h>
+#endif
 
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <glib.h>
 #include <glib/gstdio.h>
 
-#if USE_GTK
-#include "gtkgame.h"
-#endif
 #include "record.h"
 #include "util.h"
 
@@ -128,8 +130,18 @@ extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr ) {
     ppr->szName[ i ] = 0;
 
     if (fscanf( pf, " %d ", &ppr->cGames ) < 1)
-	    goto record_read_failed;
-    if( ppr->cGames < 0 )
+	{
+		if( ferror( pf ) )
+			outputerr( pch );
+		else
+			outputerrf( _("%s: invalid record file"), pch );
+
+		nVersion = 0;
+
+		return -1;
+	}
+
+	if( ppr->cGames < 0 )
 		ppr->cGames = 0;
     
     for( ea = 0; ea < NUM_AVG; ea++ )
@@ -142,7 +154,17 @@ extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr ) {
 		gchar str4[G_ASCII_DTOSTR_BUF_SIZE];
 
 		if( fscanf( pf, "%s %s %s %s ", str1, str2, str3, str4) < 4)
-			goto record_read_failed;
+		{
+			if( ferror( pf ) )
+				outputerr( pch );
+			else
+				outputerrf( _("%s: invalid record file"), pch );
+
+			nVersion = 0;
+
+			return -1;
+		}
+
 		ppr->arErrorChequerplay[ ea ] = g_ascii_strtod(str1, NULL);
 		ppr->arErrorCube[ ea ] = g_ascii_strtod(str2, NULL);
 		ppr->arErrorCombined[ ea ] = g_ascii_strtod(str3, NULL);
@@ -150,16 +172,6 @@ extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr ) {
 	}
 
     return 0;
-record_read_failed:
-    if( ferror( pf ) )
-	    outputerr( pch );
-    else
-	    outputerrf( _("%s: invalid record file"), pch );
-
-    nVersion = 0;
-
-    return -1;
-
 }
 
 static int RecordWriteItem( FILE *pf, const char *pch, playerrecord *ppr ) {
@@ -432,7 +444,7 @@ extern void CommandRecordAddGame( char *notused )
 extern void CommandRecordAddMatch( char *notused )
 {
     listOLD *pl;
-    int c = 0;
+    unsigned int c = 0;
     FILE *pf;
     char *pch;
     playerrecord apr[ 2 ];

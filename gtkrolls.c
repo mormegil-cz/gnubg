@@ -22,14 +22,9 @@
 #include "config.h"
 
 #include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "gtkgame.h"
-
 #include "drawboard.h"
-#include <glib/gi18n.h>
-
 #include "format.h"
 #include "gtkwindows.h"
 #include "gtkrolls.h"

@@ -22,9 +22,6 @@
 #ifndef _BACKGAMMON_H_
 #define _BACKGAMMON_H_
 
-#include <sys/types.h>
-#include "gnubg-types.h"
-#include <stdarg.h>
 #include "analysis.h"
 #include "eval.h"
 #include "rollout.h"
@@ -34,7 +31,7 @@
 #define VERSION_STRING "GNU Backgammon " VERSION
 #define GNUBG_CHARSET "UTF-8"
 
-extern const gchar *intro_string;
+extern const char *intro_string;
 typedef struct _command {
 	/* Command name (NULL indicates end of list) */
 	const char *sz;

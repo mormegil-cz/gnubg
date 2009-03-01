@@ -21,13 +21,6 @@
 
 #include "config.h"
 
-#include <gtk/gtk.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "backgammon.h"
 #include "gtkgame.h"
 #include "matchequity.h"
 #include "gtkmet.h"
@@ -44,20 +37,20 @@ typedef struct _mettable {
 typedef struct _metwidget {
   GtkWidget *apwPostCrawford[ 2 ];
   GtkWidget *pwPreCrawford;
-  int nMatchTo;
-  int anAway[ 2 ];
+  unsigned int nMatchTo;
+  unsigned int anAway[ 2 ];
 } metwidget;
 
 
-static void
-UpdateTable ( mettable *pmt, 
-              float aafMET[ MAXSCORE ][ MAXSCORE ],
+static void UpdateTable ( const mettable *pmt, 
+              const float met[ MAXSCORE ][ MAXSCORE ],
               const metinfo *pmi,
-              const int nRows, const int nCols, const int fInvert ) {
+              const unsigned int nRows, const unsigned int nCols, const int fInvert ) {
 
 #define STRINGLENGTH 64
 
-  int i, j, nBytes;
+  unsigned int i, j;
+  int nBytes;
   char sz[ STRINGLENGTH ];
 
   /* set labels */
@@ -72,9 +65,9 @@ UpdateTable ( mettable *pmt,
     for( j = 0; j < nCols; j++ ) {
 
       if ( fInvert )
-        nBytes = sprintf( sz, "%8.4f", GET_MET( j, i, aafMET ) * 100.0f );
+        nBytes = sprintf( sz, "%8.4f", met[j][i] * 100.0f );
       else
-        nBytes = sprintf( sz, "%8.4f", GET_MET( i, j, aafMET ) * 100.0f );
+        nBytes = sprintf( sz, "%8.4f", met[i][j] * 100.0f );
 
       g_assert( nBytes < STRINGLENGTH );
 
@@ -86,31 +79,25 @@ UpdateTable ( mettable *pmt,
 }
 
 
-static void
-UpdateAllTables ( metwidget *pmw ) {
-
-  mettable *pmt;
+static void UpdateAllTables(const metwidget *pmw)
+{
+  const mettable *pmt;
   int i;
 
-  pmt = (mettable*)g_object_get_data ( G_OBJECT ( pmw->pwPreCrawford ),
+  pmt = (const mettable*)g_object_get_data ( G_OBJECT ( pmw->pwPreCrawford ),
 		  "mettable" );
   UpdateTable ( pmt, aafMET, &miCurrent, pmw->nMatchTo, pmw->nMatchTo, FALSE );
 
   for ( i = 0; i < 2; ++i ) {
-    pmt = (mettable*)g_object_get_data ( G_OBJECT ( pmw->apwPostCrawford[ i ] ), "mettable" );
-    UpdateTable ( pmt, (float (*)[ MAXSCORE ]) aafMETPostCrawford[ i ], 
+    pmt = (const mettable*)g_object_get_data ( G_OBJECT ( pmw->apwPostCrawford[ i ] ), "mettable" );
+    UpdateTable ( pmt, (const float (*)[ MAXSCORE ])(void*)aafMETPostCrawford[ i ], 
                   &miCurrent, pmw->nMatchTo, 1, TRUE );
   }
-
-
 }
 
-
-static GtkWidget 
-*GTKWriteMET ( const int nRows, const int nCols,
-               const int nAway0, const int nAway1 ) {
-
-  int i, j;
+static GtkWidget *GTKWriteMET(const unsigned int nRows, const unsigned int nCols, const unsigned int nAway0, const unsigned int nAway1)
+{
+  unsigned int i, j;
   char sz[ 16 ];
   GtkWidget *pwScrolledWindow = gtk_scrolled_window_new( NULL, NULL );
   GtkWidget *pwTable = gtk_table_new( nRows + 1, nCols + 1, TRUE );
@@ -197,7 +184,7 @@ static GtkWidget
 
 }
 
-static void invertMETlocal( GtkWidget *pw, metwidget *pmw ){
+static void invertMETlocal( GtkWidget *notused, const metwidget *pmw ){
 
   if(fInvertMET)
     UserCommand( "set invert met off" );
@@ -205,11 +192,10 @@ static void invertMETlocal( GtkWidget *pw, metwidget *pmw ){
     UserCommand( "set invert met on" );
 
   UpdateAllTables ( pmw );
-
 }
 
 
-static void loadMET ( GtkWidget *pw, metwidget *pmw ) {
+static void loadMET ( GtkWidget *notused, const metwidget *pmw ) {
 
   SetMET ( NULL, NULL );
 
@@ -218,9 +204,8 @@ static void loadMET ( GtkWidget *pw, metwidget *pmw ) {
 }
 
 
-extern void GTKShowMatchEquityTable( const int nMatchTo,
-                                     const int anScore[ 2 ] ) {
-
+extern void GTKShowMatchEquityTable( const unsigned int nMatchTo, const unsigned int anScore[ 2 ] )
+{
   /* FIXME: Widget should update after 'Invert' or 'Load ...' */  
   int i;
   char sz[ 50 ];
@@ -234,8 +219,8 @@ extern void GTKShowMatchEquityTable( const int nMatchTo,
   metwidget mw;
 
   mw.nMatchTo = nMatchTo;
-  mw.anAway[ 0 ] = nMatchTo - anScore[ 0 ] - 1;
-  mw.anAway[ 1 ] = nMatchTo - anScore[ 1 ] - 1;
+  mw.anAway[ 0 ] = (nMatchTo - anScore[ 0 ]) - 1;
+  mw.anAway[ 1 ] = (nMatchTo - anScore[ 1 ]) - 1;
 
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwInvertButton),
                                fInvertMET); 
@@ -249,8 +234,7 @@ extern void GTKShowMatchEquityTable( const int nMatchTo,
   gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_BUTTONS ) ),
                      pwLoad );
 
-  mw.pwPreCrawford = GTKWriteMET ( mw.nMatchTo, mw.nMatchTo,
-                                   mw.anAway[ 0 ], mw.anAway[ 1 ] );
+  mw.pwPreCrawford = GTKWriteMET ( (unsigned)mw.nMatchTo, (unsigned)mw.nMatchTo, mw.anAway[ 0 ], mw.anAway[ 1 ] );
   gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
                              mw.pwPreCrawford, 
                              gtk_label_new ( _("Pre-Crawford") ) );
@@ -259,8 +243,7 @@ extern void GTKShowMatchEquityTable( const int nMatchTo,
       
     sprintf ( sz, _("Post-Crawford for player %s"), ap[ i ].szName );
 
-    mw.apwPostCrawford[ i ] = GTKWriteMET ( nMatchTo , 1, 
-                                            mw.anAway[ i ], mw.anAway[ !i ] );
+    mw.apwPostCrawford[ i ] = GTKWriteMET ( nMatchTo , 1, mw.anAway[ i ], mw.anAway[ !i ] );
     gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
                                mw.apwPostCrawford[ i ],
                                gtk_label_new ( sz ) );

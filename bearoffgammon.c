@@ -7814,7 +7814,7 @@ typedef long T[RBG_NPROBS];
 
 static T* y[] = {
   y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16,
-  y17, y18, y19, y20, y21, y22, y23, y24, y25, y26, y27, y28, y29, y30, y31, 
+  y17, y18, y19, y20, y21, y22, y23, y24, y25, y26, y27, y28, y29, y30, y31
 };
 
 extern long *getRaceBGprobs(const unsigned int board[6])
@@ -7830,6 +7830,8 @@ extern long *getRaceBGprobs(const unsigned int board[6])
 	  group += (0x1 << i);
     tot += board[i];
   }
+
+  g_assert( group < 32 );
 
   if( tot > 6 )
     return 0;
@@ -7849,6 +7851,6 @@ extern long *getRaceBGprobs(const unsigned int board[6])
       }
     }
 
-    return y[group-1][PositionIndex(grpSize, b1)];
+    return y[group - 1][PositionIndex(grpSize, b1)];
   }
 }

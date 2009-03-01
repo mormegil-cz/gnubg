@@ -23,7 +23,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "backgammon.h"
-#include <glib.h>
 #include "openurl.h"
 #ifdef WIN32
 #include "windows.h"

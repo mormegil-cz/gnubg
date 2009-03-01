@@ -53,4 +53,5 @@ CheckHintButtons( hintdata *phd );
 extern void MoveListRefreshSize(void);
 extern GtkWidget* pwDetails;
 extern int showMoveListDetail;
+
 #endif

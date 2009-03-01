@@ -1,3 +1,4 @@
+//lint -e818
 /*
  * gtkmovelistctrl.c
  * by Jon Kinsey, 2005
@@ -21,14 +22,11 @@
  */
 
 #include "config.h"
+
+#include "gtkgame.h"
 #include "gtkmovelistctrl.h"
-#include "assert.h"
-#include "backgammon.h"
 #include "format.h"
 #include "drawboard.h"
-#include "gtkchequer.h"
-#include "string.h"
-
 
 GdkColor wlCol;
 
@@ -94,7 +92,7 @@ custom_cell_renderer_movelist_get_type (void)
     cell_progress_type = g_type_register_static (GTK_TYPE_CELL_RENDERER,
                                                  "CustomCellRendererMovelist",
                                                   &cell_progress_info,
-                                                  0);
+                                                  (GTypeFlags)0);
   }
 
   return cell_progress_type;
@@ -111,7 +109,7 @@ custom_cell_renderer_movelist_get_type (void)
 static void
 custom_cell_renderer_movelist_init (CustomCellRendererMovelist *cellrendererprogress)
 {
-  GTK_CELL_RENDERER(cellrendererprogress)->mode = GTK_CELL_RENDERER_MODE_INERT;
+  GTK_CELL_RENDERER(cellrendererprogress)->mode = (int)GTK_CELL_RENDERER_MODE_INERT;
   GTK_CELL_RENDERER(cellrendererprogress)->xpad = 2;
   GTK_CELL_RENDERER(cellrendererprogress)->ypad = 2;
 }
@@ -199,13 +197,13 @@ static void
 custom_cell_renderer_movelist_set_property (GObject      *object,
                                             guint         param_id,
                                             const GValue *value,
-                                            GParamSpec   *pspec)
+                                            GParamSpec   *notused)
 {
 	CustomCellRendererMovelist *cellprogress = CUSTOM_CELL_RENDERER_MOVELIST (object);
 	if (param_id == 1)
 		cellprogress->pml = g_value_get_pointer(value);
 	else
-		cellprogress->rank = g_value_get_int(value);
+		cellprogress->rank = (unsigned)g_value_get_int(value);
 }
 
 /***************************************************************************
@@ -382,7 +380,7 @@ custom_cell_renderer_movelist_render (GtkCellRenderer *cell,
 	PangoRectangle logical_rect;
 	cubeinfo ci;
 	GetMatchStateCubeInfo( &ci, &ms );
-
+	/*lint --e(641)*/
 	selected = (flags & GTK_CELL_RENDERER_SELECTED) && GTK_WIDGET_HAS_FOCUS (widget);
 
 	gc = gdk_gc_new(window);
@@ -423,7 +421,7 @@ custom_cell_renderer_movelist_render (GtkCellRenderer *cell,
 	gdk_draw_layout_with_colors(window, gc, cell_area->x + x, cell_area->y + y, layout, pFontCol, 0);
 
 	x = _s_A + _s_a + _s_Y * 3;
-	FormatEval( buf, &cellprogress->pml->esMove );
+	(void)FormatEval( buf, &cellprogress->pml->esMove );
 	pango_layout_set_text(layout, buf, -1);
 	gdk_draw_layout_with_colors(window, gc, cell_area->x + x, cell_area->y + y, layout, pFontCol, 0);
 

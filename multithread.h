@@ -53,7 +53,7 @@ extern void MT_AddTask(Task *pt, gboolean lock);
 extern int MT_WaitForTasks(void (*pCallback)(void), int callbackTime);
 extern void MT_SetNumThreads(unsigned int num);
 extern int MT_GetThreadID(void);
-extern void mt_add_tasks(int num_tasks, AsyncFun pFun, void *taskData, gpointer linked);
+extern void mt_add_tasks(unsigned int num_tasks, AsyncFun pFun, void *taskData, gpointer linked);
 extern void MT_Release(void);
 extern int MT_GetDoneTasks(void);
 extern void MT_SyncInit(void);

@@ -25,7 +25,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 #ifdef WIN32
+#include <io.h>
+
 #include <windows.h>
 
 extern char * getInstallDir( void )

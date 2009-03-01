@@ -90,7 +90,7 @@ int CacheCreate(evalCache* pc, unsigned int s)
 	pc->size = (s < pc->size) ? 2 * s : s;
 	pc->hashMask = (pc->size >> 1) - 1;
 
-	pc->entries = (cacheNode*)malloc(pc->size / 2 * sizeof(*pc->entries));
+	pc->entries = (cacheNode*)malloc((pc->size / 2) * sizeof(*pc->entries));
 	if (pc->entries == 0)
 		return -1;
 

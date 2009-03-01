@@ -456,9 +456,9 @@ void MT_AddTask(Task *pt, gboolean lock)
 	}
 }
 
-void mt_add_tasks(int num_tasks, AsyncFun pFun, void *taskData, gpointer linked)
+void mt_add_tasks(unsigned int num_tasks, AsyncFun pFun, void *taskData, gpointer linked)
 {
-	int i;
+	unsigned int i;
 	{
 #ifdef DEBUG_MULTITHREADED
 		char buf[20];
