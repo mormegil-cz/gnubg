@@ -34,6 +34,7 @@
 #endif
 
 #include <isaac.h>
+#include "speed.h"
 
 #define EVALS_PER_ITERATION 1024
 

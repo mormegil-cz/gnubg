@@ -24,6 +24,8 @@
 #include "gnubgmodule.h"
 #include "backgammon.h"
 #include <signal.h>
+#include <glib.h>
+#include <glib/gstdio.h>
 
 #include "eval.h"
 #include "matchequity.h"

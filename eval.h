@@ -464,7 +464,7 @@ extern void
 swap_us( unsigned int *p0, unsigned int *p1 );
 
 extern void 
-swap( unsigned int *p0, unsigned int *p1 );
+swap( int *p0, int *p1 );
 
 extern void 
 SanityCheck( const TanBoard anBoard, float arOutput[] );

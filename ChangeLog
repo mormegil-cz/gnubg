@@ -1,3 +1,10 @@
+Mon Mar  2 10:35:14 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* eval.c, eval.h, osr.c: use swap_us
+	* osr.h, osr.c: conflicting definitions of raceProbs
+	* gtkmet.c: the meaning of const int a[][] and const int **a is not
+	defined in C. We need confusing casts to avoid warnings in gcc.
+
 Sun Mar  1 10:02:02 CET 2009 Øystein Johansen <oystein@gnubg.org>
 
 	* makebearoff.c, bearoff.c: Repair building of onesided

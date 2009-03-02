@@ -23,6 +23,7 @@
 
 #include "gtkgame.h"
 #include "util.h"
+#include "gtksplash.h"
 
 typedef struct _gtksplash {
   GtkWidget *pwWindow;
@@ -115,7 +116,7 @@ DestroySplash ( GtkWidget *pwSplash ) {
 extern void
 PushSplash ( GtkWidget *pwSplash, 
              const gchar *szText0, const gchar *szText1,
-             const unsigned long notused )
+             const unsigned long nMuSec )
 {
   gtksplash *pgs;
 

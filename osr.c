@@ -33,6 +33,7 @@
 #include "eval.h"
 #include "positionid.h"
 #include "mt19937ar.h"
+#include "osr.h"
 
 #define MAX_PROBS        32
 #define MAX_GAMMON_PROBS 15
@@ -566,7 +567,7 @@ static unsigned int osr(unsigned int anBoard[25], const unsigned int iGame, cons
 			g_warning("Error in function OSRQuasiRandomDice");
 
 		if ( anDice[ 0 ] < anDice[ 1 ] )
-			swap ( anDice, anDice + 1 );
+			swap_us ( anDice, anDice + 1 );
 
 		/* find and move best move */
 		FindBestMoveOSR(anBoard, anDice, &nOut);

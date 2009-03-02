@@ -23,5 +23,5 @@
 #define _GTKMET_H_
 
 extern void GTKShowMatchEquityTable( const unsigned int nMatchTo,
-                                     const unsigned int anScore[ 2 ] );
+                                     const int anScore[ 2 ] );
 #endif

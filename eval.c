@@ -1866,7 +1866,7 @@ extern void swap_us( unsigned int *p0, unsigned int *p1 ) {
     *p1 = n;
 }
 
-extern void swap( unsigned int *p0, unsigned int *p1 ) {
+extern void swap( int *p0, int *p1 ) {
     int n = *p0;
 
     *p0 = *p1;

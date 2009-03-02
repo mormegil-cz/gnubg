@@ -43,7 +43,7 @@ typedef struct _metwidget {
 
 
 static void UpdateTable ( const mettable *pmt, 
-              const float met[ MAXSCORE ][ MAXSCORE ],
+              float met[ MAXSCORE ][ MAXSCORE ],
               const metinfo *pmi,
               const unsigned int nRows, const unsigned int nCols, const int fInvert ) {
 
@@ -90,7 +90,7 @@ static void UpdateAllTables(const metwidget *pmw)
 
   for ( i = 0; i < 2; ++i ) {
     pmt = (const mettable*)g_object_get_data ( G_OBJECT ( pmw->apwPostCrawford[ i ] ), "mettable" );
-    UpdateTable ( pmt, (const float (*)[ MAXSCORE ])(void*)aafMETPostCrawford[ i ], 
+    UpdateTable ( pmt, (float (*)[ MAXSCORE ])(void*)aafMETPostCrawford[ i ], 
                   &miCurrent, pmw->nMatchTo, 1, TRUE );
   }
 }
@@ -204,7 +204,7 @@ static void loadMET ( GtkWidget *notused, const metwidget *pmw ) {
 }
 
 
-extern void GTKShowMatchEquityTable( const unsigned int nMatchTo, const unsigned int anScore[ 2 ] )
+extern void GTKShowMatchEquityTable( const unsigned int nMatchTo, const int anScore[ 2 ] )
 {
   /* FIXME: Widget should update after 'Invert' or 'Load ...' */  
   int i;
