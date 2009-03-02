@@ -513,7 +513,7 @@ static void TESS_CALLBACK tcbCombine(const double coords[3], const double *UNUSE
 	*outData = newEle;
 }
 
-static void TESS_CALLBACK tcbBegin(GLenum type, Mesh* pMesh)
+static void TESS_CALLBACK tcbBegin(GLenum type, Mesh* UNUSED(pMesh))
 {
 	curTess.tessPoints = g_array_new(FALSE, FALSE, sizeof(Point));
 	curTess.meshType = type;

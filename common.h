@@ -79,7 +79,7 @@ typedef RETSIGTYPE(*psighandler) (int);
 #elif defined(__GNUC__)
 # define UNUSED(x) UNUSED_ ## x __attribute__((unused))
 #elif defined(_lint)
-# define UNUSED(x) /*lint -e{715}*/ _unused_##x
+# define UNUSED(x) /*lint -e{715, 818}*/ _unused_##x
 #else
 # define UNUSED(x) _unused_##x
 #endif
