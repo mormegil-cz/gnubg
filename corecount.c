@@ -582,6 +582,7 @@ unsigned char CPUCount(unsigned int *TotAvailLogical,
 	unsigned char PackageIDBucket[256];
 	unsigned char CoreIDBucket[256];
 	unsigned int i, ProcessorNum;
+	DWORD dwProcessAffinity, dwSystemAffinity;
 
 	tblPkgID[0] = tblCoreID[0] = 0;
 #if LINUX
@@ -609,7 +610,6 @@ unsigned char CPUCount(unsigned int *TotAvailLogical,
 		}
 	}
 #else
-	DWORD dwProcessAffinity, dwSystemAffinity;
 	if (GetProcessAffinityMask(GetCurrentProcess(), &dwProcessAffinity, &dwSystemAffinity) == 0)
 		return USER_CONFIG_ISSUE;
 
