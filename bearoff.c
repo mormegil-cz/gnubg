@@ -28,11 +28,8 @@
 #include <unistd.h>
 #endif
 
-#include <glib.h>
 #include <glib/gstdio.h>
-#include <glib/gi18n.h>
 #include "bearoffgammon.h"
-#include "eval.h"
 #include "positionid.h"
 #include <stdlib.h>
 #include <string.h>
@@ -518,11 +515,11 @@ extern int BearoffEval(const bearoffcontext * pbc, const TanBoard anBoard, float
 		return BearoffEvalOneSided(pbc, anBoard, arOutput);
 	case BEAROFF_HYPERGAMMON:
 		return BearoffEvalHypergammon(pbc, anBoard, arOutput);
-	default: 
-		g_assert_not_reached();
+	case BEAROFF_INVALID:
+	default:
+		g_warning("Invalid type in BearoffEval");
+		return 0;
 	}
-
-	return 0;
 }
 
 extern void BearoffStatus(const bearoffcontext *pbc, char *sz)
@@ -574,6 +571,8 @@ extern void BearoffStatus(const bearoffcontext *pbc, char *sz)
 			? _("database includes gammon distributions")
 			: _("database does not include gammon distributions"));
 		break;
+	case BEAROFF_HYPERGAMMON:
+	case BEAROFF_INVALID:
 	default:
 		break;
 	}
@@ -780,10 +779,11 @@ extern int BearoffDump(const bearoffcontext * pbc, const TanBoard anBoard, char 
 		return BearoffDumpOneSided(pbc, anBoard, sz);
 	case BEAROFF_HYPERGAMMON:
 		return BearoffDumpHyper(pbc, anBoard, sz);
+	case BEAROFF_INVALID:
 	default: 
-		g_assert_not_reached();
+		g_warning("Invalid type in BearoffDump");
+		return -1;
 	}
-	return -1;
 }
 
 extern void BearoffClose(bearoffcontext * pbc)
@@ -840,6 +840,15 @@ static unsigned int MakeInt(unsigned char a, unsigned char b, unsigned char c, u
 	return (a | (unsigned char)b << 8 | (unsigned char)c << 16 | (unsigned char)d << 24);
 }
 
+void InvalidDb(bearoffcontext *pbc)
+{
+	if (errno)
+	{
+		const char *fn = pbc->szFilename ? pbc->szFilename : "";
+		g_printerr("%s(%s): %s\n", _("Bearoff Database"), fn, g_strerror(errno));
+	}
+	BearoffClose(pbc);
+}
 /*
  * Initialise bearoff database
  *
@@ -867,27 +876,29 @@ extern bearoffcontext *BearoffInit(const char *szFilename, const int bo, void (*
 		pbc->fHeuristic = TRUE;
 		pbc->p = HeuristicDatabase(p);
 		return pbc;
-
 	}
 
 	errno = 0;
 
 	if (!szFilename || !*szFilename) {
 		g_printerr("%s\n", _("No database filename provided"));
-		goto invaliddb;
+		InvalidDb(pbc);
+		return NULL;
 	}
 	pbc->szFilename = g_strdup(szFilename);
 
 	if (!g_file_test(szFilename, G_FILE_TEST_IS_REGULAR)) {
 		/* fail silently */
 		errno = 0;
-		goto invaliddb;
+		InvalidDb(pbc);
+		return NULL;
 	}
 
 
-	if (!(pbc->pf = g_fopen(szFilename, "rb"))) {
+	if ((pbc->pf = g_fopen(szFilename, "rb")) == 0) {
 		g_printerr("%s\n", _("Invalid or nonexistent database"));
-		goto invaliddb;
+		InvalidDb(pbc);
+		return NULL;
 	}
 	/* 
 	 * Read header bearoff file
@@ -897,14 +908,16 @@ extern bearoffcontext *BearoffInit(const char *szFilename, const int bo, void (*
 
 	if (fread(sz, 1, 40, pbc->pf) < 40) {
 		g_printerr("%s\n", _("Database read failed"));
-		goto invaliddb;
+		InvalidDb(pbc);
+		return NULL;
 	}
 
 	/* detect bearoff program */
 
 	if (strncmp(sz, "gnubg", 5) != 0) {
 		g_printerr("%s\n", _("Unknown bearoff database"));
-		goto invaliddb;
+		InvalidDb(pbc);
+		return NULL;
 	}
 
 	/* one sided or two sided? */
@@ -917,7 +930,8 @@ extern bearoffcontext *BearoffInit(const char *szFilename, const int bo, void (*
 		pbc->bt = BEAROFF_HYPERGAMMON;
 	else {
 		g_printerr("%s: %s\n (%s: '%2s')\n", szFilename, _("incomplete bearoff database"), _("illegal bearoff type"), sz + 6);
-		goto invaliddb;
+		InvalidDb(pbc);
+		return NULL;
 	}
 
 	if (pbc->bt == BEAROFF_TWOSIDED || pbc->bt == BEAROFF_ONESIDED) {
@@ -930,7 +944,8 @@ extern bearoffcontext *BearoffInit(const char *szFilename, const int bo, void (*
 		if (pbc->nPoints < 1 || pbc->nPoints >= 24) {
 			g_printerr("%s: %s\n (%s: %d)\n", szFilename, _("incomplete bearoff database"),
 				_("illegal number of points"), pbc->nPoints);
-			goto invaliddb;
+			InvalidDb(pbc);
+			return NULL;
 		}
 
 		/* number of chequers */
@@ -939,7 +954,8 @@ extern bearoffcontext *BearoffInit(const char *szFilename, const int bo, void (*
 		if (pbc->nChequers < 1 || pbc->nChequers > 15) {
 			g_printerr("%s: %s\n (%s: %d)", szFilename, _("incomplete bearoff database"),
 				_("illegal number of chequers"), pbc->nChequers);
-			goto invaliddb;
+			InvalidDb(pbc);
+			return NULL;
 		}
 
 	} else {
@@ -962,6 +978,7 @@ extern bearoffcontext *BearoffInit(const char *szFilename, const int bo, void (*
 		pbc->fND = atoi(sz + 19);
 		break;
 	case BEAROFF_HYPERGAMMON:
+	case BEAROFF_INVALID:
 	default:
 		break;
 	}
@@ -974,22 +991,15 @@ extern bearoffcontext *BearoffInit(const char *szFilename, const int bo, void (*
 	if (bo & (int) BO_IN_MEMORY) {
 		fclose(pbc->pf);
 		pbc->pf = NULL;
-		if (ReadIntoMemory(pbc) == NULL)
-			if (!(pbc->pf = g_fopen(szFilename, "rb"))) {
+		if ((ReadIntoMemory(pbc) == NULL))
+			if ((pbc->pf = g_fopen(szFilename, "rb")) == 0) {
 				g_printerr("%s\n", _("Invalid or nonexistent database"));
-				goto invaliddb;
+				InvalidDb(pbc);
+				return NULL;
 			}
 	}
 #endif
 	return pbc;
-      invaliddb:
-	if (errno)
-	{
-		char *fn = pbc->szFilename ? pbc->szFilename : "";
-		g_printerr("%s(%s): %s\n", _("Bearoff Database"), fn, g_strerror(errno));
-	}
-	BearoffClose(pbc);
-	return NULL;
 }
 
 extern float
@@ -1158,7 +1168,7 @@ static unsigned short int *GetDistCompressed ( unsigned short int aus[ 64 ], con
              "Offset %lu, dist size %u (offset %u), "
              "gammon dist size %u (offset %u)\n",
              pbc->szFilename, (unsigned long) iOffset, nz, ioff, nzg, ioffg );
-    g_assert( FALSE );
+    g_assert( FALSE )
   }
 
   /* read prob + gammon probs */

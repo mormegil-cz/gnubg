@@ -22,6 +22,7 @@
 //-------------------------------------------------------------------------------------------------
 
 #include "config.h"
+
 #define HWD_MT_BIT         0x10000000     // EDX[28]  Bit 28 is set if HT or multi-core is supported
 #define NUM_LOGICAL_BITS   0x00FF0000     // EBX[23:16] Bit 16-23 in ebx contains the number of logical
                                           // processors per physical processor when execute cpuid with 
@@ -63,10 +64,12 @@ unsigned char CPUCount(unsigned int *,
 
 #ifndef WIN32
 #define LINUX 1
+#else
+#define LINUX 0
 #endif
 
 // Define constant ?LINUX? to compile under Linux
-#ifdef LINUX
+#if LINUX
 // 	The Linux source code listing can be compiled using Linux kernel verison 2.6 
 //	or higher (e.g. RH 4AS-2.8 using GCC 3.4.4). 
 //	Due to syntax variances of Linux affinity APIs with earlier kernel versions 
@@ -82,11 +85,10 @@ unsigned char CPUCount(unsigned int *,
 #endif
 #include <stdlib.h>
 #include <stdio.h>
-#include <assert.h>
 
 char g_s3Levels[2048];
 
-int GetLogicalProcssingUnitCount(void)
+unsigned int GetLogicalProcssingUnitCount(void)
 {
 
    unsigned int  TotAvailLogical   = 0,  // Number of available logical CPU per CORE
@@ -353,24 +355,24 @@ unsigned int MaxCorePerPhysicalProc(void)
 		);		
 	}
 #else
-		__asm
-		{
-			xor eax, eax
-			cpuid
-			cmp eax, 4			// check if cpuid supports leaf 4
-			jl single_core		// Single core
-			mov eax, 4			
-			mov ecx, 0			// start with index = 0; Leaf 4 reports
-			cpuid				// at least one valid cache level
-			mov Regeax, eax
-			jmp multi_core
+	__asm
+	{
+		xor eax, eax
+		cpuid
+		cmp eax, 4			// check if cpuid supports leaf 4
+		jl single_core		// Single core
+		mov eax, 4			
+		mov ecx, 0			// start with index = 0; Leaf 4 reports
+		cpuid				// at least one valid cache level
+		mov Regeax, eax
+		jmp multi_core
 
 single_core:
-			xor eax, eax		
+		xor eax, eax		
 
 multi_core:
-			
-		}
+		
+	}
 #endif
 	return (unsigned int)((Regeax & NUM_CORE_BITS) >> 26)+1;
 
@@ -437,15 +439,14 @@ unsigned int MaxLogicalProcPerPhysicalProc(void)
 			: "%eax","%ecx","%edx"
 		);
 #else
-		__asm
-		{
-			mov eax, 1
-			cpuid
-			mov Regebx, ebx
-		}
+	__asm
+	{
+		mov eax, 1
+		cpuid
+		mov Regebx, ebx
+	}
 #endif
-		return (unsigned int) ((Regebx & NUM_LOGICAL_BITS) >> 16);
-
+	return (unsigned int) ((Regebx & NUM_LOGICAL_BITS) >> 16);
 }
 
 
@@ -482,8 +483,9 @@ unsigned char GetAPIC_ID(void)
 //
 unsigned int find_maskwidth(unsigned int CountItem)
 {
-	unsigned int MaskWidth,
-				 count = CountItem;
+	//lint --e{529}
+	unsigned int MaskWidth = 0, count = CountItem;
+
 #if LINUX || __GNUC__
 	asm
 	(
@@ -554,7 +556,7 @@ unsigned char GetNzbSubID(unsigned char FullID,
 	unsigned char MaskBits;
 
 	MaskWidth = find_maskwidth((unsigned int) MaxSubIDValue);
-	MaskBits  = (0xff << ShiftCount) ^ 
+	MaskBits  = (unsigned char)(0xff << ShiftCount) ^ 
 				((unsigned char) (0xff << (ShiftCount + MaskWidth)));
 
 	return (FullID & MaskBits);
@@ -573,17 +575,16 @@ unsigned char CPUCount(unsigned int *TotAvailLogical,
 	unsigned char StatusFlag = 0;
 	unsigned int numLPEnabled = 0;
 	DWORD dwAffinityMask;
-	int j = 0, MaxLPPerCore;
+	unsigned int j = 0, MaxLPPerCore;
 	unsigned char apicID, PackageIDMask;
 	unsigned char tblPkgID[256], tblCoreID[256], tblSMTID[256];
 	char	tmp[256];
 	unsigned char PackageIDBucket[256];
-	DWORD pPackageMask[256];
 	unsigned char CoreIDBucket[256];
-	DWORD ProcessorMask, pCoreMask[256];
 	unsigned int i, ProcessorNum;
 
-#ifdef LINUX
+	tblPkgID[0] = tblCoreID[0] = 0;
+#if LINUX
 	//we need to make sure that this process is allowed to run on 
 	//all of the logical processors that the OS itself can run on.
 	//A process could acquire/inherit affinity settings that restricts the 
@@ -609,9 +610,9 @@ unsigned char CPUCount(unsigned int *TotAvailLogical,
 	}
 #else
 	DWORD dwProcessAffinity, dwSystemAffinity;
-	GetProcessAffinityMask(GetCurrentProcess(), 
-						   &dwProcessAffinity,
-						   &dwSystemAffinity);
+	if (GetProcessAffinityMask(GetCurrentProcess(), &dwProcessAffinity, &dwSystemAffinity) == 0)
+		return USER_CONFIG_ISSUE;
+
 	if (dwProcessAffinity != dwSystemAffinity)  // not all CPUs are enabled
 	{
 		StatusFlag = USER_CONFIG_ISSUE;		
@@ -631,7 +632,7 @@ unsigned char CPUCount(unsigned int *TotAvailLogical,
 	MaxLPPerCore = MaxLogicalProcPerPhysicalProc() / MaxCorePerPhysicalProc();
 	dwAffinityMask = 1;
 
-#ifdef LINUX
+#if LINUX
 	cpu_set_t currentCPU;
 	while ( j < sysNumProcs )
 	{
@@ -680,11 +681,12 @@ unsigned char CPUCount(unsigned int *TotAvailLogical,
 	} // while
 
     // restore the affinity setting to its original state
-#ifdef LINUX
+#if LINUX
 	sched_setaffinity (0, sizeof(allowedCPUs), &allowedCPUs);
 	sleep(0);
 #else
-    SetThreadAffinityMask(GetCurrentThread(), dwProcessAffinity);
+    if (SetThreadAffinityMask(GetCurrentThread(), dwProcessAffinity) == 0)
+		return USER_CONFIG_ISSUE;
 	Sleep(0);
 #endif
 	*TotAvailLogical = numLPEnabled;
@@ -694,19 +696,15 @@ unsigned char CPUCount(unsigned int *TotAvailLogical,
 	//
 
 	CoreIDBucket[0] = tblPkgID[0] | tblCoreID[0];
-	ProcessorMask = 1;
-	pCoreMask[0] = ProcessorMask;
 
 	for (ProcessorNum = 1; ProcessorNum < numLPEnabled; ProcessorNum++)
 	{
-		ProcessorMask <<= 1;
 		for (i = 0; i < *TotAvailCore; i++)
 		{
 			// Comparing bit-fields of logical processors residing in different packages
 			// Assuming the bit-masks are the same on all processors in the system.
 			if ((tblPkgID[ProcessorNum] | tblCoreID[ProcessorNum]) == CoreIDBucket[i])
 			{
-				pCoreMask[i] |= ProcessorMask;
 				break;
 			}
 
@@ -715,7 +713,6 @@ unsigned char CPUCount(unsigned int *TotAvailLogical,
 		if (i == *TotAvailCore)   // did not match any bucket.  Start a new one.
 		{
 			CoreIDBucket[i] = tblPkgID[ProcessorNum] | tblCoreID[ProcessorNum];
-			pCoreMask[i] = ProcessorMask;
 
 			(*TotAvailCore)++;	// Number of available cores in the system
 
@@ -729,19 +726,15 @@ unsigned char CPUCount(unsigned int *TotAvailLogical,
 	//
 
 	PackageIDBucket[0] = tblPkgID[0];
-	ProcessorMask = 1;
-	pPackageMask[0] = ProcessorMask;
 
 	for (ProcessorNum = 1; ProcessorNum < numLPEnabled; ProcessorNum++)
 	{
-		ProcessorMask <<= 1;
 		for (i = 0; i < *PhysicalNum; i++)
 		{
 			// Comparing bit-fields of logical processors residing in different packages
 			// Assuming the bit-masks are the same on all processors in the system.
 			if (tblPkgID[ProcessorNum]== PackageIDBucket[i])
 			{
-				pPackageMask[i] |= ProcessorMask;
 				break;
 			}
 
@@ -750,7 +743,6 @@ unsigned char CPUCount(unsigned int *TotAvailLogical,
 		if (i == *PhysicalNum)   // did not match any bucket.  Start a new one.
 		{
 			PackageIDBucket[i] = tblPkgID[ProcessorNum];
-			pPackageMask[i] = ProcessorMask;
 
 			(*PhysicalNum)++;	// Total number of physical processors in the system
 
@@ -783,8 +775,6 @@ else
 
 
 }
-
-
 
 return StatusFlag;
 }
