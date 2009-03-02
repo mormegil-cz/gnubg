@@ -197,7 +197,7 @@ static void
 custom_cell_renderer_movelist_set_property (GObject      *object,
                                             guint         param_id,
                                             const GValue *value,
-                                            GParamSpec   *notused)
+                                            GParamSpec   *UNUSED(notused))
 {
 	CustomCellRendererMovelist *cellprogress = CUSTOM_CELL_RENDERER_MOVELIST (object);
 	if (param_id == 1)

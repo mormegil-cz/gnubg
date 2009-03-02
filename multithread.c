@@ -264,7 +264,7 @@ extern unsigned int MT_GetNumThreads(void)
     return td.numThreads;
 }
 
-static void CloseThread(void *unused)
+static void CloseThread(void *UNUSED(unused))
 {
 	g_assert(td.closingThreads);
 	MT_SafeInc(&td.result);

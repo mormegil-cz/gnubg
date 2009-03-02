@@ -761,14 +761,14 @@ CubeAnalysisEvalPly ( GtkWidget *pw, cubehintdata *pchd ) {
 }
 
 static void
-CubeAnalysisEval ( GtkWidget *pw, cubehintdata *pchd ) {
+CubeAnalysisEval ( GtkWidget *UNUSED(pw), cubehintdata *pchd ) {
 
   EvalCube ( pchd, &esEvalCube.ec );
 
 }
 
 static void
-CubeAnalysisEvalSettings ( GtkWidget *pw, void *unused )
+CubeAnalysisEvalSettings ( GtkWidget *pw, void *UNUSED(data) )
 {
 	GTKSetCurrentParent(pw);
 	SetEvaluation ( NULL, 0, NULL );
@@ -779,7 +779,7 @@ CubeAnalysisEvalSettings ( GtkWidget *pw, void *unused )
 }
 
 static void
-CubeAnalysisRolloutSettings ( GtkWidget *pw, void *unused )
+CubeAnalysisRolloutSettings ( GtkWidget *pw, void *UNUSED(data) )
 {
 	GTKSetCurrentParent(pw);
 	SetRollouts ( NULL, 0, NULL );
@@ -849,7 +849,7 @@ static char *GetContent ( cubehintdata *pchd )
 }
 
 static void
-CubeAnalysisCopy ( GtkWidget *pw, cubehintdata *pchd ) {
+CubeAnalysisCopy ( GtkWidget *UNUSED(pw), cubehintdata *pchd ) {
 
   char *pc =  GetContent ( pchd );
 
@@ -859,7 +859,7 @@ CubeAnalysisCopy ( GtkWidget *pw, cubehintdata *pchd ) {
 }
 
 static void
-CubeAnalysisTempMap ( GtkWidget *pw, cubehintdata *pchd ) {
+CubeAnalysisTempMap ( GtkWidget *UNUSED(pw), cubehintdata *UNUSED(pchd) ) {
 
   char *sz = g_strdup( "show temperaturemap =cube" );
   UserCommand( sz );

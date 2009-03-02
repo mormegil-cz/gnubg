@@ -1043,7 +1043,7 @@ static int DumpOver(const TanBoard anBoard, char *pchOutput,
 
 
 static int
-DumpBearoff1(const TanBoard anBoard, char *szOutput, const bgvariation bgv)
+DumpBearoff1(const TanBoard anBoard, char *szOutput, const bgvariation UNUSED(bgv))
 {
 
 	g_assert(pbc1);
@@ -1052,7 +1052,7 @@ DumpBearoff1(const TanBoard anBoard, char *szOutput, const bgvariation bgv)
 }
 
 static int
-DumpBearoff2(const TanBoard anBoard, char *szOutput, const bgvariation bgv)
+DumpBearoff2(const TanBoard anBoard, char *szOutput, const bgvariation UNUSED(bgv))
 {
 
 	g_assert(pbc2);
@@ -1070,7 +1070,7 @@ DumpBearoff2(const TanBoard anBoard, char *szOutput, const bgvariation bgv)
 
 
 static int
-DumpBearoffOS(const TanBoard anBoard, char *szOutput, const bgvariation bgv)
+DumpBearoffOS(const TanBoard anBoard, char *szOutput, const bgvariation UNUSED(bgv))
 {
 
 	g_assert(pbcOS);
@@ -1080,7 +1080,7 @@ DumpBearoffOS(const TanBoard anBoard, char *szOutput, const bgvariation bgv)
 
 
 static int
-DumpBearoffTS(const TanBoard anBoard, char *szOutput, const bgvariation bgv)
+DumpBearoffTS(const TanBoard anBoard, char *szOutput, const bgvariation UNUSED(bgv))
 {
 
 	g_assert(pbcTS);
@@ -1089,8 +1089,8 @@ DumpBearoffTS(const TanBoard anBoard, char *szOutput, const bgvariation bgv)
 }
 
 
-static int DumpRace(const TanBoard anBoard, char *szOutput,
-		    const bgvariation bgv)
+static int DumpRace(const TanBoard UNUSED(anBoard), char *UNUSED(szOutput),
+		    const bgvariation UNUSED(bgv))
 {
 
 	/* no-op -- nothing much we can say, really (pip count?) */
@@ -1099,8 +1099,8 @@ static int DumpRace(const TanBoard anBoard, char *szOutput,
 }
 
 static void
-DumpAnyContact(const TanBoard anBoard, char *szOutput,
-	       const bgvariation bgv, int isCrashed)
+DumpAnyContact(const TanBoard UNUSED(anBoard), char *UNUSED(szOutput),
+	       const bgvariation UNUSED(bgv), int UNUSED(isCrashed))
 {
 	return;
 }
@@ -1120,7 +1120,7 @@ DumpCrashed(const TanBoard anBoard, char *szOutput, const bgvariation bgv)
 }
 
 static int
-DumpHypergammon1(const TanBoard anBoard, char *szOutput, const bgvariation bgv)
+DumpHypergammon1(const TanBoard anBoard, char *szOutput, const bgvariation UNUSED(bgv))
 {
 
 	g_assert(apbcHyper[0]);
@@ -1129,7 +1129,7 @@ DumpHypergammon1(const TanBoard anBoard, char *szOutput, const bgvariation bgv)
 }
 
 static int
-DumpHypergammon2(const TanBoard anBoard, char *szOutput, const bgvariation bgv)
+DumpHypergammon2(const TanBoard anBoard, char *szOutput, const bgvariation UNUSED(bgv))
 {
 
 	g_assert(apbcHyper[1]);
@@ -1138,7 +1138,7 @@ DumpHypergammon2(const TanBoard anBoard, char *szOutput, const bgvariation bgv)
 }
 
 static int
-DumpHypergammon3(const TanBoard anBoard, char *szOutput, const bgvariation bgv)
+DumpHypergammon3(const TanBoard anBoard, char *szOutput, const bgvariation UNUSED(bgv))
 {
 
 	g_assert(apbcHyper[2]);
@@ -1157,7 +1157,7 @@ static classdumpfunc acdf[N_CLASSES] = {
 extern int
 DumpPosition(const TanBoard anBoard, char *szOutput,
 	     const evalcontext * pec, cubeinfo * pci, int fOutputMWC,
-	     int fOutputWinPC, int fOutputInvert, const char *szMatchID)
+	     int UNUSED(fOutputWinPC), int fOutputInvert, const char *szMatchID)
 {
 
 	float aarOutput[2][NUM_ROLLOUT_OUTPUTS], arDouble[4];

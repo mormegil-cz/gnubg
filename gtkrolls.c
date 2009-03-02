@@ -143,12 +143,11 @@ add_level ( GtkTreeStore *model, GtkTreeIter *iter,
 }
 
 
-static gint
-sort_func ( GtkTreeModel *model,
+static gint sort_func ( GtkTreeModel *model,
             GtkTreeIter *a,
             GtkTreeIter *b,
-            gpointer notused) {
-
+            gpointer UNUSED(data))
+{
   char *sz0, *sz1;
   float r0, r1;
 
@@ -313,7 +312,7 @@ static void CancelRolls(GtkWidget* pButton)
 	gtk_widget_set_sensitive(pButton, FALSE);
 }
 
-static gint RollsClose(GtkWidget *notused, GdkEvent *notused2, rollswidget *prw)
+static gint RollsClose(GtkWidget *UNUSED(widget), GdkEvent *UNUSED(eventDetails), rollswidget *prw)
 {
 	if (pwOldGrab != pwGrab)
 	{	/* Mid-depth change - wait for it to cancel */

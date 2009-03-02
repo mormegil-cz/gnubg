@@ -4360,7 +4360,7 @@ static void setup_readline(void)
 }
 
 #if !USE_GTK
-static void PushSplash(char *unused, char *heading, char *message, int wait)
+static void PushSplash(char *unused, char *heading, char *message)
 {
 }
 #endif
@@ -4767,24 +4767,24 @@ int main(int argc, char *argv[])
 		setup_readline();
 	}
 
-	PushSplash(pwSplash, _("Initialising"), _("Random number generator"), 250);
+	PushSplash(pwSplash, _("Initialising"), _("Random number generator"));
 	init_rng();
 
-	PushSplash(pwSplash, _("Initialising"), _("match equity table"), 250);
+	PushSplash(pwSplash, _("Initialising"), _("match equity table"));
 	met = BuildFilename2("met", "g11.xml");
 	InitMatchEquity(met);
 	g_free(met);
 
-	PushSplash(pwSplash, _("Initialising"), _("neural nets"), 250);
+	PushSplash(pwSplash, _("Initialising"), _("neural nets"));
 	init_nets(nNewWeights, fNoBearoff);
 
 #if defined(WIN32) && HAVE_SOCKETS
-	PushSplash(pwSplash, _("Initialising"), _("Windows sockets"), 250);
+	PushSplash(pwSplash, _("Initialising"), _("Windows sockets"));
 	init_winsock();
 #endif
 
 #if USE_PYTHON
-	PushSplash(pwSplash, _("Initialising"), _("Python"), 250);
+	PushSplash(pwSplash, _("Initialising"), _("Python"));
 	PythonInitialise(argv[0]);
 #endif
 
@@ -4792,7 +4792,7 @@ int main(int argc, char *argv[])
 
 	/* -r option given */
 	if (!fNoRC) {
-		PushSplash(pwSplash, _("Loading"), _("User Settings"), 250);
+		PushSplash(pwSplash, _("Loading"), _("User Settings"));
 		LoadRCFiles();
 	}
 

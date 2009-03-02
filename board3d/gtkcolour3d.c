@@ -202,7 +202,7 @@ static void SetupColourPreview(void)
 	glLoadIdentity();
 }
 
-static void TextureChange(GtkComboBox* combo, gpointer notused)
+static void TextureChange(GtkComboBox* combo, gpointer UNUSED(data))
 {
 	char *current = gtk_combo_box_get_active_text(combo);
 
@@ -217,9 +217,10 @@ static void TextureChange(GtkComboBox* combo, gpointer notused)
 	UpdateColourPreview();
 }
 
-static gboolean expose_event_preview3d(GtkWidget *widget, GdkEventExpose *notused, Material* pMat)
+static gboolean expose_event_preview3d(GtkWidget *widget, GdkEventExpose *UNUSED(eventDetails), Material* pMat)
 {
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
+
 	if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(widget)))
 		return TRUE;
 
@@ -235,7 +236,7 @@ static gboolean expose_event_preview3d(GtkWidget *widget, GdkEventExpose *notuse
 	return TRUE;
 }
 
-static void realize_preview3d(GtkWidget *widget, void* notused)
+static void realize_preview3d(GtkWidget *widget, void* UNUSED(data))
 {
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
 	if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(widget)))
@@ -269,9 +270,10 @@ static GtkWidget *CreateGLPreviewWidget(Material* pMat)	// Rename this (and the 
 	return p3dWidget;
 }
 
-static gboolean combo_box_select_text(GtkTreeModel *model, GtkTreePath *notused, GtkTreeIter *iter, /*lint -e{818}*/ gpointer text)
+static gboolean combo_box_select_text(GtkTreeModel *model, GtkTreePath *UNUSED(path), GtkTreeIter *iter, /*lint -e{818}*/ gpointer text)
 {
 	gchar *value;
+
 	gtk_tree_model_get(model, iter, 0, &value, -1);
 	if (strcmp(value, text) == 0)
 	{
@@ -353,7 +355,7 @@ static void AddWidgets(GtkWidget *window)
 	gtk_table_attach_defaults(GTK_TABLE (table), pwPreview, 0, 2, 4, 5);
 }
 
-static void DialogClose(GtkWidget *notused, gint response, void *notused2)
+static void DialogClose(GtkDialog *UNUSED(dialog), gint response, void *UNUSED(data))
 {
 	if ((GtkResponseType)response == GTK_RESPONSE_OK)
 	{	/* Apply new settings */
@@ -398,7 +400,7 @@ static void gtk_color_button_set_from_farray(GtkColorButton *button, const float
 	gtk_color_button_set_from_array(button, cold);
 }
 
-static void UpdateColour3d(GtkWidget *notused, UpdateDetails* pDetails)
+static void UpdateColour3d(GtkButton *UNUSED(button), UpdateDetails* pDetails)
 {
 	curDetails = pDetails;
 	col3d = pDetails->mat;
@@ -518,8 +520,7 @@ GtkWidget* gtk_colour_picker_new3d(Material* pMat, int opacity, TextureType text
 	details[curDetail].opacity = opacity;
 	details[curDetail].textureType = textureType;
 
-	g_signal_connect(G_OBJECT(button), "clicked",
-				   G_CALLBACK(UpdateColour3d), &details[curDetail]);
+	g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(UpdateColour3d), &details[curDetail]);
 
 	curDetail++;
 

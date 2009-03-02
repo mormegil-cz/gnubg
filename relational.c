@@ -443,7 +443,7 @@ static void AddGames(DBProvider *pdb, int session_id, int player_id0, int player
 	}
 }
 
-extern void CommandRelationalAddMatch( char *sz )
+extern void CommandRelationalAddMatch( char *UNUSED(sz) )
 {
 	DBProvider *pdb;
 	char *buf, *buf2, *date;
@@ -558,7 +558,7 @@ const char *TestDB(DBProviderType dbType)
 	return ret;
 }
 
-extern void CommandRelationalTest( char *sz )
+extern void CommandRelationalTest( char *UNUSED(sz) )
 {
 	const char *err = TestDB(dbProviderType);
 	if (err == NULL)
@@ -685,7 +685,7 @@ extern void CommandRelationalShowDetails (char *sz)
     }
 }
 
-extern void CommandRelationalShowPlayers( char *sz )
+extern void CommandRelationalShowPlayers( char *UNUSED(sz) )
 {
 	/* Use the Select command */
 	CommandRelationalSelect("name AS Player FROM player ORDER BY name");
@@ -741,7 +741,7 @@ extern void CommandRelationalErase(char *sz)
 	pdb->Disconnect();
 }
 
-extern void CommandRelationalEraseAll(char *sz)
+extern void CommandRelationalEraseAll(char *UNUSED(sz))
 {
 	DBProvider *pdb;
 

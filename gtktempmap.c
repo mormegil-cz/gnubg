@@ -308,10 +308,9 @@ UpdateTempMapEquities( tempmapwidget *ptmw ) {
                       GetEquityString( rMin, &ci, ptmw->fInvert ) );
   gtk_label_set_text( GTK_LABEL( ptmw->apwGauge[ ! ptmw->fInvert ] ),
                       GetEquityString( rMax, &ci, ptmw->fInvert ) );
-
 } 
 
-static void ExposeQuadrant(GtkWidget * pw, GdkEventExpose * pev, tempmapwidget * ptmw)
+static void ExposeQuadrant(GtkWidget * pw, GdkEventExpose *UNUSED(pev), tempmapwidget *ptmw)
 {
 	int *pi = (int *) g_object_get_data(G_OBJECT(pw), "user_data");
 	int i = 0;
@@ -495,13 +494,10 @@ ShowBestMoveToggled( GtkWidget *pw, tempmapwidget *ptmw ) {
     ptmw->fShowBestMove = f;
     UpdateTempMapEquities( ptmw );
   }
-
 }
 
-
-static void
-DestroyDialog( gpointer p, GObject *obj ) {
-
+static void DestroyDialog(gpointer p, GObject *UNUSED(obj))
+{
   tempmapwidget *ptmw = (tempmapwidget *) p;
   int i;
 

@@ -133,7 +133,7 @@ MoveFilterSetupGetValues ( movefilter *pmf, movefiltersetupwidget *pmfsw ) {
 
 
 static void
-AcceptChanged ( GtkWidget *pw, movefiltersetupwidget *pmfsw ) {
+AcceptChanged ( GtkWidget *UNUSED(pw), movefiltersetupwidget *pmfsw ) {
 
   int fFound;
   int i;
@@ -205,7 +205,7 @@ SetupSettingsMenuActivate ( GtkWidget *pwItem,
 
 static GtkWidget *
 MoveFilterPage ( const int i, const int j,
-                 movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
+                 movefilter UNUSED(aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ]),
                  movefiltersetupwidget *pmfsw ) {
 
   GtkWidget *pwPage;
@@ -506,7 +506,7 @@ ModifyClickButton ( GtkWidget *pw, movefilterwidget *pmfw ) {
 
 
 extern GtkWidget *
-MoveFilterWidget ( movefilter *pmf, int *pfOK,
+MoveFilterWidget ( movefilter *pmf, int *UNUSED(pfOK),
                    GCallback pfChanged, gpointer userdata ) {
 
   GtkWidget *pwFrame;

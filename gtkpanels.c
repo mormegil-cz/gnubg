@@ -457,7 +457,7 @@ static void PopulateCommandHistory(CommandEntryData_T *pData)
 	}
 }
 
-static void CommandOK(GtkWidget * pw, CommandEntryData_T *pData)
+static void CommandOK(GtkWidget *UNUSED(pw), CommandEntryData_T *pData)
 {
 	int i, found = -1;
 	pData->cmdString =
@@ -558,7 +558,7 @@ static void Capitalize(char *str)
 	}
 }
 
-static gboolean CommandKeyPress(GtkWidget * widget, GdkEventKey * event,
+static gboolean CommandKeyPress(GtkWidget *UNUSED(widget), GdkEventKey * event,
 				CommandEntryData_T *pData)
 {
 	short k = (short)event->keyval;
@@ -584,7 +584,7 @@ static gboolean CommandKeyPress(GtkWidget * widget, GdkEventKey * event,
 	return FALSE;
 }
 
-static gboolean CommandFocusIn(GtkWidget * widget, GdkEventFocus * event,
+static gboolean CommandFocusIn(GtkWidget * widget, GdkEventFocus *UNUSED(eventDetails),
 			       CommandEntryData_T *pData)
 {
 	if (pData->completing) {
@@ -693,8 +693,8 @@ static GtkWidget *CreateAnalysisWindow( void )
 	}
 }
 
-static void ButtonCommand( GtkWidget *pw, char *szCommand ) {
-
+static void ButtonCommand( GtkWidget *UNUSED(pw), char *szCommand )
+{
     UserCommand( szCommand );
 }
 
@@ -766,7 +766,7 @@ extern void GTKSetGame(int i)
     gtk_combo_box_set_active(GTK_COMBO_BOX(game_select_combo), i);
 }
 
-static void SelectGame(GtkWidget * pw, void *p)
+static void SelectGame(GtkWidget * pw, void *UNUSED(data))
 {
     listOLD *pl;
     int i = 0;
@@ -1137,7 +1137,7 @@ void DockPanels(void)
 	SetMainWindowSize();
 }
 
-extern void ShowAllPanels ( gpointer p, guint n, GtkWidget *pw )
+extern void ShowAllPanels ( gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw) )
 {
 	BoardData *bd = BOARD( pwBoard )->board_data;
 	int i;
@@ -1181,7 +1181,7 @@ extern void ShowAllPanels ( gpointer p, guint n, GtkWidget *pw )
 		gtk_widget_show(bd->drawing_area);
 }
 
-extern void HideAllPanels ( gpointer p, guint n, GtkWidget *pw )
+extern void HideAllPanels ( gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw) )
 {
 	BoardData *bd = BOARD( pwBoard )->board_data;
 	int i;
@@ -1231,7 +1231,7 @@ extern void HideAllPanels ( gpointer p, guint n, GtkWidget *pw )
 		gtk_widget_show(bd->drawing_area);
 }
 
-extern void ToggleDockPanels( gpointer p, guint n, GtkWidget *pw )
+extern void ToggleDockPanels( gpointer UNUSED(p), guint UNUSED(n), GtkWidget *pw )
 {
 	int newValue = GTK_CHECK_MENU_ITEM( pw )->active;
 	if (fDockPanels != newValue)
@@ -1544,7 +1544,8 @@ extern void CommandSetPanels( char *sz ) {
     
 }
 
-extern void CommandShowPanels( char *sz ) {
+extern void CommandShowPanels( char *UNUSED(sz) )
+{
 	if (fDisplayPanels)
 	  outputf( _("Game list, Annotation and Message panels/windows "
 		        "will be displayed."));
@@ -1569,8 +1570,7 @@ static void GetGeometryDisplayString(char* buf, windowobject* pwo)
 		dispName, pwo->wg.nWidth, pwo->wg.nHeight, pwo->wg.nPosX, pwo->wg.nPosY);
 }
 
-extern void
-CommandShowGeometry ( char *sz )
+extern void CommandShowGeometry ( char *UNUSED(sz) )
 {
 	int i;
 	char szBuf[1024];

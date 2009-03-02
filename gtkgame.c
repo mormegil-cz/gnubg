@@ -3742,8 +3742,7 @@ extern void RunGTK( GtkWidget *pwSplash, char *commands, char *python_script, ch
 		GTKSet( &ms.gs );
 		GTKSet( &GetMainAppearance()->fShowIDs);
 	    
-		PushSplash ( pwSplash, 
-					_("Rendering"), _("Board"), 0 );
+		PushSplash ( pwSplash, _("Rendering"), _("Board") );
 
 		GTKAllowStdin();
 	    

@@ -110,13 +110,12 @@ static int selSound;
 static int SoundSkipUpdate;
 static int relPage, relPageActivated;
 
-static void
-SeedChanged( GtkWidget *pw, int *pf ) {
+static void SeedChanged( GtkWidget *UNUSED(pw), int *pf ) {
 
 	*pf = 1;  
 }
 
-static void UseCubeToggled(GtkWidget *pw, optionswidget *pow){
+static void UseCubeToggled(GtkWidget *UNUSED(pw), optionswidget *pow){
 
   gint n = 
      gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwCubeUsecube ) ); 
@@ -129,7 +128,7 @@ static void UseCubeToggled(GtkWidget *pw, optionswidget *pow){
   gtk_widget_set_sensitive( pow->pwAutoCrawford, n );
 }
 
-static void ManualDiceToggled( GtkWidget *pw, optionswidget *pow){
+static void ManualDiceToggled( GtkWidget *UNUSED(pw), optionswidget *pow){
 
   gint n = 
      gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwDicePRNG ) ); 
@@ -142,7 +141,7 @@ static void ManualDiceToggled( GtkWidget *pw, optionswidget *pow){
 
 } 
 
-static void TutorToggled (GtkWidget *pw, optionswidget *pow){
+static void TutorToggled (GtkWidget *UNUSED(pw), optionswidget *pow){
 
   gint n = 
      gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwTutor ) ); 
@@ -166,7 +165,7 @@ static char *aszTutor[] = {
 	N_("Doubtful"), N_("Bad"), N_("Very bad"), NULL
 };
 
-static void SoundDefaultClicked(GtkWidget *widget, gpointer userdata)
+static void SoundDefaultClicked(GtkWidget *UNUSED(widget), gpointer UNUSED(userdata))
 {
 	char *defaultSound = GetDefaultSoundFile(selSound);
 	SoundSkipUpdate = TRUE;
@@ -175,7 +174,7 @@ static void SoundDefaultClicked(GtkWidget *widget, gpointer userdata)
 	soundDetails[selSound].Path = defaultSound;
 }
 
-static void SoundAllDefaultClicked(GtkWidget *widget, gpointer userdata)
+static void SoundAllDefaultClicked(GtkWidget *UNUSED(widget), gpointer UNUSED(userdata))
 {
 	int i;
 	for (i = 0; i < NUM_SOUNDS; i++) 
@@ -187,7 +186,7 @@ static void SoundAllDefaultClicked(GtkWidget *widget, gpointer userdata)
 }
 
 
-static void SoundEnabledClicked(GtkWidget *widget, gpointer userdata)
+static void SoundEnabledClicked(GtkWidget *UNUSED(widget), gpointer UNUSED(userdata))
 {
 	int enabled;
 	if (!GTK_WIDGET_REALIZED(soundEnabled) || !GTK_WIDGET_SENSITIVE(soundEnabled))
@@ -205,13 +204,13 @@ static void SoundEnabledClicked(GtkWidget *widget, gpointer userdata)
 		SoundDefaultClicked(0, 0);
 }
 
-static void SoundGrabFocus(GtkWidget *pw, void *dummy)
+static void SoundGrabFocus(GtkWidget *pw, void *UNUSED(dummy))
 {
 	gtk_widget_grab_focus(soundList);
 	SoundEnabledClicked(0, 0);
 }
 
-static void SoundToggled(GtkWidget *pw, optionswidget *pow)
+static void SoundToggled(GtkWidget *UNUSED(pw), optionswidget *UNUSED(pow))
 {
 	int enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(soundsEnabled));
     gtk_widget_set_sensitive(soundFrame, enabled);
@@ -225,7 +224,7 @@ static void SoundToggled(GtkWidget *pw, optionswidget *pow)
 		SoundGrabFocus(0, 0);
 }
 
-static void SoundSelected(GtkTreeView *treeview, gpointer userdata)
+static void SoundSelected(GtkTreeView *treeview, gpointer UNUSED(userdata))
 {
 	GtkTreePath *path;
 	gtk_tree_view_get_cursor(GTK_TREE_VIEW(treeview), &path, NULL);
@@ -237,7 +236,7 @@ static void SoundSelected(GtkTreeView *treeview, gpointer userdata)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundEnabled), (*soundDetails[selSound].Path) ? TRUE:FALSE);
 }
 
-static void SoundTidy(GtkWidget *pw, void *dummy)
+static void SoundTidy(GtkWidget *UNUSED(pw), void *UNUSED(dummy))
 {
 	unsigned int i;
 	for (i = 0; i < NUM_SOUNDS; i++) 
@@ -246,7 +245,7 @@ static void SoundTidy(GtkWidget *pw, void *dummy)
 	}
 }
 
-static void PathChanged(GtkWidget *widget, gpointer userdata)
+static void PathChanged(GtkWidget *widget, gpointer UNUSED(userdata))
 {
 	if (!SoundSkipUpdate)
 	{
@@ -257,7 +256,7 @@ static void PathChanged(GtkWidget *widget, gpointer userdata)
 		SoundSkipUpdate = FALSE;
 }
 
-static void SoundChangePathClicked(GtkWidget *widget, gpointer userdata)
+static void SoundChangePathClicked(GtkWidget *UNUSED(widget), gpointer UNUSED(userdata))
 {
 	static char *lastSoundFolder = NULL;
 	char *filename = GTKFileSelect(_("Select soundfile"), "*.wav", lastSoundFolder, NULL, GTK_FILE_CHOOSER_ACTION_OPEN);
@@ -271,12 +270,12 @@ static void SoundChangePathClicked(GtkWidget *widget, gpointer userdata)
 	}
 }
 
-static void SoundPlayClicked(GtkWidget *widget, gpointer userdata)
+static void SoundPlayClicked(GtkWidget *UNUSED(widget), gpointer UNUSED(userdata))
 {
         playSoundFile(soundDetails[selSound].Path, TRUE);
 }
 
-static gchar* CacheSizeString(GtkScale *scale, gdouble value)
+static gchar* CacheSizeString(GtkScale *UNUSED(scale), gdouble value)
 {
   return g_strdup_printf ("%imb", GetCacheMB(value));
 }
@@ -1760,7 +1759,7 @@ OptionsSet( optionswidget *pow) {
                                 fStyledGamelist );
 }
 
-static void OptionsPageChange(GtkNotebook *notebook, GtkNotebookPage *page, gint tabNumber, gpointer notused)
+static void OptionsPageChange(GtkNotebook *UNUSED(notebook), GtkNotebookPage *UNUSED(page), gint tabNumber, gpointer UNUSED(data))
 {
 	if (tabNumber == relPage && !relPageActivated)
 	{
@@ -1785,7 +1784,7 @@ extern void GTKSetOptions( void )
   GTKRunDialog(pwDialog);
 }
 
-static void SoundOK(GtkWidget *pw, void *dummy)
+static void SoundOK(GtkWidget *pw, void *UNUSED(dummy))
 {
 	SetSoundSettings();
 	gtk_widget_destroy(gtk_widget_get_toplevel(pw));

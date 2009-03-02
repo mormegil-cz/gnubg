@@ -325,7 +325,7 @@ extern move *MoveListGetMove(const hintdata *phd, GList *pl)
 	return m;
 }
 
-extern void MoveListShowToggledClicked(GtkWidget *pw, hintdata *phd)
+extern void MoveListShowToggledClicked(GtkWidget *UNUSED(pw), hintdata *phd)
 {
 	int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON ( phd->pwShow ) );
 	if (f)
@@ -336,7 +336,7 @@ extern void MoveListShowToggledClicked(GtkWidget *pw, hintdata *phd)
 	ShowMove(phd, f);
 }
 
-extern gint MoveListClearSelection( GtkWidget *pw, GdkEventSelection *pes, hintdata *phd )
+extern gint MoveListClearSelection( GtkWidget *UNUSED(pw), GdkEventSelection *UNUSED(pes), hintdata *phd )
 {
 	gtk_tree_selection_unselect_all(gtk_tree_view_get_selection(GTK_TREE_VIEW(phd->pwMoves)));
     return TRUE;

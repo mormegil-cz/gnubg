@@ -56,16 +56,16 @@ typedef struct _NNState {
 	float *savedIBase;
 } NNState;
 
-extern int (*NeuralNetEvaluateFn) (const neuralnet * pnn, float arInput[], float arOutput[], NNState * pnState);
+extern int (*NeuralNetEvaluateFn) (const neuralnet *pnn, float arInput[], float arOutput[], NNState *pnState);
 
-extern int NeuralNetCreate(neuralnet * pnn, unsigned int cInput, unsigned int cHidden, unsigned int cOutput, float rBetaHidden, float rBetaOutput);
-extern void NeuralNetDestroy(neuralnet * pnn);
-extern int NeuralNetEvaluate(const neuralnet * pnn, float arInput[], float arOutput[], NNState * pnState);
-extern int NeuralNetEvaluate128(const neuralnet * pnn, float arInput[], float arOutput[], NNState * pnState);
-extern int NeuralNetResize(neuralnet * pnn, unsigned int cInput, unsigned int cHidden, unsigned int cOutput);
-extern int NeuralNetLoad(neuralnet * pnn, FILE * pf);
-extern int NeuralNetLoadBinary(neuralnet * pnn, FILE * pf);
-extern int NeuralNetSaveBinary(const neuralnet * pnn, FILE * pf);
+extern int NeuralNetCreate(neuralnet *pnn, unsigned int cInput, unsigned int cHidden, unsigned int cOutput, float rBetaHidden, float rBetaOutput);
+extern void NeuralNetDestroy(neuralnet *pnn);
+extern int NeuralNetEvaluate(const neuralnet *pnn, float arInput[], float arOutput[], NNState *pnState);
+extern int NeuralNetEvaluate128(const neuralnet *pnn, float arInput[], float arOutput[], NNState *pnState);
+extern int NeuralNetResize(neuralnet *pnn, unsigned int cInput, unsigned int cHidden, unsigned int cOutput);
+extern int NeuralNetLoad(neuralnet *pnn, FILE *pf);
+extern int NeuralNetLoadBinary(neuralnet *pnn, FILE *pf);
+extern int NeuralNetSaveBinary(const neuralnet *pnn, FILE *pf);
 extern int SSE_Supported(void);
 
 #endif

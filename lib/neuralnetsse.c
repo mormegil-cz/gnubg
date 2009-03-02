@@ -21,6 +21,7 @@
  */
 
 #include "config.h"
+#include "common.h"
 
 #if USE_SSE_VECTORIZE
 
@@ -137,10 +138,11 @@ Evaluate128( const neuralnet *pnn, const float arInput[], float ar[],
 }
 
 
-extern int NeuralNetEvaluate128( const neuralnet *pnn, /*lint -e{818}*/ float arInput[],
-			      float arOutput[], NNState *notused )
+extern int NeuralNetEvaluate128(const neuralnet *pnn, /*lint -e{818}*/ float arInput[],
+			      float arOutput[], NNState * UNUSED(pnState))
 {
     SSE_ALIGN(float ar[HIDDEN_NODES]);
+
 #if DEBUG_SSE
 	/* Not 64bit robust (pointer truncation) - causes strange crash */
     assert(sse_aligned(ar));

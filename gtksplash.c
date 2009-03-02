@@ -113,10 +113,7 @@ DestroySplash ( GtkWidget *pwSplash ) {
 }
 
 
-extern void
-PushSplash ( GtkWidget *pwSplash, 
-             const gchar *szText0, const gchar *szText1,
-             const unsigned long nMuSec )
+extern void PushSplash ( GtkWidget *pwSplash, const gchar *szText0, const gchar *szText1 )
 {
   gtksplash *pgs;
 

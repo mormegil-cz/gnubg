@@ -45,9 +45,10 @@ extern GdkGLConfig *getGlConfig(void)
 	return glconfig;
 }
 
-static gboolean configure_event_3d(GtkWidget *widget, GdkEventConfigure *notused, void* data)
+static gboolean configure_event_3d(GtkWidget *widget, GdkEventConfigure *UNUSED(eventDetails), void* data)
 {
 	BoardData *bd = (BoardData*)data;
+
 	if (display_is_3d(bd->rd))
 	{
 		static int curHeight = -1, curWidth = -1;
@@ -280,7 +281,7 @@ static int CheckAccelerated(GtkWidget* board)
 }
 }
 
-#else
+/* Unsupported (linux) version */
 
 static int CheckAccelerated(GtkWidget* notused)
 {
@@ -301,14 +302,16 @@ static int CheckAccelerated(GtkWidget* notused)
 
 #endif
 
-int DoAcceleratedCheck(const BoardData3d* bd3d, GtkWidget* pwParent)
-{
+int DoAcceleratedCheck(const BoardData3d* UNUSED(bd3d), GtkWidget* UNUSED(pwParent))
+{	/* Currently not supported (code out of date/unwritten) */
+#ifdef TEMP_REMOVE
 	if (!CheckAccelerated(bd3d->drawing_area3d))
 	{	/* Display warning message as performance may be bad */
 		GTKShowWarning(WARN_UNACCELERATED, pwParent);
 		return 0;
 	}
 	else
+#endif
 		return 1;
 }
 

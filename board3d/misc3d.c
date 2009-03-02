@@ -2379,7 +2379,7 @@ void ClearTextures(BoardData3d* bd3d)
 	bd3d->numTextures = 0;
 }
 
-static void free_texture(gpointer data, gpointer notused)
+static void free_texture(gpointer data, gpointer UNUSED(userdata))
 {
 	free(data);
 }

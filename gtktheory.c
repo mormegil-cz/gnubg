@@ -90,9 +90,8 @@ typedef struct _theorywidget {
 } theorywidget;
 
 
-static void
-ResetTheory ( GtkWidget *pw, theorywidget *ptw ) {
-
+static void ResetTheory(GtkWidget *UNUSED(pw), theorywidget *ptw)
+{
   float aarRates[ 2 ][ 2 ];
 #if defined(REDUCTION_CODE)
   evalcontext ec = { FALSE, 0, 0, TRUE, 0.0 };
@@ -344,9 +343,8 @@ static void add_mw_match_rows(theorywidget * ptw, const cubeinfo * pci, float aa
 	}
 }
 
-static void
-TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
-
+static void TheoryUpdated(GtkWidget *UNUSED(pw), theorywidget *ptw)
+{
   cubeinfo ci;
   float aarRates[ 2 ][ 2 ];
 
@@ -493,7 +491,7 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
 
 }
 
-static void GraphExpose( GtkWidget *pwGraph, GdkEventExpose *pev,
+static void GraphExpose( GtkWidget *pwGraph, GdkEventExpose *UNUSED(pev),
 			 theorywidget *ptw ) {
     
     int i, x = 8, y = 12, cx = pwGraph->allocation.width - 16 - 1,

@@ -41,7 +41,7 @@
 randctx rc;
 double timeTaken;
 
-extern void RunEvals(void *notused)
+extern void RunEvals(void *UNUSED(notused))
 {
 	int aanBoard[ EVALS_PER_ITERATION ][ 2 ][ 25 ];
     int i, j, k;

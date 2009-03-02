@@ -73,3 +73,13 @@ typedef RETSIGTYPE(*psighandler) (int);
 #endif
 #endif
 #endif
+
+/* Macro to mark paramaters that aren't used in the function */	
+#ifdef UNUSED
+#elif defined(__GNUC__)
+# define UNUSED(x) UNUSED_ ## x __attribute__((unused))
+#elif defined(__LCLINT__)
+# define UNUSED(x) /*@unused@*/ x
+#else
+# define UNUSED(x) _unused_##x
+#endif

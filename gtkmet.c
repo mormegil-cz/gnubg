@@ -184,7 +184,7 @@ static GtkWidget *GTKWriteMET(const unsigned int nRows, const unsigned int nCols
 
 }
 
-static void invertMETlocal( GtkWidget *notused, const metwidget *pmw ){
+static void invertMETlocal( GtkWidget *UNUSED(widget), const metwidget *pmw ){
 
   if(fInvertMET)
     UserCommand( "set invert met off" );
@@ -219,8 +219,8 @@ extern void GTKShowMatchEquityTable( const unsigned int nMatchTo, const int anSc
   metwidget mw;
 
   mw.nMatchTo = nMatchTo;
-  mw.anAway[ 0 ] = (nMatchTo - anScore[ 0 ]) - 1;
-  mw.anAway[ 1 ] = (nMatchTo - anScore[ 1 ]) - 1;
+  mw.anAway[ 0 ] = (nMatchTo - (unsigned)anScore[ 0 ]) - 1;
+  mw.anAway[ 1 ] = (nMatchTo - (unsigned)anScore[ 1 ]) - 1;
 
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwInvertButton),
                                fInvertMET); 

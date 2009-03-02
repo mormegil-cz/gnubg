@@ -192,7 +192,7 @@ static void MoveListTempMapClicked( GtkWidget *pw, hintdata *phd )
   g_free( asz );
 }
 
-static void MoveListCmarkClicked(GtkWidget *pw, hintdata *phd)
+static void MoveListCmarkClicked(GtkWidget *UNUSED(pw), hintdata *phd)
 {
 	guint new_mark;
 	guint all_marked = TRUE;
@@ -281,7 +281,7 @@ EvalMoves ( hintdata *phd, evalcontext *pec )
 }
 
 static void
-MoveListEval ( GtkWidget *pw, hintdata *phd )
+MoveListEval ( GtkWidget *UNUSED(pw), hintdata *phd )
 {
   EvalMoves ( phd, &esEvalChequer.ec );
 }
@@ -304,7 +304,7 @@ MoveListEvalPly ( GtkWidget *pw, hintdata *phd )
 }
 
 static void
-MoveListEvalSettings ( GtkWidget *pw, void *unused )
+MoveListEvalSettings ( GtkWidget *pw, void *UNUSED(unused) )
 {
 	GTKSetCurrentParent(pw);
   SetEvaluation ( NULL, 0, NULL );
@@ -314,7 +314,7 @@ MoveListEvalSettings ( GtkWidget *pw, void *unused )
 }
 
 static void
-MoveListRolloutSettings ( GtkWidget *pw, void *unused )
+MoveListRolloutSettings ( GtkWidget *pw, void *UNUSED(unused) )
 {
 	GTKSetCurrentParent(pw);
 	SetRollouts ( NULL, 0, NULL );
@@ -430,7 +430,7 @@ MoveListMove ( GtkWidget *pw, hintdata *phd )
 }
 
 static void
-MoveListDetailsClicked( GtkWidget *pw, hintdata *phd )
+MoveListDetailsClicked( GtkWidget *pw, hintdata *UNUSED(phd) )
 {
 	 showMoveListDetail = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pw));
 	 /* Reshow list */
@@ -439,7 +439,7 @@ MoveListDetailsClicked( GtkWidget *pw, hintdata *phd )
 
 GtkWidget *pwDetails;
 
-static void MoveListCopy(GtkWidget *pw, hintdata *phd)
+static void MoveListCopy(GtkWidget *UNUSED(pw), hintdata *phd)
 {
   char *pc = MoveListCopyData(phd);
   if ( pc )
@@ -640,9 +640,9 @@ CreateMoveListTools ( hintdata *phd )
   return pwTools;
 }
 
-extern void HintDoubleClick(GtkTreeView        *treeview,
-                       GtkTreePath        *path,
-                       GtkTreeViewColumn  *col,
+extern void HintDoubleClick(GtkTreeView        *UNUSED(treeview),
+                       GtkTreePath        *UNUSED(path),
+                       GtkTreeViewColumn  *UNUSED(col),
                        hintdata *phd)
 {
 	gtk_button_clicked( GTK_BUTTON( phd->pwMove ) );

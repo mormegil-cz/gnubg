@@ -388,7 +388,7 @@ static void ShowPaged( char **ppch ) {
 	    outputl( *ppch++ );
 }
 
-extern void CommandShowAnalysis( char *sz ) {
+extern void CommandShowAnalysis( char *UNUSED(sz) ) {
 
     int i;
 
@@ -452,7 +452,7 @@ extern void CommandShowAnalysis( char *sz ) {
 
 }
 
-extern void CommandShowAutomatic( char *sz ) {
+extern void CommandShowAutomatic( char *UNUSED(sz) ) {
 
     static const char *szOn = N_("On"), *szOff = N_("Off");
     
@@ -536,7 +536,7 @@ void CommandShowFullBoard( char *sz ) {
 }
 
 
-extern void CommandShowDelay( char *sz ) {
+extern void CommandShowDelay( char *UNUSED(sz) ) {
 #if USE_GTK
     if( nDelay )
 	outputf( _("The delay is set to %d ms.\n"),nDelay);
@@ -547,7 +547,7 @@ extern void CommandShowDelay( char *sz ) {
 #endif
 }
 
-extern void CommandShowCache( char *sz ) {
+extern void CommandShowCache( char *UNUSED(sz) ) {
 
     unsigned int c, cHit;
     unsigned int cLookup;
@@ -568,7 +568,7 @@ extern void CommandShowCache( char *sz ) {
     outputc( '\n' );
 }
 
-extern void CommandShowCalibration( char *sz ) {
+extern void CommandShowCalibration( char *UNUSED(sz) ) {
 
 #if USE_GTK
     if( fX ) {
@@ -584,7 +584,7 @@ extern void CommandShowCalibration( char *sz ) {
 	outputl( _("No evaluation speed has been recorded." ) );
 }
 
-extern void CommandShowClockwise( char *sz ) {
+extern void CommandShowClockwise( char *UNUSED(sz) ) {
 
     if( fClockwise )
 	outputl( _("Player 1 moves clockwise (and player 0 moves "
@@ -615,12 +615,12 @@ static void ShowCommands( command *pc, const char *szPrefix ) {
     }
 }
 
-extern void CommandShowCommands( char *sz ) {
+extern void CommandShowCommands( char *UNUSED(sz) ) {
 
     ShowCommands( acTop, "" );
 }
 
-extern void CommandShowConfirm(char *sz)
+extern void CommandShowConfirm(char *UNUSED(sz))
 {
 
 	if (nConfirmDefault == -1)
@@ -642,7 +642,7 @@ extern void CommandShowConfirm(char *sz)
 
 }
 
-extern void CommandShowCopying( char *sz ) {
+extern void CommandShowCopying( char *UNUSED(sz) ) {
 
 #if USE_GTK
     if( fX )
@@ -652,7 +652,7 @@ extern void CommandShowCopying( char *sz ) {
 	ShowPaged( aszCopying );
 }
 
-extern void CommandShowCrawford( char *sz ) {
+extern void CommandShowCrawford( char *UNUSED(sz) ) {
 
   if( ms.nMatchTo > 0 ) 
     outputl( ms.fCrawford ?
@@ -665,7 +665,7 @@ extern void CommandShowCrawford( char *sz ) {
 
 }
 
-extern void CommandShowCube( char *sz ) {
+extern void CommandShowCube( char *UNUSED(sz) ) {
 
     if( ms.gs != GAME_PLAYING ) {
 	outputl( _("There is no game in progress.") );
@@ -689,7 +689,7 @@ extern void CommandShowCube( char *sz ) {
                  ms.nCube, ap[ ms.fCubeOwner ].szName );
 }
 
-extern void CommandShowDice( char *sz ) {
+extern void CommandShowDice( char *UNUSED(sz) ) {
 
     if( ms.gs != GAME_PLAYING ) {
 	outputl( _("The dice will not be rolled until a game is started.") );
@@ -704,7 +704,7 @@ extern void CommandShowDice( char *sz ) {
 		 ms.anDice[ 0 ], ms.anDice[ 1 ] );
 }
 
-extern void CommandShowDisplay( char *sz ) {
+extern void CommandShowDisplay( char *UNUSED(sz) ) {
 
     if( fDisplay )
 	outputl( _("GNU Backgammon will display boards for computer moves.") );
@@ -712,7 +712,7 @@ extern void CommandShowDisplay( char *sz ) {
 	outputl( _("GNU Backgammon will not display boards for computer moves.") );
 }
 
-extern void CommandShowEngine( char *sz ) {
+extern void CommandShowEngine( char *UNUSED(sz) ) {
 
     char szBuffer[ 4096 ];
     
@@ -721,7 +721,7 @@ extern void CommandShowEngine( char *sz ) {
     output( szBuffer );
 }
 
-extern void CommandShowEvaluation( char *sz ) {
+extern void CommandShowEvaluation( char *UNUSED(sz) ) {
 
     outputl( _("`eval' and `hint' will use:") );
     outputl( _("    Chequer play:") );
@@ -733,7 +733,7 @@ extern void CommandShowEvaluation( char *sz ) {
 
 }
 
-extern void CommandShowJacoby( char *sz ) {
+extern void CommandShowJacoby( char *UNUSED(sz) ) {
 
   if ( ! ms.nMatchTo )
     outputl( ms.fJacoby ? 
@@ -749,7 +749,7 @@ extern void CommandShowJacoby( char *sz ) {
 
 }
 
-extern void CommandShowLang( char *sz ) {
+extern void CommandShowLang( char *UNUSED(sz) ) {
 
 	if (szLang)
 		outputf(_("Your language preference is set to %s.\n"), szLang );
@@ -757,7 +757,7 @@ extern void CommandShowLang( char *sz ) {
 		outputerrf(_("Language not set"));
 }
 
-extern void CommandShowMatchInfo( char *sz ) {
+extern void CommandShowMatchInfo( char *UNUSED(sz) ) {
 
 #if USE_GTK
     if( fX ) {
@@ -792,7 +792,7 @@ extern void CommandShowMatchInfo( char *sz ) {
 	outputf( "\n%s\n", mi.pchComment );    
 }
 
-extern void CommandShowMatchLength( char *sz ) {
+extern void CommandShowMatchLength( char *UNUSED(sz) ) {
     
     outputf( ngettext("New matches default to %d point.\n", "New matches default to %d points.\n", nDefaultLength), nDefaultLength);
 }
@@ -824,7 +824,7 @@ extern void CommandShowPipCount( char *sz )
 #endif
 }
 
-extern void CommandShowPlayer( char *sz ) {
+extern void CommandShowPlayer( char *UNUSED(sz) ) {
 
     int i;
 
@@ -853,7 +853,7 @@ extern void CommandShowPlayer( char *sz ) {
     }
 }
 
-extern void CommandShowPostCrawford( char *sz ) {
+extern void CommandShowPostCrawford( char *UNUSED(sz) ) {
 
   if( ms.nMatchTo > 0 ) 
     outputl( ms.fPostCrawford ?
@@ -866,26 +866,26 @@ extern void CommandShowPostCrawford( char *sz ) {
 
 }
 
-extern void CommandShowPrompt( char *sz ) {
+extern void CommandShowPrompt( char *UNUSED(sz) ) {
 
     outputf( _("The prompt is set to `%s'.\n"), szPrompt );
 }
 
-extern void CommandShowRNG( char *sz ) {
+extern void CommandShowRNG( char *UNUSED(sz) ) {
 
   outputf( _("You are using the %s generator.\n"),
 	  gettext ( aszRNG[ rngCurrent ] ) );
     
 }
 
-extern void CommandShowRollout( char *sz ) {
+extern void CommandShowRollout( char *UNUSED(sz) ) {
 
   outputl( _("`rollout' will use:") );
   ShowRollout ( &rcRollout );
 
 }
 
-extern void CommandShowScore( char *sz ) {
+extern void CommandShowScore( char *UNUSED(sz) ) {
 
     outputf((ms.cGames == 1
 	     ? _("The score (after %d game) is: %s %d, %s %d")
@@ -912,13 +912,13 @@ extern void CommandShowScore( char *sz ) {
 
 }
 
-extern void CommandShowSeed( char *sz ) {
+extern void CommandShowSeed( char *UNUSED(sz) ) {
 
     PrintRNGSeed( rngCurrent, rngctxCurrent );
     PrintRNGCounter( rngCurrent, rngctxCurrent );
 }
 
-extern void CommandShowTurn( char *sz ) {
+extern void CommandShowTurn( char *UNUSED(sz) ) {
 
     if( ms.gs != GAME_PLAYING ) {
 	outputl( _("No game is being played.") );
@@ -957,12 +957,12 @@ ShowAuthors( const credEntry ace[], const char *title ) {
 
 }
 
-extern void CommandShowBrowser( char *sz )
+extern void CommandShowBrowser( char *UNUSED(sz) )
 {
 	outputf(_("The current browser is %s\n"), get_web_browser());
 }
 
-extern void CommandShowBuildInfo( char *sz )
+extern void CommandShowBuildInfo( char *UNUSED(sz) )
 {
     const char *pch;
 
@@ -977,7 +977,7 @@ extern void CommandShowBuildInfo( char *sz )
     outputc( '\n' );
 }
 
-extern void CommandShowScoreSheet( char *sz )
+extern void CommandShowScoreSheet( char *UNUSED(sz) )
 {
 	size_t i, width1, width2;
 	char *data[2];
@@ -1067,7 +1067,7 @@ extern void CommandShowScoreSheet( char *sz )
 	outputx();
 }
 
-extern void CommandShowCredits( char *sz )
+extern void CommandShowCredits( char *UNUSED(sz) )
 {
 #if USE_GTK
   if( fX )
@@ -1081,7 +1081,7 @@ extern void CommandShowCredits( char *sz )
 
 }
 
-extern void CommandShowWarranty( char *sz ) {
+extern void CommandShowWarranty( char *UNUSED(sz) ) {
 
 #if USE_GTK
     if( fX )
@@ -1143,7 +1143,7 @@ extern void CommandShowKleinman(char *sz)
 }
 
 #if USE_MULTITHREAD
-extern void CommandShowThreads(char *sz)
+extern void CommandShowThreads(char *UNUSED(sz))
 {
 	int c = MT_GetNumThreads();
 	outputf(ngettext("%d calculation thread.\n", "%d calculation threads.\n", c), c);
@@ -1284,7 +1284,7 @@ extern void CommandShowKeith( char *sz ) {
 	output(out);
 }
 
-extern void CommandShowBeavers( char *sz ) {
+extern void CommandShowBeavers( char *UNUSED(sz) ) {
 
     if( nBeavers > 1 )
 	outputf( _("%d beavers/raccoons allowed in money sessions.\n"), nBeavers );
@@ -1294,7 +1294,7 @@ extern void CommandShowBeavers( char *sz ) {
 	outputl( _("No beavers allowed in money sessions.") );
 }
 
-extern void CommandShowGammonValues ( char *sz ) {
+extern void CommandShowGammonValues ( char *UNUSED(sz) ) {
 
   cubeinfo ci;
   int i;
@@ -1466,7 +1466,7 @@ extern void CommandShowMatchEquityTable ( char *sz ) {
   
 }
 
-extern void CommandShowOutput( char *sz ) {
+extern void CommandShowOutput( char *UNUSED(sz) ) {
 
     outputf( fOutputMatchPC ? 
              _("Match winning chances will be shown as percentages.\n") :
@@ -1491,7 +1491,7 @@ extern void CommandShowOutput( char *sz ) {
                _("Boards will be shown in ASCII.\n") );
 }
 
-extern void CommandShowVersion( char *sz )
+extern void CommandShowVersion( char *UNUSED(sz) )
 {
 #if USE_GTK
 	if (fX)
@@ -1826,7 +1826,7 @@ extern void CommandShowMarketWindow ( char * sz ) {
 
 
 extern void
-CommandShowExport ( char *sz ) {
+CommandShowExport ( char *UNUSED(sz) ) {
 
   int i;
 
@@ -1972,7 +1972,7 @@ CommandShowExport ( char *sz ) {
 
 
 
-extern void CommandShowTutor( char *sz ) {
+extern void CommandShowTutor( char *UNUSED(sz) ) {
 
   char *level;
 
@@ -2028,7 +2028,7 @@ outputl(_("Tutor mode evaluates moves using the same settings as Analysis.") );
 
 
 extern void
-CommandShowSound ( char *sz ) {
+CommandShowSound ( char *UNUSED(sz) ) {
 
   int i;
 
@@ -2153,7 +2153,7 @@ CommandShowTemperatureMap( char *sz ) {
 }  
 
 extern void
-CommandShowVariation( char *sz ) {
+CommandShowVariation( char *UNUSED(sz) ) {
 
   if ( ms.gs != GAME_NONE )
     outputf( _("You are playing: %s\n"), gettext( aszVariations[ ms.bgv ] ) );
@@ -2163,7 +2163,7 @@ CommandShowVariation( char *sz ) {
 }
 
 extern void
-CommandShowCheat( char *sz ) {
+CommandShowCheat( char *UNUSED(sz) ) {
 
   outputf( _("Manipulation with dice is %s.\n"),
            fCheat ? _("enabled") : _("disabled") );
@@ -2173,7 +2173,7 @@ CommandShowCheat( char *sz ) {
 }
 
 
-extern void CommandShowCubeEfficiency(char *sz)
+extern void CommandShowCubeEfficiency(char *UNUSED(sz))
 {
 	outputf(_("Parameters for cube evaluations:\n"));
 	outputf("%s :%7.4f\n", _("Cube efficiency for crashed positions"), rCrashedX);
@@ -2243,7 +2243,7 @@ extern void CommandShowBearoff( char *sz ) {
 
 
 extern void
-CommandShowMatchResult( char *sz ) {
+CommandShowMatchResult( char *UNUSED(sz) ) {
 
   float arSum[ 2 ] = { 0.0f, 0.0f };
   float arSumSquared[ 2 ] = { 0.0f, 0.0f };
@@ -2320,14 +2320,14 @@ CommandShowMatchResult( char *sz ) {
 
 
 
-extern void CommandShowManualWeb (char *sz)
+extern void CommandShowManualWeb (char *UNUSED(sz))
 {
 	char *path = g_build_filename(DOCDIR, "gnubg.html", NULL);
 	OpenURL (path);
 	g_free(path);
 }
 
-extern void CommandShowManualAbout (char *sz)
+extern void CommandShowManualAbout (char *UNUSED(sz))
 {
 	char *path = g_build_filename(DOCDIR, "allabout.html", NULL);
 	OpenURL (path);

@@ -1247,7 +1247,7 @@ NumberMovesMatch ( listOLD *plMatch ) {
 
 }
 
-extern void CommandAnalyseGame( char *sz )
+extern void CommandAnalyseGame( char *UNUSED(sz) )
 {
   int nMoves;
   
@@ -1276,7 +1276,7 @@ extern void CommandAnalyseGame( char *sz )
 }
 
 
-extern void CommandAnalyseMatch( char *sz )
+extern void CommandAnalyseMatch( char *UNUSED(sz) )
 {
   listOLD *pl;
   moverecord *pmr;
@@ -1500,7 +1500,7 @@ getMWCFromError ( const statcontext *psc, float aaaar[ 3 ][ 2 ][ 2 ][ 2 ] ) {
 }
 
 extern void
-DumpStatcontext ( char *szOutput, const statcontext *psc, const char * pl, const char * op, const char * sz,
+DumpStatcontext ( char *szOutput, const statcontext *psc, const char * pl, const char * op, const char * UNUSED(sz),
                   const int fIsMatch ) {
 
   /* header */
@@ -1602,7 +1602,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * pl, const
   }
 }
 
-extern void CommandShowStatisticsMatch ( char *sz )
+extern void CommandShowStatisticsMatch ( char *UNUSED(sz) )
 {
     char szOutput[4096];
 
@@ -1630,7 +1630,7 @@ CommandShowStatisticsSession ( char *sz ) {
 
 
 extern void
-CommandShowStatisticsGame ( char *sz )
+CommandShowStatisticsGame ( char *UNUSED(sz) )
 {
 
   moverecord *pmr;
@@ -1658,7 +1658,7 @@ CommandShowStatisticsGame ( char *sz )
 }
 
 
-extern void CommandAnalyseMove(char *sz)
+extern void CommandAnalyseMove(char *UNUSED(sz))
 {
 	if (!CheckGameExists())
 		return;
@@ -1870,7 +1870,7 @@ AnalyseClearGame ( listOLD *plGame ) {
 
 
 extern void
-CommandAnalyseClearMove ( char *sz ) {
+CommandAnalyseClearMove ( char *UNUSED(sz) ) {
 
   if ( plLastMove && plLastMove->plNext && plLastMove->plNext->p ) {
     AnalyseClearMove ( plLastMove->plNext->p );
@@ -1885,7 +1885,7 @@ CommandAnalyseClearMove ( char *sz ) {
 }
 
 extern void
-CommandAnalyseClearGame ( char *sz ) {
+CommandAnalyseClearGame ( char *UNUSED(sz) ) {
 
   if (!CheckGameExists())
     return;
@@ -1900,7 +1900,7 @@ CommandAnalyseClearGame ( char *sz ) {
 }
 
 extern void
-CommandAnalyseClearMatch ( char *sz ) {
+CommandAnalyseClearMatch ( char *UNUSED(sz) ) {
 
   listOLD *pl;
 
@@ -1918,9 +1918,9 @@ CommandAnalyseClearMatch ( char *sz ) {
 }
 
 static int MoveAnalysed(moverecord * pmr, matchstate * pms, listOLD * plGame,
-			evalsetup * pesChequer, evalsetup * pesCube,
+			evalsetup * UNUSED(pesChequer), evalsetup * pesCube,
 			movefilter
-			aamf[MAX_FILTER_PLIES][MAX_FILTER_PLIES])
+			UNUSED(aamf[MAX_FILTER_PLIES][MAX_FILTER_PLIES]))
 {
 	static TanBoard anBoardMove;
 	static unsigned char auch[10];
@@ -2139,7 +2139,7 @@ extern int MatchAnalysed(void)
 	return TRUE;
 }
 
-static void cmark_cube_show(GString *gsz, const matchstate *pms,
+static void cmark_cube_show(GString *gsz, const matchstate *UNUSED(pms),
 			    const moverecord *pmr, int movenr)
 {
 	g_return_if_fail(pmr);
@@ -2162,7 +2162,7 @@ static void cmark_cube_set(moverecord *pmr, CMark cmark)
 	pmr->CubeDecPtr->cmark = cmark;
 }
 
-static void cmark_move_show(GString *gsz, const matchstate *pms,
+static void cmark_move_show(GString *gsz, const matchstate *UNUSED(pms),
 			    const moverecord *pmr, int movenr)
 {
 	guint i;
@@ -2254,7 +2254,7 @@ static void cmark_move_set(moverecord *pmr, gchar *sz, CMark cmark)
 
 	c = pmr->ml.cMoves;
 
-	while ((n = (int)g_ascii_strtoll(sz, &sz, 10))) {
+	while ((n = (int)g_ascii_strtoll(sz, &sz, 10)) != 0) {
 		if (n > c) {
 			outputerrf("Only %d moves in movelist\n", c);
 			g_slist_free(list);
@@ -2263,7 +2263,7 @@ static void cmark_move_set(moverecord *pmr, gchar *sz, CMark cmark)
 		if (!g_slist_find(list, GINT_TO_POINTER(n)))
 			list = g_slist_append(list, GINT_TO_POINTER(n));
 	}
-	if (!(c = g_slist_length(list))) {
+	if ((c = g_slist_length(list)) == 0) {
 		outputerrf("Not a valid list of moves\n");
 		return;
 	}
@@ -2340,7 +2340,7 @@ static int cmark_move_rollout(moverecord *pmr, gboolean destroy)
 			list = g_slist_append(list, GINT_TO_POINTER(j));
 	}
 
-	if (!(c = g_slist_length(list))) {
+	if ((c = g_slist_length(list)) == 0) {
 		return 0;
 	}
 
@@ -2538,7 +2538,7 @@ static gint check_cmoves_in_pmr(const moverecord *pmr)
 		return 0;
 	}
 
-	if (!(c = pmr->ml.cMoves)) {
+	if ((c = pmr->ml.cMoves) == 0) {
 		outputerrf(_("No moves to analyse"));
 		return 0;
 	}
@@ -2546,7 +2546,7 @@ static gint check_cmoves_in_pmr(const moverecord *pmr)
 	return c;
 }
 
-extern void CommandCMarkCubeShow(char *sz)
+extern void CommandCMarkCubeShow(char *UNUSED(sz))
 {
 	GString *gsz;
 	moverecord *pmr = getCurrentMoveRecord(NULL);
@@ -2560,7 +2560,7 @@ extern void CommandCMarkCubeShow(char *sz)
 	g_string_free(gsz, TRUE);
 }
 
-extern void CommandCMarkCubeSetNone(char *sz)
+extern void CommandCMarkCubeSetNone(char *UNUSED(sz))
 {
 	moverecord *pmr = getCurrentMoveRecord(NULL);
 
@@ -2570,7 +2570,7 @@ extern void CommandCMarkCubeSetNone(char *sz)
 	cmark_cube_set(pmr, CMARK_NONE);
 }
 
-extern void CommandCMarkCubeSetRollout(char *sz)
+extern void CommandCMarkCubeSetRollout(char *UNUSED(sz))
 {
 	moverecord *pmr = getCurrentMoveRecord(NULL);
 
@@ -2580,7 +2580,7 @@ extern void CommandCMarkCubeSetRollout(char *sz)
 	cmark_cube_set(pmr, CMARK_ROLLOUT);
 }
 
-extern void CommandCMarkMoveClear(char *sz)
+extern void CommandCMarkMoveClear(char *UNUSED(sz))
 {
 	moverecord *pmr = getCurrentMoveRecord(NULL);
 
@@ -2590,7 +2590,7 @@ extern void CommandCMarkMoveClear(char *sz)
 	cmark_move_clear(pmr);
 }
 
-extern void CommandCMarkGameClear(char *sz)
+extern void CommandCMarkGameClear(char *UNUSED(sz))
 {
 	if (!CheckGameExists())
 		return;
@@ -2598,7 +2598,7 @@ extern void CommandCMarkGameClear(char *sz)
 	cmark_game_clear(plGame);
 }
 
-extern void CommandCMarkMatchClear(char *sz)
+extern void CommandCMarkMatchClear(char *UNUSED(sz))
 {
 	if (!CheckGameExists())
 		return;
@@ -2631,7 +2631,7 @@ extern void CommandCMarkMoveSetRollout(char *sz)
 		outputerrf(_("cmark move set requires a list of moves to set"));
 }
 
-extern void CommandCMarkMoveShow(char *sz)
+extern void CommandCMarkMoveShow(char *UNUSED(sz))
 {
 	GString *gsz;
 	moverecord *pmr = getCurrentMoveRecord(NULL);
@@ -2645,7 +2645,7 @@ extern void CommandCMarkMoveShow(char *sz)
 	g_string_free(gsz, TRUE);
 }
 
-extern void CommandCMarkGameShow(char *sz)
+extern void CommandCMarkGameShow(char *UNUSED(sz))
 {
 	GString *gsz;
 
@@ -2658,7 +2658,7 @@ extern void CommandCMarkGameShow(char *sz)
 	g_string_free(gsz, TRUE);
 }
 
-extern void CommandCMarkMatchShow(char *sz)
+extern void CommandCMarkMatchShow(char *UNUSED(sz))
 {
 	GString *gsz;
 
@@ -2671,7 +2671,7 @@ extern void CommandCMarkMatchShow(char *sz)
 	g_string_free(gsz, TRUE);
 }
 
-extern void CommandAnalyseRolloutCube(char *sz)
+extern void CommandAnalyseRolloutCube(char *UNUSED(sz))
 {
 	moverecord *pmr = getCurrentMoveRecord(NULL);
 
@@ -2701,7 +2701,7 @@ extern void CommandAnalyseRolloutMove(char *sz)
 	cmark_move_clear(pmr);
 }
 
-extern void CommandAnalyseRolloutGame(char *sz)
+extern void CommandAnalyseRolloutGame(char *UNUSED(sz))
 {
 	if (!CheckGameExists())
 		return;
@@ -2709,7 +2709,7 @@ extern void CommandAnalyseRolloutGame(char *sz)
 	cmark_game_rollout(plGame);
 }
 
-extern void CommandAnalyseRolloutMatch(char *sz)
+extern void CommandAnalyseRolloutMatch(char *UNUSED(sz))
 {
 	if (!CheckGameExists())
 		return;

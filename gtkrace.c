@@ -67,35 +67,35 @@ static GtkWidget *monospace_text(const char *szOutput)
 	return pwText;
 }
 
-static GtkWidget *KleinmanPage(TanBoard anBoard, const int fMove)
+static GtkWidget *KleinmanPage(TanBoard anBoard, const int UNUSED(fMove))
 {
 	char sz[500];
 	show_kleinman(anBoard, sz);
 	return monospace_text(sz);
 }
 
-static GtkWidget *TwoSidedPage(TanBoard anBoard, const int fMove)
+static GtkWidget *TwoSidedPage(TanBoard anBoard, const int UNUSED(fMove))
 {
 	char sz[500];
 	show_bearoff(anBoard, sz);
 	return monospace_text(sz);
 }
 
-static GtkWidget *KeithPage(TanBoard anBoard, const int fMove)
+static GtkWidget *KeithPage(TanBoard anBoard, const int UNUSED(fMove))
 {
 	char sz[500];
 	show_keith(anBoard, sz);
 	return monospace_text(sz);
 }
 
-static GtkWidget *Pip8912Page(TanBoard anBoard, const int fMove)
+static GtkWidget *Pip8912Page(TanBoard anBoard, const int UNUSED(fMove))
 {
 	char sz[500];
 	show_8912(anBoard, sz);
 	return monospace_text(sz);
 }
 
-static GtkWidget *ThorpPage(TanBoard anBoard, const int fMove)
+static GtkWidget *ThorpPage(TanBoard anBoard, const int UNUSED(fMove))
 {
 	char sz[500];
 	show_thorp(anBoard, sz);
@@ -176,7 +176,7 @@ EffectivePipCount( const float arPips[ 2 ], const float arWastage[ 2 ],
 }
 
 static void
-PerformOSR ( GtkWidget *pw, racewidget *prw ) {
+PerformOSR ( GtkWidget *UNUSED(pw), racewidget *prw ) {
 
   int nTrials = (int)prw->padjTrials->value;
   float ar[ 5 ];
@@ -252,8 +252,7 @@ static GtkWidget *do_rollout_view(void)
 	}
 	return view;
 }
-static GtkWidget *
-OSRPage ( TanBoard anBoard, racewidget *prw ) {
+static GtkWidget *OSRPage ( TanBoard UNUSED(anBoard), racewidget *prw ) {
 
   GtkWidget *pwvbox = gtk_vbox_new( FALSE, 4 );
   GtkWidget *pw;

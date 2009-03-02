@@ -382,7 +382,7 @@ GTKStatPageCube ( const rolloutstat *prs, const int cGames ) {
 }
 
 static GtkWidget *
-GTKStatPageBearoff ( const rolloutstat *prs, const int cGames ) {
+GTKStatPageBearoff ( const rolloutstat *prs, const int UNUSED(cGames) ) {
 
   GtkWidget *pw;
   GtkWidget *pwLabel;
@@ -464,7 +464,7 @@ GTKStatPageBearoff ( const rolloutstat *prs, const int cGames ) {
 }
 
 static GtkWidget *
-GTKStatPageClosedOut ( const rolloutstat *prs, const int cGames ) {
+GTKStatPageClosedOut ( const rolloutstat *prs, const int UNUSED(cGames) ) {
 
   GtkWidget *pw;
   GtkWidget *pwLabel;
@@ -698,7 +698,7 @@ GTKRolloutStatPage ( const rolloutstat *prs,
 
 
 static void
-GTKViewRolloutStatistics(GtkWidget *widget, gpointer data){
+GTKViewRolloutStatistics(GtkWidget *UNUSED(widget), gpointer data){
 
   /* Rollout statistics information */
   
@@ -742,7 +742,7 @@ GTKViewRolloutStatistics(GtkWidget *widget, gpointer data){
   GTKRunDialog(pwDialog);
 }
 
-static void RolloutCancel( GtkObject *po, rolloutprogress *prp )
+static void RolloutCancel( GtkObject *UNUSED(po), rolloutprogress *prp )
 {
     pwGrab = pwOldGrab;
     prp->pwRolloutDialog = NULL;
@@ -751,13 +751,13 @@ static void RolloutCancel( GtkObject *po, rolloutprogress *prp )
     fInterrupt = TRUE;
 }
 
-static void RolloutStop( GtkObject *po, gpointer p ) {
+static void RolloutStop( GtkObject *UNUSED(po), gpointer UNUSED(p) ) {
 
     fInterrupt = TRUE;
 }
 
 static void 
-GTKRolloutProgressStart( const cubeinfo *pci, const int n,
+GTKRolloutProgressStart( const cubeinfo *UNUSED(pci), const int n,
                          rolloutstat aars[][ 2 ],
                          rolloutcontext *prc,
                          char asz[][ 40 ], void **pp ) {
@@ -1072,8 +1072,8 @@ static void GTKRolloutProgressEnd(void **pp, gboolean destroy)
 #endif /* USE_GTK */
 
 static void
-TextRolloutProgressStart( const cubeinfo *pci, const int n,
-                          rolloutstat aars[ 2 ][ 2 ],
+TextRolloutProgressStart( const cubeinfo *UNUSED(pci), const int n,
+                          rolloutstat UNUSED(aars[ 2 ][ 2 ]),
                           rolloutcontext *prc, char asz[][ 40 ], void **pp ) {
 
   int i;

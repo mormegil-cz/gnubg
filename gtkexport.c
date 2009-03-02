@@ -503,7 +503,7 @@ static void ExportHTMLImages(void)
 	gtk_widget_destroy(fc);
 }
 
-static void GenHtmlImages(GtkWidget *widget, gpointer data)
+static void GenHtmlImages(GtkWidget *UNUSED(widget), gpointer data)
 {	/* Temporariarly set html size and create images */
 	int temp = exsExport.nHtmlSize;
 	exsExport.nHtmlSize = (int)gtk_adjustment_get_value(GTK_ADJUSTMENT(data));
