@@ -1,6 +1,6 @@
 Tue Mar  3 14:19:11 CET 2009 Christian Anthon <anthon@kiku.dk>
 
-	* Makefile.am, configure.in, m4/az_python.m4: 
+	* Makefile.am, configure.in, m4/az_python.m4: improve python detection
 
 Tue Mar  3 13:53:25 CET 2009 Christian Anthon <anthon@kiku.dk>
 
