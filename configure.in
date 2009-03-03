@@ -282,7 +282,7 @@ AM_CHECK_PYTHON_HEADERS(have_python="yes", have_python="no")
 if test "$with_python" != "no" && test "x$have_python" = "xyes"; then
         AC_DEFINE(USE_PYTHON,1,[Define if you want to use Python inside gnubg])
 fi
-AM_CONDITIONAL(USE_PYTHON, "$with_python" != "no" && test "$have_python" != "no" )
+AM_CONDITIONAL(USE_PYTHON, test "$with_python" != "no" && test "$have_python" != "no" )
 
 dnl
 dnl SSE
