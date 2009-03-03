@@ -2394,7 +2394,7 @@ static void Copy_RGB_to_RGBA( unsigned char *puchDest, int nDestStride,
     }
 }
 
-#if USE_GTK
+#if USE_GTK && HAVE_CAIRO
 static double Highlight(double c)
 {
 	if (c < .75)
@@ -2405,7 +2405,6 @@ static double Highlight(double c)
 
 static void RenderArrow(unsigned char* puch, double arColour[4], int nSize, int left)
 {
-#if HAVE_CAIRO
 	cairo_surface_t* surface = cairo_image_surface_create_for_data (puch, CAIRO_FORMAT_ARGB32,
 												nSize * ARROW_WIDTH,
 												nSize * ARROW_HEIGHT,
@@ -2450,7 +2449,6 @@ static void RenderArrow(unsigned char* puch, double arColour[4], int nSize, int 
 
 	cairo_destroy (cr);
 	cairo_surface_destroy(surface);
-#endif
 }
 
 extern void RenderArrows( renderdata *prd, unsigned char* puch0,
@@ -2829,7 +2827,7 @@ extern void RenderImages( renderdata *prd, renderimages *pri ) {
     RenderResign( prd, pri->achResign, nSize * RESIGN_WIDTH * 4 );
     RenderResignFaces( prd, pri->achResignFaces, nSize * RESIGN_LABEL_WIDTH * 3,
 		       pri->achResign, nSize * RESIGN_WIDTH * 4 );
-#if USE_GTK
+#if USE_GTK && HAVE_CAIRO
 	if (prd->showMoveIndicator)
 		RenderArrows( prd, pri->auchArrow[0], pri->auchArrow[1], nSize * ARROW_WIDTH * 4, prd->fClockwise );
 #endif

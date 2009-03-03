@@ -619,7 +619,7 @@ static void RenderObjects(void)
 			asRefract[ 1 ], CHEQUER_WIDTH * s * 4 );
 	RenderChequerLabels( &rd, auchChequerLabels, CHEQUER_LABEL_WIDTH * s * 3 );
 
-#if USE_GTK
+#if USE_GTK && HAVE_CAIRO
 	RenderArrows( &rd, auchArrow[0], auchArrow[1], s * ARROW_WIDTH * 4, rd.fClockwise );
 #endif
 
