@@ -1,295 +1,189 @@
-dnl
-dnl @category InstalledPackages
-dnl @author Robert White <kranki@mac.com>
-dnl @author Dustin Mitchell <dustin@cs.uchicago.edu>
-dnl @version 2005-01-14
-dnl @license GPLWithACException
+AM_PATH_PYTHON([MINIMUM-VERSION], [ACTION-IF-FOUND], [ACTION-IF-NOT-FOUND])
 
-# AZ_PYTHON_DEFAULT( )
-# -----------------
-# Sets the default to not include Python support.
+# Adds support for distributing Python modules and packages.  To
+# install modules, copy them to $(pythondir), using the python_PYTHON
+# automake variable.  To install a package with the same name as the
+# automake package, install to $(pkgpythondir), or use the
+# pkgpython_PYTHON automake variable.
 
-AC_DEFUN([AZ_PYTHON_DEFAULT],
-[
-    az_use_python=true
-])
+# The variables $(pyexecdir) and $(pkgpyexecdir) are provided as
+# locations to install python extension modules (shared libraries).
+# Another macro is required to find the appropriate flags to compile
+# extension modules.
 
-# AZ_PYTHON_CSPEC( )
-# -----------------
-# Set up the c compiler options to compile Python
-# embedded programs/libraries in $PYTHON_CSPEC if
-# $PYTHON has been defined.
+# If your package is configured with a different prefix to python,
+# users will have to add the install directory to the PYTHONPATH
+# environment variable, or create a .pth file (see the python
+# documentation for details).
 
-AC_DEFUN([AZ_PYTHON_CSPEC],
-[
-    AC_ARG_VAR( [PYTHON], [Python Executable Path] )
-    if test -n "$PYTHON"
-    then
-        az_python_prefix=`${PYTHON} -c "import sys; print sys.prefix"`
-        if test -z "$az_python_prefix"
-        then
-            AC_MSG_ERROR([Python Prefix is not known])
-        fi
-        az_python_execprefix=`${PYTHON} -c "import sys; print sys.exec_prefix"`
-        az_python_version=`$PYTHON -c "import sys; print sys.version[[:3]]"`
-        az_python_includespec="-I${az_python_prefix}/include/python${az_python_version}"
-        if test x"$python_prefix" != x"$python_execprefix"; then
-            az_python_execspec="-I${az_python_execprefix}/include/python${az_python_version}"
-            az_python_includespec="${az_python_includespec} $az_python_execspec"
-        fi
-        az_python_ccshared=`${PYTHON} -c "import distutils.sysconfig; print distutils.sysconfig.get_config_var('CFLAGSFORSHARED')"`
-        az_python_cspec="${az_python_ccshared} ${az_python_includespec}"
-        AC_SUBST([PYTHON_CSPEC], [${az_python_cspec}])
-        AC_MSG_NOTICE([PYTHON_CSPEC=${az_python_cspec}])
+# If the MINIMUM-VERSION argument is passed, AM_PATH_PYTHON will
+# cause an error if the version of python installed on the system
+# doesn't meet the requirement.  MINIMUM-VERSION should consist of
+# numbers and dots only.
+
+AC_DEFUN([AM_PATH_PYTHON],
+ [
+  dnl Find a Python interpreter.  Python versions prior to 1.5 are not
+  dnl supported because the default installation locations changed from
+  dnl $prefix/lib/site-python in 1.4 to $prefix/lib/python1.5/site-packages
+  dnl in 1.5.
+  m4_define([_AM_PYTHON_INTERPRETER_LIST],
+            [python python2 python2.4 python2.3 python2.2 dnl
+python2.1 python2.0 python1.6 python1.5])
+
+  m4_if([$1],[],[
+    dnl No version check is needed.
+    # Find any Python interpreter.
+    if test -z "$PYTHON"; then
+      PYTHON=:
+      AC_PATH_PROGS([PYTHON], _AM_PYTHON_INTERPRETER_LIST)
     fi
-])
-
-# AZ_PYTHON_LSPEC( )
-# -----------------
-# Set up the linker options to link Python embedded
-# programs/libraries in $PYTHON_LSPEC if $PYTHON
-# has been defined.
-
-AC_DEFUN([AZ_PYTHON_LSPEC],
-[
-    AC_ARG_VAR( [PYTHON], [Python Executable Path] )
-    if test -n "$PYTHON"
-    then
-        AZ_PYTHON_RUN([
-import sys
-if (sys.platform == "darwin"):
-    strLinkSpec = "-framework Python"
-else:
-    import distutils.sysconfig
-    strUseFrameWork = "--enable-framework"
-    dictConfig = distutils.sysconfig.get_config_vars( )
-    strConfigArgs = dictConfig.get("CONFIG_ARGS")
-    strLinkSpec =  dictConfig.get('LDFLAGS')
-    if -1 ==  strConfigArgs.find(strUseFrameWork):
-        strLibPL = dictConfig.get("LIBPL")
-        if strLibPL and (strLibPL != ""):
-            strLinkSpec += " -L%s" % (strLibPL)
-        strSys = dictConfig.get("SYSLIBS")
-        if strSys and (strSys != ""):
-            strLinkSpec += " %s" % (strSys)
-        strSHL = dictConfig.get("SHLIBS")
-        if strSHL and (strSHL != ""):
-            strLinkSpec += " %s" % (strSHL)
-        # Construct the Python Library Name.
-        strTmplte = " -lpython%d.%d"
-        if (sys.platform == "win32") or (sys.platform == "os2emx"):
-            strTmplte = " -lpython%d%d"
-        strWrk = strTmplte % ( (sys.hexversion >> 24),
-                            ((sys.hexversion >> 16) & 0xff))
-        strLinkSpec += strWrk
-    else:
-        # This is not ideal since it changes the search path
-        # for Frameworks which could have side-effects on
-        # other included Frameworks.  However, it is necessary
-        # where someone has installed more than one frameworked
-        # Python.  Frameworks are really only used in MacOSX.
-        strLibFW = dictConfig.get("PYTHONFRAMEWORKPREFIX")
-        if strLibFW and (strLibFW != ""):
-            strLinkSpec += " -F%s" % (strLibFW)
-    strLinkSpec += " %s" % (dictConfig.get('LINKFORSHARED'))
-print strLinkSpec
-        ])
-        AC_SUBST([PYTHON_LSPEC], [${az_python_output}])
-        AC_MSG_NOTICE([PYTHON_LSPEC=${az_python_output}])
-    fi
-])
-
-
-# AZ_PYTHON_PATH( )
-# -----------------
-# Look for Python and set the output variable 'PYTHON'
-# to 'python' if found, empty otherwise.
-
-AC_DEFUN([AZ_PYTHON_PATH],
-[
-    AC_ARG_VAR( [PYTHON], [Python Executable Path] )
-    AC_PATH_PROG( PYTHON, python, [], $1 )
-    if test -z "$PYTHON"
-    then
-        AC_MSG_ERROR([Python Executable not found])
-    fi
-])
-
-# AZ_PYTHON_PREFIX( )
-# -------------------
-# Use the values of $prefix and $exec_prefix for the corresponding
-# values of PYTHON_PREFIX and PYTHON_EXEC_PREFIX.
-
-AC_DEFUN([AZ_PYTHON_PREFIX],
-[
-    if test -z "$PYTHON"
-    then
-        AC_MSG_ERROR([Python Executable Path is not known])
-    fi
-    ax_python_prefix=`${PYTHON} -c "import sys; print sys.prefix"`
-    ax_python_execprefix=`${PYTHON} -c "import sys; print sys.exec_prefix"`
-    AC_SUBST([PYTHON_PREFIX], ["${ax_python_prefix}"])
-    AC_SUBST([PYTHON_EXECPREFIX], ["${ax_python_execprefix}"])
-])
-
-
-
-# AZ_PYTHON_RUN( PYTHON_PROGRAM )
-# -----------------
-# Run a Python Test Program saving its output
-# in az_python_output and its condition code
-# in az_python_cc.
-
-AC_DEFUN([AZ_PYTHON_RUN],
-[
-    AC_ARG_VAR( [PYTHON], [Python Executable Path] )
-    if test -z "$PYTHON"
-    then
-        AC_MSG_ERROR([Python Executable not found])
+    am_display_PYTHON=python
+  ], [
+    dnl A version check is needed.
+    if test -n "$PYTHON"; then
+      # If the user set $PYTHON, use it and don't search something else.
+      AC_MSG_CHECKING([whether $PYTHON version >= $1])
+      AM_PYTHON_CHECK_VERSION([$PYTHON], [$1],
+			      [AC_MSG_RESULT(yes)],
+			      [AC_MSG_ERROR(too old)])
+      am_display_PYTHON=$PYTHON
     else
-        cat >conftest.py <<_ACEOF
-$1
-_ACEOF
-        az_python_output=`$PYTHON conftest.py`
-        az_python_cc=$?
-        rm conftest.py
-        if test -f "conftest.pyc"
-        then
-            rm conftest.pyc
-        fi
+      # Otherwise, try each interpreter until we find one that satisfies
+      # VERSION.
+      AC_CACHE_CHECK([for a Python interpreter with version >= $1],
+	[am_cv_pathless_PYTHON],[
+	for am_cv_pathless_PYTHON in _AM_PYTHON_INTERPRETER_LIST none; do
+	  test "$am_cv_pathless_PYTHON" = none && break
+	  AM_PYTHON_CHECK_VERSION([$am_cv_pathless_PYTHON], [$1], [break])
+	done])
+      # Set $PYTHON to the absolute path of $am_cv_pathless_PYTHON.
+      if test "$am_cv_pathless_PYTHON" = none; then
+	PYTHON=:
+      else
+        AC_PATH_PROG([PYTHON], [$am_cv_pathless_PYTHON])
+      fi
+      am_display_PYTHON=$am_cv_pathless_PYTHON
     fi
+  ])
+
+  if test "$PYTHON" = :; then
+  dnl Run any user-specified action, or abort.
+    m4_default([$3], [AC_MSG_ERROR([no suitable Python interpreter found])])
+  else
+
+  dnl Query Python for its version number.  Getting [:3] seems to be
+  dnl the best way to do this; it's what "site.py" does in the standard
+  dnl library.
+
+  AC_CACHE_CHECK([for $am_display_PYTHON version], [am_cv_python_version],
+    [am_cv_python_version=`$PYTHON -c "import sys; print sys.version[[:3]]"`])
+  AC_SUBST([PYTHON_VERSION], [$am_cv_python_version])
+
+  dnl Use the values of $prefix and $exec_prefix for the corresponding
+  dnl values of PYTHON_PREFIX and PYTHON_EXEC_PREFIX.  These are made
+  dnl distinct variables so they can be overridden if need be.  However,
+  dnl general consensus is that you shouldn't need this ability.
+
+  AC_SUBST([PYTHON_PREFIX], ['${prefix}'])
+  AC_SUBST([PYTHON_EXEC_PREFIX], ['${exec_prefix}'])
+
+  dnl At times (like when building shared libraries) you may want
+  dnl to know which OS platform Python thinks this is.
+
+  AC_CACHE_CHECK([for $am_display_PYTHON platform], [am_cv_python_platform],
+    [am_cv_python_platform=`$PYTHON -c "import sys; print sys.platform"`])
+  AC_SUBST([PYTHON_PLATFORM], [$am_cv_python_platform])
+
+
+  dnl Set up 4 directories:
+
+  dnl pythondir -- where to install python scripts.  This is the
+  dnl   site-packages directory, not the python standard library
+  dnl   directory like in previous automake betas.  This behavior
+  dnl   is more consistent with lispdir.m4 for example.
+  dnl Query distutils for this directory.  distutils does not exist in
+  dnl Python 1.5, so we fall back to the hardcoded directory if it
+  dnl doesn't work.
+  AC_CACHE_CHECK([for $am_display_PYTHON script directory],
+    [am_cv_python_pythondir],
+    [am_cv_python_pythondir=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_python_lib(0,0,prefix='$PYTHON_PREFIX')" 2>/dev/null ||
+     echo "$PYTHON_PREFIX/lib/python$PYTHON_VERSION/site-packages"`])
+  AC_SUBST([pythondir], [$am_cv_python_pythondir])
+
+  dnl pkgpythondir -- $PACKAGE directory under pythondir.  Was
+  dnl   PYTHON_SITE_PACKAGE in previous betas, but this naming is
+  dnl   more consistent with the rest of automake.
+
+  AC_SUBST([pkgpythondir], [\${pythondir}/$PACKAGE])
+
+  dnl pyexecdir -- directory for installing python extension modules
+  dnl   (shared libraries)
+  dnl Query distutils for this directory.  distutils does not exist in
+  dnl Python 1.5, so we fall back to the hardcoded directory if it
+  dnl doesn't work.
+  AC_CACHE_CHECK([for $am_display_PYTHON extension module directory],
+    [am_cv_python_pyexecdir],
+    [am_cv_python_pyexecdir=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_python_lib(1,0,prefix='$PYTHON_EXEC_PREFIX')" 2>/dev/null ||
+     echo "${PYTHON_EXEC_PREFIX}/lib/python${PYTHON_VERSION}/site-packages"`])
+  AC_SUBST([pyexecdir], [$am_cv_python_pyexecdir])
+
+  dnl pkgpyexecdir -- $(pyexecdir)/$(PACKAGE)
+
+  AC_SUBST([pkgpyexecdir], [\${pyexecdir}/$PACKAGE])
+
+  dnl Run any user-specified action.
+  $2
+  fi
+
 ])
 
 
-
-# AZ_PYTHON_VERSION_CHECK( VERSION, [ACTION-IF-TRUE], [ACTION-IF-FALSE] )
-# -----------------------------------------------------------------------------
-# Run ACTION-IF-TRUE if the Python interpreter has version >= VERSION.
+# AM_PYTHON_CHECK_VERSION(PROG, VERSION, [ACTION-IF-TRUE], [ACTION-IF-FALSE])
+# ---------------------------------------------------------------------------
+# Run ACTION-IF-TRUE if the Python interpreter PROG has version >= VERSION.
 # Run ACTION-IF-FALSE otherwise.
-# This test uses sys.hexversion instead of the string equivalant (first
+# This test uses sys.hexversion instead of the string equivalent (first
 # word of sys.version), in order to cope with versions such as 2.2c1.
 # hexversion has been introduced in Python 1.5.2; it's probably not
 # worth to support older versions (1.5.1 was released on October 31, 1998).
-
-AC_DEFUN([AZ_PYTHON_VERSION_CHECK],
- [
-    AC_ARG_VAR( [PYTHON], [Python Executable Path] )
-    if test -n "$PYTHON"
-    then
-        AC_MSG_CHECKING([whether $PYTHON version >= $1])
-        AZ_PYTHON_RUN([
-import sys, string
+AC_DEFUN([AM_PYTHON_CHECK_VERSION],
+ [prog="import sys, string
 # split strings by '.' and convert to numeric.  Append some zeros
 # because we need at least 4 digits for the hex conversion.
-minver = map(int, string.split('$1', '.')) + [[0, 0, 0]]
+minver = map(int, string.split('$2', '.')) + [[0, 0, 0]]
 minverhex = 0
 for i in xrange(0, 4): minverhex = (minverhex << 8) + minver[[i]]
-if sys.hexversion >= minverhex:
-    sys.exit( 0 )
-else:
-    sys.exit( 1 )
-        ])
-        if test $az_python_cc -eq 0
-        then
-            $2
-        m4_ifvaln(
-            [$3],
-            [else $3]
-        )
-        fi
-    fi
+sys.exit(sys.hexversion < minverhex)"
+  AS_IF([AM_RUN_LOG([$1 -c "$prog"])], [$3], [$4])])
+
+
+dnl a macro to check for ability to create python extensions
+dnl  AM_CHECK_PYTHON_HEADERS([ACTION-IF-POSSIBLE], [ACTION-IF-NOT-POSSIBLE])
+dnl function also defines PYTHON_INCLUDES
+AC_DEFUN([AM_CHECK_PYTHON_HEADERS],
+[AC_REQUIRE([AM_PATH_PYTHON])
+AC_MSG_CHECKING(for headers required to compile python extensions)
+dnl deduce PYTHON_INCLUDES
+py_prefix=`$PYTHON -c "import sys; print sys.prefix"`
+py_exec_prefix=`$PYTHON -c "import sys; print sys.exec_prefix"`
+if test -x "$PYTHON-config"; then
+PYTHON_INCLUDES=`$PYTHON-config --includes 2>/dev/null`
+PYTHON_LIBS=`$PYTHON-config --libs 2>/dev/null`
+else
+AC_MSG_RESULT([missing $PYTHON-config])
+PYTHON_INCLUDES="-ITHISWILLNEVERWORK"
+fi
+AC_ARG_VAR(PYTHON_INCLUDES, [Location of the python header files])
+AC_ARG_VAR(PYTHON_LIBS, [Libraries needed for python inclusion])
+dnl check if the headers exist:
+save_CPPFLAGS="$CPPFLAGS"
+CPPFLAGS="$CPPFLAGS $PYTHON_INCLUDES"
+AC_TRY_CPP([#include <Python.h>],dnl
+[AC_MSG_RESULT(found)
+$1],dnl
+[AC_MSG_RESULT(not found)
+$2])
+CPPFLAGS="$save_CPPFLAGS"
 ])
 
-
-
-# AZ_PYTHON_VERSION_ENSURE( VERSION )
-# -----------------
-# Insure that the Python Interpreter Version
-# is greater than or equal to the VERSION
-# parameter.
-
-AC_DEFUN([AZ_PYTHON_VERSION_ENSURE],
-[
-    AZ_PYTHON_VERSION_CHECK(
-        [$1],
-        [AC_MSG_RESULT(yes)],
-        [AC_MSG_ERROR(too old)]
-    )
-])
-
-
-
-# AZ_PYTHON_WITH( [path] )
-# -----------------------------------------------------------------
-# Handles the various --with-python commands.
-# Input:
-#   $1 is the optional search path for the python executable if needed
-# Ouput:
-#   USE_PYTHON (AM_CONDITIONAL) is true if python executable found
-#   and --with-python was requested; otherwise false.
-#   $PYTHON contains the full executable path to python if USE_PYTHON
-#   is true.
-#
-# Example:
-#   AZ_PYTHON_WITH( )
-#   or
-#   AZ_PYTHON_WITH("/usr/bin")
-
-AC_DEFUN([AZ_PYTHON_WITH],
-[
-    AC_ARG_VAR([PYTHON],[Python Executable Path])
-
-    # unless PYTHON was supplied to us (as a precious variable),
-    # see if --with-python[=PythonExecutablePath], --with-python,
-    # --without-python or --with-python=no was given.
-    if test -z "$PYTHON"
-    then
-        AC_MSG_CHECKING(for --with-python)
-        AC_ARG_WITH(
-            python,
-            AC_HELP_STRING([--with-python@<:@=PYTHON@:>@],
-                [absolute path name of Python executable]
-            ),
-            [
-                if test "$withval" = "yes"
-                then
-                    # "yes" was specified, but we don't have a path
-                    AC_MSG_RESULT(yes)
-                    AZ_PYTHON_PATH()
-                    AZ_PYTHON_PREFIX( )
-                    az_use_python=true
-                    AM_CONDITIONAL(USE_PYTHON, test x"$az_use_python" = x"true")
-                    AC_DEFINE(USE_PYTHON,1,[Define if you want to use Python inside gnubg])
-                elif test "$withval" = "no"
-                then
-                    AC_MSG_RESULT(no)
-                    az_use_python=false
-                    AM_CONDITIONAL(USE_PYTHON, test x"$az_use_python" = x"true")
-                else
-                    # $withval must be the executable path then.
-                    AC_SUBST([PYTHON], ["${withval}"])
-                    AC_MSG_RESULT($withval)
-                    az_use_python=true
-                    AM_CONDITIONAL(USE_PYTHON, test x"$az_use_python" = x"true")
-                    AC_DEFINE(USE_PYTHON,1,[Define if you want to use Python inside gnubg])
-                    AZ_PYTHON_PREFIX( )
-                fi
-            ],
-            [
-                # --with-python was not specified.
-                if test "x$az_use_python" = "xtrue"
-                then
-                    AC_MSG_RESULT(enabled by default)
-                    AZ_PYTHON_PATH( )
-                    AZ_PYTHON_PREFIX( )
-                    AC_DEFINE(USE_PYTHON,1,[Define if you want to use Python inside gnubg])
-                else
-                     AC_MSG_RESULT(no)
-                     az_use_python=false
-                fi
-                AM_CONDITIONAL(USE_PYTHON, test x"$az_use_python" = x"true")
-            ]
-        )
-    fi
-
-])

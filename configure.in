@@ -275,16 +275,14 @@ AM_CONDITIONAL(FOUND_GDK_PIXBUF_CSOURCE, test "x$GDK_PIXBUF_CSOURCE" != "xno" )
 dnl
 dnl Check for Python
 dnl
-
-AZ_PYTHON_DEFAULT()
-AZ_PYTHON_WITH()
-AZ_PYTHON_VERSION_ENSURE([2.2])
-AZ_PYTHON_CSPEC
-AZ_PYTHON_LSPEC
-if test "x$az_python_cspec" != "x"; then
+have_python="no"
+AC_ARG_WITH(python,[  --with-python             use python (Default if found)])
+AM_PATH_PYTHON(2.2)
+AM_CHECK_PYTHON_HEADERS(have_python="yes", have_python="no")
+if test "$with_python" != "no" && test "x$have_python" = "xyes"; then
         AC_DEFINE(USE_PYTHON,1,[Define if you want to use Python inside gnubg])
-        AM_CONDITIONAL(USE_PYTHON, test "$no_python" != "yes" )
 fi
+AM_CONDITIONAL(USE_PYTHON, "$with_python" != "no" && test "$have_python" != "no" )
 
 dnl
 dnl SSE

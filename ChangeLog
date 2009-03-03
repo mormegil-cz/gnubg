@@ -1,3 +1,7 @@
+Tue Mar  3 14:19:11 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, configure.in, m4/az_python.m4: 
+
 Tue Mar  3 13:53:25 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* htmlimages.c, render.c: allow compilation without cairo
