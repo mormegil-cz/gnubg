@@ -41,6 +41,13 @@
 #include <libxml/tree.h>
 #include <libxml/parser.h>
 #include <libxml/catalog.h>
+static const xmlChar* XML_PUBLIC_ID = BAD_CAST "-//GNU Backgammon//DTD Match Equity Tables//EN";
+#else
+typedef unsigned char xmlChar;
+#define BAD_CAST (xmlChar *)
+#define xmlStrdup(x) BAD_CAST g_strdup( (char *)(x))
+#define xmlCharStrdup(x) BAD_CAST g_strdup((x))
+#define xmlFree(x) g_free(x)
 #endif
 
 #ifdef NO_ERF
@@ -57,7 +64,6 @@
 #include "matchequity.h"
 #include "backgammon.h"
 
-static const xmlChar* XML_PUBLIC_ID = BAD_CAST "-//GNU Backgammon//DTD Match Equity Tables//EN";
 
 typedef struct _parameter {
 
@@ -858,9 +864,9 @@ static void
 freeP ( parameter *pp ) {
 
   if ( pp->szName )
-    g_free ( pp->szName );
+    xmlFree ( pp->szName );
   if ( pp->szValue )
-    g_free ( pp->szValue );
+    xmlFree ( pp->szValue );
   free ( pp );
 
 }
@@ -872,7 +878,7 @@ freeMP ( metparameters *pmp ) {
   listOLD *pl;
 
   if ( pmp->szName )
-    g_free ( pmp->szName );
+    xmlFree ( pmp->szName );
 
   pl = &pmp->lParameters;
 
@@ -909,26 +915,26 @@ getDefaultMET ( metdata *pmd ) {
 
   for ( i = 0; i < 4; i++ ) {
     pp = (parameter *) malloc ( sizeof ( parameter ) );
-    pp->szName = (xmlChar*)g_strdup ( (char*) apPreCrawford[ i ].szName );
-    pp->szValue = (xmlChar*)g_strdup ( (char*) apPreCrawford[ i ].szValue );
+    pp->szName = xmlStrdup ( apPreCrawford[ i ].szName );
+    pp->szValue = xmlStrdup ( apPreCrawford[ i ].szValue );
     ListInsert ( &pmd->mpPreCrawford.lParameters, pp );
   }
 
   for ( j = 0; j < 2; j++ ) {
     for ( i = 0; i < 3; i++ ) {
       pp = (parameter *) malloc ( sizeof ( parameter ) );
-      pp->szName = (xmlChar*)g_strdup ( (char*) apPostCrawford[ i ].szName );
-      pp->szValue = (xmlChar*)g_strdup ( (char*) apPostCrawford[ i ].szValue );
+      pp->szName = xmlStrdup (apPostCrawford[ i ].szName );
+      pp->szValue = xmlStrdup ( apPostCrawford[ i ].szValue );
       ListInsert ( &pmd->ampPostCrawford[ j ].lParameters, pp );
     }
-    pmd->ampPostCrawford[ j ].szName = (xmlChar*)g_strdup ( "zadeh" );
+    pmd->ampPostCrawford[ j ].szName = xmlCharStrdup ( "zadeh" );
   }
 
-  pmd->mpPreCrawford.szName = (xmlChar*)g_strdup ( "zadeh" );
+  pmd->mpPreCrawford.szName = xmlCharStrdup ( "zadeh" );
 
-  pmd->mi.szName = (xmlChar*)g_strdup ( "N. Zadeh, Management Science 23, 986 (1977)" );
-  pmd->mi.szFileName = (xmlChar*)g_strdup ( "met/zadeh.xml" );
-  pmd->mi.szDescription = (xmlChar*)g_strdup ( "" );
+  pmd->mi.szName = xmlCharStrdup ( "N. Zadeh, Management Science 23, 986 (1977)" );
+  pmd->mi.szFileName = xmlCharStrdup ( "met/zadeh.xml" );
+  pmd->mi.szDescription = xmlCharStrdup ( "" );
   pmd->mi.nLength = MAXSCORE;
 
 }
@@ -1162,11 +1168,11 @@ parseParameters ( listOLD *plList, xmlDocPtr doc, xmlNodePtr root ) {
       pp = (parameter *) malloc ( sizeof ( parameter ) );
 
       pc = xmlGetProp ( cur, BAD_CAST "name" );
-      pp->szName = (xmlChar*)g_strdup ( (char*) (pc ? pc : BAD_CAST "" ));
+      pp->szName = xmlStrdup ( (pc ? pc : BAD_CAST "" ));
       xmlFree(pc);
       
       pc = xmlNodeListGetString ( doc, cur->xmlChildrenNode, 1 );
-      pp->szValue = (xmlChar*)g_strdup ( (char*) (pc ? pc : BAD_CAST ""));
+      pp->szValue = xmlStrdup ( (pc ? pc : BAD_CAST ""));
       xmlFree(pc);
 
       ListInsert ( plList, pp );
@@ -1280,12 +1286,12 @@ static void parseInfo ( metdata *pmd, xmlDocPtr doc, xmlNodePtr root ) {
 
     if ( ! strcmp ( (char*) cur->name, "name" ) ) {
       pc = xmlNodeListGetString ( doc, cur->xmlChildrenNode, 1 );
-      pmd->mi.szName = ( pc ) ? (xmlChar*)g_strdup ( (char*) pc ) : NULL;
+      pmd->mi.szName = ( pc ) ? xmlStrdup ( pc ) : NULL;
       xmlFree(pc);
     }
     else if ( ! strcmp ( (char*) cur->name, "description" ) ) {
       pc = xmlNodeListGetString ( doc, cur->xmlChildrenNode, 1 );
-      pmd->mi.szDescription = ( pc ) ? (xmlChar*)g_strdup ( (char*) pc ) : NULL;
+      pmd->mi.szDescription = ( pc ) ? xmlStrdup ( pc ) : NULL;
       xmlFree(pc);
     }
     else if ( ! strcmp ( (char*) cur->name, "length" ) )
@@ -1376,7 +1382,7 @@ static int readMET ( metdata *pmd, const char *szFileName ) {
 		  if (pch)  free( pch );
 		  goto finish;
 	  }
-	  g_free( pch );
+	  xmlFree( pch );
 
 	  /* load dtd */
 
@@ -1426,7 +1432,7 @@ static int readMET ( metdata *pmd, const char *szFileName ) {
       if ( pc )
         pmd->mpPreCrawford.szName = pc;
       else
-        pmd->mpPreCrawford.szName = (xmlChar*)g_strdup ( "explicit" );
+        pmd->mpPreCrawford.szName = xmlCharStrdup ( "explicit" );
 
       parsePreCrawford ( pmd, doc, cur );
 
@@ -1468,7 +1474,7 @@ static int readMET ( metdata *pmd, const char *szFileName ) {
           if ( pc )
             pmd->ampPostCrawford[ i ].szName = BAD_CAST pc;
           else
-            pmd->ampPostCrawford[ i ].szName = (xmlChar*)g_strdup ( "explicit" );
+            pmd->ampPostCrawford[ i ].szName = xmlCharStrdup ( "explicit" );
         }
 
       }
@@ -1518,7 +1524,7 @@ static int readMET ( metdata *pmd, const char *szFileName ) {
     xmlFreeDoc ( doc );
 
   if ( ! fError )
-    pmd->mi.szFileName = (xmlChar*)g_strdup ( (char*) szFileName );
+    pmd->mi.szFileName = xmlCharStrdup ( szFileName );
 
   return fError;
 
@@ -1804,9 +1810,9 @@ InitMatchEquity ( const char *szFileName) {
   for ( i = 0; i < 2; i++ )
     freeMP ( &md.ampPostCrawford[ i ] );
 
-  if ( miCurrent.szName ) g_free ( miCurrent.szName );
-  if ( miCurrent.szFileName ) g_free ( miCurrent.szFileName );
-  if ( miCurrent.szDescription ) g_free ( miCurrent.szDescription );
+  if ( miCurrent.szName ) xmlFree ( miCurrent.szName );
+  if ( miCurrent.szFileName ) xmlFree ( miCurrent.szFileName );
+  if ( miCurrent.szDescription ) xmlFree ( miCurrent.szDescription );
 
   /* save match equity table information */
 

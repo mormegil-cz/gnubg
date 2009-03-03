@@ -127,9 +127,4 @@ extern void PushSplash ( GtkWidget *pwSplash, const gchar *szText0, const gchar 
   gtk_label_set_text ( GTK_LABEL ( pgs->apwStatus[ 1 ] ), szText1 );
 
   ProcessGtkEvents();
-
-#ifndef WIN32
-  /* Don't bother with these pauses on windows? */
-  g_usleep ( nMuSec * 1000 );
-#endif
 }

@@ -31,6 +31,9 @@
 #include <glib/gstdio.h>
 #include "bearoffgammon.h"
 #include "positionid.h"
+#include "bearoff.h"
+#include "eval.h"
+#include "backgammon.h"
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
@@ -840,7 +843,7 @@ static unsigned int MakeInt(unsigned char a, unsigned char b, unsigned char c, u
 	return (a | (unsigned char)b << 8 | (unsigned char)c << 16 | (unsigned char)d << 24);
 }
 
-void InvalidDb(bearoffcontext *pbc)
+static void InvalidDb(bearoffcontext *pbc)
 {
 	if (errno)
 	{
@@ -1168,7 +1171,7 @@ static unsigned short int *GetDistCompressed ( unsigned short int aus[ 64 ], con
              "Offset %lu, dist size %u (offset %u), "
              "gammon dist size %u (offset %u)\n",
              pbc->szFilename, (unsigned long) iOffset, nz, ioff, nzg, ioffg );
-    g_assert( FALSE )
+    g_assert( FALSE );
   }
 
   /* read prob + gammon probs */

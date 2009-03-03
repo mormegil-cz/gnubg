@@ -1,3 +1,8 @@
+Tue Mar  3 13:42:13 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* bearoff.c, gtksplash.c: minor cleanup
+	* gtkprefs.c, matchequity.c: allow compiling without xml
+
 Mon Mar  2 10:35:14 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* eval.c, eval.h, osr.c: use swap_us
