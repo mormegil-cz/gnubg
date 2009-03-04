@@ -252,7 +252,8 @@ cat > credits.c <<EOF
 #include <glib/gi18n.h>
 #include "credits.h"
 
-const char aszCOPYRIGHT[] = N_("Copyright (C) 2008 by the AUTHORS; for details type \`show version'.");
+const char aszCOPYRIGHT[] =
+    N_("Copyright (C) 2009 by Gary Wong and the AUTHORS; for details type \`show version'.");
 
 credEntry ceAuthors[] = {
 EOF
@@ -328,7 +329,7 @@ cat >> credits.c <<EOF
 
 credits creditList[] =
 {
-	{N_("Developers"), ceAuthors},
+	{N_("AUTHORS"), ceAuthors},
 	{N_("Code Contributors"), ceContrib},
 	{N_("Translations"), ceTranslations},
 	{N_("Support"), ceSupport},

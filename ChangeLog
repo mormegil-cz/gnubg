@@ -1,3 +1,9 @@
+Wed Mar  4 23:07:11 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, credits.sh, gnubg.c, gtkgame.c: use configurable
+	BUILD_DATE instead of __DATE__ to mark the build. Update copyright
+	notice.
+
 Tue Mar  3 14:19:11 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am, configure.in, m4/az_python.m4: improve python detection

@@ -3235,7 +3235,7 @@ static void ReportBug(gpointer p, guint n, GtkWidget * pwEvent)
 
 	sprintf(sz,
 		"http://savannah.gnu.org/bugs/?func=additem&group=gnubg"
-		"&release_id=" "110" "&custom_tf1=" __DATE__
+		"&release_id=" "110" "&custom_tf1=" BUILD_DATE
 		"&platform_version_id=%s", pchOS);
 	OpenURL(sz);
 }
@@ -5847,11 +5847,7 @@ extern void GTKShowBuildInfo(GtkWidget *pw, GtkWidget *pwParent)
 
 	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), pwBox);
 
-	gtk_box_pack_start( GTK_BOX( pwBox ), SelectableLabel(pwDialog, "Version " VERSION 
-#ifdef WIN32
-		" (build " __DATE__ ")"
-#endif
-		), FALSE, FALSE, 4 );
+	gtk_box_pack_start( GTK_BOX( pwBox ), SelectableLabel(pwDialog, "Version " VERSION), FALSE, FALSE, 4 );
 
 	gtk_box_pack_start(GTK_BOX(pwBox), gtk_hseparator_new(), FALSE, FALSE, 4);
 
