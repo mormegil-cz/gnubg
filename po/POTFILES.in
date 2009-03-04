@@ -124,6 +124,7 @@ lib/mt19937ar.h
 lib/neuralnet.c
 lib/neuralnet.h
 lib/neuralnetsse.c
+lib/sigmoid.h
 lib/sse.h
 makebearoff.c
 makehyper.c

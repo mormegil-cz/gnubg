@@ -1686,7 +1686,7 @@ extern void CommandAnalyseMove(char *UNUSED(sz))
 			GTKUpdateAnnotations();
 #endif
 	} else
-		outputerrf("%s", _("Please use hint on unfinished moves"));
+		outputerrf("%s", _("Please use `hint' on unfinished moves"));
 }
 
 static void
@@ -2556,7 +2556,7 @@ extern void CommandCMarkCubeShow(char *UNUSED(sz))
 
 	gsz = g_string_new(NULL);
 	cmark_cube_show(gsz, &ms, pmr, getMoveNumber(plGame, pmr) - 1);
-	outputf(_("%s"), gsz->str);
+	outputf("%s", gsz->str);
 	g_string_free(gsz, TRUE);
 }
 
@@ -2615,7 +2615,7 @@ extern void CommandCMarkMoveSetNone(char *sz)
 	if (sz && *sz)
 		cmark_move_set(pmr, sz, CMARK_NONE);
 	else
-		outputerrf(_("cmark move set requires a list of moves to set"));
+		outputerrf(_("`cmark move set none' requires a list of moves to set"));
 }
 
 extern void CommandCMarkMoveSetRollout(char *sz)
@@ -2628,7 +2628,7 @@ extern void CommandCMarkMoveSetRollout(char *sz)
 	if (sz && *sz)
 		cmark_move_set(pmr, sz, CMARK_ROLLOUT);
 	else
-		outputerrf(_("cmark move set requires a list of moves to set"));
+		outputerrf(_("`cmark move set rollout' requires a list of moves to set"));
 }
 
 extern void CommandCMarkMoveShow(char *UNUSED(sz))
@@ -2641,7 +2641,7 @@ extern void CommandCMarkMoveShow(char *UNUSED(sz))
 
 	gsz = g_string_new(NULL);
 	cmark_move_show(gsz, &ms, pmr, getMoveNumber(plGame, pmr) - 1);
-	outputf(_("%s"), gsz->str);
+	outputf("%s", gsz->str);
 	g_string_free(gsz, TRUE);
 }
 
@@ -2654,7 +2654,7 @@ extern void CommandCMarkGameShow(char *UNUSED(sz))
 
 	gsz = g_string_new(NULL);
 	cmark_game_show(gsz, plGame, getGameNumber(plGame));
-	outputf(_("%s"), gsz->str);
+	outputf("%s", gsz->str);
 	g_string_free(gsz, TRUE);
 }
 
@@ -2667,7 +2667,7 @@ extern void CommandCMarkMatchShow(char *UNUSED(sz))
 
 	gsz = g_string_new(NULL);
 	cmark_match_show(gsz, &lMatch);
-	outputf(_("%s"), gsz->str);
+	outputf("%s", gsz->str);
 	g_string_free(gsz, TRUE);
 }
 
