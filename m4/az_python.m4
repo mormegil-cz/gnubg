@@ -139,25 +139,6 @@ python2.1 python2.0 python1.6 python1.5])
 ])
 
 
-# AM_PYTHON_CHECK_VERSION(PROG, VERSION, [ACTION-IF-TRUE], [ACTION-IF-FALSE])
-# ---------------------------------------------------------------------------
-# Run ACTION-IF-TRUE if the Python interpreter PROG has version >= VERSION.
-# Run ACTION-IF-FALSE otherwise.
-# This test uses sys.hexversion instead of the string equivalent (first
-# word of sys.version), in order to cope with versions such as 2.2c1.
-# hexversion has been introduced in Python 1.5.2; it's probably not
-# worth to support older versions (1.5.1 was released on October 31, 1998).
-AC_DEFUN([AM_PYTHON_CHECK_VERSION],
- [prog="import sys, string
-# split strings by '.' and convert to numeric.  Append some zeros
-# because we need at least 4 digits for the hex conversion.
-minver = map(int, string.split('$2', '.')) + [[0, 0, 0]]
-minverhex = 0
-for i in xrange(0, 4): minverhex = (minverhex << 8) + minver[[i]]
-sys.exit(sys.hexversion < minverhex)"
-  AS_IF([AM_RUN_LOG([$1 -c "$prog"])], [$3], [$4])])
-
-
 dnl a macro to check for ability to create python extensions
 dnl  AM_CHECK_PYTHON_HEADERS([ACTION-IF-POSSIBLE], [ACTION-IF-NOT-POSSIBLE])
 dnl function also defines PYTHON_INCLUDES
@@ -165,14 +146,14 @@ AC_DEFUN([AM_CHECK_PYTHON_HEADERS],
 [AC_REQUIRE([AM_PATH_PYTHON])
 AC_MSG_CHECKING(for headers required to compile python extensions)
 dnl deduce PYTHON_INCLUDES
-py_prefix=`$PYTHON -c "import sys; print sys.prefix"`
-py_exec_prefix=`$PYTHON -c "import sys; print sys.exec_prefix"`
+if test -x "$PYTHON"; then
 if test -x "$PYTHON-config"; then
-PYTHON_INCLUDES=`$PYTHON-config --includes 2>/dev/null`
-PYTHON_LIBS=`$PYTHON-config --libs 2>/dev/null`
+PYTHON_CONFIG="$PYTHON-config"
 else
-AC_MSG_RESULT([missing $PYTHON-config])
-PYTHON_INCLUDES="-ITHISWILLNEVERWORK"
+PYTHON_CONFIG="$PYTHON ./python-config"
+fi
+PYTHON_INCLUDES=`$PYTHON_CONFIG --includes 2>/dev/null`
+PYTHON_LIBS=`$PYTHON_CONFIG --libs 2>/dev/null`
 fi
 AC_ARG_VAR(PYTHON_INCLUDES, [Location of the python header files])
 AC_ARG_VAR(PYTHON_LIBS, [Libraries needed for python inclusion])
@@ -183,6 +164,8 @@ AC_TRY_CPP([#include <Python.h>],dnl
 [AC_MSG_RESULT(found)
 $1],dnl
 [AC_MSG_RESULT(not found)
+PYTHON_INCLUDES=""
+PYTHON_LIBS=""
 $2])
 CPPFLAGS="$save_CPPFLAGS"
 ])
