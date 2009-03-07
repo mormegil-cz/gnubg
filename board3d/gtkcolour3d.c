@@ -247,7 +247,7 @@ static void realize_preview3d(GtkWidget *widget, void* UNUSED(data))
 	gdk_gl_drawable_gl_end(gldrawable);
 }
 
-static GtkWidget *CreateGLPreviewWidget(Material* pMat)	// Rename this (and the one above to CreateGLBoardWidget)
+static GtkWidget *CreateGLPreviewWidget(Material* pMat)	/* Rename this (and the one above to CreateGLBoardWidget) */
 {
 	GtkWidget *p3dWidget = gtk_drawing_area_new();
 

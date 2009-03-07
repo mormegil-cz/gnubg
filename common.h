@@ -47,13 +47,9 @@ typedef struct sigaction psighandler;
 #elif HAVE_SIGVEC
 typedef struct sigvec psighandler;
 #else
-typedef RETSIGTYPE(*psighandler) (int);
+typedef void(*psighandler) (int);
 #endif
 
-#ifndef _MSC_VER
-#define sqrtf(arg) (float)sqrt((double)(arg))
-#define fabsf(arg) (float)fabs((double)(arg))
-#endif
 /* abs returns unsigned int by definition */
 #define Abs(a) ((unsigned int)abs(a))
 
@@ -64,16 +60,6 @@ typedef RETSIGTYPE(*psighandler) (int);
 #define strcasecmp strcasecmp_error_use_StrCaseCmp
 #define strncasecmp strncasecmp_error_use_StrNCaseCmp
 
-#ifndef WIN32
-#if defined(HAVE_SIGNBIT) && !HAVE_SIGNBIT
-#define signbit(x) ((x) < 0.0)
-#endif
-#if defined(HAVE_LRINT) && !HAVE_LRINT
-#define lrint(x) ((long) ((x)+0.5))
-#endif
-#endif
-#endif
-
 /* Macro to mark paramaters that aren't used in the function */	
 #ifdef UNUSED
 #elif defined(__GNUC__)
@@ -82,4 +68,5 @@ typedef RETSIGTYPE(*psighandler) (int);
 # define UNUSED(x) /*lint -e{715, 818}*/ _unused_##x
 #else
 # define UNUSED(x) _unused_##x
+#endif
 #endif

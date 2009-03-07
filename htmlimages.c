@@ -22,10 +22,6 @@
 #include "config.h"
 #include <errno.h>
 
-#if HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
-
 #include <string.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>

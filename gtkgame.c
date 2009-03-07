@@ -43,10 +43,6 @@
 #include <io.h>
 #endif
 
-#if HAVE_SYS_UTSNAME_H
-#include <sys/utsname.h>
-#endif
-
 #include "analysis.h"
 #include "backgammon.h"
 #include "sgf.h"
@@ -3139,105 +3135,7 @@ static void SetLanguage( gpointer p, guint n, GtkWidget *pw )
 
 static void ReportBug(gpointer p, guint n, GtkWidget * pwEvent)
 {
-
-	const char *pchOS = "109";
-	char sz[1024];
-
-#ifdef WIN32
-
-	OSVERSIONINFO VersionInfo;
-
-	memset(&VersionInfo, 0, sizeof(OSVERSIONINFO));
-	VersionInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-	GetVersionEx(&VersionInfo);
-
-	switch (VersionInfo.dwPlatformId) {
-	case VER_PLATFORM_WIN32s:
-		break;
-	case VER_PLATFORM_WIN32_WINDOWS:
-	case VER_PLATFORM_WIN32_NT:
-		switch (VersionInfo.dwMajorVersion) {
-		case 3:
-			/* Windows  NT 3.51 */
-			pchOS = "106";
-			break;
-		case 4:
-			switch (VersionInfo.dwMinorVersion) {
-			case 0:
-				switch (VersionInfo.dwPlatformId) {
-				case VER_PLATFORM_WIN32_WINDOWS:
-					/* Windows  95 */
-					pchOS = "104";
-					break;
-				case VER_PLATFORM_WIN32_NT:
-					/* Windows NT 4.0 */
-					pchOS = "106";
-					break;
-				}
-				break;
-			case 10:
-				if (VersionInfo.szCSDVersion[1] == 'A')
-					/* Windows  98 SE */
-					pchOS = "110";
-				else
-					/* Windows  98 */
-					pchOS = "105";
-				break;
-			case 90:
-				/* Windows  Me */
-				pchOS = "105";
-				break;
-			}
-			break;
-		case 5:
-			switch (VersionInfo.dwMinorVersion) {
-			case 0:
-				/* Windows  2000 */
-				pchOS = "107";
-				break;
-			case 1:
-				/* Windows XP */
-				pchOS = "108";
-				break;
-			case 2:
-				/* Windows Server 2003 */
-				pchOS = "109";
-				break;
-			}
-			break;
-		}
-		break;
-	}
-#elif HAVE_SYS_UTSNAME_H	/* WIN32 */
-
-	{
-		struct utsname u;
-
-		if (uname(&u))
-			pchOS = "";
-		else {
-
-			if (!StrCaseCmp(u.sysname, "linux"))
-				pchOS = "101";
-			else if (!StrCaseCmp(u.sysname, "sunos"))
-				pchOS = "102";
-			else if (!StrCaseCmp(u.sysname, "freebsd"))
-				pchOS = "103";
-			else if (!StrCaseCmp(u.sysname, "rhapsody") ||
-				 !StrCaseCmp(u.sysname, "darwin"))
-				pchOS = "112";
-
-		}
-
-	}
-
-#endif				/* HAVE_SYS_UTSNAME_H */
-
-	sprintf(sz,
-		"http://savannah.gnu.org/bugs/?func=additem&group=gnubg"
-		"&release_id=" "110" "&custom_tf1=" BUILD_DATE
-		"&platform_version_id=%s", pchOS);
-	OpenURL(sz);
+	OpenURL("http://savannah.gnu.org/bugs/?func=additem&group=gnubg");
 }
 
 GtkItemFactoryEntry aife[] = {
@@ -3619,7 +3517,7 @@ static void gnubg_set_default_icon(void)
 {
 	/* win32 uses the ico file for this */
 	/* adapted from pidgin */
-#ifndef _WIN32
+#ifndef WIN32
 	GList *icons = NULL;
 	GdkPixbuf *icon = NULL;
 	char *ip;

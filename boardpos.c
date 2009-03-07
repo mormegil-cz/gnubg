@@ -152,7 +152,7 @@ extern void ArrowPosition( const int clockwise, int turn, const int nSize, int *
 		if (turn == 1)
 			*py = Point_y + Point_dy;
 		else
-			*py = Point_y - (nSize * BORDER_WIDTH);//- 2 * nSize * ARROW_HEIGHT;
+			*py = Point_y - (nSize * BORDER_WIDTH);/*- 2 * nSize * ARROW_HEIGHT; */
 		/* Center arrow in border */
 		*py += (nSize * (BORDER_WIDTH - ARROW_HEIGHT)) / 2;
 	}

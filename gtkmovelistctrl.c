@@ -1,4 +1,4 @@
-//lint -e818
+/*lint -e818 */
 /*
  * gtkmovelistctrl.c
  * by Jon Kinsey, 2005

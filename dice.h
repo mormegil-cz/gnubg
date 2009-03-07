@@ -26,7 +26,7 @@
 
 typedef enum _rng {
     RNG_MANUAL, RNG_ANSI, RNG_BBS, RNG_BSD, RNG_ISAAC, RNG_MD5, RNG_MERSENNE, 
-    RNG_RANDOM_DOT_ORG, RNG_USER, RNG_FILE,
+    RNG_RANDOM_DOT_ORG, RNG_FILE,
     NUM_RNGS
 } rng;
 
@@ -55,12 +55,6 @@ extern int InitRNGSeedLong( char *sz, rng rng, rngcontext *rngctx );
 extern int InitRNGBBSModulus( const char *sz, rngcontext *rngctx );
 extern int InitRNGBBSFactors( char *sz0, char *sz1, rngcontext *rngctx );
 #endif
-
-
-#if HAVE_LIBDL
-extern int
-UserRNGOpen( void *p, const char *sz );
-#endif /* HAVE_LIBDL */
 
 extern FILE *OpenDiceFile( rngcontext *rngctx, const char *sz );
 

@@ -1,3 +1,11 @@
+Sat Mar  7 21:47:05 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, backgammon.h, bearoff.c, boardpos.c, commands.inc,
+	common.h, configure.in, dice.c, dice.h, gnubg.c, gtkgame.c,
+	gtkmovelistctrl.c, gtkoptions.c, htmlimages.c, import.c, render.c,
+	set.c, show.c userrng.c, board3d/gtkcolour3d.c, lib/md5.h: Various
+	autoconf centered cleanups.
+
 Wed Mar  4 23:07:11 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, credits.sh, gnubg.c, gtkgame.c: use configurable

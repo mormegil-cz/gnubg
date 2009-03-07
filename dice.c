@@ -22,9 +22,6 @@
 #include "config.h"
 #include "backgammon.h"
 
-#if HAVE_LIBDL
-#include <dlfcn.h>
-#endif
 #include <fcntl.h>
 #if HAVE_LIBGMP
 #include <gmp.h>
@@ -59,7 +56,6 @@ const char *aszRNG[ NUM_RNGS ] = {
    N_("MD5"),
    N_("Mersenne Twister"),
    N_("www.random.org"),
-   N_("user supplied"),
    N_("read from file")
 };
 
@@ -70,16 +66,6 @@ static int (*getDiceRandomDotOrg) (void);
 static int (*GetManualDice) (unsigned int[2]);
 
 struct _rngcontext {
-
-  /* RNG_USER */
-#if HAVE_LIBDL
-  void *pvUserRNGHandle;
-  void (*pfUserRNGSeed) (unsigned long int);
-  void (*pfUserRNGShowSeed) (void);
-  long int (*pfUserRNGRandom) (void);
-  char szUserRNGSeed[ 32 ];
-  char szUserRNGRandom[ 32 ];
-#endif /* HAVE_LIBDL */
 
   /* RNG_FILE */
   FILE *fDice;
@@ -334,7 +320,6 @@ PrintRNGCounter( const rng rngx, rngcontext *rngctx ) {
     switch( rngx ) {
     case RNG_ANSI:
     case RNG_BSD:
-    case RNG_USER:
       g_print( _("Number of calls since last seed: %lu."), rngctx->c );
 	  g_print("\n");
 	  g_print( _("This number may not be correct if the same "
@@ -428,17 +413,6 @@ extern void PrintRNGSeed( const rng rngx, rngcontext *rngctx ) {
 		g_print("\n");
         return;
 	
-    case RNG_USER:
-#if HAVE_LIBDL
-	if( rngctx->pfUserRNGShowSeed ) {
-	    (*rngctx->pfUserRNGShowSeed)();
-	    return;
-	}
-	break;
-#else
-	abort();
-#endif
-
     case RNG_ISAAC:
     case RNG_MERSENNE:
 #if HAVE_LIBGMP
@@ -511,14 +485,6 @@ extern void InitRNGSeed( int n, const rng rngx, rngcontext *rngctx ) {
 	init_genrand( n, &rngctx->mti, rngctx->mt );
 	break;
 
-    case RNG_USER:
-#if HAVE_LIBDL
-	(*rngctx->pfUserRNGSeed) ( n );
-	break;
-#else
-	abort();
-#endif
-
     case RNG_MANUAL:
     case RNG_RANDOM_DOT_ORG:
     case RNG_FILE:
@@ -542,7 +508,6 @@ static void InitRNGSeedMP( mpz_t n, rng rng, rngcontext *rngctx ) {
     case RNG_BSD:
     case RNG_MERSENNE:
     case RNG_MD5: /* FIXME MD5 seed can be extended to 128 bits */
-    case RNG_USER: /* FIXME add a pfUserRNGSeedMP */
 	InitRNGSeed( mpz_get_ui( n ), rng, rngctx );
 	break;
 	    
@@ -606,14 +571,6 @@ CloseRNG( const rng rngx, rngcontext *rngctx ) {
 
 
   switch ( rngx ) {
-  case RNG_USER:
-    /* Dispose dynamically linked user module if necesary */
-#if HAVE_LIBDL
-    dlclose(rngctx->pvUserRNGHandle);
-#else
-    abort();
-#endif /* HAVE_LIBDL */
-    break;
   case RNG_FILE:
     /* close file */
     CloseDiceFile( rngctx );
@@ -795,23 +752,6 @@ extern int RollDice( unsigned int anDice[ 2 ], const rng rngx, rngcontext *rngct
                                      rngctx->mt)/(0xFFFFFFFF+1.0));
         rngctx->c += 2;
 	return 0;
-	
-    case RNG_USER:
-#if HAVE_LIBDL
-      anDice[ 0 ] = 1 + (int) (6.0*rngctx->pfUserRNGRandom()/(0x7FFFFFFL+1.0));
-      ++rngctx->c;
-      if ( anDice[ 0 ] <= 0 )
-        return -1;
-
-      anDice[ 1 ] = 1 + (int) (6.0*rngctx->pfUserRNGRandom()/(0x7FFFFFFL+1.0));
-      ++rngctx->c;
-      if ( anDice[ 1 ] <= 0 )
-        return -1;
-
-      return 0;
-#else
-	abort();
-#endif
 
     case RNG_RANDOM_DOT_ORG:
 #if HAVE_SOCKETS
@@ -852,91 +792,6 @@ extern int RollDice( unsigned int anDice[ 2 ], const rng rngx, rngcontext *rngct
 
     return -1;
 }
-
-#if HAVE_LIBDL
-/*
- * Functions for handling the user supplied RNGs
- * Ideas for further development:
- * - read szUserRNG, szUserRNGSeed, and szUserRNGRandom
- *   from user input
- */
-
-extern int UserRNGOpen( void *p, const char *sz ) {
-
-  char *error;
-  char *szCWD;
-  rngcontext *rngctx = (rngcontext *) p;
-
-  /* 
-   * (1)
-   * Try opening shared object from standard and
-   * LD_LIBRARY_PATH paths. 
-   */
-
-  rngctx->pvUserRNGHandle = dlopen( sz, RTLD_LAZY );
-
-  if (!rngctx->pvUserRNGHandle ) {
-    /*
-     * (2)
-     * Try opening shared object from current directory
-     */
-      szCWD = g_strdup_printf( "./%s", sz );
-      rngctx->pvUserRNGHandle = dlopen( szCWD, RTLD_LAZY );
-      g_free(szCWD);
-  }
-  
-  if (!rngctx->pvUserRNGHandle ) {
-      /* 
-       * Bugger! Can't load shared library
-       */
-      if( ( error = dlerror() ) )
-	  g_printerr( "%s", error );
-      else
-	  g_printerr( _("Could not load shared object %s."), sz );
-    
-      return 0;
-  } 
-    
-  /* 
-   * Shared library should now be open.
-   * Get addresses for seed and random in user's RNG 
-   */
-
-  strcpy( rngctx->szUserRNGSeed , "setseed" );
-  strcpy( rngctx->szUserRNGRandom , "getrandom" );
-
-  rngctx->pfUserRNGSeed = (void (*)(unsigned long int))
-    dlsym( rngctx->pvUserRNGHandle, rngctx->szUserRNGSeed );
-
-  if ((error = dlerror()) != NULL)  {
-      g_printerr( "%s: %s", rngctx->szUserRNGSeed, error );
-      return 0;
-  }
-  
-  rngctx->pfUserRNGRandom = 
-    (long int (*)(void)) dlsym( rngctx->pvUserRNGHandle, 
-                                rngctx->szUserRNGRandom );
-
-  if ((error = dlerror()) != NULL)  {
-      g_printerr( "%s: %s", rngctx->szUserRNGRandom, error );
-      return 0;
-  }
-
-  /* this one is allowed to fail */
-  rngctx->pfUserRNGShowSeed = 
-    ( void (*)( void ) ) dlsym( rngctx->pvUserRNGHandle, "showseed" );
-  
-  /*
-   * Everthing should be fine...
-   */
-
-  return 1;
-   
-  
-}
-
-#endif /* HAVE_LIBDL */
-
 
 extern FILE *OpenDiceFile(rngcontext *rngctx, const char *sz)
 {

@@ -146,7 +146,6 @@ dnl Checks for libraries.
 dnl
 
 AC_CHECK_LIB(m,sqrt)
-AC_CHECK_LIB(dl,dlopen)
 AC_CHECK_LIB(gmp, __gmpz_import)
 AC_SEARCH_LIBS(gethostbyname,nsl)
 AC_SEARCH_LIBS(inet_aton,resolv)
@@ -173,48 +172,21 @@ dnl
 dnl Checks for header files.
 dnl
 
-AC_CHECK_HEADERS(limits.h sys/resource.h sys/socket.h sys/stat.h sys/time.h sys/types.h sys/uio.h unistd.h sys/wait.h sys/utsname.h stropts.h)
+AC_CHECK_HEADERS(sys/resource.h sys/socket.h sys/time.h sys/types.h unistd.h)
 
 dnl
 dnl Checks for typedefs, structures, and compiler characteristics.
 dnl
 
 AC_C_INLINE
-AC_TYPE_SIGNAL
 AC_TYPE_SIZE_T
-AC_CHECK_TYPE(socklen_t,,
-              AC_DEFINE(socklen_t,int, [Define to int if <sys/socket.h> does not define.])
-              ,[
-                #ifdef HAVE_SYS_TYPES_H
-                #include <sys/types.h>
-                #endif
-                #ifdef HAVE_SYS_SOCKET_H
-                #include <sys/socket.h>
-                #endif
-
-                ])
 
 dnl
 dnl Checks for library functions.
 dnl
 
 AC_CHECK_FUNCS(sigaction sigvec,break)
-AC_CHECK_FUNCS(sigprocmask sigblock,break)
-AC_CHECK_FUNCS(getdtablesize strptime isatty random select setvbuf setpriority)
-
-
-dnl
-dnl Checks for declarations
-dnl
-
-AC_CHECK_DECLS(acosf,, AC_DEFINE(acosf, acos, [set acosf to acos if undefined]), [#include <math.h>])
-AC_CHECK_DECLS(asinf,, AC_DEFINE(asinf, asin, [set asinf to asin if undefined]), [#include <math.h>])
-AC_CHECK_DECLS(atanf,, AC_DEFINE(atanf, atan, [set atanf to atan if undefined]), [#include <math.h>])
-AC_CHECK_DECLS(cosf,, AC_DEFINE(cosf, cos, [set cosf to cos if undefined]), [#include <math.h>])
-AC_CHECK_DECLS(sinf,, AC_DEFINE(sinf, sin, [set sinf to sin if undefined]), [#include <math.h>])
-AC_CHECK_DECLS(tanf,, AC_DEFINE(tanf, tan, [set tanf to tan if undefined]), [#include <math.h>])
-AC_CHECK_DECLS(signbit, , , [#include <math.h>])
-AC_CHECK_DECLS(lrint, , , [#include <math.h>])
+AC_CHECK_FUNCS(strptime random setpriority)
 
 dnl *******************
 dnl optional components

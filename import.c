@@ -32,8 +32,6 @@
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
-#include <sys/stat.h>
-
 #include "backgammon.h"
 #include "drawboard.h"
 #if USE_GTK
@@ -118,7 +116,7 @@ ParseSetDate ( char *szFilename ) {
 #endif
     /* date could not be parsed out of filename, use last access date */
     if ( matchdate == NULL ) {
-        if ( stat( szFilename, &filestat ) == 0 ) {
+        if ( g_stat( szFilename, &filestat ) == 0 ) {
             matchdate = localtime ( &filestat.st_mtime );
         }
     }

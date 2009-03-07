@@ -352,9 +352,7 @@ static void ShowPaged( char **ppch ) {
     struct winsize ws;
 #endif
 
-#if HAVE_ISATTY
     if( isatty( STDIN_FILENO ) ) {
-#endif
 #ifdef TIOCGWINSZ
 	if( !( ioctl( STDIN_FILENO, TIOCGWINSZ, &ws ) ) )
 	    nRows = ws.ws_row;
@@ -381,9 +379,7 @@ static void ShowPaged( char **ppch ) {
 		i = 0;
 	    }
 	}
-#if HAVE_ISATTY
     } else
-#endif
 	while( *ppch )
 	    outputl( *ppch++ );
 }

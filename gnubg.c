@@ -32,9 +32,6 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <signal.h>
-#if HAVE_SYS_WAIT_H
-#include <sys/wait.h>
-#endif
 #include <ctype.h>
 #ifdef WIN32
 #include <io.h>
@@ -576,7 +573,6 @@ static char szDICE[] = N_("<die> <die>"),
     szOPTENVFORCE[] = N_("[env [force]]"),
     szOPTDEPTH[] = N_("[depth]"),
     szOPTFILENAME[] = N_("[filename]"),
-    szOPTGENERATOROPTSEED[] = N_("[generator] [seed]"),
     szOPTLENGTH[] = N_("[length]"),
     szOPTLIMIT[] = N_("[limit]"),
     szOPTMODULUSOPTSEED[] = N_("[modulus <modulus>|factors <factor> <factor>] "
@@ -1153,7 +1149,7 @@ extern int SetToggle( const char *szName, int *pf, char *sz, const char *szOn, c
     return -1;
 }
 
-extern void PortableSignal( int nSignal, RETSIGTYPE (*p)(int),
+extern void PortableSignal( int nSignal, void (*p)(int),
 			    psighandler *pOld, int fRestart ) {
 #if HAVE_SIGACTION
     struct sigaction sa;
@@ -2670,9 +2666,6 @@ SaveRNGSettings ( FILE *pf, const char *sz, rng rngCurrent, rngcontext *rngctx )
     case RNG_RANDOM_DOT_ORG:
         fprintf( pf, "%s rng random.org\n", sz );
 	break;
-    case RNG_USER:
-	/* don't save user RNGs */
-	break;
     case RNG_FILE:
         fprintf( pf, "%s rng file \"%s\"\n", sz, GetDiceFileName( rngctx ) );
 	break;
@@ -4186,7 +4179,7 @@ CreateGnubgDirectory (void)
 }
 
 
-extern RETSIGTYPE HandleInterrupt( int idSignal )
+extern void HandleInterrupt( int idSignal )
 {
 
     /* NB: It is safe to write to fInterrupt even if it cannot be read

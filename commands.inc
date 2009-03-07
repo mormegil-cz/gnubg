@@ -665,8 +665,6 @@ command cER = {
     { "random.org", CommandSetRNGRandomDotOrg, 
       N_("Use random numbers fetched from <www.random.org>"),
       NULL, NULL },
-    { "user", CommandSetRNGUser, 
-      N_("Specify an external generator"), szOPTGENERATOROPTSEED, NULL,},
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetRolloutLatePlayer[] = {
     { "chequerplay", CommandSetRolloutPlayerLateChequerplay, 

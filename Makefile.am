@@ -170,7 +170,7 @@ pkgdata_DATA = gnubg_ts0.bd gnubg.wd boards.xml \
 #
 ##files to add to the tarball when 'make dist'
 #
-EXTRA_DIST = config.rpath  userrng.c copying.awk gnubg.gtkrc credits.sh \
+EXTRA_DIST = config.rpath  copying.awk gnubg.gtkrc credits.sh \
 	$(BUILT_SOURCES) ABOUT-NLS boards.xml gnubg.sql autogen.sh \
 	gnubg.weights textures.txt corecount.c \
 	external_y.h sgf_y.h commands.inc

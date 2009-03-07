@@ -38,9 +38,6 @@
 #include <string.h>
 #include <fcntl.h>
 #include <errno.h>
-#if HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
 
 #define HEURISTIC_C 15
 #define HEURISTIC_P 6

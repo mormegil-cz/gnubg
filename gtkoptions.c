@@ -1523,10 +1523,6 @@ static void OptionsOK(GtkWidget *pw, optionswidget *pow)
         UserCommand("set rng random.org");
       break;
     case 7:
-      if (rngCurrent != RNG_USER)
-        UserCommand("set rng user");
-      break;
-    case 8:
       filename =
 	      GTKFileSelect (_("Select file with dice"), NULL, NULL, NULL,
 			      GTK_FILE_CHOOSER_ACTION_OPEN);

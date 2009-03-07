@@ -493,7 +493,7 @@ extern int SetToggle(const char *szName, int *pf, char *sz, const char *szOn,
 extern moverecord *getCurrentMoveRecord(int *pfHistory);
 extern moverecord *LinkToDouble(moverecord * pmr);
 extern moverecord *NewMoveRecord(void);
-extern RETSIGTYPE HandleInterrupt(int idSignal);
+extern void HandleInterrupt(int idSignal);
 extern void AddGame(moverecord * pmr);
 extern void AddMoveRecord(void *pmr);
 extern void ApplyMoveRecord(matchstate * pms, const listOLD * plGame,
@@ -522,7 +522,7 @@ extern void FreeMatch(void);
 extern void GetMatchStateCubeInfo(cubeinfo * pci, const matchstate * pms);
 extern void HandleCommand(char *sz, command * ac);
 extern void InitBoard(TanBoard anBoard, const bgvariation bgv);
-extern void PortableSignal(int nSignal, RETSIGTYPE(*p) (int),
+extern void PortableSignal(int nSignal, void(*p) (int),
 			   psighandler * pOld, int fRestart);
 extern void PortableSignalRestore(int nSignal, psighandler * p);
 extern void PrintCheatRoll(const int fPlayer, const int n);
@@ -856,7 +856,6 @@ extern void CommandSetRNGManual(char *);
 extern void CommandSetRNGMD5(char *);
 extern void CommandSetRNGMersenne(char *);
 extern void CommandSetRNGRandomDotOrg(char *);
-extern void CommandSetRNGUser(char *);
 extern void CommandSetRolloutBearoffTruncationExact(char *);
 extern void CommandSetRolloutBearoffTruncationOS(char *);
 extern void CommandSetRollout(char *);
