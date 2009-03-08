@@ -30,16 +30,8 @@
    with GNU Backgammon. */
 
 #include "config.h"
-
-#if STDC_HEADERS
 # include <stdlib.h>
 # include <string.h>
-#else
-# ifndef HAVE_MEMCPY
-#  define memcpy(d, s, n) bcopy ((s), (d), (n))
-# endif
-#endif
-
 #include "md5.h"
 
 /* Be conservative and always perform explicit byte-ordering.  This is
