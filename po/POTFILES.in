@@ -172,6 +172,5 @@ speed.c
 speed.h
 text.c
 timer.c
-userrng.c
 util.c
 util.h
