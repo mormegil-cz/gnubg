@@ -2857,6 +2857,7 @@ extern void CommandSaveSettings( char *szParam )
     GString *gst;
 #if USE_GTK
     const char *aszAnimation[] = {"none", "blink", "slide"};
+    const char *aszShowPips[N_GUI_SHOW_PIPS] = {"none", "pips", "epc", "wastage"};
 #endif
     gchar buf[ G_ASCII_DTOSTR_BUF_SIZE ];
     gchar aszThr[7][ G_ASCII_DTOSTR_BUF_SIZE ];
@@ -3035,9 +3036,7 @@ extern void CommandSaveSettings( char *szParam )
 	fprintf(pf, "set gui highdiefirst %s\n", fGUIHighDieFirst ? "on" : "off");
 	fprintf(pf, "set gui illegal %s\n", fGUIIllegal ? "on" : "off");
 	fprintf(pf, "set gui showids %s\n", GetMainAppearance()->fShowIDs ? "on" : "off");
-	fprintf(pf, "set gui showpips %s\n", fGUIShowPips ? "on" : "off");
-	fprintf(pf, "set gui showepc %s\n", fGUIShowEPCs ? "on" : "off");
-	fprintf(pf, "set gui showwastage %s\n", fGUIShowWastage ? "on" : "off");
+	fprintf(pf, "set gui showpips %s\n", aszShowPips[gui_show_pips]);
 	fprintf(pf, "set gui dragtargethelp %s\n", fGUIDragTargetHelp ? "on" : "off");
 	fprintf(pf, "set gui usestatspanel %s\n", fGUIUseStatsPanel ? "on" : "off");
 	fprintf(pf, "set gui movelistdetail %s\n", showMoveListDetail ? "on" : "off");

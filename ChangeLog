@@ -1,3 +1,9 @@
+Tue Mar 10 17:50:43 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, commands.inc, gnubg.c, gtkboard.c, gtkboard.h,
+	gtkgame.c, gtkoptions.c, renderprefs.c, set.c: minor changes to pip
+	count display
+
 Tue Mar 10 14:08:18 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, gtkgame.c: Minor changes to BUILD_DATE use

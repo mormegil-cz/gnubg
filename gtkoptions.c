@@ -775,34 +775,17 @@ static GtkWidget *OptionsPages( optionswidget *pow )
 			    "exchanging board positions and match "
 			    "situations."));
     
-    pow->pwShowPips = gtk_check_button_new_with_label(
-	_("Show pip count below board") );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwShowPips ),
-				  fGUIShowPips );
-    gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwShowPips, FALSE, FALSE, 0 );
-    gtk_widget_set_tooltip_text(pow->pwShowPips,
-			  _("The \"pip counts\" (number of points each player "
-			    "must advance all of their chequers to bear them "
-			    "all off) will be shown below the scores."));
-	
-    pow->pwShowWastage = gtk_check_button_new_with_label(
-	_("Show EPC wastage below board") );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwShowWastage ),
-				  fGUIShowWastage );
-    gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwShowWastage, FALSE, FALSE, 0 );
-    gtk_widget_set_tooltip_text(pow->pwShowWastage,
-			  _("The \"effective pip count wastage\" "
-                            "will be shown below the scores."));
-	
-    pow->pwShowEPCs = gtk_check_button_new_with_label(
-	_("Show EPCs below board") );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwShowEPCs ),
-				  fGUIShowEPCs );
-    gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwShowEPCs, FALSE, FALSE, 0 );
-    gtk_widget_set_tooltip_text(pow->pwShowEPCs,
-			  _("The \"effective pip counts\" "
-                            "will be shown below the scores."));
-	
+    pwhbox = gtk_hbox_new( FALSE, 2 );
+    pow->pwShowPips = gtk_combo_box_new_text();
+    gtk_combo_box_append_text(GTK_COMBO_BOX (pow->pwShowPips), _("None"));
+    gtk_combo_box_append_text(GTK_COMBO_BOX (pow->pwShowPips), _("Pips"));
+    gtk_combo_box_append_text(GTK_COMBO_BOX (pow->pwShowPips), _("EPC"));
+    gtk_combo_box_append_text(GTK_COMBO_BOX (pow->pwShowPips), _("Wastage"));
+    gtk_combo_box_set_active (GTK_COMBO_BOX (pow->pwShowPips), gui_show_pips);
+    gtk_box_pack_start (GTK_BOX (pwhbox), gtk_label_new( _("Show Pips") ), FALSE, FALSE, 0);
+    gtk_box_pack_start( GTK_BOX( pwhbox ), pow->pwShowPips, FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwvbox ), pwhbox, FALSE, FALSE, 0 );
+
     pwAnimBox = gtk_hbox_new( FALSE, 0 );
     gtk_box_pack_start( GTK_BOX( pwvbox ), pwAnimBox, FALSE, FALSE, 0 );
     
@@ -1571,9 +1554,6 @@ static void OptionsOK(GtkWidget *pw, optionswidget *pow)
   CHECKUPDATE( pow->pwIllegal, fGUIIllegal, "set gui illegal %s" )
   CHECKUPDATE( pow->pwUseDiceIcon, bd->rd->fDiceArea, "set gui dicearea %s" )
   CHECKUPDATE( pow->pwShowIDs, bd->rd->fShowIDs, "set gui showids %s" )
-  CHECKUPDATE( pow->pwShowPips, fGUIShowPips, "set gui showpips %s" )
-  CHECKUPDATE( pow->pwShowEPCs, fGUIShowEPCs, "set gui showepcs %s" )
-  CHECKUPDATE( pow->pwShowWastage, fGUIShowWastage, "set gui showwastage %s" )
   CHECKUPDATE( pow->pwHigherDieFirst, fGUIHighDieFirst, "set gui highdiefirst %s" )
   CHECKUPDATE( pow->pwSetWindowPos, fGUISetWindowPos,
 	       "set gui windowpositions %s" )
@@ -1593,6 +1573,29 @@ static void OptionsOK(GtkWidget *pw, optionswidget *pow)
 		gtk_widget_queue_draw( bd->drawing_area );
 	}
 }
+switch(gtk_combo_box_get_active(GTK_COMBO_BOX(pow->pwShowPips)))
+{
+	case GUI_SHOW_PIPS_NONE:
+		if (gui_show_pips != GUI_SHOW_PIPS_NONE)
+			UserCommand("set gui showpip none");
+		break;
+	case GUI_SHOW_PIPS_PIPS:
+		if (gui_show_pips != GUI_SHOW_PIPS_PIPS)
+			UserCommand("set gui showpip pips");
+		break;
+	case GUI_SHOW_PIPS_EPC:
+		if (gui_show_pips != GUI_SHOW_PIPS_EPC)
+			UserCommand("set gui showpip epc");
+		break;
+	case GUI_SHOW_PIPS_WASTAGE:
+		if (gui_show_pips != GUI_SHOW_PIPS_WASTAGE)
+			UserCommand("set gui showpip wastage");
+		break;
+	default:
+		g_assert_not_reached();
+}
+		
+
   if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwAnimateNone ) )
       && animGUI != ANIMATE_NONE )
       UserCommand( "set gui animation none" );

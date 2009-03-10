@@ -67,10 +67,8 @@ animation animGUI = ANIMATE_SLIDE;
 int fGUIBeep = TRUE;
 int fGUIHighDieFirst = TRUE;
 int fGUIIllegal = FALSE;
-int fGUIShowPips = TRUE;
-int fGUIShowWastage=FALSE;
+GuiShowPips gui_show_pips = GUI_SHOW_PIPS_EPC;
 int fGUIDragTargetHelp = TRUE;
-int fGUIShowEPCs = TRUE;
 int fGUIGrayEdit = TRUE;
 
 unsigned int nGUIAnimSpeed = 4;
@@ -581,96 +579,96 @@ extern char * ReturnHits( TanBoard anBoard )
 
 }
 
-extern void update_pipcount(BoardData * bd, const TanBoard points)
+static void show_pip_none(BoardData *bd, const TanBoard points, GString *gst[4])
+{
+	g_string_append_printf(gst[0], _("n/a"));
+	g_string_append_printf(gst[1], _("n/a"));
+	g_string_append_printf(gst[2], _("Pips: "));
+	g_string_append_printf(gst[3], _("Pips: "));
+}
+
+static void show_pip_pip(BoardData *bd, const TanBoard points, GString *gst[4])
 {
 	unsigned int anPip[2];
-	char *pc;
+	int f;
+	PipCount(points, anPip);
+	f = (bd->turn > 0);
+	g_string_append_printf(gst[0], "%d (%+d)", anPip[!f],
+			       anPip[!f] - anPip[f]);
+	g_string_append_printf(gst[1], "%d (%+d)", anPip[f],
+			       anPip[f] - anPip[!f]);
+	g_string_append_printf(gst[2], _("Pips: "));
+	g_string_append_printf(gst[3], _("Pips: "));
+}
+
+static void show_pip_epc(BoardData *bd, const TanBoard points, GString *gst[4])
+{
 	int f;
 	float arEPC[2];
-
-	if (fGUIShowPips) {
-
-		PipCount(points, anPip);
-		f = (bd->turn > 0);
-
-		/* EPC display enabled AND Valid EPCs found */
-		if ((fGUIShowEPCs && ms.gs != GAME_NONE) &&
-		    (EPC(points, arEPC, NULL, NULL, NULL, TRUE) == 0)) {
-
-			if (!fGUIShowWastage) {
-				/* Show: pipcount + wastage = epc (pip
-				   lead, epc lead) */
-				pc = g_strdup_printf("%.2f (%+.2f)",
-						     arEPC[!f], arEPC[!f] - arEPC[f]);
-				gtk_label_set_text(GTK_LABEL (bd->pipcount0), pc);
-				g_free(pc);
-
-				pc = g_strdup_printf("%.2f (%+.2f)",
-						     arEPC[f],
-						     arEPC[f] - arEPC[!f]);
-
-				gtk_label_set_text(GTK_LABEL
-						   (bd->pipcount1), pc);
-				g_free(pc);
-			} else {
-				/* Show: pipcount + wastage = epc (pip
-				   lead, epc lead) */
-				pc = g_strdup_printf
-				    (" %d + %.2f = %.2f (%+d, %+.2f)",
-				     anPip[!f], arEPC[!f] - anPip[!f],
-				     arEPC[!f], anPip[!f] - anPip[f],
-				     arEPC[!f] - arEPC[f]);
-				gtk_label_set_text(GTK_LABEL
-						   (bd->pipcount0), pc);
-				g_free(pc);
-
-				pc = g_strdup_printf
-				    (" %d + %.2f = %.2f (%+d, %+.2f)",
-				     anPip[f], arEPC[f] - anPip[f],
-				     arEPC[f], anPip[f] - anPip[!f],
-				     arEPC[f] - arEPC[!f]);
-				gtk_label_set_text(GTK_LABEL
-						   (bd->pipcount1), pc);
-				g_free(pc);
-			}
-
-			gtk_label_set_text(GTK_LABEL(bd->pipcountlabel0),
-					   _("EPC: "));
-			gtk_label_set_text(GTK_LABEL(bd->pipcountlabel1),
-					   _("EPC: "));
-		}
-		/* no EPCs available; show pip count only */
-		else {
-
-			pc = g_strdup_printf("%d (%+d)", anPip[!f],
-					     anPip[!f] - anPip[f]);
-			gtk_label_set_text(GTK_LABEL(bd->pipcount0), pc);
-			g_free(pc);
-
-			pc = g_strdup_printf("%d (%+d)", anPip[f],
-					     anPip[f] - anPip[!f]);
-			gtk_label_set_text(GTK_LABEL(bd->pipcount1), pc);
-			g_free(pc);
-
-			gtk_label_set_text(GTK_LABEL(bd->pipcountlabel0),
-					   _("Pips: "));
-			gtk_label_set_text(GTK_LABEL(bd->pipcountlabel1),
-					   _("Pips: "));
-		}
-	} else {
-
-		/* don't show pip count */
-		gtk_label_set_text(GTK_LABEL(bd->pipcount0), _("n/a"));
-		gtk_label_set_text(GTK_LABEL(bd->pipcount1), _("n/a"));
-		gtk_label_set_text(GTK_LABEL(bd->pipcountlabel0),
-				   _("Pips: "));
-		gtk_label_set_text(GTK_LABEL(bd->pipcountlabel1),
-				   _("Pips: "));
+	if (EPC(points, arEPC, NULL, NULL, NULL, TRUE) != 0) {
+		show_pip_pip(bd, points, gst);
+		return;
 	}
+	f = (bd->turn > 0);
+	g_string_append_printf(gst[0], "%.2f (%+.2f)", arEPC[!f],
+			       arEPC[!f] - arEPC[f]);
+	g_string_append_printf(gst[1], "%.2f (%+.2f)", arEPC[f],
+			       arEPC[f] - arEPC[!f]);
+	g_string_append_printf(gst[2], _("EPC: "));
+	g_string_append_printf(gst[3], _("EPC: "));
+}
+
+static void show_pip_pwe(BoardData *bd, const TanBoard points, GString *gst[4])
+{
+	unsigned int anPip[2];
+	int f;
+	float arEPC[2];
+	if (EPC(points, arEPC, NULL, NULL, NULL, TRUE) != 0) {
+		show_pip_pip(bd, points, gst);
+		return;
+	}
+	PipCount(points, anPip);
+	f = (bd->turn > 0);
+	g_string_append_printf(gst[0], " %d + %.2f = %.2f", anPip[!f],
+			       arEPC[!f] - anPip[!f], arEPC[!f]);
+	g_string_append_printf(gst[1], " %d + %.2f = %.2f", anPip[f],
+			       arEPC[f] - anPip[f], arEPC[f]);
+	g_string_append_printf(gst[2], _("PWE: "));
+	g_string_append_printf(gst[3], _("PWE: "));
+}
+
+extern void update_pipcount(BoardData *bd, const TanBoard points)
+{
+	int i;
+	GString *gst[4];
+
+	for (i = 0; i < 4; i++)
+		gst[i] = g_string_new(NULL);
+
+	switch (gui_show_pips) {
+	case GUI_SHOW_PIPS_WASTAGE:
+		show_pip_pwe(bd, points, gst);
+		break;
+	case GUI_SHOW_PIPS_EPC:
+		show_pip_epc(bd, points, gst);
+		break;
+	case GUI_SHOW_PIPS_PIPS:
+		show_pip_pip(bd, points, gst);
+		break;
+	default:
+		show_pip_none(bd, points, gst);
+	}
+
+	gtk_label_set_text(GTK_LABEL(bd->pipcount0), gst[0]->str);
+	gtk_label_set_text(GTK_LABEL(bd->pipcount1), gst[1]->str);
+	gtk_label_set_text(GTK_LABEL(bd->pipcountlabel0), gst[2]->str);
+	gtk_label_set_text(GTK_LABEL(bd->pipcountlabel1), gst[3]->str);
+
+	for (i = 0; i < 4; i++)
+		g_string_free(gst[i], TRUE);
 
 	UpdateTheoryData(bd, TT_PIPCOUNT | TT_EPC | TT_KLEINCOUNT, points);
 }
-
 /* A chequer has been moved or the board has been updated -- update the
    move and position ID labels. */
 int update_move(BoardData *bd)

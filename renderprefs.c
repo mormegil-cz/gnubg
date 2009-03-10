@@ -419,9 +419,26 @@ int c, fValueError = FALSE;
   else if (!StrNCaseCmp (szParam, "show_ids", c))
     /* FIXME deprecated in favour of "set gui showids" */
     prd->fShowIDs = toupper (*szValue) == 'Y';
-  else if (!StrNCaseCmp (szParam, "show_pips", c))
-    /* FIXME deprecated in favour of "set gui showpips" */
-    fGUIShowPips = toupper (*szValue) == 'Y';
+  else if (!StrNCaseCmp (szParam, "show pips", c)) {
+    /* FIXME deprecated in favour of "set gui animation ..." */
+    switch (toupper (*szValue)) {
+    case 'N':
+      gui_show_pips = GUI_SHOW_PIPS_NONE;
+      break;
+    case 'P':
+      gui_show_pips = GUI_SHOW_PIPS_PIPS;
+      break;
+    case 'E':
+      gui_show_pips = GUI_SHOW_PIPS_EPC;
+      break;
+    case 'W':
+      gui_show_pips = GUI_SHOW_PIPS_WASTAGE;
+      break;
+    default:
+      animGUI = ANIMATE_NONE;
+      break;
+    }
+  }
   else if (!StrNCaseCmp (szParam, "illegal", c))
     /* FIXME deprecated in favour of "set gui illegal" */
     fGUIIllegal = toupper (*szValue) == 'Y';

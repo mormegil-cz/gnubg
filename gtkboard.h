@@ -122,16 +122,18 @@ typedef enum _animation {
     ANIMATE_NONE, ANIMATE_BLINK, ANIMATE_SLIDE
 } animation;
 
+typedef enum _GuiShowPips {
+    GUI_SHOW_PIPS_NONE, GUI_SHOW_PIPS_PIPS, GUI_SHOW_PIPS_EPC, GUI_SHOW_PIPS_WASTAGE, N_GUI_SHOW_PIPS
+} GuiShowPips;
+
 extern animation animGUI;
 extern int fGUIBeep;
 extern int fGUIHighDieFirst;
 extern int fGUIIllegal;
-extern int fGUIShowPips;
+extern GuiShowPips gui_show_pips;
 extern int fGUISetWindowPos;
 extern int fGUIDragTargetHelp;
 extern int fGUIUseStatsPanel;
-extern int fGUIShowEPCs;
-extern int fGUIShowWastage;
 extern int fGUIGrayEdit;
 extern unsigned int nGUIAnimSpeed;
 

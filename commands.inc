@@ -578,6 +578,16 @@ command cER = {
     { "speed", CommandSetGUIAnimationSpeed,
       N_("Specify animation rate for moving chequers"), szVALUE, NULL },
     { NULL, NULL, NULL, NULL, NULL }
+}, acSetGUIShowPips[] = {
+    { "none", CommandSetGUIShowPipsNone,
+      N_("Don't show pip counts under the board"), NULL, NULL },
+    { "pips", CommandSetGUIShowPipsPips,
+      N_("Show pip counts under the board"), NULL, NULL },
+    { "epc", CommandSetGUIShowPipsEPC,
+      N_("Show EPC under the board, or pip count if unavailable"), NULL, NULL },
+    { "wastage", CommandSetGUIShowPipsWastage,
+      N_("Show EPC and wastage under the board, or pip count if unavailable"), NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acSetGUI[] = {
     { "animation", NULL, N_("Control how moving chequers are displayed"), NULL,
       acSetGUIAnimation },
@@ -599,16 +609,10 @@ command cER = {
       N_("Show the higher die on the left"), szONOFF, NULL },
     { "illegal", CommandSetGUIIllegal,
       N_("Permit dragging chequers to illegal points"), szONOFF, NULL },
-    { "showwastage", CommandSetGUIShowWastage,
-      N_("Show the effective pip count wastage below the board"), 
-      szONOFF, NULL },
-    { "showepcs", CommandSetGUIShowEPCs,
-      N_("Show the effective pip counts (EPCs) below the board"), 
-      szONOFF, NULL },
     { "showids", CommandSetGUIShowIDs,
       N_("Show the position and match IDs above the board"), szONOFF, NULL },
-    { "showpips", CommandSetGUIShowPips,
-      N_("Show the pip counts below the board"), szONOFF, NULL },
+    { "showpips", NULL,
+      N_("Show the pip counts below the board"), NULL, acSetGUIShowPips },
     { "windowpositions", CommandSetGUIWindowPositions,
       N_("Save and restore window positions and sizes"), szONOFF, NULL },
     { NULL, NULL, NULL, NULL, NULL }

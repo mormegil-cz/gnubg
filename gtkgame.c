@@ -6313,7 +6313,7 @@ extern void GTKSet( void *p ) {
 			gtk_widget_queue_resize(pwBoard);
 		}
 	}
-	else if( p == &fGUIShowPips )
+	else if( p == &gui_show_pips )
 		ShowBoard(); /* this is overkill, but it works */
 	else if (p == &fOutputWinPC)
 	{
