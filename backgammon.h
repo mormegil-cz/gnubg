@@ -31,7 +31,7 @@
 #ifndef BUILD_DATE
 #define BUILD_DATE " " __DATE__
 #endif
-#define VERSION_STRING "GNU Backgammon " VERSION BUILD_DATE
+#define VERSION_STRING "GNU Backgammon " VERSION " " BUILD_DATE
 #define GNUBG_CHARSET "UTF-8"
 
 extern const char *intro_string;

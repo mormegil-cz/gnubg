@@ -5745,7 +5745,7 @@ extern void GTKShowBuildInfo(GtkWidget *pw, GtkWidget *pwParent)
 
 	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), pwBox);
 
-	gtk_box_pack_start( GTK_BOX( pwBox ), SelectableLabel(pwDialog, "Version " VERSION), FALSE, FALSE, 4 );
+	gtk_box_pack_start( GTK_BOX( pwBox ), SelectableLabel(pwDialog, "Version " VERSION_STRING), FALSE, FALSE, 4 );
 
 	gtk_box_pack_start(GTK_BOX(pwBox), gtk_hseparator_new(), FALSE, FALSE, 4);
 
