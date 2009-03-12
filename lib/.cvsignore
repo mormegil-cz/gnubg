@@ -5,3 +5,5 @@ config.status
 *.lo
 *.la
 .libs
+CMakeFiles
+cmake_install.cmake

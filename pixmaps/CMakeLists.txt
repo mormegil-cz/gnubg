@@ -1,0 +1,2 @@
+install(DIRECTORY icons DESTINATION ${DATADIR} PATTERN "CVS" EXCLUDE)
+install(FILES gnubg-big.png DESTINATION ${PKGDATADIR}/pixmaps)

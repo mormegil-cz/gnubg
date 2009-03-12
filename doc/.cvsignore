@@ -24,3 +24,5 @@ gnubg.texi
 .gnubgtexi.err
 allabout.html
 manpage*
+CMakeFiles
+cmake_install.cmake

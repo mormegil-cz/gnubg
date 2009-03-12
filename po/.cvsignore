@@ -5,3 +5,5 @@ POTFILES
 remove-potcdate.sed
 stamp-po
 en@quot.insert-header
+CMakeFiles
+cmake_install.cmake
