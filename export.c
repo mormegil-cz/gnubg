@@ -111,7 +111,7 @@ static moverecord *export_get_moverecord(int *game_nr, int *move_nr)
 	int history = 0;
 	moverecord *pmr = NULL;
 
-	pmr = getCurrentMoveRecord(&history);
+	pmr = get_current_moverecord(&history);
 	if (history)
 		*move_nr = getMoveNumber(plGame, pmr) - 1;
 	else if (plLastMove)

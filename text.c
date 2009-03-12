@@ -1023,7 +1023,7 @@ extern void CommandExportPositionText( char *sz ) {
 
     FILE *pf;
     int fHistory;
-    moverecord *pmr = getCurrentMoveRecord ( &fHistory );
+    moverecord *pmr = get_current_moverecord ( &fHistory );
     int iMove;
     GString *gsz;
 	

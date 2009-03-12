@@ -3543,13 +3543,6 @@ extern void CommandSetTutorChequer( char * sz) {
 			  _("Exclude advice on chequer play from tutor mode.") );
 }
 
-extern void CommandSetTutorEval( char * sz) {
-
-  SetToggle ( "tutor-eval", &fTutorAnalysis, sz,
-			  _("Use Analysis settings to generate advice."),
-			  _("Use Evaluation settings to generate advice.") );
-}
-
 static void _set_tutor_skill (skilltype Skill, int skillno, char *skill) {
 
   nTutorSkillCurrent = skillno;

@@ -56,8 +56,7 @@ typedef struct _optionswidget {
 
   GtkWidget *pwAutoBearoff, *pwAutoCrawford, *pwAutoGame,
             *pwAutoMove, *pwAutoRoll;
-  GtkWidget *pwTutor, *pwTutorCube, *pwTutorChequer, *pwTutorSkill,
-            *pwTutorEvalHint, *pwTutorEvalAnalysis;
+  GtkWidget *pwTutor, *pwTutorCube, *pwTutorChequer, *pwTutorSkill;
   GtkAdjustment *padjCubeBeaver, *padjCubeAutomatic, *padjLength;
   GtkWidget *pwCubeUsecube, *pwCubeJacoby, *pwCubeInvert;
   GtkWidget *pwGameClockwise;
@@ -149,8 +148,6 @@ static void TutorToggled (GtkWidget *UNUSED(pw), optionswidget *pow){
   gtk_widget_set_sensitive( pow->pwTutorCube, n );
   gtk_widget_set_sensitive( pow->pwTutorChequer, n );
   gtk_widget_set_sensitive( pow->pwTutorSkill, n );
-  gtk_widget_set_sensitive( pow->pwTutorEvalHint, n );
-  gtk_widget_set_sensitive( pow->pwTutorEvalAnalysis, n );
 
 }
 
@@ -670,22 +667,6 @@ static GtkWidget *OptionsPages( optionswidget *pow )
     pwb = gtk_vbox_new (FALSE, 0);
     gtk_container_add (GTK_CONTAINER (pwf), pwb);
 
-    pow->pwTutorEvalHint = gtk_radio_button_new_with_label (
-	NULL, _("Same as Evaluation"));
-    gtk_box_pack_start (GTK_BOX (pwb), pow->pwTutorEvalHint,
-			FALSE, FALSE, 0);
-    gtk_widget_set_tooltip_text(pow->pwTutorEvalHint,
-			  _("The tutor will consider your decisions using "
-			    "the \"Evaluation\" settings."));
-	
-    pow->pwTutorEvalAnalysis = gtk_radio_button_new_with_label_from_widget(
-	GTK_RADIO_BUTTON( pow->pwTutorEvalHint ), _("Same as Analysis"));
-    gtk_box_pack_start (GTK_BOX (pwb), pow->pwTutorEvalAnalysis,
-			FALSE, FALSE, 0);
-    gtk_widget_set_tooltip_text(pow->pwTutorEvalAnalysis,
-			  _("The tutor will consider your decisions using "
-			    "the \"Analysis\" settings."));
-
     pwev = gtk_event_box_new();
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
     gtk_box_pack_start( GTK_BOX( pwvbox ), pwev, FALSE, FALSE, 0 );
@@ -708,8 +689,6 @@ static GtkWidget *OptionsPages( optionswidget *pow )
     gtk_widget_set_sensitive (pow->pwTutorSkill, fTutor);
     gtk_widget_set_sensitive( pow->pwTutorCube, fTutor );
     gtk_widget_set_sensitive( pow->pwTutorChequer, fTutor );
-    gtk_widget_set_sensitive( pow->pwTutorEvalHint, fTutor );
-    gtk_widget_set_sensitive( pow->pwTutorEvalAnalysis, fTutor );
   
     /* Display options */
     pwp = gtk_alignment_new( 0, 0, 0, 0 );
@@ -1389,13 +1368,6 @@ static void OptionsOK(GtkWidget *pw, optionswidget *pow)
   CHECKUPDATE(pow->pwTutor, fTutor, "set tutor mode %s")
   CHECKUPDATE(pow->pwTutorCube, fTutorCube, "set tutor cube %s")
   CHECKUPDATE(pow->pwTutorChequer, fTutorChequer, "set tutor chequer %s")
-  if(gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON (pow->pwTutorEvalHint))) {
-	if (fTutorAnalysis)
-	  UserCommand( "set tutor eval off");
-  } else {
-	if (!fTutorAnalysis)
-	  UserCommand( "set tutor eval on");
-  }
 
   {
 	GtkTreeModel *model;
@@ -1701,12 +1673,6 @@ OptionsSet( optionswidget *pow) {
 
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwTutorChequer ),
                                 fTutorChequer );
-  if (!fTutorAnalysis)
-	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwTutorEvalHint ),
-								  TRUE );
-  else
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON( pow->pwTutorEvalAnalysis ),
-								 TRUE );
 
 	gtk_combo_box_set_active (GTK_COMBO_BOX (pow->pwTutorSkill), nTutorSkillCurrent);
   gtk_adjustment_set_value ( pow->padjCubeBeaver, nBeavers );

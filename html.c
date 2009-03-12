@@ -3595,7 +3595,7 @@ extern void CommandExportPositionHtml( char *sz ) {
 
     FILE *pf;
     int fHistory;
-    moverecord *pmr = getCurrentMoveRecord ( &fHistory );
+    moverecord *pmr = get_current_moverecord ( &fHistory );
     int iMove;
 	
     sz = NextToken( &sz );
@@ -3675,7 +3675,7 @@ static void
 ExportPositionGammOnLine( FILE *pf )
 {
     int fHistory;
-    moverecord *pmr = getCurrentMoveRecord ( &fHistory );
+    moverecord *pmr = get_current_moverecord ( &fHistory );
     int iMove;
 
     fputs ( "\n<!-- Score -->\n\n", pf );

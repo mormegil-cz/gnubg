@@ -229,7 +229,6 @@ int fRecord = TRUE;
 int fShowProgress;
 int fStyledGamelist = TRUE;
 int fTruncEqualPlayer0 =TRUE;
-int fTutorAnalysis = FALSE;
 int fTutorChequer = TRUE;
 int fTutorCube = TRUE;
 int fTutor = FALSE;
@@ -2133,7 +2132,152 @@ static int hint_cube(moverecord *pmr, cubeinfo *pci)
 	return 0;
 }
 
-static void hint_double(int show)
+static skilltype no_double_skill(float aarOutput[][NUM_ROLLOUT_OUTPUTS],
+				 cubeinfo *pci)
+{
+	float arDouble[4];
+	float eq = 0.0f;
+	cubedecision cd = FindCubeDecision(arDouble, aarOutput, pci);
+	switch (cd) {
+	case DOUBLE_TAKE:
+	case DOUBLE_BEAVER:
+	case REDOUBLE_TAKE:
+		eq = arDouble[OUTPUT_NODOUBLE] - arDouble[OUTPUT_TAKE];
+		break;
+	case DOUBLE_PASS:
+	case REDOUBLE_PASS:
+		eq = arDouble[OUTPUT_NODOUBLE] - arDouble[OUTPUT_DROP];
+		break;
+	default:
+		break;
+	}
+
+	return Skill(eq);
+}
+
+static skilltype double_skill(float aarOutput[][NUM_ROLLOUT_OUTPUTS],
+			      cubeinfo *pci)
+{
+	float arDouble[4];
+	float eq = 0.0f;
+	cubedecision cd = FindCubeDecision(arDouble, aarOutput, pci);
+
+	switch (cd) {
+	case NODOUBLE_TAKE:
+	case NODOUBLE_BEAVER:
+	case NO_REDOUBLE_TAKE:
+	case NO_REDOUBLE_BEAVER:
+	case TOOGOOD_TAKE:
+	case TOOGOODRE_TAKE:
+		eq = arDouble[OUTPUT_TAKE] - arDouble[OUTPUT_NODOUBLE];
+		break;
+
+	case TOOGOOD_PASS:
+		eq = arDouble[OUTPUT_DROP] - arDouble[OUTPUT_NODOUBLE];
+		break;
+
+	default:
+		break;
+	}
+	return Skill(eq);
+}
+
+static skilltype drop_skill(float aarOutput[][NUM_ROLLOUT_OUTPUTS],
+			    cubeinfo *pci)
+{
+	float arDouble[4];
+	float eq = 0.0f;
+	cubedecision cd = FindCubeDecision(arDouble, aarOutput, pci);
+	switch (cd) {
+	case DOUBLE_TAKE:
+	case DOUBLE_BEAVER:
+	case REDOUBLE_TAKE:
+	case NODOUBLE_TAKE:
+	case NODOUBLE_BEAVER:
+	case NO_REDOUBLE_TAKE:
+	case NO_REDOUBLE_BEAVER:
+	case TOOGOOD_TAKE:
+	case TOOGOODRE_TAKE:
+	case OPTIONAL_DOUBLE_BEAVER:
+	case OPTIONAL_DOUBLE_TAKE:
+	case OPTIONAL_REDOUBLE_TAKE:
+		/* equity is for doubling player, invert for response */
+		eq = arDouble[OUTPUT_TAKE] - arDouble[OUTPUT_DROP];
+		break;
+	default:
+		break;
+	}
+	return Skill(eq);
+}
+
+static skilltype take_skill(float aarOutput[][NUM_ROLLOUT_OUTPUTS],
+			    cubeinfo *pci)
+{
+	float arDouble[4];
+	float eq = 0.0f;
+	cubedecision cd = FindCubeDecision(arDouble, aarOutput, pci);
+	switch (cd) {
+	case DOUBLE_PASS:
+	case REDOUBLE_PASS:
+	case TOOGOOD_PASS:
+	case TOOGOODRE_PASS:
+	case OPTIONAL_DOUBLE_PASS:
+	case OPTIONAL_REDOUBLE_PASS:
+		/* equity is for doubling player, invert for response */
+		eq = arDouble[OUTPUT_DROP] - arDouble[OUTPUT_TAKE];
+		break;
+	default:
+		break;
+	}
+	return Skill(eq);
+}
+
+static skilltype move_skill(moverecord *pmr)
+{
+	return Skill(pmr->ml.amMoves[pmr->n.iMove].rScore -
+		     pmr->ml.amMoves[0].rScore);
+}
+
+static void find_skills(moverecord *pmr, cubeinfo *pci, int did_double,
+			int did_take)
+{
+	doubletype dt = DoubleType(ms.fDoubled, ms.fMove, ms.fTurn);
+	taketype tt = (taketype) dt;
+
+
+	if (pmr->mt != MOVE_NORMAL && pmr->mt != MOVE_DOUBLE
+	    && pmr->mt != MOVE_TAKE) {
+		pmr->n.stMove = SKILL_NONE;
+		pmr->stCube = SKILL_NONE;
+		return;
+	}
+	if (pmr->mt == MOVE_DOUBLE && dt != DT_NORMAL) {
+		pmr->stCube = SKILL_NONE;
+		return;
+	}
+	if (pmr->mt == MOVE_TAKE && tt != TT_NORMAL) {
+		pmr->stCube = SKILL_NONE;
+		return;
+	}
+
+	if (did_double == FALSE)
+		pmr->stCube = no_double_skill(pmr->CubeDecPtr->aarOutput, pci);
+	else if (did_double == TRUE)
+		pmr->stCube = double_skill(pmr->CubeDecPtr->aarOutput, pci);
+	else if (did_take == FALSE)
+		pmr->stCube = drop_skill(pmr->CubeDecPtr->aarOutput, pci);
+	else if (did_take == TRUE)
+		pmr->stCube = take_skill(pmr->CubeDecPtr->aarOutput, pci);
+	else
+		pmr->stCube = SKILL_NONE;
+
+	if (pmr->mt == MOVE_NORMAL && pmr->n.iMove > 0 && pmr->ml.cMoves > 0
+	    && pmr->n.iMove < pmr->ml.cMoves)
+		pmr->n.stMove = move_skill(pmr);
+
+}
+
+extern void hint_double(int show, int did_double)
 {
 	static decisionData dd;
 	static cubeinfo ci;
@@ -2145,9 +2289,17 @@ static void hint_double(int show)
 		outputerrf(_("You cannot double."));
 		return;
 	}
-	pmr = getCurrentMoveRecord(&hist);
-	if (hint_cube(pmr, &ci) <0)
+
+	pmr = get_current_moverecord(&hist);
+
+	if (hint_cube(pmr, &ci) < 0)
 		return;
+
+	if (hist)
+		did_double = (pmr->mt == MOVE_DOUBLE) ? TRUE : FALSE;
+
+	find_skills(pmr, &ci, did_double, -1);
+
 #if USE_GTK
 	if (fX) {
 		GTKUpdateAnnotations();
@@ -2156,11 +2308,10 @@ static void hint_double(int show)
 		return;
 	}
 #endif
-		outputl(OutputCubeAnalysis
-			(dd.aarOutput, dd.aarStdDev, dd.pes, dd.pci));
+	outputl(OutputCubeAnalysis(dd.aarOutput, dd.aarStdDev, dd.pes, dd.pci));
 }
 
-static void hint_take(int show)
+extern void hint_take(int show, int did_take)
 {
 	static decisionData dd;
 	static cubeinfo ci;
@@ -2168,9 +2319,15 @@ static void hint_take(int show)
 	int hist;
 
 	GetMatchStateCubeInfo(&ci, &ms);
-	pmr = getCurrentMoveRecord(&hist);
-	if (hint_cube(pmr, &ci) <0)
+	pmr = get_current_moverecord(&hist);
+	if (hint_cube(pmr, &ci) < 0)
 		return;
+
+	if (hist)
+		did_take = (pmr->mt == MOVE_TAKE) ? TRUE : FALSE;
+
+	find_skills(pmr, &ci, -1, did_take);
+
 #if USE_GTK
 	if (fX) {
 		GTKUpdateAnnotations();
@@ -2183,10 +2340,7 @@ static void hint_take(int show)
 	outputl(OutputCubeAnalysis(dd.aarOutput, dd.aarStdDev, dd.pes, dd.pci));
 }
 
-
-
-
-extern void HintChequer(char *sz, gboolean show)
+extern void hint_move(char *sz, gboolean show)
 {
 	unsigned int i;
 	char szBuf[1024];
@@ -2199,7 +2353,7 @@ extern void HintChequer(char *sz, gboolean show)
 
 	GetMatchStateCubeInfo(&ci, &ms);
 
-	pmr = getCurrentMoveRecord(&hist);
+	pmr = get_current_moverecord(&hist);
 
 	if (pmr->esChequer.et == EVAL_NONE) {
 		movelist ml;
@@ -2230,6 +2384,7 @@ extern void HintChequer(char *sz, gboolean show)
 	else if (pmr->n.anMove[0] != -1)
 	{
 		pmr->n.iMove = locateMove(msBoard(), pmr->n.anMove, &pmr->ml);
+		find_skills(pmr, &ci, FALSE, -1);
 		rChequerSkill =
 			pmr->ml.amMoves[pmr->n.iMove].rScore - pmr->ml.amMoves[0].rScore;
 		pmr->n.stMove = Skill(rChequerSkill);
@@ -2270,7 +2425,7 @@ extern void CommandHint( char *sz )
   /* hint on cube decision */
   
   if( !ms.anDice[ 0 ] && !ms.fDoubled && ! ms.fResigned ) {
-    hint_double(TRUE);
+    hint_double(TRUE, -1);
     return;
   }
 
@@ -2284,14 +2439,14 @@ extern void CommandHint( char *sz )
   /* Give hint on take decision */
 
   if ( ms.fDoubled ) {
-    hint_take(TRUE);
+    hint_take(TRUE, -1);
     return;
   }
 
   /* Give hint on chequer play decision */
 
   if ( ms.anDice[ 0 ] ) {
-    HintChequer( sz, TRUE );
+    hint_move( sz, TRUE );
     return;
   }
 
@@ -2982,7 +3137,6 @@ extern void CommandSaveSettings( char *szParam )
 		    "set tutor mode %s\n"
 		    "set tutor cube %s\n"
 		    "set tutor chequer %s\n"
-		    "set tutor eval %s\n"
 		    "set tutor skill %s\n"
 		    "set confirm new %s\n"
 		    "set confirm save %s\n"
@@ -2995,7 +3149,6 @@ extern void CommandSaveSettings( char *szParam )
 		    fTutor ? "on" : "off",
 		    fTutorCube ? "on" : "off",
 		    fTutorChequer ? "on" : "off",
-		    fTutorAnalysis ? "on" : "off",
 		    ((TutorSkill == SKILL_VERYBAD) ? "very bad" :
 		     (TutorSkill == SKILL_BAD) ? "bad" : "doubtful"),
 		    fConfirmNew ? "on" : "off",

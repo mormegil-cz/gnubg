@@ -2549,7 +2549,7 @@ static gint check_cmoves_in_pmr(const moverecord *pmr)
 extern void CommandCMarkCubeShow(char *UNUSED(sz))
 {
 	GString *gsz;
-	moverecord *pmr = getCurrentMoveRecord(NULL);
+	moverecord *pmr = get_current_moverecord(NULL);
 
 	if (!check_cube_in_pmr(pmr))
 		return;
@@ -2562,7 +2562,7 @@ extern void CommandCMarkCubeShow(char *UNUSED(sz))
 
 extern void CommandCMarkCubeSetNone(char *UNUSED(sz))
 {
-	moverecord *pmr = getCurrentMoveRecord(NULL);
+	moverecord *pmr = get_current_moverecord(NULL);
 
 	if (!check_cube_in_pmr(pmr))
 		return;
@@ -2572,7 +2572,7 @@ extern void CommandCMarkCubeSetNone(char *UNUSED(sz))
 
 extern void CommandCMarkCubeSetRollout(char *UNUSED(sz))
 {
-	moverecord *pmr = getCurrentMoveRecord(NULL);
+	moverecord *pmr = get_current_moverecord(NULL);
 
 	if (!check_cube_in_pmr(pmr))
 		return;
@@ -2582,7 +2582,7 @@ extern void CommandCMarkCubeSetRollout(char *UNUSED(sz))
 
 extern void CommandCMarkMoveClear(char *UNUSED(sz))
 {
-	moverecord *pmr = getCurrentMoveRecord(NULL);
+	moverecord *pmr = get_current_moverecord(NULL);
 
 	if (!check_cmoves_in_pmr(pmr))
 		return;
@@ -2607,7 +2607,7 @@ extern void CommandCMarkMatchClear(char *UNUSED(sz))
 
 extern void CommandCMarkMoveSetNone(char *sz)
 {
-	moverecord *pmr = getCurrentMoveRecord(NULL);
+	moverecord *pmr = get_current_moverecord(NULL);
 
 	if (!check_cmoves_in_pmr(pmr))
 		return;
@@ -2620,7 +2620,7 @@ extern void CommandCMarkMoveSetNone(char *sz)
 
 extern void CommandCMarkMoveSetRollout(char *sz)
 {
-	moverecord *pmr = getCurrentMoveRecord(NULL);
+	moverecord *pmr = get_current_moverecord(NULL);
 
 	if (!check_cmoves_in_pmr(pmr))
 		return;
@@ -2634,7 +2634,7 @@ extern void CommandCMarkMoveSetRollout(char *sz)
 extern void CommandCMarkMoveShow(char *UNUSED(sz))
 {
 	GString *gsz;
-	moverecord *pmr = getCurrentMoveRecord(NULL);
+	moverecord *pmr = get_current_moverecord(NULL);
 
 	if (!check_cmoves_in_pmr(pmr))
 		return;
@@ -2673,7 +2673,7 @@ extern void CommandCMarkMatchShow(char *UNUSED(sz))
 
 extern void CommandAnalyseRolloutCube(char *UNUSED(sz))
 {
-	moverecord *pmr = getCurrentMoveRecord(NULL);
+	moverecord *pmr = get_current_moverecord(NULL);
 
 	if (!check_cube_in_pmr(pmr))
 		return;
@@ -2685,7 +2685,7 @@ extern void CommandAnalyseRolloutCube(char *UNUSED(sz))
 
 extern void CommandAnalyseRolloutMove(char *sz)
 {
-	moverecord *pmr = getCurrentMoveRecord(NULL);
+	moverecord *pmr = get_current_moverecord(NULL);
 
 	if (!check_cmoves_in_pmr(pmr))
 		return;

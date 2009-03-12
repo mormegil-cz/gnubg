@@ -146,14 +146,6 @@ int anLastMove[ 8 ], fLastMove, fLastPlayer;
 #endif
 
 static void
-ec2es ( evalsetup *pes, const evalcontext *pec ) {
-
-  pes->et = EVAL_EVAL;
-  memcpy ( &pes->ec, pec, sizeof ( evalcontext ) );
-
-}
-
-static void
 PlayMove(matchstate* pms, int const anMove[ 8 ], int const fPlayer)
 {
   int i, nSrc, nDest;
@@ -535,9 +527,6 @@ extern void AddMoveRecord( void *pv ) {
 	g_assert( FALSE );
     }
     
-    if (pmr->mt != MOVE_SETDICE)
-	    pmr_hint_destroy();
-
     /* Delete all games after plGame, and all records after plLastMove. */
     PopGame( plGame, FALSE );
     /* FIXME when we can handle variations, we should save the old moves
@@ -858,6 +847,54 @@ extern int check_resigns(cubeinfo * pci)
 	return resigned == 4 ? -1 : resigned;
 }
 
+static void copy_from_pmr_cur(moverecord *pmr)
+{
+	moverecord *pmr_cur;
+	float skill_score;
+	pmr_cur = get_current_moverecord(NULL);
+	if (pmr_cur->ml.cMoves > 0) {
+		if (pmr->ml.cMoves > 0)
+			free(pmr->ml.amMoves);
+		CopyMoveList(&pmr->ml, &pmr_cur->ml);
+		pmr->n.iMove = locateMove(msBoard(), pmr->n.anMove, &pmr->ml);
+		skill_score =
+		    pmr->ml.amMoves[pmr->n.iMove].rScore -
+		    pmr->ml.amMoves[0].rScore;
+		pmr->n.stMove = Skill(skill_score);
+	}
+
+	if (pmr_cur->CubeDecPtr->esDouble.et != EVAL_NONE) {
+		memcpy(pmr->CubeDecPtr->aarOutput,
+		       pmr_cur->CubeDecPtr->aarOutput,
+		       sizeof pmr->CubeDecPtr->aarOutput);
+		memcpy(pmr->CubeDecPtr->aarStdDev,
+		       pmr_cur->CubeDecPtr->aarStdDev,
+		       sizeof pmr->CubeDecPtr->aarStdDev);
+		memcpy(&pmr->CubeDecPtr->esDouble,
+		       &pmr_cur->CubeDecPtr->esDouble,
+		       sizeof pmr->CubeDecPtr->esDouble);
+		pmr->stCube = pmr_cur->stCube;
+	}
+
+	/* even if pmr_cur != pmr_hint we won't need pmr_hint any more */
+	pmr_hint_destroy();
+}
+
+static void parsemove_to_anmove(int c, int anMove[])
+{
+	int i;
+	for (i = 0; i < 4; i++) {
+		if (i < c) {
+			anMove[i << 1]--;
+			anMove[(i << 1) + 1]--;
+		} else {
+			anMove[i << 1] = -1;
+			anMove[(i << 1) + 1] = -1;
+		}
+	}
+	CanonicalMoveOrder(anMove);
+}
+
 static int ComputerTurn( void ) {
 
   moverecord *pmr;
@@ -865,7 +902,7 @@ static int ComputerTurn( void ) {
   float arDouble[ 4 ], rDoublePoint;
 #if HAVE_SOCKETS
   char szBoard[ 256 ], szResponse[ 256 ];
-  int i, c, fTurnOrig;
+  int c, fTurnOrig;
   TanBoard anBoardTemp;
 #endif
 
@@ -1253,8 +1290,6 @@ static int ComputerTurn( void ) {
       pmr->fPlayer = ms.fTurn;
       pmr->esChequer = ap[ ms.fTurn ].esChequer;
 
-      pmr_cubedata_copy(pmr_hint, pmr);
-      pmr_hint_destroy();
 	  fd.pml = &pmr->ml;
 	  fd.pboard = (ConstTanBoard)anBoardMove;
 	  fd.auchMove = NULL;
@@ -1268,11 +1303,14 @@ static int ComputerTurn( void ) {
 		  return -1;
       }
 
+      /* make the move found above */
       if ( pmr->ml.cMoves ) {
         memcpy( pmr->n.anMove, pmr->ml.amMoves[ 0 ].anMove,
                 sizeof( pmr->n.anMove ) );
         pmr->n.iMove = 0;
       }
+      /* but keep data already stored, e.g. a rollout */
+      copy_from_pmr_cur(pmr);
      
       /* write move to status bar or stdout */
 	outputnew ();
@@ -1428,16 +1466,7 @@ static int ComputerTurn( void ) {
 	      outputl( _("Warning: badly formed move from external player") );
 	      return -1;
 	  } else
-	      for( i = 0; i < 4; i++ )
-		  if( i < c ) {
-		      pmr->n.anMove[ i << 1 ]--;
-		      pmr->n.anMove[ ( i << 1 ) + 1 ]--;
-		  } else {
-		      pmr->n.anMove[ i << 1 ] = -1;
-		      pmr->n.anMove[ ( i << 1 ) + 1 ] = -1;
-		  }
-
-      
+		  parsemove_to_anmove(c, pmr->n.anMove);
 	  if( pmr->n.anMove[ 0 ] < 0 )
 	      playSound ( SOUND_BOT_DANCE );
       
@@ -1545,8 +1574,7 @@ static int TryBearoff( void ) {
 		pmr->fPlayer = ms.fTurn;
 		memcpy( pmr->n.anMove, ml.amMoves[ i ].anMove,
 			sizeof( pmr->n.anMove ) );
-		pmr_movelist_copy(pmr_hint, pmr);
-		pmr_hint_destroy();
+		copy_from_pmr_cur(pmr);
 
 		ShowAutoMove( msBoard(), pmr->n.anMove );
 		
@@ -2157,92 +2185,21 @@ extern void CommandDecline( char *sz ) {
     TurnDone();
 }
 
-static skilltype GoodDouble (int fisRedouble, moverecord *pmr )
+static skilltype tutor_double(int did_double)
 {
-  float arDouble[ 4 ];
-  cubeinfo ci;
-  cubedecision cd;
-  float rDeltaEquity;
-  int      fAnalyseCubeSave = fAnalyseCube;
-  evalsetup es;
-  decisionData dd;
+	moverecord *pmr;
+	cubeinfo ci;
+	GetMatchStateCubeInfo(&ci, &ms);
 
-  /* reasons that doubling is not an issue */
-  if( (ms.gs != GAME_PLAYING) || 
-		ms.anDice[ 0 ]         || 
-		(ms.fDoubled && !fisRedouble) || 
-		(!ms.fDoubled && fisRedouble) ||
-		ms.fResigned ||
-		(ap[ ms.fTurn ].pt != PLAYER_HUMAN )) {
+	/* reasons that doubling is not an issue */
+	if ((ms.gs != GAME_PLAYING)
+	    || ap[ms.fTurn].pt != PLAYER_HUMAN 
+	    || !GetDPEq(NULL, NULL, &ci))
+		return SKILL_NONE;
 
-      return (SKILL_NONE);
-  }
-
-  if (fTutorAnalysis) {
-    dd.pes = &esAnalysisCube;
-  } else {
-    dd.pes = &esEvalCube;
-  }
-
-  dd.pec = &dd.pes->ec;
-
-  GetMatchStateCubeInfo( &ci, &ms );
-
-  fAnalyseCube = TRUE;
-  if( !GetDPEq ( NULL, NULL, &ci ) ) {
-    fAnalyseCube = fAnalyseCubeSave;
-    return (SKILL_NONE);
-  }
-
-  /* Give hint on cube action */
-
-  dd.pboard = msBoard();
-  dd.pci = &ci;
-
-  if (RunAsyncProcess((AsyncFun)asyncCubeDecisionE, &dd, _("Considering cube action...")) != 0)
-  {
-	fAnalyseCube = fAnalyseCubeSave;
-	return (SKILL_NONE);
-  }
-
-  /* update analysis for hint */
-
-  ec2es ( &es, dd.pec );
-  current_pmr_cubedata_update(&es, dd.aarOutput, dd.aarStdDev);
-
-  /* store cube decision for annotation */
-
-  ec2es ( &pmr->CubeDecPtr->esDouble, dd.pec );
-  memcpy ( pmr->CubeDecPtr->aarOutput, dd.aarOutput, 
-	   2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-
-  memcpy ( pmr->CubeDecPtr->aarStdDev, dd.aarStdDev,
-	   2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-  pmr->stCube = SKILL_NONE;
-
-  /* find skill */
-
-  cd = FindCubeDecision ( arDouble,  dd.aarOutput, &ci );  
-
-  switch ( cd ) {
-	case NODOUBLE_TAKE:
-	case NODOUBLE_BEAVER:
-	case NO_REDOUBLE_TAKE:
-	case NO_REDOUBLE_BEAVER:
-	case TOOGOOD_TAKE:
-	case TOOGOODRE_TAKE:
-	  rDeltaEquity = arDouble[OUTPUT_TAKE] - arDouble[OUTPUT_NODOUBLE];
-	  break;
-
-	case TOOGOOD_PASS:
-	  rDeltaEquity = arDouble[OUTPUT_DROP] - arDouble[OUTPUT_NODOUBLE];
-	  break;
-
-	default:
-	  return (SKILL_NONE);
-	}
-
-	return ( pmr->stCube = Skill ( rDeltaEquity ) );
+	hint_double(FALSE, did_double);
+	pmr = get_current_moverecord(NULL);
+	return pmr->stCube;
 }
 
 extern void CommandDouble( char *sz ) {
@@ -2314,14 +2271,12 @@ extern void CommandDouble( char *sz ) {
 
     pmr->mt = MOVE_DOUBLE;
     pmr->fPlayer = ms.fTurn;
-    if( !LinkToDouble( pmr ) )
-    {
-	    pmr_cubedata_copy(pmr_hint, pmr);
-	    pmr_hint_destroy();
-    }
-
-    if ( fTutor && fTutorCube && !GiveAdvice( GoodDouble( FALSE, pmr ) ))
+    if ( fTutor && fTutorCube && !GiveAdvice( tutor_double(TRUE) ))
       return;
+
+    if( !LinkToDouble( pmr ) )
+		copy_from_pmr_cur(pmr);
+
 
     if( fDisplay )
 	outputf( _("%s doubles.\n"), ap[ ms.fTurn ].szName );
@@ -2340,101 +2295,18 @@ extern void CommandDouble( char *sz ) {
     TurnDone();
 }
 
-static skilltype ShouldDrop (int fIsDrop, moverecord *pmr)
+static skilltype tutor_take(int did_take)
 {
-    float arDouble[ 4 ];
-    cubeinfo ci;
-	cubedecision cd;
-    float rDeltaEquity;
-	int      fAnalyseCubeSave = fAnalyseCube;
-	decisionData dd;
-    evalsetup es;
+	moverecord *pmr;
 
-	/* reasons that doubling is not an issue */
-    if( (ms.gs != GAME_PLAYING) || 
-		ms.anDice[ 0 ]         || 
-		!ms.fDoubled || 
-		ms.fResigned ||
-		(ap[ ms.fTurn ].pt != PLAYER_HUMAN )) {
-
-      return (SKILL_NONE);
-    }
-
-	if (fTutorAnalysis)
-	  dd.pes = &esAnalysisCube;
-	else 
-	  dd.pes = &esEvalCube;
-
-	dd.pec = &dd.pes->ec;
-
-	GetMatchStateCubeInfo( &ci, &ms );
-
-	fAnalyseCube = TRUE;
-	if( !GetDPEq ( NULL, NULL, &ci ) ) {
-	  fAnalyseCube = fAnalyseCubeSave;
-	  return (SKILL_NONE);
-	}
-
-	/* Give hint on cube action */
-
-	dd.pboard = msBoard();
-	dd.pci = &ci;
-	if (RunAsyncProcess((AsyncFun)asyncCubeDecisionE, &dd, _("Considering cube action...")) != 0)
-	{
-		fAnalyseCube = fAnalyseCubeSave;
-		return (SKILL_NONE);
-	}
-
-        /* stored cube decision for hint */
-
-        ec2es ( &es, dd.pec );
-	  current_pmr_cubedata_update(&es, dd.aarOutput, dd.aarStdDev);
-	pmr_cubedata_copy(pmr_hint, pmr);
-	pmr_hint_destroy();
-	    
-	cd = FindCubeDecision ( arDouble,  dd.aarOutput, &ci );  
-
-	switch ( cd ) {
-	case DOUBLE_TAKE:
-	case DOUBLE_BEAVER:
-	case REDOUBLE_TAKE:
-	case NODOUBLE_TAKE:
-	case NODOUBLE_BEAVER:
-	case NO_REDOUBLE_TAKE:
-	case NO_REDOUBLE_BEAVER:
-	case TOOGOOD_TAKE:
-	case TOOGOODRE_TAKE:
-        case OPTIONAL_DOUBLE_BEAVER:
-        case OPTIONAL_DOUBLE_TAKE:
-        case OPTIONAL_REDOUBLE_TAKE:
-	  /* best response is take, player took */
-	  if ( !fIsDrop )
-		return ( SKILL_NONE );
-
-	  /* equity loss for dropping when you shouldn't */
- 	  rDeltaEquity =  arDouble [OUTPUT_DROP] - arDouble [OUTPUT_TAKE];
-	  break;
-
-	case DOUBLE_PASS:
-	case REDOUBLE_PASS:
-	case TOOGOOD_PASS:
-	case TOOGOODRE_PASS:
-        case OPTIONAL_DOUBLE_PASS:
-        case OPTIONAL_REDOUBLE_PASS:
-	  /* best response is drop, player dropped*/
-	  if ( fIsDrop )
+	/* reasons that taking is not an issue */
+	if ((ms.gs != GAME_PLAYING) || ms.anDice[0] || !ms.fDoubled
+	    || ms.fResigned || (ap[ms.fTurn].pt != PLAYER_HUMAN))
 		return (SKILL_NONE);
 
- 	  rDeltaEquity = arDouble [OUTPUT_TAKE] - arDouble [OUTPUT_DROP];
-	  break;
-
-
-	default:
-	  return (SKILL_NONE);
-	}
-
-	/* equity is for doubling player, invert for response */
-	return ( pmr->stCube = Skill (-rDeltaEquity) );
+	hint_take(FALSE, did_take);
+	pmr = get_current_moverecord(NULL);
+	return pmr->stCube;
 }
 
 
@@ -2467,7 +2339,7 @@ extern void CommandDrop( char *sz ) {
       return;
     }
 
-    if ( fTutor && fTutorCube && !GiveAdvice ( ShouldDrop ( TRUE, pmr ) )) {
+    if ( fTutor && fTutorCube && !GiveAdvice ( tutor_take(FALSE) )) {
       free ( pmr ); /* garbage collect */
       return;
     }
@@ -2587,9 +2459,8 @@ extern void CommandListMatch( char *sz ) {
 extern void 
 CommandMove( char *sz ) {
 
-    int j, an[ 8 ];
-	TanBoard anBoardNew, anBoardTest;
-	unsigned int i;
+    int an[ 8 ];
+	TanBoard anBoardNew;
 	int c;
     movelist ml;
     moverecord *pmr;
@@ -2653,12 +2524,7 @@ CommandMove( char *sz ) {
 		memcpy( pmr->n.anMove, ml.amMoves[ 0 ].anMove,
 			sizeof( pmr->n.anMove ) );
 	    
-	    if (pmr_hint)
-	    {
-		    pmr_movelist_copy(pmr_hint, pmr);
-		    pmr_cubedata_copy(pmr_hint, pmr);
-		    pmr_hint_destroy();
-	    }
+	    copy_from_pmr_cur(pmr);
 
 	    ShowAutoMove( msBoard(), pmr->n.anMove );
 	    
@@ -2682,95 +2548,65 @@ CommandMove( char *sz ) {
 	return;
     }
     
-    if( ( c = ParseMove( sz, an ) ) > 0 )
-	{
-		for( i = 0; i < 25; i++ ) {
-			anBoardNew[ 0 ][ i ] = ms.anBoard[ 0 ][ i ];
-			anBoardNew[ 1 ][ i ] = ms.anBoard[ 1 ][ i ];
-		}
-		
-		for( i = 0; (int)i < c; i++ ) {
-			anBoardNew[ 1 ][ an[ i << 1 ] - 1 ]--;
-			if( an[ ( i << 1 ) | 1 ] > 0 ) {
-			anBoardNew[ 1 ][ an[ ( i << 1 ) | 1 ] - 1 ]++;
-			
-			anBoardNew[ 0 ][ 24 ] +=
-				anBoardNew[ 0 ][ 24 - an[ ( i << 1 ) | 1 ] ];
-			
-			anBoardNew[ 0 ][ 24 - an[ ( i << 1 ) | 1 ] ] = 0;
-			}
-		}
-		
-		GenerateMoves( &ml, msBoard(), ms.anDice[ 0 ], ms.anDice[ 1 ],
-				   FALSE );
-		
-		for( i = 0; i < ml.cMoves; i++ )
-		{
-			PositionFromKey( anBoardTest, ml.amMoves[ i ].auch );
-		    
-			for( j = 0; j < 25; j++ )
-			if( anBoardTest[ 0 ][ j ] != anBoardNew[ 0 ][ j ] ||
-				anBoardTest[ 1 ][ j ] != anBoardNew[ 1 ][ j ] )
-				break;
-		    
-			if( j == 25 )
-			{	/* we have a legal move! */
-				playSound ( SOUND_MOVE );
+    if( ( c = ParseMove( sz, an ) ) < 0 )
+    {
+	    outputerrf(_("Move '%s' could not be parsed"), sz);
+	    return;
+    }
+    parsemove_to_anmove(c, an);
+    memcpy(anBoardNew, ms.anBoard, sizeof(TanBoard));
+    if (ApplyMove(anBoardNew, an, TRUE) <0)
+    {
+	    outputerrf( _("Illegal move.") );
+	    return;
+    }
+    /* we have a legal move! */
+    playSound ( SOUND_MOVE );
+    pmr = NewMoveRecord();
+    pmr->mt = MOVE_NORMAL;
+    pmr->sz = NULL;
+    pmr->anDice[ 0 ] = ms.anDice[ 0 ];
+    pmr->anDice[ 1 ] = ms.anDice[ 1 ];
+    pmr->fPlayer = ms.fTurn;
+    memcpy( pmr->n.anMove, an, sizeof pmr->n.anMove );
 
-				pmr = NewMoveRecord();
-
-				pmr->mt = MOVE_NORMAL;
-				pmr->sz = NULL;
-				pmr->anDice[ 0 ] = ms.anDice[ 0 ];
-				pmr->anDice[ 1 ] = ms.anDice[ 1 ];
-				pmr->fPlayer = ms.fTurn;
-
-				memcpy( pmr->n.anMove, ml.amMoves[ i ].anMove, sizeof pmr->n.anMove );
-
-				if ( fTutor && fTutorChequer)
-				{
-					HintChequer("", FALSE);
-					if (!GiveAdvice ( pmr_hint->n.stMove ))
-					{
-						free(pmr);
-						return;
-					}
-				}
-
-				if (pmr_hint)
-				{
-					pmr_movelist_copy(pmr_hint, pmr);
-					pmr_cubedata_copy(pmr_hint, pmr);
-					pmr_hint_destroy();
-				}
+    if ( fTutor && fTutorChequer)
+    {
+	    moverecord *pmr_cur = get_current_moverecord(NULL);
+	    /* update or set the move*/
+	    memcpy( pmr_cur->n.anMove, an, sizeof an );
+	    hint_move("", FALSE);
+	    if (!GiveAdvice ( pmr_cur->n.stMove ))
+	    {
+		    free(pmr);
+		    return;
+	    }
+    }
+    copy_from_pmr_cur(pmr);
 
 #if USE_GTK
-				/* There's no point delaying here. */
-				if( nTimeout ) {
-					g_source_remove( nTimeout );
-					nTimeout = 0;
-				}
+    /* There's no point delaying here. */
+    if( nTimeout ) {
+	    g_source_remove( nTimeout );
+	    nTimeout = 0;
+    }
 
-				if ( fX ) {
-					outputnew ();
-					ShowAutoMove( msBoard(), pmr->n.anMove );
-					outputx ();
-				}
+    if ( fX ) {
+	    outputnew ();
+	    ShowAutoMove( msBoard(), pmr->n.anMove );
+	    outputx ();
+    }
 #endif
 
-				AddMoveRecord( pmr );
+    AddMoveRecord( pmr );
 
 #if USE_GTK
-				/* Don't animate this move. */
-				fLastMove = FALSE;
+    /* Don't animate this move. */
+    fLastMove = FALSE;
 #endif
-				TurnDone();
+    TurnDone();
 
-				return;
-			}
-		}
-	}
-    
+    return;
     outputl( _("Illegal move.") );
 }
 
@@ -3630,14 +3466,6 @@ extern void CommandRedouble( char *sz ) {
 
     pmr = NewMoveRecord();
 
-#if 0
-
-    removed until gnubg/GoodDouble handles beavers and raccoons correctly.
-
-    if ( fTutor && fTutorCube && !GiveAdvice( GoodDouble( TRUE, pmr ) ))
-      return;
-#endif
-
     playSound ( SOUND_REDOUBLE );
 
     if( fDisplay )
@@ -3737,79 +3565,6 @@ extern void CommandResign( char *sz ) {
 
 /* evaluate wisdom of not having doubled/redoubled */
 
-static skilltype ShouldDouble ( void ) {
-
-    float arDouble[ 4 ];
-    cubeinfo ci;
-    cubedecision cd;
-    float rDeltaEquity;
-    int      fAnalyseCubeSave = fAnalyseCube;
-	decisionData dd;
-    evalsetup es;
-
-    /* reasons that doubling is not an issue */
-    if( (ms.gs != GAME_PLAYING) || 
-		ms.anDice[ 0 ]         || 
-		ms.fDoubled || 
-		ms.fResigned ||
-                ! ms.fCubeUse ||
-		(ap[ ms.fTurn ].pt != PLAYER_HUMAN )) {
-
-      return (SKILL_NONE);
-    }
-
-	if (fTutorAnalysis)
-	  dd.pes = &esAnalysisCube;
-	else 
-	  dd.pes = &esEvalCube;
-	
-	dd.pec = &dd.pes->ec;
-
-	GetMatchStateCubeInfo( &ci, &ms );
-
-	fAnalyseCube = TRUE;
-	if( !GetDPEq ( NULL, NULL, &ci ) ) {
-	  fAnalyseCube = fAnalyseCubeSave;
-	  return (SKILL_NONE);
-	}
-
-	dd.pboard = msBoard();
-	dd.pci = &ci;
-	if (RunAsyncProcess((AsyncFun)asyncCubeDecisionE, &dd, _("Considering cube action...")) != 0)
-	{
-		fAnalyseCube = fAnalyseCubeSave;
-		return (SKILL_NONE);
-	}
-        /* stored cube decision for hint */
-
-        ec2es ( &es, dd.pec );
-	  current_pmr_cubedata_update(&es, dd.aarOutput, dd.aarStdDev);
-
-	    
-	cd = FindCubeDecision ( arDouble,  dd.aarOutput, &ci );  
-
-	switch ( cd ) {
-	case DOUBLE_TAKE:
-	case DOUBLE_BEAVER:
-	case REDOUBLE_TAKE:
-
- 	  rDeltaEquity = arDouble [OUTPUT_NODOUBLE] - arDouble [OUTPUT_TAKE];
-	  break;
-
-	case DOUBLE_PASS:
-	case REDOUBLE_PASS:
-
-	  rDeltaEquity = arDouble [OUTPUT_NODOUBLE] - arDouble [OUTPUT_DROP];
-	  break;
-
-	default:
-	  return (SKILL_NONE);
-	}
-
-	return Skill (rDeltaEquity);
-
-}
-
 extern void 
 CommandRoll( char *sz ) {
 
@@ -3850,7 +3605,7 @@ CommandRoll( char *sz ) {
   if (!move_not_last_in_match_ok())
 	  return;
 
-  if ( fTutor && fTutorCube && !GiveAdvice( ShouldDouble() ))
+  if ( fTutor && fTutorCube && !GiveAdvice( tutor_double(FALSE) ))
 	  return;
 
   if ( ! fCheat || CheatDice ( ms.anDice, &ms, afCheatRoll[ ms.fMove ] ) )
@@ -3866,8 +3621,6 @@ CommandRoll( char *sz ) {
 
   AddMoveRecord( pmr );
 
-  //InvalidateStoredMoves();
-  
   DiceRolled();      
 
 #if USE_GTK
@@ -3956,7 +3709,7 @@ extern void CommandTake( char *sz ) {
 
     pmr->stCube = SKILL_NONE;
 
-    if ( fTutor && fTutorCube && !GiveAdvice ( ShouldDrop ( FALSE, pmr ) )) {
+    if ( fTutor && fTutorCube && !GiveAdvice ( tutor_take(TRUE) )) {
         free ( pmr ); /* garbage collect */
         return;
     }
@@ -4175,15 +3928,6 @@ extern void pmr_cubedata_set(moverecord *pmr, evalsetup *pes, float output[][NUM
 	memcpy(pmr->CubeDecPtr->aarStdDev, stddev, sizeof(pmr->CubeDecPtr->aarStdDev));
 }
 
-extern void pmr_cubedata_copy(const moverecord *source, moverecord *target)
-{
-	if (!source || source->CubeDecPtr->esDouble.et == EVAL_NONE)
-		return;
-        memcpy( target->CubeDecPtr->aarOutput, source->CubeDecPtr->aarOutput, sizeof target->CubeDecPtr->aarOutput );
-        memcpy( target->CubeDecPtr->aarStdDev, source->CubeDecPtr->aarStdDev, sizeof target->CubeDecPtr->aarStdDev );
-        memcpy( &target->CubeDecPtr->esDouble, &source->CubeDecPtr->esDouble, sizeof target->CubeDecPtr->esDouble );
-}
-
 extern void pmr_movelist_set(moverecord *pmr, evalsetup *pes, movelist *pml)
 {
 	float skill_score;
@@ -4198,28 +3942,17 @@ extern void pmr_movelist_set(moverecord *pmr, evalsetup *pes, movelist *pml)
 	pmr->n.stMove = Skill( skill_score );
 }
 
-extern void pmr_movelist_copy(const moverecord *source, moverecord *target)
-{
-	float skill_score;
-	CopyMoveList(&target->ml, &source->ml);
-	target->n.iMove = locateMove ( msBoard(), target->n.anMove, &target->ml );
-	if (target->ml.cMoves > 0)
-		skill_score = target->ml.amMoves[ target->n.iMove ]. rScore - target->ml.amMoves[ 0 ].rScore;
-	else
-		skill_score = 0.0f;
-	target->n.stMove = Skill( skill_score );
-}
-
 extern void current_pmr_cubedata_update(evalsetup *pes, float output[][NUM_ROLLOUT_OUTPUTS], float stddev[][NUM_ROLLOUT_OUTPUTS])
 {
-	moverecord *pmr = getCurrentMoveRecord(NULL);
+	moverecord *pmr = get_current_moverecord(NULL);
 	if (pmr->CubeDecPtr->esDouble.et == EVAL_NONE)
 		pmr_cubedata_set(pmr, pes, output, stddev);
 }
 
-extern moverecord *getCurrentMoveRecord(int *pfHistory)
+extern moverecord *get_current_moverecord(int *pfHistory)
 {
-	if (plLastMove && plLastMove->plNext && plLastMove->plNext->p) {
+	if (plLastMove && plLastMove->plNext && plLastMove->plNext->p)
+	{
 		if (pfHistory)
 			*pfHistory = TRUE;
 		return plLastMove->plNext->p;
@@ -4238,8 +3971,14 @@ extern moverecord *getCurrentMoveRecord(int *pfHistory)
 		pmr_hint->anDice[0] = ms.anDice[0];
 		pmr_hint->anDice[1] = ms.anDice[1];
 	}
+	else if (ms.fDoubled)
+	{
+		pmr_hint->mt = MOVE_TAKE;
+	}
 	else
+	{
 		pmr_hint->mt = MOVE_DOUBLE;
+	}
 	return pmr_hint;
 }
 

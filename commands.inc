@@ -1044,8 +1044,6 @@ command cER = {
   { "chequer", CommandSetTutorChequer, 
     N_("Include chequer play in advice"),
     szONOFF, &cOnOff },
-  { "eval", CommandSetTutorEval, 
-    N_("Use Analysis settings for Tutor"), szONOFF, &cOnOff },
   { "skill", NULL, N_("Set level for tutor warnings"), 
     NULL, acSetTutorSkill },
   { NULL, NULL, NULL, NULL, NULL }    

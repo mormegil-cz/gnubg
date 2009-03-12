@@ -2576,7 +2576,7 @@ extern void CommandSavePosition(char *sz)
     /* FIXME if the dice are not rolled, this should be done with a PL
        property (which is SaveGame()'s job) */
 
-    pmcu = getCurrentMoveRecord(NULL);
+    pmcu = get_current_moverecord(NULL);
     if (pmcu->ml.cMoves > 0 || pmcu->CubeDecPtr->esDouble.et != EVAL_NONE)
 	    ListInsert(&l, pmcu);
     else if (ms.anDice[0] > 0)

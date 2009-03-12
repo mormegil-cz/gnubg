@@ -5428,7 +5428,7 @@ GTKHint( moverecord *pmr)
     /* create dialog */
 
 	pwHint = GTKCreateDialog( _("GNU Backgammon - Hint"), DT_INFO,
-			   NULL, DIALOG_FLAG_MODAL | DIALOG_FLAG_NOTIDY, G_CALLBACK( HintOK ), NULL );
+			   NULL, DIALOG_FLAG_NONE, G_CALLBACK( HintOK ), NULL );
 	SetPanelWidget(WINDOW_HINT, pwHint);
     
     gtk_container_add( GTK_CONTAINER( DialogArea( pwHint, DA_MAIN ) ), 

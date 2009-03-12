@@ -1,3 +1,9 @@
+Thu Mar 12 22:08:49 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* analysis.c, backgammon.h, commands.inc, export.c, gnubg.c,
+	gtkgame.c, gtkoptions.c, html.c, play.c, set.c, sgf.c, show.c, text.c:
+	hopefully fix the problems introduced by the hint changes
+
 Tue Mar 10 17:50:43 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, commands.inc, gnubg.c, gtkboard.c, gtkboard.h,

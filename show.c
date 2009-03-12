@@ -1993,13 +1993,6 @@ extern void CommandShowTutor( char *UNUSED(sz) ) {
 	outputl( _("No warnings are given for \'doubtful\', \'bad\', or "
 			   "\'very bad\' chequer moves.") );
   
-  if (fTutorAnalysis)
-outputl(_("Tutor mode evaluates moves using the same settings as Analysis.") );
-  else
-	outputl(
-	_("Tutor mode evaluates moves using the same settings as Evaluation.") );
-
-
   switch (TutorSkill) {
   default:
   case SKILL_DOUBTFUL:
