@@ -2234,14 +2234,18 @@ static skilltype take_skill(float aarOutput[][NUM_ROLLOUT_OUTPUTS],
 
 static skilltype move_skill(moverecord *pmr)
 {
-	return Skill(pmr->ml.amMoves[pmr->n.iMove].rScore -
-		     pmr->ml.amMoves[0].rScore);
+	if (pmr->n.iMove >= pmr->ml.cMoves)
+		return SKILL_NONE;
+	else
+		return Skill(pmr->ml.amMoves[pmr->n.iMove].rScore -
+			     pmr->ml.amMoves[0].rScore);
 }
 
-static void find_skills(moverecord *pmr, cubeinfo *pci, int did_double,
+extern void find_skills(moverecord *pmr, matchstate *pms, int did_double,
 			int did_take)
 {
-	doubletype dt = DoubleType(ms.fDoubled, ms.fMove, ms.fTurn);
+	cubeinfo ci;
+	doubletype dt = DoubleType(pms->fDoubled, pms->fMove, pms->fTurn);
 	taketype tt = (taketype) dt;
 
 
@@ -2261,17 +2265,17 @@ static void find_skills(moverecord *pmr, cubeinfo *pci, int did_double,
 	}
 
 	if (did_double == FALSE)
-		pmr->stCube = no_double_skill(pmr->CubeDecPtr->aarOutput, pci);
+		pmr->stCube = no_double_skill(pmr->CubeDecPtr->aarOutput, &ci);
 	else if (did_double == TRUE)
-		pmr->stCube = double_skill(pmr->CubeDecPtr->aarOutput, pci);
+		pmr->stCube = double_skill(pmr->CubeDecPtr->aarOutput, &ci);
 	else if (did_take == FALSE)
-		pmr->stCube = drop_skill(pmr->CubeDecPtr->aarOutput, pci);
+		pmr->stCube = drop_skill(pmr->CubeDecPtr->aarOutput, &ci);
 	else if (did_take == TRUE)
-		pmr->stCube = take_skill(pmr->CubeDecPtr->aarOutput, pci);
+		pmr->stCube = take_skill(pmr->CubeDecPtr->aarOutput, &ci);
 	else
 		pmr->stCube = SKILL_NONE;
 
-	if (pmr->mt == MOVE_NORMAL && pmr->n.iMove > 0 && pmr->ml.cMoves > 0
+	if (pmr->mt == MOVE_NORMAL && pmr->ml.cMoves > 0
 	    && pmr->n.iMove < pmr->ml.cMoves)
 		pmr->n.stMove = move_skill(pmr);
 
@@ -2298,13 +2302,13 @@ extern void hint_double(int show, int did_double)
 	if (hist)
 		did_double = (pmr->mt == MOVE_DOUBLE) ? TRUE : FALSE;
 
-	find_skills(pmr, &ci, did_double, -1);
+	find_skills(pmr, &ms, did_double, -1);
 
 #if USE_GTK
 	if (fX) {
 		GTKUpdateAnnotations();
 		if (show)
-			GTKCubeHint(pmr, &ms);
+			GTKCubeHint(pmr, &ms, did_double, -1);
 		return;
 	}
 #endif
@@ -2326,13 +2330,13 @@ extern void hint_take(int show, int did_take)
 	if (hist)
 		did_take = (pmr->mt == MOVE_TAKE) ? TRUE : FALSE;
 
-	find_skills(pmr, &ci, -1, did_take);
+	find_skills(pmr, &ms, -1, did_take);
 
 #if USE_GTK
 	if (fX) {
 		GTKUpdateAnnotations();
 		if (show)
-			GTKCubeHint(pmr, &ms);
+			GTKCubeHint(pmr, &ms, -1, did_take);
 		return;
 	}
 #endif
@@ -2348,7 +2352,6 @@ extern void hint_move(char *sz, gboolean show)
 	unsigned int n = (parse_n <= 0) ? 10 : parse_n;
 	moverecord *pmr;
 	cubeinfo ci;
-	float rChequerSkill;
 	int hist;
 
 	GetMatchStateCubeInfo(&ci, &ms);
@@ -2376,18 +2379,15 @@ extern void hint_move(char *sz, gboolean show)
 	if (!hist && fX)
 		GTKGetMove(pmr->n.anMove);
 #endif
-	if (pmr->n.anMove[0] == -1 && pmr->ml.cMoves > 0) {
-		memcpy(pmr->n.anMove, pmr->ml.amMoves[0].anMove,
-				sizeof(pmr->n.anMove));
-		pmr->n.iMove = 0;
+	if (pmr->n.anMove[0] == -1)
+	{
+		pmr->n.iMove = UINT_MAX;
+		pmr->n.stMove = SKILL_NONE;
 	}
 	else if (pmr->n.anMove[0] != -1)
 	{
 		pmr->n.iMove = locateMove(msBoard(), pmr->n.anMove, &pmr->ml);
-		find_skills(pmr, &ci, FALSE, -1);
-		rChequerSkill =
-			pmr->ml.amMoves[pmr->n.iMove].rScore - pmr->ml.amMoves[0].rScore;
-		pmr->n.stMove = Skill(rChequerSkill);
+		find_skills(pmr, &ms, FALSE, -1);
 	}
 
 #if USE_GTK

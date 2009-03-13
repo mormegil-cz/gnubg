@@ -118,7 +118,7 @@ static void GameListSelectRow(GtkCList *pcl, gint y, gint x, GdkEventButton *pev
 
     CalculateBoard();
 
-    if ( pmr && pmr->mt == MOVE_NORMAL ) {
+    if ( pmr && (pmr->mt == MOVE_NORMAL || pmr->mt == MOVE_SETDICE) ) {
        /* roll dice */
        ms.gs = GAME_PLAYING;
        ms.anDice[ 0 ] = pmr->anDice[ 0 ];

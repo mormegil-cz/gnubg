@@ -1,3 +1,10 @@
+Fri Mar 13 22:50:48 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, gnubg.c, gtkchequer.c, gtkchequer.h, gtkcube.c,
+	gtkcube.h, gtkgame.c, gtkgame.h, gtkgamelist.c, html.c,
+	play.c: fix the color for chosen move problem. Attempt to keep the
+	gamelist annotation marks up to date.
+
 Fri Mar 13 17:23:57 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gtkgame.c, gtkmovelist.c, gtkmovelistctrl.c: fix double-click move

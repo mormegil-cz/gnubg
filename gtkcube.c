@@ -46,6 +46,8 @@ typedef struct _cubehintdata {
   GtkWidget *pwTools;   /* the tools */
   moverecord *pmr;
   matchstate ms;
+  int did_double;
+  int did_take;
 } cubehintdata;
 
 
@@ -623,6 +625,8 @@ static void UpdateCubeAnalysis(cubehintdata * pchd)
 
 	GtkWidget *pw = 0;
 
+	find_skills(pchd->pmr, &ms, pchd->did_double, pchd->did_take);
+
 	switch (pchd->pmr->mt) {
 	case MOVE_NORMAL:
 	case MOVE_DOUBLE:
@@ -1029,7 +1033,7 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
 }
 
 
-extern GtkWidget *CreateCubeAnalysis(moverecord *pmr, matchstate *pms)
+extern GtkWidget *CreateCubeAnalysis(moverecord *pmr, matchstate *pms, int did_double, int did_take)
 {
 
 	cubehintdata *pchd = g_new0(cubehintdata, 1);
@@ -1038,6 +1042,8 @@ extern GtkWidget *CreateCubeAnalysis(moverecord *pmr, matchstate *pms)
 
 	pchd->pmr = pmr;
 	pchd->ms = *pms;
+	pchd->did_double = did_double;
+	pchd->did_take = did_take;
 	pchd->pw = pw = gtk_hbox_new(FALSE, 2);
 	switch (pmr->mt) {
 

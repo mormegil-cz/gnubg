@@ -101,7 +101,7 @@ extern void GTKCalibrationUpdate(void *context, float rEvalsPerSec);
 extern void GtkChangeLanguage(void);
 extern void GTKClearMoveRecord(void);
 extern void GTKCommandShowCredits(GtkWidget * pw, GtkWidget * parent);
-extern void GTKCubeHint(moverecord *pmr, matchstate *pms );
+extern void GTKCubeHint(moverecord *pmr, matchstate *pms, int did_double, int did_take );
 extern void GTKDelay(void);
 extern void GTKDisallowStdin(void);
 extern void GTKDumpStatcontext(int game);

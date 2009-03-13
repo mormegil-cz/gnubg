@@ -1013,6 +1013,7 @@ extern void CommandTake(char *);
 extern void hint_move(char *sz, gboolean show);
 extern void hint_double(int show, int did_double);
 extern void hint_take(int show, int did_take);
+extern void find_skills(moverecord *pmr, matchstate *pms, int did_double, int did_take);
 extern int getGameNumber(const listOLD * plGame);
 extern int getMoveNumber(const listOLD * plGame, const void *p);
 extern int CheckGameExists(void);

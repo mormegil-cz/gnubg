@@ -2449,7 +2449,7 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
   /* print alerts */
 
-  if ( badSkill(pmr->n.stMove) ) {
+  if ( badSkill(pmr->n.stMove) && pmr->n.iMove < pmr->ml.cMoves) {
 
     /* blunder or error */
 
