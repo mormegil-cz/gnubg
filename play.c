@@ -487,6 +487,10 @@ static int PopMoveRecord( listOLD *plDelete ) {
 extern void AddMoveRecord( void *pv ) {
     moverecord *pmr = pv, *pmrOld;
 
+    /* various set commands calls AddMoveRecord, so we need to destroy the
+     * hint here. */
+    pmr_hint_destroy();
+
     g_assert( pmr->fPlayer >= 0 && pmr->fPlayer <= 1 );
     g_assert( pmr->ml.cMoves < MAX_MOVES );
     switch( pmr->mt ) {
