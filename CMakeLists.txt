@@ -155,9 +155,9 @@ endif (SSE_COMPILES)
 configure_file(config.h.cmake ${CMAKE_BINARY_DIR}/config.h)
 
 if (EXE_BISON)
-	add_custom_command( OUTPUT sgf_y.c DEPENDS sgf_y.y
+	add_custom_command( OUTPUT sgf_y.c sgf_y.h DEPENDS sgf_y.y
 	       	COMMAND ${EXE_BISON} -y --defines=sgf_y.h -osgf_y.c sgf_y.y)
-	add_custom_command( OUTPUT external_y.c DEPENDS external_y.y
+	add_custom_command( OUTPUT external_y.c external_y.h DEPENDS external_y.y
 	       	COMMAND ${EXE_BISON} -y --defines=external_y.h -oexternal_y.c external_y.y)
 	add_custom_target(RerunBison DEPENDS sgf_y.c external_y.c)
 endif (EXE_BISON)
@@ -174,8 +174,9 @@ if (EXE_FLEX)
 endif (EXE_FLEX)
 
 include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/lib
-	${CMAKE_SOURCE_DIR}/board3d ${GLIB_INCLUDE_DIRS} ${GTK_INCLUDE_DIRS}
-	${PYTHON_INCLUDE_PATH} ${GSTREAMER_INCLUDE_DIRS})
+	${CMAKE_SOURCE_DIR}/board3d ${CMAKE_SOURCE_DIR}/non-src
+	${GLIB_INCLUDE_DIRS} ${GTK_INCLUDE_DIRS} ${PYTHON_INCLUDE_PATH}
+	${GSTREAMER_INCLUDE_DIRS})
 
 set(DATADIR ${CMAKE_INSTALL_PREFIX}/share)
 set(DOCDIR ${CMAKE_INSTALL_PREFIX}/share/doc/gnubg)
@@ -186,35 +187,13 @@ ADD_DEFINITIONS("-DDOCDIR=\"${DOCDIR}\"")
 ADD_DEFINITIONS("-DLOCALEDIR=\"${LOCALEDIR}\"")
 ADD_DEFINITIONS("-DPKGDATADIR=\"${PKGDATADIR}\"")
 
-add_library(eval bearoff.c bearoff.h positionid.c
+add_library(eval STATIC bearoff.c bearoff.h positionid.c
 	positionid.h eval.c eval.h matchequity.c matchequity.h util.c util.h
 	bearoffgammon.h bearoffgammon.c matchid.c matchid.h mec.c mec.h)
 target_link_libraries(eval event neuralnetsse)
 
-add_executable(gnubg analysis.c bearoffgammon.c boardpos.c 
-	dbprovider.c dice.c drawboard.c eval.c export.c external.c
-	file.c format.c formatgs.c gnubg.c gnubgmodule.c gnubgstock.c
-	gtkboard.c gtkchequer.c gtkcube.c gtkexport.c gtkfile.c gtkgame.c
-	gtkgamelist.c gtkmet.c gtkmovefilter.c gtkmovelist.c gtkmovelistctrl.c
-	gtk-multiview.c gtkoptions.c gtkpanels.c gtkprefs.c gtkrace.c
-	gtkrelational.c gtkrolls.c gtksplash.c gtktempmap.c gtktheory.c
-	gtktoolbar.c gtkwindows.c html.c htmlimages.c import.c latex.c
-	matchequity.c matchid.c mec.c multithread.c openurl.c osr.c play.c
-	progress.c record.c relational.c render.c renderprefs.c
-	rollout.c set.c sgf.c show.c simpleboard.c sound.c speed.c text.c
-	timer.c util.c copying.c credits.c credits.h external_l.c external_y.c
-	external_y.h sgf_l.c sgf_y.c sgf_y.h analysis.h backgammon.h
-	boarddim.h boardpos.h common.h config.h
-	credits.h dbprovider.h dice.h drawboard.h export.h external.h
-	external_y.h file.h formatgs.h format.h gnubgmodule.h gnubgstock.h
-	gtkboard.h gtkchequer.h gtkcube.h gtkexport.h gtkfile.h gtkgame.h
-	gtkmet.h gtkmovefilter.h gtkmovelistctrl.h gtk-multiview.h
-	gtkoptions.h gtkpanels.h gtkprefs.h gtkrace.h gtkrelational.h
-	gtkrolls.h gtksplash.h gtktempmap.h gtktheory.h gtktoolbar.h
-	gtkwindows.h import.h multithread.h
-	openurl.h osr.h progress.h record.h relational.h render.h
-	renderprefs.h rollout.h sgf.h sgf_y.h simpleboard.h sound.h speed.h
-	)
+add_executable(gnubg analysis.c analysis.h backgammon.h bearoffgammon.c boarddim.h boardpos.c boardpos.h common.h config.h dbprovider.c dbprovider.h dice.c dice.h drawboard.c drawboard.h eval.c export.c export.h external.c external.h file.c file.h format.c formatgs.c formatgs.h format.h gnubg.c gnubgmodule.c gnubgmodule.h gnubgstock.c gnubgstock.h gtkboard.c gtkboard.h gtkchequer.c gtkchequer.h gtkcube.c gtkcube.h gtkexport.c gtkexport.h gtkfile.c gtkfile.h gtkgame.c gtkgame.h gtkgamelist.c gtkmet.c gtkmet.h gtkmovefilter.c gtkmovefilter.h gtkmovelist.c gtkmovelistctrl.c gtkmovelistctrl.h gtk-multiview.c gtk-multiview.h gtkoptions.c gtkoptions.h gtkpanels.c gtkpanels.h gtkprefs.c gtkprefs.h gtkrace.c gtkrace.h gtkrelational.c gtkrelational.h gtkrolls.c gtkrolls.h gtksplash.c gtksplash.h gtktempmap.c gtktempmap.h gtktheory.c gtktheory.h gtktoolbar.c gtktoolbar.h gtkwindows.c gtkwindows.h html.c htmlimages.c import.c import.h latex.c matchequity.c matchid.c mec.c multithread.c multithread.h non-src/copying.c non-src/credits.c non-src/credits.h non-src/external_l.c non-src/external_y.c non-src/external_y.h non-src/sgf_l.c non-src/sgf_y.c non-src/sgf_y.h openurl.c openurl.h osr.c osr.h play.c progress.c progress.h record.c record.h relational.c relational.h render.c render.h renderprefs.c renderprefs.h rollout.c rollout.h set.c sgf.c sgf.h show.c simpleboard.c simpleboard.h sound.c sound.h speed.c speed.h text.c timer.c util.c)
+
 
 target_link_libraries(gnubg eval board3d ${GLIB_LIBRARIES} ${GTK_LIBRARIES}
 	${PYTHON_LIBRARIES} ${GSTREAMER_LIBRARIES} ${GTKGLEXT_LIBRARIES}
@@ -234,14 +213,9 @@ target_link_libraries(makehyper eval ${GLIB_LIBRARIES} ${LIBXML2_LIBRARIES} )
 add_executable(bearoffdump bearoffdump.c)
 target_link_libraries(bearoffdump eval ${GLIB_LIBRARIES} ${LIBXML2_LIBRARIES} )
 
-add_custom_command(OUTPUT gnubg.wd DEPENDS makeweights gnubg.weights COMMAND
-	makeweights <gnubg.weights >gnubg.wd)
-
-add_custom_command(OUTPUT gnubg_os0.bd DEPENDS makebearoff COMMAND makebearoff
-	./makebearoff -o 6 -s 7999999 -f gnubg_os0.bd)
-
-add_custom_command(OUTPUT gnubg_ts0.bd DEPENDS makebearoff COMMAND makebearoff
-	./makebearoff -t 6x6 -f gnubg_ts0.bd)
+add_custom_command(TARGET makeweights POST_BUILD COMMAND ./makeweights <gnubg.weights >gnubg.wd)
+add_custom_command(TARGET makebearoff POST_BUILD COMMAND ./makebearoff -o 6 -s 7999999 -f gnubg_os0.bd)
+add_custom_command(TARGET makebearoff POST_BUILD COMMAND ./makebearoff -t 6x6 -f gnubg_ts0.bd)
 
 add_custom_target(RebuildEvalData DEPENDS gnubg.wd gnubg_os0.bd gnubg_ts0.bd)
 
