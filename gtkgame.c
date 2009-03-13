@@ -962,7 +962,7 @@ extern void SetAnnotation( moverecord *pmr ) {
 			      
 	    if( pmr->ml.cMoves ) 
               pwMoveAnalysis = CreateMoveList( pmr,
-                                               TRUE, TRUE, !IsPanelDocked(WINDOW_ANALYSIS));
+                                               TRUE, FALSE, !IsPanelDocked(WINDOW_ANALYSIS));
 
             if ( pwMoveAnalysis && pwCubeAnalysis ) {
               /* notebook with analysis */

@@ -203,6 +203,7 @@ if (!psHighlight)
   {
     float *ar = pml->amMoves[ i ].arEvalMove;
 	int rankKnown;
+	char *highlight_sz;
 
 	if (showWLTree)
 		gtk_list_store_set(store, &iter, 0, pml->amMoves + i, -1);
@@ -232,10 +233,12 @@ if (!psHighlight)
 			rankKnown = 0;
 	}
 
+	highlight_sz = (phd->piHighlight && *phd->piHighlight == i) ? "*" : "";
+
 	if (rankKnown)
-      sprintf( sz, "%s%d", pml->amMoves[i].cmark ? "+" : "", i + 1 );
+      sprintf( sz, "%s%s%d", pml->amMoves[i].cmark ? "+" : "", highlight_sz, i + 1 );
     else
-      sprintf( sz, "%s??", pml->amMoves[i].cmark ? "+" : "" );
+      sprintf( sz, "%s%s??", pml->amMoves[i].cmark ? "+" : "", highlight_sz );
 
 	if (showWLTree)
 	{

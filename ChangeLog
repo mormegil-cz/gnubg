@@ -1,3 +1,8 @@
+Fri Mar 13 17:23:57 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtkgame.c, gtkmovelist.c, gtkmovelistctrl.c: fix double-click move
+	in movelist crash. Add star to mark chosen move.
+
 Thu Mar 12 22:08:49 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* analysis.c, backgammon.h, commands.inc, export.c, gnubg.c,
