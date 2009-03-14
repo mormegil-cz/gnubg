@@ -2247,6 +2247,7 @@ extern void find_skills(moverecord *pmr, matchstate *pms, int did_double,
 	cubeinfo ci;
 	doubletype dt = DoubleType(pms->fDoubled, pms->fMove, pms->fTurn);
 	taketype tt = (taketype) dt;
+	GetMatchStateCubeInfo(&ci, pms);
 
 
 	if (pmr->mt != MOVE_NORMAL && pmr->mt != MOVE_DOUBLE
