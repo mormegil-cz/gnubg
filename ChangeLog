@@ -1,3 +1,7 @@
+Tue Mar 17 14:23:23 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* sound.c: make gstreamer sounds wait till play is ready 
+
 Fri Mar 13 22:50:48 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, gnubg.c, gtkchequer.c, gtkchequer.h, gtkcube.c,
