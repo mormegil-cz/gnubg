@@ -1,3 +1,7 @@
+Fri Mar 20 21:37:46 WEST 2009 Øystein Johansen <oystein@gnubg.org>
+	
+	* boards.xml: Change encoding to UTF-8.
+
 Fri Mar 20 17:17:44 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am, configure.in, gnubg.c, sound.c: use libcanberra as a
