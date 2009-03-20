@@ -1,3 +1,8 @@
+Fri Mar 20 17:17:44 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, configure.in, gnubg.c, sound.c: use libcanberra as a
+	simple sound wrapper and remove gstreamer support
+
 Tue Mar 17 14:23:23 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* sound.c: make gstreamer sounds wait till play is ready 

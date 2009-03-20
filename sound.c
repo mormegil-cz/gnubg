@@ -153,97 +153,9 @@ void PlaySound_QuickTime (const char *cSoundFilename)
         else fQTPlaying = FALSE;
     }
 }
-#elif HAVE_GSTREAMER
-#include <gst/gst.h>
-static void print_gst_error(GstMessage *message, const char *sound)
-{
-	GError *err;
-	gchar *debug;
-
-	gst_message_parse_error(message, &err, &debug);
-	outputerrf(_("Error playing %s: %s\n"), sound, err->message);
-	g_error_free(err);
-	g_free(debug);
-}
-
-static gboolean bus_callback(GstBus * bus, GstMessage * message,
-				gpointer play)
-{
-	switch (GST_MESSAGE_TYPE(message)) {
-	case GST_MESSAGE_ERROR:
-		{
-			print_gst_error(message, _("sound"));
-			gst_element_set_state(play, GST_STATE_NULL);
-			return FALSE;
-		}
-	case GST_MESSAGE_EOS:
-		{
-			gst_element_set_state(play, GST_STATE_NULL);
-			return FALSE;
-		}
-	default:
-		return TRUE;
-	}
-
-}
-
-static void PlaySoundGst(const char *fn, gboolean sync)
-{
-#define MAX_PLAY_TIME 6*GST_SECOND
-	static GstElement *play = NULL;
-	GstBus *bus;
-	gchar *uri;
-	GstState state = GST_STATE_NULL;
-
-	g_return_if_fail(g_file_test(fn, G_FILE_TEST_EXISTS));
-	g_return_if_fail(g_path_is_absolute(fn));
-	uri = g_filename_to_uri(fn, NULL, NULL);
-	g_return_if_fail(uri);
-
-	if (!play)
-		play = gst_element_factory_make("playbin", "play");
-
-	while (state != GST_STATE_READY)
-	{
-		if (gst_element_get_state(play, &state, NULL, MAX_PLAY_TIME) == GST_STATE_CHANGE_SUCCESS)
-			break;
-		g_usleep(1000);
-	}
-
-	g_object_set(G_OBJECT(play), "uri", uri, NULL);
-
-
-
-	if (gst_element_set_state(play, GST_STATE_PLAYING) == GST_STATE_CHANGE_FAILURE)
-	{
-		outputerrf("Failed to play sound file '%s'", fn);
-		gst_element_set_state(play, GST_STATE_NULL);
-		g_free(uri);
-		return;
-	}
-	g_free(uri);
-
-
-	bus = gst_pipeline_get_bus (GST_PIPELINE (play));
-	if (sync)
-	{
-		GstMessage *msg;
-		msg = gst_bus_poll (bus, GST_MESSAGE_EOS | GST_MESSAGE_ERROR, MAX_PLAY_TIME);
-		if (msg)
-		{
-			if (GST_MESSAGE_TYPE(msg) == GST_MESSAGE_ERROR)
-				print_gst_error(msg, fn);
-			gst_message_unref(msg);
-		}
-		gst_object_unref (bus);
-		gst_element_set_state(play, GST_STATE_NULL);
-	}
-	else
-	{
-		gst_bus_add_watch (bus, bus_callback, play);
-		gst_object_unref (bus);
-	}
-}
+#elif HAVE_CANBERRA
+#include <canberra.h>
+#include <canberra-gtk.h>
 #endif
 
 const char *sound_description[ NUM_SOUNDS ] = {
@@ -344,8 +256,8 @@ playSoundFile (char *file, /*lint -e{715}*/gboolean sync)
       }
 #elif defined(__APPLE__)
 	PlaySound_QuickTime (file);
-#elif HAVE_GSTREAMER
-	PlaySoundGst(file, sync);
+#elif HAVE_CANBERRA
+	ca_context_play(ca_gtk_context_get(), 0, CA_PROP_MEDIA_FILENAME, file, NULL);
 #endif
 }
 

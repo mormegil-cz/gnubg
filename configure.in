@@ -107,7 +107,7 @@ PKG_CHECK_MODULES(LIBPNG, [libpng12], have_libpng="yes", AC_MSG_WARN([no png sup
 PKG_CHECK_MODULES(CAIRO, [cairo >= 1.2], have_cairo="yes", [AC_MSG_WARN([no cairo support])])
 PKG_CHECK_MODULES(PANGOCAIRO, [pangocairo >= 1.0], have_pangocairo="yes", [AC_MSG_WARN([no pangocairo support])])
 PKG_CHECK_MODULES(SQLITE, [sqlite3], have_sqlite="yes", AC_MSG_WARN([no sqlite support]))
-PKG_CHECK_MODULES(GSTREAMER, [gstreamer-0.10], have_gstreamer="yes", AC_MSG_WARN([no gstreamer support]))
+PKG_CHECK_MODULES(CANBERRA, [libcanberra-gtk], have_canberra="yes", AC_MSG_WARN([no libcanberra-gtk support]))
 PKG_CHECK_MODULES(GTK, [gtk+-2.0 >= 2.6.0], have_gtk="yes" , AC_MSG_WARN([no gtk support]))
 PKG_CHECK_MODULES(GTKGLEXT, [gtkglext-1.0 >= 1.0], have_gtkglext="yes" , AC_MSG_WARN([no gtkglext support]))
 
@@ -135,8 +135,8 @@ if test "x$have_sqlite" = "xyes"; then
 	AC_DEFINE(HAVE_SQLITE,1, [Define if you want to use sqlite])
 fi
 
-if test "x$have_gstreamer" = "xyes"; then
-	AC_DEFINE(HAVE_GSTREAMER,1, [Define if you want to use gstreamer])
+if test "x$have_canberra" = "xyes"; then
+	AC_DEFINE(HAVE_CANBERRA,1, [Define if you want to use gstreamer])
 fi
 
 dnl have_gthread, have_gtk and have_gtk are handled later, not having glib is fatal
