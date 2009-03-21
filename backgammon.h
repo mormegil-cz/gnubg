@@ -74,7 +74,7 @@ typedef enum _movetype {
 	MOVE_SETBOARD,
 	MOVE_SETDICE,
 	MOVE_SETCUBEVAL,
-    MOVE_SETCUBEPOS
+	MOVE_SETCUBEPOS,
 } movetype;
 
 typedef struct _movegameinfo {
@@ -180,31 +180,6 @@ typedef struct _moverecord {
 	xmovesetcubepos scp;	/* setting cube owner */
 } moverecord;
 
-typedef enum {
-	GAME_NONE, GAME_PLAYING, GAME_OVER, GAME_RESIGNED, GAME_DROP
-} gamestate;
-
-typedef struct _matchstate {
-	TanBoard anBoard;
-	unsigned int anDice[2];	/* (0,0) for unrolled dice */
-	int fTurn;		/* who makes the next decision */
-	int fResigned;
-	int fResignationDeclined;
-	int fDoubled;
-	int cGames;
-	int fMove;		/* player on roll */
-	int fCubeOwner;
-	int fCrawford;
-	int fPostCrawford;
-	int nMatchTo;
-	int anScore[2];
-	int nCube;
-	unsigned int cBeavers;
-	bgvariation bgv;
-	int fCubeUse;
-	int fJacoby;
-	gamestate gs;
-} matchstate;
 
 typedef struct _matchinfo {	/* SGF match information */
 	char *pchRating[2];
@@ -499,7 +474,7 @@ extern void ApplyMoveRecord(matchstate * pms, const listOLD * plGame,
 			    const moverecord * pmr);
 extern void CalculateBoard(void);
 extern void CancelCubeAction(void);
-extern void ChangeGame(const listOLD * plGameNew);
+extern void ChangeGame(listOLD * plGameNew);
 extern void UpdateGame( int fShowBoard );
 extern void ClearMatch(void);
 extern void ClearMoveRecord(void);
@@ -1013,7 +988,7 @@ extern void CommandTake(char *);
 extern void hint_move(char *sz, gboolean show);
 extern void hint_double(int show, int did_double);
 extern void hint_take(int show, int did_take);
-extern void find_skills(moverecord *pmr, matchstate *pms, int did_double, int did_take);
+extern void find_skills(moverecord *pmr, const matchstate *pms, int did_double, int did_take);
 extern int getGameNumber(const listOLD * plGame);
 extern int getMoveNumber(const listOLD * plGame, const void *p);
 extern int CheckGameExists(void);

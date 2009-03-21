@@ -589,51 +589,6 @@ extern void GTKThaw( void ) {
 		GTKSetMoveRecord( plLastMove->p );
 }
 
-static void SkillMenuActivate( GtkWidget *pw, skilltype st ) {
-
-    static const char* aszSkillCmd[ N_SKILLS ] = {
-      "verybad", "bad", "doubtful", "clear skill",
-    };
-    char sz[ 64 ];
-
-    sprintf( sz, "annotate %s %s", 
-             (char *) g_object_get_data( G_OBJECT( pw ), "user_data" ),
-             aszSkillCmd[ st ] );
-    UserCommand( sz );
-
-    GTKUpdateAnnotations();
-}
-
-static GtkWidget*
-SkillMenu(skilltype stSelect, char* szAnno)
-{
-  GtkWidget* pwMenu = gtk_menu_new();
-  GtkWidget* pwOptionMenu;
-  skilltype st;
-    
-  for( st = SKILL_VERYBAD; st < N_SKILLS; st++ ) {
-      const char* l = aszSkillType[st] ? gettext(aszSkillType[st]) : "";
-      GtkWidget* pwItem = gtk_menu_item_new_with_label(l);
-    
-      gtk_menu_append( GTK_MENU( pwMenu ), pwItem);
-      g_object_set_data( G_OBJECT( pwItem ), "user_data", szAnno );
-      g_signal_connect( G_OBJECT( pwItem ), "activate",
-			  G_CALLBACK( SkillMenuActivate ),
-			  GINT_TO_POINTER( st ) );
-  }
-    
-  gtk_widget_show_all( pwMenu );
-    
-  pwOptionMenu = gtk_option_menu_new();
-  gtk_option_menu_set_menu( GTK_OPTION_MENU( pwOptionMenu ), pwMenu );
-
-  gtk_option_menu_set_history( GTK_OPTION_MENU( pwOptionMenu ), stSelect );
-
-  return pwOptionMenu;
-}
-
-
-
 static GtkWidget *
 ResignAnalysis ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
                  int nResigned,
@@ -732,66 +687,37 @@ ResignAnalysis ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
 
 
 
-
-static void LuckMenuActivate( GtkWidget *pw, lucktype lt ) {
-
-    static const char *aszLuckCmd[ N_LUCKS ] = {
-	"veryunlucky", "unlucky", "clear luck", "lucky", "verylucky"
-    };
-    char sz[ 64 ];
-    
-    sprintf( sz, "annotate roll %s", aszLuckCmd[ lt ] );
-    UserCommand( sz );
-}
-
-static GtkWidget *RollAnalysis( int n0, int n1, float rLuck,
-				lucktype ltSelect ) {
-
-    char sz[ 64 ], *pch;
-    cubeinfo ci;
-    GtkWidget *pw = gtk_hbox_new( FALSE, 4 ), *pwMenu, *pwOptionMenu,
-	*pwItem;
-    lucktype lt;
-    
-    pch = sz + sprintf( sz, _("Rolled %d%d"), n0, n1 );
-    
-    if( rLuck != ERR_VAL ) {
-	if( fOutputMWC && ms.nMatchTo ) {
-	    GetMatchStateCubeInfo( &ci, &ms );
-	    
-	    pch += sprintf( pch, " (%+0.3f%%)",
-		     100.0f * ( eq2mwc( rLuck, &ci ) - eq2mwc( 0.0f, &ci ) ) );
-	} else
-	    pch += sprintf( pch, " (%+0.3f)", rLuck );
-    }
-
-    gtk_box_pack_start( GTK_BOX( pw ), gtk_label_new( sz ), FALSE, FALSE, 4 );
-
-    pwMenu = gtk_menu_new();
-    for( lt = LUCK_VERYBAD; lt <= LUCK_VERYGOOD; lt++ ) {
-	gtk_menu_append( GTK_MENU( pwMenu ),
-			 pwItem = gtk_menu_item_new_with_label(
-			     aszLuckType[ lt ] ? 
-                                gettext ( aszLuckType[ lt ] ) : "" ) );
-	g_signal_connect( G_OBJECT( pwItem ), "activate",
-			    G_CALLBACK( LuckMenuActivate ),
-			    GINT_TO_POINTER( lt ) );
-    }
-    gtk_widget_show_all( pwMenu );
-    
-    pwOptionMenu = gtk_option_menu_new();
-    gtk_option_menu_set_menu( GTK_OPTION_MENU( pwOptionMenu ), pwMenu );
-    gtk_option_menu_set_history( GTK_OPTION_MENU( pwOptionMenu ), ltSelect );
-    
-    gtk_box_pack_start( GTK_BOX( pw ), pwOptionMenu, FALSE, FALSE, 0 );
-
-    return pw;
-}
-
-
-#define ANALYSIS_HORIZONTAL 0
-
 GtkWidget *pwMoveAnalysis = NULL;
+
+static GtkWidget *luck_label(lucktype lt)
+{
+	GtkWidget *label;
+	gchar *markup;
+	const gchar *skill;
+	gchar *color[N_LUCKS] = {"red", "orange", "black", "green", "white"}; 
+
+	label = gtk_label_new(NULL);
+	skill = aszLuckType[lt] ? gettext(aszLuckType[lt]) : "";
+	markup = g_strdup_printf("<span foreground=\"%s\" background=\"black\" weight=\"bold\">%s</span>", color[lt], skill);
+	gtk_label_set_markup(GTK_LABEL(label), markup);
+	g_free(markup);
+	return label;
+}
+
+static GtkWidget *skill_label(skilltype st)
+{
+	GtkWidget *label;
+	gchar *markup;
+	const gchar *skill;
+	gchar *color[] = {"red", "orange", "yellow", "black"}; 
+
+	label = gtk_label_new(NULL);
+	skill = aszSkillType[st] ? gettext(aszSkillType[st]) : "";
+	markup = g_strdup_printf("<span foreground=\"%s\" background=\"black\" weight=\"bold\">%s</span>", color[st], skill);
+	gtk_label_set_markup(GTK_LABEL(label), markup);
+	g_free(markup);
+	return label;
+}
 
 extern void SetAnnotation( moverecord *pmr ) {
 
@@ -847,15 +773,9 @@ extern void SetAnnotation( moverecord *pmr ) {
 
 	    pwAnalysis = gtk_vbox_new( FALSE, 0 );
 
-#if ANALYSIS_HORIZONTAL
-	    pwBox = gtk_table_new( 3, 2, FALSE );
-	    gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwBox, FALSE, FALSE,
-				0 );
-#else
 	    pwBox = gtk_table_new( 2, 3, FALSE );
 	    gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwBox, FALSE, FALSE,
 				4 );
-#endif
 
 	    ms.fMove = ms.fTurn = pmr->fPlayer;
 
@@ -870,15 +790,9 @@ extern void SetAnnotation( moverecord *pmr ) {
               gtk_table_attach_defaults( GTK_TABLE ( pwBox ),
                                    gtk_label_new ( _("Didn't double") ),
                                    0, 1, 0, 1 );
-#if ANALYSIS_HORIZONTAL
               gtk_table_attach_defaults( GTK_TABLE ( pwBox ),
-                                   SkillMenu ( pmr->stCube, "cube" ),
-                                   1, 2, 0, 1 );
-#else
-              gtk_table_attach_defaults( GTK_TABLE ( pwBox ),
-                                   SkillMenu ( pmr->stCube, "cube" ),
+                                   skill_label(pmr->stCube),
                                    0, 1, 1, 2 );
-#endif
             }
 
             /* luck */
@@ -886,8 +800,6 @@ extern void SetAnnotation( moverecord *pmr ) {
 	{
     char sz[ 64 ], *pch;
     cubeinfo ci;
-    GtkWidget *pwMenu, *pwOptionMenu, *pwItem;
-    lucktype lt;
     
     pch = sz + sprintf( sz, _("Rolled %d%d"), pmr->anDice[0], pmr->anDice[1] );
     
@@ -899,31 +811,9 @@ extern void SetAnnotation( moverecord *pmr ) {
 	} else
 	    pch += sprintf( pch, " (%+0.3f)", pmr->rLuck );
     }
-#if ANALYSIS_HORIZONTAL
-    gtk_table_attach_defaults( GTK_TABLE( pwBox ),
-				gtk_label_new( sz ), 0, 1, 1, 2 );
-#else
     gtk_table_attach_defaults( GTK_TABLE( pwBox ),
 				gtk_label_new( sz ), 1, 2, 0, 1 );
-#endif
-
-    pwMenu = gtk_menu_new();
-    for( lt = LUCK_VERYBAD; lt <= LUCK_VERYGOOD; lt++ ) {
-	gtk_menu_append( GTK_MENU( pwMenu ),
-			 pwItem = gtk_menu_item_new_with_label(
-			     aszLuckType[ lt ] ? 
-                                gettext ( aszLuckType[ lt ] ) : "" ) );
-	g_signal_connect( G_OBJECT( pwItem ), "activate",
-			    G_CALLBACK( LuckMenuActivate ),
-			    GINT_TO_POINTER( lt ) );
-    }
-    gtk_widget_show_all( pwMenu );
-    
-    pwOptionMenu = gtk_option_menu_new();
-    gtk_option_menu_set_menu( GTK_OPTION_MENU( pwOptionMenu ), pwMenu );
-    gtk_option_menu_set_history( GTK_OPTION_MENU( pwOptionMenu ), pmr->lt );
-
-    gtk_table_attach_defaults( GTK_TABLE( pwBox ), pwOptionMenu, 1, 2, 1, 2 );
+    gtk_table_attach_defaults( GTK_TABLE( pwBox ), luck_label(pmr->lt), 1, 2, 1, 2 );
 
 	}
 
@@ -931,31 +821,18 @@ extern void SetAnnotation( moverecord *pmr ) {
 	    strcpy( sz, _("Moved ") );
 	    FormatMove( sz + strlen(_("Moved ")), msBoard(), pmr->n.anMove );
 
-#if ANALYSIS_HORIZONTAL
-	    gtk_table_attach_defaults( GTK_TABLE( pwBox ),
-			      gtk_label_new( sz ), 
-			      0, 1, 2, 3 );
-#else
 	    gtk_table_attach_defaults( GTK_TABLE( pwBox ),
 			      gtk_label_new( sz ), 
 			      2, 3, 0, 1 );
-#endif
 
-#if ANALYSIS_HORIZONTAL
 	    gtk_table_attach_defaults( GTK_TABLE( pwBox ), 
-                              SkillMenu( pmr->n.stMove, "move" ),
-			      1, 2, 2, 3 );
-#else
-	    gtk_table_attach_defaults( GTK_TABLE( pwBox ), 
-                              SkillMenu( pmr->n.stMove, "move" ),
+			    skill_label(pmr->n.stMove),
 			      2, 3, 1, 2 );
-#endif
 
-#undef ANALYSIS_HORIZONTAL
 
             /* cube */
 
-            pwCubeAnalysis = CreateCubeAnalysis( pmr, &ms, -1, -1 );
+            pwCubeAnalysis = CreateCubeAnalysis( pmr, &ms, FALSE, -1 );
 
 
             /* move */
@@ -1014,14 +891,14 @@ extern void SetAnnotation( moverecord *pmr ) {
                                    Q_ ( aszDoubleTypes[ dt ] ) ),
 				FALSE, FALSE, 2 );
 	    gtk_box_pack_start( GTK_BOX( pwBox ), 
-                                SkillMenu( pmr->stCube, "double" ),
+                                   skill_label(pmr->stCube),
 				FALSE, FALSE, 2 );
 	    gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwBox, FALSE, FALSE,
 				0 );
 
             if ( dt == DT_NORMAL ) {
 	    
-              if ( ( pw = CreateCubeAnalysis( pmr, &ms, -1, -1 ) ) )
+              if ( ( pw = CreateCubeAnalysis( pmr, &ms, TRUE, -1 ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
 				    FALSE, 0 );
 
@@ -1048,15 +925,13 @@ extern void SetAnnotation( moverecord *pmr ) {
 				    _("Drop") ),
 				FALSE, FALSE, 2 );
 	    gtk_box_pack_start( GTK_BOX( pwBox ), 
-                                SkillMenu( pmr->stCube, 
-                                           ( pmr->mt == MOVE_TAKE ) ?
-                                           "take" : "drop" ),
+                                   gtk_label_new(aszSkillType[pmr->stCube] ? gettext(aszSkillType[pmr->stCube]) : ""),
 				FALSE, FALSE, 2 );
 	    gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwBox, FALSE, FALSE,
 				0 );
 
             if ( tt == TT_NORMAL ) {
-              if ( ( pw = CreateCubeAnalysis( pmr, &ms, -1, -1 ) ) )
+              if ( ( pw = CreateCubeAnalysis( pmr, &ms, -1, pmr->mt == MOVE_TAKE ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
 				    FALSE, 0 );
             }
@@ -1086,9 +961,6 @@ extern void SetAnnotation( moverecord *pmr ) {
 	    gtk_box_pack_start( GTK_BOX( pwBox ),
 				gtk_label_new( _("Resign") ),
 				FALSE, FALSE, 2 );
-	    gtk_box_pack_start( GTK_BOX( pwBox ), 
-                                SkillMenu( pmr->r.stResign, "resign" ),
-				FALSE, FALSE, 2 );
 
 	    pwAlign = gtk_alignment_new( 0.5f, 0.5f, 0.0f, 0.0f );
 	    gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwAlign, FALSE, FALSE,
@@ -1102,9 +974,6 @@ extern void SetAnnotation( moverecord *pmr ) {
 	    gtk_box_pack_start( GTK_BOX( pwBox ),
 				gtk_label_new( _("Accept") ),
 				FALSE, FALSE, 2 );
-	    gtk_box_pack_start( GTK_BOX( pwBox ), 
-                                SkillMenu( pmr->r.stAccept, "accept" ),
-				FALSE, FALSE, 2 );
 
 	    pwAlign = gtk_alignment_new( 0.5f, 0.5f, 0.0f, 0.0f );
 	    gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwAlign, FALSE, FALSE,
@@ -1114,13 +983,6 @@ extern void SetAnnotation( moverecord *pmr ) {
 	    
 	    break;
 	    
-	case MOVE_SETDICE:
-	    pwAnalysis = RollAnalysis( pmr->anDice[ 0 ],
-				       pmr->anDice[ 1 ],
-				       pmr->rLuck, pmr->lt );
-	    break;
-
-
 	default:
 	    break;
 	}
@@ -1144,32 +1006,6 @@ extern void SetAnnotation( moverecord *pmr ) {
 
 
     }
-}
-
-/* The annotation for one or more moves has been modified.  We refresh
-   the entire game and annotation windows, just to be safe. */
-extern void GTKUpdateAnnotations( void ) {
-
-    listOLD *pl;
-    
-    if (!plGame)
-    	return;
-
-    GTKFreeze();
-    
-    GTKClearMoveRecord();
-
-    for( pl = plGame->plNext; pl->p; pl = pl->plNext ) {
-	GTKAddMoveRecord( pl->p );
-        FixMatchState ( &ms, pl->p );
-	ApplyMoveRecord( &ms, plGame, pl->p );
-    }
-
-    CalculateBoard();
-
-    GTKSetMoveRecord( plLastMove->p );
-
-    GTKThaw();
 }
 
 extern void GTKSaveSettings( void ) {
@@ -4022,61 +3858,22 @@ static void ToolButtonPressed( GtkWidget *pw, newwidget *pnw ) {
 
 extern int edit_new(unsigned int length)
 {
-	char sz[40];
-	playertype pt_store[2] = { ap[0].pt, ap[1].pt };
-	int cAutoDoubles_store = cAutoDoubles;
-	int fAutoGame_store = fAutoGame;
-	int fDisplay_store = fDisplay;
-	int manual_dice = (rngCurrent == RNG_MANUAL); 
-	int i;
-	BoardData *bd = BOARD( pwBoard )->board_data;
+	matchstate ms;
 
-	ap[0].pt = PLAYER_HUMAN;
-	ap[1].pt = PLAYER_HUMAN;
-	cAutoDoubles = 0;
-	fAutoGame = TRUE;
-	fDisplay = FALSE;
+	ms.anDice[0] = ms.anDice[1] = 0;
+	ms.fTurn = ms.fMove = 1;
+	ms.fResigned = 0;
+	ms.fDoubled = 0;
+	ms.fCubeOwner = -1;
+	ms.fCrawford = FALSE;
+	ms.anScore[0] = ms.anScore[1] = 0; 
+	ms.nCube = 0;
+	ms.gs = GAME_PLAYING;
 
-#if USE_BOARD3D
-	SuspendDiceRolling(bd->rd);
-#endif
+	ms.nMatchTo = length;
 
-	if (manual_dice)
-	{
-		outputoff();
-		SetRNG( &rngCurrent, rngctxCurrent, RNG_MERSENNE, "" );
-		outputon();
-	}
+	CommandSetMatchID(MatchIDFromMatchState(&ms));
 
-	sprintf(sz, "new match %d", length);
-	UserCommand(sz);
-
-#if USE_BOARD3D
-	ResumeDiceRolling(bd->rd);
-#endif
-
-	if (manual_dice)
-	{
-		outputoff();
-		SetRNG( &rngCurrent, rngctxCurrent, RNG_MANUAL, "" );
-		outputon();
-	}
-
-	sprintf(sz, "set turn 1");
-	UserCommand(sz);
-
-	for( i = 0; i < 26; i++ )
-	{
-		bd->points[i] = 0;
-	}
-	bd->points[26] = bd->nchequers;
-	bd->points[27] = -bd->nchequers;
-
-	ap[0].pt = pt_store[0];
-	ap[1].pt = pt_store[1];
-	fDisplay = fDisplay_store;
-	cAutoDoubles = cAutoDoubles_store;
-	fAutoGame = fAutoGame_store;
 	return 0;
 }
 
@@ -5313,7 +5110,7 @@ HintOK ( GtkWidget *pw, void *unused )
 	DestroyPanel(WINDOW_HINT);
 }
 
-extern void GTKCubeHint(moverecord *pmr, matchstate *pms, int did_double, int did_take ) {
+extern void GTKCubeHint(moverecord *pmr, const matchstate *pms, int did_double, int did_take ) {
     
     GtkWidget *pw, *pwHint;
 

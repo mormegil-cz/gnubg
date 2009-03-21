@@ -715,6 +715,7 @@ CubeAnalysisRollout ( GtkWidget *pw, cubehintdata *pchd ) {
   pes->et = EVAL_ROLLOUT;
 
   UpdateCubeAnalysis ( pchd );
+  ChangeGame(NULL);
 
 }
 
@@ -744,6 +745,7 @@ static void EvalCube ( cubehintdata *pchd, evalcontext *pec )
   memcpy ( &pes->ec, dd.pec, sizeof ( evalcontext ) );
 
   UpdateCubeAnalysis ( pchd );
+  ChangeGame(NULL);
 }
 
 static void
@@ -1033,7 +1035,7 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
 }
 
 
-extern GtkWidget *CreateCubeAnalysis(moverecord *pmr, matchstate *pms, int did_double, int did_take)
+extern GtkWidget *CreateCubeAnalysis(moverecord *pmr, const matchstate *pms, int did_double, int did_take)
 {
 
 	cubehintdata *pchd = g_new0(cubehintdata, 1);

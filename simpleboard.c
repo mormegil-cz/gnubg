@@ -520,7 +520,7 @@ extern SimpleBoard *simple_board_new_from_ids(gchar * position_id,
 		return (NULL);
 
 	if (MatchFromID
-	    ((int *) board->ms.anDice, &board->ms.fTurn,
+	    (board->ms.anDice, &board->ms.fTurn,
 	     &board->ms.fResigned, &board->ms.fDoubled, &board->ms.fMove,
 	     &board->ms.fCubeOwner, &board->ms.fCrawford,
 	     &board->ms.nMatchTo, board->ms.anScore, &board->ms.nCube,

@@ -2173,6 +2173,7 @@ static skilltype double_skill(float aarOutput[][NUM_ROLLOUT_OUTPUTS],
 		break;
 
 	default:
+	case TOOGOODRE_PASS:
 		break;
 	}
 	return Skill(eq);
@@ -2237,7 +2238,7 @@ static skilltype move_skill(moverecord *pmr)
 			     pmr->ml.amMoves[0].rScore);
 }
 
-extern void find_skills(moverecord *pmr, matchstate *pms, int did_double,
+extern void find_skills(moverecord *pmr, const matchstate *pms, int did_double,
 			int did_take)
 {
 	cubeinfo ci;
@@ -2280,7 +2281,6 @@ extern void find_skills(moverecord *pmr, matchstate *pms, int did_double,
 
 extern void hint_double(int show, int did_double)
 {
-	static decisionData dd;
 	static cubeinfo ci;
 	moverecord *pmr;
 	int hist;
@@ -2303,18 +2303,18 @@ extern void hint_double(int show, int did_double)
 
 #if USE_GTK
 	if (fX) {
-		GTKUpdateAnnotations();
+		if (hist)
+			ChangeGame(NULL);
 		if (show)
 			GTKCubeHint(pmr, &ms, did_double, -1);
 		return;
 	}
 #endif
-	outputl(OutputCubeAnalysis(dd.aarOutput, dd.aarStdDev, dd.pes, dd.pci));
+	outputl(OutputCubeAnalysis(pmr->CubeDecPtr->aarOutput, pmr->CubeDecPtr->aarStdDev, &pmr->CubeDecPtr->esDouble, &ci));
 }
 
 extern void hint_take(int show, int did_take)
 {
-	static decisionData dd;
 	static cubeinfo ci;
 	moverecord *pmr;
 	int hist;
@@ -2331,14 +2331,15 @@ extern void hint_take(int show, int did_take)
 
 #if USE_GTK
 	if (fX) {
-		GTKUpdateAnnotations();
+		if (hist)
+			ChangeGame(NULL);
 		if (show)
 			GTKCubeHint(pmr, &ms, -1, did_take);
 		return;
 	}
 #endif
 
-	outputl(OutputCubeAnalysis(dd.aarOutput, dd.aarStdDev, dd.pes, dd.pci));
+	outputl(OutputCubeAnalysis(pmr->CubeDecPtr->aarOutput, pmr->CubeDecPtr->aarStdDev, &pmr->CubeDecPtr->esDouble, &ci));
 }
 
 extern void hint_move(char *sz, gboolean show)
@@ -2389,7 +2390,9 @@ extern void hint_move(char *sz, gboolean show)
 
 #if USE_GTK
 	if (fX) {
-		GTKUpdateAnnotations();
+		printf("dice are now %d\n", ms.anDice[0]);
+		if (hist)
+		ChangeGame(NULL);
 		if (show)
 			GTKHint(pmr);
 		return;
@@ -5176,7 +5179,7 @@ extern void CommandSwapPlayers ( char *sz )
   if ( fX ) {
     GTKSet ( ap );
     GTKRegenerateGames();
-    GTKUpdateAnnotations();
+    ChangeGame(NULL);
   }
 #endif
 

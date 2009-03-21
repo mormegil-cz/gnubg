@@ -100,7 +100,7 @@ extern GtkWidget *board_new(renderdata* prd)
 	bd->doubled = 0;
 	bd->cube_owner = 0;
 	bd->resigned = 0;
-	bd->diceShown = DICE_NOT_SHOWN;
+	bd->diceShown = DICE_BELOW_BOARD;
 	bd->grayBoard = FALSE;
 	bd->turn = 0;
 
@@ -3334,8 +3334,6 @@ extern void board_set_gnubg_id(GtkWidget * pw, BoardData * bd)
 	char *tmp;
 	tmp = g_strdup(gtk_entry_get_text(GTK_ENTRY(bd->gnubg_id)));
 
-	if (ms.gs != GAME_PLAYING)
-		SetMatchID("cIkaAAAAAAAA");
 	editing = ToolbarIsEditing(pwToolbar);
 	if (editing)
 		click_edit();
@@ -4200,7 +4198,7 @@ extern void InitBoardData(BoardData* bd)
 		bd->resigned = 0;
 
 		/* Set dice so 3d roll happens */
-		bd->diceShown = DICE_NOT_SHOWN;
+		bd->diceShown = DICE_BELOW_BOARD;
 		bd->diceRoll[0] = bd->diceRoll[1] = 0;
 
 		UpdateShadows(bd->bd3d);

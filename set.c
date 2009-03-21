@@ -429,7 +429,7 @@ extern void CommandSetStyledGameList( char *sz ) {
 
 #if USE_GTK
     if( fX )
-		GTKUpdateAnnotations();
+		ChangeGame(NULL);
 #endif
 }
 
@@ -572,6 +572,9 @@ extern void CommandSetBoard( char *sz ) {
     PositionKey( (ConstTanBoard)an, pmr->sb.auchKey );
     
     AddMoveRecord( pmr );
+
+    /* this way the player turn is stored */
+    get_current_moverecord(NULL);
     
     ShowBoard();
 }
@@ -4218,20 +4221,24 @@ extern void CommandSetGNUBgID(char *sz)
 				if (matchid)
 					continue;
 				matchid = g_strdup(out);
-				CommandSetMatchID(out);
 			} else if (strlen(out) == L_POSITIONID) {
 				if (posid)
 					continue;
 				posid = g_strdup(out);
-				CommandSetBoard(out);
 			}
 			g_free(out);
 		}
+		if (posid && matchid)
+			break;
 	}
 	if (!posid && !matchid) {
 		outputerrf(_("No valid GNUBG id's found"));
 		return;
 	}
+	if (matchid)
+		CommandSetMatchID(matchid);
+	if (posid)
+		CommandSetBoard(posid);
 	outputf(_("Setting GNUBG id %s:%s\n"), posid ? posid : "",
 		matchid ? matchid : "");
 	g_free(posid);

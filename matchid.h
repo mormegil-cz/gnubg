@@ -43,7 +43,7 @@ extern char*
 MatchIDFromKey( unsigned char auchKey[ 8 ] );
 
 extern int
-MatchFromID ( int anDice[ 2 ],
+MatchFromID ( unsigned int anDice[ 2 ],
               int *pfTurn,
               int *pfResigned,
               int *pfDoubled,

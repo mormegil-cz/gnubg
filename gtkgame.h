@@ -101,7 +101,7 @@ extern void GTKCalibrationUpdate(void *context, float rEvalsPerSec);
 extern void GtkChangeLanguage(void);
 extern void GTKClearMoveRecord(void);
 extern void GTKCommandShowCredits(GtkWidget * pw, GtkWidget * parent);
-extern void GTKCubeHint(moverecord *pmr, matchstate *pms, int did_double, int did_take );
+extern void GTKCubeHint(moverecord *pmr, const matchstate *pms, int did_double, int did_take );
 extern void GTKDelay(void);
 extern void GTKDisallowStdin(void);
 extern void GTKDumpStatcontext(int game);
@@ -143,7 +143,6 @@ extern void GTKTextToClipboard(const char *sz);
 extern void GTKTextWindow(const char *szOutput, const char *title,
 			  const int type, GtkWidget *parent);
 extern void GTKThaw(void);
-extern void GTKUpdateAnnotations(void);
 extern void HideAllPanels(gpointer p, guint n, GtkWidget * pw);
 extern void HintDoubleClick(GtkTreeView * treeview, GtkTreePath * path,
 			    GtkTreeViewColumn * col, hintdata * phd);

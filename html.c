@@ -3004,37 +3004,7 @@ static void
 HTMLPrintComment ( FILE *pf, const moverecord *pmr,
                    const htmlexportcss hecss ) {
 
-  char *sz = NULL;
-
-  switch ( pmr->mt ) {
-
-  case MOVE_GAMEINFO:
-    sz = pmr->sz;
-    break;
-  case MOVE_DOUBLE:
-  case MOVE_TAKE:
-  case MOVE_DROP:
-    sz = pmr->sz;
-    break;
-  case MOVE_NORMAL:
-    sz = pmr->sz;
-    break;
-  case MOVE_RESIGN:
-    sz = pmr->sz;
-    break;
-  case MOVE_SETBOARD:
-    sz = pmr->sz;
-    break;
-  case MOVE_SETDICE:
-    sz = pmr->sz;
-    break;
-  case MOVE_SETCUBEVAL:
-    sz = pmr->sz;
-    break;
-  case MOVE_SETCUBEPOS:
-    sz = pmr->sz;
-    break;
-  }
+  char *sz = pmr->sz;
 
   if ( sz ) {
 

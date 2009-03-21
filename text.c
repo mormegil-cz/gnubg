@@ -635,37 +635,8 @@ static void TextDumpStatcontext ( FILE *pf, const statcontext *psc,
 static void
 TextPrintComment ( FILE *pf, const moverecord *pmr ) {
 
-  char *sz = NULL;
+  char *sz = pmr->sz;
 
-  switch ( pmr->mt ) {
-
-  case MOVE_GAMEINFO:
-    sz = pmr->sz;
-    break;
-  case MOVE_DOUBLE:
-  case MOVE_TAKE:
-  case MOVE_DROP:
-    sz = pmr->sz;
-    break;
-  case MOVE_NORMAL:
-    sz = pmr->sz;
-    break;
-  case MOVE_RESIGN:
-    sz = pmr->sz;
-    break;
-  case MOVE_SETBOARD:
-    sz = pmr->sz;
-    break;
-  case MOVE_SETDICE:
-    sz = pmr->sz;
-    break;
-  case MOVE_SETCUBEVAL:
-    sz = pmr->sz;
-    break;
-  case MOVE_SETCUBEPOS:
-    sz = pmr->sz;
-    break;
-  }
 
   if ( sz ) {
 

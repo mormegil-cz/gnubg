@@ -23,6 +23,7 @@
 #define _ANALYSIS_H_
 
 #include "list.h"
+#include "gnubg-types.h"
 
 typedef enum _lucktype {
     LUCK_VERYBAD, LUCK_BAD, LUCK_NONE, LUCK_GOOD, LUCK_VERYGOOD
@@ -151,5 +152,8 @@ extern skilltype
 Skill( float r );
 
 extern int MatchAnalysed(void);
+extern float LuckAnalysis(const TanBoard anBoard, int n0, int n1,
+			  matchstate *pms);
+extern lucktype Luck( float r );
 
 #endif

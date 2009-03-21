@@ -22,6 +22,6 @@
 #ifndef _GTKCUBE_H_
 #define _GTKCUBE_H_
 
-extern GtkWidget *CreateCubeAnalysis(moverecord *pmr, matchstate *pms, int did_double, int did_take);
+extern GtkWidget *CreateCubeAnalysis(moverecord *pmr, const matchstate *pms, int did_double, int did_take);
 
 #endif

@@ -192,10 +192,10 @@ static void ToolbarToggleEdit(GtkWidget *pw)
 	BoardData *pbd = BOARD(pwBoard)->board_data;
 
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pw))) {
-		editing = TRUE;
 		if (ms.gs == GAME_NONE)
 			edit_new(nDefaultLength);
 		/* Undo any partial move that may have been made when entering edit mode */
+		editing = TRUE;
 		GTKUndo();
 	} else
 		editing = FALSE;

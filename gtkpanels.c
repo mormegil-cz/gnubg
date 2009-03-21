@@ -1126,7 +1126,7 @@ void DockPanels(void)
 	}
 	/* Refresh panel contents */
 	GTKRegenerateGames();
-	GTKUpdateAnnotations();
+	ChangeGame(NULL);
 	if (currentSelectedGame != -1)
 	    GTKSetGame(currentSelectedGame);
 

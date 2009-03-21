@@ -107,6 +107,7 @@ static void MoveListRolloutClicked(GtkWidget *pw, hintdata *phd)
 
   MoveListUpdate ( phd );
   SetAnnotation(pmrCurAnn);
+  ChangeGame(NULL);
 }
 
 extern void ShowMove ( hintdata *phd, const int f )
@@ -279,6 +280,7 @@ EvalMoves ( hintdata *phd, evalcontext *pec )
   find_skills(phd->pmr, &ms, -1, -1);
   MoveListUpdate ( phd );
   SetAnnotation(pmrCurAnn);
+  ChangeGame(NULL);
 }
 
 static void

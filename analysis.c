@@ -241,20 +241,27 @@ LuckNormal ( const TanBoard anBoard, const int n0, const int n1,
 
 }
 
-static float LuckAnalysis( const TanBoard anBoard, int n0, int n1,
-			   cubeinfo *pci, int fFirstMove ) {
+extern float LuckAnalysis(const TanBoard anBoard, int n0, int n1,
+			  matchstate *pms)
+{
+	cubeinfo ci;
+	int is_init_board;
+	TanBoard init_board;
 
-  if( n0-- < n1-- )
-    swap( &n0, &n1 );
-    
-  if ( fFirstMove && n0 != n1 )
-    return LuckFirst ( anBoard, n0, n1, pci, &ecLuck );
-  else
-    return LuckNormal ( anBoard, n0, n1, pci, &ecLuck );
+	GetMatchStateCubeInfo(&ci, pms);
+	InitBoard(init_board, pms->bgv);
+	is_init_board = !memcmp(init_board, pms->anBoard, 2 * 25 * sizeof(int));
 
+	if (n0-- < n1--)
+		swap(&n0, &n1);
+
+	if (is_init_board && n0 != n1)
+		return LuckFirst(anBoard, n0, n1, &ci, &ecLuck);
+	else
+		return LuckNormal(anBoard, n0, n1, &ci, &ecLuck);
 }
 
-static lucktype Luck( float r ) {
+extern lucktype Luck( float r ) {
 
     if( r > arLuckLevel[ LUCK_VERYGOOD ] )
 	return LUCK_VERYGOOD;
@@ -642,7 +649,6 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const listOLD *plParentGame,
           updateStatcontext ( psc, pmr, pms, plParentGame );
         }
 		break;
-      
     case MOVE_NORMAL:
 		if( pmr->fPlayer != pms->fMove ) {
 			SwapSides( pms->anBoard );
@@ -692,7 +698,7 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const listOLD *plParentGame,
 			pmr->rLuck = LuckAnalysis( (ConstTanBoard)pms->anBoard,
 						pmr->anDice[ 0 ],
 						pmr->anDice[ 1 ],
-						&ci, is_initial_position );
+						pms);
 			pmr->lt = Luck( pmr->rLuck );
 		}
       
@@ -933,7 +939,7 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const listOLD *plParentGame,
 			pmr->rLuck = LuckAnalysis( (ConstTanBoard)pms->anBoard,
 						pmr->anDice[ 0 ],
 						pmr->anDice[ 1 ],
-						&ci, is_initial_position );
+						pms);
 			pmr->lt = Luck( pmr->rLuck );
 		}
 
@@ -1268,7 +1274,7 @@ extern void CommandAnalyseGame( char *UNUSED(sz) )
 
 #if USE_GTK
   if( fX )
-    GTKUpdateAnnotations();
+    ChangeGame(NULL);
 #endif
 
   playSound( SOUND_ANALYSIS_FINISHED );
@@ -1313,7 +1319,7 @@ extern void CommandAnalyseMatch( char *UNUSED(sz) )
 
 #if USE_GTK
   if( fX )
-      GTKUpdateAnnotations();
+      ChangeGame(NULL);
 #endif
 
   playSound( SOUND_ANALYSIS_FINISHED );
@@ -1683,7 +1689,7 @@ extern void CommandAnalyseMove(char *UNUSED(sz))
 
 #if USE_GTK
 		if (fX)
-			GTKUpdateAnnotations();
+			ChangeGame(NULL);
 #endif
 	} else
 		outputerrf("%s", _("Please use `hint' on unfinished moves"));
@@ -1876,7 +1882,7 @@ CommandAnalyseClearMove ( char *UNUSED(sz) ) {
     AnalyseClearMove ( plLastMove->plNext->p );
 #if USE_GTK
     if( fX )
-      GTKUpdateAnnotations();
+      ChangeGame(NULL);
 #endif
   }
   else
@@ -1894,7 +1900,7 @@ CommandAnalyseClearGame ( char *UNUSED(sz) ) {
 
 #if USE_GTK
   if( fX )
-    GTKUpdateAnnotations();
+    ChangeGame(NULL);
 #endif
 
 }
@@ -1912,7 +1918,7 @@ CommandAnalyseClearMatch ( char *UNUSED(sz) ) {
 
 #if USE_GTK
   if( fX )
-    GTKUpdateAnnotations();
+    ChangeGame(NULL);
 #endif
 
 }
@@ -2371,7 +2377,7 @@ static int cmark_move_rollout(moverecord *pmr, gboolean destroy)
 	RefreshMoveList(&pmr->ml, NULL);
 #if USE_GTK
 	if (fX)
-		GTKUpdateAnnotations();
+		ChangeGame(NULL);
 	else
 #endif
 		ShowBoard();
@@ -2439,12 +2445,12 @@ static void cmark_cube_rollout(moverecord *pmr, gboolean destroy)
 
 #if USE_GTK
 	if (fX)
-		GTKUpdateAnnotations();
+		ChangeGame(NULL);
 #endif
 	ShowBoard();
 }
 
-static int move_change(const listOLD *new_game, const listOLD *new_move)
+static int move_change(listOLD *new_game, const listOLD *new_move)
 {
 	g_return_val_if_fail(new_game, FALSE);
 	g_return_val_if_fail(new_move, FALSE);
