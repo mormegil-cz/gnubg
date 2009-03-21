@@ -271,7 +271,7 @@ MatchFromID ( unsigned int anDice[ 2 ],
 
   return MatchFromKey ( anDice, pfTurn, pfResigned, pfDoubled,
                         pfMove, pfCubeOwner, pfCrawford, pnMatchTo,  
-                        anScore, pnCube, pgs, auchKey );
+                        (int *)anScore, pnCube, pgs, auchKey );
 
 }
 
