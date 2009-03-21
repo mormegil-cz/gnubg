@@ -1,4 +1,3 @@
-
 /*
  * gtkprefs.c
  *
@@ -32,11 +31,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if HAVE_LIBXML2
-#include <libxml/parser.h>
-#include <libxml/parserInternals.h>
-#endif
-
 #include "drawboard.h"
 #include "gtkboard.h"
 #include "gtkgame.h"
@@ -67,9 +61,7 @@ static GtkAdjustment *apadjDiceExponent[ 2 ], *apadjDiceCoefficient[ 2 ];
 static GtkWidget *apwColour[ 2 ], *apwBoard[ 4 ],
     *pwWood, *pwWoodType, *pwHinges, *pwLightTable, *pwMoveIndicator,
     *pwWoodF, *pwNotebook, *pwLabels, *pwDynamicLabels;
-#if HAVE_LIBXML2
 static GList *plBoardDesigns = NULL;
-#endif
 #if USE_BOARD3D
 GtkWidget *pwBoardType, *pwShowShadows, *pwAnimateRoll, *pwAnimateFlag, *pwCloseBoard,
 	*pwDarkness, *lightLab, *darkLab, *pwLightSource, *pwDirectionalSource, *pwQuickDraw,
@@ -89,7 +81,6 @@ GtkAdjustment *padjDarkness, *padjAccuracy, *padjBoardAngle, *padjSkewFactor, *p
 GtkWidget *pwPrevBoard;
 renderdata rdPrefs;
 
-#if HAVE_LIBXML2
 static GtkWidget *pwDesignAdd, *pwDesignRemove, *pwDesignUpdate;
 static GtkWidget *pwDesignImport, *pwDesignExport;
 static GtkWidget *pwDesignList;
@@ -98,7 +89,6 @@ static GtkWidget *pwDesignAddTitle;
 
 GtkListStore *designListStore;
 enum {NAME_COL = 0, DATA_COL = 1};
-#endif /* HAVE_LIBXML2 */
 
 static GtkWidget *apwDiceColour[ 2 ];
 static GtkWidget *pwCubeColour;
@@ -110,12 +100,9 @@ static int /*fWood,*/ fUpdate;
 static void GetPrefs ( renderdata *prd );
 void AddPages(BoardData* bd, GtkWidget* pwNotebook);
 
-#if HAVE_LIBXML2
 static void AddDesignRow ( gpointer data, gpointer user_data );
 static void AddDesignRowIfNew ( gpointer data, gpointer user_data );
-#endif
 
-#if HAVE_LIBXML2
 
 static GList *
 ParseBoardDesigns ( const char *szFile, const int fDeletable );
@@ -257,19 +244,15 @@ static boarddesign* FindDesign (renderdata* prdDesign)
 	}
 	return NULL;
 }
-#endif /* HAVE_LIBXML2 */
 
 static void SetTitle(void)
 {	/* Update dialog title to include design name + author */
-#if HAVE_LIBXML2
 	boarddesign *pbde;
-#endif
 	char title[1024];
 	GtkWidget *pwDialog = gtk_widget_get_toplevel(pwPrevBoard);
 
 	strcpy(title, _("GNU Backgammon - Appearance"));
 
-#if HAVE_LIBXML2
 	/* Search for current settings in designs */
 	strcat(title, ": ");
 
@@ -301,7 +284,6 @@ static void SetTitle(void)
 		}
 		pbdeSelected = 0;
 	}
-#endif
 	gtk_window_set_title( GTK_WINDOW( pwDialog ),  title);
 }
 
@@ -1758,7 +1740,6 @@ static GtkWidget *GeneralPage( BoardData *bd, GtkWidget* bdMain ) {
     return pwx;
 }
 
-#if HAVE_LIBXML2
 
 /* functions for board design */
 
@@ -2761,16 +2742,13 @@ static GtkWidget *DesignPage ( GList **pplBoardDesigns, BoardData *bd )
 
 }
 
-#endif /* HAVE_LIBXML2 */
 
 static void
 BoardPrefsDestroy ( GtkWidget *pw, void * arg) {
 
 	fUpdate = FALSE;
 
-#if HAVE_LIBXML2
 	free_board_designs ( plBoardDesigns );
-#endif /* HAVE_LIBXML2 */
 }
 
 static void GetPrefs ( renderdata* prd ) {
@@ -2934,11 +2912,9 @@ void AddPages(BoardData* bd, GtkWidget* pwNotebook)
 
 #endif
 
-#if HAVE_LIBXML2
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
 			      DesignPage( &plBoardDesigns, bd ),
 			      gtk_label_new(_("Designs") ) );
-#endif /* HAVE_LIBXML2 */
 
 #if USE_BOARD3D
 	if (display_is_3d(&rdPrefs))
@@ -3075,9 +3051,7 @@ extern void BoardPreferences(GtkWidget *pwBoard)
 			      GeneralPage( bd, pwBoard ),
 			      gtk_label_new( _("General") ) );
 
-#if HAVE_LIBXML2
     plBoardDesigns = read_board_designs ();
-#endif
 	AddPages(bd, pwNotebook);
 
     g_signal_connect( G_OBJECT( pwNotebook ), "switch-page",
@@ -3134,7 +3108,6 @@ extern void BoardPreferencesDone( GtkWidget *pwBoard )
 
 #if USE_BOARD3D
 
-#if HAVE_LIBXML2
 static int IsWhiteColour3d(Material* pMat)
 {
 	return (pMat->ambientColour[0] == 1) && (pMat->ambientColour[1] == 1) && (pMat->ambientColour[2] == 1) &&
@@ -3148,11 +3121,9 @@ static int IsBlackColour3d(Material* pMat)
 		(pMat->diffuseColour[0] == 0) && (pMat->diffuseColour[1] == 0) && (pMat->diffuseColour[2] == 0) &&
 		(pMat->specularColour[0] == 0) && (pMat->specularColour[1] == 0) && (pMat->specularColour[2] == 0);
 }
-#endif
 
 void Default3dSettings(BoardData* bd)
 {	/* If no 3d settings loaded, set 3d appearance to first design */
-#if HAVE_LIBXML2
 	/* Check if colours are set to default values */
 	if (IsWhiteColour3d(&bd->rd->ChequerMat[0]) && IsBlackColour3d(&bd->rd->ChequerMat[1]) &&
 		IsWhiteColour3d(&bd->rd->DiceMat[0]) && IsBlackColour3d(&bd->rd->DiceMat[1]) &&
@@ -3227,254 +3198,188 @@ void Default3dSettings(BoardData* bd)
 		}
 		free_board_designs ( plBoardDesigns );
 	}
-#endif /* HAVE_LIBXML2 */
 }
 #endif
 
-#if HAVE_LIBXML2
+/* --- Here --- */
 
-typedef enum _parsestate {
+typedef enum {
   STATE_NONE,
   STATE_BOARD_DESIGNS,
   STATE_BOARD_DESIGN,
   STATE_ABOUT,
   STATE_TITLE, STATE_AUTHOR,
   STATE_DESIGN
-} parsestate;
+} parserstate;
 
-typedef struct _parsecontext {
+typedef struct _DesignParser
+{
+  gchar *filename;
+  parserstate state;
+  boarddesign *current_design;
+  GList *designs;
+  gboolean deletable;
+} DesignParser;
 
-  GList *pl;  /* list of board designs */
+static void design_parser_start_element (GMarkupParseContext *context,
+ 	const gchar *element_name,
+ 	const gchar **attribute_names,
+ 	const gchar **attribute_values,
+ 	gpointer user_data,
+ 	GError **error){
 
-  parsestate aps[ 10 ];      /* the current tag */
-  int ips;                   /* depth of stack */
-
-  boarddesign *pbde;
-  int i, j;      /* counters */
-  int err;     /* return code */
-  int fDeletable; /* is the board design deletable */
-
-} parsecontext;
-
-
-static void
-PushState ( parsecontext *ppc, const parsestate ps ) {
-
-  if ( ppc->ips > 9 ) {
-    ppc->err = TRUE;
-    return;
-  }
-
-  ++(ppc->ips);
-  ppc->aps[ ppc->ips ] = ps;
-
+	DesignParser *parser = (DesignParser *) user_data;
+	
+	switch (parser->state) {
+		case STATE_NONE:
+		if ( strcmp( element_name, "board-designs") == 0 )
+			parser->state = STATE_BOARD_DESIGNS;
+		break;
+		case STATE_BOARD_DESIGNS:
+		if ( strcmp( element_name, "board-design") == 0 ){
+			parser->state = STATE_BOARD_DESIGN;
+			parser->current_design = g_new0(  boarddesign, 1 );
+		}
+		break;
+		
+		case STATE_BOARD_DESIGN:
+		if ( strcmp( element_name, "about") == 0 )
+			parser->state = STATE_ABOUT;
+		if ( strcmp( element_name, "design") == 0 )
+			parser->state = STATE_DESIGN;
+		break;
+		case STATE_ABOUT:
+		if ( strcmp( element_name, "title") == 0 )
+			parser->state = STATE_TITLE;
+		if ( strcmp( element_name, "author") == 0 )
+			parser->state = STATE_AUTHOR;
+		break;
+		case STATE_TITLE:
+		case STATE_AUTHOR:
+		case STATE_DESIGN:
+		default:
+		break;
+	}
 }
 
-static void
-PopState ( parsecontext *ppc ) {
-
- (ppc->ips)--;
-
+static void design_parser_end_element (GMarkupParseContext *context,
+ 	const gchar *element_name,
+ 	gpointer user_data,
+ 	GError **error)
+{
+	DesignParser *parser = (DesignParser *) user_data;
+	
+	switch (parser->state) {
+		case STATE_NONE:
+			g_assert_not_reached();
+		break;
+		case STATE_BOARD_DESIGNS:
+			parser->state = STATE_NONE;
+		break;
+		case STATE_BOARD_DESIGN:
+			parser->designs = g_list_prepend( parser->designs, parser->current_design);
+			parser->current_design = NULL;
+			parser->state = STATE_BOARD_DESIGNS;
+		break;
+		case STATE_ABOUT:
+			parser->state = STATE_BOARD_DESIGN;
+		break;
+		case STATE_TITLE:
+			parser->state = STATE_ABOUT;
+		break;
+		case STATE_AUTHOR:
+			parser->state = STATE_ABOUT;
+		break;
+		case STATE_DESIGN:
+			parser->state = STATE_BOARD_DESIGN;
+		break;
+		default:
+			g_assert_not_reached();
+	}
 }
 
-
-static void Err( void *pv, const char *msg, ... ) {
-
-  parsecontext *ppc = pv;
-  va_list args;
-  
-  ppc->err = TRUE;
-  
-  va_start(args, msg);
-  g_vprintf(msg, args);
-  va_end(args);
-  
+static void design_parser_characters (GMarkupParseContext *context,
+ 	const gchar *text,
+ 	gsize text_len,
+ 	gpointer user_data,
+ 	GError **error)
+{
+	DesignParser *parser = (DesignParser *) user_data;
+	
+	switch (parser->state) {
+		case STATE_TITLE:
+		parser->current_design->szTitle = g_strdup( text );
+		break;
+		case STATE_AUTHOR:
+		parser->current_design->szAuthor = g_strdup( text );
+		break;
+		case STATE_DESIGN:
+		parser->current_design->szBoardDesign = g_strdup( text );
+		break;
+		default:
+		break;
+	}
 }
 
-static void ScanEndElement( void *pv, const xmlChar *pchName ) {
-  
-  parsecontext *ppc = pv;
-
-  /* pop element */
-
-  PopState ( ppc );
-
-}
-
-
-
-static void ScanCharacters( void *pv, const xmlChar *pchIn, int cch ) {
-
-  parsecontext *ppc = pv;
-  char *sz = g_strndup ( (char*)pchIn, cch );
-  char *pc;
-
-  switch ( ppc->aps[ ppc->ips ] ) {
-  case STATE_BOARD_DESIGNS:
-  case STATE_BOARD_DESIGN:
-    /* no chars in these elements */
-    break;
-
-  case STATE_TITLE:
-
-    pc = ppc->pbde->szTitle;
-    ppc->pbde->szTitle = g_strconcat( pc, sz, NULL );
-    g_free ( pc );
-    break;
-
-  case STATE_AUTHOR:
-
-    pc = ppc->pbde->szAuthor;
-    ppc->pbde->szAuthor = g_strconcat( pc, sz, NULL );
-    g_free ( pc );
-    break;
-
-  case STATE_DESIGN:
-    pc = ppc->pbde->szBoardDesign;
-    ppc->pbde->szBoardDesign = g_strconcat( pc, sz, NULL );
-    g_free ( pc );
-    break;
-
-  default:
-    break;
-  }
-
-  g_free ( sz );
-
-}
-
-static void ScanStartElement( void *pv, const xmlChar *pchName,
-                              const xmlChar **ppchAttrs ) {
-
-  parsecontext *ppc = pv;
-
-  if ( ! strcmp ( (char*)pchName, "board-designs" ) && ppc->ips == -1 ) {
-
-    PushState ( ppc, STATE_BOARD_DESIGNS );
-
-  }
-  else if ( ! strcmp ( (char*)pchName, "board-design" ) &&
-            ppc->aps[ ppc->ips ] == STATE_BOARD_DESIGNS ) {
-
-    /* allocate list if empty */
-    if ( ! ppc->pl )
-      ppc->pl = g_list_alloc ();
-
-    ppc->pbde = (boarddesign *) g_malloc ( sizeof ( boarddesign ) );
-    memset ( ppc->pbde, 0, sizeof ( boarddesign ) );
-    ppc->pbde->fDeletable = ppc->fDeletable;
-    ppc->pl = g_list_append ( ppc->pl, (gpointer) ppc->pbde );
-
-    PushState ( ppc, STATE_BOARD_DESIGN );
-
-  }
-  else if ( ! strcmp ( (char*) pchName, "about" ) &&
-            ppc->aps[ ppc->ips ] == STATE_BOARD_DESIGN ) {
-
-    PushState ( ppc, STATE_ABOUT );
-
-  }
-  else if ( ! strcmp ( (char*)pchName, "title" ) &&
-            ppc->aps[ ppc->ips ] == STATE_ABOUT ) {
-
-    PushState ( ppc, STATE_TITLE );
-    ppc->pbde->szTitle = g_strdup ( "" );
-
-  }
-  else if ( ! strcmp( (char*) pchName, "author" ) &&
-            ppc->aps[ ppc->ips ] == STATE_ABOUT ) {
-
-    PushState ( ppc, STATE_AUTHOR );
-    ppc->pbde->szAuthor = g_strdup ( "" );
-
-  }
-  else if ( ! strcmp( (char*) pchName, "design" ) &&
-            ppc->aps[ ppc->ips ] == STATE_BOARD_DESIGN ) {
-
-    PushState ( ppc, STATE_DESIGN );
-    ppc->pbde->szBoardDesign = g_strdup ( "" );
-
-  }
-  else
-    printf ( "ignoring start tag \"%s\"\n", pchName );
-
-
+static void design_parser_error (GMarkupParseContext *context,
+ 	GError *error,
+ 	gpointer user_data) 
+{
+	DesignParser *parser = (DesignParser *) user_data;
+	g_warning("An error occured while parsing file: %s\n", parser->filename);
 }
 
 
-static xmlSAXHandler xsaxScan = {
-    NULL, /* internalSubset */
-    NULL, /* isStandalone */
-    NULL, /* hasInternalSubset */
-    NULL, /* hasExternalSubset */
-    NULL, /* resolveEntity */
-    NULL, /* getEntity */
-    NULL, /* entityDecl */
-    NULL, /* notationDecl */
-    NULL, /* attributeDecl */
-    NULL, /* elementDecl */
-    NULL, /* unparsedEntityDecl */
-    NULL, /* setDocumentLocator */
-    NULL, /* startDocument */
-    NULL, /* endDocument */
-    ScanStartElement, /* startElement */
-    ScanEndElement, /* endElement */
-    NULL, /* reference */
-    ScanCharacters, /* characters */
-    NULL, /* ignorableWhitespace */
-    NULL, /* processingInstruction */
-    NULL, /* comment */
-    Err, /* xmlParserWarning */
-    Err, /* xmlParserError */
-    Err, /* fatal error */
-    NULL, /* getParameterEntity */
-    NULL, /* cdataBlock; */
-    NULL,  /* externalSubset; */
-    TRUE
+static GMarkupParser markup_parser = {
+	design_parser_start_element, 
+	design_parser_end_element,
+	design_parser_characters,
+	NULL,
+	design_parser_error
 };
 
 static GList *
-ParseBoardDesigns ( const char *szFile, const int fDeletable ) {
+ParseBoardDesigns ( const char *szFile, const int fDeletable )
+{
 
-  xmlParserCtxt *pxpc;
-  parsecontext pc;
+  GList *returnlist;
+  GMarkupParseContext *context;
+  DesignParser *parser;
   char *contents;
   gsize size;
+  GError *error = NULL;
 
+  parser = g_new0( DesignParser, 1 );
 
-  pc.ips = -1;
-  pc.pl = NULL;
-  pc.err = FALSE;
-  pc.fDeletable = fDeletable;
+  parser->filename = g_strdup( szFile );
+  parser->designs = NULL;
+  parser->deletable = fDeletable;
 
   /* create parser context */
 
-  if (!g_file_test(szFile, G_FILE_TEST_IS_REGULAR))
-          return NULL;
   if (!g_file_get_contents(szFile, &contents, &size, NULL))
           return NULL;
 
-  pxpc = xmlCreateMemoryParserCtxt ( contents, (int)size );
-  g_free(contents);
-  if ( ! pxpc )
+  context = g_markup_parse_context_new( &markup_parser, 0, parser, NULL );
+  if ( ! context )
           return NULL;
 
-  xmlFree(pxpc->sax);
-  pxpc->sax = &xsaxScan;
-  pxpc->userData = &pc;
-
   /* parse document */
+  if(!g_markup_parse_context_parse( context, contents, size, &error )){
+	g_warning("Error parsing XML: %s\n", error->message );
+	g_error_free( error );
+        free_board_designs ( parser->designs );
+	return NULL;
+  }
+  g_markup_parse_context_free (context); 
 
-  xmlParseDocument ( pxpc );
+  returnlist = parser->designs;
 
-  if ( pc.err )
-    free_board_designs ( pc.pl );
+  g_free( parser->filename );
+  free_board_design( parser->current_design, NULL );
+  g_free( parser );  
 
-  pxpc -> sax = NULL;
-  xmlFreeParserCtxt(pxpc);
-
-  return pc.err ? NULL : pc.pl;
-
+  return g_list_reverse(returnlist);
 }
 
-#endif /* HAVE_LIBXML2 */
+
