@@ -269,7 +269,7 @@ MatchFromID ( unsigned int anDice[ 2 ],
 
   /* get matchstate info from the key */
 
-  return MatchFromKey ( anDice, pfTurn, pfResigned, pfDoubled,
+  return MatchFromKey ( (int *)anDice, pfTurn, pfResigned, pfDoubled,
                         pfMove, pfCubeOwner, pfCrawford, pnMatchTo,  
                         (int *)anScore, pnCube, pgs, auchKey );
 

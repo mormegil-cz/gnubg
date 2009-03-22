@@ -2306,7 +2306,7 @@ extern void hint_double(int show, int did_double)
 		if (hist)
 			ChangeGame(NULL);
 		if (show)
-			GTKCubeHint(pmr, &ms, did_double, -1);
+			GTKCubeHint(pmr, &ms, did_double, -1, hist);
 		return;
 	}
 #endif
@@ -2334,7 +2334,7 @@ extern void hint_take(int show, int did_take)
 		if (hist)
 			ChangeGame(NULL);
 		if (show)
-			GTKCubeHint(pmr, &ms, -1, did_take);
+			GTKCubeHint(pmr, &ms, -1, did_take, hist);
 		return;
 	}
 #endif
@@ -2393,7 +2393,7 @@ extern void hint_move(char *sz, gboolean show)
 		if (hist)
 		ChangeGame(NULL);
 		if (show)
-			GTKHint(pmr);
+			GTKHint(pmr, hist);
 		return;
 	} else
 #endif

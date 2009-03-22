@@ -106,8 +106,11 @@ static void MoveListRolloutClicked(GtkWidget *pw, hintdata *phd)
   free ( ai );
 
   MoveListUpdate ( phd );
-  SetAnnotation(pmrCurAnn);
-  ChangeGame(NULL);
+  if (phd->hist)
+  {
+	  SetAnnotation(pmrCurAnn);
+	  ChangeGame(NULL);
+  }
 }
 
 extern void ShowMove ( hintdata *phd, const int f )
@@ -279,8 +282,11 @@ EvalMoves ( hintdata *phd, evalcontext *pec )
 
   find_skills(phd->pmr, &ms, -1, -1);
   MoveListUpdate ( phd );
-  SetAnnotation(pmrCurAnn);
-  ChangeGame(NULL);
+  if (phd->hist)
+  {
+	  SetAnnotation(pmrCurAnn);
+	  ChangeGame(NULL);
+  }
 }
 
 static void
@@ -691,7 +697,7 @@ extern int CheckHintButtons(hintdata * phd)
 
 extern GtkWidget *
 CreateMoveList( moverecord *pmr, const int fButtonsValid,
-                const int fDestroyOnMove, const int fDetails )
+                const int fDestroyOnMove, const int fDetails, int hist )
 {
     GtkWidget *pw;
     GtkWidget *pwVBox, *mlt;
@@ -712,6 +718,7 @@ CreateMoveList( moverecord *pmr, const int fButtonsValid,
     phd->fDestroyOnMove = fDestroyOnMove;
     phd->pwMove = NULL;
     phd->fDetails = fDetails;
+    phd->hist = hist;
   mlt = CreateMoveListTools( phd );
 	MoveListCreate(phd);
 

@@ -719,7 +719,7 @@ static GtkWidget *skill_label(skilltype st)
 	return label;
 }
 
-extern void SetAnnotation( moverecord *pmr ) {
+extern void SetAnnotation( moverecord *pmr) {
 
     GtkWidget *pwParent = pwAnalysis->parent, *pw = NULL, *pwBox, *pwAlign;
     int fMoveOld, fTurnOld;
@@ -832,14 +832,14 @@ extern void SetAnnotation( moverecord *pmr ) {
 
             /* cube */
 
-            pwCubeAnalysis = CreateCubeAnalysis( pmr, &ms, FALSE, -1 );
+            pwCubeAnalysis = CreateCubeAnalysis( pmr, &ms, FALSE, -1, TRUE );
 
 
             /* move */
 			      
 	    if( pmr->ml.cMoves ) 
               pwMoveAnalysis = CreateMoveList( pmr,
-                                               TRUE, FALSE, !IsPanelDocked(WINDOW_ANALYSIS));
+                                               TRUE, FALSE, !IsPanelDocked(WINDOW_ANALYSIS), TRUE);
 
             if ( pwMoveAnalysis && pwCubeAnalysis ) {
               /* notebook with analysis */
@@ -898,7 +898,7 @@ extern void SetAnnotation( moverecord *pmr ) {
 
             if ( dt == DT_NORMAL ) {
 	    
-              if ( ( pw = CreateCubeAnalysis( pmr, &ms, TRUE, -1 ) ) )
+              if ( ( pw = CreateCubeAnalysis( pmr, &ms, TRUE, -1, TRUE ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
 				    FALSE, 0 );
 
@@ -931,7 +931,7 @@ extern void SetAnnotation( moverecord *pmr ) {
 				0 );
 
             if ( tt == TT_NORMAL ) {
-              if ( ( pw = CreateCubeAnalysis( pmr, &ms, -1, pmr->mt == MOVE_TAKE ) ) )
+              if ( ( pw = CreateCubeAnalysis( pmr, &ms, -1, pmr->mt == MOVE_TAKE, TRUE ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
 				    FALSE, 0 );
             }
@@ -5110,7 +5110,7 @@ HintOK ( GtkWidget *pw, void *unused )
 	DestroyPanel(WINDOW_HINT);
 }
 
-extern void GTKCubeHint(moverecord *pmr, const matchstate *pms, int did_double, int did_take ) {
+extern void GTKCubeHint(moverecord *pmr, const matchstate *pms, int did_double, int did_take, int hist ) {
     
     GtkWidget *pw, *pwHint;
 
@@ -5121,7 +5121,7 @@ extern void GTKCubeHint(moverecord *pmr, const matchstate *pms, int did_double, 
 			   NULL, DIALOG_FLAG_MODAL | DIALOG_FLAG_NOTIDY, G_CALLBACK( HintOK ), NULL );
 	SetPanelWidget(WINDOW_HINT, pwHint);
 
-    pw = CreateCubeAnalysis (pmr, pms, did_double, did_take);
+    pw = CreateCubeAnalysis (pmr, pms, did_double, did_take, hist);
 
     gtk_container_add( GTK_CONTAINER( DialogArea( pwHint, DA_MAIN ) ),
                        pw );
@@ -5213,14 +5213,14 @@ GTKResignHint( float arOutput[], float rEqBefore, float rEqAfter,
 }
 
 extern void 
-GTKHint( moverecord *pmr)
+GTKHint( moverecord *pmr, int hist)
 {
     GtkWidget *pwMoves, *pwHint;
 
     if (GetPanelWidget(WINDOW_HINT))
 	gtk_widget_destroy(GetPanelWidget(WINDOW_HINT));
 
-    pwMoves = CreateMoveList( pmr, TRUE, TRUE, TRUE );
+    pwMoves = CreateMoveList( pmr, TRUE, TRUE, TRUE, hist );
 
     /* create dialog */
 

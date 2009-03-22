@@ -48,6 +48,7 @@ typedef struct _cubehintdata {
   matchstate ms;
   int did_double;
   int did_take;
+  int hist;
 } cubehintdata;
 
 
@@ -715,7 +716,8 @@ CubeAnalysisRollout ( GtkWidget *pw, cubehintdata *pchd ) {
   pes->et = EVAL_ROLLOUT;
 
   UpdateCubeAnalysis ( pchd );
-  ChangeGame(NULL);
+  if (pchd->hist)
+	  ChangeGame(NULL);
 
 }
 
@@ -745,7 +747,8 @@ static void EvalCube ( cubehintdata *pchd, evalcontext *pec )
   memcpy ( &pes->ec, dd.pec, sizeof ( evalcontext ) );
 
   UpdateCubeAnalysis ( pchd );
-  ChangeGame(NULL);
+  if (pchd->hist)
+	  ChangeGame(NULL);
 }
 
 static void
@@ -1035,7 +1038,7 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
 }
 
 
-extern GtkWidget *CreateCubeAnalysis(moverecord *pmr, const matchstate *pms, int did_double, int did_take)
+extern GtkWidget *CreateCubeAnalysis(moverecord *pmr, const matchstate *pms, int did_double, int did_take, int hist)
 {
 
 	cubehintdata *pchd = g_new0(cubehintdata, 1);
@@ -1046,6 +1049,7 @@ extern GtkWidget *CreateCubeAnalysis(moverecord *pmr, const matchstate *pms, int
 	pchd->ms = *pms;
 	pchd->did_double = did_double;
 	pchd->did_take = did_take;
+	pchd->hist = hist;
 	pchd->pw = pw = gtk_hbox_new(FALSE, 2);
 	switch (pmr->mt) {
 
