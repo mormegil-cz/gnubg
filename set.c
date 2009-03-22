@@ -2548,6 +2548,7 @@ extern void CommandSetTurn( char *sz ) {
     
     ms.fTurn = ms.fMove = i;
     CancelCubeAction();
+    pmr_hint_destroy();
     fNextTurn = FALSE;
 #if USE_GTK
     if (fX) {

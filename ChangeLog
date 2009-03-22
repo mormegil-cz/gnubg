@@ -1,9 +1,13 @@
+Sun Mar 22 09:24:09 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* set.c: destroy pmr_hint in CommandSetTurn
+
 Sat Mar 21 22:44:02 CET 2009 Christian Anthon <anthon@kiku.dk>
 
-	* analysis.c, analysis.h, backgammon.h, eval.h, gnubg.c,
-	gtkboard.c, gtkchequer.c, gtkcube.c, gtkcube.h, gtkgame.c, gtkgame.h,
-	gtkpanels.c, gtktoolbar.c, html.c, matchid.c, matchid.h, play.c,
-	set.c, simpleboard.c, text.c, lib/gnubg-types.h: another bunch of hint
+	* analysis.c, analysis.h, backgammon.h, eval.h, gnubg.c, gtkboard.c,
+	gtkchequer.c, gtkcube.c, gtkcube.h, gtkgame.c, gtkgame.h, gtkpanels.c,
+	gtktoolbar.c, html.c, matchid.c, matchid.h, play.c, set.c,
+	simpleboard.c, text.c, lib/gnubg-types.h: another bunch of hint
 	related changes.
 
 Sat Mar 21 11:44:35 WEST 2009 Øystein Johansen <oystein@gnubg.org>
