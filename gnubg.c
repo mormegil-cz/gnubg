@@ -2390,7 +2390,6 @@ extern void hint_move(char *sz, gboolean show)
 
 #if USE_GTK
 	if (fX) {
-		printf("dice are now %d\n", ms.anDice[0]);
 		if (hist)
 		ChangeGame(NULL);
 		if (show)
