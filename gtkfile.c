@@ -427,14 +427,11 @@ enum {
 	NUM_COLS
 };
 
-static char *batch_analyse(gchar *filename)
+static gboolean batch_create_save(gchar *filename, gchar **save, char **result)
 {
 	gchar *file;
 	gchar *folder;
 	gchar *dir;
-	gchar *save;
-	gchar *cmd;
-
 	DisectPath(filename, NULL, &file, &folder);
 	dir = g_build_filename(folder, "analysed", NULL);
 	g_free(folder);
@@ -445,14 +442,35 @@ static char *batch_analyse(gchar *filename)
 	if (!g_file_test(dir, G_FILE_TEST_IS_DIR))
 	{
 		g_free(dir);
-		return (_("Failed to make directory"));
+		if (result)
+			*result = _("Failed to make directory");
+		return FALSE;
 	}
 
-	save = g_strconcat(dir, G_DIR_SEPARATOR_S, file, ".sgf", NULL);
+	*save = g_strconcat(dir, G_DIR_SEPARATOR_S, file, ".sgf", NULL);
 	g_free(file);
 	g_free(dir);
+	return TRUE;
+}
+
+static gboolean batch_analyse(gchar *filename, char **result, gboolean add_to_db)
+{
+	gchar *cmd;
+	gchar *save = NULL;
+
+
+	if (!batch_create_save(filename, &save, result))
+		return FALSE;
+
+	printf("save %s\n", save);
+
 	if (g_file_test((save), G_FILE_TEST_EXISTS))
-		return(_("Previous"));
+	{
+		*result = _("Previous");
+		g_free(save);
+		return TRUE;
+	}
+
 
 	g_free(szCurrentFileName);
 	szCurrentFileName = NULL;
@@ -460,21 +478,38 @@ static char *batch_analyse(gchar *filename)
 	UserCommand(cmd);
 	g_free(cmd);
 	if (!szCurrentFileName)
-		return _("Failed import");
+	{
+		*result = _("Failed import");
+		g_free(save);
+		return FALSE;
+	}
 
 	UserCommand("analysis clear match");
 	UserCommand("analyse match");
 
 	if (!MatchAnalysed())
-		return(_("Cancelled"));
+	{
+		*result = _("Cancelled");
+		g_free(save);
+		return FALSE;
+	}
 
 	cmd = g_strdup_printf("save match \"%s\"", save);
 	UserCommand(cmd);
 	g_free(cmd);
-	return (_("Done"));
+	g_free(save);
+
+	if (add_to_db)
+	{
+		cmd = g_strdup("relational add match quiet");
+		UserCommand(cmd);
+		g_free(cmd);
+	}
+	*result = _("Done");
+	return TRUE;
 }
 
-static void batch_do_all(gpointer batch_model)
+static void batch_do_all(gpointer batch_model, gboolean add_to_db)
 {
 	gchar *result;
 	GtkTreeIter iter;
@@ -490,9 +525,9 @@ static void batch_do_all(gpointer batch_model)
 		gtk_tree_model_get(batch_model, &iter, COL_PATH, &filename,
 				   -1);
 
-		result = batch_analyse(filename);
+		batch_analyse(filename, &result, add_to_db);
 		gtk_list_store_set(batch_model, &iter, COL_RESULT, result,
-				   -1);
+				-1);
 
 		cancelled = GPOINTER_TO_INT(g_object_get_data(batch_model,
 					"cancelled"));
@@ -591,7 +626,43 @@ static GtkWidget *batch_create_view(GSList * filenames)
 	return view;
 }
 
-static void batch_create_dialog_and_run(GSList * filenames)
+static void batch_open_selected_file(GtkTreeView * view)
+{
+	gchar *save;
+	gchar *file;
+	gchar *cmd;
+	GtkTreeModel *model;
+	GtkTreeIter selected_iter;
+	GtkTreeSelection *sel = gtk_tree_view_get_selection(view);
+
+	if (gtk_tree_selection_count_selected_rows(sel) != 1)
+		return;
+
+	model = gtk_tree_view_get_model(view);
+	gtk_tree_selection_get_selected(sel, &model, &selected_iter);
+	gtk_tree_model_get(model, &selected_iter, COL_PATH, &file, -1);
+
+	if (!batch_create_save(file, &save, NULL))
+		return;
+
+	cmd = g_strdup_printf("load match \"%s\"", save);
+	UserCommand(cmd);
+	g_free(save);
+	g_free(cmd);
+}
+
+static void batch_row_activate(GtkTreeView * view, GtkTreePath * path,
+			       GtkTreeViewColumn * col, gpointer userdata)
+{
+	batch_open_selected_file(view);
+}
+
+static void batch_row_open(GtkWidget *widget, GtkTreeView * view)
+{
+	batch_open_selected_file(view);
+}
+
+static void batch_create_dialog_and_run(GSList * filenames, gboolean add_to_db)
 {
 	GtkWidget *dialog;
 	GtkWidget *buttons;
@@ -599,6 +670,7 @@ static void batch_create_dialog_and_run(GSList * filenames)
 	GtkWidget *ok_button;
 	GtkWidget *skip_button;
 	GtkWidget *stop_button;
+	GtkWidget *open_button;
 	GtkTreeModel *model;
 	GtkWidget *sw;
 
@@ -632,17 +704,29 @@ static void batch_create_dialog_and_run(GSList * filenames)
 
 	skip_button = gtk_button_new_with_label(_("Skip"));
 	stop_button = gtk_button_new_with_label(_("Stop"));
+	open_button = gtk_button_new_with_label(_("Open"));
 
 	gtk_container_add(GTK_CONTAINER(buttons), skip_button);
 	gtk_container_add(GTK_CONTAINER(buttons), stop_button);
+	gtk_container_add(GTK_CONTAINER(buttons), open_button);
 
 	g_signal_connect(G_OBJECT(skip_button), "clicked",
 			 G_CALLBACK(batch_skip_file), model);
 	g_signal_connect(G_OBJECT(stop_button), "clicked",
 			 G_CALLBACK(batch_stop), model);
 	gtk_widget_show_all(dialog);
-	batch_do_all(model);
+
+	batch_do_all(model, add_to_db);
+	
+	g_signal_connect(open_button, "clicked", G_CALLBACK(batch_row_open), view);
+	g_signal_connect(view, "row-activated", G_CALLBACK(batch_row_activate), view);
+
 	gtk_widget_set_sensitive(ok_button, TRUE);
+	gtk_widget_set_sensitive(open_button, TRUE);
+	gtk_widget_set_sensitive(skip_button, FALSE);
+	gtk_widget_set_sensitive(stop_button, FALSE);
+
+	gtk_window_set_modal(GTK_WINDOW(dialog), FALSE);
 }
 
 extern void GTKBatchAnalyse(gpointer p, guint n, GtkWidget * pw)
@@ -651,6 +735,7 @@ extern void GTKBatchAnalyse(gpointer p, guint n, GtkWidget * pw)
 	GSList *filenames = NULL;
 	GtkWidget *fc;
 	static gchar *last_folder = NULL;
+	GtkWidget *add_to_db;
 
 	folder = last_folder ? last_folder : default_import_folder;
 
@@ -659,17 +744,26 @@ extern void GTKBatchAnalyse(gpointer p, guint n, GtkWidget * pw)
 	gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(fc), TRUE);
 	add_import_filters(GTK_FILE_CHOOSER(fc));
 
+
+
+	add_to_db = gtk_check_button_new_with_label (_("Add to relational database"));
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (add_to_db), TRUE);
+
+	gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(fc), add_to_db);
+
 	if (gtk_dialog_run(GTK_DIALOG(fc)) == GTK_RESPONSE_ACCEPT) {
 		filenames =
 		    gtk_file_chooser_get_filenames(GTK_FILE_CHOOSER(fc));
 	}
 	if (filenames) {
+		gboolean add_to_db_set;
 		g_free(last_folder);
 		last_folder =
 		    gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER
 							(fc));
+		add_to_db_set = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(add_to_db));
 		gtk_widget_destroy(fc);
-		batch_create_dialog_and_run(filenames);
+		batch_create_dialog_and_run(filenames, add_to_db_set);
 	} else
 		gtk_widget_destroy(fc);
 }

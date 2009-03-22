@@ -443,13 +443,19 @@ static void AddGames(DBProvider *pdb, int session_id, int player_id0, int player
 	}
 }
 
-extern void CommandRelationalAddMatch( char *UNUSED(sz) )
+extern void CommandRelationalAddMatch(char *sz)
 {
 	DBProvider *pdb;
 	char *buf, *buf2, *date;
 	char warnings[1024];
 	int session_id, existing_id, player_id0, player_id1;
 	*warnings = '\0';
+	char *arg = NULL;
+	gboolean quiet = FALSE;
+
+	arg = NextToken(&sz);
+	if (arg)
+		quiet = !strcmp(arg, "quiet");
 
 	if (ListEmpty(&lMatch))
 	{
@@ -458,9 +464,9 @@ extern void CommandRelationalAddMatch( char *UNUSED(sz) )
 	}
 
 	/* Warn if match is not finished or fully analyzed */
-	if (!GameOver())
+	if (!quiet && !GameOver())
 		strcat(warnings, _("The match is not finished\n"));
-	if (!MatchAnalysed())
+	if (!quiet && !MatchAnalysed())
 		strcat(warnings, _("All of the match is not analyzed\n"));
 
 	if (*warnings)
@@ -476,7 +482,7 @@ extern void CommandRelationalAddMatch( char *UNUSED(sz) )
 	existing_id = RelationalMatchExists(pdb);
 	if (existing_id != -1)
 	{
-		if (!GetInputYN(_("Match exists, overwrite?")))
+		if (!quiet && !GetInputYN(_("Match exists, overwrite?")))
 			return;
 
 		/* Remove any game stats and games */

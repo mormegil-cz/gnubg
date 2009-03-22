@@ -1,3 +1,8 @@
+Sun Mar 22 22:00:17 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtkfile.c, relational.c : add an open button and an option to add to
+	the relational database when done.
+
 Sun Mar 22 09:24:09 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* set.c: destroy pmr_hint in CommandSetTurn
