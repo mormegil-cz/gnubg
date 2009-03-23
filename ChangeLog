@@ -1,3 +1,7 @@
+Mon Mar 23 09:54:12 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtkgame.c: gtkcubehint shouldn't be modal either.
+
 Sun Mar 22 23:33:50 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c, gtkchequer.c, gtkchequer.h, gtkcube.c, gtkcube.h,

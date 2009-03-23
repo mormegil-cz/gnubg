@@ -5118,7 +5118,7 @@ extern void GTKCubeHint(moverecord *pmr, const matchstate *pms, int did_double, 
 	gtk_widget_destroy(GetPanelWidget(WINDOW_HINT));
 
 	pwHint = GTKCreateDialog( _("GNU Backgammon - Hint"), DT_INFO,
-			   NULL, DIALOG_FLAG_MODAL | DIALOG_FLAG_NOTIDY, G_CALLBACK( HintOK ), NULL );
+			   NULL, DIALOG_FLAG_NOTIDY, G_CALLBACK( HintOK ), NULL );
 	SetPanelWidget(WINDOW_HINT, pwHint);
 
     pw = CreateCubeAnalysis (pmr, pms, did_double, did_take, hist);
