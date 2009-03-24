@@ -3892,7 +3892,6 @@ extern void SetMatchID(const char *szMatchID)
 
 	/* make sure that the hint record has the player on turn */
 	pmr_cur = get_current_moverecord(NULL);
-	printf("pmr cur has player %d\n", pmr_cur->fPlayer);
 
 	ShowBoard();
 }
