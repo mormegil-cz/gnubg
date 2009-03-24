@@ -2492,7 +2492,7 @@ extern void CommandSavePosition(char *sz)
     moverecord *pmgi;
     moverecord *pmsb;
     moverecord *pmsd = NULL;
-    moverecord *pmcu = NULL;
+    moverecord *pmr_cur = NULL;
     moverecord *pmscv;
     moverecord *pmscp;
 
@@ -2576,9 +2576,9 @@ extern void CommandSavePosition(char *sz)
     /* FIXME if the dice are not rolled, this should be done with a PL
        property (which is SaveGame()'s job) */
 
-    pmcu = get_current_moverecord(NULL);
-    if (pmcu->ml.cMoves > 0 || pmcu->CubeDecPtr->esDouble.et != EVAL_NONE)
-	    ListInsert(&l, pmcu);
+    pmr_cur = get_current_moverecord(NULL);
+    if (pmr_cur && (pmr_cur->ml.cMoves > 0 || pmr_cur->CubeDecPtr->esDouble.et != EVAL_NONE))
+	    ListInsert(&l, pmr_cur);
     else if (ms.anDice[0] > 0)
     {
 	    pmsd = NewMoveRecord();

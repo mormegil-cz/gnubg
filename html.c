@@ -3565,12 +3565,12 @@ extern void CommandExportPositionHtml( char *sz ) {
 
     FILE *pf;
     int fHistory;
-    moverecord *pmr = get_current_moverecord ( &fHistory );
+    moverecord *pmr;
     int iMove;
 	
     sz = NextToken( &sz );
     
-    if( ms.gs == GAME_NONE ) {
+    if( ms.gs != GAME_NONE ) {
 	outputl( _("No game in progress (type `new game' to start one).") );
 	return;
     }
@@ -3580,7 +3580,7 @@ extern void CommandExportPositionHtml( char *sz ) {
 		 "position html').") );
 	return;
     }
-
+    pmr = get_current_moverecord ( &fHistory );
     if ( ! confirmOverwrite ( sz, fConfirmSave ) )
       return;
 
@@ -3646,6 +3646,12 @@ ExportPositionGammOnLine( FILE *pf )
 {
     int fHistory;
     moverecord *pmr = get_current_moverecord ( &fHistory );
+
+    if (!pmr)
+    {
+	    outputerrf(_("Unable to export this position"));
+	    return;
+    }
     int iMove;
 
     fputs ( "\n<!-- Score -->\n\n", pf );

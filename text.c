@@ -994,7 +994,7 @@ extern void CommandExportPositionText( char *sz ) {
 
     FILE *pf;
     int fHistory;
-    moverecord *pmr = get_current_moverecord ( &fHistory );
+    moverecord *pmr;
     int iMove;
     GString *gsz;
 	
@@ -1010,7 +1010,7 @@ extern void CommandExportPositionText( char *sz ) {
 		 "position text').") );
 	return;
     }
-
+    pmr = get_current_moverecord ( &fHistory );
 
     if ( ! confirmOverwrite ( sz, fConfirmSave ) )
       return;

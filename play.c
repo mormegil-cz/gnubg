@@ -487,6 +487,8 @@ static void copy_from_pmr_cur(moverecord *pmr, gboolean get_move, gboolean get_c
 {
 	moverecord *pmr_cur;
 	pmr_cur = get_current_moverecord(NULL);
+	if (!pmr_cur)
+		return;
 	if (get_move && pmr_cur->ml.cMoves > 0) {
 		if (pmr->ml.cMoves > 0)
 			free(pmr->ml.amMoves);
@@ -2221,7 +2223,7 @@ static skilltype tutor_double(int did_double)
 
 	hint_double(FALSE, did_double);
 	pmr = get_current_moverecord(NULL);
-	return pmr->stCube;
+	return pmr ? pmr->stCube : SKILL_NONE;
 }
 
 extern void CommandDouble( char *sz ) {
@@ -2324,7 +2326,7 @@ static skilltype tutor_take(int did_take)
 
 	hint_take(FALSE, did_take);
 	pmr = get_current_moverecord(NULL);
-	return pmr->stCube;
+	return pmr ? pmr->stCube : SKILL_NONE;
 }
 
 
@@ -2589,6 +2591,7 @@ CommandMove( char *sz ) {
     if ( fTutor && fTutorChequer)
     {
 	    moverecord *pmr_cur = get_current_moverecord(NULL);
+	    g_assert(pmr_cur);
 	    /* update or set the move*/
 	    memcpy( pmr_cur->n.anMove, an, sizeof an );
 	    hint_move("", FALSE);
@@ -2884,16 +2887,17 @@ extern void ChangeGame(listOLD *plGameNew)
 	UpdateGame(FALSE);
 	SetMoveRecord(plLastMove->p);
 	pmr_cur = get_current_moverecord(NULL);
-	if (pmr_cur->fPlayer != ms.fTurn)
-	{
-		char *sz = g_strdup_printf("%s", pmr_cur->fPlayer ? "1" : "0");
-		CommandSetTurn(sz);
-		g_free(sz);
-	}
-	if (dice_rolled)
-	{
-		ms.anDice[0] = pmr_cur->anDice[0];
-		ms.anDice[1] = pmr_cur->anDice[1];
+	if (pmr_cur) {
+		if (pmr_cur->fPlayer != ms.fTurn) {
+			char *sz =
+			    g_strdup_printf("%s", pmr_cur->fPlayer ? "1" : "0");
+			CommandSetTurn(sz);
+			g_free(sz);
+		}
+		if (dice_rolled) {
+			ms.anDice[0] = pmr_cur->anDice[0];
+			ms.anDice[1] = pmr_cur->anDice[1];
+		}
 	}
 	ShowBoard();
 }
@@ -3771,7 +3775,6 @@ extern void SetMatchID(const char *szMatchID)
 	gamestate gs;
 	char szID[15];
 	moverecord *pmr;
-	moverecord *pmr_cur;
 
 	if (!szMatchID || !*szMatchID)
 		return;
@@ -3891,7 +3894,7 @@ extern void SetMatchID(const char *szMatchID)
 	UpdateSetting(&ms.fCrawford);
 
 	/* make sure that the hint record has the player on turn */
-	pmr_cur = get_current_moverecord(NULL);
+	get_current_moverecord(NULL);
 
 	ShowBoard();
 }
@@ -3947,6 +3950,8 @@ extern void pmr_movelist_set(moverecord *pmr, evalsetup *pes, movelist *pml)
 extern void current_pmr_cubedata_update(evalsetup *pes, float output[][NUM_ROLLOUT_OUTPUTS], float stddev[][NUM_ROLLOUT_OUTPUTS])
 {
 	moverecord *pmr = get_current_moverecord(NULL);
+	if (!pmr)
+		return;
 	if (pmr->CubeDecPtr->esDouble.et == EVAL_NONE)
 		pmr_cubedata_set(pmr, pes, output, stddev);
 }
@@ -3962,6 +3967,13 @@ extern moverecord *get_current_moverecord(int *pfHistory)
 
 	if (pfHistory)
 		*pfHistory = FALSE;
+
+	if (ms.gs != GAME_PLAYING)
+	{
+		pmr_hint_destroy();
+		return NULL;
+	}
+
 	if (!pmr_hint)
 	{
 		pmr_hint = NewMoveRecord();
