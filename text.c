@@ -35,7 +35,7 @@
 #include "format.h"
 #include "positionid.h"
 #include "matchid.h"
-#include "record.h"
+#include "relational.h"
 
 
 
@@ -606,28 +606,14 @@ TextAnalysis ( GString *gsz, const matchstate *pms, moverecord *pmr ) {
 }
 
 
-static void TextDumpStatcontext ( FILE *pf, const statcontext *psc,
-                                  matchstate *pms, const int iGame ) {
+static void TextDumpStatcontext(GString *gsz, const statcontext *psc, int nMatchTo)
+{
+	char sz[4096];
 
-  char sz[ 4096 ];
+	DumpStatcontext(sz, psc, ap[0].szName, ap[1].szName, nMatchTo);
+	g_string_append(gsz, sz);
+	g_string_append(gsz, "\n\n");
 
-  if ( iGame >= 0 ) {
-    fprintf ( pf, _("Game statistics for game %d\n\n"), iGame + 1 );
-  }
-  else {
-    
-    if ( pms->nMatchTo )
-      fprintf ( pf, _( "Match statistics\n\n" ) );
-    else
-      fprintf ( pf, _( "Session statistics\n\n" ) );
-
-  }
-
-  DumpStatcontext ( sz, psc, ap[0].szName, ap[1].szName,
-          NULL, iGame < 0 );
-  fputs ( sz, pf );
-
-  fputs ( "\n\n", pf );
 }
 
 
@@ -702,53 +688,6 @@ TextMatchInfo ( FILE *pf, const matchinfo *pmi ) {
   }
 }
 
-
-
-static void
-TextDumpPlayerRecords ( FILE *pf ) {
-
-  /* dump the player records from file */
- 
-  playerrecord apr[ 2 ];
-  playerrecord *pr;
-  int i;
-  int f = FALSE;
-  int af[ 2 ] = { FALSE, FALSE };
-  
-  for ( i = 0; i < 2; ++i ) 
-    if ( ( pr = GetPlayerRecord ( ap[ i ].szName ) ) ) {
-      f = TRUE;
-      af[ i ] = TRUE;
-      memcpy ( &apr[ i ], pr, sizeof ( playerrecord ) );
-    }
-
-  if ( ! f )
-    return;
-
-  fputs ( _("Statistics from player records:\n\n" ), pf );
-  
-  fprintf(pf, "%-31s %-11s %-11s %-12s %-6s %10s\n", "", _("Short-term"), _("Long-term"), _("Total"), _("Total"), "");
-  fprintf(pf, "%-31s %-11s %-11s %-12s %-6s %10s\n", "", _("error rate"), _("error rate"), _("error rate"), _("luck"), "");
-  fprintf(pf, "%-31s %-11s %-11s %-12s %-6s %10s\n", "Name", _("Cheq. Cube"),_("Cheq. Cube"),_("Cheq. Cube"), _("rate"), _("Games"));
-
-  for ( i = 0; i < 2; ++i ) 
-    if ( af[ i ] ) 
-      fprintf( pf, 
-	      "%-31s %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %6.3f %11d\n",
-               apr[ i ].szName, apr[ i ].arErrorChequerplay[ EXPAVG_20 ],
-               apr[ i ].arErrorCube[ EXPAVG_20 ],
-               apr[ i ].arErrorChequerplay[ EXPAVG_100 ],
-               apr[ i ].arErrorCube[ EXPAVG_100 ],
-               apr[ i ].arErrorChequerplay[ EXPAVG_TOTAL ],
-               apr[ i ].arErrorCube[ EXPAVG_TOTAL ],
-               apr[ i ].arLuck[ EXPAVG_TOTAL ], apr[ i ].cGames );
-
-  fputs ( "\n", pf );
-
-
-}
-
-
 /*
  * Export a game in HTML
  *
@@ -758,143 +697,162 @@ TextDumpPlayerRecords ( FILE *pf ) {
  *
  */
 
-static void ExportGameText ( FILE *pf, listOLD *plGame, 
-                             const int iGame, const int fLastGame ) {
+static void ExportGameText(FILE * pf, listOLD *plGame,
+			   const int iGame, const int fLastGame)
+{
 
-    listOLD *pl;
-    moverecord *pmr;
-    matchstate msExport;
-    matchstate msOrig;
-    int iMove = 0;
-    statcontext *psc = NULL;
-    static statcontext scTotal;
-    xmovegameinfo *pmgi = NULL;
-    GString *gsz;
-    listOLD *pl_hint = NULL;
+	listOLD *pl;
+	moverecord *pmr;
+	matchstate msExport;
+	matchstate msOrig;
+	int iMove = 0;
+	statcontext *psc = NULL;
+	static statcontext scTotal;
+	xmovegameinfo *pmgi = NULL;
+	GString *gsz;
+	listOLD *pl_hint = NULL;
+	statcontext *psc_rel;
 
-    if ( ! iGame )
-      IniStatcontext ( &scTotal );
+	msOrig.nMatchTo = 0;
 
-    updateStatisticsGame ( plGame );
+	if (!iGame)
+		IniStatcontext(&scTotal);
 
-    if (game_is_last(plGame))
-	    pl_hint = game_add_pmr_hint(plGame);
+	updateStatisticsGame(plGame);
 
-    for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
+	if (game_is_last(plGame))
+		pl_hint = game_add_pmr_hint(plGame);
 
-      pmr = pl->p;
+	for (pl = plGame->plNext; pl != plGame; pl = pl->plNext) {
 
-      FixMatchState ( &msExport, pmr );
+		pmr = pl->p;
 
-      switch( pmr->mt ) {
+		FixMatchState(&msExport, pmr);
 
-      case MOVE_GAMEINFO:
+		switch (pmr->mt) {
 
-        ApplyMoveRecord ( &msExport, plGame, pmr );
+		case MOVE_GAMEINFO:
 
-	gsz = g_string_new(NULL);
-        TextPrologue( gsz, &msExport, iGame );
-	fputs(gsz->str, pf);
-	g_string_free(gsz, TRUE);
+			ApplyMoveRecord(&msExport, plGame, pmr);
 
-        if ( exsExport.fIncludeMatchInfo )
-          TextMatchInfo ( pf, &mi );
+			gsz = g_string_new(NULL);
+			TextPrologue(gsz, &msExport, iGame);
+			fputs(gsz->str, pf);
+			g_string_free(gsz, TRUE);
 
-        msOrig = msExport;
-        pmgi = &pmr->g;
+			if (exsExport.fIncludeMatchInfo)
+				TextMatchInfo(pf, &mi);
 
-        psc = &pmr->g.sc;
+			msOrig = msExport;
+			pmgi = &pmr->g;
 
-        AddStatcontext ( psc, &scTotal );
-    
-        /* FIXME: game introduction */
-        break;
+			psc = &pmr->g.sc;
 
-      case MOVE_NORMAL:
+			AddStatcontext(psc, &scTotal);
 
-	if( pmr->fPlayer != msExport.fMove ) {
-	    SwapSides( msExport.anBoard );
-	    msExport.fMove = pmr->fPlayer;
+			/* FIXME: game introduction */
+			break;
+
+		case MOVE_NORMAL:
+
+			if (pmr->fPlayer != msExport.fMove) {
+				SwapSides(msExport.anBoard);
+				msExport.fMove = pmr->fPlayer;
+			}
+
+			msExport.fTurn = msExport.fMove = pmr->fPlayer;
+			msExport.anDice[0] = pmr->anDice[0];
+			msExport.anDice[1] = pmr->anDice[1];
+
+			gsz = g_string_new(NULL);
+			TextBoardHeader(gsz, &msExport, iGame, iMove);
+			fputs(gsz->str, pf);
+			g_string_free(gsz, TRUE);
+
+			printTextBoard(pf, &msExport);
+			gsz = g_string_new(NULL);
+			TextAnalysis(gsz, &msExport, pmr);
+			fputs(gsz->str, pf);
+			g_string_free(gsz, TRUE);
+
+			iMove++;
+
+			break;
+
+		case MOVE_DOUBLE:
+		case MOVE_TAKE:
+		case MOVE_DROP:
+
+			gsz = g_string_new(NULL);
+			TextBoardHeader(gsz, &msExport, iGame, iMove);
+			fputs(gsz->str, pf);
+			g_string_free(gsz, TRUE);
+
+			printTextBoard(pf, &msExport);
+
+			gsz = g_string_new(NULL);
+			TextAnalysis(gsz, &msExport, pmr);
+			fputs(gsz->str, pf);
+			g_string_free(gsz, TRUE);
+
+			iMove++;
+
+			break;
+
+		default:
+
+			break;
+
+		}
+
+		if (exsExport.fIncludeAnnotation)
+			TextPrintComment(pf, pmr);
+
+		ApplyMoveRecord(&msExport, plGame, pmr);
+
 	}
-      
-        msExport.fTurn = msExport.fMove = pmr->fPlayer;
-        msExport.anDice[ 0 ] = pmr->anDice[ 0 ];
-        msExport.anDice[ 1 ] = pmr->anDice[ 1 ];
 
-	gsz = g_string_new(NULL);
-        TextBoardHeader ( gsz, &msExport, iGame, iMove );
-	fputs(gsz->str, pf);
-        g_string_free(gsz, TRUE);
+	if (pl_hint)
+		game_remove_pmr_hint(pl_hint);
 
-        printTextBoard( pf, &msExport );
-	gsz = g_string_new(NULL);
-        TextAnalysis ( gsz, &msExport, pmr );
-	fputs(gsz->str, pf);
-        g_string_free(gsz, TRUE);
-        
-        iMove++;
+	if (pmgi && pmgi->fWinner != -1) {
 
-        break;
+		/* print game result */
 
-      case MOVE_DOUBLE:
-      case MOVE_TAKE:
-      case MOVE_DROP:
+		fprintf(pf,
+			ngettext("%s wins %d point", "%s wins %d points",
+				 pmgi->nPoints), ap[pmgi->fWinner].szName,
+			pmgi->nPoints);
+	}
 
-	gsz = g_string_new(NULL);
-	TextBoardHeader ( gsz, &msExport, iGame, iMove );
-	fputs(gsz->str, pf);
-	g_string_free(gsz, TRUE);
+	if (psc) {
+		gsz = g_string_new(NULL);
+		g_string_append_printf(gsz, _("\n\nGame statistics for game %d\n\n"), iGame + 1);
+		TextDumpStatcontext(gsz, psc, msOrig.nMatchTo);
+		if (msOrig.nMatchTo)
+			g_string_append_printf(gsz, _("Match statistics\n\n"));
+		else
+			g_string_append_printf(gsz, _("Session statistics\n\n"));
+		fputs(gsz->str, pf);
+		g_string_free(gsz, TRUE);
+	}
 
+	if (fLastGame) {
+		gsz = g_string_new(NULL);
+		TextDumpStatcontext(gsz, &scTotal, msOrig.nMatchTo);
+		fputs(gsz->str, pf);
+		psc_rel = relational_player_stats_get(ap[0].szName, ap[1].szName);
+		if (psc_rel)
+		{
+			g_string_append_printf(gsz, _("\nStatistics from database\n\n"));
+			TextDumpStatcontext(gsz, psc_rel, 0);
+			g_free(psc_rel);
+		}
+		fputs(gsz->str, pf);
+		g_string_free(gsz, TRUE);
+	}
 
-        printTextBoard( pf, &msExport );
-        
-	gsz = g_string_new(NULL);
-        TextAnalysis ( gsz, &msExport, pmr );
-	fputs(gsz->str, pf);
-        g_string_free(gsz, TRUE);
-        
-        iMove++;
-
-        break;
-
-
-      default:
-
-        break;
-        
-      }
-
-      if ( exsExport.fIncludeAnnotation )
-        TextPrintComment ( pf, pmr );
-
-      ApplyMoveRecord ( &msExport, plGame, pmr );
-
-    }
-    
-    if (pl_hint)
-	    game_remove_pmr_hint(pl_hint);
-
-    if( pmgi && pmgi->fWinner != -1 ) {
-
-      /* print game result */
-
-        fprintf ( pf, ngettext("%s wins %d point", "%s wins %d points",  pmgi->nPoints), 
-                  ap[ pmgi->fWinner ].szName, 
-                  pmgi->nPoints );
-    }
-
-    if ( psc ) {
-      TextDumpStatcontext ( pf, psc, &msOrig, iGame );
-      TextDumpPlayerRecords ( pf );
-    }
-
-
-    if ( fLastGame ) {
-
-      TextDumpStatcontext ( pf, &scTotal, &msOrig, -1 );
-    }
-
-    TextEpilogue( pf, &msExport );
+	TextEpilogue(pf, &msExport);
 }
 
 extern void CommandExportGameText( char *sz ) {
@@ -931,9 +889,6 @@ extern void CommandExportGameText( char *sz ) {
 
     setDefaultFileName ( sz);
 }
-
-
-
 
 extern void CommandExportMatchText( char *sz ) {
     

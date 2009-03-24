@@ -573,122 +573,178 @@ extern void CommandRelationalTest( char *UNUSED(sz) )
 		outputl(err);
 }
 
-extern void CommandRelationalShowDetails (char *sz)
-{
-	DBProvider *pdb;
-	gchar *buf, output[4096], query[2][200], *player_name;
-	RowSet *rs;
-	gint i, id;
-	statcontext sc;
 
-	if (!sz || !*sz || ((player_name = NextToken (&sz)) == NULL))
-    {
-      outputl (_("You must specify a player name to list the details for "
-		 "(see `help relational show details')."));
-      return;
-    }
+extern statcontext *relational_player_stats_get(const char *player0, const char *player1)
+{
+	int id0 = -1;
+	int id1 = -1;
+	DBProvider *pdb = NULL;
+	char *query[2];
+	int i;
+	char *buf;
+	RowSet *rs;
+	statcontext *psc;
+
+	g_return_val_if_fail(player0, NULL);
 
 	if ((pdb = ConnectToDB(dbProviderType)) == NULL)
-		return;
+		return NULL;
 
-	id = GetPlayerId(pdb, player_name);
-	if (id == -1)
-	{
-		outputl (_("Player not found or player stats empty"));
-		return;
+	id0 = GetPlayerId(pdb, player0);
+	if (player1)
+		id1 = GetPlayerId(pdb, player1);
+	if (id0 == -1 || (player1 && id1 == -1))
+		return NULL;
+
+	psc = g_new0(statcontext, 1);
+
+	if (!player1) {
+		query[0] =
+		    g_strdup_printf("where matchstat.player_id = %d", id0);
+		query[1] =
+		    g_strdup_printf("NATURAL JOIN session WHERE "
+				    "(session.player_id0 = %d OR session.player_id1 = %d) "
+				    "AND matchstat.player_id != %d", id0, id0,
+				    id0);
+	} else {
+		query[0] = g_strdup_printf("NATURAL JOIN session WHERE "
+					   "((session.player_id0 = %d OR session.player_id1 = %d) "
+					   " AND "
+					   " (session.player_id0 = %d OR session.player_id1 = %d))"
+					   "AND matchstat.player_id = %d", id0,
+					   id0, id1, id1, id0);
+		query[1] =
+		    g_strdup_printf("NATURAL JOIN session WHERE "
+				    "((session.player_id0 = %d OR session.player_id1 = %d) "
+				    " AND "
+				    " (session.player_id0 = %d OR session.player_id1 = %d))"
+				    "AND matchstat.player_id = %d", id0, id0,
+				    id1, id1, id1);
 	}
-	sprintf (query[0], "where matchstat.player_id = %d", id);
-	sprintf (query[1], "NATURAL JOIN session WHERE "
-		"(session.player_id0 = %d OR session.player_id1 = %d) "
-		"AND matchstat.player_id != %d", id, id, id);
-	IniStatcontext (&sc);
-	for (i = 0; i < 2; ++i)
-	{
-		buf = g_strdup_printf ("SUM(total_moves),"
-				"SUM(unforced_moves),"
-				"SUM(total_cube_decisions),"
-				"SUM(close_cube_decisions),"
-				"SUM(doubles),"
-				"SUM(takes),"
-				"SUM(passes),"
-				"SUM(very_bad_moves),"
-				"SUM(bad_moves),"
-				"SUM(doubtful_moves),"
-				"SUM(unmarked_moves),"
-				"SUM(very_unlucky_rolls),"
-				"SUM(unlucky_rolls),"
-				"SUM(unmarked_rolls),"
-				"SUM(lucky_rolls),"
-				"SUM(very_lucky_rolls),"
-				"SUM(missed_doubles_below_cp),"
-				"SUM(missed_doubles_above_cp),"
-				"SUM(wrong_doubles_below_dp),"
-				"SUM(wrong_doubles_above_tg),"
-				"SUM(wrong_takes),"
-				"SUM(wrong_passes),"
-				"SUM(chequer_error_total_normalised),"
-				"SUM(error_missed_doubles_below_cp_normalised),"
-				"SUM(error_missed_doubles_above_cp_normalised),"
-				"SUM(error_wrong_doubles_below_dp_normalised),"
-				"SUM(error_wrong_doubles_above_tg_normalised),"
-				"SUM(error_wrong_takes_normalised),"
-				"SUM(error_wrong_passes_normalised),"
-				"SUM(luck_total_normalised)"
-				"from matchstat " "%s", query[i]);
+
+	IniStatcontext(psc);
+	for (i = 0; i < 2; ++i) {
+		buf = g_strdup_printf("SUM(total_moves),"
+				      "SUM(unforced_moves),"
+				      "SUM(total_cube_decisions),"
+				      "SUM(close_cube_decisions),"
+				      "SUM(doubles),"
+				      "SUM(takes),"
+				      "SUM(passes),"
+				      "SUM(very_bad_moves),"
+				      "SUM(bad_moves),"
+				      "SUM(doubtful_moves),"
+				      "SUM(unmarked_moves),"
+				      "SUM(very_unlucky_rolls),"
+				      "SUM(unlucky_rolls),"
+				      "SUM(unmarked_rolls),"
+				      "SUM(lucky_rolls),"
+				      "SUM(very_lucky_rolls),"
+				      "SUM(missed_doubles_below_cp),"
+				      "SUM(missed_doubles_above_cp),"
+				      "SUM(wrong_doubles_below_dp),"
+				      "SUM(wrong_doubles_above_tg),"
+				      "SUM(wrong_takes),"
+				      "SUM(wrong_passes),"
+				      "SUM(chequer_error_total_normalised),"
+				      "SUM(error_missed_doubles_below_cp_normalised),"
+				      "SUM(error_missed_doubles_above_cp_normalised),"
+				      "SUM(error_wrong_doubles_below_dp_normalised),"
+				      "SUM(error_wrong_doubles_above_tg_normalised),"
+				      "SUM(error_wrong_takes_normalised),"
+				      "SUM(error_wrong_passes_normalised),"
+				      "SUM(luck_total_normalised)"
+				      "from matchstat " "%s", query[i]);
 		rs = pdb->Select(buf);
-		g_free (buf);
-		if ((!rs) || !strtol (rs->data[1][0], NULL, 0))
-		{
-			outputl (_("Player not found or player stats empty"));
-			return;
-		}
-		sc.anTotalMoves[i] = strtol (rs->data[1][0], NULL, 0);
-		sc.anUnforcedMoves[i] = strtol (rs->data[1][1], NULL, 0);
-		sc.anTotalCube[i] = strtol (rs->data[1][2], NULL, 0);
-		sc.anCloseCube[i] = strtol (rs->data[1][3], NULL, 0);
-		sc.anDouble[i] = strtol (rs->data[1][4], NULL, 0);
-		sc.anTake[i] = strtol (rs->data[1][5], NULL, 0);
-		sc.anPass[i] = strtol (rs->data[1][6], NULL, 0);
-		sc.anMoves[i][SKILL_VERYBAD] = strtol (rs->data[1][7], NULL, 0);
-		sc.anMoves[i][SKILL_BAD] = strtol (rs->data[1][8], NULL, 0);
-		sc.anMoves[i][SKILL_DOUBTFUL] = strtol (rs->data[1][9], NULL, 0);
-		sc.anMoves[i][SKILL_NONE] = strtol (rs->data[1][10], NULL, 0);
-		sc.anLuck[i][LUCK_VERYBAD] = strtol (rs->data[1][11], NULL, 0);
-		sc.anLuck[i][LUCK_BAD] = strtol (rs->data[1][12], NULL, 0);
-		sc.anLuck[i][LUCK_NONE] = strtol (rs->data[1][13], NULL, 0);
-		sc.anLuck[i][LUCK_GOOD] = strtol (rs->data[1][14], NULL, 0);
-		sc.anLuck[i][LUCK_VERYGOOD] = strtol (rs->data[1][15], NULL, 0);
-		sc.anCubeMissedDoubleDP[i] = strtol (rs->data[1][16], NULL, 0);
-		sc.anCubeMissedDoubleTG[i] = strtol (rs->data[1][17], NULL, 0);
-		sc.anCubeWrongDoubleDP[i] = strtol (rs->data[1][18], NULL, 0);
-		sc.anCubeWrongDoubleTG[i] = strtol (rs->data[1][19], NULL, 0);
-		sc.anCubeWrongTake[i] = strtol (rs->data[1][20], NULL, 0);
-		sc.anCubeWrongPass[i] = strtol (rs->data[1][21], NULL, 0);
-		sc.arErrorCheckerplay[i][0] = (float)g_ascii_strtod (rs->data[1][22], NULL);
-		sc.arErrorMissedDoubleDP[i][0] = (float)g_ascii_strtod (rs->data[1][23], NULL);
-		sc.arErrorMissedDoubleTG[i][0] = (float)g_ascii_strtod (rs->data[1][24], NULL);
-		sc.arErrorWrongDoubleDP[i][0] = (float)g_ascii_strtod (rs->data[1][25], NULL);
-		sc.arErrorWrongDoubleTG[i][0] = (float)g_ascii_strtod (rs->data[1][26], NULL);
-		sc.arErrorWrongTake[i][0] = (float)g_ascii_strtod (rs->data[1][27], NULL);
-		sc.arErrorWrongPass[i][0] = (float)g_ascii_strtod (rs->data[1][28], NULL);
-		sc.arLuck[i][0] = (float)g_ascii_strtod (rs->data[1][29], NULL);
+		g_free(buf);
+		if ((!rs) || !strtol(rs->data[1][0], NULL, 0))
+			return NULL;
+		psc->anTotalMoves[i] = strtol(rs->data[1][0], NULL, 0);
+		psc->anUnforcedMoves[i] = strtol(rs->data[1][1], NULL, 0);
+		psc->anTotalCube[i] = strtol(rs->data[1][2], NULL, 0);
+		psc->anCloseCube[i] = strtol(rs->data[1][3], NULL, 0);
+		psc->anDouble[i] = strtol(rs->data[1][4], NULL, 0);
+		psc->anTake[i] = strtol(rs->data[1][5], NULL, 0);
+		psc->anPass[i] = strtol(rs->data[1][6], NULL, 0);
+		psc->anMoves[i][SKILL_VERYBAD] =
+		    strtol(rs->data[1][7], NULL, 0);
+		psc->anMoves[i][SKILL_BAD] = strtol(rs->data[1][8], NULL, 0);
+		psc->anMoves[i][SKILL_DOUBTFUL] =
+		    strtol(rs->data[1][9], NULL, 0);
+		psc->anMoves[i][SKILL_NONE] = strtol(rs->data[1][10], NULL, 0);
+		psc->anLuck[i][LUCK_VERYBAD] = strtol(rs->data[1][11], NULL, 0);
+		psc->anLuck[i][LUCK_BAD] = strtol(rs->data[1][12], NULL, 0);
+		psc->anLuck[i][LUCK_NONE] = strtol(rs->data[1][13], NULL, 0);
+		psc->anLuck[i][LUCK_GOOD] = strtol(rs->data[1][14], NULL, 0);
+		psc->anLuck[i][LUCK_VERYGOOD] =
+		    strtol(rs->data[1][15], NULL, 0);
+		psc->anCubeMissedDoubleDP[i] = strtol(rs->data[1][16], NULL, 0);
+		psc->anCubeMissedDoubleTG[i] = strtol(rs->data[1][17], NULL, 0);
+		psc->anCubeWrongDoubleDP[i] = strtol(rs->data[1][18], NULL, 0);
+		psc->anCubeWrongDoubleTG[i] = strtol(rs->data[1][19], NULL, 0);
+		psc->anCubeWrongTake[i] = strtol(rs->data[1][20], NULL, 0);
+		psc->anCubeWrongPass[i] = strtol(rs->data[1][21], NULL, 0);
+		psc->arErrorCheckerplay[i][0] =
+		    (float)g_ascii_strtod(rs->data[1][22], NULL);
+		psc->arErrorMissedDoubleDP[i][0] =
+		    (float)g_ascii_strtod(rs->data[1][23], NULL);
+		psc->arErrorMissedDoubleTG[i][0] =
+		    (float)g_ascii_strtod(rs->data[1][24], NULL);
+		psc->arErrorWrongDoubleDP[i][0] =
+		    (float)g_ascii_strtod(rs->data[1][25], NULL);
+		psc->arErrorWrongDoubleTG[i][0] =
+		    (float)g_ascii_strtod(rs->data[1][26], NULL);
+		psc->arErrorWrongTake[i][0] =
+		    (float)g_ascii_strtod(rs->data[1][27], NULL);
+		psc->arErrorWrongPass[i][0] =
+		    (float)g_ascii_strtod(rs->data[1][28], NULL);
+		psc->arLuck[i][0] =
+		    (float)g_ascii_strtod(rs->data[1][29], NULL);
 		FreeRowset(rs);
 	}
-	sc.fMoves = 1;
-	sc.fCube = 1;
-	sc.fDice = 1;
-	DumpStatcontext (output, &sc, player_name, _("Opponents"), NULL, FALSE);
+	psc->fMoves = 1;
+	psc->fCube = 1;
+	psc->fDice = 1;
+
+	return psc;
+}
+
+
+extern void CommandRelationalShowDetails(char *sz)
+{
+	gchar output[4096];
+	statcontext *psc;
+
+	gchar *player0 = NextToken(&sz);
+	gchar *player1 = NextToken(&sz);
+
+	if (!player0) {
+		outputerrf(_
+			   ("You must specify a player name to list the details for "
+			    "(see `help relational show details')."));
+		return;
+	}
+
+	psc = relational_player_stats_get(player0, player1);
+
+	if (!psc)
+	{
+		outputerrf(_("Empty player stats or player(s) not found"));
+		return;
+	}
+
+	DumpStatcontext(output, psc, player0,
+			player1 ? player1 : _("Opponents"), 0);
+	g_free(psc);
 #if USE_GTK
-  if (fX)
-    {
-      GTKTextWindow (output, _("Player statistics"), DT_INFO, NULL);
-    }
-  else
+	if (fX) {
+		GTKTextWindow(output, _("Player statistics"), DT_INFO, NULL);
+	} else
 #endif
-    {
-      outputl (_("Player statistics\n\n"));
-      outputl (output);
-    }
+	{
+		outputl(_("Player statistics\n\n"));
+		outputl(output);
+	}
 }
 
 extern void CommandRelationalShowPlayers( char *UNUSED(sz) )
@@ -773,9 +829,7 @@ extern void CommandRelationalEraseAll(char *UNUSED(sz))
 
 extern void CommandRelationalSelect(char *sz)
 {
-#if !USE_GTK
 	unsigned int i, j;
-#endif
 	RowSet *rs;
 
 	if (!sz || !*sz)
@@ -795,8 +849,10 @@ extern void CommandRelationalSelect(char *sz)
 	}
 
 #if USE_GTK
-	GtkShowQuery(rs);
-#else
+	if (fX)
+		GtkShowQuery(rs);
+	else
+#endif
 	for (i = 0; i < rs->rows; i++)
 	{
 		if (i == 1)
@@ -833,7 +889,6 @@ extern void CommandRelationalSelect(char *sz)
 		}
 		outputl("");
 	}
-#endif
 	FreeRowset(rs);
 }
 

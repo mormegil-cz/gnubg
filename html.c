@@ -35,8 +35,8 @@
 #include "eval.h"
 #include "positionid.h"
 #include "matchid.h"
-#include "record.h"
 #include "formatgs.h"
+#include "relational.h"
 
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -414,21 +414,14 @@ printRolloutTable ( FILE *pf,
 
 
 static void
-printStatTableHeader ( FILE *pf, const htmlexportcss hecss,
-                       const char *format, ... ) {
-
-  va_list val;
-
-  va_start( val, format );
+printStatTableHeader ( FILE *pf, const htmlexportcss hecss, const char *header) {
 
   fprintf ( pf, 
             "<tr %s>\n"
             "<th colspan=\"3\" style=\"text-align: center\">", 
             GetStyle ( CLASS_STATTABLEHEADER, hecss ) );
-  vfprintf ( pf, format, val );
+  fputs ( header, pf );
   fputs ( "</th>\n</tr>\n", pf );
-
-  va_end( val );
 
 }
 
@@ -2861,10 +2854,8 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
  */
 
 static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
-                                  matchstate *pms, const int iGame,
-                                  const htmlexportcss hecss ) {
-
-  const int fIsMatch = iGame < 0;
+                                  int nMatchTo, const int iGame,
+                                  const htmlexportcss hecss, const gchar *header ) {
 
   fprintf ( pf, "\n<!-- %s Statistics -->\n\n", 
             ( iGame >= 0 ) ? "Game" : "Match" );
@@ -2873,24 +2864,7 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
             "<table %s>\n",
             GetStyle ( CLASS_STATTABLE, hecss ) );
 
-  if ( iGame >= 0 ) {
-    printStatTableHeader ( pf,
-                           hecss, 
-                           _("Game statistics for game %d"),
-                           iGame + 1);
-  }
-  else {
-    
-    if ( pms->nMatchTo )
-      printStatTableHeader ( pf,
-                             hecss, 
-                             _( "Match statistics" ) );
-    else
-      printStatTableHeader ( pf,
-                             hecss,
-                             _( "Session statistics" ) );
-
-  }
+  printStatTableHeader ( pf, hecss, header); 
 
   fprintf ( pf,
             "<tr %s>\n"
@@ -2904,7 +2878,7 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
   if( psc->fMoves ) {
 
-    GList *list = formatGS( psc, pms->nMatchTo, fIsMatch, FORMATGS_CHEQUER );
+    GList *list = formatGS( psc, nMatchTo, FORMATGS_CHEQUER );
     GList *pl;
 
     printStatTableHeader ( pf, hecss, _("Checker play statistics") );
@@ -2926,7 +2900,7 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
   if( psc->fDice ) {
 
-    GList *list = formatGS( psc, pms->nMatchTo, fIsMatch, FORMATGS_LUCK );
+    GList *list = formatGS( psc, nMatchTo, FORMATGS_LUCK );
     GList *pl;
 
     printStatTableHeader ( pf, hecss, 
@@ -2949,7 +2923,7 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
   if( psc->fCube ) {
 
-    GList *list = formatGS( psc, pms->nMatchTo, fIsMatch, FORMATGS_CUBE );
+    GList *list = formatGS( psc, nMatchTo, FORMATGS_CUBE );
     GList *pl;
 
     printStatTableHeader ( pf, hecss, 
@@ -2972,7 +2946,7 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
   {
     
-    GList *list = formatGS( psc, pms->nMatchTo, fIsMatch, FORMATGS_OVERALL );
+    GList *list = formatGS( psc, nMatchTo, FORMATGS_OVERALL );
     GList *pl;
     
     printStatTableHeader ( pf, hecss, 
@@ -3127,92 +3101,6 @@ HTMLMatchInfo ( FILE *pf, const matchinfo *pmi,
 
 }
 
-static void
-HTMLDumpPlayerRecords ( FILE *pf, const htmlexportcss hecss ) {
-
-  /* dump the player records from file */
- 
-  playerrecord apr[ 2 ];
-  playerrecord *pr;
-  int i;
-  int f = FALSE;
-  int af[ 2 ] = { FALSE, FALSE };
-  
-  for ( i = 0; i < 2; ++i ) 
-    if ( ( pr = GetPlayerRecord ( ap[ i ].szName ) ) ) {
-      f = TRUE;
-      af[ i ] = TRUE;
-      memcpy ( &apr[ i ], pr, sizeof ( playerrecord ) );
-    }
-    else
-      memset ( &apr[ i ], 0, sizeof ( playerrecord ) );
-
-  if ( ! f )
-    return;
-
-  fputs ( "\n<!-- Player records -->\n\n", pf );
-
-  fprintf ( pf,
-            "<table %s>\n",
-            GetStyle ( CLASS_STATTABLE, hecss ) );
-
-  printStatTableHeader ( pf, hecss, _("Recorded player statistics") );
-  
-  fprintf ( pf,
-            "<tr %s>\n"
-            "<th>%s</th><th>%s</th><th>%s</th>\n"
-            "</tr>\n",
-            GetStyle ( CLASS_STATTABLEHEADER, hecss ),
-            _("Player"), 
-            ap[ 0 ].szName, ap[ 1 ].szName );
-
-  printStatTableRow ( pf,
-                      _("Chequer (Long-term error rate)"), "%5.3f",
-                      -apr[ 0 ].arErrorChequerplay[ EXPAVG_100 ],
-                      -apr[ 1 ].arErrorChequerplay[ EXPAVG_100 ] );
-
-  printStatTableRow ( pf,
-                      _("Cube (Long-term error rate)"), "%5.3f",
-                      -apr[ 0 ].arErrorCube[ EXPAVG_100 ],
-                      -apr[ 1 ].arErrorCube[ EXPAVG_100 ] );
-
-  printStatTableRow ( pf,
-                      _("Chequer (Short-term error rate)"), "%5.3f",
-                      -apr[ 0 ].arErrorChequerplay[ EXPAVG_20 ],
-                      -apr[ 1 ].arErrorChequerplay[ EXPAVG_20 ] );
-
-  printStatTableRow ( pf,
-                      _("Cube (Short-term error rate)"), "%5.3f",
-                      -apr[ 0 ].arErrorCube[ EXPAVG_20 ],
-                      -apr[ 1 ].arErrorCube[ EXPAVG_20 ] );
-
-  printStatTableRow ( pf,
-                      _("Chequer (total)"), "%5.3f",
-                      -apr[ 0 ].arErrorChequerplay[ TOTAL ],
-                      -apr[ 1 ].arErrorChequerplay[ TOTAL ] );
-
-  printStatTableRow ( pf,
-                      _("Cube (total)"), "%5.3f",
-                      -apr[ 0 ].arErrorCube[ TOTAL ],
-                      -apr[ 1 ].arErrorCube[ TOTAL ] );
-
-  printStatTableRow ( pf,
-                      _("Luck (total)"), "%5.3f",
-                      apr[ 0 ].arLuck[ TOTAL ],
-                      apr[ 1 ].arLuck[ TOTAL ] );
-
-  printStatTableRow ( pf,
-                      _("Games (total)"), "%d",
-                      apr[ 0 ].cGames,
-                      apr[ 1 ].cGames );
-
-  fprintf ( pf, "</table>\n" );
-
-  fprintf ( pf, "\n<!-- End Player Records -->\n\n" );
-
-}
-
-
 /*
  * Export a game in HTML
  *
@@ -3238,6 +3126,9 @@ static void ExportGameHTML ( FILE *pf, listOLD *plGame, const char *szImageDir,
     static statcontext scTotal;
     xmovegameinfo *pmgi = NULL;
     listOLD *pl_hint = NULL;
+    statcontext *psc_rel = NULL;
+
+    msOrig.nMatchTo = 0;
 
     if ( ! iGame )
       IniStatcontext ( &scTotal );
@@ -3343,17 +3234,26 @@ static void ExportGameHTML ( FILE *pf, listOLD *plGame, const char *szImageDir,
     }
 
     if ( psc ) {
-      HTMLDumpStatcontext ( pf, psc, &msOrig, iGame, hecss );
-      HTMLDumpPlayerRecords ( pf, hecss );
+	    char *header = g_strdup_printf( _("Game statistics for game %d"), iGame + 1);
+      HTMLDumpStatcontext ( pf, psc, msOrig.nMatchTo, iGame, hecss, header );
+      g_free(header);
     }
 
 
     if ( fLastGame ) {
+	    const gchar *header;
 
       /* match statistics */
+    header = ms.nMatchTo ? _( "Match statistics" ) : _( "Session statistics" );
 
       fprintf ( pf, "<hr />\n" );
-      HTMLDumpStatcontext ( pf, &scTotal, &msOrig, -1, hecss );
+      HTMLDumpStatcontext ( pf, &scTotal, msOrig.nMatchTo, -1, hecss, header );
+      psc_rel = relational_player_stats_get(ap[0].szName, ap[1].szName);
+      if (psc_rel)
+      {
+	      HTMLDumpStatcontext ( pf, psc_rel, 0, -1, hecss, _("Statistics from database") );
+	      g_free(psc_rel);
+      }
 
     }
 

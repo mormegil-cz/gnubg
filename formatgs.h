@@ -32,9 +32,7 @@ enum _formatgs {
   FORMATGS_LUCK,
   FORMATGS_OVERALL };
 
-extern GList *
-formatGS( const statcontext *psc, const int nMatchTo,
-          const int fIsMatch, const enum _formatgs fg );
+extern GList *formatGS( const statcontext *psc, const int nMatchTo, const enum _formatgs fg );
 
 extern void
 freeGS( GList *list );

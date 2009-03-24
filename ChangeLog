@@ -1,3 +1,11 @@
+Wed Mar 25 00:44:46 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* diff? err, analysis.c, analysis.h, backgammon.h, commands.inc,
+	formatgs.c, formatgs.h, gnubg.c, gtkgame.c, html.c, record.c,
+	record.h, relational.c, relational.h, text.c: Remove the player
+	records (may still be viewed if existing). Add simple stats form the
+	relational db to html and text exports
+
 Wed Mar 25 00:39:33 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* export.c, gnubg.c, html.c, play.c, sgf.c, text.c: don't create a

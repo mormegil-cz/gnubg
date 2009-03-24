@@ -31,38 +31,20 @@
 #include "export.h"
 
 
-static char *total_text(int nMatchTo)
+static const char *total_text(int nMatchTo)
 {
-	static char *emgMWC = NULL, *emgPoints = NULL;
 	if (nMatchTo)
-	{
-		if (!emgMWC)
-			emgMWC = g_strdup_printf("%s (%s)", _("EMG"), _("MWC"));
-		return emgMWC;
-	}
+			return _("EMG (MWC)");
 	else
-	{
-		if (!emgPoints)
-			emgPoints = g_strdup_printf("%s (%s)", _("EMG"), _("Points"));
-		return emgPoints;
-	}
+			return _("EMG (Points)");
 }
 
-static char *rate_text(int nMatchTo)
+static const char *rate_text(int nMatchTo)
 {
-	static char *memgMWC = NULL, *memgPoints = NULL;
 	if (nMatchTo)
-	{
-		if (!memgMWC)
-			memgMWC = g_strdup_printf("%s (%s)", _("mEMG"), _("MWC"));
-		return memgMWC;
-	}
+		return _("mEMG (MWC)");
 	else
-	{
-		if (!memgPoints)
-			memgPoints = g_strdup_printf("%s (%s)", _("mEMG"), _("Points"));
-		return memgPoints;
-	}
+		return _("mEMG (Points)");
 }
 
 static char **
@@ -150,9 +132,7 @@ luckAdjust( const char *sz, const float ar[ 2 ], const int nMatchTo) {
 
 }
 
-extern GList *
-formatGS( const statcontext *psc, const int nMatchTo,
-          const int fIsMatch, const enum _formatgs fg ) {
+extern GList *formatGS( const statcontext *psc, const int nMatchTo, const enum _formatgs fg ) {
 
   GList *list = NULL;
   char **aasz;
@@ -503,7 +483,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
                                             psc->arLuckAdj,
                                             nMatchTo ) );
 
-          if ( fIsMatch && nMatchTo ) {
+          if ( nMatchTo ) {
 
             /* luck based fibs rating */
           
@@ -534,7 +514,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
 
         /* error based fibs rating */
 
-        if ( fIsMatch && nMatchTo ) {
+        if ( nMatchTo ) {
 
           aasz = g_malloc( 3 * sizeof ( *aasz ) );
           aasz[ 0 ] = g_strdup( _("Error based abs. FIBS rating") );
@@ -584,7 +564,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
 
       }
 
-      if( psc->fDice && fIsMatch && !nMatchTo && psc->nGames > 1 ) {
+      if( psc->fDice && !nMatchTo && psc->nGames > 1 ) {
 
 	static const char *asz[ 2 ][ 2 ] = {
           { N_("Advantage (actual) in ppg"),

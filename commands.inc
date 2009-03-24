@@ -316,19 +316,7 @@ command cER = {
     { "session", CommandNewSession, N_("Start a new (money) session"), NULL,
       NULL },
     { NULL, NULL, NULL, NULL, NULL }
-}, acRecordAdd[] = {
-    { "game", CommandRecordAddGame,
-      N_("Log the game statistics to the player records"), NULL, NULL },
-    { "match", CommandRecordAddMatch, 
-      N_("Log the match statistics to the player records"), NULL, NULL },
-    { "session", CommandRecordAddSession,
-      N_("Log the session statistics to the player records"), NULL, NULL },
-    { NULL, NULL, NULL, NULL, NULL }    
 }, acRecord[] = {
-    { "add", NULL, N_("Enter statistics into the player records"), NULL,
-      acRecordAdd },
-    { "erase", CommandRecordErase, N_("Remove all statistics from one "
-				      "player's record"), szNAME, NULL },
     { "eraseall", CommandRecordEraseAll,
       N_("Remove all player record statistics"), NULL, NULL },
     { "show", CommandRecordShow, N_("View the player records"), szOPTNAME,

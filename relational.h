@@ -25,11 +25,13 @@
 #include <dbprovider.h>
 #include <stddef.h>
 #include <sys/types.h>
+#include "analysis.h"
 
 #define DB_VERSION 1
 
 
 extern int RelationalUpdatePlayerDetails(const char* oldName, const char* newName, const char* newNotes);
 extern float Ratio(float a, int b);
+extern statcontext *relational_player_stats_get(const char *player0, const char *player1);
 
 #endif /* _RELATIONAL_H_ */

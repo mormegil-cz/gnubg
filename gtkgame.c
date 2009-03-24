@@ -133,8 +133,6 @@ typedef enum _gnubgcommand {
     CMD_PREV_ROLL,
     CMD_PREV_ROLLED,
     CMD_QUIT,
-    CMD_RECORD_ADD_GAME,
-    CMD_RECORD_ADD_MATCH,
     CMD_RECORD_SHOW,
     CMD_REJECT,
     CMD_RELATIONAL_ADD_MATCH,
@@ -204,8 +202,6 @@ static const char *aszCommands[ NUM_CMDS ] = {
     "previous roll",
 	"previous rolled",
     "quit",
-    "record add game",
-    "record add match",
     "record show",
     "reject",
     "relational add match",
@@ -3135,24 +3131,12 @@ GtkItemFactoryEntry aife[] = {
 	{ N_("/_Analyse/Match or session statistics"), NULL, Command,
           CMD_SHOW_STATISTICS_MATCH, NULL, NULL },
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>", NULL },
-	{ N_("/_Analyse/Player records"), NULL, Command,
+	{ N_("/_Analyse/Old Player records"), NULL, Command,
 	  CMD_RECORD_SHOW, NULL, NULL },
-	{ N_("/_Analyse/Add to player records"), NULL, NULL, 0, "<Branch>",
-		NULL },
-	{ N_("/_Analyse/Add to player records/Game statistics"), NULL, Command,
-	  CMD_RECORD_ADD_GAME,
-		"<StockItem>", GTK_STOCK_ADD
-	},
-	{ N_("/_Analyse/Add to player records/Match or session statistics"), NULL,
-	  Command, CMD_RECORD_ADD_MATCH,
-		"<StockItem>", GTK_STOCK_ADD
-	},
-	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>", NULL },
-        { N_("/_Analyse/Relational database"), NULL, NULL, 0, "<Branch>", NULL },
-    { N_("/_Analyse/Relational database/Add match or session"), NULL,
+    { N_("/_Analyse/Add match or session to database"), NULL,
         GtkRelationalAddMatch, 0,
 	"<StockItem>", GTK_STOCK_ADD},
-    { N_("/_Analyse/Relational database/Show Records"), NULL,
+    { N_("/_Analyse/Show Records"), NULL,
         GtkShowRelational, 0, NULL, NULL },
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ N_("/_Analyse/Distribution of rolls"), NULL, Command, 
@@ -3266,6 +3250,10 @@ static void CreateMainWindow(void)
     gtk_item_factory_set_translate_func ( pif, GTKTranslate, NULL, NULL );
 
     gtk_item_factory_create_items( pif, sizeof( aife ) / sizeof( aife[ 0 ] ), aife, NULL );
+
+    if (!records_exist())
+	    gtk_item_factory_delete_item(pif, "/Analyse/Old Player records");
+
 	/* Tick default toolbar style */
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget_by_action(pif, nToolbarStyle + TOOLBAR_ACTION_OFFSET)), TRUE);
     gtk_window_add_accel_group( GTK_WINDOW( pwMain ), pagMain );
@@ -6036,12 +6024,8 @@ extern void GTKSet( void *p ) {
 	    pif, CMD_ANALYSE_CLEAR_MATCH ), !ListEmpty( &lMatch ) );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SHOW_STATISTICS_MATCH ), !ListEmpty ( &lMatch ) );
-	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
-	    pif, CMD_RECORD_SHOW ), TRUE );
-	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
-	    pif, CMD_RECORD_ADD_GAME ), plGame != NULL );
-	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
-	    pif, CMD_RECORD_ADD_MATCH ), TRUE );
+	//gtk_widget_hide(gtk_item_factory_get_widget_by_action(
+	 //   pif, CMD_RECORD_SHOW ), TRUE );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SHOW_MATCHEQUITYTABLE ), TRUE );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
@@ -6051,14 +6035,12 @@ extern void GTKSet( void *p ) {
 
     gtk_widget_set_sensitive( 
        gtk_item_factory_get_widget( pif,
-                                    "/Analyse/Relational database/"
-                                    "Add match or session" ), 
+                                    "/Analyse/Add match or session to database" ), 
        !ListEmpty( &lMatch ) );
 
     gtk_widget_set_sensitive( 
           gtk_item_factory_get_widget( pif,
-                                       "/Analyse/"
-                                       "Relational database/Show Records" ), 
+                                       "/Analyse/Show Records" ), 
           TRUE );
 
 	fAutoCommand = FALSE;
@@ -6220,8 +6202,7 @@ static void FillStats(const statcontext *psc, const matchstate *pms,
                       const enum _formatgs gs, GtkWidget* statList )
 {
 
-  int fIsMatch = (curStatGame == 0);
-  GList *list = formatGS( psc, pms->nMatchTo, fIsMatch, gs );
+  GList *list = formatGS( psc, pms->nMatchTo, gs );
   GList *pl;
   
   for ( pl = g_list_first( list ); pl; pl = g_list_next( pl ) ) {
@@ -6678,7 +6659,7 @@ GTKGetMove ( int anMove[ 8 ] ) {
 }
 
 typedef struct _recordwindowinfo {
-    GtkWidget *pwList, *pwTable, *pwErase, *apwStats[ 22 ];
+    GtkWidget *pwList, *pwTable, *apwStats[ 22 ];
     int nRow;
 } recordwindowinfo;
 
@@ -6687,8 +6668,6 @@ static void RecordSelect( GtkCList *pw, gint nRow, gint nCol,
     char *pch;
     int i;
     
-    gtk_widget_set_sensitive( prwi->pwErase, TRUE );
-
     for( i = 0; i < 22; i++ ) {
 	gtk_clist_get_text( pw, nRow, i, &pch );
 	gtk_label_set_text( GTK_LABEL( prwi->apwStats[ i ] ), pch );
@@ -6701,21 +6680,8 @@ static void RecordUnselect( GtkCList *pw, gint nRow, gint nCol,
 			    GdkEventButton *pev, recordwindowinfo *prwi ) {
     int i;
     
-    gtk_widget_set_sensitive( prwi->pwErase, FALSE );
-
     for( i = 0; i < 22; i++ )
 	gtk_label_set_text( GTK_LABEL( prwi->apwStats[ i ] ), NULL );
-}
-
-static void RecordErase( GtkWidget *pw, recordwindowinfo *prwi ) {
-
-    char *pch;
-    char sz[ 64 ];
-    
-    gtk_clist_get_text( GTK_CLIST( prwi->pwList ), prwi->nRow, 0, &pch );
-    sprintf( sz, "record erase \"%s\"", pch );
-    UserCommand( sz );
-    gtk_clist_remove( GTK_CLIST( prwi->pwList ), prwi->nRow );
 }
 
 static void RecordEraseAll( GtkWidget *pw, recordwindowinfo *prwi ) {
@@ -6873,11 +6839,6 @@ extern void GTKRecordShow( FILE *pfIn, char *szFile, char *szPlayer ) {
 					   ax[ i ], axEnd[ i ],
 					   ay[ i ], ay[ i ] + 1 );
 	    gtk_container_add( GTK_CONTAINER( pwVbox ), rwi.pwTable );
-	    rwi.pwErase = gtk_button_new_with_label( _("Erase" ) );
-	    g_signal_connect( G_OBJECT( rwi.pwErase ), "clicked",
-				G_CALLBACK( RecordErase ), &rwi );
-	    gtk_box_pack_start( GTK_BOX( pwVbox ), rwi.pwErase, FALSE, FALSE,
-				0 );
 	    pwEraseAll = gtk_button_new_with_label( _("Erase All" ) );
 	    g_signal_connect( G_OBJECT( pwEraseAll ), "clicked",
 			G_CALLBACK( RecordEraseAll ), &rwi );

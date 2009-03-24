@@ -69,7 +69,6 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "renderprefs.h"
 #include "rollout.h"
 #include "sound.h"
-#include "record.h"
 #include "progress.h"
 #include "osr.h"
 #include "format.h"
