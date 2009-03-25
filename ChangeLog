@@ -1,4 +1,10 @@
-Wed Mar 25 11:48:28 CET 2009 Christian Anthon <anthon@kiku.dk>
+Wed Mar 25 22:30:30 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* eval.c, play.c: sort moves according to "back" chequer as a last
+	resort in analysis and computer moves to avoid some silly looking
+	moves when the game is over, but not resigned yet.
+
+Wed Mar 25 11:48:28 CET 2009 Christian Anthon <anthon@kiku.dk>:
 
 	* gtkboard.c, gtkoptions.c: minor pips/epc display changes
 

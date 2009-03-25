@@ -3557,26 +3557,46 @@ static int GenerateMovesSub( movelist *pml, int anRoll[], int nMoveDepth,
     return !fUsed || fPartial;
 }
 
-static int CompareMoves( const move *pm0, const move *pm1 ) {
+static int CompareMoves(const move *pm0, const move *pm1)
+{
 
-    return ( pm1->rScore > pm0->rScore ||
-	     ( pm1->rScore == pm0->rScore && pm1->rScore2 > pm0->rScore2 ) ) ?
-	1 : -1;
+	/*high score first */
+	return (pm1->rScore > pm0->rScore ||
+		(pm1->rScore == pm0->rScore && pm1->rScore2 > pm0->rScore2)) ?
+	    1 : -1;
 }
 
-static int CompareMovesGeneral( const move *pm0, const move *pm1 ) {
+static int CompareMovesGeneral(const move *pm0, const move *pm1)
+{
+	TanBoard board[2];
+	unsigned int back[2] = { -1, -1 };
+	int a, b;
 
-  int i = cmp_evalsetup ( &pm0->esMove, &pm1->esMove );
+	int i = cmp_evalsetup(&pm0->esMove, &pm1->esMove);
 
-  if ( i )
-    return -i; /* sort descending */
-  else
-    return CompareMoves ( pm0, pm1 );
+	if (i)
+		return -i;	/* sort descending */
 
+	if (pm0->rScore != pm1->rScore || pm0->rScore2 != pm1->rScore2)
+		return CompareMoves(pm0, pm1);
+
+	/* find the "back" chequer */
+	PositionFromKey(board[0], pm0->auch);
+	PositionFromKey(board[1], pm1->auch);
+	for (a = 0; a < 2; a++) {
+		for (b = 24; b > -1; b--) {
+			if (board[a][1][b] > 0) {
+				back[a] = b;
+				break;
+			}
+		}
+	}
+	/* "back" chequer at high point bad */
+	return (back[0] < back[1] ? 1 : -1);
 }
 
-extern int 
-ScoreMove(NNState *nnStates, move *pm, const cubeinfo *pci, const evalcontext *pec, int nPlies )
+extern int ScoreMove(NNState *nnStates, move *pm, const cubeinfo *pci,
+		const evalcontext *pec, int nPlies )
 {
     TanBoard anBoardTemp;
     float arEval[ NUM_ROLLOUT_OUTPUTS ];
@@ -3747,12 +3767,11 @@ int FindBestMove( int anMove[ 8 ], int nDice0, int nDice1,
                             &ecBasic, pec ? pec->nPlies : 0, aamf );
 }
 
-extern int 
-FindnSaveBestMoves( movelist *pml,
-                    int nDice0, int nDice1, const TanBoard anBoard,
-                    unsigned char *auchMove, const float rThr,
-                    const cubeinfo* pci, const evalcontext* pec,
-                    movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
+extern int FindnSaveBestMoves( movelist *pml, int nDice0, int nDice1,
+		const TanBoard anBoard, unsigned char *auchMove, const
+		float rThr, const cubeinfo* pci, const evalcontext* pec,
+		movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] )
+{
 
   /* Find best moves. 
      Ensure that auchMove is evaluated at the deepest ply. */
