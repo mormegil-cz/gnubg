@@ -447,9 +447,8 @@ extern void CommandRelationalAddMatch(char *sz)
 {
 	DBProvider *pdb;
 	char *buf, *buf2, *date;
-	char warnings[1024];
+	char warnings[1024] = "";
 	int session_id, existing_id, player_id0, player_id1;
-	*warnings = '\0';
 	char *arg = NULL;
 	gboolean quiet = FALSE;
 

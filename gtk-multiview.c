@@ -29,7 +29,6 @@
 G_DEFINE_TYPE (GtkMultiview, gtk_multiview, GTK_TYPE_CONTAINER)
 
 
-static void    gtk_multiview_class_init    (GtkMultiviewClass *klass);
 static void    gtk_multiview_size_request  (GtkWidget         *widget,
 					    GtkRequisition    *requisition);
 static void    gtk_multiview_size_allocate (GtkWidget         *widget,

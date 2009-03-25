@@ -3545,6 +3545,7 @@ static void
 ExportPositionGammOnLine( FILE *pf )
 {
     int fHistory;
+    int iMove;
     moverecord *pmr = get_current_moverecord ( &fHistory );
 
     if (!pmr)
@@ -3552,7 +3553,6 @@ ExportPositionGammOnLine( FILE *pf )
 	    outputerrf(_("Unable to export this position"));
 	    return;
     }
-    int iMove;
 
     fputs ( "\n<!-- Score -->\n\n", pf );
 

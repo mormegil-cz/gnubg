@@ -149,7 +149,6 @@ extern void HintDoubleClick(GtkTreeView * treeview, GtkTreePath * path,
 extern void HintSelect(GtkTreeSelection * selection, hintdata * phd);
 extern void InitGTK(int *argc, char ***argv);
 extern void MoveListCreate(hintdata * phd);
-extern void MoveListDestroy();
 extern void MoveListFreeSelectionList(GList * pl);
 extern void MoveListShowToggledClicked(GtkWidget * pw, hintdata * phd);
 extern void MoveListUpdate(const hintdata * phd);

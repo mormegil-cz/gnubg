@@ -1003,7 +1003,7 @@ extern void ProcessGtkEvents(void);
 #if !USE_MULTITHREAD
 extern void CallbackProgress( void );
 #endif
-#endif
 extern void SetRNG( rng *prng, rngcontext *rngctx, rng rngNew, char *szSeed );
 extern int check_resigns(cubeinfo * pci);
 extern int quick_roll(void);
+#endif
