@@ -629,12 +629,12 @@ static void show_pip_pwe(BoardData *bd, const TanBoard points, GString *gst[4])
 	}
 	PipCount(points, anPip);
 	f = (bd->turn > 0);
-	g_string_append_printf(gst[0], " %d + %.2f = %.2f", anPip[!f],
-			       arEPC[!f] - anPip[!f], arEPC[!f]);
-	g_string_append_printf(gst[1], " %d + %.2f = %.2f", anPip[f],
-			       arEPC[f] - anPip[f], arEPC[f]);
-	g_string_append_printf(gst[2], _("PWE: "));
-	g_string_append_printf(gst[3], _("PWE: "));
+	g_string_append_printf(gst[0], " %d + %.2f = %.2f(%+.2f)", anPip[!f],
+			       arEPC[!f] - anPip[!f], arEPC[!f], arEPC[!f]-arEPC[f]);
+	g_string_append_printf(gst[1], " %d + %.2f = %.2f(%+.2f)", anPip[f],
+			       arEPC[f] - anPip[f], arEPC[f], arEPC[f]-arEPC[!f]);
+	g_string_append_printf(gst[2], _("EPC: "));
+	g_string_append_printf(gst[3], _("EPC: "));
 }
 
 extern void update_pipcount(BoardData *bd, const TanBoard points)

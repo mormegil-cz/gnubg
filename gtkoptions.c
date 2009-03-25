@@ -758,8 +758,8 @@ static GtkWidget *OptionsPages( optionswidget *pow )
     pow->pwShowPips = gtk_combo_box_new_text();
     gtk_combo_box_append_text(GTK_COMBO_BOX (pow->pwShowPips), _("None"));
     gtk_combo_box_append_text(GTK_COMBO_BOX (pow->pwShowPips), _("Pips"));
-    gtk_combo_box_append_text(GTK_COMBO_BOX (pow->pwShowPips), _("EPC"));
-    gtk_combo_box_append_text(GTK_COMBO_BOX (pow->pwShowPips), _("Wastage"));
+    gtk_combo_box_append_text(GTK_COMBO_BOX (pow->pwShowPips), _("Pips or EPC"));
+    gtk_combo_box_append_text(GTK_COMBO_BOX (pow->pwShowPips), _("Pips and EPC"));
     gtk_combo_box_set_active (GTK_COMBO_BOX (pow->pwShowPips), gui_show_pips);
     gtk_box_pack_start (GTK_BOX (pwhbox), gtk_label_new( _("Show Pips") ), FALSE, FALSE, 0);
     gtk_box_pack_start( GTK_BOX( pwhbox ), pow->pwShowPips, FALSE, FALSE, 0 );
