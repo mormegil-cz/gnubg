@@ -1,3 +1,8 @@
+Thu Mar 26 13:56:00 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtkboard.c: don't call update_move in board size allocation,
+	leads to a hang.
+
 Thu Mar 26 11:48:33 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* analysis.c, eval.c, play.c, sgf.c: make hint and cmark features work

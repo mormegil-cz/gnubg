@@ -3221,8 +3221,6 @@ static void board_size_allocate( GtkWidget *board, GtkAllocation *allocation )
     && (display_is_2d(bd->rd))
 #endif
 	) {
-    update_move(bd);
-
       new_size = MIN( allocation->width / BOARD_WIDTH,
                       ( allocation->height - 2 ) / (BOARD_HEIGHT + DIE_HEIGHT ));    /* FIXME: is 89 correct? */
 
