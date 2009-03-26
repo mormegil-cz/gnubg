@@ -6742,8 +6742,8 @@ RefreshMoveList ( movelist *pml, int *ai ) {
 }
 
 
-extern void
-CopyMoveList ( movelist *pmlDest, const movelist *pmlSrc ) {
+extern void CopyMoveList ( movelist *pmlDest, const movelist *pmlSrc )
+{
 
   if ( pmlDest == pmlSrc )
     return;

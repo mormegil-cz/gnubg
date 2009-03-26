@@ -2188,15 +2188,18 @@ static void cmark_move_show(GString *gsz, const matchstate *UNUSED(pms),
 	}
 }
 
-static void cmark_game_show(GString *gsz, const listOLD *game, int game_number)
+static void cmark_game_show(GString *gsz, listOLD *game, int game_number)
 {
+	listOLD *pl, *pl_hint = NULL;
 	matchstate ms_local;
-	listOLD *pl;
 	moverecord *pmr;
 	int movenr = 1;
 
 	g_return_if_fail(gsz);
 	g_return_if_fail(game);
+
+	if (game_is_last(game))
+		pl_hint = game_add_pmr_hint(game);
 
 	g_string_append_printf(gsz, _("Game %d\n"), game_number);
 	for (pl = game->plNext; pl != game; pl = pl->plNext) {
@@ -2234,6 +2237,8 @@ static void cmark_game_show(GString *gsz, const listOLD *game, int game_number)
 			break;
 		}
 	}
+	if (pl_hint)
+		game_remove_pmr_hint(pl_hint);
 }
 
 static void cmark_match_show(GString *gsz, const listOLD *match)
@@ -2290,9 +2295,12 @@ static void cmark_move_clear(moverecord *pmr)
 
 static void cmark_game_clear(listOLD *game)
 {
-	listOLD *pl;
+	listOLD *pl, *pl_hint = NULL;
 
 	g_return_if_fail(game);
+
+	if (game_is_last(game))
+		pl_hint = game_add_pmr_hint(game);
 
 	for (pl = game->plNext; pl != game; pl = pl->plNext) {
 		moverecord *pmr = pl->p;
@@ -2312,6 +2320,9 @@ static void cmark_game_clear(listOLD *game)
 			break;
 		}
 	}
+	if (pl_hint)
+		game_remove_pmr_hint(pl_hint);
+
 }
 
 static void cmark_match_clear(listOLD *match)
@@ -2474,9 +2485,12 @@ static int move_change(listOLD *new_game, const listOLD *new_move)
 
 static void cmark_game_rollout(listOLD *game)
 {
-	listOLD *pl;
+	listOLD *pl, *pl_hint = NULL;
 
 	g_return_if_fail(game);
+
+	if (game_is_last(game))
+		pl_hint = game_add_pmr_hint(game);
 
 	for (pl = game->plNext; pl != game; pl = pl->plNext) {
 		moverecord *pmr_prev;
@@ -2488,7 +2502,7 @@ static void cmark_game_rollout(listOLD *game)
 		switch (pmr->mt) {
 		case MOVE_NORMAL:
 			if (!move_change(game, pl->plPrev))
-				return;
+				goto finished;
 			cmark_move_rollout(pmr, TRUE);
 			cmark_cube_rollout(pmr, TRUE);
 			break;
@@ -2497,13 +2511,16 @@ static void cmark_game_rollout(listOLD *game)
 			if (pmr_prev->mt == MOVE_DOUBLE)
 				break;
 			if (!move_change(game, pl->plPrev))
-				return;
+				goto finished;
 			cmark_cube_rollout(pmr, TRUE);
 			break;
 		default:
 			break;
 		}
 	}
+finished:
+	if (pl_hint)
+		game_remove_pmr_hint(pl_hint);
 }
 
 static void cmark_match_rollout(listOLD *match)
@@ -2559,7 +2576,7 @@ extern void CommandCMarkCubeShow(char *UNUSED(sz))
 		return;
 
 	gsz = g_string_new(NULL);
-	cmark_cube_show(gsz, &ms, pmr, getMoveNumber(plGame, pmr) - 1);
+	cmark_cube_show(gsz, &ms, pmr, getMoveNumber(plGame, pmr));
 	outputf("%s", gsz->str);
 	g_string_free(gsz, TRUE);
 }
@@ -2644,7 +2661,7 @@ extern void CommandCMarkMoveShow(char *UNUSED(sz))
 		return;
 
 	gsz = g_string_new(NULL);
-	cmark_move_show(gsz, &ms, pmr, getMoveNumber(plGame, pmr) - 1);
+	cmark_move_show(gsz, &ms, pmr, getMoveNumber(plGame, pmr));
 	outputf("%s", gsz->str);
 	g_string_free(gsz, TRUE);
 }
