@@ -40,7 +40,7 @@ command cER = {
     { NULL, NULL, NULL, NULL, NULL }
 }, acAnalyseRollout[] = {
     { "cube", CommandAnalyseRolloutCube, 
-      N_("Rollout an analysed cube.\n"),
+      N_("Rollout an analysed cube"),
 	      NULL, NULL },
 	
     { "move", CommandAnalyseRolloutMove, 
@@ -49,16 +49,15 @@ command cER = {
 	 "\"analyse rollout move\" will rollout previously marked candidates."),
 	      NULL, NULL },
     { "game", CommandAnalyseRolloutGame, 
-      N_("Rollout marked candidates in the game.\n"),
+      N_("Rollout marked candidates in the game"),
 	      NULL, NULL },
     { "match", CommandAnalyseRolloutMatch, 
-      N_("Rollout marked candidates in the match.\n"),
+      N_("Rollout marked candidates in the match"),
 	      NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acCmarkCubeSet[] = {
     { "rollout", CommandCMarkCubeSetRollout, N_("CMark cube for rollout"), NULL, NULL },
     { "none", CommandCMarkCubeSetNone, N_("CMark cube clear"), NULL, NULL },
-    { "clear", CommandCMarkCubeSetNone, N_("CMark cube clear"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acCmarkMoveSet[] = {
     { "rollout", CommandCMarkMoveSetRollout, N_("CMark moves for rollout"), NULL, NULL },
@@ -325,18 +324,18 @@ command cER = {
 }, acRelationalAdd[] = {
     { "match", CommandRelationalAddMatch,
       N_("Log the match to the external relational database"), 
-      szOPTENVFORCE, NULL },
+      szQUIET, NULL },
     { NULL, NULL, NULL, NULL, NULL }    
 }, acRelationalErase[] = {
     { "player", CommandRelationalErase, N_("Remove all statistics from one player "
-			"in the relational database"), szNAMEOPTENV, NULL },
+			"in the relational database"), szNAME, NULL },
     { "allplayers", CommandRelationalEraseAll,
       N_("Remove all player statistics in the relational database"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acRelationalShow[] = {
     { "details", CommandRelationalShowDetails, 
       N_("Show details of the matches for a given player in the database"), 
-      szNAMEOPTENV, NULL },
+      szNAME, NULL },
     { "players", CommandRelationalShowPlayers, 
       N_("Show a list of all the players in the database"), 
       NULL, NULL },
@@ -1440,10 +1439,7 @@ command cER = {
       NULL },
     { "roll", CommandRoll, N_("Roll the dice"), NULL, NULL },
     { "rollout", CommandRollout, 
-      N_("Have gnubg perform rollouts of a position. Accepted formats are\n"
-		      "rollout (rolls out the current position)\n"
-		      "rollout =1 =2 =3 (rolls out the first three choices from the hint list)\n"
-		      "rollout =cube (rolls out the cube action)"),
+      N_("Have gnubg perform rollouts of the current position."),
       szOPTPOSITION, NULL },
     { "save", NULL, N_("Write data to a file"), NULL, acSave },
     { "set", NULL, N_("Modify program parameters"), NULL, acSet },
