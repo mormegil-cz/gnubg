@@ -1,3 +1,7 @@
+Sat Mar 28 22:11:39 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* eval.c: delete a debug message and reformat a few things
+
 Thu Mar 26 13:56:00 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gtkboard.c: don't call update_move in board size allocation,
