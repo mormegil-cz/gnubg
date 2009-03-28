@@ -2021,15 +2021,6 @@ CommandShowSound ( char *UNUSED(sz) ) {
 
   int i;
 
-#if USE_GTK
-
-  if ( fX ) {
-    GTKSound();
-    return;
-  }
-
-#endif /* USE_GTK */
-
   outputf ( _("Sounds are enabled          : %s\n"),
             fSound ? _("yes") : _("no"));
 
