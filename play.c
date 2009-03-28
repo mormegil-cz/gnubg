@@ -2891,7 +2891,6 @@ extern void ChangeGame(listOLD *plGameNew)
 	}
 #endif
 	CalculateBoard();
-	UpdateGame(FALSE);
 	SetMoveRecord(plLastMove->p);
 	pmr_cur = get_current_moverecord(NULL);
 	if (pmr_cur) {
@@ -2906,6 +2905,7 @@ extern void ChangeGame(listOLD *plGameNew)
 			ms.anDice[1] = pmr_cur->anDice[1];
 		}
 	}
+	UpdateGame(FALSE);
 	ShowBoard();
 }
 
