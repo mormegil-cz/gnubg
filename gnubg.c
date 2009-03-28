@@ -2282,6 +2282,14 @@ extern void hint_double(int show, int did_double)
 	static cubeinfo ci;
 	moverecord *pmr;
 	int hist;
+	doubletype dt = DoubleType ( ms.fDoubled, ms.fMove, ms.fTurn );
+	if (dt != DT_NORMAL)
+	{
+		if (show)
+			outputerrf( _("This decision is part of beaver/raccoon sequence and cannot be hinted"));
+		return;
+	}
+
 	GetMatchStateCubeInfo(&ci, &ms);
 
 	if (!GetDPEq(NULL, NULL, &ci)) {
@@ -2319,6 +2327,13 @@ extern void hint_take(int show, int did_take)
 	static cubeinfo ci;
 	moverecord *pmr;
 	int hist;
+	taketype tt = (taketype) DoubleType ( ms.fDoubled, ms.fMove, ms.fTurn );
+        if ( tt != TT_NORMAL )
+	{
+		if (show)
+			outputerrf( _("This decision is part of beaver/raccoon sequence and cannot be hinted"));
+		return;
+	}
 
 	GetMatchStateCubeInfo(&ci, &ms);
 	pmr = get_current_moverecord(&hist);

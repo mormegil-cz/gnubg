@@ -1,3 +1,10 @@
+Sat Mar 28 23:12:15 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* analysis.c, gnubg.c, gtkcube.c, gtkgame.c: minor fixes to
+	hint/analysis of games with beavers: account for initial double
+	in statistics, but not the following ones and show the take/beaver
+	widget when applicable (i.e. not for raccoons).
+
 Sat Mar 28 22:49:14 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* play.c: fix to find the dice after updating the gamelist

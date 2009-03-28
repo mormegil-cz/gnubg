@@ -625,13 +625,17 @@ static void UpdateCubeAnalysis(cubehintdata * pchd)
 {
 
 	GtkWidget *pw = 0;
+	doubletype dt = DoubleType(ms.fDoubled, ms.fMove, ms.fTurn);
 
 	find_skills(pchd->pmr, &ms, pchd->did_double, pchd->did_take);
 
 	switch (pchd->pmr->mt) {
 	case MOVE_NORMAL:
 	case MOVE_DOUBLE:
-		pw = CubeAnalysis(pchd);
+		if (dt == DT_NORMAL)
+			pw = CubeAnalysis(pchd);
+		else if (dt == DT_BEAVER)
+			pw = TakeAnalysis(pchd);
 		break;
 
 	case MOVE_DROP:
@@ -1040,7 +1044,7 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
 
 extern GtkWidget *CreateCubeAnalysis(moverecord *pmr, const matchstate *pms, int did_double, int did_take, int hist)
 {
-
+	doubletype dt = DoubleType(pms->fDoubled, pms->fMove, pms->fTurn);
 	cubehintdata *pchd = g_new0(cubehintdata, 1);
 
 	GtkWidget *pw, *pwhb, *pwx;
@@ -1055,7 +1059,10 @@ extern GtkWidget *CreateCubeAnalysis(moverecord *pmr, const matchstate *pms, int
 
 	case MOVE_NORMAL:
 	case MOVE_DOUBLE:
-		pchd->pwFrame = CubeAnalysis(pchd);
+		if (dt == DT_NORMAL)
+			pchd->pwFrame = CubeAnalysis(pchd);
+		else if (dt == DT_BEAVER)
+			pchd->pwFrame = TakeAnalysis(pchd);
 		break;
 	case MOVE_TAKE:
 	case MOVE_DROP:
