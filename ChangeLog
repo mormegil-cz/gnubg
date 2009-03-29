@@ -1,3 +1,8 @@
+Sun Mar 29 15:50:38 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* dice.c, dice.h, gnubg.c, play.c, rollout.c: fall back to mersenne
+	twister if dice generator fails
+
 Sat Mar 28 23:12:15 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* analysis.c, gnubg.c, gtkcube.c, gtkgame.c: minor fixes to

@@ -217,7 +217,7 @@ static int nSkip;
 static int RolloutDice( int iTurn, int iGame,
                             int fInitial,
                             unsigned int anDice[ 2 ],
-                            const rng rngx,
+                            rng *rngx,
                             void *rngctx,
                             const int fRotate, const perArray *dicePerms ) {
 
@@ -562,7 +562,7 @@ BasicCubefulRollout ( unsigned int aanBoard[][ 2 ][ 25 ],
     /* Chequer play */
 
     if( RolloutDice( iTurn, iGame, prc->fInitial, anDice,
-                         prc->rngRollout, rngctxRollout, prc->fRotate, dicePerms ) < 0 )
+                         &prc->rngRollout, rngctxRollout, prc->fRotate, dicePerms ) < 0 )
       return -1;
 
     if( anDice[ 0 ] < anDice[ 1 ] )

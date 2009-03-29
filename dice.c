@@ -682,115 +682,99 @@ extern void *InitRNG( unsigned long *pnSeed, int *pfInitFrom,
 
 }
 
-extern int RollDice( unsigned int anDice[ 2 ], const rng rngx, rngcontext *rngctx ) {
+extern int RollDice(unsigned int anDice[2], rng *prng, rngcontext *rngctx)
+{
+	anDice[0] = anDice[1] = UINT_MAX;
 
-    switch( rngx ) {
-    case RNG_ANSI:
-	anDice[ 0 ] = 1+(int) (6.0*rand()/(RAND_MAX+1.0));
-	anDice[ 1 ] = 1+(int) (6.0*rand()/(RAND_MAX+1.0));
-        rngctx->c += 2;
-	return 0;
-	
-    case RNG_BBS:
+	switch (*prng) {
+	case RNG_ANSI:
+		anDice[0] = 1 + (int)(6.0 * rand() / (RAND_MAX + 1.0));
+		anDice[1] = 1 + (int)(6.0 * rand() / (RAND_MAX + 1.0));
+		rngctx->c += 2;
+		break;
+
+	case RNG_BBS:
 #if HAVE_LIBGMP
-	if( BBSCheck( rngctx ) ) {
-		BBSInitialSeedFailure(rngctx);
-	    return -1;
-	}
-	
-	anDice[ 0 ] = BBSGetTrit( rngctx ) + BBSGetBit( rngctx ) * 3 + 1;
-	anDice[ 1 ] = BBSGetTrit( rngctx ) + BBSGetBit( rngctx ) * 3 + 1;
-        rngctx->c += 2;
-	return 0;
+		if (BBSCheck(rngctx)) {
+			BBSInitialSeedFailure(rngctx);
+			break;
+		}
+		anDice[0] = BBSGetTrit(rngctx) + BBSGetBit(rngctx) * 3 + 1;
+		anDice[1] = BBSGetTrit(rngctx) + BBSGetBit(rngctx) * 3 + 1;
+		rngctx->c += 2;
+		break;
 #else
-	abort();
+		abort();
 #endif
-	
-    case RNG_BSD:
+
+	case RNG_BSD:
 #if HAVE_RANDOM
-	anDice[ 0 ] = 1+(int) (6.0*random()/(RAND_MAX+1.0));
-	anDice[ 1 ] = 1+(int) (6.0*random()/(RAND_MAX+1.0));
-        rngctx->c += 2;
-	return 0;
+		anDice[0] = 1 + (int)(6.0 * random() / (RAND_MAX + 1.0));
+		anDice[1] = 1 + (int)(6.0 * random() / (RAND_MAX + 1.0));
+		rngctx->c += 2;
+		break;
 #else
-	abort();
+		abort();
 #endif
-	
-    case RNG_ISAAC:
-	anDice[ 0 ] = 1+(int) (6.0*irand( &rngctx->rc )/(0xFFFFFFFF+1.0));
-	anDice[ 1 ] = 1+(int) (6.0*irand( &rngctx->rc )/(0xFFFFFFFF+1.0));
-        rngctx->c += 2;
-	return 0;
-	
-    case RNG_MANUAL:
-	return GetManualDice( anDice );
 
-    case RNG_MD5: {
-	union _hash {
-	    char ach[ 16 ];
-	    md5_uint32 an[ 2 ];
-	} h;
-	
-	md5_buffer( (char *) &rngctx->nMD5, sizeof rngctx->nMD5, &h );
+	case RNG_ISAAC:
+		anDice[0] = 1 + (int)(6.0 * irand(&rngctx->rc) / (0xFFFFFFFF + 1.0));
+		anDice[1] = 1 + (int)(6.0 * irand(&rngctx->rc) / (0xFFFFFFFF + 1.0));
+		rngctx->c += 2;
+		break;
 
-	anDice[ 0 ] = h.an[ 0 ] / 715827882 + 1;
-	anDice[ 1 ] = h.an[ 1 ] / 715827882 + 1;
+	case RNG_MANUAL:
+		return GetManualDice(anDice);
 
-	rngctx->nMD5++;
-        rngctx->c += 2;
-	
-	return 0;
-    }
-	
-	
-    case RNG_MERSENNE:
-	anDice[ 0 ] = 
-          1+(int) (6.0*genrand_int32(&rngctx->mti, 
-                                     rngctx->mt)/(0xFFFFFFFF+1.0));
-	anDice[ 1 ] = 
-          1+(int) (6.0*genrand_int32(&rngctx->mti,
-                                     rngctx->mt)/(0xFFFFFFFF+1.0));
-        rngctx->c += 2;
-	return 0;
+	case RNG_MD5:{
+			union _hash {
+				char ach[16];
+				md5_uint32 an[2];
+			} h;
 
-    case RNG_RANDOM_DOT_ORG:
+			md5_buffer((char *)&rngctx->nMD5, sizeof rngctx->nMD5, &h);
+
+			anDice[0] = h.an[0] / 715827882 + 1;
+			anDice[1] = h.an[1] / 715827882 + 1;
+
+			rngctx->nMD5++;
+			rngctx->c += 2;
+
+			break;
+		}
+
+	case RNG_MERSENNE:
+		anDice[0] =
+		    1 + (int)(6.0 * genrand_int32(&rngctx->mti, rngctx->mt) / (0xFFFFFFFF + 1.0));
+		anDice[1] =
+		    1 + (int)(6.0 * genrand_int32(&rngctx->mti, rngctx->mt) / (0xFFFFFFFF + 1.0));
+		rngctx->c += 2;
+		break;
+
+	case RNG_RANDOM_DOT_ORG:
 #if HAVE_SOCKETS
 
-      anDice[ 0 ] = getDiceRandomDotOrg();
-      anDice[ 1 ] = getDiceRandomDotOrg();
+		anDice[0] = getDiceRandomDotOrg();
+		anDice[1] = getDiceRandomDotOrg();
+#endif				/* !HAVE_SOCKETS */
+		break;
 
-      if ( anDice[ 0 ] <= 0 || anDice[ 1 ] <= 0 )
-        return -1;
-      else
-        return 0;
+	case RNG_FILE:
 
-#else /* HAVE_SOCKETS */
+		anDice[0] = ReadDiceFile(rngctx);
+		anDice[1] = ReadDiceFile(rngctx);
+		rngctx->c += 2;
 
-      g_assert ( FALSE );
+	default:
+		break;
 
-#endif /* !HAVE_SOCKETS */
-
-      break;
-
-    case RNG_FILE:
-
-      anDice[ 0 ] = ReadDiceFile( rngctx );
-      anDice[ 1 ] = ReadDiceFile( rngctx );
-      rngctx->c += 2;
-
-      if ( anDice[ 0 ] <= 0 || anDice[ 1 ] <= 0 )
-        return -1;
-      else
-        return 0;
-
-      break;
-
-    default:
-      break;
-
-    }
-
-    return -1;
+	}
+	if (anDice[0] < 1 || anDice[1] < 1 || anDice[0] > 6 || anDice[1] > 6) {
+		outputerrf(_("Your dice generator isn't working. Failing back on RNG_MERSENNE"));
+		SetRNG(prng, rngctx, RNG_MERSENNE, "");
+		RollDice(anDice, prng, rngctx);
+	}
+	return 0;
 }
 
 extern FILE *OpenDiceFile(rngcontext *rngctx, const char *sz)

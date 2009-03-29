@@ -764,7 +764,7 @@ static int NewGame( void )
     AddGame( pmr );
     
  reroll:
-    fError = RollDice( ms.anDice, rngCurrent, rngctxCurrent );
+    fError = RollDice( ms.anDice, &rngCurrent, rngctxCurrent );
 
     if( fInterrupt || fError ) {
 	    PopGame(plGame, TRUE);
@@ -1286,7 +1286,7 @@ static int ComputerTurn( void ) {
       if ( !ms.anDice[ 0 ] ) {
         if ( ! fCheat || CheatDice ( ms.anDice, 
                                      &ms, afCheatRoll[ ms.fMove ] ) )
-	  if( RollDice ( ms.anDice, rngCurrent, rngctxCurrent ) < 0 )
+	  if( RollDice ( ms.anDice, &rngCurrent, rngctxCurrent ) < 0 )
             return -1;
 
 	  DiceRolled();      
@@ -1380,7 +1380,7 @@ static int ComputerTurn( void ) {
       if( !ms.anDice[ 0 ] && !ms.fDoubled && !ms.fResigned &&
 	  ( !ms.fCubeUse || ms.nCube >= MAX_CUBE ||
 	    !GetDPEq( NULL, NULL, &ci ) ) ) {
-	  if( RollDice( ms.anDice, rngCurrent, rngctxCurrent ) < 0 )
+	  if( RollDice( ms.anDice, &rngCurrent, rngctxCurrent ) < 0 )
 	      return -1;
 	      
 	  DiceRolled();      
@@ -1471,7 +1471,7 @@ static int ComputerTurn( void ) {
 	return ms.fTurn == fTurnOrig ? -1 : 0;
       } else if( !ms.anDice[ 0 ] ) {
 	  if( tolower( *szResponse ) == 'r' ) { /* roll */
-	      if( RollDice( ms.anDice, rngCurrent, rngctxCurrent ) < 0 )
+	      if( RollDice( ms.anDice, &rngCurrent, rngctxCurrent ) < 0 )
 		  return -1;
 	      
 		  DiceRolled();      
@@ -3655,7 +3655,7 @@ CommandRoll( char *sz ) {
 	  return;
 
   if ( ! fCheat || CheatDice ( ms.anDice, &ms, afCheatRoll[ ms.fMove ] ) )
-    if( RollDice ( ms.anDice, rngCurrent, rngctxCurrent ) < 0 )
+    if( RollDice ( ms.anDice, &rngCurrent, rngctxCurrent ) < 0 )
       return;
 
   pmr = NewMoveRecord();

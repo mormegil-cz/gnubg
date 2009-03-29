@@ -5366,7 +5366,7 @@ CommandDiceRolls (char *sz) {
     n = ParseNumber( &pch );
 
     while (n-- > 0) {
-      RollDice( anDice, rngCurrent, rngctxCurrent );
+      RollDice( anDice, &rngCurrent, rngctxCurrent );
 
       printf( "%d %d\n", anDice[ 0 ], anDice[ 1 ] );
 
