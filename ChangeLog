@@ -1,3 +1,9 @@
+Sun Mar 29 21:25:51 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gnubgmodule.c: Avoid calling PythonNextTurn in PythonCommand, since
+	PythonNextTurn always plays the next turn, and the command doesn't
+	imply that.
+
 Sun Mar 29 15:50:38 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* dice.c, dice.h, gnubg.c, play.c, rollout.c: fall back to mersenne

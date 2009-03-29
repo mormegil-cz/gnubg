@@ -411,35 +411,39 @@ PythonEvalContext( PyObject* self UNUSED_PARAM, PyObject *args ) {
   return EvalContextToPy( &ec );
 }
 
-static PyObject *
-PythonCommand( PyObject* self UNUSED_PARAM, PyObject *args ) {
+static PyObject *PythonCommand(PyObject * self UNUSED_PARAM, PyObject * args)
+{
 
-  char *pch;
-  char *sz;
-  psighandler sh;
+	char *pch;
+	char *sz;
+	psighandler sh;
 
-  if ( ! PyArg_ParseTuple( args, "s:command", &pch ) )
-    return NULL;
+	if (!PyArg_ParseTuple(args, "s:command", &pch))
+		return NULL;
 
-  sz = g_strdup( pch );
+	sz = g_strdup(pch);
 
-  PortableSignal( SIGINT, HandleInterrupt, &sh, FALSE );
-  HandleCommand( sz, acTop );
+	PortableSignal(SIGINT, HandleInterrupt, &sh, FALSE);
+	HandleCommand(sz, acTop);
 
-   if( ms.gs != GAME_NONE ) {  /* HACK, no idea if this is right or not */
-  PythonNextTurn(0, 0); 
-   }
+	/* this is what the cl interface does. Let's try that. */
+	while (fNextTurn)
+		NextTurn(TRUE);
+	/* before we had 
+	 * if( ms.gs != GAME_NONE )
+	 * PythonNextTurn(0, 0);
+	 * which always run NextTurn(TRUE), and that isn't right/
 
-  outputx();
-  free( sz );
-  PortableSignalRestore( SIGINT, &sh );
-  if( fInterrupt ) {
-    raise( SIGINT );
-    fInterrupt = FALSE;
-  }
-  
-  Py_INCREF(Py_None);
-  return Py_None;
+	outputx();
+	free(sz);
+	PortableSignalRestore(SIGINT, &sh);
+	if (fInterrupt) {
+		raise(SIGINT);
+		fInterrupt = FALSE;
+	}
+
+	Py_INCREF(Py_None);
+	return Py_None;
 }
 
 
