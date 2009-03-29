@@ -432,7 +432,7 @@ static PyObject *PythonCommand(PyObject * self UNUSED_PARAM, PyObject * args)
 	/* before we had 
 	 * if( ms.gs != GAME_NONE )
 	 * PythonNextTurn(0, 0);
-	 * which always run NextTurn(TRUE), and that isn't right/
+	 * which always run NextTurn(TRUE), and that isn't right */
 
 	outputx();
 	free(sz);
