@@ -1,3 +1,7 @@
+Mon Mar 30 13:52:31 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtkgame.c: rc files should be added before gtk_init
+
 Mon Mar 30 10:46:29 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gtkgame.c: add highligting to the skill label when take/drop

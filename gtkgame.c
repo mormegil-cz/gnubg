@@ -3377,10 +3377,6 @@ extern void InitGTK(int *argc, char ***argv)
 	GtkIconFactory *pif;
 	GdkAtom cb;
 
-	fX = gtk_init_check(argc, argv);
-	if (!fX)
-		return;
-
 	sz = BuildFilename("gnubg.gtkrc");
 	gtk_rc_add_default_file(sz);
 	g_free(sz);
@@ -3392,6 +3388,10 @@ extern void InitGTK(int *argc, char ***argv)
 	sz = g_build_filename(szHomeDirectory, "gnubgmenurc", NULL);
 	gtk_accel_map_load(sz);
 	g_free(sz);
+
+	fX = gtk_init_check(argc, argv);
+	if (!fX)
+		return;
 
 	gnubg_stock_init();
 
