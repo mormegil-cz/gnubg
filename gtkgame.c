@@ -915,13 +915,11 @@ extern void SetAnnotation( moverecord *pmr) {
 
 	    pwAnalysis = gtk_vbox_new( FALSE, 0 );
 
-	    pwBox = gtk_hbox_new( FALSE, 0 );
+	    pwBox = gtk_vbox_new( FALSE, 0 );
 	    gtk_box_pack_start( GTK_BOX( pwBox ),
 				gtk_label_new( pmr->mt == MOVE_TAKE ? _("Take") :
-				    _("Drop") ),
-				FALSE, FALSE, 2 );
-	    gtk_box_pack_start( GTK_BOX( pwBox ), 
-                                   gtk_label_new(aszSkillType[pmr->stCube] ? gettext(aszSkillType[pmr->stCube]) : ""),
+				    _("Drop") ), FALSE, FALSE, 2 );
+	    gtk_box_pack_start( GTK_BOX( pwBox ), skill_label(pmr->stCube),
 				FALSE, FALSE, 2 );
 	    gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwBox, FALSE, FALSE,
 				0 );
