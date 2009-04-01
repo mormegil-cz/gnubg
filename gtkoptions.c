@@ -1264,7 +1264,6 @@ static GtkWidget *OptionsPages(optionswidget *pow)
 	append_cube_options(pow);
 	append_tutor_options(pow);
 	append_display_options(pow);
-	append_display_options(pow);
 	append_match_options(pow);
 	append_sound_options(pow);
 	append_dice_options(pow);
@@ -1419,9 +1418,9 @@ static void OptionsOK(GtkWidget *pw, optionswidget *pow)
 	  if (gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->apwDice[i])))
 		  break;
   }
-  if (i < RNG_FILE) {
+  if (i < RNG_FILE && i != rngCurrent ) {
 	  UserCommand(set_rng_cmds[i]);
-  } else if (i == RNG_FILE) {
+  } else if (i == RNG_FILE && i != rngCurrent ) {
       filename = GTKFileSelect (_("Select file with dice"), NULL, NULL, NULL,
 			      GTK_FILE_CHOOSER_ACTION_OPEN);
       if (filename)
