@@ -769,15 +769,14 @@ static int NewGame( void )
     if( fInterrupt || fError ) {
 	    PopGame(plGame, TRUE);
 	    plGame = plGame_store;
+	    plLastMove = plLastMove_store;
 	    if (!plGame)
 		    return -1;
 	    ChangeGame( plGame );
-	    if (plLastMove_store)
-	    {
-		    plLastMove = plLastMove_store;
-		    CalculateBoard();
-		    SetMoveRecord(plLastMove ->p);
-	    }
+	    if (!plLastMove)
+		    return -1;
+	    CalculateBoard();
+	    SetMoveRecord(plLastMove ->p);
 	    ShowBoard();
 	    return -1;
     }

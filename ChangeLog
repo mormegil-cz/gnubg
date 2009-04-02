@@ -1,3 +1,7 @@
+Thu Apr  2 23:33:25 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* play.c: hopefully fix a crash related to canceling of manual dice
+
 Thu Apr  2 22:32:14 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* play.c: fix a crash (assert in getCubeDecisionOrdering) when
