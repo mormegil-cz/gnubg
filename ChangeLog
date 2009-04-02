@@ -1,3 +1,8 @@
+Thu Apr  2 22:32:14 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* play.c: fix a crash (assert in getCubeDecisionOrdering) when
+	updating the current game annotions. 
+
 Thu Apr  2 10:13:47 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c: hint - don't update annotation when working through tutor

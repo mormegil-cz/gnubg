@@ -2885,8 +2885,10 @@ extern void ChangeGame(listOLD *plGameNew)
 			FixMatchState(&ms, pl->p);
 			ApplyMoveRecord(&ms, plGame, pl->p);
 		}
-
 		GTKSetGame(GameIndex(plGame));
+		/* we need to get the matchstate right before GTKThaw when
+		 * we are updating the current current game */
+		CalculateBoard();
 		GTKThaw();
 	}
 #endif
