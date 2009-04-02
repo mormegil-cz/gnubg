@@ -1,3 +1,7 @@
+Thu Apr  2 10:13:47 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c: hint - don't update annotation when working through tutor
+
 Wed Apr  1 17:41:13 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gtkoptions.c: display options was added twice and rng was update

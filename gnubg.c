@@ -2305,14 +2305,14 @@ extern void hint_double(int show, int did_double)
 	if (hint_cube(pmr, &ci) < 0)
 		return;
 
-	if (hist)
+	if (hist && did_double == -1)
 		did_double = (pmr->mt == MOVE_DOUBLE) ? TRUE : FALSE;
 
 	find_skills(pmr, &ms, did_double, -1);
 
 #if USE_GTK
 	if (fX) {
-		if (hist)
+		if (hist && show)
 			ChangeGame(NULL);
 		if (show)
 			GTKCubeHint(pmr, &ms, did_double, -1, hist);
@@ -2342,14 +2342,14 @@ extern void hint_take(int show, int did_take)
 	if (hint_cube(pmr, &ci) < 0)
 		return;
 
-	if (hist)
+	if (hist && did_take == -1)
 		did_take = (pmr->mt == MOVE_TAKE) ? TRUE : FALSE;
 
 	find_skills(pmr, &ms, -1, did_take);
 
 #if USE_GTK
 	if (fX) {
-		if (hist)
+		if (hist && show)
 			ChangeGame(NULL);
 		if (show)
 			GTKCubeHint(pmr, &ms, -1, did_take, hist);
@@ -2410,7 +2410,7 @@ extern void hint_move(char *sz, gboolean show)
 
 #if USE_GTK
 	if (fX) {
-		if (hist)
+		if (hist && show)
 		ChangeGame(NULL);
 		if (show)
 			GTKHint(pmr, hist);
