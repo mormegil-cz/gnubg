@@ -1,3 +1,8 @@
+Fri Apr  3 22:04:43 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtkboard.c: Use the player's dice color to chose who wins
+	the opening roll with manual dice.
+
 Fri Apr  3 21:45:17 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gnubgmodule.c, gtkprefs.c, import.c, multithread.c, play.c,
