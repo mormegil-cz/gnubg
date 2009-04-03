@@ -327,7 +327,8 @@ static gpointer MT_WorkerThreadFunction(void *id)
 static void MT_WorkerThreadFunction(void *id)
 #endif
 {
-#if __GNUC__ && USE_SSE_VECTORIZE
+	/* why do we need this align ?*/
+#if __GNUC__ && WIN32
 	asm  __volatile__  ("andl $-16, %%esp" : : : "%esp");
 #endif
 	{

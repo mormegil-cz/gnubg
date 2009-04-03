@@ -1,3 +1,9 @@
+Fri Apr  3 21:45:17 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gnubgmodule.c, gtkprefs.c, import.c, multithread.c, play.c,
+	relational.c, text.c: minor compile stuff, an error in the last
+	checkin, and ifdef WIN32 the align in multithread.c
+
 Fri Apr  3 13:59:50 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, gtkboard.c, gtkchequer.c, play.c: CommandMove didn't

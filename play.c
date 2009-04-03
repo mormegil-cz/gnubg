@@ -915,11 +915,31 @@ static void parsemove_to_anmove(int c, int anMove[])
 			anMove[i << 1] = -1;
 			anMove[(i << 1) + 1] = -1;
 		}
-		printf("%d %d -", anMove[i << 1], anMove[(i << 1) + 1]);
 	}
-	printf("\n");
 	CanonicalMoveOrder(anMove);
 }
+
+/*! \brief parses the move and finds the new board in the list of moves/
+ * \param pml the list of moves
+ * \param old_board the board before move
+ * \param board the new board 
+ * \return 1 if found, 0 otherwise
+ */
+static gboolean parse_move_is_legal(char *sz, const matchstate *pms, int *an)
+{
+	int c;
+	TanBoard anBoardNew;
+	movelist ml;
+	c = ParseMove(sz, an);
+	if (c < 0)
+		return FALSE;
+	parsemove_to_anmove(c, an);
+	memcpy(anBoardNew, ms.anBoard, sizeof(TanBoard));
+	ApplyMove(anBoardNew, an, FALSE);
+	GenerateMoves(&ml, pms->anBoard, pms->anDice[0], pms->anDice[1], FALSE);
+	return board_in_list(&ml, pms->anBoard, (ConstTanBoard) anBoardNew, an);
+}
+
 
 static int ComputerTurn( void ) {
 
@@ -928,7 +948,7 @@ static int ComputerTurn( void ) {
   float arDouble[ 4 ], rDoublePoint;
 #if HAVE_SOCKETS
   char szBoard[ 256 ], szResponse[ 256 ];
-  int c, fTurnOrig;
+  int fTurnOrig;
   TanBoard anBoardTemp;
 #endif
 
@@ -2506,27 +2526,6 @@ extern int board_in_list(const movelist *pml, const TanBoard old_board, const Ta
 	if (an)
 		*an = -1;
 	return 0;
-}
-
-/*! \brief parses the move and finds the new board in the list of moves/
- * \param pml the list of moves
- * \param old_board the board before move
- * \param board the new board 
- * \return 1 if found, 0 otherwise
- */
-static gboolean parse_move_is_legal(char *sz, const matchstate *pms, int *an)
-{
-	int c;
-	TanBoard anBoardNew;
-	movelist ml;
-	c = ParseMove(sz, an);
-	if (c < 0)
-		return FALSE;
-	parsemove_to_anmove(c, an);
-	memcpy(anBoardNew, ms.anBoard, sizeof(TanBoard));
-	ApplyMove(anBoardNew, an, FALSE);
-	GenerateMoves(&ml, pms->anBoard, pms->anDice[0], pms->anDice[1], FALSE);
-	return board_in_list(&ml, pms->anBoard, (ConstTanBoard)anBoardNew, an);
 }
 
 extern void 

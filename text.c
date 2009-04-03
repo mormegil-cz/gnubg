@@ -104,7 +104,7 @@ printTextBoard ( FILE *pf, const matchstate *pms ) {
         cch = 20;
 		
       sprintf( szCube, _("%c: %*s (Cube: %d)"), pms->fCubeOwner ? 'X' :
-               'O', cch, ap[ pms->fCubeOwner ].szName, pms->nCube );
+               'O', (int)cch, ap[ pms->fCubeOwner ].szName, pms->nCube );
 
       apch[ pms->fCubeOwner ? 6 : 0 ] = szCube;
 

@@ -3514,7 +3514,7 @@ typedef struct _PartyGame
 
 static int ConvertPartyGammonFileToMat(FILE *partyFP, FILE *matFP)
 {
-	PartyGame pg;
+	PartyGame pg = {-1, -1, NULL};
 	int matchLen = -1;
 	char p1[MAX_NAME_LEN], p2[MAX_NAME_LEN];
 	GList *games = NULL;

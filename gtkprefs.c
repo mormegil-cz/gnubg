@@ -681,7 +681,7 @@ extern void gtk_color_button_get_array(GtkColorButton *button, double array[4])
 	array[0] = (gdouble)color.red / 65535.0;
 	array[1] = (gdouble)color.green / 65535.0;
 	array[2] = (gdouble)color.blue / 65535.0;
-	array[3] = (gdouble)alpha / 65535;
+	array[3] = (gdouble)alpha / 65535.0;
 
 }
 
@@ -943,7 +943,7 @@ static GtkWidget *BoardPage( BoardData *bd ) {
 	apadjBoard[ j ] = GTK_ADJUSTMENT( gtk_adjustment_new(
             bd->rd->aSpeckle[ j ] / 128.0, 0, 1, 0.1, 0.1, 0 ) );
 
-	for( i = 0; i < 3; i++ )
+	for( i = 0; i < 4; i++ )
 	    ar[ i ] = bd->rd->aanBoardColour[ j ][ i ] / 255.0;
     
 	gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),

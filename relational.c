@@ -884,7 +884,7 @@ extern void CommandRelationalSelect(char *sz)
 			if (j > 0)
 				output(" | ");
 
-			outputf("%*s", rs->widths[j], rs->data[i][j]);
+			outputf("%*s", (int)rs->widths[j], rs->data[i][j]);
 		}
 		outputl("");
 	}
