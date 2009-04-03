@@ -1,3 +1,8 @@
+Fri Apr  3 13:59:50 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, gtkboard.c, gtkchequer.c, play.c: CommandMove didn't
+	accept moves of type 25/16.
+
 Thu Apr  2 23:33:25 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* play.c: hopefully fix a crash related to canceling of manual dice

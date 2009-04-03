@@ -915,7 +915,9 @@ static void parsemove_to_anmove(int c, int anMove[])
 			anMove[i << 1] = -1;
 			anMove[(i << 1) + 1] = -1;
 		}
+		printf("%d %d -", anMove[i << 1], anMove[(i << 1) + 1]);
 	}
+	printf("\n");
 	CanonicalMoveOrder(anMove);
 }
 
@@ -1485,25 +1487,21 @@ static int ComputerTurn( void ) {
 
 	  return ms.fTurn == fTurnOrig ? -1 : 0;
       } else {
-          pmr = NewMoveRecord();
-
-	  pmr->mt = MOVE_NORMAL;
-	  pmr->anDice[ 0 ] = ms.anDice[ 0 ];
-	  pmr->anDice[ 1 ] = ms.anDice[ 1 ];
-	  pmr->fPlayer = ms.fTurn;
-	  
-	  if( ( c = ParseMove( szResponse, pmr->n.anMove ) ) < 0 ) {
-	      pmr->n.anMove[ 0 ] = 0;
-	      outputl( _("Warning: badly formed move from external player") );
-	      return -1;
-	  } else
-		  parsemove_to_anmove(c, pmr->n.anMove);
-	  if( pmr->n.anMove[ 0 ] < 0 )
-	      playSound ( SOUND_BOT_DANCE );
-      
-
-	  AddMoveRecord( pmr );
-	  return 0;
+	      int an[8];
+	      parse_move_is_legal(szResponse, &ms, an);
+	      pmr = NewMoveRecord();
+	      pmr->mt = MOVE_NORMAL;
+	      pmr->anDice[ 0 ] = ms.anDice[ 0 ];
+	      pmr->anDice[ 1 ] = ms.anDice[ 1 ];
+	      pmr->fPlayer = ms.fTurn;
+	      memcpy( pmr->n.anMove, an, sizeof pmr->n.anMove );
+	      if( pmr->n.anMove[ 0 ] < 0 )
+	      {
+		      /* illegal or no move */
+		      playSound ( SOUND_BOT_DANCE );
+	      }
+	      AddMoveRecord( pmr );
+	      return 0;
       }
 #else
       /* fall through */
@@ -2482,12 +2480,59 @@ extern void CommandListMatch( char *sz ) {
     /* FIXME */
 }
 
+/*! \brief finds the new board in the list of moves/
+ * \param pml the list of moves
+ * \param old_board the board before move
+ * \param board the new board 
+ * \return 1 if found, 0 otherwise
+ */
+extern int board_in_list(const movelist *pml, const TanBoard old_board, const TanBoard board, int *an)
+{
+	guint j;
+	TanBoard list_board;
+	g_return_val_if_fail(pml, FALSE);
+	g_return_val_if_fail(old_board, FALSE);
+	g_return_val_if_fail(board, FALSE);
+	for (j = 0; j < pml->cMoves; j++) {
+		memcpy(list_board, old_board, sizeof(TanBoard));
+		ApplyMove(list_board, pml->amMoves[j].anMove, FALSE);
+		if (memcmp(list_board, board, sizeof(TanBoard)) == 0)
+		{
+			if (an)
+				memcpy(an, pml->amMoves[j].anMove, 8 * sizeof(int));
+			return 1;
+		}
+	}
+	if (an)
+		*an = -1;
+	return 0;
+}
+
+/*! \brief parses the move and finds the new board in the list of moves/
+ * \param pml the list of moves
+ * \param old_board the board before move
+ * \param board the new board 
+ * \return 1 if found, 0 otherwise
+ */
+static gboolean parse_move_is_legal(char *sz, const matchstate *pms, int *an)
+{
+	int c;
+	TanBoard anBoardNew;
+	movelist ml;
+	c = ParseMove(sz, an);
+	if (c < 0)
+		return FALSE;
+	parsemove_to_anmove(c, an);
+	memcpy(anBoardNew, ms.anBoard, sizeof(TanBoard));
+	ApplyMove(anBoardNew, an, FALSE);
+	GenerateMoves(&ml, pms->anBoard, pms->anDice[0], pms->anDice[1], FALSE);
+	return board_in_list(&ml, pms->anBoard, (ConstTanBoard)anBoardNew, an);
+}
+
 extern void 
 CommandMove( char *sz ) {
 
     int an[ 8 ];
-	TanBoard anBoardNew;
-	int c;
     movelist ml;
     moverecord *pmr;
     
@@ -2572,18 +2617,12 @@ CommandMove( char *sz ) {
 	return;
     }
     
-    if( ( c = ParseMove( sz, an ) ) < 0 )
+    if (!parse_move_is_legal(sz, &ms, an))
     {
-	    outputerrf(_("Move '%s' could not be parsed"), sz);
+	    outputerrf( _("Illegal or unparsable move.") );
 	    return;
     }
-    parsemove_to_anmove(c, an);
-    memcpy(anBoardNew, ms.anBoard, sizeof(TanBoard));
-    if (ApplyMove(anBoardNew, an, TRUE) <0)
-    {
-	    outputerrf( _("Illegal move.") );
-	    return;
-    }
+
     /* we have a legal move! */
     playSound ( SOUND_MOVE );
     pmr = NewMoveRecord();

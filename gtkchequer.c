@@ -407,7 +407,6 @@ MoveListMove ( GtkWidget *pw, hintdata *phd )
 	move m;
 	move *pm;
 	char szMove[ 40 ];
-	TanBoard anBoard;
 	GList *plSelList = MoveListGetSelectionList(phd);
 	if (!plSelList)
 		return;
@@ -416,15 +415,6 @@ MoveListMove ( GtkWidget *pw, hintdata *phd )
 	MoveListFreeSelectionList(plSelList);
 
 	memcpy(&m, pm, sizeof(move));
-
-	memcpy ( anBoard, msBoard(), sizeof(TanBoard) );
-	ApplyMove ( anBoard, m.anMove, FALSE );
-
-	if ( ! ms.fMove )
-	SwapSides ( anBoard );
-
-	sprintf ( szMove, "show fullboard %s", PositionID ( (ConstTanBoard)anBoard ) );
-	UserCommand ( szMove );
 
 	if ( phd->fDestroyOnMove )
 	/* Destroy widget on exit */

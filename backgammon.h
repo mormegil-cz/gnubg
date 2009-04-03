@@ -1006,4 +1006,5 @@ extern void CallbackProgress( void );
 extern void SetRNG( rng *prng, rngcontext *rngctx, rng rngNew, char *szSeed );
 extern int check_resigns(cubeinfo * pci);
 extern int quick_roll(void);
+extern int board_in_list(const movelist *pml, const TanBoard old_board, const TanBoard board, int *an);
 #endif

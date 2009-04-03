@@ -867,25 +867,6 @@ static int apply_perm(TanBoard board, int *from_point, int permi[])
 	return 1;
 }
 
-/*! \brief finds the new board in the list of moves/
- * \param pml the list of moves
- * \param old_board the board before move
- * \param board the new board 
- * \return 1 if found, 0 otherwise
- */
-static int board_in_list(movelist *pml, TanBoard old_board, TanBoard board)
-{
-	guint j;
-	TanBoard list_board;
-	for (j = 0; j < pml->cMoves; j++) {
-		memcpy(list_board, old_board, sizeof(TanBoard));
-		ApplyMove(list_board, pml->amMoves[j].anMove, FALSE);
-		if (memcmp(list_board, board, sizeof(TanBoard)) == 0)
-			return 1;
-	}
-	return 0;
-}
-
 /*! \brief finds legal destinations for a dragged chequer
  * \param bd The board with a chequer lifted
  * \param dest_points the legal destinations if any
@@ -923,7 +904,7 @@ static gboolean legal_dest_points(BoardData * bd, int dest_points[4])
 		memcpy(board, real_board, sizeof(TanBoard));
 		if (!apply_perm(board, &from_point, perm[i]))
 			continue;
-		if (!board_in_list(&ml, bd->old_board, board))
+		if (!board_in_list(&ml, (ConstTanBoard)bd->old_board, (ConstTanBoard)board, NULL))
 			continue;
 
 		/* from_point is now the final dest */
