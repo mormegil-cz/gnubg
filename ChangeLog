@@ -1,3 +1,7 @@
+Sun Apr  5 17:16:41 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtkboard.c, gtkgame.c: add labels to the manual dice widget
+
 Fri Apr  3 22:04:43 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gtkboard.c: Use the player's dice color to chose who wins

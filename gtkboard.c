@@ -4071,7 +4071,7 @@ static gboolean dice_widget_press( GtkWidget *dice, GdkEvent *event, BoardData
 		*bd )
 {
 
-    GtkWidget *pwTable = dice->parent;
+    GtkWidget *pwTable = dice->parent->parent;
     int n = GPOINTER_TO_INT(g_object_get_data( G_OBJECT( dice ), "user_data" ));
     int *an = g_object_get_data( G_OBJECT( pwTable ), "user_data" );
 
@@ -4111,54 +4111,64 @@ extern void Copy3dDiceColour(renderdata* prd)
 }
 #endif
 
-extern GtkWidget *board_dice_widget( Board *board )
+extern GtkWidget *board_dice_widget(Board * board)
 {
-	GtkWidget *pw = gtk_table_new( 6, 6, TRUE ), *pwDice;
-	BoardData *bd = board->board_data;    
+	GtkWidget *main_table = gtk_table_new(2, 2, FALSE);
+	GtkWidget *pw = gtk_table_new(6, 6, TRUE);
+	GtkWidget *pwDice;
+	GtkWidget *label;
+	BoardData *bd = board->board_data;
 	int x, y;
 	int setSize = bd->rd->nSize;
-
 	int diceStride = setSize * DIE_WIDTH * 4;
 	int pipStride = setSize * 3;
 	renderdata rd;
+
+	label = gtk_label_new(_("High die right (or buttom player wins opening roll)"));
+	gtk_label_set_angle(GTK_LABEL(label), 90);
+	gtk_table_attach_defaults(GTK_TABLE(main_table), label, 0, 1, 1, 2);
+
+	label = gtk_label_new(_("High die left (or top player wins opening roll)"));
+	gtk_table_attach_defaults(GTK_TABLE(main_table), label, 1, 2, 0, 1);
+
+	gtk_table_attach_defaults(GTK_TABLE(main_table), pw, 1, 2, 1, 2);
+
 	CopyAppearance(&rd);
 	rd.nSize = setSize;
 #if USE_BOARD3D
 	Copy3dDiceColour(&rd);
 #endif
-	TTachDice[ 0 ] = malloc(diceStride * setSize * DIE_HEIGHT);
-	TTachDice[ 1 ] = malloc(diceStride * setSize * DIE_HEIGHT);
-	TTachPip[ 0 ] = malloc(pipStride * setSize);
-	TTachPip[ 1 ] = malloc(pipStride * setSize);
+	TTachDice[0] = malloc(diceStride * setSize * DIE_HEIGHT);
+	TTachDice[1] = malloc(diceStride * setSize * DIE_HEIGHT);
+	TTachPip[0] = malloc(pipStride * setSize);
+	TTachPip[1] = malloc(pipStride * setSize);
 
-	RenderDice( &rd, TTachDice[ 0 ], TTachDice[ 1 ], diceStride );
-	RenderPips( &rd, TTachPip[ 0 ], TTachPip[ 1 ], pipStride );
+	RenderDice(&rd, TTachDice[0], TTachDice[1], diceStride);
+	RenderPips(&rd, TTachPip[0], TTachPip[1], pipStride);
 
-	for( y = 0; y < 6; y++ )
-	{
-		for( x = 0; x < 6; x++ )
-		{
+	for (y = 0; y < 6; y++) {
+		for (x = 0; x < 6; x++) {
 			pwDice = gtk_drawing_area_new();
-			g_object_set_data( G_OBJECT( pwDice ), "user_data",
-							GINT_TO_POINTER(( y * 6 + x )));
-			gtk_widget_set_size_request(pwDice, 2 * DIE_WIDTH * setSize, DIE_HEIGHT * setSize );
-			gtk_widget_add_events( pwDice, GDK_EXPOSURE_MASK |
-						GDK_BUTTON_PRESS_MASK |
-						GDK_STRUCTURE_MASK );
-			g_signal_connect( G_OBJECT( pwDice ), "expose_event",
-					G_CALLBACK( dice_widget_expose ), bd );
-			g_signal_connect( G_OBJECT( pwDice ), "button_press_event",
-					G_CALLBACK( dice_widget_press ), bd );
-			gtk_table_attach_defaults( GTK_TABLE( pw ), pwDice,
-							x, x + 1, y, y + 1 );
+			g_object_set_data(G_OBJECT(pwDice), "user_data",
+					  GINT_TO_POINTER((y * 6 + x)));
+			gtk_widget_set_size_request(pwDice, 2 * DIE_WIDTH * setSize,
+						    DIE_HEIGHT * setSize);
+			gtk_widget_add_events(pwDice,
+					      GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK |
+					      GDK_STRUCTURE_MASK);
+			g_signal_connect(G_OBJECT(pwDice), "expose_event",
+					 G_CALLBACK(dice_widget_expose), bd);
+			g_signal_connect(G_OBJECT(pwDice), "button_press_event",
+					 G_CALLBACK(dice_widget_press), bd);
+			gtk_table_attach_defaults(GTK_TABLE(pw), pwDice, x, x + 1, y, y + 1);
 		}
 	}
 
-	gtk_table_set_row_spacings( GTK_TABLE( pw ), 2 * setSize );
-	gtk_table_set_col_spacings( GTK_TABLE( pw ), 1 * setSize );
-	gtk_container_set_border_width( GTK_CONTAINER( pw ), setSize );
+	gtk_table_set_row_spacings(GTK_TABLE(pw), 2 * setSize);
+	gtk_table_set_col_spacings(GTK_TABLE(pw), 1 * setSize);
+	gtk_container_set_border_width(GTK_CONTAINER(pw), setSize);
 
-	return pw;	    
+	return main_table;
 }
 
 #if USE_BOARD3D
