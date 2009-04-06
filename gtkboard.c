@@ -4124,7 +4124,7 @@ extern GtkWidget *board_dice_widget(Board * board)
 	int pipStride = setSize * 3;
 	renderdata rd;
 
-	label = gtk_label_new(_("High die right (or buttom player wins opening roll)"));
+	label = gtk_label_new(_("High die right (or bottom player wins opening roll)"));
 	gtk_label_set_angle(GTK_LABEL(label), 90);
 	gtk_table_attach_defaults(GTK_TABLE(main_table), label, 0, 1, 1, 2);
 
