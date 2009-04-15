@@ -67,30 +67,6 @@ IsValidMove ( const TanBoard anBoard, const int anMove[ 8 ] ) {
 }
 
 
-static int
-IsValidNackMove( const TanBoard anBoard, const int anMove[ 8 ] )
-{
-    int result = 0;
-
-    if ( !anBoard[ 0 ][ 1 ] && !anBoard[ 1 ][ 1 ]         /* opponents checkers on nack point? */
-        && anBoard[ 0 ][ 5 ] && anBoard[ 1 ][ 5 ]         /* need spare checkers on 6 and 12   */
-        && anBoard[ 0 ][ 12 ] && anBoard[ 1 ][ 12 ] )
-	{
-		TanBoard anBoardTemp;
-		memcpy(anBoardTemp, anBoard, sizeof anBoardTemp);
-		anBoardTemp[ 0 ][ 22 ] += 2;                            /* move checkers to nack point       */
-		anBoardTemp[ 1 ][ 22 ] += 2;
-		--anBoardTemp[ 0 ][ 5 ];
-		--anBoardTemp[ 1 ][ 5 ];
-		--anBoardTemp[ 0 ][ 12 ];
-		--anBoardTemp[ 1 ][ 12 ];
-
-		result = IsValidMove( (ConstTanBoard)anBoardTemp, anMove );
-	}
-    return result;
-}
-
-
 static void
 ParseSetDate ( char *szFilename ) {
     /* Gamesgrid mat files contain date in filename.
@@ -507,7 +483,7 @@ static int ImportJF( FILE * fp, char *szFileName) {
 
 }  
 
-static int fWarned, fPostCrawford, fTryNackgammon;
+static int fWarned, fPostCrawford;
 
 
 static int
@@ -597,7 +573,7 @@ ExpandMatMove ( const TanBoard anBoard, int anMove[ 8 ], int *pc,
 
 }
 
-static void ParseMatMove( char *sz, int iPlayer ) {
+static void ParseMatMove( char *sz, int iPlayer, int *warned ) {
 
     char *pch;
     moverecord *pmr;
@@ -704,18 +680,13 @@ static void ParseMatMove( char *sz, int iPlayer ) {
             
             /* check if move is valid */
             
-           if ( ! IsValidMove ( msBoard(), pmr->n.anMove ) ) {
-               if ( !fTryNackgammon ) {
-                   if ( IsValidNackMove( msBoard(), pmr->n.anMove ) ) {
-                       fTryNackgammon = 1;     /* try Nackgammon import next time */
-                   }
-                }
-                if ( !fTryNackgammon ) {
-                    /* only give warning if Nack didn't work either */
-                    outputf ( _("WARNING: Invalid move: \"%s\" encountered\n"), sz + 3 );
-                }
-                return;
-            }
+	    if ( ! IsValidMove ( msBoard(), pmr->n.anMove ) ) {
+		    if (*warned == -1)
+			    outputf ( _("WARNING: Invalid move: \"%s\" encountered\n"), sz + 3 );
+		    else 
+			    *warned = TRUE;
+		    return;
+	    }
             
             AddMoveRecord( pmr );
             
@@ -850,7 +821,7 @@ static char* GetMatLine(FILE* fp)
 }
 
 static int 
-ImportGame( FILE *fp, int iGame, int nLength, bgvariation bgVariation ) {
+ImportGame( FILE *fp, int iGame, int nLength, bgvariation bgVariation, int *warned ) {
 
     char sz0[ MAX_NAME_LEN ], sz1[ MAX_NAME_LEN ], *pch, *pchLeft, *pchRight = NULL, *szLine;
     int n0, n1;
@@ -970,10 +941,12 @@ ImportGame( FILE *fp, int iGame, int nLength, bgvariation bgVariation ) {
       else
 	    pchLeft = szLine;
 
-      ParseMatMove( pchLeft, 0 );
+      ParseMatMove( pchLeft, 0, warned );
 
-      if( pchRight )
-	    ParseMatMove( pchRight, 1 );
+      if( pchRight && *warned < TRUE)
+	    ParseMatMove( pchRight, 1, warned );
+      if (*warned == TRUE)
+	      return 1;
     }
 
     AddGame( pmr );
@@ -984,145 +957,115 @@ ImportGame( FILE *fp, int iGame, int nLength, bgvariation bgVariation ) {
 
 }
 
-static int ImportMatVariation( FILE *fp, char *szFilename, bgvariation bgVariation ) {
+static int ImportMatVariation(FILE * fp, char *szFilename, bgvariation bgVariation, int warned)
+{
 
-    int n = 0, nLength, game;
-    char ch;
-    gchar *pchComment = NULL;
-    char *szLine;
+	int n = 0, nLength, game;
+	char ch;
+	gchar *pchComment = NULL;
+	char *szLine;
 
-    fWarned = fPostCrawford = FALSE;
-    
-    do
-    {
-      szLine = GetMatLine(fp);
-      if (!szLine)
-      {
-        outputerrf( _("%s: not a valid .mat file"), szFilename );
-        g_free( pchComment );
-        return -1;
-      }
+	fWarned = fPostCrawford = FALSE;
 
-      if ( *szLine == '#' || *szLine == ';' ) {
-        /* comment */
-        char *pchOld = pchComment;
-        char *pch;
-        if( ( pch = strpbrk( szLine, "\n\r" ) ) )
-          *pch = 0;
-        pch = szLine + 1;
-        while ( isspace( *pch ) )
-          ++pch;
-        if ( *pch ) {
-          pchComment = g_strconcat( pchComment ? pchComment : "", 
-                                    pch, "\n", NULL );
-          g_free( pchOld );
-        }
-      }
-      else
-        /* Look for start of mat file */
-        n = sscanf( szLine, "%d %*1[Pp]oint %*1[Mm]atch%c", &nLength, &ch );
-    } while(n != 2);
-    
-    if( ms.gs == GAME_PLAYING && fConfirmNew ) {
-      if( fInterrupt ) {
-        g_free( pchComment );
-        return -1;
-      }
-	    
-      if( !GetInputYN( _("Are you sure you want to import a saved match, "
-                         "and discard the game in progress? ") ) ) {
-        g_free( pchComment );
-        return -1;
-      }
-    }
-    if (nLength <0)
-    {
-	    outputerrf(_("Invalid match length %d found in mat file\n"), nLength);
-	    return -1;
-    }
-    else if (nLength > MAXSCORE)
-	    outputerrf(("GNU Backgammon doesn't support the match length(%d), maximum is %d. Proceeding anyway, but expect the roof to fall down!"), nLength, MAXSCORE);
+	do {
+		szLine = GetMatLine(fp);
+		if (!szLine) {
+			outputerrf(_("%s: not a valid .mat file"), szFilename);
+			g_free(pchComment);
+			return -1;
+		}
+
+		if (*szLine == '#' || *szLine == ';') {
+			/* comment */
+			char *pchOld = pchComment;
+			char *pch;
+			if ((pch = strpbrk(szLine, "\n\r")))
+				*pch = 0;
+			pch = szLine + 1;
+			while (isspace(*pch))
+				++pch;
+			if (*pch) {
+				pchComment = g_strconcat(pchComment ? pchComment : "",
+							 pch, "\n", NULL);
+				g_free(pchOld);
+			}
+		} else
+			/* Look for start of mat file */
+			n = sscanf(szLine, "%d %*1[Pp]oint %*1[Mm]atch%c", &nLength, &ch);
+	} while (n != 2);
+
+	if (nLength < 0) {
+		outputerrf(_("Invalid match length %d found in mat file\n"), nLength);
+		return -1;
+	} else if (nLength > MAXSCORE)
+		outputerrf(("GNU Backgammon doesn't support the match length(%d), "
+			    "maximum is %d. Proceeding anyway, but expect the "
+			    "roof to fall down!"), nLength, MAXSCORE);
 
 #if USE_GTK
-	if( fX )
-	{	/* Clear record to avoid ugly updates */
+	if (fX) {		/* Clear record to avoid ugly updates */
 		GTKClearMoveRecord();
 		GTKFreeze();
 	}
 #endif
-    
-    FreeMatch();
-    ClearMatch();
 
-    ParseSetDate ( szFilename );
+	ParseSetDate(szFilename);
 
-    if ( pchComment ) 
-      mi.pchComment = g_strdup( pchComment ); /* no need to free mi.pchComment 
-                                               as it's already done in 
-                                               ClearMatch */
-    g_free( pchComment );
+	if (pchComment)
+		mi.pchComment = g_strdup(pchComment);	/* no need to free mi.pchComment as it's
+							   already done in ClearMatch */
+	g_free(pchComment);
 
 	szLine = GetMatLine(fp);
-	while(szLine)
-	{
-		if (!strncmp(szLine, START_STRING, START_STRING_LEN))
-		{
+	while (szLine) {
+		if (!strncmp(szLine, START_STRING, START_STRING_LEN)) {
 			game = atoi(szLine + START_STRING_LEN);
 			if (!game)
-				outputf( _("WARNING! Unrecognized line in mat file: '%s'\n"), szLine);
+				outputf(_("WARNING! Unrecognized line in mat file: '%s'\n"),
+					szLine);
 			{
-				if (ImportGame(fp, game - 1, nLength, bgVariation))
-					break;  /* match is over; avoid multiple matches in same .mat file */
+				if (ImportGame(fp, game - 1, nLength, bgVariation, &warned))
+					break;	/* import failed */
 			}
-		}
-		else 
-		  szLine = GetMatLine(fp);
+		} else
+			szLine = GetMatLine(fp);
 
-    }
+	}
 
-    UpdateSettings();
-    
+	UpdateSettings();
+
 #if USE_GTK
-    if( fX ){
-	GTKThaw();
-	GTKSet(ap);
-    }
+	if (fX) {
+		GTKThaw();
+		GTKSet(ap);
+	}
 #endif
 
-    return 0;
-
+	return (warned > 0);
 }
 
 
-static int
-ImportMat( FILE *fp, char *szFilename ) {
+static int ImportMat(FILE * fp, char *szFilename)
+{
 
-    int result;
+	bgvariation bgv;
 
-    fTryNackgammon = 0;
+	if (ms.gs == GAME_PLAYING && fConfirmNew
+	    && !GetInputYN(_("Are you sure you want to import a saved match, "
+			     "and discard the game in progress? ")))
+		return -1;
 
-    /* try to import standard backgammon first */
-    result = ImportMatVariation( fp, szFilename, VARIATION_STANDARD );
+	for (bgv = VARIATION_STANDARD; bgv < NUM_VARIATIONS; bgv++) {
+		if (ImportMatVariation(fp, szFilename, bgv, FALSE) == 0)
+			return 0;
+		/* reset and try a different format */
+		if (fseek(fp, 0L, SEEK_SET) != 0)
+			return -1;
+		FreeMatch();
+		ClearMatch();
+	}
 
-    if ( fTryNackgammon && result == 0 ) {
-        if ( fseek( fp, 0L, SEEK_SET ) == 0 ) {
-
-            /* if nackgammon did the trick during standard import try it */
-            result = ImportMatVariation( fp, szFilename, VARIATION_NACKGAMMON );
-            if ( result != 0 ) {
-
-                /* nack didn't work either, use standard again */
-                if ( fseek( fp, 0L, SEEK_SET ) == 0 ) {
-                    result = ImportMatVariation( fp, szFilename, VARIATION_STANDARD );
-                } else {
-                    result = -1;    /* fseek failed */ 
-                }
-            }
-        } else {
-            result = -1;    /* fseek failed */
-        }
-    }
-    return result;
+	return ImportMatVariation(fp, szFilename, VARIATION_STANDARD, -1);
 }
 
 
@@ -3329,6 +3272,7 @@ static int ImportGAM(FILE *fp, char *szFilename )
 {
 	char *pch, *pchLeft, *pchRight, *szLine;
 	moverecord *pmgi;
+	int warned = -1;
 
 #if USE_GTK
 	if( fX )
@@ -3388,6 +3332,7 @@ static int ImportGAM(FILE *fp, char *szFilename )
 		pmgi->g.fCubeUse = TRUE;          /* assume use of cube */
 		IniStatcontext( &pmgi->g.sc );
 
+
 		AddMoveRecord( pmgi );
 
 		/* Read game */
@@ -3409,10 +3354,10 @@ static int ImportGAM(FILE *fp, char *szFilename )
 			else
 				pchLeft = szLine;
 
-			ParseMatMove( pchLeft, 0 );
+			ParseMatMove( pchLeft, 0, &warned );
 
 			if( pchRight )
-				ParseMatMove( pchRight, 1 );
+				ParseMatMove( pchRight, 1, &warned);
 
 			if (ms.gs != GAME_PLAYING)
 			{
