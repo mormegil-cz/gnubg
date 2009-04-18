@@ -1196,7 +1196,7 @@ extern void RolloutLoopMT(void *unused)
 				ajiJSD[1].rJSD = (float)fabs(ajiJSD[1].rEquity / ajiJSD[1].rJSD);
 				if (rcRollout.fStopOnJsd &&
 						(altGameCount[0] >= (rcRollout.nMinimumJsdGames - 1)) &&
-						rcRollout.rJsdLimit < MIN(ajiJSD[0].rJSD, ajiJSD[0].rJSD))
+						rcRollout.rJsdLimit < MIN(ajiJSD[0].rJSD, ajiJSD[1].rJSD))
 				{ 
 					fNoMore[0] = 1;
 					fNoMore[1] = 1;

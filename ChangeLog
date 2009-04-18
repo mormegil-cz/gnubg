@@ -1,3 +1,8 @@
+Sat Apr 18 22:29:37 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtkgame.c: set shrink FALSE in the panel pane
+	* rollout.c: fix typo in jsd check causing cube rollouts to stop early 
+
 Wed Apr 15 19:51:11 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* import.c: check for bg variations when importing mat.

@@ -3284,7 +3284,7 @@ static void CreateMainWindow(void)
 	   BOARD(pwBoard)->board_data);
 
    pwPanelHbox = gtk_hbox_new(FALSE, 0);
-   gtk_paned_add2(GTK_PANED(hpaned), pwPanelHbox);
+   gtk_paned_pack2(GTK_PANED(hpaned), pwPanelHbox, FALSE, FALSE);
    gtk_box_pack_start( GTK_BOX( pwPanelHbox ), pwPanelVbox = gtk_vbox_new( FALSE, 1 ), TRUE, TRUE, 0);
 
    DockPanels();
