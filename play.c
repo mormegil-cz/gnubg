@@ -509,7 +509,6 @@ static void copy_from_pmr_cur(moverecord *pmr, gboolean get_move, gboolean get_c
 		pmr->CubeDecPtr->cmark = pmr_cur->CubeDecPtr->cmark;
 	}
 
-	find_skills(pmr, &ms, -1, -1);
 }
 
 static void add_moverecord_get_cur(moverecord *pmr)
@@ -519,15 +518,25 @@ static void add_moverecord_get_cur(moverecord *pmr)
 	case MOVE_RESIGN:
 		copy_from_pmr_cur(pmr, TRUE, TRUE);
 		pmr_hint_destroy();
+		find_skills(pmr, &ms, FALSE, -1);
 		break;
 	case MOVE_DOUBLE:
+		copy_from_pmr_cur(pmr, FALSE, TRUE);
+		find_skills(pmr, &ms, TRUE, -1);
+		break;
 	case MOVE_TAKE:
+		copy_from_pmr_cur(pmr, FALSE, TRUE);
+		pmr_hint_destroy();
+		find_skills(pmr, &ms, -1, TRUE);
+		break;
 	case MOVE_DROP:
 		copy_from_pmr_cur(pmr, FALSE, TRUE);
 		pmr_hint_destroy();
+		find_skills(pmr, &ms, -1, FALSE);
 		break;
 	case MOVE_SETDICE:
 		copy_from_pmr_cur(pmr, FALSE, TRUE);
+		find_skills(pmr, &ms, FALSE, -1);
 		break;
 	default:
 		pmr_hint_destroy();
@@ -582,8 +591,9 @@ extern void AddMoveRecord( void *pv ) {
     moverecord *pmr = pv, *pmrOld;
 
     add_moverecord_get_cur(pmr);
-    
+
     add_moverecord_sanity_check(pmr);
+
 
     /* Delete all games after plGame, and all records after plLastMove. */
     PopGame( plGame, FALSE );

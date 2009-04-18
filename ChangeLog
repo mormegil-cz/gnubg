@@ -1,3 +1,8 @@
+Sat Apr 18 23:45:02 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtkchequer.c, play.c: fix two problems with the update of skill
+	labels reported by Michel.
+
 Sat Apr 18 22:29:37 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gtkgame.c: set shrink FALSE in the panel pane

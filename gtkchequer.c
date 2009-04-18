@@ -105,6 +105,7 @@ static void MoveListRolloutClicked(GtkWidget *pw, hintdata *phd)
 
   free ( ai );
 
+  find_skills(phd->pmr, &ms, -1, -1);
   MoveListUpdate ( phd );
   if (phd->hist)
   {
