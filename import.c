@@ -1055,6 +1055,9 @@ static int ImportMat(FILE * fp, char *szFilename)
 			     "and discard the game in progress? ")))
 		return -1;
 
+	FreeMatch();
+	ClearMatch();
+
 	for (bgv = VARIATION_STANDARD; bgv < NUM_VARIATIONS; bgv++) {
 		if (ImportMatVariation(fp, szFilename, bgv, FALSE) == 0)
 			return 0;
