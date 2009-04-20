@@ -382,7 +382,9 @@ GTKShowRace ( TanBoard anBoard ) {
 
   /* show dialog */
 
-  PerformOSR ( NULL, prw );
+  /* OSR can take a long time for non-race positions */
+  if( ClassifyPosition( msBoard(), ms.bgv ) <= CLASS_RACE )
+	  PerformOSR ( NULL, prw );
   gtk_notebook_set_current_page ( GTK_NOTEBOOK ( pwNotebook ), 0 );
 
   GTKRunDialog(pwDialog);

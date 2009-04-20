@@ -344,6 +344,9 @@ static void FindBestMoveOSR4(unsigned int anBoard[ 25 ], const unsigned int nDic
 
   }
 
+#if 0
+  /* this is broken or very very slow when the player has chequers in the
+   * 3rd or 4th quadrant */
   if (*pnOut > 0)
   {
     /* check for 4, 3, or 2 chequers move exactly into home quadrant */
@@ -367,6 +370,7 @@ static void FindBestMoveOSR4(unsigned int anBoard[ 25 ], const unsigned int nDic
       }
     }
   }
+#endif
 
   if ( *pnOut > 0 && nd > 0 )
   {

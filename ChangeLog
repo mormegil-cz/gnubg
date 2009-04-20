@@ -1,3 +1,8 @@
+Mon Apr 20 17:42:19 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtkrace.c, osr.c: only perform automatic osr when the position is a
+	race and fix a problem in osr with chequers in the 3rd or 4th quadrant
+
 Sat Apr 18 23:45:02 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gtkchequer.c, play.c: fix two problems with the update of skill
