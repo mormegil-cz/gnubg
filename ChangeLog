@@ -1,3 +1,8 @@
+Mon Apr 20 17:46:37 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtkboard.c, play.c: fix a minor problem in quick_roll and dont' call
+	CommandPlay when clicking during computer turn (may crash)
+
 Mon Apr 20 17:42:19 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gtkrace.c, osr.c: only perform automatic osr when the position is a

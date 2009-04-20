@@ -1638,7 +1638,7 @@ extern gboolean board_button_press(GtkWidget *board, GdkEventButton *event,
 
 	if (!bd->playing)
 	{
-		if (quick_roll() != 0)
+		if (quick_roll() == 0)
 			board_beep(bd);
 		return TRUE;
 	}
@@ -1807,8 +1807,16 @@ extern gboolean board_button_press(GtkWidget *board, GdkEventButton *event,
 
 		if (ap[ms.fTurn].pt != PLAYER_HUMAN && !editing)
 		{
-			UserCommand("play");
+			/* calling CommandPlay here may lead to crashes if
+			 * the click is in the small time frame between end
+			 * of player turn and next computer turn */
+			outputl( _("It is the computer's turn -- type `play' to force it to "
+				"move immediately.") );
+			outputx();
+
+			board_beep(bd);
 			bd->drag_point = -1;
+
 			return TRUE;
 		}
 
