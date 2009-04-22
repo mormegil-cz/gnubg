@@ -1,9 +1,12 @@
+Wed Apr 22 18:28:09 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* progress.c: show the number of trials finished for each of
+	candidates
+
 Tue Apr 21 01:08:20 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* import.c: match wasn't cleared before import of mat files
 
-Mon Apr 20 23:20:44 CEST 2009 Christian Anthon <anthon@kiku.dk>
-: 
 Mon Apr 20 17:46:37 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gtkboard.c, play.c: fix a minor problem in quick_roll and dont' call

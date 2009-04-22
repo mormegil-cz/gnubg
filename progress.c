@@ -42,6 +42,7 @@
 #if USE_GTK
 #include "gtkgame.h"
 #include "gtkwindows.h"
+#define N_ROLLOUT_COLS NUM_ROLLOUT_OUTPUTS + 3
 #endif /* USE_GTK */
 
 
@@ -81,10 +82,10 @@ static void AllocTextList(rolloutprogress *prp)
 
 	for (i = 0; i < lines; i++)
 	{
-		prp->pListText[i * 2] = malloc(sizeof(char*) * (NUM_ROLLOUT_OUTPUTS + 2));
-		memset(prp->pListText[i * 2], 0, sizeof(char*) * (NUM_ROLLOUT_OUTPUTS + 2));
-		prp->pListText[i * 2 + 1] = malloc(sizeof(char*) * (NUM_ROLLOUT_OUTPUTS + 2));
-		memset(prp->pListText[i * 2 + 1], 0, sizeof(char*) * (NUM_ROLLOUT_OUTPUTS + 2));
+		prp->pListText[i * 2] = malloc(sizeof(char*) * (N_ROLLOUT_COLS));
+		memset(prp->pListText[i * 2], 0, sizeof(char*) * (N_ROLLOUT_COLS));
+		prp->pListText[i * 2 + 1] = malloc(sizeof(char*) * (N_ROLLOUT_COLS));
+		memset(prp->pListText[i * 2 + 1], 0, sizeof(char*) * (N_ROLLOUT_COLS));
 	}
 }
 
@@ -756,25 +757,52 @@ static void RolloutStop( GtkObject *UNUSED(po), gpointer UNUSED(p) ) {
     fInterrupt = TRUE;
 }
 
+static GtkWidget *create_rollout_list(int n, char asz[][40])
+{
+	int i;
+	GtkWidget *list;
+	static const char *aszTitle[N_ROLLOUT_COLS] = {
+		NULL,
+		N_("Trials"),
+		N_("Win"),
+		N_("Win (g)"),
+		N_("Win (bg)"),
+		N_("Lose (g)"),
+		N_("Lose (bg)"),
+		N_("Cubeless"),
+		N_("Cubeful"),
+		N_("Rank/no. JSDs")
+	};
+	char *aszEmpty[N_ROLLOUT_COLS] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+	char *aszTemp[N_ROLLOUT_COLS];
+
+	for (i = 0; i < N_ROLLOUT_COLS; i++)
+		aszTemp[i] = aszTitle[i] ? gettext(aszTitle[i]) : "";
+
+	list = gtk_clist_new_with_titles(N_ROLLOUT_COLS, aszTemp);
+	gtk_clist_column_titles_passive(GTK_CLIST(list));
+
+	for (i = 0; i < N_ROLLOUT_COLS; i++) {
+		gtk_clist_set_column_auto_resize(GTK_CLIST(list), i, TRUE);
+		gtk_clist_set_column_justification(GTK_CLIST(list), i, GTK_JUSTIFY_RIGHT);
+	}
+
+	for (i = 0; i < n; i++) {
+		gtk_clist_append(GTK_CLIST(list), aszEmpty);
+		gtk_clist_append(GTK_CLIST(list), aszEmpty);
+
+		gtk_clist_set_text(GTK_CLIST(list), 2 * i, 0, asz[i]);
+		gtk_clist_set_text(GTK_CLIST(list), 2 * i + 1, 0, _("Standard error"));
+	}
+	return list;
+}
+
 static void 
 GTKRolloutProgressStart( const cubeinfo *UNUSED(pci), const int n,
                          rolloutstat aars[][ 2 ],
                          rolloutcontext *prc,
                          char asz[][ 40 ], void **pp ) {
     
-  static const char *aszTitle[] = {
-    NULL,
-    N_("Win"), 
-    N_("Win (g)"), 
-    N_("Win (bg)"), 
-    N_("Lose (g)"), 
-    N_("Lose (bg)"),
-    N_("Cubeless"), 
-    N_("Cubeful"),
-	N_("Rank/no. JSDs")
-  }; 
-  char *aszEmpty[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
-  char *aszTemp[ 9 ];
   gchar *sz;
   int i;
   GtkWidget *pwVbox;
@@ -782,7 +810,6 @@ GTKRolloutProgressStart( const cubeinfo *UNUSED(pci), const int n,
   GtkWidget *pwhbox;
   rolloutprogress *prp = 
     (rolloutprogress *) g_malloc( sizeof ( rolloutprogress ) );
-  int nColumns = sizeof (aszTitle) / sizeof (aszTitle[0]);
   *pp = prp;
   prp->prs = (rolloutstat *) aars;
   prp->n = n;
@@ -824,35 +851,13 @@ GTKRolloutProgressStart( const cubeinfo *UNUSED(pci), const int n,
                       G_CALLBACK( GTKViewRolloutStatistics ), prp );
 
   pwVbox = gtk_vbox_new( FALSE, 4 );
-	
-  for ( i = 0; i < nColumns; i++ )
-    aszTemp[ i ] = aszTitle[ i ] ? gettext ( aszTitle[ i ] ) : "";
-
-  prp->pwRolloutResult = gtk_clist_new_with_titles( nColumns, aszTemp );
-  gtk_clist_column_titles_passive( GTK_CLIST( prp->pwRolloutResult ) );
-    
+  prp->pwRolloutResult = create_rollout_list(n, asz);
   prp->pwRolloutProgress = gtk_progress_bar_new();
   
   gtk_box_pack_start( GTK_BOX( pwVbox ), prp->pwRolloutResult, TRUE, TRUE, 0 );
   gtk_box_pack_start( GTK_BOX( pwVbox ), prp->pwRolloutProgress, FALSE, FALSE,
                       0 );
     
-  for( i = 0; i < nColumns; i++ ) {
-    gtk_clist_set_column_auto_resize( GTK_CLIST( prp->pwRolloutResult ), i,
-                                      TRUE );
-    gtk_clist_set_column_justification( GTK_CLIST( prp->pwRolloutResult ), i,
-                                        GTK_JUSTIFY_RIGHT );
-  }
-
-  for( i = 0; i < n; i++ ) {
-    gtk_clist_append( GTK_CLIST( prp->pwRolloutResult ), aszEmpty );
-    gtk_clist_append( GTK_CLIST( prp->pwRolloutResult ), aszEmpty );
-
-    gtk_clist_set_text( GTK_CLIST( prp->pwRolloutResult ), i << 1, 0,
-                        asz[ i ] );
-    gtk_clist_set_text( GTK_CLIST( prp->pwRolloutResult ), ( i << 1 ) | 1, 0,
-                        _("Standard error") );
-  }
 
   
   /* time elapsed and left */
@@ -919,6 +924,9 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
     if( !prp ||  !prp->pwRolloutResult )
       return;
 
+    sprintf(sz, "%d", iGame + 1);
+    SetRolloutText(prp, iAlternative * 2, 1, sz);
+
     for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ ) {
 
       /* result */
@@ -934,7 +942,7 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                 prc->fCubeful ? OutputMWC( aarOutput[ iAlternative ][ i ],
                                            &aci[ 0 ], TRUE ) : "n/a" );
 
-		SetRolloutText(prp, iAlternative * 2, i + 1, sz);
+		SetRolloutText(prp, iAlternative * 2, i + 2, sz);
 
       /* standard errors */
 
@@ -949,7 +957,7 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                 prc->fCubeful ? OutputMWC( aarStdDev[ iAlternative ][ i ],
                                            &aci[ 0 ], FALSE ) : "n/a" );
 
-		SetRolloutText(prp, iAlternative * 2 + 1, i + 1, sz);
+		SetRolloutText(prp, iAlternative * 2 + 1, i + 2, sz);
 
     }
 
@@ -958,15 +966,15 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 		    sprintf (sz, "%s", fStopped ? "s" : "r");
 	    else
 		    sprintf (sz, "%d %s", nRank, fStopped ? "s" : "r");
-	  SetRolloutText(prp, iAlternative * 2, i + 1, sz);
+	  SetRolloutText(prp, iAlternative * 2, i + 2, sz);
 	  if (nRank != 1 || fCubeRollout)
 	    sprintf( sz,  "%5.3f", rJsd);
 	  else
 	    strcpy (sz, " ");
 
-	  SetRolloutText(prp, iAlternative * 2 + 1, i + 1, sz);
+	  SetRolloutText(prp, iAlternative * 2 + 1, i + 2, sz);
 	} else {
-	  SetRolloutText(prp, iAlternative * 2, i + 1, "n/a");
+	  SetRolloutText(prp, iAlternative * 2, i + 2, "n/a");
 	}
 
 	/* Update progress bar with highest number trials for all the alternatives */
