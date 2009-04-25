@@ -49,6 +49,7 @@ Kaoru Takahashi
 Stein Kulseth
 Mike Petch
 Rod Roark
+Ingo Macherius
 EOF
 
 cat > $support <<EOF
@@ -252,7 +253,8 @@ cat > credits.c <<EOF
 #include <glib/gi18n.h>
 #include "credits.h"
 
-const char aszCOPYRIGHT[] =
+char aszCOPYRIGHT[] = N_("Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004 "
+			"by Gary Wong.\n"
     N_("Copyright (C) 2009 by Gary Wong and the AUTHORS; for details type \`show version'.");
 
 credEntry ceAuthors[] = {
