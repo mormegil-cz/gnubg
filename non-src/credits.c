@@ -18,8 +18,8 @@
 #include <glib/gi18n.h>
 #include "credits.h"
 
-const char aszCOPYRIGHT[] =
-    N_("Copyright (C) 2009 by Gary Wong and the AUTHORS; for details type `show version'.");
+const char aszCOPYRIGHT[] = N_("Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004 by Gary Wong.\n"
+                               "Copyright (C) 2009 by Gary Wong and the AUTHORS; for details type `show version'.");
 
 credEntry ceAuthors[] = {
   {"Joseph Heled", 0},
@@ -42,6 +42,7 @@ credEntry ceContrib[] = {
   {"Stein Kulseth", 0},
   {"Mike Petch", 0},
   {"Rod Roark", 0},
+  {"Ingo Macherius", 0},
   {0, 0}
 };
 
@@ -201,8 +202,9 @@ const char aszAUTHORS[] =
 "\n"
 "                         Contributors of code include:\n"
 "\n"
-"    Olivier Baur    Nis Joergensen  Kaoru Takahashi Mike Petch\n"
-"    Holger Bochnig  Petr Kadlec     Stein Kulseth   Rod Roark\n"
+"    Olivier Baur    Petr Kadlec     Mike Petch\n"
+"    Holger Bochnig  Kaoru Takahashi Rod Roark\n"
+"    Nis Joergensen  Stein Kulseth   Ingo Macherius\n"
 "\n"
 "                            Translations by:\n"
 "\n"
