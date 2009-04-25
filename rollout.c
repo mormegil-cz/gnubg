@@ -1140,7 +1140,7 @@ extern void RolloutLoopMT(void *unused)
 				ajiJSD[alt].rJSD = ajiJSD[alt].rEquity / denominator;
 
 				if ((rcRollout.fStopMoveOnJsd || rcRollout.fStopOnJsd) &&
-				    (altGameCount[alt] >= (rcRollout.nMinimumJsdGames - 1))) {
+				    (altGameCount[alt] >= (rcRollout.nMinimumJsdGames ))) {
 					if (ajiJSD[alt].rJSD > rcRollout.rJsdLimit) {
 						/* This move is no longer worth rolling out */
 
@@ -1195,7 +1195,7 @@ extern void RolloutLoopMT(void *unused)
 				ajiJSD[1].rEquity = ajiJSD[1].rEquity - eq_dp;
 				ajiJSD[1].rJSD = (float)fabs(ajiJSD[1].rEquity / ajiJSD[1].rJSD);
 				if (rcRollout.fStopOnJsd &&
-						(altGameCount[0] >= (rcRollout.nMinimumJsdGames - 1)) &&
+						(altGameCount[0] >= (rcRollout.nMinimumJsdGames )) &&
 						rcRollout.rJsdLimit < MIN(ajiJSD[0].rJSD, ajiJSD[1].rJSD))
 				{ 
 					fNoMore[0] = 1;
@@ -1210,7 +1210,7 @@ extern void RolloutLoopMT(void *unused)
 			for (alt = 0; alt < ro_alternatives; ++alt) {
 				int output;
 				err_too_big = 0;
-				if (fNoMore[alt] || altGameCount[alt] < (rcRollout.nMinimumGames - 1))
+				if (fNoMore[alt] || altGameCount[alt] < (rcRollout.nMinimumGames ))
 					continue;
 				prc = &ro_apes[alt]->rc;
 				for (output = 0; output < NUM_ROLLOUT_OUTPUTS; output++) {

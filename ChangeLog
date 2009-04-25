@@ -1,3 +1,8 @@
+Sun Apr 26 01:02:06 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* rollout.c: mt rollouts stopped one short of the minum number of
+	trials when using jsd or sd criteria.
+
 Sat Apr 25 22:01:35 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* AUTHORS, credits.sh, non-src/credits.c: Add Ingo Macherius to list
