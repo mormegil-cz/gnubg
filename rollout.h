@@ -64,6 +64,7 @@ typedef void
                         float arStdDev[][ NUM_ROLLOUT_OUTPUTS ],
                         const rolloutcontext *prc,
                         const cubeinfo aci[],
+			unsigned int initial_game_count,
                         const int iGame,
                         const int iAlternative,
 						const int nRank,

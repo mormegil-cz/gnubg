@@ -119,28 +119,15 @@ static void SetRolloutText(rolloutprogress *prp, int x, int y, const char* sz)
  *
  */
 
-static time_t
-estimatedTimeLeft( const time_t tStart, const int iGame, const int nTrials,
-                   const int iAlt, const int nAlt ) {
-
-  time_t t;
-  time_t delta;
-  float tpert;
-
-  time( &t );
-
-  delta = t - tStart;
-
-  /* time per trial so far */
-
-  tpert = 1.0f * delta / ( 1.0f * ( iGame * nAlt + iAlt + 1 ) );
-
-  /* estimate time left */
-
-  return (time_t)(( ( nAlt - iAlt - 1 ) + ( nTrials - iGame - 1 ) * nAlt ) * tpert);
-
+static time_t time_left(unsigned int n_games_todo, unsigned int n_games_done,
+			unsigned int initial_game_count, time_t t_start)
+{
+	float pt;
+	time_t t_now;
+	time(&t_now);
+	pt = ((float)n_games_todo) / (n_games_done - initial_game_count);
+	return pt * (t_now - t_start);
 }
-
 
 static char *
 formatDelta( const time_t t ) {
@@ -804,7 +791,6 @@ GTKRolloutProgressStart( const cubeinfo *UNUSED(pci), const int n,
                          char asz[][ 40 ], void **pp ) {
     
   gchar *sz;
-  int i;
   GtkWidget *pwVbox;
   GtkWidget *pwButtons;
   GtkWidget *pwhbox;
@@ -902,134 +888,129 @@ GTKRolloutProgressStart( const cubeinfo *UNUSED(pci), const int n,
 }
 
 static void
-GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
-                    float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
-                    const rolloutcontext *prc,
-                    const cubeinfo aci[],
-                    const int iGame,
-                    const int iAlternative,
-					const int nRank,	
-					const float rJsd,
-					const int fStopped,
-					const int fShowRanks,
-					int fCubeRollout,
-                    rolloutprogress *prp ) {
+GTKRolloutProgress(float aarOutput[][NUM_ROLLOUT_OUTPUTS],
+		   float aarStdDev[][NUM_ROLLOUT_OUTPUTS],
+		   const rolloutcontext * prc,
+		   const cubeinfo aci[],
+		   unsigned int initial_game_count,
+		   const int iGame,
+		   const int iAlternative,
+		   const int nRank,
+		   const float rJsd,
+		   const int fStopped,
+		   const int fShowRanks, int fCubeRollout, rolloutprogress * prp)
+{
 
-	static int maxGames = 0;
-    char sz[ 32 ];
-    int i;
-    gchar *gsz;
-    double frac;
+	static unsigned int n_games_todo = 0;
+	static unsigned int n_games_done = 0;
+	static int min_games_done = 0;
+	char sz[32];
+	int i;
+	gchar *gsz;
+	double frac;
 
-    if( !prp ||  !prp->pwRolloutResult )
-      return;
+	if (!prp || !prp->pwRolloutResult)
+		return;
 
-    sprintf(sz, "%d", iGame + 1);
-    SetRolloutText(prp, iAlternative * 2, 1, sz);
+	sprintf(sz, "%d", iGame + 1);
+	SetRolloutText(prp, iAlternative * 2, 1, sz);
 
-    for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ ) {
+	for (i = 0; i < NUM_ROLLOUT_OUTPUTS; i++) {
 
-      /* result */
+		/* result */
 
-      if ( i < OUTPUT_EQUITY ) 
-        strcpy( sz, OutputPercent( aarOutput[ iAlternative ][ i ] ) );
-      else if ( i == OUTPUT_EQUITY ) 
-        strcpy( sz, OutputEquityScale( aarOutput[ iAlternative ][ i ],
-                                       &aci[ iAlternative ], &aci[ 0 ], 
-                                       TRUE ) );
-      else 
-        strcpy( sz, 
-                prc->fCubeful ? OutputMWC( aarOutput[ iAlternative ][ i ],
-                                           &aci[ 0 ], TRUE ) : "n/a" );
+		if (i < OUTPUT_EQUITY)
+			strcpy(sz, OutputPercent(aarOutput[iAlternative][i]));
+		else if (i == OUTPUT_EQUITY)
+			strcpy(sz, OutputEquityScale(aarOutput[iAlternative][i],
+						     &aci[iAlternative], &aci[0], TRUE));
+		else
+			strcpy(sz,
+			       prc->fCubeful ? OutputMWC(aarOutput[iAlternative][i],
+							 &aci[0], TRUE) : "n/a");
 
 		SetRolloutText(prp, iAlternative * 2, i + 2, sz);
 
-      /* standard errors */
+		/* standard errors */
 
-      if ( i < OUTPUT_EQUITY )
-        strcpy( sz, OutputPercent( aarStdDev[ iAlternative ][ i ] ) );
-      else if ( i == OUTPUT_EQUITY ) 
-        strcpy( sz, OutputEquityScale( aarStdDev[ iAlternative ][ i ],
-                                       &aci[ iAlternative ], &aci[ 0 ], 
-                                       FALSE ) );
-      else
-        strcpy( sz, 
-                prc->fCubeful ? OutputMWC( aarStdDev[ iAlternative ][ i ],
-                                           &aci[ 0 ], FALSE ) : "n/a" );
+		if (i < OUTPUT_EQUITY)
+			strcpy(sz, OutputPercent(aarStdDev[iAlternative][i]));
+		else if (i == OUTPUT_EQUITY)
+			strcpy(sz, OutputEquityScale(aarStdDev[iAlternative][i],
+						     &aci[iAlternative], &aci[0], FALSE));
+		else
+			strcpy(sz,
+			       prc->fCubeful ? OutputMWC(aarStdDev[iAlternative][i],
+							 &aci[0], FALSE) : "n/a");
 
 		SetRolloutText(prp, iAlternative * 2 + 1, i + 2, sz);
 
-    }
+	}
 
-    if (fShowRanks && iGame > 1) {
-	    if (fCubeRollout)
-		    sprintf (sz, "%s", fStopped ? "s" : "r");
-	    else
-		    sprintf (sz, "%d %s", nRank, fStopped ? "s" : "r");
-	  SetRolloutText(prp, iAlternative * 2, i + 2, sz);
-	  if (nRank != 1 || fCubeRollout)
-	    sprintf( sz,  "%5.3f", rJsd);
-	  else
-	    strcpy (sz, " ");
+	if (fShowRanks && iGame > 1) {
+		if (fCubeRollout)
+			sprintf(sz, "%s", fStopped ? "s" : "r");
+		else
+			sprintf(sz, "%d %s", nRank, fStopped ? "s" : "r");
+		SetRolloutText(prp, iAlternative * 2, i + 2, sz);
+		if (nRank != 1 || fCubeRollout)
+			sprintf(sz, "%5.3f", rJsd);
+		else
+			strcpy(sz, " ");
 
-	  SetRolloutText(prp, iAlternative * 2 + 1, i + 2, sz);
+		SetRolloutText(prp, iAlternative * 2 + 1, i + 2, sz);
 	} else {
-	  SetRolloutText(prp, iAlternative * 2, i + 2, "n/a");
+		SetRolloutText(prp, iAlternative * 2, i + 2, "n/a");
 	}
 
 	/* Update progress bar with highest number trials for all the alternatives */
-	if (iAlternative == 0 || iGame > maxGames)
-		maxGames = iGame;
-	if (iAlternative == (prp->n - 1))
-	{
-		frac = (maxGames + 1.0) / (prc->nTrials * 1.0); 
-		gsz = g_strdup_printf( "%d/%d (%d%%)" , maxGames + 1 , prc->nTrials, (int)(100 * frac) );
-     
-		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR( prp->pwRolloutProgress), frac );
-		gtk_progress_bar_set_text(GTK_PROGRESS_BAR( prp->pwRolloutProgress), gsz );
-		g_free( gsz );
-		prp->nGamesDone = maxGames + 1;
+	if (iAlternative == 0) {
+		n_games_todo = 0;
+		n_games_done = 0;
+		min_games_done = prc->nTrials;
 	}
-    
-    /* calculate estimate time left */
+	n_games_done += iGame + 1;
+	if (!fStopped) {
+		n_games_todo += prc->nTrials - (iGame + 1);
+		if (iGame < min_games_done)
+			min_games_done = iGame + 1;
+	}
+	if (iAlternative == (prp->n - 1)) {
+		frac = ((float)min_games_done)/prc->nTrials;
+		gsz = g_strdup_printf("%d/%d (%d%%)", min_games_done, prc->nTrials, (int)(100.0f * frac));
+		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(prp->pwRolloutProgress), frac);
+		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(prp->pwRolloutProgress), gsz);
+		g_free(gsz);
+		prp->nGamesDone = min_games_done;
+	}
 
-    if ( (iAlternative == ( prp->n - 1 )) && iGame > 10 ) {
-      /* The code in estimatedTimeLeft allows that it's called on every
-         iAlternative, but it gives a lot of updates on the gui. If someone
-         thinks otherwise, we can consider removing the if-condition above */
-      time_t t = estimatedTimeLeft( prp->tStart, iGame, prc->nTrials,
-                                    iAlternative, prp->n );
+	/* calculate estimate time left */
 
-      gtk_label_set_text( GTK_LABEL( prp->pwElapsed ), 
-                          formatDelta( time( NULL ) - prp->tStart ) );
-      gtk_label_set_text( GTK_LABEL( prp->pwLeft ), 
-                          formatDelta( t ) );
+	if ((iAlternative == (prp->n - 1)) && n_games_done > initial_game_count) {
+		time_t t = time_left(n_games_todo, n_games_done, initial_game_count, prp->tStart);
+		gtk_label_set_text(GTK_LABEL(prp->pwElapsed), formatDelta(time(NULL) - prp->tStart));
+		gtk_label_set_text(GTK_LABEL(prp->pwLeft), formatDelta(t));
 
-    }
+	}
 
-    /* calculate estimated SE */
+	/* calculate estimated SE */
 
-    if ( !iAlternative && iGame > 10 ) {
+	if (!iAlternative && iGame > 10) {
 
-      float r;
+		float r;
 
-      if ( prc->fCubeful ) {
-        r = estimatedSE( aarStdDev[ 0 ][ OUTPUT_CUBEFUL_EQUITY ], 
-                         iGame, prc->nTrials );
-        gtk_label_set_text( GTK_LABEL( prp->pwSE ), 
-                            OutputMWC( r, &aci[ 0 ], FALSE ) );
-      }
-      else {
-        r = estimatedSE( aarStdDev[ 0 ][ OUTPUT_EQUITY ],
-                         iGame, prc->nTrials );
-        gtk_label_set_text( GTK_LABEL( prp->pwSE ),
-                            OutputEquityScale( r, &aci[ 0 ], 
-                                               &aci[ 0 ], FALSE ) );
-      }
+		if (prc->fCubeful) {
+			r = estimatedSE(aarStdDev[0][OUTPUT_CUBEFUL_EQUITY], iGame, prc->nTrials);
+			gtk_label_set_text(GTK_LABEL(prp->pwSE), OutputMWC(r, &aci[0], FALSE));
+		} else {
+			r = estimatedSE(aarStdDev[0][OUTPUT_EQUITY], iGame, prc->nTrials);
+			gtk_label_set_text(GTK_LABEL(prp->pwSE),
+					   OutputEquityScale(r, &aci[0], &aci[0], FALSE));
+		}
 
-    }
-      
-    return;
+	}
+
+	return;
 }
 
 static void GTKRolloutProgressEnd(void **pp, gboolean destroy)
@@ -1117,111 +1098,107 @@ TextRolloutProgressEnd( void **pp ) {
 }
 
 
-static void
-TextRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
-                     float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
-                     const rolloutcontext *prc,
-                     const cubeinfo aci[],
-                     const int iGame,
-                     const int iAlternative,
-                     const int nRank,
-                     const float rJsd,
-                     const int fStopped,
-                     const int fShowRanks,
-		     int fCubeRollout,
-                     rolloutprogress *prp ) {
+static void TextRolloutProgress(float aarOutput[][NUM_ROLLOUT_OUTPUTS],
+				float aarStdDev[][NUM_ROLLOUT_OUTPUTS], const rolloutcontext * prc,
+				const cubeinfo aci[], unsigned int initial_game_count,
+				const int iGame, const int iAlternative, const int nRank,
+				const float rJsd, const int fStopped, const int fShowRanks,
+				int fCubeRollout, rolloutprogress * prp)
+{
 
-  char *pch, *pc;
-  time_t t;
+	char *pch, *pc;
+	time_t t;
+	static unsigned int n_games_todo = 0;
+	static unsigned int n_games_done = 0;
+	static int min_games_done = 0;
 
-  /* write progress 1/10th trial or just when called if mt */
+	/* write progress 1/10th trial or just when called if mt */
 #if !USE_MULTITHREAD
-  if ( fInterrupt || (iGame >= prp->iNextGame && iAlternative == prp->iNextAlternative ))
+	if (!fInterrupt && (iGame < prp->iNextGame || iAlternative != prp->iNextAlternative)) {
+		/* To avoid *.po include \r. */
+		outputf(_("Rollout: %d/%d trials"), iGame, prc->nTrials);
+		output("      \r");
+		fflush(stdout);
+		return;
+	}
 #endif
-  {
 
-    if ( ! iAlternative )
-      outputl( "" );
+	if (!iAlternative)
+		outputl("");
 
-    pch = OutputRolloutResult( NULL, 
-                               (char(*) [1024]) prp->ppch[ iAlternative ], 
-                               ( float (*)[NUM_ROLLOUT_OUTPUTS] )
-                                aarOutput[ iAlternative ],
-                                ( float (*)[NUM_ROLLOUT_OUTPUTS] )
-                                aarStdDev[ iAlternative ],
-                               &aci[ iAlternative ], 1, prc->fCubeful );
+	pch = OutputRolloutResult(NULL,
+				  (char (*)[1024])prp->ppch[iAlternative],
+				  (float (*)[NUM_ROLLOUT_OUTPUTS])
+				  aarOutput[iAlternative], (float (*)[NUM_ROLLOUT_OUTPUTS])
+				  aarStdDev[iAlternative], &aci[iAlternative], 1, prc->fCubeful);
 
-    if ( fShowRanks && iGame > 1 ) {
+	if (fShowRanks && iGame > 1) {
 
-      pc = strrchr( pch, '\n' );
-      *pc = 0;
+		pc = strrchr(pch, '\n');
+		*pc = 0;
 
-      if (fCubeRollout)
-	      sprintf( pc, " %c", fStopped ? 's' : 'r' );
-      else
-	      sprintf( pc, " %d%c", nRank, fStopped ? 's' : 'r' );
+		if (fCubeRollout)
+			sprintf(pc, " %c", fStopped ? 's' : 'r');
+		else
+			sprintf(pc, " %d%c", nRank, fStopped ? 's' : 'r');
 
-      if ( nRank != 1 || fCubeRollout )
-        sprintf( strchr( pc, 0 ), " %5.3f\n", rJsd );
-      else
-        strcat( pc, "\n" );
+		if (nRank != 1 || fCubeRollout)
+			sprintf(strchr(pc, 0), " %5.3f\n", rJsd);
+		else
+			strcat(pc, "\n");
 
-      
-    }
+	}
 
-    prp->iNextAlternative = ( ++prp->iNextAlternative ) % prp->n;
-    if ( iAlternative == ( prp->n - 1 ) )
-      prp->iNextGame += prc->nTrials/10;
+	prp->iNextAlternative = (++prp->iNextAlternative) % prp->n;
+	if (iAlternative == (prp->n - 1))
+		prp->iNextGame += prc->nTrials / 10;
 
-    output( pch );
+	output(pch);
 
-    if ( ! iAlternative ) {
+	output(OutputRolloutContext(NULL, prc));
+	if (iAlternative == 0) {
+		n_games_todo = 0;
+		n_games_done = 0;
+		min_games_done = prc->nTrials;
+	}
+	n_games_done += iGame + 1;
+	if (!fStopped) {
+		n_games_todo += prc->nTrials - (iGame + 1);
+		if (iGame < min_games_done)
+			min_games_done = iGame + 1;
+	}
+	if (iAlternative != (prp->n - 1))
+		return;
 
-      /* time elapsed and time left */
+	/* time elapsed and time left */
 
-      t = estimatedTimeLeft( prp->tStart, iGame, prc->nTrials,
-                             iAlternative, prp->n );
-      
-      outputf( _("Time elapsed %s"), 
-               formatDelta( time( NULL ) - prp->tStart ) );
-      outputf( _(" Estimated time left %s\n"), 
-               formatDelta( t ) );
+	t = time_left(n_games_todo, n_games_done, initial_game_count, prp->tStart);
 
-      /* estimated SE */
+	outputf(_("Time elapsed %s"), formatDelta(time(NULL) - prp->tStart));
+	outputf(_(" Estimated time left %s\n"), formatDelta(t));
 
-      /* calculate estimated SE */
-      
-      if ( iGame > 10 ) {
+	/* estimated SE */
 
-        if ( prc->fCubeful )
-          pc = OutputMWC( estimatedSE( aarStdDev[ 0 ][ OUTPUT_CUBEFUL_EQUITY ], 
-                                       iGame, prc->nTrials ), 
-                          &aci[ 0 ], FALSE );
-        else
-          pc = OutputEquityScale( estimatedSE( aarStdDev[ 0 ][ OUTPUT_EQUITY ],
-                                               iGame, prc->nTrials ),
-                                  &aci[ 0 ], &aci[ 0 ], FALSE );
+	/* calculate estimated SE */
 
-        if ( prp->ppch && prp->ppch[ 0 ] && *prp->ppch[ 0 ] ) 
-          outputf( _("Estimated SE for \"%s\" after %d trials %s\n" ),
-                   prp->ppch[ 0 ], prc->nTrials, pc );
-        else
-          outputf( _("Estimated SE after %d trials %s\n" ),
-                   prc->nTrials, pc );
-        
-      }
+	if (iGame <= 10)
+		return;
 
-    }
+	if (prc->fCubeful)
+		pc = OutputMWC(estimatedSE
+			       (aarStdDev[0][OUTPUT_CUBEFUL_EQUITY], iGame,
+				prc->nTrials), &aci[0], FALSE);
+	else
+		pc = OutputEquityScale(estimatedSE
+				       (aarStdDev[0][OUTPUT_EQUITY], iGame,
+					prc->nTrials), &aci[0], &aci[0], FALSE);
 
-  }
-#if !USE_MULTITHREAD
-  else {
-    /* To avoid *.po include \r. */
-    outputf( _("Rollout: %d/%d trials"), iGame, prc->nTrials );
-    output( "      \r" );
-    fflush( stdout );
-  }
-#endif
+	if (prp->ppch && prp->ppch[0] && *prp->ppch[0])
+		outputf(_("Estimated SE for \"%s\" after %d trials %s\n"),
+			prp->ppch[0], prc->nTrials, pc);
+	else
+		outputf(_("Estimated SE after %d trials %s\n"), prc->nTrials, pc);
+
 }
 
 
@@ -1250,6 +1227,7 @@ RolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                  float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
                  const rolloutcontext *prc,
                  const cubeinfo aci[],
+		 unsigned int initial_game_count,
                  const int iGame,
                  const int iAlternative,
                  const int nRank,
@@ -1264,13 +1242,13 @@ RolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 
 #if USE_GTK
   if ( fX ) {
-    GTKRolloutProgress( aarOutput, aarStdDev, prc, aci, iGame, iAlternative, 
+    GTKRolloutProgress( aarOutput, aarStdDev, prc, aci, initial_game_count, iGame, iAlternative, 
                         nRank, rJsd, fStopped, fShowRanks, fCubeRollout, pUserData );
     return;
   }
 #endif /* USE_GTK */
 
-  TextRolloutProgress( aarOutput, aarStdDev, prc, aci, iGame, iAlternative, 
+  TextRolloutProgress( aarOutput, aarStdDev, prc, aci, initial_game_count, iGame, iAlternative, 
                        nRank, rJsd, fStopped, fShowRanks, fCubeRollout, pUserData );
 
 }

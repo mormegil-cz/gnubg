@@ -1,3 +1,10 @@
+Sun Apr 26 23:01:07 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* format.c, format.h, gnubg.c, html.c, progress.c, progress.h,
+	rollout.c, rollout.h:  Fix the rollout timer to allow for stopped
+	rollouts and differing number of games done. Print the rollout context
+	in the text progress.
+
 Sun Apr 26 01:02:06 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* rollout.c: mt rollouts stopped one short of the minum number of

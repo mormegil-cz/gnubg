@@ -968,6 +968,7 @@ int ro_fInvert;
 int ro_NextTrial;
 unsigned int *altGameCount;
 int *altTrialCount;
+unsigned int initial_game_count;
 
 extern void RolloutLoopMT(void *unused)
 {
@@ -1291,7 +1292,7 @@ static void UpdateProgress(void)
 
 		for (alt = 0; alt < ro_alternatives; ++alt) {
 			prc = &ro_apes[alt]->rc;
-			(*ro_pfProgress) (aarMu, aarSigma, prc, aciLocal, altGameCount[alt] - 1, alt,
+			(*ro_pfProgress) (aarMu, aarSigma, prc, aciLocal, initial_game_count, altGameCount[alt] - 1, alt,
 					  ajiJSD[alt].nRank + 1, ajiJSD[alt].rJSD, fNoMore[alt], show_jsds, ro_fCubeRollout,
 					  ro_pUserData);
 		}
@@ -1364,7 +1365,7 @@ RolloutGeneral(ConstTanBoard * apBoard,
 
 	/* nFirstTrial will be the smallest number of trials done for an alternative */
 	nFirstTrial = cGames = rcRollout.nTrials;
-
+	initial_game_count =  0;
 	for (alt = 0; alt < alternatives; ++alt) {
 		pes = apes[alt];
 		prc = &pes->rc;
@@ -1421,6 +1422,7 @@ RolloutGeneral(ConstTanBoard * apBoard,
 				    prc->aecChequerLate[i].fCubeful = (prc->fCubeful || fCubeRollout);
 
 			altTrialCount[alt] = altGameCount[alt] = nGames;
+			initial_game_count += nGames;
 			if (nGames < nFirstTrial)
 				nFirstTrial = nGames;
 			/* restore internal variables from input values */

@@ -1896,7 +1896,7 @@ extern char *FormatMoveHint( char *sz, const matchstate *pms, movelist *pml,
       case EVAL_ROLLOUT:
         strcat ( sz,
                  OutputRolloutContext ( "        ",
-                                        &pml->amMoves[ i ].esMove ) );
+                                        &pml->amMoves[ i ].esMove.rc ) );
         break;
 
       default:

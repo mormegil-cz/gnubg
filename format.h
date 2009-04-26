@@ -41,7 +41,7 @@ extern char *
 OutputEquity ( const float r, const cubeinfo *pci, const int f );
 
 extern char *
-OutputRolloutContext ( const char *szIndent, const evalsetup *pes );
+OutputRolloutContext ( const char *szIndent, const rolloutcontext *prc );
 
 extern char *
 OutputEvalContext ( const evalcontext *pec, const int fChequer );
