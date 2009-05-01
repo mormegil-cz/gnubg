@@ -33,7 +33,6 @@
 #ifdef WIN32
 #include "wglbuffer.h"
 #endif
-#include "misc3d.h"
 #include "util.h"
 #include <glib/gstdio.h>
 

@@ -1,3 +1,6 @@
+Fri May  1 10:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+	* misc3d.h (and c files) : Remove this header file to simplify include files.
+
 Sun Dec 28 21:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 	* misc3d.c : Remove old board logo and add a small delay after close board animation
 

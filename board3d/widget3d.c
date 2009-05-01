@@ -23,7 +23,6 @@
 
 #include "config.h"
 #include "inc3d.h"
-#include "misc3d.h"
 #include "tr.h"
 
 gboolean gtk_gl_init_success = FALSE;
