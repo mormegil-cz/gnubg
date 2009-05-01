@@ -24,7 +24,7 @@
 #include <glib.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include "common.h"
 
 #ifdef WIN32
 #include <io.h>
@@ -150,7 +150,7 @@ int TEMP_g_mkstemp(char *tmpl)
   return -1;
 }
 
-int TEMP_g_file_open_tmp (const char *tmpl, char      **name_used, GError    **notused)
+int TEMP_g_file_open_tmp (const char *tmpl, char **name_used, GError **UNUSED(pError))
 {
   const char *sep = "";
   char test;

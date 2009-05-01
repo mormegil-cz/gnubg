@@ -330,7 +330,7 @@ cat >> credits.c <<EOF
 
 credits creditList[] =
 {
-	{N_("AUTHORS"), ceAuthors},
+	{N_("Authors"), ceAuthors},
 	{N_("Code Contributors"), ceContrib},
 	{N_("Translations"), ceTranslations},
 	{N_("Support"), ceSupport},

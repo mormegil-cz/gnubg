@@ -74,7 +74,7 @@ typedef enum _movetype {
 	MOVE_SETBOARD,
 	MOVE_SETDICE,
 	MOVE_SETCUBEVAL,
-	MOVE_SETCUBEPOS,
+	MOVE_SETCUBEPOS
 } movetype;
 
 typedef struct _movegameinfo {

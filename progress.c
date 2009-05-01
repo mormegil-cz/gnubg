@@ -126,7 +126,7 @@ static time_t time_left(unsigned int n_games_todo, unsigned int n_games_done,
 	time_t t_now;
 	time(&t_now);
 	pt = ((float)n_games_todo) / (n_games_done - initial_game_count);
-	return pt * (t_now - t_start);
+	return (time_t)(pt * (t_now - t_start));
 }
 
 static char *

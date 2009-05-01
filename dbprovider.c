@@ -28,15 +28,13 @@
 #include "gnubgmodule.h"
 #endif
 
+#include "backgammon.h"
 #include <stdlib.h>
-#include <glib.h>
 #include <glib/gstdio.h>
 #include <string.h>
 #include "dbprovider.h"
-#include "backgammon.h"
-#include "util.h"
 
-DBProviderType dbProviderType = 0;
+DBProviderType dbProviderType = (DBProviderType)0;
 int storeGameStats = TRUE;
 
 #if USE_PYTHON
@@ -90,12 +88,13 @@ DBProvider providers[NUM_PROVIDERS] =
 DBProvider providers[1] = {{0, 0, 0, 0, 0, 0, 0, "No Providers", "No Providers", "No Providers", 0, 0, 0, 0, 0}};
 #endif
 
-extern RowSet* MallocRowset(size_t rows, size_t cols)
+static RowSet* MallocRowset(size_t rows, size_t cols)
 {
 	size_t i;
 	RowSet* pRow = malloc(sizeof(RowSet));
+	assert(pRow);
 
-	pRow->widths = malloc(cols * sizeof(int));
+	pRow->widths = (size_t*)malloc(cols * sizeof(int));
 	memset(pRow->widths, 0, cols * sizeof(int));
 
 	pRow->data = malloc(rows * sizeof(char*));
@@ -111,7 +110,7 @@ extern RowSet* MallocRowset(size_t rows, size_t cols)
 	return pRow;
 }
 
-extern void SetRowsetData(RowSet *rs, size_t row, size_t col, const char *data)
+static void SetRowsetData(/*lint -e{818}*/RowSet *rs, size_t row, size_t col, const char *data)
 {
 	size_t size;
 	if (!data)
@@ -145,7 +144,7 @@ extern void FreeRowset(RowSet* pRow)
 	pRow->widths = NULL;
 }
 
-int RunQueryValue(DBProvider *pdb, const char *query)
+int RunQueryValue(const DBProvider *pdb, const char *query)
 {
 	RowSet *rs;
 	rs = pdb->Select(query);
@@ -159,7 +158,7 @@ int RunQueryValue(DBProvider *pdb, const char *query)
 		return -1;
 }
 
-extern RowSet* RunQuery(char *sz)
+extern RowSet* RunQuery(const char *sz)
 {
 	DBProvider *pdb;
 	if ((pdb = ConnectToDB(dbProviderType)) != NULL)
@@ -219,14 +218,14 @@ void SetDBSettings(DBProviderType dbType, const char *database, const char *user
 
 void RelationalSaveSettings(FILE *pf)
 {
-	int i;
+	unsigned int i;
 	fprintf(pf, "relational setup storegamestats=%s\n", storeGameStats ? "yes" : "no");
 	
 	if (dbProviderType != INVALID_PROVIDER)
 		fprintf(pf, "relational setup dbtype=%s\n", providers[dbProviderType].shortname);
 	for (i = 0; i < NUM_PROVIDERS; i++)
 	{
-		DBProvider* pdb = GetDBProvider(i);
+		DBProvider* pdb = GetDBProvider((DBProviderType)i);
 		fprintf(pf, "relational setup %s-database=%s\n", providers[i].shortname, pdb->database);
 		fprintf(pf, "relational setup %s-username=%s\n", providers[i].shortname, pdb->username);
 		fprintf(pf, "relational setup %s-password=%s\n", providers[i].shortname, pdb->password);
@@ -235,7 +234,7 @@ void RelationalSaveSettings(FILE *pf)
 
 extern DBProvider* GetDBProvider(DBProviderType dbType)
 {
-#ifdef USE_PYTHON
+#if USE_PYTHON
 	static int setup = FALSE;
 	if (!setup)
 	{
@@ -397,16 +396,16 @@ static void PyCommit(void)
 RowSet* ConvertPythonToRowset(PyObject *v)
 {
 	RowSet *pRow;
-	size_t i, j;
+	Py_ssize_t row, col, i, j;
 	if (!PySequence_Check(v))
 	{
 		outputerrf( _("invalid Python return") );
 		return NULL;
 	}
 
-	i = PySequence_Size(v);
-	j = 0;
-	if (i > 0)
+	row = PySequence_Size(v);
+	col = 0;
+	if (row > 0)
 	{
 		PyObject *cols = PySequence_GetItem(v, 0);
 		if (!PySequence_Check(cols))
@@ -415,11 +414,11 @@ RowSet* ConvertPythonToRowset(PyObject *v)
 			return NULL;
 		}
 		else
-			j = (int)PySequence_Size(cols);
+			col = PySequence_Size(cols);
 	}
 
-	pRow = MallocRowset(i, j);
-	for (i = 0; i < pRow->rows; i++)
+	pRow = MallocRowset((size_t)row, (size_t)col);
+	for (i = 0; i < (int)pRow->rows; i++)
 	{
 		PyObject *e = PySequence_GetItem(v, i);
 
@@ -431,8 +430,7 @@ RowSet* ConvertPythonToRowset(PyObject *v)
 
 		if (PySequence_Check(e))
 		{
-			size_t j;
-			for (j = 0; j < pRow->cols; j++)
+			for (j = 0; j < (int)pRow->cols; j++)
 			{
 				char buf[1024];
 				PyObject *e2 = PySequence_GetItem(e, j);
@@ -456,7 +454,7 @@ RowSet* ConvertPythonToRowset(PyObject *v)
 				else
 					sprintf(buf, "[%s]", _("unknown type"));
 
-				SetRowsetData(pRow, i, j, buf);
+				SetRowsetData(pRow, (size_t)i, (size_t)j, buf);
 
 				Py_DECREF(e2);
 			}
@@ -484,6 +482,8 @@ GList *PyMySQLGetDatabaseList(const char *user, const char *password)
 		unsigned int i;
 		GList *glist = NULL;
 		RowSet* list = ConvertPythonToRowset(rs);
+		if (!list)
+			return NULL;
 		for (i = 0; i < list->rows; i++)
 			glist = g_list_append(glist, g_strdup(list->data[i][0]));
 		FreeRowset(list);
@@ -553,7 +553,7 @@ int PyPostgreDeleteDatabase(const char *dbfilename, const char *user, const char
 
 sqlite3 *connection;
 
-int SQLiteConnect(const char *dbfilename, const char *user, const char *password)
+int SQLiteConnect(const char *dbfilename, const char *user, const char *UNUSED(password))
 {
 	char *name, *filename;
 	int exists, ret;
@@ -575,12 +575,14 @@ int SQLiteConnect(const char *dbfilename, const char *user, const char *password
 
 static void SQLiteDisconnect(void)
 {
-	sqlite3_close(connection);
+	if (sqlite3_close(connection) != SQLITE_OK)
+		outputerrf("SQL error: %s in sqlite3_close()", sqlite3_errmsg(connection));
 }
 
 RowSet *SQLiteSelect(const char* str)
 {
-	int i, row, ret;
+	size_t i, row;
+	int ret;
 	char *buf = g_strdup_printf("Select %s;", str);
 	RowSet *rs = NULL;
 
@@ -589,15 +591,16 @@ RowSet *SQLiteSelect(const char* str)
 	g_free(buf);
 	if (ret == SQLITE_OK)
 	{
-		int numCols = sqlite3_column_count(pStmt);
-		int numRows = 0;
+		size_t numCols = (size_t)sqlite3_column_count(pStmt);
+		size_t numRows = 0;
 		while((ret = sqlite3_step(pStmt)) == SQLITE_ROW)
 			numRows++;
-		sqlite3_reset(pStmt);
+		if (sqlite3_reset(pStmt) != SQLITE_OK)
+			outputerrf("SQL error: %s in sqlite3_reset()", sqlite3_errmsg(connection));
 		rs = MallocRowset(numRows + 1, numCols);	/* first row is headings */
 
 		for (i = 0; i < numCols; i++)
-			SetRowsetData(rs, 0, i, sqlite3_column_name(pStmt, i));
+			SetRowsetData(rs, 0, i, sqlite3_column_name(pStmt, (int)i));
 
 		row = 0;
 
@@ -605,7 +608,7 @@ RowSet *SQLiteSelect(const char* str)
 		{
 			row++;
 			for (i = 0; i < numCols; i++)
-				SetRowsetData(rs, row, i, (const char*)sqlite3_column_text(pStmt, i));
+				SetRowsetData(rs, row, i, (const char*)sqlite3_column_text(pStmt, (int)i));
 		}
 		if (ret == SQLITE_DONE)
 			ret = SQLITE_OK;
@@ -613,7 +616,8 @@ RowSet *SQLiteSelect(const char* str)
 	if (ret != SQLITE_OK)
 		outputerrf("SQL error: %s\nfrom '%s'", sqlite3_errmsg(connection), str);
 
-	sqlite3_finalize(pStmt);
+	if (sqlite3_finalize(pStmt) != SQLITE_OK)
+		outputerrf("SQL error: %s in sqlite3_finalize()", sqlite3_errmsg(connection));
 	return rs;
 }
 
@@ -635,7 +639,7 @@ static void SQLiteCommit(void)
 #endif
 
 #if NUM_PROVIDERS
-GList *SQLiteGetDatabaseList(const char *user, const char *password)
+GList *SQLiteGetDatabaseList(const char *user, const char *UNUSED(password))
 {
 	GList *glist = NULL;
 	GDir *dir = g_dir_open(szHomeDirectory, 0, NULL);
@@ -657,7 +661,7 @@ GList *SQLiteGetDatabaseList(const char *user, const char *password)
 	return glist;
 }
 
-int SQLiteDeleteDatabase(const char *dbfilename, const char *user, const char *password)
+int SQLiteDeleteDatabase(const char *dbfilename, const char *user, const char *UNUSED(password))
 {
 	char *name, *filename;
 	int ret;

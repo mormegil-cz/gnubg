@@ -22,6 +22,8 @@
 #if USE_MULTITHREAD
 /*must be first here because of strange warning from mingw*/
 #include "multithread.h"
+#else
+#include "backgammon.h"
 #endif
 
 #if HAVE_UNISTD_H
@@ -29,11 +31,6 @@
 #endif
 
 #include <glib/gstdio.h>
-#include "bearoffgammon.h"
-#include "positionid.h"
-#include "bearoff.h"
-#include "eval.h"
-#include "backgammon.h"
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>

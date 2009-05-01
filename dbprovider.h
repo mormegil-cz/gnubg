@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 #include <glib.h>
-
 extern int storeGameStats;
 
 typedef struct _RowSet
@@ -64,9 +63,7 @@ void RelationalSaveSettings(FILE *pf);
 void SetDBParam(const char *db, const char *key, const char *value);
 extern int CreateDatabase(DBProvider *pdb);
 const char *GetProviderName(int i);
-extern RowSet* RunQuery(char *sz);
-extern int RunQueryValue(DBProvider *pdb, const char *query);
-extern RowSet* MallocRowset(size_t rows, size_t cols);
-extern void SetRowsetData(RowSet *rs, size_t row, size_t col, const char *data);
+extern RowSet* RunQuery(const char *sz);
+extern int RunQueryValue(const DBProvider *pdb, const char *query);
 extern void FreeRowset(RowSet* pRow);
 #endif

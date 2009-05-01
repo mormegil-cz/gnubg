@@ -22,15 +22,11 @@
 
 #include "config.h"
 
-#include <gtk/gtk.h>
-#include <string.h>
-#include "eval.h"
-#include "gtkchequer.h"
-#include "backgammon.h"
-#include "format.h"
-#include "assert.h"
-#include "gtkmovelistctrl.h"
 #include "gtkgame.h"
+#include <string.h>
+
+#include "format.h"
+#include "gtkmovelistctrl.h"
 #include "drawboard.h"
 
 #define DETAIL_COLUMN_COUNT 11
@@ -55,7 +51,7 @@ enum
 
 extern void MoveListCreate(hintdata *phd)
 {
-    static char *aszTitleDetails[] = {
+    static const char *aszTitleDetails[] = {
 	N_("Rank"), 
         N_("Type"), 
         N_("Win"), 

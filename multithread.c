@@ -327,7 +327,7 @@ static gpointer MT_WorkerThreadFunction(void *id)
 static void MT_WorkerThreadFunction(void *id)
 #endif
 {
-	/* why do we need this align ?*/
+	/* why do we need this align ? - because of a gcc bug */
 #if __GNUC__ && WIN32
 	asm  __volatile__  ("andl $-16, %%esp" : : : "%esp");
 #endif

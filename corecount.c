@@ -197,7 +197,7 @@ unsigned int CpuIDSupported(void)
 {
 	unsigned int MaxInputValue;
 // If CPUID instruction is supported
-#if LINUX || __GNUC__
+#if LINUX || defined(__GNUC__)
 	//try    
 	{		
 		MaxInputValue = 0;
@@ -248,7 +248,7 @@ unsigned int CpuIDSupported(void)
 unsigned int GenuineIntel(void)
 {
 	unsigned int VendorIDb = 0,VendorIDd = 0, VendorIDc = 0;
-#if LINUX || __GNUC__
+#if LINUX || defined(__GNUC__)
 		
 //	try    
     // If CPUID instruction is supported
@@ -328,7 +328,7 @@ unsigned int MaxCorePerPhysicalProc(void)
 	unsigned int Regeax        = 0;
 	
 	if (!HWD_MTSupported()) return (unsigned int) 1;  // Single core
-#if LINUX || __GNUC__
+#if LINUX || defined(__GNUC__)
 	{
 		asm
 		(
@@ -394,7 +394,7 @@ unsigned int HWD_MTSupported(void)
 
 	if ((CpuIDSupported() >= 1) && GenuineIntel())
 	{
-#if LINUX || __GNUC__
+#if LINUX || defined(__GNUC__)
 		asm 
 		(
 			"movl $1,%%eax\n\t"
@@ -429,7 +429,7 @@ unsigned int MaxLogicalProcPerPhysicalProc(void)
 	unsigned int Regebx = 0;
 
 	if (!HWD_MTSupported()) return (unsigned int) 1;
-#if LINUX || __GNUC__
+#if LINUX || defined(__GNUC__)
 		asm 
 		(
 			"movl $1,%%eax\n\t"
@@ -454,7 +454,7 @@ unsigned char GetAPIC_ID(void)
 {
 
 	unsigned int Regebx = 0;
-#if LINUX || __GNUC__
+#if LINUX || defined(__GNUC__)
 	asm
 	(
 		"movl $1, %%eax\n\t"	
@@ -486,7 +486,7 @@ unsigned int find_maskwidth(unsigned int CountItem)
 	//lint --e{529}
 	unsigned int MaskWidth = 0, count = CountItem;
 
-#if LINUX || __GNUC__
+#if LINUX || defined(__GNUC__)
 	asm
 	(
 #ifdef __x86_64__		// define constant to compile  

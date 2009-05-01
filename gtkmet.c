@@ -43,7 +43,7 @@ typedef struct _metwidget {
 
 
 static void UpdateTable ( const mettable *pmt, 
-              float met[ MAXSCORE ][ MAXSCORE ],
+              /*lint -e{818}*/float met[ MAXSCORE ][ MAXSCORE ],
               const metinfo *pmi,
               const unsigned int nRows, const unsigned int nCols, const int fInvert ) {
 
@@ -195,7 +195,7 @@ static void invertMETlocal( GtkWidget *UNUSED(widget), const metwidget *pmw ){
 }
 
 
-static void loadMET ( GtkWidget *notused, const metwidget *pmw ) {
+static void loadMET ( GtkWidget *UNUSED(widget), const metwidget *pmw ) {
 
   SetMET ( NULL, NULL );
 
