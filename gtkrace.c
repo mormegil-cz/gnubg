@@ -327,7 +327,7 @@ GTKShowRace ( TanBoard anBoard ) {
   racewidget *prw;
 
   prw = malloc ( sizeof ( racewidget ) );
-  assert(prw != NULL);
+  g_assert(prw != NULL);
   memcpy ( prw->anBoard, anBoard, 2 * 25 * sizeof ( int ) );
   prw->fMove = ms.fMove;
 
