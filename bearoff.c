@@ -30,6 +30,9 @@
 #include <unistd.h>
 #endif
 
+#include "bearoffgammon.h"
+#include "positionid.h"
+
 #include <glib/gstdio.h>
 #include <stdlib.h>
 #include <string.h>
