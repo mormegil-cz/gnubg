@@ -1,3 +1,7 @@
+Tue May  5 18:08:56 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtktempmap.c: fix font size for locales using comma
+
 Sun Apr 26 23:01:07 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* format.c, format.h, gnubg.c, html.c, progress.c, progress.h,

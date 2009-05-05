@@ -319,7 +319,7 @@ static void ExposeQuadrant(GtkWidget * pw, GdkEventExpose *UNUSED(pev), tempmapw
 	float r = 0.0f;
 	cubeinfo ci;
 	PangoLayout *layout;
-	char font[20];
+	PangoFontDescription *description;
 	float y;
 	GString *str;
 	char *pch, *tmp;
@@ -378,9 +378,10 @@ static void ExposeQuadrant(GtkWidget * pw, GdkEventExpose *UNUSED(pev), tempmapw
 	else
 		y = 2 +(pw->allocation.height - 4) / 10.0f;
 
-	sprintf(font, "sans %.2f", pw->allocation.width / 8.0);
+	description = pango_font_description_from_string("sans");
+	pango_font_description_set_size(description, (pw->allocation.width / 8.0f) * PANGO_SCALE);
 	layout = gtk_widget_create_pango_layout(pw, NULL);
-	pango_layout_set_font_description(layout, pango_font_description_from_string(font));
+	pango_layout_set_font_description(layout, description);
 	do
 	{
 		tmp = strchr(pch, ' ');
