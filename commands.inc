@@ -161,6 +161,8 @@ command cER = {
       NULL, acAnnotateMove },
     { NULL, NULL, NULL, NULL, NULL }
 }, acClear[] = {
+  { "cache", CommandClearCache, 
+    N_("Clear evaluation cache"), NULL, NULL },
   { "hint", CommandClearHint, 
     N_("Clear analysis used for `hint'"), NULL, NULL },
   { NULL, NULL, NULL, NULL, NULL }

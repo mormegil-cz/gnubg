@@ -4157,10 +4157,16 @@ extern char
   }
 }
 
+
 extern void
 EvalCacheFlush(void)
 {
   CacheFlush( & cEval );
+}
+
+void CommandClearCache(char *sz)
+{
+	EvalCacheFlush();
 }
 
 extern double GetEvalCacheSize(void)
