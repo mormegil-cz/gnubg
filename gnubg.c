@@ -2167,11 +2167,10 @@ static skilltype double_skill(float aarOutput[][NUM_ROLLOUT_OUTPUTS],
 		break;
 
 	case TOOGOOD_PASS:
+	case TOOGOODRE_PASS:
 		eq = arDouble[OUTPUT_DROP] - arDouble[OUTPUT_NODOUBLE];
 		break;
-
 	default:
-	case TOOGOODRE_PASS:
 		break;
 	}
 	return Skill(eq);

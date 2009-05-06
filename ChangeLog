@@ -1,3 +1,7 @@
+Wed May  6 15:44:22 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c: too good to redouble-pass errors didn't get annotated
+
 Tue May  5 22:55:53 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, commands.inc, eval.c: add command to clear cache for
