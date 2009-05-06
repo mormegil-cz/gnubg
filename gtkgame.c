@@ -2980,6 +2980,10 @@ GtkItemFactoryEntry aife[] = {
 		"<StockItem>", GTK_STOCK_SAVE
 	},
 	{ N_("/_File/-"), NULL, NULL, 0, "<Separator>", NULL },
+	{ N_("/_File/Open _Commands..."), NULL, GTKCommandsOpen, 0, 
+		"<StockItem>", GTK_STOCK_OPEN
+	},
+	{ N_("/_File/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ N_("/_File/Match information..."), NULL, GTKMatchInfo, 0, NULL,
 		NULL },
 	{ N_("/_File/-"), NULL, NULL, 0, "<Separator>", NULL },

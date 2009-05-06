@@ -414,6 +414,20 @@ extern void GTKOpen(gpointer p, guint n, GtkWidget * pw)
 	gtk_widget_destroy(fc);
 }
 
+extern void GTKCommandsOpen(gpointer p, guint n, GtkWidget *pw)
+{
+	gchar *filename = NULL;
+	GtkWidget *fc =
+	    GnuBGFileDialog(_("Open Commands file"), NULL, NULL, GTK_FILE_CHOOSER_ACTION_OPEN);
+
+	if (gtk_dialog_run(GTK_DIALOG(fc)) == GTK_RESPONSE_ACCEPT) {
+		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fc));
+		CommandLoadCommands(filename);
+		g_free(filename);
+	}
+	gtk_widget_destroy(fc);
+}
+
 extern void GTKSave (gpointer p, guint n, GtkWidget * pw)
 {
   SaveCommon (N_EXPORT_TYPES, _("Save or export to file"));

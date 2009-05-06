@@ -25,6 +25,7 @@
 #ifndef _GTKFILE_H_
 #define _GTKFILE_H_
 extern void GTKOpen (gpointer p, guint n, GtkWidget * pw);
+extern void GTKCommandsOpen(gpointer p, guint n, GtkWidget *pw);
 extern void GTKSave (gpointer p, guint n, GtkWidget * pw);
 extern char *GTKFileSelect (const gchar * prompt, const gchar * extension, const gchar * folder,
 			    const gchar * name, GtkFileChooserAction action);
