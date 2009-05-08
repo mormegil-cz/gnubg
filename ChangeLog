@@ -1,3 +1,7 @@
+Fri May  8 14:29:05 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* import.c: fix tmg import of resigns
+
 Fri May  8 13:08:57 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c, html.c, latex.c, text.c: checkin of Michel's export patch.
