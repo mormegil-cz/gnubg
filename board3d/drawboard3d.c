@@ -39,7 +39,7 @@ typedef struct _viewArea
 /* My logcube - more than 32 then return 0 (show 64) */
 static int LogCube( int n )
 {
-	int i = 1;
+	int i = 0;
 	while (n > (1 << i))
 		i++;
 

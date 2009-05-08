@@ -1,3 +1,6 @@
+Fri May 08 08:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+	* drawboard3d.c : Show 64 for 1 cube (bug was showing 2)
+
 Fri May  1 10:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 	* misc3d.h (and c files) : Remove this header file to simplify include files.
 
