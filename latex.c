@@ -396,6 +396,7 @@ static void ExportGameLaTeX( FILE *pf, listOLD *plGame ) {
 	switch( pmr->mt ) {
 	case MOVE_GAMEINFO:
 		dt = DT_NORMAL;
+            fputs ( "\\clearpage\n", pf );
             fputs ( "\\noindent{\\Large ", pf );
 	    if( pmr->g.nMatch )
 		fprintf( pf, _("%d point match (game %d)"), 
@@ -444,9 +445,8 @@ static void ExportGameLaTeX( FILE *pf, listOLD *plGame ) {
 
 	    /* FIXME use center and tabular environment instead of verbatim */
 	    fputs( "{\\footnotesize\\begin{verbatim}\n", pf );
-	    for( i = 0; i < pmr->ml.cMoves && i <= pmr->n.iMove; i++ ) {
-		if( i >= 5 /* FIXME allow user to choose limit */ &&
-		    i != pmr->n.iMove )
+	    for( i = 0; i < pmr->ml.cMoves; i++ ) {
+		if( i >= exsExport.nMoves && i != pmr->n.iMove )
 		    continue;
 
 		putc( i == pmr->n.iMove ? '*' : ' ', pf );

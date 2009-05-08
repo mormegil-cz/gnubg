@@ -504,7 +504,8 @@ TextPrintMoveAnalysis ( GString *gsz, const matchstate *pms, moverecord *pmr ) {
       g_string_append(gsz,FormatMoveHint( szBuf, pms, &pmr->ml, i,
                              i != pmr->n.iMove ||
                              i != pmr->ml.cMoves - 1 ||
-                             pmr->ml.cMoves == 1,
+                             pmr->ml.cMoves == 1 ||
+                             i < exsExport.nMoves - 1,
                              exsExport.fMovesDetailProb,
                              exsExport.afMovesParameters 
                              [ pmr->ml.amMoves[ i ].esMove.et - 1 ] ) );

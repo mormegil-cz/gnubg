@@ -1388,7 +1388,9 @@ static void DisplayAnalysis( moverecord *pmr ) {
 	    outputc( i == pmr->n.iMove ? '*' : ' ' );
 	    output( FormatMoveHint( szBuf, &ms, &pmr->ml, i,
 				    i != pmr->n.iMove ||
-				    i != pmr->ml.cMoves - 1, TRUE, TRUE ) );
+				    i != pmr->ml.cMoves - 1 ||
+                                    pmr->ml.cMoves == 1 ||
+                                    i < exsExport.nMoves - 1, TRUE, TRUE ) );
 
 	}
 	

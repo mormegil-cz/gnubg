@@ -2533,7 +2533,7 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
       /* move no */
 
       if ( i != pmr->n.iMove || i != pmr->ml.cMoves - 1 || 
-           pmr->ml.cMoves == 1 ) 
+           pmr->ml.cMoves == 1 || i < exsExport.nMoves - 1 ) 
         fprintf ( pf, 
                   "<td %s>%d</td>\n", 
                   GetStyle ( CLASS_MOVENUMBER, hecss ), i + 1 );

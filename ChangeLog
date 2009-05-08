@@ -1,3 +1,7 @@
+Fri May  8 13:08:57 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c, html.c, latex.c, text.c: checkin of Michel's export patch.
+
 Wed May  6 21:24:09 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gtkfile.c, gtkfile.h, gtkgame.c: Re-implement the load commands menu
