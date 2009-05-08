@@ -379,7 +379,7 @@ static void ExposeQuadrant(GtkWidget * pw, GdkEventExpose *UNUSED(pev), tempmapw
 		y = 2 +(pw->allocation.height - 4) / 10.0f;
 
 	description = pango_font_description_from_string("sans");
-	pango_font_description_set_size(description, (pw->allocation.width / 8.0f) * PANGO_SCALE);
+	pango_font_description_set_size(description, pw->allocation.width * PANGO_SCALE / 8);
 	layout = gtk_widget_create_pango_layout(pw, NULL);
 	pango_layout_set_font_description(layout, description);
 	do
