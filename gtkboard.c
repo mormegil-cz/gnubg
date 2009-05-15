@@ -1082,8 +1082,8 @@ gboolean place_chequer_or_revert(BoardData *bd, int dest )
                     }
             }
         } else {
-          if ((unsigned int)ABS(source - dest2) == bd->diceRoll [ 0 ] + bd->diceRoll [ 1 ] || 
-			  (dest > 25 && (unsigned int)ABS (source - dest2) > MAX(bd->diceRoll[ 0 ], bd->diceRoll[ 1 ]))
+          if (Abs(source - dest2) == bd->diceRoll [ 0 ] + bd->diceRoll [ 1 ] || 
+			  (dest > 25 && Abs(source - dest2) > MAX(bd->diceRoll[ 0 ], bd->diceRoll[ 1 ]))
               ) 
             for (i = 0; i < 2; i++) {
                     passpoint = source - bd->diceRoll[ i ] * bd->drag_colour;
@@ -1351,7 +1351,7 @@ static void board_quick_edit(GtkWidget *board, BoardData *bd, int x, int y,
 
 #if USE_BOARD3D
 	if (display_is_3d(bd->rd))
-		n = BoardPoint3d(bd, bd->bd3d, bd->rd, x, y, -1);
+		n = BoardPoint3d(bd, x, y);
     else
 #endif
     /* Map (x,y) to a point from 0..27 using a version of
@@ -1416,7 +1416,7 @@ static void board_quick_edit(GtkWidget *board, BoardData *bd, int x, int y,
     /* Given n, map (x, y) to the ith checker position on point n*/
 #if USE_BOARD3D
 	if (display_is_3d(bd->rd))
-		i = BoardPoint3d(bd, bd->bd3d, bd->rd, x, y, n);
+		i = BoardSubPoint3d(bd, x, y, n);
 	else
 #endif
 	    i = board_chequer_number( board, bd, n, x, y );
@@ -1651,8 +1651,7 @@ extern gboolean board_button_press(GtkWidget *board, GdkEventButton *event,
 
 		/* Reverse screen y coords for openGL */
 		y = board->allocation.height - y;
-
-		bd->drag_point = BoardPoint3d(bd, bd->bd3d, bd->rd, x, y, -1);
+		bd->drag_point = BoardPoint3d(bd, x, y);
 	}
 	else
 #endif
@@ -2029,7 +2028,7 @@ extern gboolean board_button_release(GtkWidget *board, GdkEventButton *event,
 	if (display_is_3d(bd->rd))
 	{	/* Reverse screen y coords for OpenGL */
 		y = board->allocation.height - y;
-		release_point = BoardPoint3d(bd, bd->bd3d, bd->rd, x, y, -1);
+		release_point = BoardPoint3d(bd, x, y);
 	}
 	else
 #endif

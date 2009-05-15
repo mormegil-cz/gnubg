@@ -1,3 +1,6 @@
+Fri May 15 18:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+	* drawboard3d.c : Improve click detection code
+
 Fri May 08 08:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 	* drawboard3d.c : Show 64 for 1 cube (bug was showing 2)
 
