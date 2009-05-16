@@ -2502,7 +2502,7 @@ static int NearestHit(int hits, const GLuint* ptr)
 			depth = (float) *ptr++ / 0x7fffffff;
 			ptr++;	/* Skip max depth value */
 			/* Ignore clicks on the board base as other objects must be closer */
-			if (*ptr >= POINT_DICE || depth < minDepth)
+			if (*ptr >= POINT_DICE && depth < minDepth)
 			{
 				minDepth = depth;
 				sel = (int)*ptr;
@@ -2664,11 +2664,21 @@ NTH_STATIC void drawPointPick(const BoardData *bd, void *data)
 
 /* 20 allows for 5 hit records (more than enough) */
 #define BUFSIZE 20
+<<<<<<< drawboard3d.c
 GLuint selectBuf[BUFSIZE];
 
 typedef void (*PickDrawFun)(const BoardData *bd, void *data);
+=======
+GLuint selectBuf[BUFSIZE];
+>>>>>>> 1.84
+
+<<<<<<< drawboard3d.c
+int PickDraw(int x, int y, PickDrawFun drawFun, const BoardData *bd, void *data)
+=======
+typedef void (*PickDrawFun)(const BoardData *bd, void *data);
 
 int PickDraw(int x, int y, PickDrawFun drawFun, const BoardData *bd, void *data)
+>>>>>>> 1.84
 {	/* Identify if anything is below point (x,y) */
 	BoardData3d *bd3d = bd->bd3d;
 	GLint hits;
