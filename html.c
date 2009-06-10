@@ -3470,7 +3470,7 @@ extern void CommandExportPositionHtml( char *sz ) {
 	
     sz = NextToken( &sz );
     
-    if( ms.gs != GAME_NONE ) {
+    if( ms.gs == GAME_NONE ) {
 	outputl( _("No game in progress (type `new game' to start one).") );
 	return;
     }
