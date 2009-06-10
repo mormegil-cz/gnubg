@@ -2579,16 +2579,19 @@ static gint board_set( Board *board, const gchar *board_text, const gint
 	if( bd->turn != old_turn )
 	{
 #if USE_BOARD3D
-		/* Make sure flag shadow is correct if players are swapped when resigned */
-		if (bd->resigned)
-			updateFlagOccPos(bd, bd->bd3d);
-
-		if (bd->rd->quickDraw)
+		if (display_is_3d(bd->rd))
 		{
-			if (bd->rd->fDynamicLabels)
-				RestrictiveDrawBoardNumbers(bd->bd3d);
-			if (bd->rd->showMoveIndicator)
-				RestrictiveDrawMoveIndicator(bd);
+			/* Make sure flag shadow is correct if players are swapped when resigned */
+			if (bd->resigned)
+				updateFlagOccPos(bd, bd->bd3d);
+
+			if (bd->rd->quickDraw)
+			{
+				if (bd->rd->fDynamicLabels)
+					RestrictiveDrawBoardNumbers(bd->bd3d);
+				if (bd->rd->showMoveIndicator)
+					RestrictiveDrawMoveIndicator(bd);
+			}
 		}
 #endif
 	  redrawNeeded = 1;
