@@ -40,10 +40,6 @@
 #endif
 #endif
 
-#if defined(_MSC_VER) && HAVE_LIBXML2
-#include <libxml/xmlmemory.h>
-#endif
-
 #if HAVE_LIBREADLINE
 static char *gnubg_histfile;
 #include <readline/history.h>
@@ -625,9 +621,6 @@ char const *aszBuildInfo[] = {
 #endif
 #if HAVE_SOCKETS
     N_("External players supported."),
-#endif
-#if HAVE_LIBXML2
-    N_("XML match equity files supported."),
 #endif
 #if HAVE_LIBGMP
     N_("Long RNG seeds supported."),
@@ -4719,21 +4712,6 @@ static void null_debug (const gchar* dom, GLogLevelFlags logflags, const gchar* 
 {
 }
 
-#if defined(_MSC_VER) && HAVE_LIBXML2
-
-static void * XMLCALL wrap_xml_g_malloc(size_t size)
-{
-	return g_malloc(size);
-}
-
-static void * XMLCALL wrap_xml_g_realloc(void *mem, size_t size)
-{
-	return g_realloc(mem, size);
-}
-
-#endif
-
-
 int main(int argc, char *argv[])
 {
 #if USE_GTK
@@ -4817,9 +4795,6 @@ int main(int argc, char *argv[])
 		const char *szDataDirectory = getInstallDir();
 		_chdir(szDataDirectory);
 	}
-#if defined(_MSC_VER) && HAVE_LIBXML2
-	xmlMemSetup(g_free, wrap_xml_g_malloc, wrap_xml_g_realloc, g_strdup);
-#endif
 #endif
 
 	/* print version and exit if -v option given */
