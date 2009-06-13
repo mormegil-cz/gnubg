@@ -3049,7 +3049,7 @@ GtkItemFactoryEntry aife[] = {
 	  "/View/Toolbar/Text only", NULL },
 	{ N_("/_View/_Toolbar/_Both"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_BOTH,
 	  "/View/Toolbar/Text only", NULL },
-	{ N_("/_View/Full screen"), NULL, DoFullScreenMode, 0, "<CheckItem>", NULL },
+	{ N_("/_View/Full screen"), "F11", DoFullScreenMode, 0, "<CheckItem>", NULL },
 	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ N_("/_View/Play _Clockwise"), NULL, click_swapdirection, 0, "<CheckItem>", NULL },
 #if USE_BOARD3D
