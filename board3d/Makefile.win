@@ -19,7 +19,6 @@ INCLUDE = -I. -I.. -I../lib \
 	-I$(MINGW)/include/glib-2.0 \
 	-I$(MINGW)/lib/glib-2.0/include \
 	-I$(MINGW)/include/atk-1.0 \
-	-I$(MINGW)/include/libxml2 \
 	-I$(MINGW)/include/pango-1.0 \
 	-I$(MINGW)/../Python23/include \
 	-I$(MINGW)/include/gtkglext-1.0 \

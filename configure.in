@@ -101,7 +101,6 @@ dnl
 
 PKG_CHECK_MODULES(GLIB, [glib-2.0 >= 2.6.0], have_glib="yes", AC_MSG_ERROR([You need to have glib2 to compile GNU backgammon]))
 PKG_CHECK_MODULES(GTHREAD, [gthread-2.0], have_gthread="yes", AC_MSG_WARN([no thread support in glib]))
-PKG_CHECK_MODULES(LIBXML2, [libxml-2.0],have_libxml="yes", AC_MSG_WARN([no xml METs support]))
 PKG_CHECK_MODULES(FREETYPE2, [freetype2], have_freetype="yes", AC_MSG_WARN([no freetype support]))
 PKG_CHECK_MODULES(LIBPNG, [libpng12], have_libpng="yes", AC_MSG_WARN([no png support]))
 PKG_CHECK_MODULES(CAIRO, [cairo >= 1.2], have_cairo="yes", [AC_MSG_WARN([no cairo support])])
@@ -110,10 +109,6 @@ PKG_CHECK_MODULES(SQLITE, [sqlite3], have_sqlite="yes", AC_MSG_WARN([no sqlite s
 PKG_CHECK_MODULES(CANBERRA, [libcanberra-gtk], have_canberra="yes", AC_MSG_WARN([no libcanberra-gtk support]))
 PKG_CHECK_MODULES(GTK, [gtk+-2.0 >= 2.6.0], have_gtk="yes" , AC_MSG_WARN([no gtk support]))
 PKG_CHECK_MODULES(GTKGLEXT, [gtkglext-1.0 >= 1.0], have_gtkglext="yes" , AC_MSG_WARN([no gtkglext support]))
-
-if test "x$have_libxml" = "xyes"; then
-	AC_DEFINE(HAVE_LIBXML2,1, [Define if you have libxml2.])
-fi
 
 if test "x$have_freetype" = "xyes"; then
 	AC_DEFINE(HAVE_FREETYPE, 1, [Define if you have freetype2])

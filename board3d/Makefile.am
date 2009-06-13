@@ -6,7 +6,7 @@
 AM_CPPFLAGS = -DDATADIR='"$(datadir)"' -DPKGDATADIR='"$(datadir)/gnubg"'
 
 INCLUDES = -I$(srcdir)/.. $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) \
-	-I$(srcdir)/../lib @LIBXML2_CFLAGS@ \
+	-I$(srcdir)/../lib \
 	-DLOCALEDIR=\"$(localedir)\" \
 	@FREETYPE2_CFLAGS@ @GTKGLEXT_CFLAGS@
 

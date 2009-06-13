@@ -62,7 +62,6 @@ INCLUDE = -I. -I./lib -I./board3d -I./non-src \
 	  -I$(MINGW)/include/glib-2.0 \
 	  -I$(MINGW)/lib/glib-2.0/include \
 	  -I$(MINGW)/include/atk-1.0 \
-	  -I$(MINGW)/include/libxml2 \
 	  -I$(MINGW)/include/pango-1.0 \
 	  -I"$(PYTHON_DIR)/include" \
 	  -I$(MINGW)/include/freetype2 \

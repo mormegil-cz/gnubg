@@ -2441,7 +2441,7 @@ NTH_STATIC void drawPickBoard(const BoardData *bd, void *data)
 	}
 }
 
-void DrawPoint(const BoardData *bd, int point)
+static void DrawPoint(const BoardData *bd, int point)
 {
 	BoardData3d *bd3d = bd->bd3d;
 	unsigned int j;
@@ -2668,7 +2668,7 @@ GLuint selectBuf[BUFSIZE];
 
 typedef void (*PickDrawFun)(const BoardData *bd, void *data);
 
-int PickDraw(int x, int y, PickDrawFun drawFun, const BoardData *bd, void *data)
+static int PickDraw(int x, int y, PickDrawFun drawFun, const BoardData *bd, void *data)
 {	/* Identify if anything is below point (x,y) */
 	BoardData3d *bd3d = bd->bd3d;
 	GLint hits;

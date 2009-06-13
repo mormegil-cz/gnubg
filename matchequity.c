@@ -1493,36 +1493,6 @@ static void met_parser_error (GMarkupParseContext *context,
     g_warning("An error occured while parsing file: %s\n", parser->filename );
 }
 
-static void metparameters_free( metparameters *params )
-{
-    listOLD *l;
-    if ( !params ) return;
-	for ( l = &params->lParameters; l ; l = l->plNext ){
-		parameter *p = (parameter *) l->p;
-		g_free( p->szName );
-        g_free( p );
-    }
-
-	ListDelete( &params->lParameters );
-    
-    g_free( params->szName );
-    g_free( params );
-}
-
-void metdata_free( metdata *data )
-{
-    metparameters_free( &data->mpPreCrawford );
-
-    metparameters_free( &data->ampPostCrawford[0] );
-    metparameters_free( &data->ampPostCrawford[1] );
-
-    g_free( data->mi.szName );
-	g_free( data->mi.szFileName );
-    g_free( data->mi.szDescription );
-
-    g_free( data );
-}
-
 /*
  * Calculate gammon and backgammon price at the specified score
  * with specified cube.

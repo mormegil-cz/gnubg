@@ -11,7 +11,7 @@ bin_PROGRAMS = gnubg makebearoff makehyper bearoffdump makeweights
 #
 ##include path
 #
-INCLUDES = -I$(srcdir)/lib -I$(srcdir)/board3d @LIBXML2_CFLAGS@ \
+INCLUDES = -I$(srcdir)/lib -I$(srcdir)/board3d \
 	   -DLOCALEDIR=\"$(localedir)\" @FREETYPE2_CFLAGS@ @GLIB_CFLAGS@ \
 	   @LIBPNG_CFLAGS@ @GTK_CFLAGS@ @CAIRO_CFLAGS@ @PANGOCAIRO_CFLAGS@ @GTHREAD_CFLAGS@ \
 	   @GTKGLEXT_CFLAGS@ @SQLITE_CFLAGS@ @CANBERRA_CFLAGS@
@@ -129,7 +129,7 @@ endif
 #
 gnubg_LDADD = -L$(srcdir)/lib lib/libevent.la @GTK_LIBS@ @LIBPNG_LIBS@ @CAIRO_LIBS@ @PANGOCAIRO_LIBS@ \
 	      @GTHREAD_LIBS@ \
-	      @LTLIBOBJS@ @LIBXML2_LIBS@ \
+	      @LTLIBOBJS@ \
 	      @FREETYPE2_LIBS@ @GLIB_LIBS@ @LIBPNG_LIBS@ @SQLITE_LIBS@ @CANBERRA_LIBS@
 if USE_PYTHON
 gnubg_LDADD += @PYTHON_LIBS@ 
@@ -149,13 +149,13 @@ UTILSOURCES = eval.h eval.c positionid.h positionid.c \
 	mec.h mec.c util.c util.h
 
 makebearoff_SOURCES = makebearoff.c $(UTILSOURCES)
-makebearoff_LDADD = -Llib lib/libevent.la  @GLIB_LIBS@ @LIBXML2_LIBS@
+makebearoff_LDADD = -Llib lib/libevent.la  @GLIB_LIBS@
 
 makehyper_SOURCES = makehyper.c $(UTILSOURCES)
-makehyper_LDADD = -Llib lib/libevent.la  @GLIB_LIBS@ @LIBXML2_LIBS@
+makehyper_LDADD = -Llib lib/libevent.la  @GLIB_LIBS@
 
 bearoffdump_SOURCES = bearoffdump.c $(UTILSOURCES)
-bearoffdump_LDADD = -Llib lib/libevent.la  @GLIB_LIBS@ @LIBXML2_LIBS@
+bearoffdump_LDADD = -Llib lib/libevent.la  @GLIB_LIBS@
 
 makeweights_SOURCES = makeweights.c
 makeweights_LDADD = -Llib lib/libevent.la @GLIB_LIBS@ 

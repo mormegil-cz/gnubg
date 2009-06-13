@@ -31,9 +31,9 @@
 
 typedef struct _metinfo {
 
-  unsigned char *szName;          /* Name of match equity table */
-  unsigned char *szFileName;     /* File name of met */
-  unsigned char *szDescription;  /* Description of met */
+  gchar *szName;          /* Name of match equity table */
+  gchar *szFileName;     /* File name of met */
+  gchar *szDescription;  /* Description of met */
   int nLength;                /* native length of met */
  
 } metinfo;
