@@ -329,7 +329,7 @@ extern void
 GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
 
 
-  GtkWidget *vbox, *hbox;
+  GtkWidget *vbox, *hbox, *vb2;
   GtkAdjustment *padj;
   int n;
 
@@ -366,14 +366,12 @@ GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
 
   /* buttons */
 
-  gtk_box_pack_start ( GTK_BOX ( vbox ), gtk_hseparator_new (),
-                       FALSE, FALSE, 0 );
+  gtk_box_pack_start ( GTK_BOX ( vbox ), gtk_hseparator_new (), FALSE, FALSE, 0 );
 
   hbox = gtk_hbox_new ( FALSE, 0 );
   gtk_box_pack_start (GTK_BOX ( vbox ),hbox, FALSE, FALSE, 4 );
 
-  gtk_box_pack_start ( GTK_BOX ( hbox ), gtk_label_new ( _("Depth") ), 
-                       FALSE, FALSE, 4 );
+  gtk_box_pack_start ( GTK_BOX ( hbox ), gtk_label_new ( _("Depth") ), FALSE, FALSE, 4 );
 
   /* Set page size to 1 */
   padj = GTK_ADJUSTMENT(gtk_adjustment_new(1., 1., 5., 1., 1., 0.));
@@ -384,13 +382,16 @@ GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
   gtk_scale_set_draw_value( GTK_SCALE( prw->pScale ), TRUE );
   gtk_range_set_update_policy( GTK_RANGE( prw->pScale ), GTK_UPDATE_DISCONTINUOUS );
 
+  /* Separate vbox to make button height correct */
+  vb2 = gtk_vbox_new ( FALSE, 0 );
+  gtk_box_pack_start (GTK_BOX ( hbox ),vb2, FALSE, FALSE, 4 );
   prw->pCancel = gtk_button_new_with_label( _("Cancel") );
-  g_signal_connect( G_OBJECT( prw->pCancel ), "clicked", 
-			G_CALLBACK( CancelRolls ), NULL );
-  gtk_box_pack_start ( GTK_BOX ( hbox ), prw->pCancel, FALSE, FALSE, 4 );
+  gtk_widget_set_size_request( prw->pCancel, -1, 27 );
+  gtk_widget_set_sensitive(prw->pCancel, FALSE);
+  g_signal_connect( G_OBJECT( prw->pCancel ), "clicked", G_CALLBACK( CancelRolls ), NULL );
+  gtk_box_pack_start ( GTK_BOX ( vb2 ), prw->pCancel, FALSE, FALSE, 4 );
 
-  g_signal_connect( G_OBJECT ( prw->pScale ), "value-changed",
-                       G_CALLBACK ( DepthChanged ), prw );
+  g_signal_connect( G_OBJECT ( prw->pScale ), "value-changed", G_CALLBACK ( DepthChanged ), prw );
 
   /* tree  */
 
