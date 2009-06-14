@@ -1,3 +1,7 @@
+Sun Jun 14 22:00:00 2003  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* positionid.c: Rewrite position key functions (hopefully faster)
+
 Sat Jun 13 02:04:28 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* err? gmon.out, Makefile.am, Makefile.w32, TODO, configure.in,

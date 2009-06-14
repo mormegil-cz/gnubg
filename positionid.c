@@ -57,28 +57,46 @@ static inline void addBits(unsigned char auchKey[10], unsigned int bitPos, unsig
   }
 }
 
-extern void
-PositionKey(const TanBoard anBoard, unsigned char auchKey[10])
+extern void PositionKey(const TanBoard anBoard, unsigned char auchKey[10])
 {
-  unsigned int i, iBit = 0;
-  const unsigned int* j;
+	unsigned int i;
+	int iBit = 32;
+	unsigned int *iKey = (unsigned int *)auchKey;
+	const unsigned int* j;
 
-  memset(auchKey, 0, 10 * sizeof(*auchKey));
+	memset(auchKey, 0, 10 * sizeof(*auchKey));
 
-  for(i = 0; i < 2; ++i) {
-    const unsigned int* const b = anBoard[i];
-    for(j = b; j < b + 25; ++j)
+	for(i = 0; i < 2; ++i)
 	{
-      const unsigned int nc = *j;
-
-      if( nc ) {
-        addBits(auchKey, iBit, nc);
-        iBit += nc + 1;
-      } else {
-        ++iBit;
-      }
-    }
-  }
+		const unsigned int* const b = anBoard[i];
+		for(j = b; j < b + 25; ++j)
+		{
+			const unsigned int nc = *j;
+			if( !nc )
+				iBit--;
+			else
+			{
+				if (iBit <= 0)
+				{
+					iBit += 32;
+					iKey++;
+				}
+				if (nc <= (unsigned int)iBit)
+				{
+					*iKey |= ((1 << (nc)) - 1) << (32 - iBit);
+					iBit -= nc;
+				}
+				else
+				{
+					*iKey |= ((1 << iBit) - 1) << (32 - iBit);
+					iKey++;
+					*iKey |= ((1 << ((nc - iBit))) - 1);
+					iBit = 32 - (nc - iBit);
+				}
+				iBit--;
+			}
+		}
+	}
 }
 
 extern char *PositionIDFromKey( const unsigned char auchKey[ 10 ] ) {
@@ -186,39 +204,48 @@ extern void ClosestLegalPosition( TanBoard anBoard )
 		anBoard[ 1 ][ 24 ] = 0;
 }
 
-extern void
-PositionFromKey(TanBoard anBoard, const unsigned char* pauch)
+extern void PositionFromKey(TanBoard anBoard, const unsigned char* pauch)
 {
-  int i = 0, j  = 0, k;
-  const unsigned char* a;
+	int i = 0, j = 0, xtest;
+	int *ptest = (int*)pauch;
 
-  memset(anBoard[0], 0, sizeof(anBoard[0]));
-  memset(anBoard[1], 0, sizeof(anBoard[1]));
-  
-  for(a = pauch; a < pauch + 10; ++a) {
-    unsigned char cur = *a;
-    
-    for(k = 0; k < 8; ++k)
+	memset(anBoard, 0, sizeof(TanBoard));
+
+	xtest = 1;
+	do
 	{
-      if( (cur & 0x1) )
-	  {
-        if (i >= 2 || j >= 25)
-        {	/* Error, so return - will probably show error message */
-          return;
-        }
-        ++anBoard[i][j];
-      }
-	  else
-	  {
-		if( ++j == 25 )
+		if ((*ptest) & xtest)
+			++anBoard[i][j];
+		else if( ++j == 25 )
 		{
-		  ++i;
-		  j = 0;
+			++i;
+			j = 0;
 		}
-      }
-      cur >>= 1;
-    }
-  }
+	} while (xtest <<= 1);
+	xtest = 1;
+	ptest++;
+	do
+	{
+		if ((*ptest) & xtest)
+			++anBoard[i][j];
+		else if( ++j == 25 )
+		{
+			++i;
+			j = 0;
+		}
+	} while (xtest <<= 1);
+	xtest = 1;
+	ptest++;
+	do
+	{
+		if ((*ptest) & xtest)
+			++anBoard[i][j];
+		else if( ++j == 25 )
+		{
+			++i;
+			j = 0;
+		}
+	} while ((short)(xtest <<= 1));
 }
 
 extern unsigned char Base64( const unsigned char ch )
