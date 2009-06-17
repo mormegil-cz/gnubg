@@ -25,12 +25,16 @@ freetype2 (_Required_)
 
 gtk2 (GUI)
 cairo2 (graphics)
-esound (sound)
+canberra (sound)
 gtkglext (3d boards)
 readline (command line)
 python (extension)
 sqlite3 (database)
 gmp3 (better random numbers)
+
+for documentation
+texinfo
+docbook2x
 
 In most cases, configure will automatically determine everything it needs to
 know in order to compile.  However, there are a few options to ``configure'' to
