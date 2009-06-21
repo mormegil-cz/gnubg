@@ -1,3 +1,8 @@
+Sun Jun 21 23:21:36 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* configure.in, lib/neuralnetsse.c, lib/sigmoid.h: check Øysteins
+	sigmoid sse2 patch in.
+
 Sun Jun 14 22:00:00 2003  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* positionid.c: Rewrite position key functions (hopefully faster)

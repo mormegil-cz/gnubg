@@ -34,7 +34,7 @@
 #include <assert.h>
 #endif
 
-#include <xmmintrin.h>
+#include <emmintrin.h>
 #ifndef _MSC_VER
 #include <mm_malloc.h>
 #endif
@@ -59,12 +59,67 @@ void sse_free(float* ptr)
 		free(ptr);
 }
 
+#if USE_SSE2
+#include <stdint.h>
+
+static const union {
+	float f[4];
+	__m128 ps;
+} ones = {{1.0f, 1.0f, 1.0f, 1.0f}};
+
+static const union {
+	float f[4];
+	__m128 ps;
+} tens = {{10.0f, 10.0f, 10.0f, 10.0f}};
+
+static const union {
+	int32_t i32[4];
+	__m128 ps;
+} abs_mask = {{0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF}};
+
+static inline __m128 sigmoid_positive_ps( __m128 xin )
+{
+	union {
+		__m128i i;
+		int32_t i32[4];
+	} i;
+	__m128 ex;
+	float *ex_elem = (float*) &ex;
+	__m128 x1 = _mm_min_ps( xin, tens.ps );
+
+	x1 = _mm_mul_ps( x1, tens.ps );
+	i.i  = _mm_cvtps_epi32( x1 );
+ 	ex_elem[0] = e[i.i32[0]];
+	ex_elem[1] = e[i.i32[1]];
+	ex_elem[2] = e[i.i32[2]];
+	ex_elem[3] = e[i.i32[3]];
+	x1 = _mm_sub_ps( x1, _mm_cvtepi32_ps( i.i ) ); 
+	x1 = _mm_add_ps( x1, tens.ps );
+	x1 = _mm_mul_ps( x1, ex );
+	x1 = _mm_add_ps( x1, ones.ps ); 
+	return _mm_rcp_ps( x1 );
+}
+
+static inline __m128 sigmoid_ps( __m128 xin )
+{	
+	__m128 mask = _mm_cmplt_ps( xin, _mm_setzero_ps() );
+	__m128 c; 
+	xin = _mm_and_ps (xin , abs_mask.ps ); /* Abs. value by clearing signbit */
+	c = sigmoid_positive_ps(xin);
+	return _mm_or_ps( _mm_and_ps(  mask, c ) , _mm_andnot_ps ( mask , _mm_sub_ps( ones.ps, c )));
+}
+
+#endif  // USE_SSE2
+
 static void
 Evaluate128( const neuralnet *pnn, const float arInput[], float ar[],
                         float arOutput[], float *saveAr ) {
 
     unsigned int i, j;
     float *prWeight;
+#if USE_SSE2
+    float *par;
+#endif
     __m128 vec0, vec1, vec3, scalevec, sum;
     
     /* Calculate activity at hidden nodes */
@@ -109,8 +164,18 @@ Evaluate128( const neuralnet *pnn, const float arInput[], float ar[],
     if( saveAr)
       memcpy( saveAr, ar, HIDDEN_NODES * sizeof( *saveAr));
     
-    for( i = 0; i < HIDDEN_NODES; i++ )
-		ar[ i ] = sigmoid( -pnn->rBetaHidden * ar[ i ] );
+#if USE_SSE2
+	scalevec = _mm_set1_ps(pnn->rBetaHidden);
+	for (par = ar, i = 32; i; i--, par += 4) {
+		__m128 vec = _mm_load_ps(par);
+		vec = _mm_mul_ps(vec, scalevec);
+		vec = sigmoid_ps(vec);
+		_mm_store_ps(par, vec);
+	}
+#else
+	for (i = 0; i < HIDDEN_NODES; i++)
+		ar[i] = sigmoid(-pnn->rBetaHidden * ar[i]);
+#endif
     
     /* Calculate activity at output nodes */
     prWeight = pnn->arOutputWeight;
