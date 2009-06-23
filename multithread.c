@@ -329,7 +329,10 @@ static void MT_WorkerThreadFunction(void *id)
 {
 	/* why do we need this align ? - because of a gcc bug */
 #if __GNUC__ && WIN32
+	/* Align stack pointer on 16 byte boundary so SSE variables work correctly */
+	int align_offset;
 	asm  __volatile__  ("andl $-16, %%esp" : : : "%esp");
+	align_offset = ((int)(&align_offset)) % 16;
 #endif
 	{
 		int *pID = (int*)id;
@@ -350,7 +353,10 @@ static void MT_WorkerThreadFunction(void *id)
 		} while (!td.closingThreads);
 
 #ifdef GLIB_THREADS
-		g_usleep(0);	/* Avoid odd crash */
+#if __GNUC__ && WIN32
+		/* De-align stack pointer to avoid crash on exit */
+		asm  __volatile__  ("addl %0, %%esp" : :"r"(align_offset));
+#endif
 		return NULL;
 #endif
 	}
