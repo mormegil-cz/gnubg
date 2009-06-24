@@ -105,9 +105,6 @@ cubeEntry( const int n, const float rn, const float ru,
       return g_strdup_printf( "%3d (%+6.3f (%+7.3f))", 
                               n, rn, ru );
   }
-    
-  g_assert_not_reached();
-  return NULL;
 
 }
 
@@ -440,7 +437,7 @@ extern GList *formatGS( const statcontext *psc, const int nMatchTo, const enum _
         aasz[ 0 ] = g_strdup( _("Snowie error rate") );
 
         for ( i = 0; i < 2; ++i )
-          if ( ( n = psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] ) )
+          if ( ( n = psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] ) > 0 )
             aasz[ i + 1 ] = 
               errorRateMP( -aaaar[ COMBINED ][ TOTAL ][ i ][ NORMALISED ] / n,
                            0.0f, nMatchTo );

@@ -48,11 +48,10 @@ makebearoff_SOURCE = makebearoff eval positionid matchequity \
 makebearoff_OBJECTS=$(patsubst %,$(OBJDIR)/%.o,$(makebearoff_SOURCE))
 
 makebearoff_LIBS = \
-		   -levent -lglib-2.0.dll -lxml2 -lfreetype.dll \
+		   -levent -lglib-2.0.dll -lfreetype.dll \
 		   -lgobject-2.0.dll -lgtk-win32-2.0 -lgdk-win32-2.0 \
-		   -liconv -lpng -lz -lwinmm -lpango-1.0 -lgdk_pixbuf-2.0 \
-		   -lopengl32 -lglu32 -lglut32 -lwsock32 \
-		   -lgdkglext-win32-1.0.dll -lgtkglext-win32-1.0.dll \
+		   -lwinmm -lpango-1.0 -lgdk_pixbuf-2.0 \
+		   -lopengl32 -lglu32 -lwsock32 \
 		   -lintl -lcairo -lcomctl32 -lgthread-2.0
 
 INCLUDE = -I. -I./lib -I./board3d -I./non-src \
@@ -70,11 +69,11 @@ INCLUDE = -I. -I./lib -I./board3d -I./non-src \
 
 LIBPATH = -L$(BINDIR) -L"$(PYTHON_DIR)/libs"
 
-LIBS = -levent -lglib-2.0.dll -lxml2 -lfreetype.dll \
+LIBS = -levent -lglib-2.0.dll -lfreetype.dll \
        -lgobject-2.0.dll -lgtk-win32-2.0 -lgdk-win32-2.0 \
-       -liconv -lpng -lz -lwinmm -lpango-1.0 -lpangocairo-1.0 -lgdk_pixbuf-2.0 \
-       -lopengl32 -lglu32 -lglut32 -lwsock32 \
-       -lgdkglext-win32-1.0.dll -lgtkglext-win32-1.0.dll \
+       -lwinmm -lpango-1.0 -lpangocairo-1.0 -lgdk_pixbuf-2.0 \
+       -lpng -lopengl32 -lglu32 -lwsock32 \
+	   -lgdkglext-win32-1.0.dll -lgtkglext-win32-1.0.dll \
        -lintl -lcairo -lgthread-2.0.dll # -lsqlite3 -lpython25
 
 #LIBOPTIONS=-mwindows

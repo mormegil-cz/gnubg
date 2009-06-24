@@ -569,7 +569,7 @@ extern void CommandExportGameLaTeX( char *sz ) {
 
     if( !strcmp( sz, "-" ) )
 	pf = stdout;
-    else if( !( pf = g_fopen( sz, "w" ) ) ) {
+    else if( ( pf = g_fopen( sz, "w" ) ) == 0 ) {
 	outputerr( sz );
 	return;
     }
@@ -605,7 +605,7 @@ extern void CommandExportMatchLaTeX( char *sz ) {
 
     if( !strcmp( sz, "-" ) )
 	pf = stdout;
-    else if( !( pf = g_fopen( sz, "w" ) ) ) {
+    else if( ( pf = g_fopen( sz, "w" ) ) == 0 ) {
 	outputerr( sz );
 	return;
     }

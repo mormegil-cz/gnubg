@@ -588,7 +588,7 @@ RNGSystemSeed( const rng rngx, void *p, unsigned long *pnSeed ) {
 
   int f = FALSE;
   rngcontext *rngctx = (rngcontext *) p;
-  int n;
+  int n = 0;
 
 #if HAVE_LIBGMP
   int h;
@@ -818,8 +818,6 @@ uglyloop:
 
   }
   goto uglyloop;	/* This logic should be reconsidered */
-
-  return -1;
 
 }
 

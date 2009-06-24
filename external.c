@@ -173,7 +173,7 @@ extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz ) {
 #else
 	else if( !inet_aton( sz, &psin->sin_addr ) ) {
 #endif /* WIN32 */
-	    if( !( phe = gethostbyname( sz ) ) ) {
+	    if( ( phe = gethostbyname( sz ) ) == 0 ) {
 		*pch = ':';
 		errno = EINVAL;
 		free( psin );
@@ -190,7 +190,7 @@ extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz ) {
 
 	*pch++ = ':';
 	
-	psin->sin_port = htons( atoi( pch ) );
+	psin->sin_port = htons( (u_short)atoi( pch ) );
 	
 	*ppsa = (struct sockaddr *) psin;
     } else {
@@ -661,7 +661,7 @@ listenloop:
 
       while( !ExternalRead( hPeer, szCommand, sizeof( szCommand ) ) ) {
 
-        if ( ! ( pec = ExtParse( szCommand ) ) ) {
+        if ( ( pec = ExtParse( szCommand ) ) == 0 ) {
           /* parse error */
           szResponse = szError;
         }

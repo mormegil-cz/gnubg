@@ -12,12 +12,18 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifndef _MULTITHREAD_H
+#define _MULTITHREAD_H
+
 #if USE_MULTITHREAD
+
 #include "backgammon.h"
 #include <glib.h>
 
 #ifdef WIN32
+#ifndef GLIB_THREADS
 #include <windows.h>
+#endif
 #endif
 
 /*#define DEBUG_MULTITHREADED 1*/
@@ -89,4 +95,6 @@ extern int asyncRet;
 #define MT_SafeDec(x) (--(*x))
 #define MT_SafeDecCheck(x) ((--(*x)) == 0)
 #define MT_GetThreadID(x) 0
+#endif
+
 #endif

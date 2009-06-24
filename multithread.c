@@ -355,7 +355,7 @@ static void MT_WorkerThreadFunction(void *id)
 #ifdef GLIB_THREADS
 #if __GNUC__ && WIN32
 		/* De-align stack pointer to avoid crash on exit */
-		asm  __volatile__  ("addl %0, %%esp" : :"r"(align_offset));
+		asm  __volatile__  ("addl %0, %%esp" : : "r"(align_offset) : "%esp");
 #endif
 		return NULL;
 #endif

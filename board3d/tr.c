@@ -2,6 +2,9 @@
 
 /*
  * $Log$
+ * Revision 1.4  2009/06/24 18:38:46  Superfly_Jon
+ * Fix compiler warnings
+ *
  * Revision 1.3  2008/03/13 18:15:09  Superfly_Jon
  * Minor comipler grumbles
  *
@@ -44,18 +47,9 @@
  * Copyright (C) Brian Paul
  */
 
-
-#include <assert.h>
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-#ifdef WIN32
-#include <windows.h>
-#endif
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include "config.h"
+#include "inc3d.h"
 #include "tr.h"
-
 
 #define DEFAULT_TILE_WIDTH  256
 #define DEFAULT_TILE_HEIGHT 256
@@ -254,7 +248,7 @@ void trRowOrder(TRcontext *tr, TRenum order)
 void trOrtho(TRcontext *tr,
              GLdouble left, GLdouble right,
              GLdouble bottom, GLdouble top,
-             GLdouble zNear, GLdouble zFar)
+             GLdouble znear, GLdouble zfar)
 {
    if (!tr)
       return;
@@ -264,15 +258,15 @@ void trOrtho(TRcontext *tr,
    tr->Right = right;
    tr->Bottom = bottom;
    tr->Top = top;
-   tr->Near = zNear;
-   tr->Far = zFar;
+   tr->Near = znear;
+   tr->Far = zfar;
 }
 
 
 void trFrustum(TRcontext *tr,
                GLdouble left, GLdouble right,
                GLdouble bottom, GLdouble top,
-               GLdouble zNear, GLdouble zFar)
+               GLdouble znear, GLdouble zfar)
 {
    if (!tr)
       return;
@@ -282,21 +276,21 @@ void trFrustum(TRcontext *tr,
    tr->Right = right;
    tr->Bottom = bottom;
    tr->Top = top;
-   tr->Near = zNear;
-   tr->Far = zFar;
+   tr->Near = znear;
+   tr->Far = zfar;
 }
 
 
 void trPerspective(TRcontext *tr,
                    GLdouble fovy, GLdouble aspect,
-                   GLdouble zNear, GLdouble zFar )
+                   GLdouble znear, GLdouble zfar )
 {
    GLdouble xmin, xmax, ymin, ymax;
-   ymax = zNear * tan(fovy * 3.14159265 / 360.0);
+   ymax = znear * tan(fovy * 3.14159265 / 360.0);
    ymin = -ymax;
    xmin = ymin * aspect;
    xmax = ymax * aspect;
-   trFrustum(tr, xmin, xmax, ymin, ymax, zNear, zFar);
+   trFrustum(tr, xmin, xmax, ymin, ymax, znear, zfar);
 }
 
 

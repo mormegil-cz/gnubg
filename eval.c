@@ -3935,7 +3935,7 @@ extern float KleinmanCount (int nPipOnRoll, int nPipNotOnRoll)
   if (nSum > 4)
   {
 	rK = (double) (nDiff + 4) / (2 * sqrt( nSum - 4 ));
-	return 0.5f * (1.0f + (float)erf( rK ));
+	return 0.5f * (1.0f + erf( rK ));
   }
   else
 	  return 0.f;

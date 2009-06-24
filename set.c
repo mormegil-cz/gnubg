@@ -21,6 +21,11 @@
 
 #include "config.h"
 
+#ifdef WIN32
+/* Needed for thread priority defines */
+#include <windows.h>
+#endif
+
 #include <glib.h>
 #include <ctype.h>
 #include <errno.h>
@@ -81,11 +86,6 @@
 #include "fun3d.h"
 #endif
 #include "multithread.h"
-
-#ifdef WIN32
-/* Needed for thread priority defines */
-#include <windows.h>
-#endif
 
 static int iPlayerSet, iPlayerLateSet;
 
@@ -1504,7 +1504,7 @@ extern void CommandSetPlayer( char *sz ) {
 
     szSetCommand = szTemp;
 
-    if( !( i = ParsePlayer( pch ) ) || i == 1 ) {
+    if( ( i = ParsePlayer( pch ) ) == 0 || i == 1 ) {
         iPlayerSet = i;
         sprintf( szTemp, "player %d", i );
 
@@ -1515,7 +1515,7 @@ extern void CommandSetPlayer( char *sz ) {
     }
 
     if( i == 2 ) {
-	if( !( pchCopy = malloc( strlen( sz ) + 1 ) ) ) {
+	if( ( pchCopy = malloc( strlen( sz ) + 1 ) ) == 0 ) {
 	    outputl( _("Insufficient memory.") );
 		
 	    return;
@@ -2229,7 +2229,7 @@ CommandSetRolloutPlayer ( char *sz ) {
 	return;
     }
 
-    if( !( i = ParsePlayer( pch ) ) || i == 1 ) {
+    if( ( i = ParsePlayer( pch ) ) == 0 || i == 1 ) {
 	iPlayerSet = i;
 
 	HandleCommand( sz, acSetRolloutPlayer );
@@ -2238,7 +2238,7 @@ CommandSetRolloutPlayer ( char *sz ) {
     }
 
     if( i == 2 ) {
-	if( !( pchCopy = malloc( strlen( sz ) + 1 ) ) ) {
+	if( ( pchCopy = malloc( strlen( sz ) + 1 ) ) == 0 ) {
 	    outputl( _("Insufficient memory.") );
 		
 	    return;
@@ -2278,7 +2278,7 @@ CommandSetRolloutLatePlayer ( char *sz ) {
 	return;
     }
 
-    if( !( i = ParsePlayer( pch ) ) || i == 1 ) {
+    if( ( i = ParsePlayer( pch ) ) == 0 || i == 1 ) {
 	iPlayerLateSet = i;
 
 	HandleCommand( sz, acSetRolloutLatePlayer );
@@ -2287,7 +2287,7 @@ CommandSetRolloutLatePlayer ( char *sz ) {
     }
 
     if( i == 2 ) {
-	if( !( pchCopy = malloc( strlen( sz ) + 1 ) ) ) {
+	if( ( pchCopy = malloc( strlen( sz ) + 1 ) ) == 0 ) {
 	    outputl( _("Insufficient memory.") );
 		
 	    return;
@@ -2323,10 +2323,10 @@ extern void CommandSetScore( char *sz ) {
     char *pchEnd0, *pchEnd1;
     int fCrawford0, fCrawford1, fPostCrawford0, fPostCrawford1;
 
-    if( !( pch0 = NextToken( &sz ) ) )
+    if( ( pch0 = NextToken( &sz ) ) == 0 )
 	pch0 = "";
     
-    if( !( pch1 = NextToken( &sz ) ) )
+    if( ( pch1 = NextToken( &sz ) ) == 0 )
 	pch1 = "";
     
     n0 = strtol( pch0, &pchEnd0, 10 );
@@ -2909,7 +2909,7 @@ CommandSetAnalysisPlayer( char *sz ) {
     return;
   }
 
-  if( !( i = ParsePlayer( pch ) ) || i == 1 ) {
+  if( ( i = ParsePlayer( pch ) ) == 0 || i == 1 ) {
     iPlayerSet = i;
 
     HandleCommand( sz, acSetAnalysisPlayer );
@@ -2918,7 +2918,7 @@ CommandSetAnalysisPlayer( char *sz ) {
   }
 
   if( i == 2 ) {
-    if( !( pchCopy = malloc( strlen( sz ) + 1 ) ) ) {
+    if( ( pchCopy = malloc( strlen( sz ) + 1 ) ) == 0 ) {
       outputl( _("Insufficient memory.") );
       
       return;
@@ -3831,7 +3831,7 @@ CommandSetCheatPlayer( char *sz ) {
 	return;
     }
 
-    if( !( i = ParsePlayer( pch ) ) || i == 1 ) {
+    if( ( i = ParsePlayer( pch ) ) == 0 || i == 1 ) {
 	iPlayerSet = i;
 
 	HandleCommand( sz, acSetCheatPlayer );
@@ -3840,7 +3840,7 @@ CommandSetCheatPlayer( char *sz ) {
     }
 
     if( i == 2 ) {
-	if( !( pchCopy = malloc( strlen( sz ) + 1 ) ) ) {
+	if( ( pchCopy = malloc( strlen( sz ) + 1 ) ) == 0 ) {
 	    outputl( _("Insufficient memory.") );
 		
 	    return;

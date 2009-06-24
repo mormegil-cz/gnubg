@@ -39,7 +39,6 @@
 #endif
 
 #ifdef WIN32
-#include <windows.h>
 #include <io.h>
 #endif
 
@@ -1096,7 +1095,7 @@ static void MainSize( GtkWidget *pw, GtkRequisition *preq, gpointer p ) {
 	int width;
 
     if( GTK_WIDGET_REALIZED( pw ) )
-	g_signal_handlers_disconnect_by_func( G_OBJECT( pw ),
+	g_signal_handlers_disconnect_by_func( G_OBJECT( pw ), G_CALLBACK( MainSize ), p );
 				       G_CALLBACK( MainSize ), p );
     else if (!SetMainWindowSize())
 		gtk_window_set_default_size( GTK_WINDOW( pw ),
@@ -1393,7 +1392,7 @@ extern void HideToolbar(void)
 
 static gboolean EndFullScreen(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
 {
-	short k = event->keyval;
+	short k = (short)event->keyval;
 
 	if (k == KEY_ESCAPE)
 		FullScreenMode(FALSE);
@@ -4113,10 +4112,10 @@ int fTruncEqualPlayer0 = 1;
  ***************************************************************************/
 static void GetRolloutSettings( GtkWidget *pw, rolloutwidget *prw ) {
   int   p0, p1, i;
-  int fCubeEqChequer, fPlayersAreSame, nTruncPlies;
+  int fCubeEqChequer, fPlayersAreSame;
 
   prw->rcRollout.nTrials = (int)prw->prwGeneral->padjTrials->value;
-  nTruncPlies = prw->rcRollout.nTruncate = (int)prw->prwGeneral->padjTruncPlies->value;
+  prw->rcRollout.nTruncate = (unsigned short)prw->prwGeneral->padjTruncPlies->value;
 
   prw->rcRollout.nSeed = (int)prw->prwGeneral->padjSeed->value;
 
@@ -4141,13 +4140,13 @@ static void GetRolloutSettings( GtkWidget *pw, rolloutwidget *prw ) {
   prw->rcRollout.fTruncBearoffOS = gtk_toggle_button_get_active(
                                                                 GTK_TOGGLE_BUTTON( prw->prwGeneral->pwTruncBearoffOS ) );
 
-  if (nTruncPlies == 0) 
+  if (prw->rcRollout.nTruncate == 0) 
     prw->rcRollout.fDoTruncate = FALSE;
 
   prw->rcRollout.fLateEvals = gtk_toggle_button_get_active(
                                                            GTK_TOGGLE_BUTTON( prw->prwGeneral->pwDoLate ) );
 
-  prw->rcRollout.nLate = (int)prw->prwGeneral->padjLatePlies->value;
+  prw->rcRollout.nLate = (unsigned short)prw->prwGeneral->padjLatePlies->value;
 
   fCubeEqChequer = 
     gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( 

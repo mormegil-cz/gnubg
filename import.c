@@ -615,7 +615,7 @@ static void ParseMatMove( char *sz, int iPlayer, int *warned ) {
 		  TanBoard anBoard;
           char aszPlayer[ 2 ][ MAX_NAME_LEN ];
 
-          if ( ! ( pch = strchr( sz + 4, '(' ) ) ) {
+          if ( ( pch = strchr( sz + 4, '(' ) ) == 0 ) {
             outputl( _("No '(' following text 'Illegal play'") );
             return;
           }
@@ -926,7 +926,7 @@ ImportGame( FILE *fp, int iGame, int nLength, bgvariation bgVariation, int *warn
     {
       pchRight = pchLeft = NULL;
 
-      if( ( pch = strpbrk( szLine, "\n\r" ) ) )
+      if( ( pch = strpbrk( szLine, "\n\r" ) ) != 0 )
 	    *pch = 0;
 
       if( ( pchLeft = strchr( szLine, ':' ) ) &&
@@ -936,7 +936,7 @@ ImportGame( FILE *fp, int iGame, int nLength, bgvariation bgVariation, int *warn
       else if( strlen( szLine ) > 15 && ( pchRight = strstr( szLine + 15, "  " ) ) )
 	    *pchRight++ = 0;
 	
-      if( ( pchLeft = strchr( szLine, ')' ) ) )
+      if( ( pchLeft = strchr( szLine, ')' ) ) != 0 )
 	    pchLeft++;
       else
 	    pchLeft = szLine;
@@ -960,7 +960,7 @@ ImportGame( FILE *fp, int iGame, int nLength, bgvariation bgVariation, int *warn
 static int ImportMatVariation(FILE * fp, char *szFilename, bgvariation bgVariation, int warned)
 {
 
-	int n = 0, nLength, game;
+	int n = 0, nLength = -1, game;
 	char ch;
 	gchar *pchComment = NULL;
 	char *szLine;
@@ -979,7 +979,7 @@ static int ImportMatVariation(FILE * fp, char *szFilename, bgvariation bgVariati
 			/* comment */
 			char *pchOld = pchComment;
 			char *pch;
-			if ((pch = strpbrk(szLine, "\n\r")))
+			if ((pch = strpbrk(szLine, "\n\r")) != 0)
 				*pch = 0;
 			pch = szLine + 1;
 			while (isspace(*pch))
@@ -1433,7 +1433,7 @@ ImportOldmovesGame( FILE *pf, int iGame, int nLength, int n0,
 
     do {
 
-	if( ( pch = strpbrk( sz, "\n\r" ) ) )
+	if( ( pch = strpbrk( sz, "\n\r" ) ) != 0 )
 	    *pch = 0;
 
 	ParseOldmove( sz, fInvert );
@@ -1665,7 +1665,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
                     szComment = NULL;
 
 		} else {
-		    if( ( fPlayer = *pch == '\t' ) )
+		    if( ( fPlayer = *pch == '\t' ) != 0 )
 			pch++;
 
 		    if( *pch >= '1' && *pch <= '6' && pch[ 1 ] >= '1' &&
@@ -2194,7 +2194,7 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
       free ( pmi->pchPlace );
 
     pmi->pchPlace = g_strdup ( sz );
-    if ( ( pc2 = strchr ( sz, '\n' ) ) )
+    if ( ( pc2 = strchr ( sz, '\n' ) ) != 0 )
       *pc2 = 0;
 
   }
@@ -2339,7 +2339,7 @@ ParseTMGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
   case 0: /* MatchID */
     pc = strchr ( sz, ':' ) + 2;
     sprintf( szTemp, _("TMG MatchID: %s"), pc );
-    if ( ( pc2 = strchr ( szTemp, '\n' ) ) )
+    if ( ( pc2 = strchr ( szTemp, '\n' ) ) != 0 )
       *pc2 = 0;
     pmi->pchComment = g_strdup ( szTemp );
     return 0;
@@ -2376,7 +2376,7 @@ ParseTMGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
     break;
 
   case 7: /* Jacoby */
-    if ( ! ( pc = strchr( sz, ':' ) ) )
+    if ( ( pc = strchr( sz, ':' ) ) == 0 )
       return 0;
     *pfJacobyRule = atoi ( pc + 2 );
     return 0;
@@ -2389,21 +2389,21 @@ ParseTMGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
     break;
 
   case 11: /* Crawford */
-    if ( ! ( pc = strchr( sz, ':' ) ) )
+    if ( ( pc = strchr( sz, ':' ) ) == 0 )
       return 0;
     *pfCrawfordRule = atoi ( pc + 2 );
     return 0;
     break;
 
   case 12: /* Cube */
-    if ( ! ( pc = strchr( sz, ':' ) ) )
+    if ( ( pc = strchr( sz, ':' ) ) == 0 )
       return 0;
     *pfCubeUse = atoi ( pc + 2 );
     return 0;
     break;
 
   case 14: /* Length */
-    if ( ! ( pc = strchr( sz, ':' ) ) )
+    if ( ( pc = strchr( sz, ':' ) ) == 0 )
       return 0;
     *pnLength = atoi ( pc + 2 );
     return 0;
@@ -2411,7 +2411,7 @@ ParseTMGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
 
   case 16: /* Variant */
 
-    if ( ! ( pc = strchr( sz, ':' ) ) )
+    if ( ( pc = strchr( sz, ':' ) ) == 0 )
       return 0;
     switch( atoi( pc + 2 ) ) {
     case 1:
@@ -3282,7 +3282,7 @@ static int ImportGAM(FILE *fp, char *szFilename )
 	FreeMatch();
 	ClearMatch();
 
-	while((szLine = GetMatLine(fp)))
+	while((szLine = GetMatLine(fp)) != 0)
 	{
 		szLine += strspn(szLine, " \t" );
 
@@ -3333,11 +3333,11 @@ static int ImportGAM(FILE *fp, char *szFilename )
 		AddMoveRecord( pmgi );
 
 		/* Read game */
-		while((szLine = GetMatLine(fp)))
+		while((szLine = GetMatLine(fp)) != 0)
 		{
 			pchRight = pchLeft = NULL;
 
-			if( ( pch = strpbrk( szLine, "\n\r" ) ) )
+			if( ( pch = strpbrk( szLine, "\n\r" ) ) != 0 )
 				*pch = 0;
 
 			if( ( pchLeft = strchr( szLine, ':' ) ) &&
@@ -3346,7 +3346,7 @@ static int ImportGAM(FILE *fp, char *szFilename )
 			else if( strlen( szLine ) > 15 && ( pchRight = strstr( szLine + 15, "  " ) ) )
 				*pchRight++ = 0;
 
-			if( ( pchLeft = strchr( szLine, ')' ) ) )
+			if( ( pchLeft = strchr( szLine, ')' ) ) != 0 )
 				pchLeft++;
 			else
 				pchLeft = szLine;
@@ -3546,7 +3546,7 @@ extern void CommandImportBKG( char *sz ) {
 	return;
     }
 
-    if( ( pf = g_fopen( sz, "r" ) ) ) {
+    if( ( pf = g_fopen( sz, "r" ) ) != 0 ) {
         rc = ImportBKG( pf, sz );
 	fclose( pf );
         if ( rc )
@@ -3598,7 +3598,7 @@ extern void CommandImportMat( char *sz ) {
 	return;
     }
 
-    if( ( pf = g_fopen( sz, "r" ) ) ) {
+    if( ( pf = g_fopen( sz, "r" ) ) != 0 ) {
         rc = ImportMat( pf, sz );
 	fclose( pf );
         if ( rc )
@@ -3624,7 +3624,7 @@ extern void CommandImportOldmoves( char *sz ) {
 	return;
     }
 
-    if( ( pf = g_fopen( sz, "r" ) ) ) {
+    if( ( pf = g_fopen( sz, "r" ) ) != 0 ) {
 	rc = ImportOldmoves( pf, sz );
 	fclose( pf );
         if ( rc )
@@ -3651,7 +3651,7 @@ extern void CommandImportSGG( char *sz ) {
 	return;
     }
 
-    if( ( pf = g_fopen( sz, "r" ) ) ) {
+    if( ( pf = g_fopen( sz, "r" ) ) != 0 ) {
 	rc = ImportSGG( pf, sz );
 	fclose( pf );
         if ( rc )
@@ -3677,7 +3677,7 @@ extern void CommandImportTMG( char *sz ) {
 	return;
     }
 
-    if( ( pf = g_fopen( sz, "r" ) ) ) {
+    if( ( pf = g_fopen( sz, "r" ) ) != 0 ) {
 	rc = ImportTMG( pf, sz );
 	fclose( pf );
         if ( rc )
@@ -3703,7 +3703,7 @@ extern void CommandImportSnowieTxt( char *sz ) {
 	return;
     }
 
-    if( ( pf = g_fopen( sz, "r" ) ) ) {
+    if( ( pf = g_fopen( sz, "r" ) ) != 0 ) {
 	rc = ImportSnowieTxt( pf );
 	fclose( pf );
         if ( rc )
@@ -3727,7 +3727,7 @@ extern void CommandImportEmpire(char *sz)
 	return;
     }
 
-    if ((pf = g_fopen( sz, "r" )))
+    if ((pf = g_fopen( sz, "r" )) != 0)
 	{
 		int res = ImportGAM(pf, sz);
 		fclose(pf);
@@ -3755,7 +3755,7 @@ extern void CommandImportParty(char *sz)
 	return;
     }
 
-    if (! (gamf = g_fopen( sz, "r" ))) {
+    if ( (gamf = g_fopen( sz, "r" )) == 0) {
             outputerr(sz);
             return;
     }
@@ -3768,7 +3768,7 @@ extern void CommandImportParty(char *sz)
             return;
     }
 
-    if (! (matf = g_fopen( tmpfile, "w" ))) {
+    if ( (matf = g_fopen( tmpfile, "w" )) == 0) {
             outputerr(tmpfile);
             g_free(tmpfile);
             fclose(gamf);
@@ -3776,7 +3776,7 @@ extern void CommandImportParty(char *sz)
     }
 
     if (ConvertPartyGammonFileToMat(gamf, matf)) {
-            if( ( pf = g_fopen( tmpfile, "r" ) ) ) {
+            if( ( pf = g_fopen( tmpfile, "r" ) ) != 0 ) {
                     rc = ImportMat( pf, tmpfile );
                     fclose( pf );
                     if ( !rc )
@@ -4002,13 +4002,13 @@ extern void CommandImportBGRoom(char *sz)
 	return;
     }
 
-    if (! (gamf = g_fopen( sz, "r" ))) {
+    if ( (gamf = g_fopen( sz, "r" )) == 0) {
             outputerr(sz);
             return;
     }
 
     matfile = g_strdup_printf("%s.mat", sz);
-    if (! (matf = g_fopen( matfile, "w" ))) {
+    if ( (matf = g_fopen( matfile, "w" )) == 0) {
             outputerr(matfile);
             g_free(matfile);
             fclose(gamf);
@@ -4016,7 +4016,7 @@ extern void CommandImportBGRoom(char *sz)
     }
 
     if (ConvertBackGammonRoomFileToMat(gamf, matf)) {
-            if( ( pf = g_fopen( matfile, "r" ) ) ) {
+            if( ( pf = g_fopen( matfile, "r" ) ) != 0 ) {
                     rc = ImportMat( pf, matfile);
                     fclose( pf );
                     if ( !rc )

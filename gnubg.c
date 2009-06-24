@@ -1301,7 +1301,7 @@ extern void InitBoard( TanBoard anBoard, const bgvariation bgv )
   case VARIATION_HYPERGAMMON_3:
 
     for ( i = 0; i < 2; ++i )
-      for ( j = 0; j < ( bgv - VARIATION_HYPERGAMMON_1 + 1 ); ++j )
+      for ( j = 0; j < (unsigned int)( bgv - VARIATION_HYPERGAMMON_1 + 1 ); ++j )
         anBoard[ i ][ 23 - j ] = 1;
     
     break;
@@ -3827,9 +3827,8 @@ extern int GetInputYN( char *szPrompt )
     if( fInterrupt )
 	return FALSE;
 
-    while( 1 ) {
-	pch = GetInput( szPrompt );
-
+    while( (pch = GetInput( szPrompt )) != 0 )
+	{
 	if( pch )
 	    switch( *pch ) {
 	    case 'y':
@@ -3844,11 +3843,9 @@ extern int GetInputYN( char *szPrompt )
 		g_free( pch );
 	    }
 
-	if( fInterrupt )
-	    return FALSE;
-	
 	outputl( _("Please answer `y' or `n'.") );
     }
+    return FALSE;
 }
 
 /* Like strncpy, except it does the right thing */
@@ -4149,7 +4146,7 @@ ProgressValueAdd ( int iValue ) {
 static void Progress( void )
 {
     static int i = 0;
-    static char ach[ 4 ] = "/-\\|";
+    static char ach[ 5 ] = "/-\\|";
    
     if( !fShowProgress )
 	return;
@@ -5191,9 +5188,8 @@ static int GetAdviceAnswer( char *sz ) {
     if( fInterrupt )
     return FALSE;
 
-    while( 1 ) {
-	pch = GetInput( sz );
-
+    while( (pch = GetInput( sz )) != 0 )
+	{
 	if( pch )
 	    switch( *pch ) {
 	    case 'y':
@@ -5208,11 +5204,9 @@ static int GetAdviceAnswer( char *sz ) {
 		free( pch );
 	    }
 
-	if( fInterrupt )
-	    return FALSE;
-	
 	outputl( _("Please answer `y' or `n'.") );
     }
+    return FALSE;
 }
 
 extern int GiveAdvice( skilltype Skill )

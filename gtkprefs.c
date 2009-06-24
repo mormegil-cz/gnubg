@@ -690,10 +690,10 @@ extern void gtk_color_button_set_from_array(GtkColorButton *button, double colar
 	GdkColor color;
 	guint16 alpha;
 
-	color.red = (int)(colarray[0] * 65535);
-	color.green = (int)(colarray[1] * 65535);
-	color.blue = (int)(colarray[2] * 65535);
-	alpha = (int)(colarray[3] * 65535);
+	color.red = (guint16)(colarray[0] * 65535);
+	color.green = (guint16)(colarray[1] * 65535);
+	color.blue = (guint16)(colarray[2] * 65535);
+	alpha = (guint16)(colarray[3] * 65535);
 
 	gtk_color_button_set_color(button, &color);
 	gtk_color_button_set_alpha(button, alpha);
@@ -1040,8 +1040,9 @@ static GtkWidget *BorderPage( BoardData *bd ) {
 						     pwWood : pwWoodF ),
 				  TRUE );
     
-    for( i = 0; i < 3; i++ )
-	ar[ i ] = bd->rd->aanBoardColour[ 1 ][ i ] / 255.0;
+	for( i = 0; i < 3; i++ )
+		ar[ i ] = bd->rd->aanBoardColour[ 1 ][ i ] / 255.0;
+	ar[3] = 0;
 
     apwBoard[1] = gtk_color_button_new();
     g_signal_connect(G_OBJECT(apwBoard[1]), "color-set", UpdatePreview, NULL);
@@ -2019,7 +2020,7 @@ DesignSave ( GtkWidget *pw, gpointer data ) {
 
   szFile = g_build_filename ( szHomeDirectory, "boards.xml", NULL);
 
-  if ( ! ( pf = g_fopen ( szFile, "w+" ) ) ) {
+  if ( ( pf = g_fopen ( szFile, "w+" ) ) == 0 ) {
     outputerr ( szFile );
     g_free ( szFile );
     return;
@@ -2371,7 +2372,7 @@ static void DesignAdd ( GtkWidget *pw, gpointer data )
   GList **pplBoardDesigns = data;
   renderdata rdNew;
 
-  if ( ! ( pbde = (boarddesign *) g_malloc ( sizeof ( boarddesign ) ) ) ) {
+  if ( ( pbde = (boarddesign *) g_malloc ( sizeof ( boarddesign ) ) ) == 0 ) {
     outputerr ( "allocate boarddesign" );
     return;
   }
@@ -2417,9 +2418,9 @@ static void ExportDesign ( GtkWidget *pw, gpointer data )
 	boarddesign *pbde;
 	renderdata rdNew;
 
-        if (! (pch = szFile =
+        if ((pch = szFile =
                                 GTKFileSelect(_("Export Design"), NULL, NULL, NULL,
-                                        GTK_FILE_CHOOSER_ACTION_SAVE))) return;
+                                        GTK_FILE_CHOOSER_ACTION_SAVE)) == 0) return;
 
 	szFile = NextToken( &szFile );
 
@@ -2427,7 +2428,7 @@ static void ExportDesign ( GtkWidget *pw, gpointer data )
 	* Copy current design 
 	*/
 
-	if ( ! ( pbde = (boarddesign *) g_malloc ( sizeof ( boarddesign ) ) ) ) {
+	if ( ( pbde = (boarddesign *) g_malloc ( sizeof ( boarddesign ) ) ) == 0 ) {
 		outputerr ( "allocate boarddesign" );
 		return;
 	}
@@ -2454,7 +2455,7 @@ static void ExportDesign ( GtkWidget *pw, gpointer data )
 	pbde->fDeletable = TRUE;
 
 	/* if file exists, read in any designs */
-	if (!(designs = ParseBoardDesigns(szFile, TRUE)))
+	if ((designs = ParseBoardDesigns(szFile, TRUE)) == 0)
 	{	/* None found so create empty list */
 		designs = g_list_alloc();
 	}
@@ -2462,7 +2463,7 @@ static void ExportDesign ( GtkWidget *pw, gpointer data )
 
 	/* write designs to file */
 
-	if ( ! ( pf = g_fopen ( szFile, "w+" ) ) ) {
+	if ( ( pf = g_fopen ( szFile, "w+" ) ) == 0 ) {
 		outputerr ( szFile );
 		free_board_design( pbde, NULL );
 		g_free ( pch );
@@ -2486,13 +2487,13 @@ static void ImportDesign ( GtkWidget *pw, gpointer data )
 	gint old_length;
 	gint num_added;
 
-        if (! (pch = szFile =
+        if ( (pch = szFile =
                                 GTKFileSelect(_("Import Design"), NULL, NULL, NULL,
-                                        GTK_FILE_CHOOSER_ACTION_OPEN))) return;
+                                        GTK_FILE_CHOOSER_ACTION_OPEN)) == 0) return;
 
 	szFile = NextToken( &szFile );
 
-	if ( ! ( new_designs = ParseBoardDesigns( szFile, TRUE ) ) ) {
+	if ( ( new_designs = ParseBoardDesigns( szFile, TRUE ) ) == 0 ) {
 		/* no designs found */
 		outputl( _("File not found or no designs in file.") );
 		outputx();
