@@ -1096,7 +1096,7 @@ static void MainSize( GtkWidget *pw, GtkRequisition *preq, gpointer p ) {
 
     if( GTK_WIDGET_REALIZED( pw ) )
 	g_signal_handlers_disconnect_by_func( G_OBJECT( pw ), G_CALLBACK( MainSize ), p );
-				       G_CALLBACK( MainSize ), p );
+
     else if (!SetMainWindowSize())
 		gtk_window_set_default_size( GTK_WINDOW( pw ),
 				     MAX( 480, preq->width ),

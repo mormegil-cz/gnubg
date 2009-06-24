@@ -2400,7 +2400,7 @@ NTH_STATIC void drawPickAreas(const BoardData *bd, void *data)
 NTH_STATIC void drawPickBoard(const BoardData *bd, void *data)
 {	/* Draw points and piece objects for selected board */
 	BoardData3d *bd3d = bd->bd3d;
-	int selectedBoard = (int)data;
+	int selectedBoard = GPOINTER_TO_INT(data);
 	unsigned int i, j;
 
 	unsigned int firstPoint = (selectedBoard - 1) * 6;
@@ -2476,8 +2476,8 @@ static void DrawPoint(const BoardData *bd, int point)
 
 NTH_STATIC void drawPickPoint(const BoardData *bd, void *data)
 {	/* Draw all the objects on the board to see if any have been selected */
-	int pointA = ((int)data) / 100;
-	int pointB = ((int)data) - pointA * 100;
+	int pointA = (GPOINTER_TO_INT(data)) / 100;
+	int pointB = (GPOINTER_TO_INT(data)) - pointA * 100;
 
 	/* pieces on both points */
 	DrawPoint(bd, pointA);
@@ -2614,7 +2614,7 @@ NTH_STATIC void drawFlagPick(const BoardData *bd, void *data)
 
 NTH_STATIC void drawPointPick(const BoardData *bd, void *data)
 {	/* Draw sub parts of point to work out which part of point clicked */
-	unsigned int point = (unsigned int)data;
+	unsigned int point = GPOINTER_TO_UINT(data);
 	unsigned int i;
 	float pos[3];
 
@@ -2727,7 +2727,7 @@ int BoardPoint3d(const BoardData* bd, int x, int y)
 		g_assert(picked >= 1 && picked <= 4);	/* one of 4 boards */
 
 		/* Work out which point in board was clicked */
-		hits = PickDraw(x, y, drawPickBoard, bd, (void*)picked);
+		hits = PickDraw(x, y, drawPickBoard, bd, GINT_TO_POINTER(picked));
 		firstPoint = (int)selectBuf[3];
 		if (hits == 1)
 			return firstPoint;	/* Board point clicked */
@@ -2737,14 +2737,14 @@ int BoardPoint3d(const BoardData* bd, int x, int y)
 			return firstPoint;	/* Chequer clicked over point (common) */
 
 		/* Could be either chequer or point - work out which one */
-		hits = PickDraw(x, y, drawPickPoint, bd, (void*)(firstPoint * 100 + secondPoint));
+		hits = PickDraw(x, y, drawPickPoint, bd, GINT_TO_POINTER(firstPoint * 100 + secondPoint));
 		return NearestHit(hits, (GLuint*)selectBuf);
 	}
 }
 
-int BoardSubPoint3d(const BoardData* bd, int x, int y, int point)
+int BoardSubPoint3d(const BoardData* bd, int x, int y, guint point)
 {
-	int hits = PickDraw(x, y, drawPointPick, bd, (void*)point);
+	int hits = PickDraw(x, y, drawPointPick, bd, GUINT_TO_POINTER(point));
 	return NearestHit(hits, (GLuint*)selectBuf);
 }
 
