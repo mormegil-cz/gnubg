@@ -557,6 +557,7 @@ extern void CommandAnnotateVeryUnlucky(char *);
 extern void CommandCalibrate(char *);
 extern void CommandClearHint(char *);
 extern void CommandClearCache(char *);
+extern void CommandClearTurn(char *);
 extern void CommandCopy(char *);
 extern void CommandDecline(char *);
 extern void CommandDiceRolls(char *);

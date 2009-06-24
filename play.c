@@ -4490,3 +4490,39 @@ getMoveNumber ( const listOLD *plGame, const void *p ) {
 }
 
 
+extern void CommandClearTurn(char *sz)
+{
+	moverecord *pmr;
+	if (ms.gs != GAME_PLAYING) {
+		outputl(_("There must be a game in progress to set a player on roll."));
+		return;
+	}
+
+	if (ms.fResigned) {
+		outputl(_("Please resolve the resignation first."));
+		return;
+	}
+
+	if (!move_not_last_in_match_ok())
+		return;
+
+	while ((pmr = plLastMove->p) && (pmr->mt == MOVE_DOUBLE || pmr->mt == MOVE_SETDICE))
+		PopMoveRecord(plLastMove);
+
+	pmr_hint_destroy();
+	fNextTurn = FALSE;
+#if USE_GTK
+	if (fX) {
+		BoardData *bd = BOARD(pwBoard)->board_data;
+		bd->diceRoll[0] = bd->diceRoll[1] = -1;
+	}
+#endif
+	ms.anDice[0] = ms.anDice[1] = 0;
+
+	UpdateSetting(&ms.fTurn);
+
+#if USE_GTK
+	if (fX)
+		ShowBoard();
+#endif				/* USE_GTK */
+}

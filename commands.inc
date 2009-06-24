@@ -165,6 +165,8 @@ command cER = {
     N_("Clear evaluation cache"), NULL, NULL },
   { "hint", CommandClearHint, 
     N_("Clear analysis used for `hint'"), NULL, NULL },
+  { "turn", CommandClearTurn, 
+    N_("Clear initialized cube action and dice roll"), NULL, NULL },
   { NULL, NULL, NULL, NULL, NULL }
 }, acExportGame[] = {
     { "gam", CommandExportGameGam, N_("Records a log of the game in .gam "

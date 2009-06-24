@@ -2553,7 +2553,7 @@ extern void CommandSetTurn( char *sz ) {
 #if USE_GTK
     if (fX) {
 	    BoardData *bd = BOARD(pwBoard)->board_data;
-	    bd->diceRoll[0] = bd->diceRoll[1] = 0;
+	    bd->diceRoll[0] = bd->diceRoll[1] = -1;
     }
 #endif
     ms.anDice[ 0 ] = ms.anDice[ 1 ] = 0;

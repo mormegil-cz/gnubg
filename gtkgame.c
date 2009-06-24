@@ -105,6 +105,7 @@ typedef enum _gnubgcommand {
     CMD_ANALYSE_ROLLOUT_MOVE,
     CMD_ANALYSE_ROLLOUT_GAME,
     CMD_ANALYSE_ROLLOUT_MATCH,
+    CMD_CLEAR_TURN,
     CMD_CMARK_CUBE_CLEAR,
     CMD_CMARK_CUBE_SHOW,
     CMD_CMARK_MOVE_CLEAR,
@@ -174,6 +175,7 @@ static const char *aszCommands[ NUM_CMDS ] = {
     "analyse rollout move",
     "analyse rollout game",
     "analyse rollout match",
+    "clear turn",
     "cmark cube clear",
     "cmark cube show",
     "cmark move clear",
@@ -466,24 +468,39 @@ static void Command( gpointer p, guint iCommand, GtkWidget *widget ) {
     }
 }
 
-extern int GTKGetManualDice( unsigned int an[ 2 ] ) {
+static void gui_clear_turn(GtkWidget *pw, GtkWidget *dialog)
+{
+	if (dialog)
+		gtk_widget_destroy(dialog);
+	CommandClearTurn(NULL);
+}
 
-    GtkWidget *pwDialog = GTKCreateDialog( _("GNU Backgammon - Dice"),
-					DT_INFO, NULL, DIALOG_FLAG_MODAL | DIALOG_FLAG_CLOSEBUTTON, NULL, NULL ),
-	*pwDice = board_dice_widget( BOARD( pwBoard ) );
+extern int GTKGetManualDice(unsigned int an[2])
+{
 
-    an[ 0 ] = 0;
-    
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-		       pwDice );
-    g_object_set_data( G_OBJECT( pwDice ), "user_data", an );
-    
-    g_signal_connect( G_OBJECT( pwDice ), "destroy",
-			G_CALLBACK( DestroySetDice ), pwDialog );
-    
-	GTKRunDialog(pwDialog);
+	GtkWidget *dialog;
+	GtkWidget *dice;
+	GtkContainer *buttons;
+	GtkWidget *clear;
 
-    return an[ 0 ] ? 0 : -1;
+	dialog =
+	    GTKCreateDialog(_("GNU Backgammon - Dice"), DT_INFO, NULL,
+			    DIALOG_FLAG_MODAL | DIALOG_FLAG_CLOSEBUTTON, NULL, NULL);
+	dice = board_dice_widget(BOARD(pwBoard));
+	buttons = GTK_CONTAINER(DialogArea(dialog, DA_BUTTONS));
+	clear = gtk_button_new_with_label(_("Clear"));
+
+	an[0] = 0;
+
+	gtk_container_add(GTK_CONTAINER(DialogArea(dialog, DA_MAIN)), dice);
+	gtk_container_add(buttons, clear);
+	g_object_set_data(G_OBJECT(dice), "user_data", an);
+	g_signal_connect(G_OBJECT(dice), "destroy", G_CALLBACK(DestroySetDice), dialog);
+	g_signal_connect(G_OBJECT(clear), "clicked", G_CALLBACK(gui_clear_turn), dialog);
+
+	GTKRunDialog(dialog);
+
+	return an[0] ? 0 : -1;
 }
 
 extern void GTKSetDice( gpointer p, guint n, GtkWidget *pw ) {
@@ -3079,6 +3096,7 @@ GtkItemFactoryEntry aife[] = {
           NULL, Command, CMD_SET_TURN_0, "<RadioItem>", NULL },
 	{ N_("/_Game/Set turn/1"), NULL, Command, CMD_SET_TURN_1,
 	  "/Game/Set turn/0", NULL },
+	{ N_("/_Game/Clear turn"), NULL, Command, CMD_CLEAR_TURN, NULL, NULL },
 	{ N_("/_Analyse"), NULL, NULL, 0, "<Branch>", NULL },
 	{ N_("/_Analyse/_Evaluate"), "<control>E", Command, CMD_EVAL, NULL, NULL },
 	{ N_("/_Analyse/_Hint"), "<control>H", Command, CMD_HINT,
