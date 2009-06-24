@@ -91,9 +91,9 @@ extern unsigned long GetHashKey(unsigned long hashMask, const cacheNodeDetail* e
 	ub4 b = a;
 	ub4 c = 11 + (unsigned int)e->nEvalContext;
 
-	c = c + (*((short*)&e->auchKey[8]) << 8);
-	b = b + *((int*)&(e->auchKey[4]));
-	a = a + *((int*)&(e->auchKey[0]));
+	c = c + (((short)e->key.data[2]) << 8);
+	b = b + e->key.data[1];
+	a = a + e->key.data[0];
 
 	/* hashmix macro expanded here */
 	a = (a - b - c) ^ (c >> 13);
@@ -120,10 +120,10 @@ unsigned int CacheLookup(evalCache* pc, const cacheNodeDetail* e, float *arOut, 
 	cache_lock(pc, l);
 #endif
 	if ((pc->entries[l].nd_primary.nEvalContext != e->nEvalContext ||
-		memcmp(pc->entries[l].nd_primary.auchKey, e->auchKey, sizeof(e->auchKey)) != 0))
+		memcmp(pc->entries[l].nd_primary.key.auch, e->key.auch, sizeof(e->key.auch)) != 0))
 	{	/* Not in primary slot */
 		if ((pc->entries[l].nd_secondary.nEvalContext != e->nEvalContext ||
-			memcmp(pc->entries[l].nd_secondary.auchKey, e->auchKey, sizeof(e->auchKey)) != 0))
+			memcmp(pc->entries[l].nd_secondary.key.auch, e->key.auch, sizeof(e->key.auch)) != 0))
 		{	/* Cache miss */
 #if USE_MULTITHREAD
 			cache_unlock(pc, l);

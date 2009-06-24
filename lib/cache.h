@@ -23,19 +23,26 @@
 
 #include <stdlib.h>
 
-#define CACHE_STATS 1	/* Calculate simple cache stats */
+/* Set to calculate simple cache stats */
+#define CACHE_STATS 0
 
-typedef struct _cacheNodeDetail {
-  unsigned char auchKey[10];
-  int nEvalContext;
-  float ar[6];
+typedef struct _cacheNodeDetail
+{
+	union
+	{
+		unsigned char auch[10];
+		int data[3];
+	} key;
+	int nEvalContext;
+	float ar[6];
 } cacheNodeDetail;
 
-typedef struct _cacheNode {
-  cacheNodeDetail nd_primary;
-  cacheNodeDetail nd_secondary;
+typedef struct _cacheNode
+{
+	cacheNodeDetail nd_primary;
+	cacheNodeDetail nd_secondary;
 #if USE_MULTITHREAD
-  int lock;
+	int lock;
 #endif
 } cacheNode;
 

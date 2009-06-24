@@ -2624,7 +2624,7 @@ FindBestMoveInEval(NNState *nnStates, int const nDice0, int const nDice1, const 
 {
 	  evalcache ec;
 	  unsigned long l;
-	  memcpy(ec.auchKey, pm->auch, sizeof(ec.auchKey));
+	  memcpy(ec.key.auch, pm->auch, sizeof(ec.key.auch));
 	  ec.nEvalContext = 0;
 	  if ( ( l = CacheLookup( &cpEval, &ec, arOutput, NULL ) ) != CACHEHIT ) {
    
@@ -2706,7 +2706,7 @@ FindBestMoveInEval(NNState *nnStates, int const nDice0, int const nDice1, const 
       {
 	evalcache ec;
 	unsigned long l;
-	memcpy(ec.auchKey, pm->auch, sizeof(ec.auchKey));
+	memcpy(ec.key.auch, pm->auch, sizeof(ec.key.auch));
 	ec.nEvalContext =  pci->fMove << 14;
 
 	if ( ( l = CacheLookup( &cpEval, &ec, arOutput, NULL ) ) != CACHEHIT ) {
@@ -3022,7 +3022,7 @@ EvaluatePositionCache( NNState *nnStates, const TanBoard anBoard, float arOutput
 	return EvaluatePositionFull( nnStates, anBoard, arOutput, pci, pecx, nPlies,
 				     pc );
     
-    PositionKey( anBoard, ec.auchKey );
+    PositionKey( anBoard, ec.key.auch );
 
     ec.nEvalContext = EvalKey ( pecx, nPlies, pci, FALSE );
 	if ( ( l = CacheLookup( &cEval, &ec, arOutput, NULL ) ) == CACHEHIT ) {
@@ -5955,7 +5955,7 @@ EvaluatePositionCubeful3( NNState *nnStates, const TanBoard anBoard,
 				       nPlies, fTop );
 }
 
-  PositionKey ( anBoard, ec.auchKey );
+  PositionKey ( anBoard, ec.key.auch );
 
   /* check cache for existence for earlier calculation */
 
