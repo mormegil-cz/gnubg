@@ -447,7 +447,7 @@ rolloutcontext rcRollout =
   /* evaltype */ \
   EVAL_EVAL, \
   /* evalcontext */ \
-  { TRUE, 0, TRUE, TRUE, 0.0 }, \
+  { TRUE, 0, FALSE, TRUE, 0.0 }, \
   /* rolloutcontext */ \
   { \
     { \
