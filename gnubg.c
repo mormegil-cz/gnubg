@@ -1257,10 +1257,7 @@ extern void HandleCommand( char *sz, command *ac )
 	    break;
 
     if( !pc->sz ) {
-	outputf( _("Unknown keyword `%s'."), pch );
-	output("\n");
-
-	outputx();
+	outputerrf( _("Unknown keyword `%s'.\n"), pch );
 	return;
     }
 

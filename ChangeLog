@@ -1,3 +1,8 @@
+Thu Jun 25 22:50:54 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c, gtkfile.c: fix a problem with translated text in the save
+	dialog used for the "save" command.
+
 Wed Jun 24 22:19:44 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, commands.inc, gtkgame.c, play.c, set.c: add a menu

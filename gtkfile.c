@@ -178,6 +178,7 @@ static void SaveCommon (guint f, gchar * prompt)
   static gchar *last_export_folder = NULL;
   gchar *fn = GetFilename (TRUE, (f == 1) ? 0 : last_export_type);
   gchar *folder = NULL;
+  const gchar *mgp_text[3] = {"match", "game", "position"};
 
   if (f == 1)
     folder = last_save_folder ? last_save_folder : default_sgf_folder;
@@ -228,7 +229,7 @@ static void SaveCommon (guint f, gchar * prompt)
       fn = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (so.fc));
       if (fn)
 	{
-	  gchar *et = gtk_combo_box_get_active_text (GTK_COMBO_BOX (so.mgp));
+	  const gchar *et = mgp_text[gtk_combo_box_get_active(GTK_COMBO_BOX (so.mgp))];
 	  gchar *cmd = NULL;
 	  type = gtk_combo_box_get_active (GTK_COMBO_BOX (so.description));
 	  if (type == EXPORT_SGF)
