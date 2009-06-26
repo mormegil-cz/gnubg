@@ -1225,7 +1225,12 @@ extern void HandleCommand( char *sz, command *ac )
           while ( isspace( *sz ) )
             ++sz;
 
+#if USE_PYTHON
 		PythonRun(sz);
+#else
+	    outputl( _("This installation of GNU Backgammon was compiled without Python support.") );
+	    outputx();
+#endif
 		return;
         }
 
@@ -2482,7 +2487,9 @@ Shutdown( void ) {
 #endif
   EvalShutdown();
 
+#if USE_PYTHON
   PythonShutdown();
+#endif
 
 #if HAVE_SOCKETS
 #ifdef WIN32
@@ -2676,7 +2683,11 @@ extern void CommandLoadPython(char *sz)
 	sz = NextToken(&sz);
 
 	if (sz && *sz)
+#if USE_PYTHON
 		LoadPythonFile(sz);
+#else
+	outputl(_("This build of GNU Backgammon does not support Python"));
+#endif
 	else
 		outputl(_("You must specify a file to load from."));
 }

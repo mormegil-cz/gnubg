@@ -25,9 +25,7 @@
 #if USE_PYTHON
 #ifdef WIN32
 /* needed for mingw inclusion of Python.h */
-#ifndef _MSC_VER
 #include <stdint.h>
-#endif
 #endif
 #include <Python.h>
 #if PY_VERSION_HEX < 0x02050000 && !defined(PY_SSIZE_T_MIN)
