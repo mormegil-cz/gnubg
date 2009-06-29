@@ -22,6 +22,7 @@
 #include "backgammon.h"
 #include <glib/gstdio.h>
 #include "file.h"
+#include <stdlib.h>
 
 ExportFormat export_format[] = {
 	{EXPORT_SGF, ".sgf", N_("Gnu Backgammon File"), "sgf", {TRUE, TRUE, TRUE}},	/*must be the first element */
