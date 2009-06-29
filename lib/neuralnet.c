@@ -528,11 +528,15 @@ static int CheckSSE(void)
 		"jp 4f\n\t"
 
 "2:"
-		/* Check if sse is supported (bit 25 in edx from cpuid 1) */
+		/* Check if sse is supported (bit 25/26 in edx from cpuid 1) */
 		"mov $1, %%eax\n\t"
 		"cpuid\n\t"
 		"mov $1, %%eax\n\t"
+#if USE_SSE2
+		"shl $26, %%eax\n\t"
+#else
 		"shl $25, %%eax\n\t"
+#endif
 		"test %%eax, %%edx\n\t"
 		"jnz 3f\n\t"
 		/* Not supported */

@@ -653,9 +653,17 @@ extern const char *GetBuildInfoString(void)
 		{
 			sseShown = 1;
 			if (SSE_Supported())
+#if USE_SSE2
+				return N_("SSE2 supported and available.");
+#else
 				return N_("SSE supported and available.");
+#endif
 			else
+#if USE_SSE2
+				return N_("SSE2 supported but not available.");
+#else
 				return N_("SSE supported but not available.");
+#endif
 		}
 		sseShown = 0;
 #endif
