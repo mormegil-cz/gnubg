@@ -35,9 +35,6 @@
 #include <ctype.h>
 #ifdef WIN32
 #include <io.h>
-#if _MSC_VER
-#include <direct.h>
-#endif
 #endif
 
 #if HAVE_LIBREADLINE

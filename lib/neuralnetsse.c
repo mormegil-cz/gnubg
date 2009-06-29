@@ -40,9 +40,6 @@
 #include <xmmintrin.h> 
 #endif
 
-#ifndef _MSC_VER
-#include <mm_malloc.h>
-#endif
 #include <glib.h>
 #include "sigmoid.h"
 

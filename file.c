@@ -21,10 +21,6 @@
 #include "config.h"
 #include "backgammon.h"
 #include <glib/gstdio.h>
-#ifndef _MSC_VER
-#include <string.h>
-#include <stdlib.h>
-#endif
 #include "file.h"
 
 ExportFormat export_format[] = {
