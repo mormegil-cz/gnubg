@@ -47,18 +47,12 @@
 
 float *sse_malloc(size_t size)
 {
-	if (SSE_Supported())
-		return (float *)_mm_malloc(size, ALIGN_SIZE);
-	else
-		return (float *)malloc(size);
+	return (float *)_mm_malloc(size, ALIGN_SIZE);
 }
 
 void sse_free(float* ptr)
 {
-	if (SSE_Supported())
-		_mm_free(ptr);
-	else
-		free(ptr);
+	_mm_free(ptr);
 }
 
 #if USE_SSE2

@@ -699,9 +699,6 @@ static int weights_failed(char * filename, FILE * weights)
 	return 0;
 }
 
-int (*NeuralNetEvaluateFn)( const neuralnet *pnn, float arInput[],
-			      float arOutput[], NNState *pnState) = 0;
-
 extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 			   int fNoBearoff, void (*pfProgress) (unsigned int))
 {
@@ -714,11 +711,9 @@ extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 	if (!fInitialised) {
 
 #if USE_SSE_VECTORIZE
-		if (SSE_Supported())
-			NeuralNetEvaluateFn = NeuralNetEvaluate128;
-		else
+		if (!SSE_Supported())
+			g_critical(_("This version of GNU Backgammon is compiled with SSE support but this machine does not support SSE"));
 #endif
-			NeuralNetEvaluateFn = NeuralNetEvaluate;
 
 		cCache = 0x1 << 17;
 		if( CacheCreate( &cEval, cCache ) )
@@ -2295,7 +2290,11 @@ EvalRace(const TanBoard anBoard, float arOutput[], const bgvariation bgv, NNStat
 
   CalculateRaceInputs( anBoard, arInput );
 
-	if ( NeuralNetEvaluateFn( &nnRace, arInput, arOutput, nnStates ? nnStates + (CLASS_RACE - CLASS_RACE) : NULL) )
+#if USE_SSE_VECTORIZE
+	if ( NeuralNetEvaluate128( &nnRace, arInput, arOutput, nnStates ? nnStates + (CLASS_RACE - CLASS_RACE) : NULL) )
+#else
+	if ( NeuralNetEvaluate( &nnRace, arInput, arOutput, nnStates ? nnStates + (CLASS_RACE - CLASS_RACE) : NULL) )
+#endif
     return -1;
   
   /* anBoard[1] is on roll */
@@ -2395,7 +2394,11 @@ EvalContact(const TanBoard anBoard, float arOutput[], const bgvariation bgv, NNS
     
   CalculateContactInputs( anBoard, arInput );
     
-  return NeuralNetEvaluateFn(&nnContact, arInput, arOutput, nnStates ? nnStates + (CLASS_CONTACT - CLASS_RACE) : NULL);
+#if USE_SSE_VECTORIZE
+  return NeuralNetEvaluate128(&nnContact, arInput, arOutput, nnStates ? nnStates + (CLASS_CONTACT - CLASS_RACE) : NULL);
+#else
+  return NeuralNetEvaluate(&nnContact, arInput, arOutput, nnStates ? nnStates + (CLASS_CONTACT - CLASS_RACE) : NULL);
+#endif
 }
 
 static int
@@ -2405,7 +2408,11 @@ EvalCrashed(const TanBoard anBoard, float arOutput[], const bgvariation bgv, NNS
 
   CalculateCrashedInputs( anBoard, arInput );
     
-  return NeuralNetEvaluateFn( &nnCrashed, arInput, arOutput, nnStates ? nnStates + (CLASS_CRASHED - CLASS_RACE) : NULL);
+#if USE_SSE_VECTORIZE
+  return NeuralNetEvaluate128( &nnCrashed, arInput, arOutput, nnStates ? nnStates + (CLASS_CRASHED - CLASS_RACE) : NULL);
+#else
+  return NeuralNetEvaluate( &nnCrashed, arInput, arOutput, nnStates ? nnStates + (CLASS_CRASHED - CLASS_RACE) : NULL);
+#endif
 }
 
 extern int

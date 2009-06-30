@@ -1,3 +1,7 @@
+Tue Jun 30 12:00:00 2003  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* neuralnet.c, gnubg.c,eval.c: Simplify SSE, now it's either supported or it isn't
+
 Tue Jun 30 09:10:24 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* po/da.mo, board3d/Makefile.am, po/POTFILES.in, po/cs.po, po/da.po,
