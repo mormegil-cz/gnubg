@@ -1,3 +1,10 @@
+Tue Jun 30 09:10:24 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* po/da.mo, board3d/Makefile.am, po/POTFILES.in, po/cs.po, po/da.po,
+	po/de.po, po/en_US.po, po/es.po, po/fr.po, po/gnubg.pot, po/is.po,
+	po/it.po, po/ja.po, po/ru.po, po/tr.po: update the danish translation
+	and remove misc3d.h from Makefiles and POTFILES.in
+
 Mon Jun 29 20:00:00 2003  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* neuralnet.c, gnubg.c: Add check for SSE2

@@ -15,7 +15,6 @@ board3d/inc3d.h
 board3d/matrix.c
 board3d/matrix.h
 board3d/misc3d.c
-board3d/misc3d.h
 board3d/model.c
 board3d/model.h
 board3d/shadow.c
