@@ -45,7 +45,7 @@ extern void PositionFromBearoff(unsigned int anBoard[], unsigned int usID,
 
 extern unsigned short PositionIndex(unsigned int g, const unsigned int anBoard[6]);
 
-extern int EqualKeys( const unsigned char auch0[ 10 ], const unsigned char auch1[ 10 ] );
+#define EqualKeys(k1, k2) (!memcmp(k1, k2, sizeof(char[10])))
 extern int EqualBoards( const TanBoard anBoard0, const TanBoard anBoard1 );
 
 /* Return 1 for valid position, 0 for not */

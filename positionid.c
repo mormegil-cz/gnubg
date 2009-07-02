@@ -293,18 +293,6 @@ PositionFromID(TanBoard anBoard, const char* pchEnc)
 
   return CheckPosition( (ConstTanBoard)anBoard );
 }
-
-extern int 
-EqualKeys( const unsigned char auch0[ 10 ], const unsigned char auch1[ 10 ] ) {
-
-    int i;
-
-    for( i = 0; i < 10; i++ )
-        if( auch0[ i ] != auch1[ i ] )
-            return 0;
-    
-    return 1;
-}
  
 extern int EqualBoards( const TanBoard anBoard0, const TanBoard anBoard1 ) {
 
