@@ -3329,11 +3329,10 @@ static void CreateMainWindow(void)
     g_signal_connect( G_OBJECT( pwStatus ), "text-popped",
 			G_CALLBACK( TextPopped ), NULL );
 
-	pwStop = gtk_button_new();
-	gtk_container_add(GTK_CONTAINER(pwStop), gtk_image_new_from_stock(GTK_STOCK_STOP, GTK_ICON_SIZE_SMALL_TOOLBAR));
-	gtk_widget_set_sensitive(pwStop, FALSE);
-	gtk_box_pack_start( GTK_BOX( pwHbox ), pwStop, FALSE, FALSE, 0 );
-	g_signal_connect(G_OBJECT(pwStop), "clicked", G_CALLBACK( Stop ), NULL );
+    pwStop = gtk_event_box_new();
+    gtk_container_add(GTK_CONTAINER(pwStop), gtk_image_new_from_stock(GTK_STOCK_STOP, GTK_ICON_SIZE_SMALL_TOOLBAR));
+	gtk_box_pack_start( GTK_BOX( pwHbox ), pwStop, FALSE, FALSE, 2 );
+	g_signal_connect(G_OBJECT(pwStop), "button-press-event", G_CALLBACK( Stop ), NULL );
 	pwGrab = pwStop;
 
     gtk_box_pack_start( GTK_BOX( pwHbox ),
