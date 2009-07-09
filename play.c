@@ -3119,96 +3119,108 @@ static void ShowMark( moverecord *pmr ) {
 
 }
 
-int
-InternalCommandNext(int fMarkedMoves, int n)
+int InternalCommandNext(int fMarkedMoves, int n)
 {
-  int done = 0;
-  
-  if( fMarkedMoves ) {
-	moverecord* pmr = 0;
-	listOLD* p =  plLastMove->plNext;
+	int done = 0;
 
-	/* we need to increment the count if we're pointing to a marked move */
-	if ( p->p && MoveIsMarked( (moverecord *) p->p ) )
-	  ++n;
+	if (fMarkedMoves) {
+		listOLD *pgame = plGame;
+		moverecord *pmr = 0;
+		listOLD *p = plLastMove->plNext;
 
-	while(p->p) {
-		pmr = (moverecord *) p->p;
-		if (MoveIsMarked(pmr) && (--n <= 0))
-		break;
-		
-		p = p->plNext;
+		for (pgame = lMatch.plNext; pgame->p != plGame && pgame != &lMatch;
+		     pgame = pgame->plNext) ;
+		if (pgame->p != plGame)
+			/* current game not found */
+			return 0;
+
+		/* we need to increment the count if we're pointing to a marked move */
+		if (p->p && MoveIsMarked((moverecord *)p->p))
+			++n;
+
+		while (p->p) {
+			pmr = (moverecord *)p->p;
+			if (MoveIsMarked(pmr) && (--n <= 0))
+				break;
+			p = p->plNext;
+			if (!(p->p)) {
+				if (pgame->plNext == pgame)
+					return 0;
+				pgame = pgame->plNext;
+				if (!(pgame->p))
+					return 0;
+				p = ((listOLD *)pgame->p)->plNext;
+			}
+		}
+		if (p->p == 0)
+			return 0;
+		if (pgame->p != plGame)
+			ChangeGame(pgame->p);
+
+		plLastMove = p->plPrev;
+		CalculateBoard();
+		ShowMark(pmr);
+	} else {
+		while (n-- && plLastMove->plNext->p) {
+			plLastMove = plLastMove->plNext;
+			FixMatchState(&ms, plLastMove->p);
+			ApplyMoveRecord(&ms, plGame, plLastMove->p);
+
+			++done;
+		}
 	}
 
-	if (p->p == 0)
-		return 0;
-	  
-    plLastMove = p->plPrev;
-    CalculateBoard();
-    ShowMark( pmr );		
-  } else {
-    while( n-- && plLastMove->plNext->p ) {
-      plLastMove = plLastMove->plNext;
-      FixMatchState ( &ms, plLastMove->p );
-      ApplyMoveRecord( &ms, plGame, plLastMove->p );
+	UpdateGame(FALSE);
 
-      ++done;
-    }
-  }
-    
-  UpdateGame( FALSE );
+	if (plLastMove->plNext && plLastMove->plNext->p)
+		FixMatchState(&ms, plLastMove->plNext->p);
 
-  if ( plLastMove->plNext && plLastMove->plNext->p )
-    FixMatchState ( &ms, plLastMove->plNext->p );
+	SetMoveRecord(plLastMove->p);
 
-  SetMoveRecord( plLastMove->p );
-
-  return done;
+	return done;
 }
 			 
-extern void
-CommandNext( char* sz )
+extern void CommandNext(char *sz)
 {
-  int n;
-  char* pch;
-  int fMarkedMoves = FALSE;
-    
-  if( !plGame ) {
-    outputl( _("No game in progress (type `new game' to start one).") );
-    return;
-  }
-    
+	int n;
+	char *pch;
+	int fMarkedMoves = FALSE;
+
+	if (!plGame) {
+		outputl(_("No game in progress (type `new game' to start one)."));
+		return;
+	}
 #if USE_BOARD3D
 	RestrictiveRedraw();
 #endif
-  n = 1;
+	n = 1;
 
-  if( ( pch = NextToken( &sz ) ) ) {
-    if( !StrNCaseCmp( pch, "game", strlen( pch ) ) ) {
-      CommandNextGame( sz );
-      return;
-    } else if( !StrNCaseCmp( pch, "roll", strlen( pch ) ) ) {
-      CommandNextRoll( sz );
-      return;
-    } else if( !StrNCaseCmp( pch, "rolled", strlen( pch ) ) ) {
-      CommandNextRolled( sz );
-      return;
-    } else if( !StrNCaseCmp( pch, "marked", strlen( pch ) ) ) {
-      fMarkedMoves = TRUE;
-      if( ( pch = NextToken( &sz ) ) ) {
-	n = ParseNumber( &pch );
-      }
-    } else
-      n = ParseNumber( &pch );
-  }
-    
-  if( n < 1 ) {
-    outputl( _("If you specify a parameter to the `next' command, it must "
-	       "be a positive number (the count of moves to step ahead).") );
-    return;
-  }
-    
-  InternalCommandNext(fMarkedMoves, n);
+	if ((pch = NextToken(&sz))) {
+		if (!StrCaseCmp(pch, "game")) {
+			CommandNextGame(sz);
+			return;
+		} else if (!StrCaseCmp(pch, "roll")) {
+			CommandNextRoll(sz);
+			return;
+		} else if (!StrCaseCmp(pch, "rolled")) {
+			CommandNextRolled(sz);
+			return;
+		} else if (!StrCaseCmp(pch, "marked")) {
+			fMarkedMoves = TRUE;
+			if ((pch = NextToken(&sz))) {
+				n = ParseNumber(&pch);
+			}
+		} else
+			n = ParseNumber(&pch);
+	}
+
+	if (n < 1) {
+		outputl(_("If you specify a parameter to the `next' command, it must "
+			  "be a positive number (the count of moves to step ahead)."));
+		return;
+	}
+
+	InternalCommandNext(fMarkedMoves, n);
 }
 
 extern void CommandEndGame(char *sz)
@@ -3343,76 +3355,77 @@ extern void CommandPlay( char *sz )
     fComputing = FALSE;
 }
 
-static void CommandPreviousGame( char *sz ) {
+static void CommandPreviousGame(char *sz)
+{
 
-    int n;
-    char *pch;
-    listOLD *pl;
-    
-    if( ( pch = NextToken( &sz ) ) )
-	n = ParseNumber( &pch );
-    else
-	n = 1;
+	int n;
+	char *pch;
+	listOLD *pl;
 
-    if( n < 1 ) {
-	outputl( _("If you specify a parameter to the `previous game' command, "
-		 "it must be a positive number (the count of games to step "
-		 "back).") );
-	return;
-    }
-    
-    for( pl = lMatch.plNext; pl->p != plGame && pl != &lMatch; 
-         pl = pl->plNext )
-	;
-    
-    if ( pl->p != plGame )
-      /* current game not found */
-      return;
-    
-    for( ; n && pl->plPrev->p; n--, pl = pl->plPrev )
-	;
+	if ((pch = NextToken(&sz)))
+		n = ParseNumber(&pch);
+	else
+		n = 1;
 
-    if( pl->p == plGame )
-	return;
+	if (n < 1) {
+		outputl(_("If you specify a parameter to the `previous game' command, "
+			  "it must be a positive number (the count of games to step " "back)."));
+		return;
+	}
 
-    ChangeGame( pl->p );
+	for (pl = lMatch.plNext; pl->p != plGame && pl != &lMatch; pl = pl->plNext) ;
+
+	if (pl->p != plGame)
+		/* current game not found */
+		return;
+
+	for (; n && pl->plPrev->p; n--, pl = pl->plPrev) ;
+
+	if (pl->p == plGame)
+		return;
+
+	ChangeGame(pl->p);
 }
 
-static void CommandPreviousRoll( char *sz ) {
+static void CommandPreviousRoll(char *sz)
+{
 
-    moverecord *pmr;
-    
-    if( !plLastMove || !plLastMove->p )
-	/* silently ignore */
-	return;
+	moverecord *pmr;
 
-    if( !( pmr = plLastMove->plNext->p ) || pmr->mt != MOVE_NORMAL ||
-	!ms.anDice[ 0 ] ) {
-	/* to skip back over the "dice roll" for anything other than a normal
-	   move, or if the dice haven't been rolled, just skip the entire
-	   move */
-	CommandPrevious( NULL );
+	if (!plLastMove || !plLastMove->p)
+		/* silently ignore */
+		return;
+	pmr = plLastMove->plNext->p;
+	if (!ms.anDice[0]) {
+		/* if the dice haven't been rolled skip the entire move */
+		CommandPrevious(NULL);
 
-	if( plLastMove->plNext->p != pmr ) {
-	    pmr = plLastMove->plNext->p;
+		if (plLastMove->plNext->p != pmr) {
+			pmr = plLastMove->plNext->p;
+			if (pmr && (pmr->mt == MOVE_NORMAL || pmr->mt == MOVE_GAMEINFO))
+				/* We've stepped back a whole move; now we need to recover the
+				   previous dice roll. */
+				CommandNextRoll(NULL);
+		}
 
-	    if( pmr && pmr->mt == MOVE_NORMAL )
-		/* We've stepped back a whole move; now we need to recover
-		   the previous dice roll. */
-		CommandNextRoll( NULL );
+	} else {
+
+		CalculateBoard();
+
+		ms.anDice[0] = 0;
+		ms.anDice[1] = 0;
+#if USE_GTK
+		if (fX) {
+			BoardData *bd = BOARD(pwBoard)->board_data;
+			bd->diceRoll[0] = bd->diceRoll[1] = -1;
+		}
+#endif
+
+		if (pmr)
+			FixMatchState(&ms, pmr);
+
+		UpdateGame(FALSE);
 	}
-	
-	return;
-    }
-
-    CalculateBoard();
-    
-    ms.anDice[ 0 ] = 0;
-    ms.anDice[ 1 ] = 0;
-    
-    FixMatchState ( &ms, pmr );
-
-    UpdateGame( FALSE );
 }
 
 static void CommandPreviousRolled( char *sz ) {
@@ -3433,81 +3446,102 @@ static void CommandPreviousRolled( char *sz ) {
 
 }
 
-extern void CommandPrevious( char *sz ) {
+extern void CommandPrevious(char *sz)
+{
 
-    int n;
-    char *pch;
-    int fMarkedMoves = FALSE;
-    listOLD *p;
-    moverecord *pmr = NULL;
-    
-    if( !plGame ) {
-	outputl( _("No game in progress (type `new game' to start one).") );
-	return;
-    }
-    
+	int n;
+	char *pch;
+	int fMarkedMoves = FALSE;
+	listOLD *p;
+	moverecord *pmr = NULL;
+
+	if (!plGame) {
+		outputl(_("No game in progress (type `new game' to start one)."));
+		return;
+	}
 #if USE_BOARD3D
 	RestrictiveRedraw();
 #endif
 
 	n = 1;
 
-    if( ( pch = NextToken( &sz ) ) ) {
-	if( !StrNCaseCmp( pch, "game", strlen( pch ) ) ) {
-	    CommandPreviousGame( sz );
-	    return;
-	} else if( !StrNCaseCmp( pch, "rolled", strlen( pch ) ) ) {
-	    CommandPreviousRolled( sz );
-	    return;
-	} else if( !StrNCaseCmp( pch, "roll", strlen( pch ) ) ) {
-	    CommandPreviousRoll( sz );
-	    return;
-	} else if( !StrNCaseCmp( pch, "marked", strlen( pch ) ) ) {
-	  fMarkedMoves = TRUE;
-	  if( ( pch = NextToken( &sz ) ) ) {
-	    n = ParseNumber( &pch );
-	  }
-    } else
-	  n = ParseNumber( &pch );	
-    }
-    
-    if( n < 1 ) {
-	outputl( _("If you specify a parameter to the `previous' command, it "
-		 "must be a positive number (the count of moves to step "
-		 "back).") );
-	return;
-    }
-
-    if( fMarkedMoves ) {
-	p =  plLastMove;
-	while( ( p->p ) != 0 ) {
-	    pmr = (moverecord *) p->p;
-	    if( MoveIsMarked (pmr) && ( --n <= 0 ) )
-		break;
-	    
-	    p = p->plPrev;
+	if ((pch = NextToken(&sz))) {
+		if (!StrCaseCmp(pch, "game")) {
+			CommandPreviousGame(sz);
+			return;
+		} else if (!StrCaseCmp(pch, "rolled")) {
+			CommandPreviousRolled(sz);
+			return;
+		} else if (!StrCaseCmp(pch, "roll")) {
+			CommandPreviousRoll(sz);
+			return;
+		} else if (!StrCaseCmp(pch, "marked")) {
+			fMarkedMoves = TRUE;
+			if ((pch = NextToken(&sz))) {
+				n = ParseNumber(&pch);
+			}
+		} else
+			n = ParseNumber(&pch);
 	}
 
-	if (p->p == 0)
-	    return;
+	if (n < 1) {
+		outputl(_("If you specify a parameter to the `previous' command, it "
+			  "must be a positive number (the count of moves to step " "back)."));
+		return;
+	}
 
-	plLastMove = p->plPrev;
-    } else {
-	while( n-- && plLastMove->plPrev->p )
-	    plLastMove = plLastMove->plPrev;
-    }
+	if (fMarkedMoves) {
+		listOLD *pgame;
+		p = plLastMove;
 
-    CalculateBoard();
-    
-    if( pmr )
-	ShowMark( pmr );
+		for (pgame = lMatch.plNext; pgame->p != plGame && pgame != &lMatch;
+		     pgame = pgame->plNext) ;
 
-    UpdateGame( FALSE );
+		if (pgame->p != plGame)
+			return;
 
-    if ( plLastMove->plNext && plLastMove->plNext->p )
-      FixMatchState ( &ms, plLastMove->plNext->p );
+		while ((p->p) != 0) {
+			pmr = (moverecord *)p->p;
+			if (MoveIsMarked(pmr) && (--n <= 0))
+				break;
 
-    SetMoveRecord( plLastMove->p );
+			p = p->plPrev;
+			if (!(p->p)) {
+				if (pgame->plPrev == pgame)
+					return;
+				pgame = pgame->plPrev;
+				if (!(pgame->p))
+					return;
+				p = ((listOLD *)pgame->p)->plNext;
+				while (p->plNext->p)
+					p = p->plNext;
+				;
+			}
+		}
+
+		if (p->p == 0)
+			return;
+
+		if (pgame->p != plGame)
+			ChangeGame(pgame->p);
+
+		plLastMove = p->plPrev;
+	} else {
+		while (n-- && plLastMove->plPrev->p)
+			plLastMove = plLastMove->plPrev;
+	}
+
+	CalculateBoard();
+
+	if (pmr)
+		ShowMark(pmr);
+
+	UpdateGame(FALSE);
+
+	if (plLastMove->plNext && plLastMove->plNext->p)
+		FixMatchState(&ms, plLastMove->plNext->p);
+
+	SetMoveRecord(plLastMove->p);
 }
 
 extern void CommandRedouble( char *sz ) {
