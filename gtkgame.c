@@ -3499,6 +3499,9 @@ extern void RunGTK( GtkWidget *pwSplash, char *commands, char *python_script, ch
 		/* Show everything */
 		gtk_widget_show_all( pwMain );
 
+		/* Set the default arrow cursor in the stop window so obvious it can be clicked */
+		gdk_window_set_cursor(pwStop->window, gdk_cursor_new(GDK_ARROW));
+
 		/* Make sure toolbar looks correct */
 		{
 			int style = nToolbarStyle;
