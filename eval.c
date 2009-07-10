@@ -2560,343 +2560,6 @@ static float Noise( const evalcontext* pec, const TanBoard anBoard,
     return r;
 }
 
-static int 
-EvaluatePositionCache( NNState *nnStates, const TanBoard anBoard, float arOutput[],
-                       const cubeinfo* pci, const evalcontext* pecx,
-		       int nPlies, positionclass pc );
-
-static int 
-FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
-                   TanBoard anBoard, const cubeinfo* pci,
-                   const evalcontext* pec, int nPlies,
-                   movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] );
-
-
-static int
-ScoreMoves( movelist *pml, const cubeinfo* pci, const evalcontext* pec,
-	    int nPlies );
-
-#if !defined(REDUCTION_CODE)
-
-#define nPruneMoves 10
-static const int cubefullPrune = 1;
-
-static void
-FindBestMoveInEval(NNState *nnStates, int const nDice0, int const nDice1, const TanBoard anBoardIn,
-				   TanBoard anBoardOut, const cubeinfo* const pci, const evalcontext* pec)
-{
-  unsigned int i;
-  float rScore, rBestScore;
-  movelist ml;
-  GenerateMoves(&ml, anBoardIn, nDice0, nDice1, FALSE);
-    
-  if( ml.cMoves == 0 ) {
-    /* no legal moves */
-    return;
-  }
-
-  if( ml.cMoves == 1 ) {
-    /* forced move */
-    ml.iMoveBest = 0;
-  } else {
-    int use = ml.cMoves > nPruneMoves;
-    unsigned int bmovesi[nPruneMoves];
-    float arOutput[5];
-    
-    ((cubeinfo*)pci)->fMove = !pci->fMove;
-    if( use ) {
-      positionclass evalClass = 0;
-      float arInput[200];
-      
-      for(i = 0; i < ml.cMoves; i++) {
-	move* const pm = &ml.amMoves[i];
-	
-	PositionFromKey(anBoardOut, pm->auch);
-	SwapSides(anBoardOut);
-
-	{
-	  positionclass pc = ClassifyPosition((ConstTanBoard)anBoardOut, VARIATION_STANDARD);
-	  if( i == 0 ) {
-	    if( pc < CLASS_RACE ) {
-	      break;
-	    }
-	    evalClass = pc;
-	  } else {
-	    if( pc != evalClass ) {
-	      break;
-	    }
-	  }
-
-#if defined(PRUNE_CACHE)
-{
-	  evalcache ec;
-	  unsigned long l;
-	  memcpy(ec.key.auch, pm->auch, sizeof(ec.key.auch));
-	  ec.nEvalContext = 0;
-	  if ( ( l = CacheLookup( &cpEval, &ec, arOutput, NULL ) ) != CACHEHIT ) {
-   
-#endif
-	    baseInputs((ConstTanBoard)anBoardOut, arInput);
-	    {
-	      neuralnet* nets[] = {&nnpRace, &nnpCrashed, &nnpContact};
-	      neuralnet* n = nets[pc - CLASS_RACE];
-		  if (nnStates)
-			  nnStates[pc - CLASS_RACE].state = (i == 0) ?  NNSTATE_INCREMENTAL : NNSTATE_DONE;
-	      NeuralNetEvaluate(n, arInput, arOutput, nnStates);
-	      SanityCheck((ConstTanBoard)anBoardOut, arOutput);
-	    }
-#if defined(PRUNE_CACHE)
-	    memcpy( ec.ar, arOutput, sizeof(float) * NUM_OUTPUTS );
-		ec.ar[5] = 0.f;
-	    CacheAdd(&cpEval, &ec, l);
-	}
-}
-#endif
-	  pm->rScore = UtilityME(arOutput, pci);
-	  if( i < nPruneMoves ) {
-	    bmovesi[i] = i;
-	    if( pm->rScore > ml.amMoves[ bmovesi[0] ].rScore ) {
-	      bmovesi[i] = bmovesi[0];
-	      bmovesi[0] = i;
-	    }
-	  } else if( pm->rScore < ml.amMoves[ bmovesi[0] ].rScore ) {
-	    int m = 0, k;
-	    bmovesi[0] = i;
-	    for(k = 1; k < nPruneMoves; ++k) {
-	      if( ml.amMoves[ bmovesi[k] ].rScore >
-		  ml.amMoves[ bmovesi[m] ].rScore ) {
-		m = k;
-	      }
-	    }
-	    bmovesi[0] = bmovesi[m];
-	    bmovesi[m] = i;
-	  }
-	}
-      }
-
-      if( i == ml.cMoves ) {
-	ml.cMoves = nPruneMoves;
-      } else {
-	use  = 0;
-      }
-    }
-
-    /* See if this is the problem */
-	if (cubefullPrune)
-	{
-	((cubeinfo*)pci)->fMove = !pci->fMove;
-	if( use ) {
-	move *amMoves = (move*) g_alloca(ml.cMoves * sizeof(move));
-	for(i = 0; i < ml.cMoves; i++) {
- unsigned int const j = bmovesi[i];
-	memcpy(&amMoves[i], &ml.amMoves[j], sizeof(amMoves[0]));
-	bmovesi[i] = i;
-	}
-	memcpy(&ml.amMoves[0], amMoves, ml.cMoves * sizeof(amMoves[0]));
-	}
-	ScoreMoves(&ml, pci, pec, 0);
-
-	/*
-	((cubeinfo*)pci)->fMove = !pci->fMove;
-	int c = ml.iMoveBest;
-	*/
-	} else {
-
-    nnStates[0].state = nnStates[1].state = nnStates[2].state = NNSTATE_INCREMENTAL;
-    rBestScore = 99999.9f;
-    for(i = 0; i < ml.cMoves; i++) {
-      unsigned int const j = use ? bmovesi[i] : i;
-      const move* const pm = &ml.amMoves[j];
-	
-      PositionFromKey(anBoardOut, pm->auch);
-      SwapSides(anBoardOut);
-      {
-	evalcache ec;
-	unsigned long l;
-	memcpy(ec.key.auch, pm->auch, sizeof(ec.key.auch));
-	ec.nEvalContext =  pci->fMove << 14;
-
-	if ( ( l = CacheLookup( &cpEval, &ec, arOutput, NULL ) ) != CACHEHIT ) {
-	  positionclass pc = ClassifyPosition((ConstTanBoard)anBoardOut, VARIATION_STANDARD);
-
-	  acef[pc]((ConstTanBoard)anBoardOut, arOutput, VARIATION_STANDARD, nnStates);
-	  if ( pc > CLASS_PERFECT )
-	    SanityCheck((ConstTanBoard)anBoardOut, arOutput);
-
-	  memcpy( ec.ar, arOutput, sizeof(float) * NUM_OUTPUTS );
-	  ec.ar[5] = 0.f;
-	  CacheAdd(&cEval, &ec, l);
-	}
-	rScore = UtilityME(arOutput, pci);
-	if( rScore < rBestScore ) {
-	  rBestScore = rScore;
-	  ml.iMoveBest = j;
-	}
-      }
-    }
-    nnStates[0].state = nnStates[1].state = nnStates[2].state = NNSTATE_NONE;
-
-    ((cubeinfo*)pci)->fMove = !pci->fMove;
-  }
-  }
-  
-  PositionFromKey(anBoardOut, ml.amMoves[ml.iMoveBest].auch);
-}
-#endif
-
-static int EvaluatePositionFull( NNState *nnStates, const TanBoard anBoard, float arOutput[],
-                      const cubeinfo* pci, const evalcontext* pec, unsigned int nPlies,
-                      positionclass pc )
-{
-  int i, n0, n1;
-#if defined( REDUCTION_CODE )
-  int fUseReduction, r;
-  laRollList_t *rolls = NULL;
-  laRollList_t *rollList = NULL;
-#endif
-  float arVariationOutput[ NUM_OUTPUTS ];
-  float rTemp;
-  int w
-#if defined( REDUCTION_CODE )
-    , sumW
-#endif
-    ;
-  
-  if( pc > CLASS_PERFECT && nPlies > 0 ) {
-    /* internal node; recurse */
-
-    TanBoard anBoardNew;
-    /* int anMove[ 8 ]; */
-    cubeinfo ciOpp;
-#if !defined(REDUCTION_CODE)
-    int const  usePrune =
-      pec->fUsePrune && !pec->rNoise && pci->bgv == VARIATION_STANDARD;
-#endif 
-      
-    for( i = 0; i < NUM_OUTPUTS; i++ )
-      arOutput[ i ] = 0.0;
-
-#if defined( REDUCTION_CODE )
-    /* reset reduction group */
-
-    if ( pec->nReduced && ( nPlies == pec->nPlies ) )
-      nReductionGroup = 0;
-
-    fUseReduction = pec->nReduced && ( nPlies == 1 ) && ( pec->nPlies > 0 );
-
-    if ( fUseReduction ) {
-      nReductionGroup = (nReductionGroup + 1) % pec->nReduced;
-      rollList = rollLists[ pec->nReduced ];
-      rolls = &rollList[ nReductionGroup ];
-    }
-    else
-      rolls = &allLists[ 0 ];
-#endif
-    
-    /* loop over rolls */
-
-    
-#if defined( REDUCTION_CODE )
-    sumW = 0;
-    for ( r=0; r < rolls->numRolls; r++ ) {
-      n0 = rolls->d1[r];
-      n1 = rolls->d2[r];
-      w  = rolls->wt[r];
-#else
-      for( n0 = 1; n0 <= 6; n0++ ) {
-	for( n1 = 1; n1 <= n0; n1++ ) {
-	  w = (n0 == n1) ? 1 : 2;
-#endif
-
-      for( i = 0; i < 25; i++ ) {
-        anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
-        anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
-      }
-
-      if( fInterrupt ) {
-        errno = EINTR;
-        return -1;
-      }
-
-#if !defined(REDUCTION_CODE)
-      if( usePrune ) {
-	FindBestMoveInEval(nnStates, n0, n1, anBoard, anBoardNew, pci, pec);
-      } else {
-#endif
-	FindBestMovePlied( NULL, n0, n1, anBoardNew, pci, pec, 0,
-			   defaultFilters );
-#if !defined(REDUCTION_CODE)
-      }
-#endif
-
-      SwapSides( anBoardNew );
-
-      SetCubeInfo ( &ciOpp, pci->nCube, pci->fCubeOwner, !pci->fMove,
-                    pci->nMatchTo, pci->anScore, pci->fCrawford,
-                    pci->fJacoby, pci->fBeavers, pci->bgv );
-
-      /* Evaluate at 0-ply */
-      if( EvaluatePositionCache( nnStates, (ConstTanBoard)anBoardNew, arVariationOutput,
-                                 &ciOpp, pec, nPlies - 1, 
-                                 ClassifyPosition( (ConstTanBoard)anBoardNew, ciOpp.bgv ) ) )
-        return -1;
-
-      for( i = 0; i < NUM_OUTPUTS; i++ )
-        arOutput[ i ] += w * arVariationOutput[ i ];
-#if defined( REDUCTION_CODE )
-      sumW += w;
-#endif
-    }
-
-#if defined( REDUCTION_CODE )
-    /* reset reduction group */
-
-    if ( pec->nReduced && ( nPlies == pec->nPlies ) )
-      nReductionGroup = 0;
-#else
-      }
-#endif
-      
-    /* normalize */
-    for ( i = 0; i < NUM_OUTPUTS; i++ )
-      arOutput[ i ] /=
-#if defined( REDUCTION_CODE )
-	sumW
-#else
-	36
-#endif
-	;
-    
-    /* flop eval */
-    arOutput[ OUTPUT_WIN ] = 1.0f - arOutput[ OUTPUT_WIN ];
-
-    rTemp = arOutput[ OUTPUT_WINGAMMON ];
-    arOutput[ OUTPUT_WINGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ];
-    arOutput[ OUTPUT_LOSEGAMMON ] = rTemp;
-
-    rTemp = arOutput[ OUTPUT_WINBACKGAMMON ];
-    arOutput[ OUTPUT_WINBACKGAMMON ] = arOutput[ OUTPUT_LOSEBACKGAMMON ];
-    arOutput[ OUTPUT_LOSEBACKGAMMON ] = rTemp;
-
-  } 
-  else {
-    /* at leaf node; use static evaluation */
-    
-    if( acef[ pc ]( anBoard, arOutput, pci->bgv, nnStates ) )
-      return -1;
-
-    if( pec->rNoise && pc != CLASS_OVER )
-	for( i = 0; i < NUM_OUTPUTS; i++ )
-	    arOutput[ i ] += Noise( pec, anBoard, i );
-    
-    if ( pc > CLASS_PERFECT )
-      /* no sanity check needed for exact evaluations */
-      SanityCheck( anBoard, arOutput );
-  }
-
-  return 0;
-}
-
 static int
 EvalKey ( const evalcontext *pec, const int nPlies,
           const cubeinfo *pci, int fCubefulEquity ) {
@@ -3004,48 +2667,6 @@ EvalKey ( const evalcontext *pec, const int nPlies,
 
 }
 
-
-static int 
-EvaluatePositionCache( NNState *nnStates, const TanBoard anBoard, float arOutput[],
-                       const cubeinfo* pci, const evalcontext* pecx,
-		       int nPlies, positionclass pc ) {
-    evalcache ec;
-    unsigned long l;
-    /* This should be a part of the code that is called in all
-       time-consuming operations at a relatively steady rate, so is a
-       good choice for a callback function. */
-#if !USE_MULTITHREAD
-{
-	static int iTick;
-    if( ++iTick >= 0x400 )
-	{
-		iTick = 0;
-		CallbackProgress();
-    }
-}
-#endif
-    if( !cCache || ( !pecx->fDeterministic && pecx->rNoise != 0.0f ) )
-	/* non-deterministic noisy evaluations; cannot cache */
-	return EvaluatePositionFull( nnStates, anBoard, arOutput, pci, pecx, nPlies,
-				     pc );
-    
-    PositionKey( anBoard, ec.key.auch );
-
-    ec.nEvalContext = EvalKey ( pecx, nPlies, pci, FALSE );
-	if ( ( l = CacheLookup( &cEval, &ec, arOutput, NULL ) ) == CACHEHIT ) {
-	return 0;
-    }
-
-	if( EvaluatePositionFull( nnStates, anBoard, arOutput, pci, pecx, nPlies, pc ) )
-	return -1;
-
-    memcpy( ec.ar, arOutput, sizeof ( float ) * NUM_OUTPUTS );
-	ec.ar[5] = 0.f;
-    CacheAdd(&cEval, &ec, l);
-    return 0;
-}
-
-
 extern int
 PerfectCubeful ( bearoffcontext *pbc, 
                  const TanBoard anBoard, float arEquity[] ) {
@@ -3084,17 +2705,6 @@ EvaluatePerfectCubeful ( const TanBoard anBoard, float arEquity[],
 
   return -1;
 
-}
-
-extern int 
-EvaluatePosition( NNState *nnStates, const TanBoard anBoard, float arOutput[],
-		  const cubeinfo* pci, const evalcontext* pec ) {
-    
-  positionclass pc = ClassifyPosition( anBoard, pci->bgv );
-    
-  return EvaluatePositionCache( nnStates, anBoard, arOutput, pci, 
-				pec ? pec : &ecBasic,
-				pec ? pec->nPlies : 0, pc );
 }
 
 extern void InvertEvaluation( float ar[ NUM_OUTPUTS ] ) {		
@@ -3602,95 +3212,6 @@ static int CompareMovesGeneral(const move *pm0, const move *pm1)
 	return (back[0] < back[1] ? 1 : -1);
 }
 
-extern int ScoreMove(NNState *nnStates, move *pm, const cubeinfo *pci,
-		const evalcontext *pec, int nPlies )
-{
-    TanBoard anBoardTemp;
-    float arEval[ NUM_ROLLOUT_OUTPUTS ];
-    cubeinfo ci;
-
-    PositionFromKey( anBoardTemp, pm->auch );
-      
-    SwapSides( anBoardTemp );
-
-    /* swap fMove in cubeinfo */
-    memcpy ( &ci, pci, sizeof (ci) );
-    ci.fMove = ! ci.fMove;
-
-    if ( GeneralEvaluationEPlied (nnStates, arEval, (ConstTanBoard)anBoardTemp, &ci, 
-                                   pec, nPlies ) )
-      return -1;
-
-    InvertEvaluationR ( arEval, &ci );
-
-    if ( ci.nMatchTo )
-      arEval[ OUTPUT_CUBEFUL_EQUITY ] =
-        mwc2eq ( arEval[ OUTPUT_CUBEFUL_EQUITY ], pci );
-
-    /* Save evaluations */  
-    memcpy( pm->arEvalMove, arEval, NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-    memset( pm->arEvalStdDev, 0, NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-    
-    /* Save evaluation setup */
-    pm->esMove.et = EVAL_EVAL;
-    pm->esMove.ec = *pec;
-    pm->esMove.ec.nPlies = nPlies;
-    
-    /* Score for move:
-       rScore is the primary score (cubeful/cubeless)
-       rScore2 is the secondary score (cubeless) */
-    pm->rScore =  (pec->fCubeful) ?
-      arEval[ OUTPUT_CUBEFUL_EQUITY ] : arEval[ OUTPUT_EQUITY ];
-    pm->rScore2 = arEval[ OUTPUT_EQUITY ];
-
-    return 0;
-}
-
-static int
-ScoreMoves( movelist *pml, const cubeinfo* pci, const evalcontext* pec,
-	    int nPlies )
-{
- unsigned int i;
-	int r = 0;	/* return value */
-	NNState *nnStates;
-#if USE_MULTITHREAD
-	nnStates = nnStatesStorage[MT_GetThreadID()];
-#else
-	nnStates = nnStatesStorage;
-#endif    
-
-  pml->rBestScore = -99999.9f;
-
-  if( nPlies == 0 ) {
-    /* start incremental evaluations */
-	  nnStates[0].state = nnStates[1].state = nnStates[2].state = NNSTATE_INCREMENTAL;
-  }
-
-
-  for( i = 0; i < pml->cMoves; i++ ) {
-    if( ScoreMove(nnStates, pml->amMoves + i, pci, pec, nPlies ) < 0 ) {
-      r = -1;
-      break;
-    }
-
-    if( ( pml->amMoves[ i ].rScore > pml->rBestScore ) || 
-	( ( pml->amMoves[ i ].rScore == pml->rBestScore ) 
-	  && ( pml->amMoves[ i ].rScore2 > 
-	       pml->amMoves[ pml->iMoveBest ].rScore2 ) ) ) {
-      pml->iMoveBest = i;
-      pml->rBestScore = pml->amMoves[ i ].rScore;
-    }
-  }
-
-  if( nPlies == 0 ) {
-    /* reset to none */
-	
-	  nnStates[0].state = nnStates[1].state = nnStates[2].state = NNSTATE_NONE;
-  }
-    
-  return r;
-}
-
 extern int 
 GenerateMoves( movelist *pml, const TanBoard anBoard,
                int n0, int n1, int fPartial ) {
@@ -3725,211 +3246,6 @@ GenerateMoves( movelist *pml, const TanBoard anBoard,
 	return pml->cMoves;
 }
 
-static movefilter NullFilter = {0, 0, 0.0};
-
-static int 
-FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
-                   TanBoard anBoard,
-		   const cubeinfo* pci, const evalcontext* pec, int nPlies,
-                   movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
-
-  evalcontext ec;
-  movelist ml;
-  unsigned int i;
-
-  memcpy( &ec, pec, sizeof ( evalcontext ) );
-  ec.nPlies = nPlies;
-
-  if ( anMove )
-    for ( i = 0; i < 8; ++i )
-      anMove[ i ] = -1;
-
-  if( FindnSaveBestMoves( &ml, nDice0, nDice1, (ConstTanBoard)anBoard, NULL, 0.0f,
-                          pci, &ec, aamf ) < 0 )
-    return -1;
-
-  if( anMove ) {
-    for( i = 0; i < ml.cMaxMoves * 2; i++ ) 
-      anMove[ i ] = ml.amMoves[ ml.iMoveBest ].anMove[ i ];
-  }
-	
-  if ( ml.cMoves )
-    PositionFromKey( anBoard, ml.amMoves[ ml.iMoveBest ].auch );
-
-  if ( ml.amMoves )
-    free( ml.amMoves );
-
-  return ml.cMaxMoves * 2;
-}
-
-
-extern 
-int FindBestMove( int anMove[ 8 ], int nDice0, int nDice1,
-                  TanBoard anBoard, cubeinfo *pci,
-                  evalcontext *pec,
-                  movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) { 
-
-  return FindBestMovePlied( anMove, nDice0, nDice1, anBoard, 
-                            pci, pec ? pec :
-                            &ecBasic, pec ? pec->nPlies : 0, aamf );
-}
-
-extern int FindnSaveBestMoves( movelist *pml, int nDice0, int nDice1,
-		const TanBoard anBoard, unsigned char *auchMove, const
-		float rThr, const cubeinfo* pci, const evalcontext* pec,
-		movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] )
-{
-
-  /* Find best moves. 
-     Ensure that auchMove is evaluated at the deepest ply. */
-
-  unsigned int i;
-  unsigned int nMoves, iPly;
-  move *pm;
-  movefilter* mFilters;
-  unsigned int nMaxPly = 0;
-  int cOldMoves;
-    
-  /* Find all moves -- note that pml contains internal pointers to static
-     data, so we can't call GenerateMoves again (or anything that calls
-     it, such as ScoreMoves at more than 0 plies) until we have saved
-     the moves we want to keep in amCandidates. */
-  GenerateMoves( pml, anBoard, nDice0, nDice1, FALSE );
-
-  if ( pml->cMoves == 0 ) {
-      /* no legal moves */
-      pml->amMoves = NULL;
-      return 0;
-  }
- 
-  /* Save moves */
-  pm = (move *) malloc ( pml->cMoves * sizeof ( move ) );
-  memcpy( pm, pml->amMoves, pml->cMoves * sizeof( move ) );    
-  pml->amMoves = pm;
-  nMoves = pml->cMoves;
-
-  mFilters = ( pec->nPlies > 0 && pec->nPlies <= MAX_FILTER_PLIES) ?
-      aamf[ pec->nPlies-1] : aamf[MAX_FILTER_PLIES-1];
-
-  for ( iPly = 0; iPly < pec->nPlies; iPly++ ) {
-
-      movefilter* mFilter =
-	(iPly < MAX_FILTER_PLIES) ? &mFilters[iPly] : &NullFilter;
-	 
-      unsigned int k;
-
-      if( mFilter->Accept < 0 ) {
-	continue;
-      }
-
-      if( ScoreMoves( pml, pci, pec, iPly ) < 0 ) {
-	return -1;
-      }
-
-      qsort( pml->amMoves, pml->cMoves, sizeof(move), (cfunc)CompareMoves);
-      pml->iMoveBest = 0;
-      
-      k = pml->cMoves;
-      /* we check for mFilter->Accept < 0 above */
-      pml->cMoves = MIN((unsigned int)mFilter->Accept, pml->cMoves );
-
-      {
-	unsigned int limit = MIN(k, pml->cMoves + mFilter->Extra);
-      
-	for( /**/ ; pml->cMoves < limit; ++pml->cMoves ) {
-	  if( pml->amMoves[ pml->cMoves ].rScore <
-	      pml->amMoves[0].rScore - mFilter->Threshold ) {
-	    break;
-	  }
-	}
-      }
-
-      nMaxPly = iPly;
-
-    if ( pml->cMoves == 1 && mFilter->Accept != 1 )
-      /* if there is only one move to evaluate there is no need to continue */
-      goto finished;
-
-
-  }
-
-  /* evaluate moves on top ply */
-
-  if( ScoreMoves( pml, pci, pec, pec->nPlies ) < 0 ) {
-    free( pm );
-    pml->cMoves = 0;
-    pml->amMoves = NULL;
-    return -1;
-  }
-
-  nMaxPly = pec->nPlies;
-  
-  /* Resort the moves, in case the new evaluation reordered them. */
-  qsort( pml->amMoves, pml->cMoves, sizeof( move ), (cfunc) CompareMoves );
-  pml->iMoveBest = 0;
-  
-  /* set the proper size of the movelist */
-  
- finished:
-
-  cOldMoves = pml->cMoves;
-  pml->cMoves = nMoves;
-
-  /* Make sure that auchMove and top move are both  
-     evaluated at the deepest ply. */
-  if( auchMove ) {
-
-    int fResort = FALSE;
-
-    for( i = 0; i < pml->cMoves; i++ )
-      if( EqualKeys( auchMove, pml->amMoves[ i ].auch ) ) {
-
-        /* ensure top move is evaluted at deepest ply */
-
-        if( pml->amMoves[ i ].esMove.ec.nPlies < nMaxPly ) {
-          ScoreMove( NULL, pml->amMoves + i, pci, pec, nMaxPly );
-          fResort = TRUE;
-        }
-
-        if ( ( fabs( pml->amMoves[ i ].rScore - 
-                     pml->amMoves[ 0 ].rScore ) > rThr ) &&
-             ( nMaxPly < pec->nPlies ) ) {
-
-          /* this is en error/blunder: re-analyse at top-ply */
-          
-          ScoreMove( NULL, pml->amMoves, pci, pec, pec->nPlies );
-          ScoreMove( NULL, pml->amMoves + i, pci, pec, pec->nPlies );
-          cOldMoves = 1; /* only one move scored at deepest ply */
-          fResort = TRUE;
-          
-        }
-
-        /* move it up to the other moves evaluated on nMaxPly */
-        
-        if ( fResort && pec->nPlies ) {
-          move m;
-          int j;
-
-          memcpy( &m, pml->amMoves + i, sizeof m );
-
-          for ( j = i - 1; j >= cOldMoves; --j )
-            memcpy( pml->amMoves+j+1, pml->amMoves+j, sizeof( move ) );
-
-          memcpy( pml->amMoves + cOldMoves, &m, sizeof ( m ) );
-          
-            /* reorder moves evaluated on nMaxPly */
-          
-          qsort( pml->amMoves, cOldMoves + 1, 
-                 sizeof( move ), (cfunc) CompareMoves );
-          
-        }
-        break;
-      }
-  }
-
-  return 0;
-
-}
 
 extern float KleinmanCount (int nPipOnRoll, int nPipNotOnRoll)
 {
@@ -5343,684 +4659,6 @@ CalcCubefulEquity ( positionclass pc,
 }
 #endif 
 
-extern int
-GeneralCubeDecisionE ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                       const TanBoard anBoard,
-                       const cubeinfo* pci,
-		       const evalcontext* pec, const evalsetup* pes ) {
-
-  float arOutput[ NUM_OUTPUTS ];
-  cubeinfo aciCubePos[ 2 ];
-  float arCubeful[ 2 ];
-  int i,j;
-
-
-  /* Setup cube for "no double" and "double, take" */
-
-  memcpy ( &aciCubePos[ 0 ], pci, sizeof ( cubeinfo ) );
-  memcpy ( &aciCubePos[ 1 ], pci, sizeof ( cubeinfo ) );
-  aciCubePos[ 1 ].fCubeOwner = ! aciCubePos[ 1 ].fMove;
-  aciCubePos[ 1 ].nCube *= 2;
-
-  if ( EvaluatePositionCubeful3 ( NULL, anBoard, 
-                                  arOutput, 
-                                  arCubeful,
-                                  aciCubePos, 2,
-                                  pci, pec, pec->nPlies, TRUE ) )
-    return -1;
-
-  
-  /* Scale double-take equity */
-  if ( ! pci->nMatchTo )
-    arCubeful[ 1 ] *= 2.0;
-
-  for ( i = 0; i < 2; i++ ) {
-
-    /* copy cubeless winning chances */
-    for ( j = 0; j < NUM_OUTPUTS; j++ )
-      aarOutput[ i ][ j ] = arOutput[ j ];
-
-    /* equity */
-
-    aarOutput[ i ][ OUTPUT_EQUITY ] =
-      UtilityME ( arOutput, &aciCubePos[ i ] );
-
-    aarOutput[ i ][ OUTPUT_CUBEFUL_EQUITY ] = arCubeful[ i ];
-
-  }
-
-  return 0;
-
-}
-
-extern int
-GeneralEvaluationE( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
-                    const TanBoard anBoard,
-                    const cubeinfo* pci, const evalcontext *pec) {
-
-  return GeneralEvaluationEPlied ( NULL, arOutput, anBoard,
-                                   pci, pec, pec->nPlies );
-
-}
-
-
-extern int 
-GeneralEvaluationEPliedCubeful ( NNState *nnStates, float arOutput [ NUM_ROLLOUT_OUTPUTS ],
-                                 const TanBoard anBoard,
-                                 const cubeinfo* pci, const evalcontext* pec,
-                                 int nPlies ) {
-
-  float rCubeful;
-
-  if ( EvaluatePositionCubeful3 ( nnStates, anBoard, 
-                                  arOutput, 
-                                  &rCubeful,
-                                  pci, 1,
-                                  pci, pec, nPlies, FALSE ) )
-    return -1;
-
-  arOutput[ OUTPUT_EQUITY ] = UtilityME ( arOutput, pci );
-  arOutput[ OUTPUT_CUBEFUL_EQUITY ] = rCubeful;
-
-  return 0;
-
-}
-
-extern int
-GeneralEvaluationEPlied (NNState *nnStates, float arOutput [ NUM_ROLLOUT_OUTPUTS ],
-                          const TanBoard anBoard,
-                          const cubeinfo* pci, const evalcontext* pec,
-			  int nPlies ) {
-
-  if ( pec->fCubeful ) {
-
-    if ( GeneralEvaluationEPliedCubeful ( nnStates, arOutput, anBoard, pci,
-                                          pec, nPlies ) )
-      return -1;
-
-  } 
-  else {
-    if ( EvaluatePositionCache ( nnStates, anBoard, arOutput, pci, pec,
-                                 nPlies, 
-                                 ClassifyPosition ( anBoard, pci->bgv ) ) )
-      return -1;
-
-    arOutput[ OUTPUT_EQUITY ] = UtilityME ( arOutput, pci );
-    arOutput[ OUTPUT_CUBEFUL_EQUITY ] = 0.0f;
-
-  }
-
-  return 0;
-
-}
-
-static void 
-GetECF3 ( float arCubeful[], int cci,
-          float arCf[], cubeinfo aci[] ) {
-
-  int i,ici;
-  float rND, rDT, rDP;
-
-  for ( ici = 0, i = 0; ici < cci; ici++, i += 2 ) {
-
-    if ( aci[ i + 1 ].nCube > 0 ) {
-
-      /* cube available */
-
-      rND = arCf [ i ];
-
-      if ( aci[ 0 ].nMatchTo )
-        rDT = arCf [ i + 1 ];
-      else
-        rDT = 2.0f * arCf[ i + 1 ];
-
-      GetDPEq ( NULL, &rDP, &aci[ i ] );
-
-      if ( rDT >= rND && rDP >= rND ) {
-
-        /* double */
-
-        if ( rDT >= rDP )
-          /* pass */
-          arCubeful[ ici ] = rDP;
-        else
-          /* take */
-          arCubeful[ ici ] = rDT;
-
-      }
-      else {
-
-        /* no double */
-
-        arCubeful [ici ] = rND;
-
-      }
-
-
-    }
-    else {
-
-      /* no cube available: always no double */
-
-      arCubeful[ ici ] = arCf[ i ];
-
-    }
-
-  }
-
-}
-
-
-static void
-MakeCubePos( const cubeinfo aciCubePos[], const int cci,
-	     const int fTop, cubeinfo aci[], const int fInvert )
-{
-  int i, ici;
-
-  for ( ici = 0, i = 0; ici < cci; ici++ ) {
-
-    /* no double */
-
-    if ( aciCubePos[ ici ].nCube > 0 ) {
-
-      SetCubeInfo ( &aci[ i ], 
-                    aciCubePos[ ici ].nCube,
-                    aciCubePos[ ici ].fCubeOwner,
-                    fInvert ?
-                    ! aciCubePos[ ici ].fMove : aciCubePos[ ici ].fMove,
-                    aciCubePos[ ici ].nMatchTo,
-                    aciCubePos[ ici ].anScore,
-                    aciCubePos[ ici ].fCrawford,
-                    aciCubePos[ ici ].fJacoby,
-                    aciCubePos[ ici ].fBeavers,
-                    aciCubePos[ ici ].bgv );
-
-    } 
-    else {
-
-      aci[ i ].nCube = -1;
-
-    }
-
-    i++;
-
-    if ( ! fTop && aciCubePos[ ici ].nCube > 0 &&
-         GetDPEq ( NULL, NULL, &aciCubePos[ ici ] ) ) 
-      /* we may double */
-      SetCubeInfo ( &aci[ i ], 
-                    2 * aciCubePos[ ici ].nCube,
-                    ! aciCubePos[ ici ].fMove,
-                    fInvert ?
-                    ! aciCubePos[ ici ].fMove : aciCubePos[ ici ].fMove,
-                    aciCubePos[ ici ].nMatchTo,
-                    aciCubePos[ ici ].anScore,
-                    aciCubePos[ ici ].fCrawford,
-                    aciCubePos[ ici ].fJacoby,
-                    aciCubePos[ ici ].fBeavers,
-                    aciCubePos[ ici ].bgv );
-    else
-      /* mark cube position as unavaiable */
-      aci[ i ].nCube = -1;
-
-    i++;
-
-
-  } /* loop cci */
-
-}
-
-
-static int 
-EvaluatePositionCubeful4( NNState *nnStates, const TanBoard anBoard,
-                          float arOutput[ NUM_OUTPUTS ],
-                          float arCubeful[],
-                          const cubeinfo aciCubePos[], int cci, 
-                          const cubeinfo* pciMove, const evalcontext* pec, 
-                          unsigned int nPlies, int fTop ) {
-  
-  
-  /* calculate cubeful equity */
-
-  int i, ici;
-  positionclass pc;
-  float r;
-  float ar[ NUM_OUTPUTS ];
-  float arEquity[ 4 ];
-  float rCubeX;
-
-  cubeinfo ciMoveOpp;
-
-  float *arCf = (float*) g_alloca(2 * cci * sizeof(float));
-  float *arCfTemp = (float*) g_alloca(2 * cci * sizeof(float));
-  cubeinfo *aci = (cubeinfo*) g_alloca(2 * cci * sizeof(cubeinfo));
-
-#if defined( REDUCTION_CODE )
-  int fUseReduction, ir;
-  laRollList_t *rolls = NULL;
-  laRollList_t *rollList = NULL;
-#endif
-  int w
-#if defined( REDUCTION_CODE )
-    , sumW
-#endif
-    ;
-  int n0, n1;
-
-  pc = ClassifyPosition ( anBoard, pciMove->bgv );
-  
-  if( pc > CLASS_OVER && nPlies > 0 && 
-      ! ( pc <= CLASS_PERFECT && !pciMove->nMatchTo ) ) {
-    /* internal node; recurse */
-
-    TanBoard anBoardNew;
-
-#if !defined( REDUCTION_CODE )
-    int const  usePrune =
-      pec->fUsePrune && !pec->rNoise && pciMove->bgv == VARIATION_STANDARD;
-#endif
-
-    for( i = 0; i < NUM_OUTPUTS; i++ )
-      arOutput[ i ] = 0.0;
-
-    for ( i = 0; i < 2 * cci; i++ )
-      arCf[ i ] = 0.0;
-
-    /* construct next level cube positions */
-
-    MakeCubePos ( aciCubePos, cci, fTop, aci, TRUE );
-
-#if defined( REDUCTION_CODE )
-    /* speed reduction */
-
-    /* make sure to reset nReductionGroup */
-
-    if ( pec->nReduced && ( nPlies == pec->nPlies ) )
-      nReductionGroup = 0;
-
-    fUseReduction = pec->nReduced && ( nPlies == 1 ) && ( pec->nPlies > 0 );
-
-    if ( fUseReduction ) {
-      nReductionGroup = (nReductionGroup + 1) % pec->nReduced;
-      rollList = rollLists[ pec->nReduced ];
-      rolls = &rollList[ nReductionGroup ];
-    }
-    else
-      rolls = &allLists[ 0 ];
-    
-#endif
-
-    /* loop over rolls */
-
-#if defined( REDUCTION_CODE )
-    sumW = 0;
-    for ( ir=0; ir < rolls->numRolls; ir++ ) {
-      n0 = rolls->d1[ir];
-      n1 = rolls->d2[ir];
-      w  = rolls->wt[ir];
-#else
-    for( n0 = 1; n0 <= 6; n0++ ) {
-      for( n1 = 1; n1 <= n0; n1++ ) {
-	w = (n0 == n1) ? 1 : 2;
-#endif
-
-      for( i = 0; i < 25; i++ ) {
-        anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
-        anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
-      }
-
-      if( fInterrupt ) {
-        errno = EINTR;
-        return -1;
-      }
-
-#if !defined( REDUCTION_CODE )
-      if( usePrune ) {
-	FindBestMoveInEval(nnStates, n0, n1, anBoard, anBoardNew, pciMove, pec);
-      } else {
-#endif
-	FindBestMovePlied( NULL, n0, n1, anBoardNew,
-                         pciMove, pec, 0, defaultFilters );
-#if !defined( REDUCTION_CODE )
-      }
-#endif
-
-      SwapSides( anBoardNew );
-
-      SetCubeInfo ( &ciMoveOpp,
-                    pciMove->nCube, pciMove->fCubeOwner,
-                    ! pciMove->fMove, pciMove->nMatchTo,
-                    pciMove->anScore, pciMove->fCrawford,
-                    pciMove->fJacoby, pciMove->fBeavers, pciMove->bgv );
-
-	  /* Evaluate at 0-ply */
-      if( EvaluatePositionCubeful3( nnStates, (ConstTanBoard)anBoardNew,
-                                    ar,
-                                    arCfTemp,
-                                    aci,
-                                    2 * cci,
-                                    &ciMoveOpp,
-                                    pec, nPlies - 1, FALSE ) )
-        return -1;
-
-      /* Sum up cubeless winning chances and cubeful equities */
-	      
-      for( i = 0; i < NUM_OUTPUTS; i++ )
-        arOutput[ i ] += w * ar[ i ];
-      for ( i = 0; i < 2 * cci; i++ )
-        arCf[ i ] += w * arCfTemp[ i ];
-
-#if defined( REDUCTION_CODE )
-      sumW += w;
-#endif
-
-    }
-
-#if defined( REDUCTION_CODE )
-    /* reset reduction group */
-
-    if ( pec->nReduced && ( nPlies == pec->nPlies ) )
-      nReductionGroup = 0;
-#else
-    }
-#endif
-
-    /* Flip evals */
-#if !defined( REDUCTION_CODE )
-#define sumW 36
-#endif
-    
-    arOutput[ OUTPUT_WIN ] =
-      1.0f - arOutput[ OUTPUT_WIN ] / sumW;
-	  
-    r = arOutput[ OUTPUT_WINGAMMON ] / sumW;
-    arOutput[ OUTPUT_WINGAMMON ] =
-      arOutput[ OUTPUT_LOSEGAMMON ] / sumW;
-    arOutput[ OUTPUT_LOSEGAMMON ] = r;
-	  
-    r = arOutput[ OUTPUT_WINBACKGAMMON ] / sumW;
-    arOutput[ OUTPUT_WINBACKGAMMON ] =
-      arOutput[ OUTPUT_LOSEBACKGAMMON ] / sumW;
-    arOutput[ OUTPUT_LOSEBACKGAMMON ] = r;
-
-    for ( i = 0; i < 2 * cci; i++ ) 
-      if ( pciMove->nMatchTo )
-        arCf[ i ] = 1.0f - arCf[ i ] / sumW;
-      else
-        arCf[ i ] = - arCf[ i ] / sumW;
-#undef sumW
-    
-    /* invert fMove */
-    /* Remember than fMove was inverted in the call to MakeCubePos */
-
-    for ( i = 0; i < 2 * cci; i++ )
-      aci[ i ].fMove = ! aci[ i ].fMove;
-
-    /* get cubeful equities */
-
-    GetECF3 ( arCubeful, cci, arCf, aci );
-
-  } else {
-    /* at leaf node; use static evaluation */
-
-    if ( pc == CLASS_HYPERGAMMON1 || pc == CLASS_HYPERGAMMON2 ||
-         pc == CLASS_HYPERGAMMON3 ) {
-
-      bearoffcontext *pbc = apbcHyper[ pc - CLASS_HYPERGAMMON1 ];
-      unsigned int nUs, nThem, iPos;
-      int n;
-
-      if (!pbc)
-        return -1;
-
-      nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
-      nThem = PositionBearoff ( anBoard[ 0 ],  pbc->nPoints, pbc->nChequers );
-      n = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
-      iPos = nUs * n + nThem;
-      
-      if ( BearoffHyper ( apbcHyper[ pc - CLASS_HYPERGAMMON1 ], iPos,
-                          arOutput, arEquity ) )
-        return -1;
-
-    }
-    else if ( pc > CLASS_OVER && pc <= CLASS_PERFECT /* && ! pciMove->nMatchTo */ ) {
-
-      if ( EvaluatePerfectCubeful ( anBoard, arEquity, pciMove->bgv ) ) {
-        return -1;
-      }
-
-      arOutput[ 0 ] = ( arEquity[ 0 ] + 1.0f ) / 2.0f;
-      arOutput[ 1 ] = arOutput[ 2 ] = arOutput[ 3 ] = arOutput[ 4 ] = 0.0;
-
-    }
-    else {
-
-      /* evaluate with neural net */
-      
-      if( EvaluatePosition ( nnStates, anBoard, arOutput, pciMove, NULL ) )
-        return -1;
-      
-      if( pec->rNoise && pc != CLASS_OVER )
-        for( i = 0; i < NUM_OUTPUTS; i++ )
-          arOutput[ i ] += Noise( pec, anBoard, i );
-
-      if ( pc > CLASS_PERFECT )
-        SanityCheck( anBoard, arOutput );
-      
-    }
-    
-    /* Calculate cube efficiency */
-      
-    rCubeX = EvalEfficiency ( anBoard, pc );
-
-    /* Build all possible cube positions */
-    
-    MakeCubePos ( aciCubePos, cci, fTop, aci, FALSE );
-    
-    /* Calculate cubeful equity for each possible cube position */
-    
-    for ( ici = 0; ici < 2 * cci; ici++ ) 
-      if ( aci[ ici ].nCube > 0 ) {
-        /* cube available */
-
-        if ( ! aci[ ici ].nMatchTo ) {
-
-          /* money play */
-
-          switch ( pc ) {
-          case CLASS_HYPERGAMMON1:
-          case CLASS_HYPERGAMMON2:
-          case CLASS_HYPERGAMMON3:
-            /* exact bearoff equities & contact */
-
-            arCf[ ici ] = CFHYPER( arEquity, &aci[ ici ] );
-            break;
-
-          case CLASS_BEAROFF2:
-          case CLASS_BEAROFF_TS:
-            /* exact bearoff equities */
-
-            arCf[ ici ] = CFMONEY( arEquity, &aci[ ici ] );
-            break;
-
-          case CLASS_OVER:
-          case CLASS_RACE:
-          case CLASS_CRASHED:
-          case CLASS_CONTACT:
-          case CLASS_BEAROFF1:
-          case CLASS_BEAROFF_OS:
-            /* approximate using Janowski's formulae */
-            
-            arCf[ ici ] = Cl2CfMoney ( arOutput, &aci[ ici ], rCubeX );
-            break;
-
-          }
-
-        }
-        else {
-
-          float rCl, rCf, rCfMoney;
-          float X = rCubeX;
-          cubeinfo ciMoney;
-
-          /* match play */
-
-          switch ( pc ) {
-          case CLASS_HYPERGAMMON1:
-          case CLASS_HYPERGAMMON2:
-          case CLASS_HYPERGAMMON3:
-            /* use exact money equities to guess cube efficiency */
-
-            SetCubeInfoMoney( &ciMoney, 1, aci[ ici ].fCubeOwner,
-                         aci[ ici ].fMove, FALSE, FALSE, aci[ ici ].bgv );
-
-            rCl = Utility( arOutput, &ciMoney );
-            rCubeX = 1.0;
-            rCf = Cl2CfMoney( arOutput, &ciMoney, rCubeX );
-            rCfMoney = CFHYPER( arEquity, &ciMoney );
-
-            if ( fabs( rCl - rCf ) > 0.0001 )
-              rCubeX = ( rCfMoney - rCl ) / ( rCf - rCl );
-
-            arCf[ ici ] = Cl2CfMatch( arOutput, &aci[ ici ], rCubeX );
-
-            rCubeX = X;
-
-            break;
-
-          case CLASS_BEAROFF2:
-          case CLASS_BEAROFF_TS:
-            /* use exact money equities to guess cube efficiency */
-
-            SetCubeInfoMoney( &ciMoney, 1, aci[ ici ].fCubeOwner,
-                         aci[ ici ].fMove, FALSE, FALSE, aci[ ici ].bgv );
-
-            rCl = arEquity[ 0 ];
-            rCubeX = 1.0;
-            rCf = Cl2CfMoney( arOutput, &ciMoney, rCubeX );
-            rCfMoney = CFMONEY( arEquity, &ciMoney );
-
-            if ( fabs( rCl - rCf ) > 0.0001 )
-              rCubeX = ( rCfMoney - rCl ) / ( rCf - rCl );
-            else
-              rCubeX = X;
-
-            arCf[ ici ] = Cl2CfMatch( arOutput, &aci[ ici ], rCubeX );
-
-            rCubeX = X;
-
-            break;
-
-          case CLASS_OVER:
-          case CLASS_RACE:
-          case CLASS_CRASHED:
-          case CLASS_CONTACT:
-          case CLASS_BEAROFF1:
-          case CLASS_BEAROFF_OS:
-            /* approximate using Joern's generalisation of 
-               Janowski's formulae */
-            
-            arCf[ ici ] = Cl2CfMatch ( arOutput, &aci[ ici ], rCubeX );
-            break;
-
-          }
-
-        }
-
-      }
-
-
-    /* find optimal of "no double" and "double" */
-    
-    GetECF3 ( arCubeful, cci, arCf, aci );
-
-  }
-  
-  return 0;
-
-}  
-/* EvaluatePositionCubeful3 is now just a wrapper for ....Cubeful4, which
-   first checks the cache, and then calls ...Cubeful3 */
-
-extern int 
-EvaluatePositionCubeful3( NNState *nnStates, const TanBoard anBoard,
-                          float arOutput[ NUM_OUTPUTS ],
-                          float arCubeful[],
-                          const cubeinfo aciCubePos[], int cci, 
-                          const cubeinfo* pciMove, const evalcontext *pec, 
-                          int nPlies, int fTop ) {
-
-  int ici;
-  int fAll = TRUE;
-  evalcache ec;
-  unsigned long l;
-
-  if( !cCache || ( !pec->fDeterministic && pec->rNoise != 0.0f ) )
-      /* non-deterministic evaluation; never cache */
-{
-      return EvaluatePositionCubeful4( nnStates, anBoard, arOutput, arCubeful,
-				       aciCubePos, cci, pciMove, pec,
-				       nPlies, fTop );
-}
-
-  PositionKey ( anBoard, ec.key.auch );
-
-  /* check cache for existence for earlier calculation */
-
-  fAll = ! fTop; /* FIXME: fTop should be a part of EvalKey */
-
-  for ( ici = 0; ici < cci && fAll; ++ici ) {
-
-      if ( aciCubePos[ ici ].nCube < 0 )
-	  {
-        continue;
-	  }
-      /* argh, bug #9211: the stuff in EvalKey only stores 4 bit for
-         the score, so a score of -20,-20 is treated identical to
-         -4,-4.... */
-
-
-
-      ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ], TRUE );
-
-	  if ( ( l = CacheLookup( &cEval, &ec, arOutput, arCubeful + ici ) ) != CACHEHIT ) {
-        fAll = FALSE;
-	  }
-  }
-
-  /* get equities */
-  
-  if ( ! fAll ) {
-
-    /* cache miss */
-    if ( EvaluatePositionCubeful4 ( nnStates, anBoard, arOutput, arCubeful, 
-                                    aciCubePos, 
-                                    cci, pciMove, pec, nPlies, fTop ) )
-      return -1;
-    
-    /* add to cache */
-    
-    if ( ! fTop ) {
-
-      for ( ici = 0; ici < cci; ++ici ) {
-        if ( aciCubePos[ ici ].nCube < 0 )
-          continue;
-        
-        memcpy ( ec.ar, arOutput, sizeof ( float ) * NUM_OUTPUTS );
-        ec.ar[5] = arCubeful[ ici ];	/* Cubeful equity stored in slot 5 */
-        ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ], TRUE );
-
-	CacheAdd(&cEval, &ec, GetHashKey(cEval.hashMask, &ec));
-
-      }
-    }
-  }
-
-  return 0;
-  
-}
-
-#include "drawboard.h"
-  
 
 
 
@@ -6316,6 +4954,121 @@ getMoneyPoints ( float aaarPoints[ 2 ][ 7 ][ 2 ],
     aaarPoints[ i ][ 6 ][ 1 ] = ( rL + 1.0f ) / ( rW + rL + 0.5f );
 
   }
+
+}
+
+static void 
+GetECF3 ( float arCubeful[], int cci,
+          float arCf[], cubeinfo aci[] ) {
+
+  int i,ici;
+  float rND, rDT, rDP;
+
+  for ( ici = 0, i = 0; ici < cci; ici++, i += 2 ) {
+
+    if ( aci[ i + 1 ].nCube > 0 ) {
+
+      /* cube available */
+
+      rND = arCf [ i ];
+
+      if ( aci[ 0 ].nMatchTo )
+        rDT = arCf [ i + 1 ];
+      else
+        rDT = 2.0f * arCf[ i + 1 ];
+
+      GetDPEq ( NULL, &rDP, &aci[ i ] );
+
+      if ( rDT >= rND && rDP >= rND ) {
+
+        /* double */
+
+        if ( rDT >= rDP )
+          /* pass */
+          arCubeful[ ici ] = rDP;
+        else
+          /* take */
+          arCubeful[ ici ] = rDT;
+
+      }
+      else {
+
+        /* no double */
+
+        arCubeful [ici ] = rND;
+
+      }
+
+
+    }
+    else {
+
+      /* no cube available: always no double */
+
+      arCubeful[ ici ] = arCf[ i ];
+
+    }
+
+  }
+
+}
+
+
+static void
+MakeCubePos( const cubeinfo aciCubePos[], const int cci,
+	     const int fTop, cubeinfo aci[], const int fInvert )
+{
+  int i, ici;
+
+  for ( ici = 0, i = 0; ici < cci; ici++ ) {
+
+    /* no double */
+
+    if ( aciCubePos[ ici ].nCube > 0 ) {
+
+      SetCubeInfo ( &aci[ i ], 
+                    aciCubePos[ ici ].nCube,
+                    aciCubePos[ ici ].fCubeOwner,
+                    fInvert ?
+                    ! aciCubePos[ ici ].fMove : aciCubePos[ ici ].fMove,
+                    aciCubePos[ ici ].nMatchTo,
+                    aciCubePos[ ici ].anScore,
+                    aciCubePos[ ici ].fCrawford,
+                    aciCubePos[ ici ].fJacoby,
+                    aciCubePos[ ici ].fBeavers,
+                    aciCubePos[ ici ].bgv );
+
+    } 
+    else {
+
+      aci[ i ].nCube = -1;
+
+    }
+
+    i++;
+
+    if ( ! fTop && aciCubePos[ ici ].nCube > 0 &&
+         GetDPEq ( NULL, NULL, &aciCubePos[ ici ] ) ) 
+      /* we may double */
+      SetCubeInfo ( &aci[ i ], 
+                    2 * aciCubePos[ ici ].nCube,
+                    ! aciCubePos[ ici ].fMove,
+                    fInvert ?
+                    ! aciCubePos[ ici ].fMove : aciCubePos[ ici ].fMove,
+                    aciCubePos[ ici ].nMatchTo,
+                    aciCubePos[ ici ].anScore,
+                    aciCubePos[ ici ].fCrawford,
+                    aciCubePos[ ici ].fJacoby,
+                    aciCubePos[ ici ].fBeavers,
+                    aciCubePos[ ici ].bgv );
+    else
+      /* mark cube position as unavaiable */
+      aci[ i ].nCube = -1;
+
+    i++;
+
+
+  } /* loop cci */
 
 }
 
@@ -6961,5 +5714,1249 @@ extern doubletype DoubleType(const int fDoubled, const int fMove,
 
 	}
 	return DT_NORMAL;
+}
+
+static int 
+EvaluatePositionCache( NNState *nnStates, const TanBoard anBoard, float arOutput[],
+                       const cubeinfo* pci, const evalcontext* pecx,
+		       int nPlies, positionclass pc );
+
+static int 
+FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
+                   TanBoard anBoard, const cubeinfo* pci,
+                   const evalcontext* pec, int nPlies,
+                   movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] );
+
+
+static int
+ScoreMoves( movelist *pml, const cubeinfo* pci, const evalcontext* pec,
+	    int nPlies );
+
+#if !defined(REDUCTION_CODE)
+
+#define nPruneMoves 10
+static const int cubefullPrune = 1;
+
+static void
+FindBestMoveInEval(NNState *nnStates, int const nDice0, int const nDice1, const TanBoard anBoardIn,
+				   TanBoard anBoardOut, const cubeinfo* const pci, const evalcontext* pec)
+{
+  unsigned int i;
+  float rScore, rBestScore;
+  movelist ml;
+  GenerateMoves(&ml, anBoardIn, nDice0, nDice1, FALSE);
+    
+  if( ml.cMoves == 0 ) {
+    /* no legal moves */
+    return;
+  }
+
+  if( ml.cMoves == 1 ) {
+    /* forced move */
+    ml.iMoveBest = 0;
+  } else {
+    int use = ml.cMoves > nPruneMoves;
+    unsigned int bmovesi[nPruneMoves];
+    float arOutput[5];
+    
+    ((cubeinfo*)pci)->fMove = !pci->fMove;
+    if( use ) {
+      positionclass evalClass = 0;
+      float arInput[200];
+      
+      for(i = 0; i < ml.cMoves; i++) {
+	move* const pm = &ml.amMoves[i];
+	
+	PositionFromKey(anBoardOut, pm->auch);
+	SwapSides(anBoardOut);
+
+	{
+	  positionclass pc = ClassifyPosition((ConstTanBoard)anBoardOut, VARIATION_STANDARD);
+	  if( i == 0 ) {
+	    if( pc < CLASS_RACE ) {
+	      break;
+	    }
+	    evalClass = pc;
+	  } else {
+	    if( pc != evalClass ) {
+	      break;
+	    }
+	  }
+
+#if defined(PRUNE_CACHE)
+{
+	  evalcache ec;
+	  unsigned long l;
+	  memcpy(ec.key.auch, pm->auch, sizeof(ec.key.auch));
+	  ec.nEvalContext = 0;
+	  if ( ( l = CacheLookup( &cpEval, &ec, arOutput, NULL ) ) != CACHEHIT ) {
+   
+#endif
+	    baseInputs((ConstTanBoard)anBoardOut, arInput);
+	    {
+	      neuralnet* nets[] = {&nnpRace, &nnpCrashed, &nnpContact};
+	      neuralnet* n = nets[pc - CLASS_RACE];
+		  if (nnStates)
+			  nnStates[pc - CLASS_RACE].state = (i == 0) ?  NNSTATE_INCREMENTAL : NNSTATE_DONE;
+	      NeuralNetEvaluate(n, arInput, arOutput, nnStates);
+	      SanityCheck((ConstTanBoard)anBoardOut, arOutput);
+	    }
+#if defined(PRUNE_CACHE)
+	    memcpy( ec.ar, arOutput, sizeof(float) * NUM_OUTPUTS );
+		ec.ar[5] = 0.f;
+	    CacheAdd(&cpEval, &ec, l);
+	}
+}
+#endif
+	  pm->rScore = UtilityME(arOutput, pci);
+	  if( i < nPruneMoves ) {
+	    bmovesi[i] = i;
+	    if( pm->rScore > ml.amMoves[ bmovesi[0] ].rScore ) {
+	      bmovesi[i] = bmovesi[0];
+	      bmovesi[0] = i;
+	    }
+	  } else if( pm->rScore < ml.amMoves[ bmovesi[0] ].rScore ) {
+	    int m = 0, k;
+	    bmovesi[0] = i;
+	    for(k = 1; k < nPruneMoves; ++k) {
+	      if( ml.amMoves[ bmovesi[k] ].rScore >
+		  ml.amMoves[ bmovesi[m] ].rScore ) {
+		m = k;
+	      }
+	    }
+	    bmovesi[0] = bmovesi[m];
+	    bmovesi[m] = i;
+	  }
+	}
+      }
+
+      if( i == ml.cMoves ) {
+	ml.cMoves = nPruneMoves;
+      } else {
+	use  = 0;
+      }
+    }
+
+    /* See if this is the problem */
+	if (cubefullPrune)
+	{
+	((cubeinfo*)pci)->fMove = !pci->fMove;
+	if( use ) {
+	move *amMoves = (move*) g_alloca(ml.cMoves * sizeof(move));
+	for(i = 0; i < ml.cMoves; i++) {
+ unsigned int const j = bmovesi[i];
+	memcpy(&amMoves[i], &ml.amMoves[j], sizeof(amMoves[0]));
+	bmovesi[i] = i;
+	}
+	memcpy(&ml.amMoves[0], amMoves, ml.cMoves * sizeof(amMoves[0]));
+	}
+	ScoreMoves(&ml, pci, pec, 0);
+
+	/*
+	((cubeinfo*)pci)->fMove = !pci->fMove;
+	int c = ml.iMoveBest;
+	*/
+	} else {
+
+    nnStates[0].state = nnStates[1].state = nnStates[2].state = NNSTATE_INCREMENTAL;
+    rBestScore = 99999.9f;
+    for(i = 0; i < ml.cMoves; i++) {
+      unsigned int const j = use ? bmovesi[i] : i;
+      const move* const pm = &ml.amMoves[j];
+	
+      PositionFromKey(anBoardOut, pm->auch);
+      SwapSides(anBoardOut);
+      {
+	evalcache ec;
+	unsigned long l;
+	memcpy(ec.key.auch, pm->auch, sizeof(ec.key.auch));
+	ec.nEvalContext =  pci->fMove << 14;
+
+	if ( ( l = CacheLookup( &cpEval, &ec, arOutput, NULL ) ) != CACHEHIT ) {
+	  positionclass pc = ClassifyPosition((ConstTanBoard)anBoardOut, VARIATION_STANDARD);
+
+	  acef[pc]((ConstTanBoard)anBoardOut, arOutput, VARIATION_STANDARD, nnStates);
+	  if ( pc > CLASS_PERFECT )
+	    SanityCheck((ConstTanBoard)anBoardOut, arOutput);
+
+	  memcpy( ec.ar, arOutput, sizeof(float) * NUM_OUTPUTS );
+	  ec.ar[5] = 0.f;
+	  CacheAdd(&cEval, &ec, l);
+	}
+	rScore = UtilityME(arOutput, pci);
+	if( rScore < rBestScore ) {
+	  rBestScore = rScore;
+	  ml.iMoveBest = j;
+	}
+      }
+    }
+    nnStates[0].state = nnStates[1].state = nnStates[2].state = NNSTATE_NONE;
+
+    ((cubeinfo*)pci)->fMove = !pci->fMove;
+  }
+  }
+  
+  PositionFromKey(anBoardOut, ml.amMoves[ml.iMoveBest].auch);
+}
+#endif
+
+static int EvaluatePositionFull( NNState *nnStates, const TanBoard anBoard, float arOutput[],
+                      const cubeinfo* pci, const evalcontext* pec, unsigned int nPlies,
+                      positionclass pc )
+{
+  int i, n0, n1;
+#if defined( REDUCTION_CODE )
+  int fUseReduction, r;
+  laRollList_t *rolls = NULL;
+  laRollList_t *rollList = NULL;
+#endif
+  float arVariationOutput[ NUM_OUTPUTS ];
+  float rTemp;
+  int w
+#if defined( REDUCTION_CODE )
+    , sumW
+#endif
+    ;
+  
+  if( pc > CLASS_PERFECT && nPlies > 0 ) {
+    /* internal node; recurse */
+
+    TanBoard anBoardNew;
+    /* int anMove[ 8 ]; */
+    cubeinfo ciOpp;
+#if !defined(REDUCTION_CODE)
+    int const  usePrune =
+      pec->fUsePrune && !pec->rNoise && pci->bgv == VARIATION_STANDARD;
+#endif 
+      
+    for( i = 0; i < NUM_OUTPUTS; i++ )
+      arOutput[ i ] = 0.0;
+
+#if defined( REDUCTION_CODE )
+    /* reset reduction group */
+
+    if ( pec->nReduced && ( nPlies == pec->nPlies ) )
+      nReductionGroup = 0;
+
+    fUseReduction = pec->nReduced && ( nPlies == 1 ) && ( pec->nPlies > 0 );
+
+    if ( fUseReduction ) {
+      nReductionGroup = (nReductionGroup + 1) % pec->nReduced;
+      rollList = rollLists[ pec->nReduced ];
+      rolls = &rollList[ nReductionGroup ];
+    }
+    else
+      rolls = &allLists[ 0 ];
+#endif
+    
+    /* loop over rolls */
+
+    
+#if defined( REDUCTION_CODE )
+    sumW = 0;
+    for ( r=0; r < rolls->numRolls; r++ ) {
+      n0 = rolls->d1[r];
+      n1 = rolls->d2[r];
+      w  = rolls->wt[r];
+#else
+      for( n0 = 1; n0 <= 6; n0++ ) {
+	for( n1 = 1; n1 <= n0; n1++ ) {
+	  w = (n0 == n1) ? 1 : 2;
+#endif
+
+      for( i = 0; i < 25; i++ ) {
+        anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
+        anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
+      }
+
+      if( fInterrupt ) {
+        errno = EINTR;
+        return -1;
+      }
+
+#if !defined(REDUCTION_CODE)
+      if( usePrune ) {
+	FindBestMoveInEval(nnStates, n0, n1, anBoard, anBoardNew, pci, pec);
+      } else {
+#endif
+	FindBestMovePlied( NULL, n0, n1, anBoardNew, pci, pec, 0,
+			   defaultFilters );
+#if !defined(REDUCTION_CODE)
+      }
+#endif
+
+      SwapSides( anBoardNew );
+
+      SetCubeInfo ( &ciOpp, pci->nCube, pci->fCubeOwner, !pci->fMove,
+                    pci->nMatchTo, pci->anScore, pci->fCrawford,
+                    pci->fJacoby, pci->fBeavers, pci->bgv );
+
+      /* Evaluate at 0-ply */
+      if( EvaluatePositionCache( nnStates, (ConstTanBoard)anBoardNew, arVariationOutput,
+                                 &ciOpp, pec, nPlies - 1, 
+                                 ClassifyPosition( (ConstTanBoard)anBoardNew, ciOpp.bgv ) ) )
+        return -1;
+
+      for( i = 0; i < NUM_OUTPUTS; i++ )
+        arOutput[ i ] += w * arVariationOutput[ i ];
+#if defined( REDUCTION_CODE )
+      sumW += w;
+#endif
+    }
+
+#if defined( REDUCTION_CODE )
+    /* reset reduction group */
+
+    if ( pec->nReduced && ( nPlies == pec->nPlies ) )
+      nReductionGroup = 0;
+#else
+      }
+#endif
+      
+    /* normalize */
+    for ( i = 0; i < NUM_OUTPUTS; i++ )
+      arOutput[ i ] /=
+#if defined( REDUCTION_CODE )
+	sumW
+#else
+	36
+#endif
+	;
+    
+    /* flop eval */
+    arOutput[ OUTPUT_WIN ] = 1.0f - arOutput[ OUTPUT_WIN ];
+
+    rTemp = arOutput[ OUTPUT_WINGAMMON ];
+    arOutput[ OUTPUT_WINGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ];
+    arOutput[ OUTPUT_LOSEGAMMON ] = rTemp;
+
+    rTemp = arOutput[ OUTPUT_WINBACKGAMMON ];
+    arOutput[ OUTPUT_WINBACKGAMMON ] = arOutput[ OUTPUT_LOSEBACKGAMMON ];
+    arOutput[ OUTPUT_LOSEBACKGAMMON ] = rTemp;
+
+  } 
+  else {
+    /* at leaf node; use static evaluation */
+    
+    if( acef[ pc ]( anBoard, arOutput, pci->bgv, nnStates ) )
+      return -1;
+
+    if( pec->rNoise && pc != CLASS_OVER )
+	for( i = 0; i < NUM_OUTPUTS; i++ )
+	    arOutput[ i ] += Noise( pec, anBoard, i );
+    
+    if ( pc > CLASS_PERFECT )
+      /* no sanity check needed for exact evaluations */
+      SanityCheck( anBoard, arOutput );
+  }
+
+  return 0;
+}
+
+
+static int 
+EvaluatePositionCache( NNState *nnStates, const TanBoard anBoard, float arOutput[],
+                       const cubeinfo* pci, const evalcontext* pecx,
+		       int nPlies, positionclass pc ) {
+    evalcache ec;
+    unsigned long l;
+    /* This should be a part of the code that is called in all
+       time-consuming operations at a relatively steady rate, so is a
+       good choice for a callback function. */
+#if !USE_MULTITHREAD
+{
+	static int iTick;
+    if( ++iTick >= 0x400 )
+	{
+		iTick = 0;
+		CallbackProgress();
+    }
+}
+#endif
+    if( !cCache || ( !pecx->fDeterministic && pecx->rNoise != 0.0f ) )
+	/* non-deterministic noisy evaluations; cannot cache */
+	return EvaluatePositionFull( nnStates, anBoard, arOutput, pci, pecx, nPlies,
+				     pc );
+    
+    PositionKey( anBoard, ec.key.auch );
+
+    ec.nEvalContext = EvalKey ( pecx, nPlies, pci, FALSE );
+	if ( ( l = CacheLookup( &cEval, &ec, arOutput, NULL ) ) == CACHEHIT ) {
+	return 0;
+    }
+
+	if( EvaluatePositionFull( nnStates, anBoard, arOutput, pci, pecx, nPlies, pc ) )
+	return -1;
+
+    memcpy( ec.ar, arOutput, sizeof ( float ) * NUM_OUTPUTS );
+	ec.ar[5] = 0.f;
+    CacheAdd(&cEval, &ec, l);
+    return 0;
+}
+
+extern int 
+EvaluatePosition( NNState *nnStates, const TanBoard anBoard, float arOutput[],
+		  const cubeinfo* pci, const evalcontext* pec ) {
+    
+  positionclass pc = ClassifyPosition( anBoard, pci->bgv );
+    
+  return EvaluatePositionCache( nnStates, anBoard, arOutput, pci, 
+				pec ? pec : &ecBasic,
+				pec ? pec->nPlies : 0, pc );
+}
+
+
+extern int ScoreMove(NNState *nnStates, move *pm, const cubeinfo *pci,
+		const evalcontext *pec, int nPlies )
+{
+    TanBoard anBoardTemp;
+    float arEval[ NUM_ROLLOUT_OUTPUTS ];
+    cubeinfo ci;
+
+    PositionFromKey( anBoardTemp, pm->auch );
+      
+    SwapSides( anBoardTemp );
+
+    /* swap fMove in cubeinfo */
+    memcpy ( &ci, pci, sizeof (ci) );
+    ci.fMove = ! ci.fMove;
+
+    if ( GeneralEvaluationEPlied (nnStates, arEval, (ConstTanBoard)anBoardTemp, &ci, 
+                                   pec, nPlies ) )
+      return -1;
+
+    InvertEvaluationR ( arEval, &ci );
+
+    if ( ci.nMatchTo )
+      arEval[ OUTPUT_CUBEFUL_EQUITY ] =
+        mwc2eq ( arEval[ OUTPUT_CUBEFUL_EQUITY ], pci );
+
+    /* Save evaluations */  
+    memcpy( pm->arEvalMove, arEval, NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+    memset( pm->arEvalStdDev, 0, NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+    
+    /* Save evaluation setup */
+    pm->esMove.et = EVAL_EVAL;
+    pm->esMove.ec = *pec;
+    pm->esMove.ec.nPlies = nPlies;
+    
+    /* Score for move:
+       rScore is the primary score (cubeful/cubeless)
+       rScore2 is the secondary score (cubeless) */
+    pm->rScore =  (pec->fCubeful) ?
+      arEval[ OUTPUT_CUBEFUL_EQUITY ] : arEval[ OUTPUT_EQUITY ];
+    pm->rScore2 = arEval[ OUTPUT_EQUITY ];
+
+    return 0;
+}
+
+static int
+ScoreMoves( movelist *pml, const cubeinfo* pci, const evalcontext* pec,
+	    int nPlies )
+{
+ unsigned int i;
+	int r = 0;	/* return value */
+	NNState *nnStates;
+#if USE_MULTITHREAD
+	nnStates = nnStatesStorage[MT_GetThreadID()];
+#else
+	nnStates = nnStatesStorage;
+#endif    
+
+  pml->rBestScore = -99999.9f;
+
+  if( nPlies == 0 ) {
+    /* start incremental evaluations */
+	  nnStates[0].state = nnStates[1].state = nnStates[2].state = NNSTATE_INCREMENTAL;
+  }
+
+
+  for( i = 0; i < pml->cMoves; i++ ) {
+    if( ScoreMove(nnStates, pml->amMoves + i, pci, pec, nPlies ) < 0 ) {
+      r = -1;
+      break;
+    }
+
+    if( ( pml->amMoves[ i ].rScore > pml->rBestScore ) || 
+	( ( pml->amMoves[ i ].rScore == pml->rBestScore ) 
+	  && ( pml->amMoves[ i ].rScore2 > 
+	       pml->amMoves[ pml->iMoveBest ].rScore2 ) ) ) {
+      pml->iMoveBest = i;
+      pml->rBestScore = pml->amMoves[ i ].rScore;
+    }
+  }
+
+  if( nPlies == 0 ) {
+    /* reset to none */
+	
+	  nnStates[0].state = nnStates[1].state = nnStates[2].state = NNSTATE_NONE;
+  }
+    
+  return r;
+}
+
+static movefilter NullFilter = {0, 0, 0.0};
+
+static int 
+FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
+                   TanBoard anBoard,
+		   const cubeinfo* pci, const evalcontext* pec, int nPlies,
+                   movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
+
+  evalcontext ec;
+  movelist ml;
+  unsigned int i;
+
+  memcpy( &ec, pec, sizeof ( evalcontext ) );
+  ec.nPlies = nPlies;
+
+  if ( anMove )
+    for ( i = 0; i < 8; ++i )
+      anMove[ i ] = -1;
+
+  if( FindnSaveBestMoves( &ml, nDice0, nDice1, (ConstTanBoard)anBoard, NULL, 0.0f,
+                          pci, &ec, aamf ) < 0 )
+    return -1;
+
+  if( anMove ) {
+    for( i = 0; i < ml.cMaxMoves * 2; i++ ) 
+      anMove[ i ] = ml.amMoves[ ml.iMoveBest ].anMove[ i ];
+  }
+	
+  if ( ml.cMoves )
+    PositionFromKey( anBoard, ml.amMoves[ ml.iMoveBest ].auch );
+
+  if ( ml.amMoves )
+    free( ml.amMoves );
+
+  return ml.cMaxMoves * 2;
+}
+
+
+extern 
+int FindBestMove( int anMove[ 8 ], int nDice0, int nDice1,
+                  TanBoard anBoard, cubeinfo *pci,
+                  evalcontext *pec,
+                  movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) { 
+
+  return FindBestMovePlied( anMove, nDice0, nDice1, anBoard, 
+                            pci, pec ? pec :
+                            &ecBasic, pec ? pec->nPlies : 0, aamf );
+}
+
+extern int FindnSaveBestMoves( movelist *pml, int nDice0, int nDice1,
+		const TanBoard anBoard, unsigned char *auchMove, const
+		float rThr, const cubeinfo* pci, const evalcontext* pec,
+		movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] )
+{
+
+  /* Find best moves. 
+     Ensure that auchMove is evaluated at the deepest ply. */
+
+  unsigned int i;
+  unsigned int nMoves, iPly;
+  move *pm;
+  movefilter* mFilters;
+  unsigned int nMaxPly = 0;
+  int cOldMoves;
+    
+  /* Find all moves -- note that pml contains internal pointers to static
+     data, so we can't call GenerateMoves again (or anything that calls
+     it, such as ScoreMoves at more than 0 plies) until we have saved
+     the moves we want to keep in amCandidates. */
+  GenerateMoves( pml, anBoard, nDice0, nDice1, FALSE );
+
+  if ( pml->cMoves == 0 ) {
+      /* no legal moves */
+      pml->amMoves = NULL;
+      return 0;
+  }
+ 
+  /* Save moves */
+  pm = (move *) malloc ( pml->cMoves * sizeof ( move ) );
+  memcpy( pm, pml->amMoves, pml->cMoves * sizeof( move ) );    
+  pml->amMoves = pm;
+  nMoves = pml->cMoves;
+
+  mFilters = ( pec->nPlies > 0 && pec->nPlies <= MAX_FILTER_PLIES) ?
+      aamf[ pec->nPlies-1] : aamf[MAX_FILTER_PLIES-1];
+
+  for ( iPly = 0; iPly < pec->nPlies; iPly++ ) {
+
+      movefilter* mFilter =
+	(iPly < MAX_FILTER_PLIES) ? &mFilters[iPly] : &NullFilter;
+	 
+      unsigned int k;
+
+      if( mFilter->Accept < 0 ) {
+	continue;
+      }
+
+      if( ScoreMoves( pml, pci, pec, iPly ) < 0 ) {
+	return -1;
+      }
+
+      qsort( pml->amMoves, pml->cMoves, sizeof(move), (cfunc)CompareMoves);
+      pml->iMoveBest = 0;
+      
+      k = pml->cMoves;
+      /* we check for mFilter->Accept < 0 above */
+      pml->cMoves = MIN((unsigned int)mFilter->Accept, pml->cMoves );
+
+      {
+	unsigned int limit = MIN(k, pml->cMoves + mFilter->Extra);
+      
+	for( /**/ ; pml->cMoves < limit; ++pml->cMoves ) {
+	  if( pml->amMoves[ pml->cMoves ].rScore <
+	      pml->amMoves[0].rScore - mFilter->Threshold ) {
+	    break;
+	  }
+	}
+      }
+
+      nMaxPly = iPly;
+
+    if ( pml->cMoves == 1 && mFilter->Accept != 1 )
+      /* if there is only one move to evaluate there is no need to continue */
+      goto finished;
+
+
+  }
+
+  /* evaluate moves on top ply */
+
+  if( ScoreMoves( pml, pci, pec, pec->nPlies ) < 0 ) {
+    free( pm );
+    pml->cMoves = 0;
+    pml->amMoves = NULL;
+    return -1;
+  }
+
+  nMaxPly = pec->nPlies;
+  
+  /* Resort the moves, in case the new evaluation reordered them. */
+  qsort( pml->amMoves, pml->cMoves, sizeof( move ), (cfunc) CompareMoves );
+  pml->iMoveBest = 0;
+  
+  /* set the proper size of the movelist */
+  
+ finished:
+
+  cOldMoves = pml->cMoves;
+  pml->cMoves = nMoves;
+
+  /* Make sure that auchMove and top move are both  
+     evaluated at the deepest ply. */
+  if( auchMove ) {
+
+    int fResort = FALSE;
+
+    for( i = 0; i < pml->cMoves; i++ )
+      if( EqualKeys( auchMove, pml->amMoves[ i ].auch ) ) {
+
+        /* ensure top move is evaluted at deepest ply */
+
+        if( pml->amMoves[ i ].esMove.ec.nPlies < nMaxPly ) {
+          ScoreMove( NULL, pml->amMoves + i, pci, pec, nMaxPly );
+          fResort = TRUE;
+        }
+
+        if ( ( fabs( pml->amMoves[ i ].rScore - 
+                     pml->amMoves[ 0 ].rScore ) > rThr ) &&
+             ( nMaxPly < pec->nPlies ) ) {
+
+          /* this is en error/blunder: re-analyse at top-ply */
+          
+          ScoreMove( NULL, pml->amMoves, pci, pec, pec->nPlies );
+          ScoreMove( NULL, pml->amMoves + i, pci, pec, pec->nPlies );
+          cOldMoves = 1; /* only one move scored at deepest ply */
+          fResort = TRUE;
+          
+        }
+
+        /* move it up to the other moves evaluated on nMaxPly */
+        
+        if ( fResort && pec->nPlies ) {
+          move m;
+          int j;
+
+          memcpy( &m, pml->amMoves + i, sizeof m );
+
+          for ( j = i - 1; j >= cOldMoves; --j )
+            memcpy( pml->amMoves+j+1, pml->amMoves+j, sizeof( move ) );
+
+          memcpy( pml->amMoves + cOldMoves, &m, sizeof ( m ) );
+          
+            /* reorder moves evaluated on nMaxPly */
+          
+          qsort( pml->amMoves, cOldMoves + 1, 
+                 sizeof( move ), (cfunc) CompareMoves );
+          
+        }
+        break;
+      }
+  }
+
+  return 0;
+
+}
+extern int
+GeneralCubeDecisionE ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                       const TanBoard anBoard,
+                       const cubeinfo* pci,
+		       const evalcontext* pec, const evalsetup* pes ) {
+
+  float arOutput[ NUM_OUTPUTS ];
+  cubeinfo aciCubePos[ 2 ];
+  float arCubeful[ 2 ];
+  int i,j;
+
+
+  /* Setup cube for "no double" and "double, take" */
+
+  memcpy ( &aciCubePos[ 0 ], pci, sizeof ( cubeinfo ) );
+  memcpy ( &aciCubePos[ 1 ], pci, sizeof ( cubeinfo ) );
+  aciCubePos[ 1 ].fCubeOwner = ! aciCubePos[ 1 ].fMove;
+  aciCubePos[ 1 ].nCube *= 2;
+
+  if ( EvaluatePositionCubeful3 ( NULL, anBoard, 
+                                  arOutput, 
+                                  arCubeful,
+                                  aciCubePos, 2,
+                                  pci, pec, pec->nPlies, TRUE ) )
+    return -1;
+
+  
+  /* Scale double-take equity */
+  if ( ! pci->nMatchTo )
+    arCubeful[ 1 ] *= 2.0;
+
+  for ( i = 0; i < 2; i++ ) {
+
+    /* copy cubeless winning chances */
+    for ( j = 0; j < NUM_OUTPUTS; j++ )
+      aarOutput[ i ][ j ] = arOutput[ j ];
+
+    /* equity */
+
+    aarOutput[ i ][ OUTPUT_EQUITY ] =
+      UtilityME ( arOutput, &aciCubePos[ i ] );
+
+    aarOutput[ i ][ OUTPUT_CUBEFUL_EQUITY ] = arCubeful[ i ];
+
+  }
+
+  return 0;
+
+}
+
+extern int
+GeneralEvaluationE( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
+                    const TanBoard anBoard,
+                    const cubeinfo* pci, const evalcontext *pec) {
+
+  return GeneralEvaluationEPlied ( NULL, arOutput, anBoard,
+                                   pci, pec, pec->nPlies );
+
+}
+
+
+extern int 
+GeneralEvaluationEPliedCubeful ( NNState *nnStates, float arOutput [ NUM_ROLLOUT_OUTPUTS ],
+                                 const TanBoard anBoard,
+                                 const cubeinfo* pci, const evalcontext* pec,
+                                 int nPlies ) {
+
+  float rCubeful;
+
+  if ( EvaluatePositionCubeful3 ( nnStates, anBoard, 
+                                  arOutput, 
+                                  &rCubeful,
+                                  pci, 1,
+                                  pci, pec, nPlies, FALSE ) )
+    return -1;
+
+  arOutput[ OUTPUT_EQUITY ] = UtilityME ( arOutput, pci );
+  arOutput[ OUTPUT_CUBEFUL_EQUITY ] = rCubeful;
+
+  return 0;
+
+}
+
+extern int
+GeneralEvaluationEPlied (NNState *nnStates, float arOutput [ NUM_ROLLOUT_OUTPUTS ],
+                          const TanBoard anBoard,
+                          const cubeinfo* pci, const evalcontext* pec,
+			  int nPlies ) {
+
+  if ( pec->fCubeful ) {
+
+    if ( GeneralEvaluationEPliedCubeful ( nnStates, arOutput, anBoard, pci,
+                                          pec, nPlies ) )
+      return -1;
+
+  } 
+  else {
+    if ( EvaluatePositionCache ( nnStates, anBoard, arOutput, pci, pec,
+                                 nPlies, 
+                                 ClassifyPosition ( anBoard, pci->bgv ) ) )
+      return -1;
+
+    arOutput[ OUTPUT_EQUITY ] = UtilityME ( arOutput, pci );
+    arOutput[ OUTPUT_CUBEFUL_EQUITY ] = 0.0f;
+
+  }
+
+  return 0;
+
+}
+
+static int 
+EvaluatePositionCubeful4( NNState *nnStates, const TanBoard anBoard,
+                          float arOutput[ NUM_OUTPUTS ],
+                          float arCubeful[],
+                          const cubeinfo aciCubePos[], int cci, 
+                          const cubeinfo* pciMove, const evalcontext* pec, 
+                          unsigned int nPlies, int fTop ) {
+  
+  
+  /* calculate cubeful equity */
+
+  int i, ici;
+  positionclass pc;
+  float r;
+  float ar[ NUM_OUTPUTS ];
+  float arEquity[ 4 ];
+  float rCubeX;
+
+  cubeinfo ciMoveOpp;
+
+  float *arCf = (float*) g_alloca(2 * cci * sizeof(float));
+  float *arCfTemp = (float*) g_alloca(2 * cci * sizeof(float));
+  cubeinfo *aci = (cubeinfo*) g_alloca(2 * cci * sizeof(cubeinfo));
+
+#if defined( REDUCTION_CODE )
+  int fUseReduction, ir;
+  laRollList_t *rolls = NULL;
+  laRollList_t *rollList = NULL;
+#endif
+  int w
+#if defined( REDUCTION_CODE )
+    , sumW
+#endif
+    ;
+  int n0, n1;
+
+  pc = ClassifyPosition ( anBoard, pciMove->bgv );
+  
+  if( pc > CLASS_OVER && nPlies > 0 && 
+      ! ( pc <= CLASS_PERFECT && !pciMove->nMatchTo ) ) {
+    /* internal node; recurse */
+
+    TanBoard anBoardNew;
+
+#if !defined( REDUCTION_CODE )
+    int const  usePrune =
+      pec->fUsePrune && !pec->rNoise && pciMove->bgv == VARIATION_STANDARD;
+#endif
+
+    for( i = 0; i < NUM_OUTPUTS; i++ )
+      arOutput[ i ] = 0.0;
+
+    for ( i = 0; i < 2 * cci; i++ )
+      arCf[ i ] = 0.0;
+
+    /* construct next level cube positions */
+
+    MakeCubePos ( aciCubePos, cci, fTop, aci, TRUE );
+
+#if defined( REDUCTION_CODE )
+    /* speed reduction */
+
+    /* make sure to reset nReductionGroup */
+
+    if ( pec->nReduced && ( nPlies == pec->nPlies ) )
+      nReductionGroup = 0;
+
+    fUseReduction = pec->nReduced && ( nPlies == 1 ) && ( pec->nPlies > 0 );
+
+    if ( fUseReduction ) {
+      nReductionGroup = (nReductionGroup + 1) % pec->nReduced;
+      rollList = rollLists[ pec->nReduced ];
+      rolls = &rollList[ nReductionGroup ];
+    }
+    else
+      rolls = &allLists[ 0 ];
+    
+#endif
+
+    /* loop over rolls */
+
+#if defined( REDUCTION_CODE )
+    sumW = 0;
+    for ( ir=0; ir < rolls->numRolls; ir++ ) {
+      n0 = rolls->d1[ir];
+      n1 = rolls->d2[ir];
+      w  = rolls->wt[ir];
+#else
+    for( n0 = 1; n0 <= 6; n0++ ) {
+      for( n1 = 1; n1 <= n0; n1++ ) {
+	w = (n0 == n1) ? 1 : 2;
+#endif
+
+      for( i = 0; i < 25; i++ ) {
+        anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
+        anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
+      }
+
+      if( fInterrupt ) {
+        errno = EINTR;
+        return -1;
+      }
+
+#if !defined( REDUCTION_CODE )
+      if( usePrune ) {
+	FindBestMoveInEval(nnStates, n0, n1, anBoard, anBoardNew, pciMove, pec);
+      } else {
+#endif
+	FindBestMovePlied( NULL, n0, n1, anBoardNew,
+                         pciMove, pec, 0, defaultFilters );
+#if !defined( REDUCTION_CODE )
+      }
+#endif
+
+      SwapSides( anBoardNew );
+
+      SetCubeInfo ( &ciMoveOpp,
+                    pciMove->nCube, pciMove->fCubeOwner,
+                    ! pciMove->fMove, pciMove->nMatchTo,
+                    pciMove->anScore, pciMove->fCrawford,
+                    pciMove->fJacoby, pciMove->fBeavers, pciMove->bgv );
+
+	  /* Evaluate at 0-ply */
+      if( EvaluatePositionCubeful3( nnStates, (ConstTanBoard)anBoardNew,
+                                    ar,
+                                    arCfTemp,
+                                    aci,
+                                    2 * cci,
+                                    &ciMoveOpp,
+                                    pec, nPlies - 1, FALSE ) )
+        return -1;
+
+      /* Sum up cubeless winning chances and cubeful equities */
+	      
+      for( i = 0; i < NUM_OUTPUTS; i++ )
+        arOutput[ i ] += w * ar[ i ];
+      for ( i = 0; i < 2 * cci; i++ )
+        arCf[ i ] += w * arCfTemp[ i ];
+
+#if defined( REDUCTION_CODE )
+      sumW += w;
+#endif
+
+    }
+
+#if defined( REDUCTION_CODE )
+    /* reset reduction group */
+
+    if ( pec->nReduced && ( nPlies == pec->nPlies ) )
+      nReductionGroup = 0;
+#else
+    }
+#endif
+
+    /* Flip evals */
+#if !defined( REDUCTION_CODE )
+#define sumW 36
+#endif
+    
+    arOutput[ OUTPUT_WIN ] =
+      1.0f - arOutput[ OUTPUT_WIN ] / sumW;
+	  
+    r = arOutput[ OUTPUT_WINGAMMON ] / sumW;
+    arOutput[ OUTPUT_WINGAMMON ] =
+      arOutput[ OUTPUT_LOSEGAMMON ] / sumW;
+    arOutput[ OUTPUT_LOSEGAMMON ] = r;
+	  
+    r = arOutput[ OUTPUT_WINBACKGAMMON ] / sumW;
+    arOutput[ OUTPUT_WINBACKGAMMON ] =
+      arOutput[ OUTPUT_LOSEBACKGAMMON ] / sumW;
+    arOutput[ OUTPUT_LOSEBACKGAMMON ] = r;
+
+    for ( i = 0; i < 2 * cci; i++ ) 
+      if ( pciMove->nMatchTo )
+        arCf[ i ] = 1.0f - arCf[ i ] / sumW;
+      else
+        arCf[ i ] = - arCf[ i ] / sumW;
+#undef sumW
+    
+    /* invert fMove */
+    /* Remember than fMove was inverted in the call to MakeCubePos */
+
+    for ( i = 0; i < 2 * cci; i++ )
+      aci[ i ].fMove = ! aci[ i ].fMove;
+
+    /* get cubeful equities */
+
+    GetECF3 ( arCubeful, cci, arCf, aci );
+
+  } else {
+    /* at leaf node; use static evaluation */
+
+    if ( pc == CLASS_HYPERGAMMON1 || pc == CLASS_HYPERGAMMON2 ||
+         pc == CLASS_HYPERGAMMON3 ) {
+
+      bearoffcontext *pbc = apbcHyper[ pc - CLASS_HYPERGAMMON1 ];
+      unsigned int nUs, nThem, iPos;
+      int n;
+
+      if (!pbc)
+        return -1;
+
+      nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
+      nThem = PositionBearoff ( anBoard[ 0 ],  pbc->nPoints, pbc->nChequers );
+      n = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
+      iPos = nUs * n + nThem;
+      
+      if ( BearoffHyper ( apbcHyper[ pc - CLASS_HYPERGAMMON1 ], iPos,
+                          arOutput, arEquity ) )
+        return -1;
+
+    }
+    else if ( pc > CLASS_OVER && pc <= CLASS_PERFECT /* && ! pciMove->nMatchTo */ ) {
+
+      if ( EvaluatePerfectCubeful ( anBoard, arEquity, pciMove->bgv ) ) {
+        return -1;
+      }
+
+      arOutput[ 0 ] = ( arEquity[ 0 ] + 1.0f ) / 2.0f;
+      arOutput[ 1 ] = arOutput[ 2 ] = arOutput[ 3 ] = arOutput[ 4 ] = 0.0;
+
+    }
+    else {
+
+      /* evaluate with neural net */
+      
+      if( EvaluatePosition ( nnStates, anBoard, arOutput, pciMove, NULL ) )
+        return -1;
+      
+      if( pec->rNoise && pc != CLASS_OVER )
+        for( i = 0; i < NUM_OUTPUTS; i++ )
+          arOutput[ i ] += Noise( pec, anBoard, i );
+
+      if ( pc > CLASS_PERFECT )
+        SanityCheck( anBoard, arOutput );
+      
+    }
+    
+    /* Calculate cube efficiency */
+      
+    rCubeX = EvalEfficiency ( anBoard, pc );
+
+    /* Build all possible cube positions */
+    
+    MakeCubePos ( aciCubePos, cci, fTop, aci, FALSE );
+    
+    /* Calculate cubeful equity for each possible cube position */
+    
+    for ( ici = 0; ici < 2 * cci; ici++ ) 
+      if ( aci[ ici ].nCube > 0 ) {
+        /* cube available */
+
+        if ( ! aci[ ici ].nMatchTo ) {
+
+          /* money play */
+
+          switch ( pc ) {
+          case CLASS_HYPERGAMMON1:
+          case CLASS_HYPERGAMMON2:
+          case CLASS_HYPERGAMMON3:
+            /* exact bearoff equities & contact */
+
+            arCf[ ici ] = CFHYPER( arEquity, &aci[ ici ] );
+            break;
+
+          case CLASS_BEAROFF2:
+          case CLASS_BEAROFF_TS:
+            /* exact bearoff equities */
+
+            arCf[ ici ] = CFMONEY( arEquity, &aci[ ici ] );
+            break;
+
+          case CLASS_OVER:
+          case CLASS_RACE:
+          case CLASS_CRASHED:
+          case CLASS_CONTACT:
+          case CLASS_BEAROFF1:
+          case CLASS_BEAROFF_OS:
+            /* approximate using Janowski's formulae */
+            
+            arCf[ ici ] = Cl2CfMoney ( arOutput, &aci[ ici ], rCubeX );
+            break;
+
+          }
+
+        }
+        else {
+
+          float rCl, rCf, rCfMoney;
+          float X = rCubeX;
+          cubeinfo ciMoney;
+
+          /* match play */
+
+          switch ( pc ) {
+          case CLASS_HYPERGAMMON1:
+          case CLASS_HYPERGAMMON2:
+          case CLASS_HYPERGAMMON3:
+            /* use exact money equities to guess cube efficiency */
+
+            SetCubeInfoMoney( &ciMoney, 1, aci[ ici ].fCubeOwner,
+                         aci[ ici ].fMove, FALSE, FALSE, aci[ ici ].bgv );
+
+            rCl = Utility( arOutput, &ciMoney );
+            rCubeX = 1.0;
+            rCf = Cl2CfMoney( arOutput, &ciMoney, rCubeX );
+            rCfMoney = CFHYPER( arEquity, &ciMoney );
+
+            if ( fabs( rCl - rCf ) > 0.0001 )
+              rCubeX = ( rCfMoney - rCl ) / ( rCf - rCl );
+
+            arCf[ ici ] = Cl2CfMatch( arOutput, &aci[ ici ], rCubeX );
+
+            rCubeX = X;
+
+            break;
+
+          case CLASS_BEAROFF2:
+          case CLASS_BEAROFF_TS:
+            /* use exact money equities to guess cube efficiency */
+
+            SetCubeInfoMoney( &ciMoney, 1, aci[ ici ].fCubeOwner,
+                         aci[ ici ].fMove, FALSE, FALSE, aci[ ici ].bgv );
+
+            rCl = arEquity[ 0 ];
+            rCubeX = 1.0;
+            rCf = Cl2CfMoney( arOutput, &ciMoney, rCubeX );
+            rCfMoney = CFMONEY( arEquity, &ciMoney );
+
+            if ( fabs( rCl - rCf ) > 0.0001 )
+              rCubeX = ( rCfMoney - rCl ) / ( rCf - rCl );
+            else
+              rCubeX = X;
+
+            arCf[ ici ] = Cl2CfMatch( arOutput, &aci[ ici ], rCubeX );
+
+            rCubeX = X;
+
+            break;
+
+          case CLASS_OVER:
+          case CLASS_RACE:
+          case CLASS_CRASHED:
+          case CLASS_CONTACT:
+          case CLASS_BEAROFF1:
+          case CLASS_BEAROFF_OS:
+            /* approximate using Joern's generalisation of 
+               Janowski's formulae */
+            
+            arCf[ ici ] = Cl2CfMatch ( arOutput, &aci[ ici ], rCubeX );
+            break;
+
+          }
+
+        }
+
+      }
+
+
+    /* find optimal of "no double" and "double" */
+    
+    GetECF3 ( arCubeful, cci, arCf, aci );
+
+  }
+  
+  return 0;
+
+}
+/* EvaluatePositionCubeful3 is now just a wrapper for ....Cubeful4, which
+   first checks the cache, and then calls ...Cubeful3 */
+
+extern int 
+EvaluatePositionCubeful3( NNState *nnStates, const TanBoard anBoard,
+                          float arOutput[ NUM_OUTPUTS ],
+                          float arCubeful[],
+                          const cubeinfo aciCubePos[], int cci, 
+                          const cubeinfo* pciMove, const evalcontext *pec, 
+                          int nPlies, int fTop ) {
+
+  int ici;
+  int fAll = TRUE;
+  evalcache ec;
+  unsigned long l;
+
+  if( !cCache || ( !pec->fDeterministic && pec->rNoise != 0.0f ) )
+      /* non-deterministic evaluation; never cache */
+{
+      return EvaluatePositionCubeful4( nnStates, anBoard, arOutput, arCubeful,
+				       aciCubePos, cci, pciMove, pec,
+				       nPlies, fTop );
+}
+
+  PositionKey ( anBoard, ec.key.auch );
+
+  /* check cache for existence for earlier calculation */
+
+  fAll = ! fTop; /* FIXME: fTop should be a part of EvalKey */
+
+  for ( ici = 0; ici < cci && fAll; ++ici ) {
+
+      if ( aciCubePos[ ici ].nCube < 0 )
+	  {
+        continue;
+	  }
+      /* argh, bug #9211: the stuff in EvalKey only stores 4 bit for
+         the score, so a score of -20,-20 is treated identical to
+         -4,-4.... */
+
+
+
+      ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ], TRUE );
+
+	  if ( ( l = CacheLookup( &cEval, &ec, arOutput, arCubeful + ici ) ) != CACHEHIT ) {
+        fAll = FALSE;
+	  }
+  }
+
+  /* get equities */
+  
+  if ( ! fAll ) {
+
+    /* cache miss */
+    if ( EvaluatePositionCubeful4 ( nnStates, anBoard, arOutput, arCubeful, 
+                                    aciCubePos, 
+                                    cci, pciMove, pec, nPlies, fTop ) )
+      return -1;
+    
+    /* add to cache */
+    
+    if ( ! fTop ) {
+
+      for ( ici = 0; ici < cci; ++ici ) {
+        if ( aciCubePos[ ici ].nCube < 0 )
+          continue;
+        
+        memcpy ( ec.ar, arOutput, sizeof ( float ) * NUM_OUTPUTS );
+        ec.ar[5] = arCubeful[ ici ];	/* Cubeful equity stored in slot 5 */
+        ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ], TRUE );
+
+	CacheAdd(&cEval, &ec, GetHashKey(cEval.hashMask, &ec));
+
+      }
+    }
+  }
+
+  return 0;
+  
 }
 
