@@ -19,6 +19,9 @@
  * $Id$
  */
 
+//#define GTK_DISABLE_DEPRECATED 1
+//#define G_DISABLE_DEPRECATED 1
+//#define GDK_DISABLE_DEPRECATED 1
 #include "config.h"
 
 #include <stdio.h>
@@ -164,457 +167,409 @@ estimatedSE( const float rSE, const int iGame, const int nTrials ) {
  * Make pages with statistics.
  */
 
-static GtkWidget *
-GTKStatPageWin ( const rolloutstat *prs, const int cGames ) {
+static void add_stat_columns(GtkTreeView * treeview, char *title, char **headers, int n)
+{
+	GtkCellRenderer *renderer;
+	GtkTreeViewColumn *column;
+	int i, j;
+	renderer = gtk_cell_renderer_text_new();
+	g_object_set(renderer, "xalign", 1.0, NULL);
+	column = gtk_tree_view_column_new_with_attributes(title, renderer, "text", 0, NULL);
+	gtk_tree_view_column_set_alignment(column, 1.0);
+	gtk_tree_view_append_column(treeview, column);
 
-  GtkWidget *pw;
-  GtkWidget *pwLabel;
-  GtkWidget *pwStat;
+	for (i = 0; i < 2; i++) {
+		for (j = 0; j < n; j++) {
+			char *header = g_strdup_printf("%s%s", headers[j], ap[i].szName);
+			renderer = gtk_cell_renderer_text_new();
+			g_object_set(renderer, "xalign", 1.0, NULL);
+			column = gtk_tree_view_column_new_with_attributes(header,
+									  renderer, "text",
+									  1 + j + i * n, NULL);
+			gtk_tree_view_column_set_expand(column, TRUE);
+			gtk_tree_view_column_set_alignment(column, 1.0);
+			gtk_tree_view_append_column(treeview, column);
+			g_free(header);
+		}
+	}
+}
 
-  static char *aszColumnTitle[ 7 ];
+static GtkTreeModel *create_win_model(const rolloutstat *prs, int cGames, int *cGamesCount)
+{
+	GtkListStore *store;
+	GtkTreeIter iter;
+	gchar *s[6];
+	int i, j;
+	int anTotal[6];
+	*cGamesCount = 0;
+	memset(anTotal, 0, sizeof(anTotal));
 
-  static char *aszRow[ 7 ];
-  int i;
-  int anTotal[ 6 ];
-  int cGamesCount=0;
+	store = gtk_list_store_new(7, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
+				   G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+	for (i = 0; i < STAT_MAXCUBE; i++) {
+		gchar *title;
 
-  pw = gtk_vbox_new ( FALSE, 0 );
+		s[0] = g_strdup_printf("%d", prs->acWin[i]);
+		s[1] = g_strdup_printf("%d", prs->acWinGammon[i]);
+		s[2] = g_strdup_printf("%d", prs->acWinBackgammon[i]);
+		s[3] = g_strdup_printf("%d", (prs + 1)->acWin[i]);
+		s[4] = g_strdup_printf("%d", (prs + 1)->acWinGammon[i]);
+		s[5] = g_strdup_printf("%d", (prs + 1)->acWinBackgammon[i]);
 
-  pwLabel = gtk_label_new ( _("Win statistics") );
+		gtk_list_store_append(store, &iter);
+		title = g_strdup_printf((i < STAT_MAXCUBE - 1) ? _("%d-cube") : _(">= %d-cube"), 1 << i);
+		gtk_list_store_set(store, &iter,
+			       	0, title , 
+			        1, s[0], 
+				2, s[1], 
+				3, s[2], 
+				4, s[3], 
+				5, s[4], 
+				6, s[5],
+			       	-1);
 
-  gtk_box_pack_start ( GTK_BOX ( pw ), pwLabel, FALSE, FALSE, 4 );
+		anTotal[0] += prs->acWin[i];
+		anTotal[1] += prs->acWinGammon[i];
+		anTotal[2] += prs->acWinBackgammon[i];
+		anTotal[3] += (prs + 1)->acWin[i];
+		anTotal[4] += (prs + 1)->acWinGammon[i];
+		anTotal[5] += (prs + 1)->acWinBackgammon[i];
 
-  /* table with results */
+		for (j = 0; j < 6; j++)
+			g_free(s[j]);
+	}
 
-  aszColumnTitle[ 0 ] = g_strdup ( _("Cube") );
-  for ( i = 0; i < 2; i++ ) {
-    aszColumnTitle[ 3 * i + 1 ] = 
-      g_strdup_printf ( _("Win Single\n%s"), ap[ i ].szName );
-    aszColumnTitle[ 3 * i + 2 ] = 
-      g_strdup_printf ( _("Win Gammon\n%s"), ap[ i ].szName );
-    aszColumnTitle[ 3 * i + 3 ] = 
-      g_strdup_printf ( _("Win BG\n%s"), ap[ i ].szName );
-  }
+	for (j = 0; j < 6; j++)
+		s[j] = g_strdup_printf("%d", anTotal[j]);
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, _("Total"), 
+				   1, s[0], 2, s[1], 3, s[2], 4, s[3], 5, s[4], 6, s[5], -1);
+	for (j = 0; j < 6; j++)
+		g_free(s[j]);
 
-  pwStat = gtk_clist_new_with_titles( 7, aszColumnTitle );
+	for (j = 0; j < 6; j++) {
+		s[j] = g_strdup_printf("%6.2f%%", 100.0 * (float)anTotal[j] / (float)cGames);
+		*cGamesCount += anTotal[j];
+	}
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "%%", 
+				   1, s[0], 2, s[1], 3, s[2], 4, s[3], 5, s[4], 6, s[5], -1);
+	for (j = 0; j < 6; j++)
+		g_free(s[j]);
 
-  for ( i = 0; i < 7; i++ )
-    g_free ( aszColumnTitle[ i ] );
+	return GTK_TREE_MODEL(store);
+}
 
-  gtk_clist_column_titles_passive( GTK_CLIST( pwStat ) );
-    
-  gtk_box_pack_start( GTK_BOX( pw ), pwStat, TRUE, TRUE, 0 );
-    
-  for( i = 0; i < 7; i++ ) {
-    gtk_clist_set_column_auto_resize( GTK_CLIST( pwStat ), i,
-				      TRUE );
-    gtk_clist_set_column_justification( GTK_CLIST( pwStat ), i,
-					GTK_JUSTIFY_RIGHT );
+static GtkWidget *GTKStatPageWin ( const rolloutstat *prs, const int cGames ) {
+	GtkWidget *pw;
+	GtkWidget *pwLabel;
+	GtkWidget *treeview;
+	GtkTreeModel *model;
+	char *headers[] = {N_("Win Single\n"), N_("Win Gammon\n"), N_("Win BG\n")};
+	int cGamesCount;
+	char *sz;
 
-    aszRow[ i ] = malloc ( 100 );
-  }
+	pw = gtk_vbox_new(FALSE, 0);
 
-  memset ( anTotal, 0, sizeof ( anTotal ) );
-  
-  for ( i = 0; i < STAT_MAXCUBE; i++ ) {
+	pwLabel = gtk_label_new(_("Win statistics"));
 
-    sprintf ( aszRow[ 0 ], ( i < STAT_MAXCUBE - 1 ) ?
-	      _("%d-cube") : _(">= %d-cube"), 1 << i);
-    sprintf ( aszRow[ 1 ], "%d", prs->acWin[ i ] );
-    sprintf ( aszRow[ 2 ], "%d", prs->acWinGammon[ i ] );
-    sprintf ( aszRow[ 3 ], "%d", prs->acWinBackgammon[ i ] );
+	gtk_box_pack_start(GTK_BOX(pw), pwLabel, FALSE, FALSE, 4);
 
-    sprintf ( aszRow[ 4 ], "%d", (prs+1)->acWin[ i ] );
-    sprintf ( aszRow[ 5 ], "%d", (prs+1)->acWinGammon[ i ] );
-    sprintf ( aszRow[ 6 ], "%d", (prs+1)->acWinBackgammon[ i ] );
+	/* create treeview */
+	g_print("a %d\n", cGamesCount);
+	model = create_win_model(prs, cGames, &cGamesCount);
+	g_print("b %d\n", cGamesCount);
+	treeview = gtk_tree_view_new_with_model(model);
+	g_object_unref(model);
+	add_stat_columns(GTK_TREE_VIEW(treeview), _("Cube"), headers, 3);
 
-    anTotal[ 0 ] += prs->acWin[ i ];
-    anTotal[ 1 ] += prs->acWinGammon[ i ];
-    anTotal[ 2 ] += prs->acWinBackgammon[ i ];
-    anTotal[ 3 ] += (prs+1)->acWin[ i ];
-    anTotal[ 4 ] += (prs+1)->acWinGammon[ i ];
-    anTotal[ 5 ] += (prs+1)->acWinBackgammon[ i ];
+	gtk_box_pack_start(GTK_BOX(pw), treeview, TRUE, TRUE, 0);
 
-    gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
+	sz = g_strdup_printf(_("%d/%d games truncated"), (cGames- cGamesCount), cGames);
+	pwLabel = gtk_label_new(sz);
+	gtk_box_pack_start(GTK_BOX(pw), pwLabel, FALSE, FALSE, 4);
+	g_free(sz);
 
-  }
+	return pw;
+}
 
+static GtkTreeModel *create_cube_model(const rolloutstat *prs, int cGames, int *anTotal)
+{
+	GtkListStore *store;
+	GtkTreeIter iter;
+	gchar *s[4];
+	int i, j;
+	store = gtk_list_store_new(5, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
+				   G_TYPE_STRING, G_TYPE_STRING);
 
-  sprintf ( aszRow[ 0 ], _("Total") );
-  for ( i = 0; i < 6; i++ )
-    sprintf ( aszRow[ i + 1 ], "%d", anTotal[ i ] );
-  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
+	memset(anTotal, 0, 4 * sizeof(int));
 
+	for (i = 0; i < STAT_MAXCUBE; i++) {
+		gchar *title;
 
-  sprintf ( aszRow[ 0 ], "%%" );
-  for ( i = 0; i < 6; i++ ) {
-    sprintf ( aszRow[ i + 1 ], "%6.2f%%",
-	      100.0 * (float) anTotal[ i ] / (float) cGames );
-    cGamesCount+=anTotal[i];
-  }
-  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
+		s[0] = g_strdup_printf("%d", prs->acDoubleTake[i]);
+		s[1] = g_strdup_printf("%d", prs->acDoubleDrop[i]);
+		s[2] = g_strdup_printf("%d", (prs + 1)->acDoubleTake[i]);
+		s[3] = g_strdup_printf("%d", (prs + 1)->acDoubleDrop[i]);
+		gtk_list_store_append(store, &iter);
+		title = g_strdup_printf((i < STAT_MAXCUBE - 1) ? _("%d-cube") : _(">= %d-cube"), 2 << i);
+		gtk_list_store_set(store, &iter, 0, title,
+				   1, s[0], 2, s[1], 3, s[2], 4, s[3], -1);
+		for (j = 0; j < 4; j++)
+			g_free(s[j]);
 
+		anTotal[0] += prs->acDoubleTake[i];
+		anTotal[1] += prs->acDoubleDrop[i];
+		anTotal[2] += (prs + 1)->acDoubleTake[i];
+		anTotal[3] += (prs + 1)->acDoubleDrop[i];
 
-  for ( i = 0; i < 7; i++ ) free ( aszRow[ i ] );
+	}
 
-  /* allow for one missing (could just be a stopped rollout) */
-  if (cGamesCount < (cGames-1)) outputerrf (_("Win statistics invalid due to (race) truncation, or  (%d != %d)"), cGamesCount, cGames);
+	for (j = 0; j < 4; j++)
+		s[j] = g_strdup_printf("%d", anTotal[j]);
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, _("Total"), 1, s[0], 2, s[1], 3, s[2], 4, s[3], -1);
+	for (j = 0; j < 4; j++)
+		g_free(s[j]);
 
-  return pw;
+	for (j = 0; j < 4; j++)
+		s[j] = g_strdup_printf("%6.2f%%", 100.0 * (float)anTotal[j] / (float)cGames);
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "%%", 1, s[0], 2, s[1], 3, s[2], 4, s[3], -1);
+	for (j = 0; j < 4; j++)
+		g_free(s[j]);
+
+	return GTK_TREE_MODEL(store);
+}
+
+static GtkWidget *GTKStatPageCube(const rolloutstat *prs, const int cGames)
+{
+	GtkWidget *pw;
+	GtkWidget *pwLabel;
+	GtkWidget *treeview;
+	GtkTreeModel *model;
+	char *headers[] = { N_("Double, take\n"), N_("Double, pass\n") };
+	int anTotal[4];
+	char sz[100];
+
+	pw = gtk_vbox_new(FALSE, 0);
+
+	pwLabel = gtk_label_new(_("Cube statistics"));
+
+	gtk_box_pack_start(GTK_BOX(pw), pwLabel, FALSE, FALSE, 4);
+
+	/* create treeview */
+	model = create_cube_model(prs, cGames, anTotal);
+	treeview = gtk_tree_view_new_with_model(model);
+	g_object_unref(model);
+	add_stat_columns(GTK_TREE_VIEW(treeview), _("Cube"), headers, 2);
+
+	gtk_box_pack_start(GTK_BOX(pw), treeview, TRUE, TRUE, 0);
+
+	if (anTotal[1] + anTotal[0]) {
+		sprintf(sz, _("Cube efficiency for %s: %7.4f"),
+			ap[0].szName, (float)anTotal[0] / (anTotal[1] + anTotal[0]));
+		pwLabel = gtk_label_new(sz);
+		gtk_box_pack_start(GTK_BOX(pw), pwLabel, FALSE, FALSE, 4);
+	}
+
+	if (anTotal[2] + anTotal[3]) {
+		sprintf(sz, _("Cube efficiency for %s: %7.4f"),
+			ap[1].szName, (float)anTotal[2] / (anTotal[3] + anTotal[2]));
+		pwLabel = gtk_label_new(sz);
+		gtk_box_pack_start(GTK_BOX(pw), pwLabel, FALSE, FALSE, 4);
+	}
+	return pw;
 
 }
 
+static GtkTreeModel *create_bearoff_model(const rolloutstat *prs)
+{
+	GtkListStore *store;
+	GtkTreeIter iter;
+	gchar *s1, *s2;
+	store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 
-static GtkWidget *
-GTKStatPageCube ( const rolloutstat *prs, const int cGames ) {
+	s1 = g_strdup_printf("%d", prs->nBearoffMoves);
+	s2 = g_strdup_printf("%d", (prs + 1)->nBearoffMoves);
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, _("Moves with bearoff"), 1, s1, 2, s2, -1);
+	g_free(s1);
+	g_free(s2);
 
-  GtkWidget *pw;
-  GtkWidget *pwLabel;
-  GtkWidget *pwStat;
+	s1 = g_strdup_printf("%d", prs->nBearoffPipsLost);
+	s2 = g_strdup_printf("%d", (prs + 1)->nBearoffPipsLost);
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, _("Pips lost"), 1, s1, 2, s2, -1);
+	g_free(s1);
+	g_free(s2);
 
-  static char *aszColumnTitle[ 5 ];
+	if (prs->nBearoffMoves)
+		s1 = g_strdup_printf("%7.2f", (float)prs->nBearoffPipsLost / prs->nBearoffMoves);
+	else
+		s1 = g_strdup_printf("n/a");
 
-  static char *aszRow[ 5 ];
-  int i;
-  char sz[ 100 ];
-  int anTotal[ 4 ];
+	if ((prs + 1)->nBearoffMoves)
+		s2 = g_strdup_printf("%7.2f",
+				     (float)(prs + 1)->nBearoffPipsLost / (prs + 1)->nBearoffMoves);
+	else
+		s2 = g_strdup_printf("n/a");
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, _("Average Pips lost"), 1, s1, 2, s2, -1);
+	g_free(s1);
+	g_free(s2);
 
-  aszColumnTitle[ 0 ] = g_strdup ( _("Cube") );
-  for ( i = 0; i < 2; i++ ) {
-    aszColumnTitle[ 2 * i + 1 ] = 
-      g_strdup_printf ( _("#Double, take\n%s"), ap[ i ].szName );
-    aszColumnTitle[ 2 * i + 2 ] = 
-      g_strdup_printf ( _("#Double, pass\n%s"), ap[ i ].szName );
-  }
-
-  pw = gtk_vbox_new ( FALSE, 0 );
-
-  pwLabel = gtk_label_new ( _("Cube statistics") );
-
-  gtk_box_pack_start ( GTK_BOX ( pw ), pwLabel, FALSE, FALSE, 4 );
-
-  /* table with results */
-
-  pwStat = gtk_clist_new_with_titles( 5, aszColumnTitle );
-  gtk_clist_column_titles_passive( GTK_CLIST( pwStat ) );
-
-  for ( i = 0; i < 5; i++ )
-    g_free ( aszColumnTitle[ i ] );
-    
-  gtk_box_pack_start( GTK_BOX( pw ), pwStat, TRUE, TRUE, 0 );
-    
-  for( i = 0; i < 5; i++ ) {
-    gtk_clist_set_column_auto_resize( GTK_CLIST( pwStat ), i,
-				      TRUE );
-    gtk_clist_set_column_justification( GTK_CLIST( pwStat ), i,
-					GTK_JUSTIFY_RIGHT );
-
-    aszRow[ i ] = malloc ( 100 );
-  }
-
-  memset ( anTotal, 0, sizeof ( anTotal ) );
-  
-  for ( i = 0; i < STAT_MAXCUBE; i++ ) {
-
-    sprintf ( aszRow[ 0 ], ( i < STAT_MAXCUBE - 1 ) ?
-	      _("%d-cube") : _(">= %d-cube"), 2 << i );
-    sprintf ( aszRow[ 1 ], "%d", prs->acDoubleTake[ i ] );
-    sprintf ( aszRow[ 2 ], "%d", prs->acDoubleDrop[ i ] );
-
-    sprintf ( aszRow[ 3 ], "%d", (prs+1)->acDoubleTake[ i ] );
-    sprintf ( aszRow[ 4 ], "%d", (prs+1)->acDoubleDrop[ i ] );
-
-    anTotal[ 0 ] += prs->acDoubleTake[ i ];
-    anTotal[ 1 ] += prs->acDoubleDrop[ i ];
-    anTotal[ 2 ] += (prs+1)->acDoubleTake[ i ];
-    anTotal[ 3 ] += (prs+1)->acDoubleDrop[ i ];
-
-    gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
-
-  }
-
-
-  sprintf ( aszRow[ 0 ], _("Total") );
-  for ( i = 0; i < 4; i++ )
-    sprintf ( aszRow[ i + 1 ], "%d", anTotal[ i ] );
-  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
-
-
-  sprintf ( aszRow[ 0 ], "%%" );
-  for ( i = 0; i < 4; i++ )
-    sprintf ( aszRow[ i + 1 ], "%6.2f%%",
-	      100.0 * (float) anTotal[ i ] / (float) cGames );
-  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
-
-
-  for ( i = 0; i < 5; i++ ) free ( aszRow[ i ] );
-
-  if ( anTotal[ 1 ] + anTotal[ 0 ] ) {
-    sprintf ( sz, _("Cube efficiency for %s: %7.4f"),
-              ap[ 0 ].szName,
-	      (float) anTotal[ 0 ] / ( anTotal[ 1 ] + anTotal[ 0 ] ) );
-    pwLabel = gtk_label_new ( sz );
-    gtk_box_pack_start ( GTK_BOX ( pw ), pwLabel, FALSE, FALSE, 4 );
-  }
-
-  if ( anTotal[ 2 ] + anTotal[ 3 ] ) {
-    sprintf ( sz, _("Cube efficiency for %s: %7.4f"),
-              ap[ 1 ].szName,
-	      (float) anTotal[ 2 ] / ( anTotal[ 3 ] + anTotal[ 2 ] ) );
-    pwLabel = gtk_label_new ( sz );
-    gtk_box_pack_start ( GTK_BOX ( pw ), pwLabel, FALSE, FALSE, 4 );
-  }
-
-  return pw;
-
+	return GTK_TREE_MODEL(store);
 }
 
-static GtkWidget *
-GTKStatPageBearoff ( const rolloutstat *prs, const int UNUSED(cGames) ) {
+static GtkWidget *GTKStatPageBearoff ( const rolloutstat *prs, const int UNUSED(cGames) ) {
+	GtkWidget *pw;
+	GtkWidget *pwLabel;
+	GtkWidget *treeview;
+	GtkTreeModel *model;
+	char *headers[] = {""};
 
-  GtkWidget *pw;
-  GtkWidget *pwLabel;
-  GtkWidget *pwStat;
+	pw = gtk_vbox_new(FALSE, 0);
 
-  static char *aszColumnTitle[ 3 ];
+	pwLabel = gtk_label_new(_("Bearoff statistics"));
 
-  static char *aszRow[ 3 ];
-  int i;
+	gtk_box_pack_start(GTK_BOX(pw), pwLabel, FALSE, FALSE, 4);
 
-  pw = gtk_vbox_new ( FALSE, 0 );
+	/* create treeview */
+	model = create_bearoff_model(prs);
+	treeview = gtk_tree_view_new_with_model(model);
+	g_object_unref(model);
+	add_stat_columns(GTK_TREE_VIEW(treeview), "", headers, 1);
 
-  pwLabel = gtk_label_new ( _("Bearoff statistics") );
+	gtk_box_pack_start(GTK_BOX(pw), treeview, TRUE, TRUE, 0);
 
-  gtk_box_pack_start ( GTK_BOX ( pw ), pwLabel, FALSE, FALSE, 4 );
-
-  /* column titles */
-
-  aszColumnTitle[ 0 ] = g_strdup ( "" );
-  for ( i = 0; i < 2; i++ )
-    aszColumnTitle[ i + 1 ] = g_strdup ( ap[ i ].szName );
-
-  /* table with results */
-
-  pwStat = gtk_clist_new_with_titles( 3, aszColumnTitle );
-  gtk_clist_column_titles_passive( GTK_CLIST( pwStat ) );
-    
-
-  /* garbage collect */
-
-  for ( i = 0; i < 3; i++ )
-    free ( aszColumnTitle[ i ] );
-
-  /* content */
-    
-  gtk_box_pack_start( GTK_BOX( pw ), pwStat, TRUE, TRUE, 0 );
-    
-  for( i = 0; i < 3; i++ ) {
-    gtk_clist_set_column_auto_resize( GTK_CLIST( pwStat ), i,
-				      TRUE );
-    gtk_clist_set_column_justification( GTK_CLIST( pwStat ), i,
-					GTK_JUSTIFY_RIGHT );
-
-    aszRow[ i ] = malloc ( 100 );
-  }
-
-  
-  sprintf ( aszRow[ 0 ], _("Moves with bearoff") );
-  sprintf ( aszRow[ 1 ], "%d", prs->nBearoffMoves );
-  sprintf ( aszRow[ 2 ], "%d", (prs+1)->nBearoffMoves );
-  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
-
-  sprintf ( aszRow[ 0 ], _("Pips lost") );
-  sprintf ( aszRow[ 1 ], "%d", prs->nBearoffPipsLost );
-  sprintf ( aszRow[ 2 ], "%d", (prs+1)->nBearoffPipsLost );
-  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
-
-  sprintf ( aszRow[ 0 ], _("Average Pips lost") );
-
-  if ( prs->nBearoffMoves )
-    sprintf ( aszRow[ 1 ], "%7.2f",
-  	    (float) prs->nBearoffPipsLost / prs->nBearoffMoves );
-  else
-    sprintf ( aszRow[ 1 ], "n/a" );
-
-  if ( (prs+1)->nBearoffMoves )
-    sprintf ( aszRow[ 2 ], "%7.2f",
-	      (float) (prs+1)->nBearoffPipsLost / (prs+1)->nBearoffMoves );
-  else
-    sprintf ( aszRow[ 2 ], "n/a" );
-
-
-  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
-
-  for ( i = 0; i < 2; i++ ) free ( aszRow[ i ] );
-
-  return pw;
-
-}
-
-static GtkWidget *
-GTKStatPageClosedOut ( const rolloutstat *prs, const int UNUSED(cGames) ) {
-
-  GtkWidget *pw;
-  GtkWidget *pwLabel;
-  GtkWidget *pwStat;
-
-  static char *aszColumnTitle[ 3 ];
-
-  static char *aszRow[ 3 ];
-  int i;
-
-  pw = gtk_vbox_new ( FALSE, 0 );
-
-  pwLabel = gtk_label_new ( _("Closed out statistics") );
-
-  gtk_box_pack_start ( GTK_BOX ( pw ), pwLabel, FALSE, FALSE, 4 );
-
-  /* column titles */
-
-  aszColumnTitle[ 0 ] = g_strdup ( "" );
-  for ( i = 0; i < 2; i++ )
-    aszColumnTitle[ i + 1 ] = g_strdup ( ap[ i ].szName );
-
-  /* table with results */
-
-  pwStat = gtk_clist_new_with_titles( 3, aszColumnTitle );
-  gtk_clist_column_titles_passive( GTK_CLIST( pwStat ) );
-
-  /* garbage collect */
-
-  for ( i = 0; i < 3; i++ )
-    free ( aszColumnTitle[ i ] );
-
-  /* content */
-    
-  gtk_box_pack_start( GTK_BOX( pw ), pwStat, TRUE, TRUE, 0 );
-    
-  for( i = 0; i < 3; i++ ) {
-    gtk_clist_set_column_auto_resize( GTK_CLIST( pwStat ), i,
-				      TRUE );
-    gtk_clist_set_column_justification( GTK_CLIST( pwStat ), i,
-					GTK_JUSTIFY_RIGHT );
-
-    aszRow[ i ] = malloc ( 100 );
-  }
-
-  sprintf ( aszRow[ 0 ], _("Number of close-outs") );
-  sprintf ( aszRow[ 1 ], "%d", prs->nOpponentClosedOut );
-  sprintf ( aszRow[ 2 ], "%d", (prs+1)->nOpponentClosedOut );
-  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
-
-  sprintf ( aszRow[ 0 ], _("Average move number for close out") );
-  if ( prs->nOpponentClosedOut )
-    sprintf ( aszRow[ 1 ], "%7.2f",
-	      1.0f + prs->rOpponentClosedOutMove / prs->nOpponentClosedOut );
-  else
-    sprintf ( aszRow[ 1 ], "n/a" );
-
-
-  if ( (prs+1)->nOpponentClosedOut )
-    sprintf ( aszRow[ 2 ], "%7.2f",
-	      1.0f + (prs+1)->rOpponentClosedOutMove /
-	      (prs+1)->nOpponentClosedOut );
-  else
-    sprintf ( aszRow[ 2 ], "n/a" );
-
-
-  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
-
-  for ( i = 0; i < 2; i++ ) free ( aszRow[ i ] );
-
-  return pw;
-
+	return pw;
 }
 
 
-static GtkWidget *
-GTKStatPageHit ( const rolloutstat *prs, const int cGames ) {
+static GtkTreeModel *create_closed_out_model(const rolloutstat *prs)
+{
+	GtkListStore *store;
+	GtkTreeIter iter;
+	gchar *s1, *s2;
+	store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 
-  GtkWidget *pw;
-  GtkWidget *pwLabel;
-  GtkWidget *pwStat;
+	/* add data to the list store */
+	s1 = g_strdup_printf("%d", prs->nOpponentClosedOut);
+	s2 = g_strdup_printf("%d", (prs + 1)->nOpponentClosedOut);
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, _("Number of close-outs"), 1, s1, 2, s2, -1);
+	g_free(s1);
+	g_free(s2);
 
-  static char *aszColumnTitle[ 3 ];
+	if (prs->nOpponentClosedOut)
+		s1 = g_strdup_printf("%7.2f", 1.0f + prs->rOpponentClosedOutMove / prs->nOpponentClosedOut);
+	else
+		s1 = g_strdup("n/a");
+	if ((prs + 1)->nOpponentClosedOut)
+		s2 = g_strdup_printf("%7.2f", 1.0f +
+			       	(prs + 1)->rOpponentClosedOutMove / (prs + 1)-> nOpponentClosedOut);
+	else
+		s2 = g_strdup("n/a");
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, _("Average move number for close out"), 1, s1, 2, s2,
+			   -1);
+	g_free(s1);
+	g_free(s2);
 
-  static char *aszRow[ 3 ];
-  int i;
+	return GTK_TREE_MODEL(store);
+}
 
-  pw = gtk_vbox_new ( FALSE, 0 );
+static GtkWidget *GTKStatPageClosedOut(const rolloutstat *prs, const int UNUSED(cGames))
+{
+	GtkWidget *pw;
+	GtkWidget *pwLabel;
+	GtkWidget *treeview;
+	GtkTreeModel *model;
+	char *headers[] = {""};
 
-  pwLabel = gtk_label_new ( _("Hit statistics") );
+	pw = gtk_vbox_new(FALSE, 0);
 
-  gtk_box_pack_start ( GTK_BOX ( pw ), pwLabel, FALSE, FALSE, 4 );
+	pwLabel = gtk_label_new(_("Closed out statistics"));
 
-  /* column titles */
+	gtk_box_pack_start(GTK_BOX(pw), pwLabel, FALSE, FALSE, 4);
 
-  aszColumnTitle[ 0 ] = g_strdup ( "" );
-  for ( i = 0; i < 2; i++ )
-    aszColumnTitle[ i + 1 ] = g_strdup ( ap[ i ].szName );
+	/* create treeview */
+	model = create_closed_out_model(prs);
+	treeview = gtk_tree_view_new_with_model(model);
+	g_object_unref(model);
+	add_stat_columns(GTK_TREE_VIEW(treeview), "", headers, 1);
 
-  /* table with results */
+	gtk_box_pack_start(GTK_BOX(pw), treeview, TRUE, TRUE, 0);
 
-  pwStat = gtk_clist_new_with_titles( 3, aszColumnTitle );
-  gtk_clist_column_titles_passive( GTK_CLIST( pwStat ) );
+	return pw;
 
-  /* garbage collect */
+}
 
-  for ( i = 0; i < 3; i++ )
-    free ( aszColumnTitle[ i ] );
+static GtkTreeModel *create_hit_model(const rolloutstat *prs, int cGames)
+{
+	GtkListStore *store;
+	GtkTreeIter iter;
+	gchar *s1, *s2;
+	store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+	/* add data to the list store */
+	s1 = g_strdup_printf("%d", prs->nOpponentHit);
+	s2 = g_strdup_printf("%d", (prs + 1)->nOpponentHit);
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, _("Number of games with hit(s)"), 1, s1, 2, s2, -1);
+	g_free(s1);
+	g_free(s2);
 
-  /* content */
-    
-  gtk_box_pack_start( GTK_BOX( pw ), pwStat, TRUE, TRUE, 0 );
-    
-  for( i = 0; i < 3; i++ ) {
-    gtk_clist_set_column_auto_resize( GTK_CLIST( pwStat ), i,
-				      TRUE );
-    gtk_clist_set_column_justification( GTK_CLIST( pwStat ), i,
-					GTK_JUSTIFY_RIGHT );
+	s1 = g_strdup_printf("%7.2f%%", 100.0 * (prs)->nOpponentHit / (1.0 * cGames));
+	s2 = g_strdup_printf("%7.2f%%", 100.0 * (prs + 1)->nOpponentHit / (1.0 * cGames));
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, _("Percent games with hits"), 1, s1, 2, s2, -1);
+	g_free(s1);
+	g_free(s2);
 
-    aszRow[ i ] = malloc ( 100 );
-  }
+	if (prs->nOpponentHit)
+		s1 = g_strdup_printf("%7.2f",
+				     1.0f + prs->rOpponentHitMove / (1.0 * prs->nOpponentHit));
+	else
+		s1 = g_strdup_printf("n/a");
 
-  sprintf ( aszRow[ 0 ], _("Number of games with hit(s)") );
-  sprintf ( aszRow[ 1 ], "%d", prs->nOpponentHit );
-  sprintf ( aszRow[ 2 ], "%d", (prs+1)->nOpponentHit );
-  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
+	if ((prs + 1)->nOpponentHit)
+		s2 = g_strdup_printf("%7.2f", 1.0f + (prs + 1)->rOpponentHitMove / 
+				(1.0 * (prs + 1)->nOpponentHit));
+	else
+		s2 = g_strdup_printf("n/a");
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, _("Average move number for first hit"),
+		       	1, s1, 2, s2, -1);
+	g_free(s1);
+	g_free(s2);
 
-  sprintf ( aszRow[ 0 ], _("Percent games with hits") );
-  sprintf ( aszRow[ 1 ], "%7.2f%%", 
-            100.0 * (prs)->nOpponentHit / ( 1.0 * cGames ) );
-  sprintf ( aszRow[ 2 ], "%7.2f%%", 
-            100.0 * (prs+1)->nOpponentHit / (1.0 * cGames ) );
-  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
+	return GTK_TREE_MODEL(store);
+}
 
-  sprintf ( aszRow[ 0 ], _("Average move number for first hit") );
-  if ( prs->nOpponentHit )
-    sprintf ( aszRow[ 1 ], "%7.2f",
-	      1.0f + prs->rOpponentHitMove / prs->nOpponentHit );
-  else
-    sprintf ( aszRow[ 1 ], "n/a" );
+static GtkWidget *GTKStatPageHit(const rolloutstat *prs, const int cGames)
+{
+	GtkWidget *pw;
+	GtkWidget *pwLabel;
+	GtkWidget *treeview;
+	GtkTreeModel *model;
+	char *headers[] = { "" };
 
+	pw = gtk_vbox_new(FALSE, 0);
 
-  sprintf ( aszRow[ 0 ], _("Average move number for first hit") );
-  if ( prs->nOpponentHit )
-    sprintf ( aszRow[ 1 ], "%7.2f",
-	      1.0f + prs->rOpponentHitMove / (1.0 * prs->nOpponentHit ) );
-  else
-    sprintf ( aszRow[ 1 ], "n/a" );
+	pwLabel = gtk_label_new(_("Hit statistics"));
 
-  if ( (prs+1)->nOpponentHit )
-    sprintf ( aszRow[ 2 ], "%7.2f",
-	      1.0f + (prs+1)->rOpponentHitMove /
-	      ( 1.0 * (prs+1)->nOpponentHit ) );
-  else
-    sprintf ( aszRow[ 2 ], "n/a" );
+	gtk_box_pack_start(GTK_BOX(pw), pwLabel, FALSE, FALSE, 4);
 
+	/* create treeview */
+	model = create_hit_model(prs, cGames);
+	treeview = gtk_tree_view_new_with_model(model);
+	g_object_unref(model);
+	add_stat_columns(GTK_TREE_VIEW(treeview), "", headers, 1);
 
-  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
+	gtk_box_pack_start(GTK_BOX(pw), treeview, TRUE, TRUE, 0);
 
-  for ( i = 0; i < 2; i++ ) free ( aszRow[ i ] );
-
-  return pw;
+	return pw;
 
 }
 
@@ -639,30 +594,6 @@ GTKRolloutStatPage ( const rolloutstat *prs,
   pwBearoff = GTKStatPageBearoff ( prs, cGames );
   pwHit =  GTKStatPageHit ( prs, cGames );
   pwClosedOut =  GTKStatPageClosedOut ( prs, cGames );
-
-  /*
-  pwNotebook = gtk_notebook_new ();
-
-  gtk_container_set_border_width( GTK_CONTAINER( pwNotebook ), 4 );
-
-  gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
-                             pwWin,
-                             gtk_label_new ( "Win" ) );
-
-  gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
-                             pwCube,
-                             gtk_label_new ( "Cube" ) );
-
-  gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
-                             pwBearoff,
-                             gtk_label_new ( "Bearoff" ) );
-
-  gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
-                             pwHit,
-                             gtk_label_new ( "Hit" ) );
-
-  gtk_box_pack_start( GTK_BOX( pw ), pwNotebook, FALSE, FALSE, 0 );
-  */
 
   psw = gtk_scrolled_window_new ( NULL, NULL );
 
