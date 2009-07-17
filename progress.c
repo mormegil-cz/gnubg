@@ -19,9 +19,6 @@
  * $Id$
  */
 
-//#define GTK_DISABLE_DEPRECATED 1
-//#define G_DISABLE_DEPRECATED 1
-//#define GDK_DISABLE_DEPRECATED 1
 #include "config.h"
 
 #include <stdio.h>
