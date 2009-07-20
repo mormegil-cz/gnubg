@@ -273,9 +273,7 @@ static GtkWidget *GTKStatPageWin ( const rolloutstat *prs, const int cGames ) {
 	gtk_box_pack_start(GTK_BOX(pw), pwLabel, FALSE, FALSE, 4);
 
 	/* create treeview */
-	g_print("a %d\n", cGamesCount);
 	model = create_win_model(prs, cGames, &cGamesCount);
-	g_print("b %d\n", cGamesCount);
 	treeview = gtk_tree_view_new_with_model(model);
 	g_object_unref(model);
 	add_stat_columns(GTK_TREE_VIEW(treeview), _("Cube"), headers, 3);
