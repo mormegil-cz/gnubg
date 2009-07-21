@@ -158,6 +158,7 @@ int fReadingCommand;
 #endif
 #endif
 
+static int foutput_on = TRUE;
 const char *intro_string =
     N_("This program comes with ABSOLUTELY NO WARRANTY; for details type `show warranty'.\n"
        "This is free software, and you are welcome to redistribute it under certain conditions; type `show copying' for details.\n");
@@ -1099,25 +1100,25 @@ extern int SetToggle( const char *szName, int *pf, char *sz, const char *szOn, c
     
     if( !StrCaseCmp( "on", pch ) || !StrNCaseCmp( "yes", pch, cch ) ||
 	!StrNCaseCmp( "true", pch, cch ) ) {
+	outputl( szOn );
+
 	if( *pf != TRUE ) {
 	    *pf = TRUE;
 	    UpdateSetting( pf );
 	}
-	
-	outputl( szOn );
 
 	return TRUE;
     }
 
     if( !StrCaseCmp( "off", pch ) || !StrNCaseCmp( "no", pch, cch ) ||
 	!StrNCaseCmp( "false", pch, cch ) ) {
+	outputl( szOff );
+
 	if( *pf != FALSE ) {
 	    *pf = FALSE;
 	    UpdateSetting( pf );
 	}
 	
-	outputl( szOff );
-
 	return FALSE;
     }
 
@@ -1414,7 +1415,7 @@ extern void ShowBoard( void )
     moverecord *pmr;
 	TanBoard an;
 
-	if( cOutputDisabled )
+	if( cOutputDisabled || !foutput_on)
 		return;
 
     if( ms.gs == GAME_NONE ) {
@@ -3870,7 +3871,7 @@ extern char *strcpyn( char *szDest, const char *szSrc, int cch )
 extern void output( const char *sz )
 {
 
-    if( cOutputDisabled )
+    if( cOutputDisabled || !foutput_on)
 	return;
     
 #if USE_GTK
@@ -3890,7 +3891,7 @@ extern void outputl( const char *sz )
 {
 
     
-    if( cOutputDisabled )
+    if( cOutputDisabled || !foutput_on)
 	return;
     
 #if USE_GTK
@@ -3933,7 +3934,7 @@ extern void outputv( const char *sz, va_list val )
 {
 
     char *szFormatted;
-    if( cOutputDisabled )
+    if( cOutputDisabled || !foutput_on)
 	return;
     szFormatted = g_strdup_vprintf( sz, val );
     output( szFormatted );
@@ -3982,7 +3983,7 @@ extern void outputerrv(const char *sz, va_list val)
 extern void outputx( void )
 {
     
-    if( cOutputDisabled || cOutputPostponed )
+    if( cOutputDisabled || cOutputPostponed || !foutput_on)
 	return;
 
 #if USE_GTK
@@ -3995,7 +3996,7 @@ extern void outputx( void )
 extern void outputnew( void )
 {
     
-    if( cOutputDisabled )
+    if( cOutputDisabled || !foutput_on)
 	return;
     
 #if USE_GTK
@@ -4018,6 +4019,12 @@ extern void outputon( void )
     g_assert( cOutputDisabled );
 
     cOutputDisabled--;
+}
+
+extern void CommandSetOutputOutput(char *sz)
+{
+	SetToggle("output", &foutput_on, sz, _("output will be shown"), _("output will not be shown"));
+		return;
 }
 
 /* Temporarily disable outputx() calls */

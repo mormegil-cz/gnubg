@@ -1,3 +1,7 @@
+Tue Jul 21 11:52:24 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, commands.inc, gnubg.c: add command to turn off output
+
 Thu Jul 16 22:55:06 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* po/da.mo, progress.c: port rollout stat page to gtk_tree_view

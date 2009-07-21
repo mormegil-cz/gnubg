@@ -797,6 +797,7 @@ extern void CommandSetOutputDigits(char *);
 extern void CommandSetOutputErrorRateFactor(char *);
 extern void CommandSetOutputMatchPC(char *);
 extern void CommandSetOutputMWC(char *);
+extern void CommandSetOutputOutput(char *sz);
 extern void CommandSetOutputRawboard(char *);
 extern void CommandSetOutputWinPC(char *);
 extern void CommandSetPanelWidth(char *);

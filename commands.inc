@@ -624,6 +624,9 @@ command cER = {
       N_("Record the round of the match within the event"), szOPTVALUE, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetOutput[] = {
+    { "output", CommandSetOutputOutput,
+      N_("Print to messages to stdout"),
+      szONOFF, &cOnOff },
     { "matchpc", CommandSetOutputMatchPC,
       N_("Show match equities as percentages (on) or probabilities (off)"),
       szONOFF, &cOnOff },
