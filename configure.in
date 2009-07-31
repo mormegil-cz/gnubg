@@ -288,7 +288,7 @@ if test "x$ssecpu" != "xno"; then
         if test x"$GCC" = xyes; then
 		if test "x$SSE_CFLAGS" = x; then
 			if test "x$ssecpu" = "xsse2"; then 
-				SSE_CFLAGS="-msse2"
+				SSE_CFLAGS="-msse -msse2"
 			else
 				SSE_CFLAGS="-msse"
 			fi
