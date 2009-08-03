@@ -26,39 +26,13 @@
 #include <string.h>
 #include "common.h"
 
+char *datadir = NULL;
+char *pkg_datadir = NULL;
+char *docdir = NULL;
 #ifdef WIN32
 #include <io.h>
 
 #include <windows.h>
-
-extern char * getInstallDir( void )
-{
-  static char *ret = NULL;
-  if (!ret)
-  {
-	char buf[FILENAME_MAX];
-	if (GetModuleFileName(NULL, buf, sizeof(buf)) != 0)
-	{
-		char *p1 = strrchr(buf, '/'), *p2 = strrchr(buf, '\\');
-		int pos1 = (p1 != NULL) ? (int)(p1 - buf) : -1;
-		int pos2 = (p2 != NULL) ? (int)(p2 - buf) : -1;
-		int pos = MAX(pos1, pos2);
-		if (pos > 0)
-			buf[pos] = '\0';
-		ret = g_strdup(buf);
-	}
-  }
-  return ret;
-}
-
-extern char *getDocDir(void)
-{
-	static char *docdir = NULL;
-	if (!docdir)
-		docdir = g_build_filename(getInstallDir(), "doc", NULL);
-	return docdir;
-}
-
 extern void PrintSystemError(const char* message)
 {
 	LPVOID lpMsgBuf;
@@ -82,6 +56,52 @@ extern void PrintSystemError(const char* message)
 	printf("Unknown system error while %s!\n", message);
 }
 #endif
+
+extern char *getDataDir(void)
+{
+	if (!datadir) {
+#ifndef WIN32
+		datadir = g_strdup(DATADIR);
+#else
+		char buf[FILENAME_MAX];
+		if (GetModuleFileName(NULL, buf, sizeof(buf)) != 0) {
+			char *p1 = strrchr(buf, '/'), *p2 = strrchr(buf, '\\');
+			int pos1 = (p1 != NULL) ? (int)(p1 - buf) : -1;
+			int pos2 = (p2 != NULL) ? (int)(p2 - buf) : -1;
+			int pos = MAX(pos1, pos2);
+			if (pos > 0)
+				buf[pos] = '\0';
+			ret = g_strdup(buf);
+		}
+#endif
+	}
+	return datadir;
+}
+
+extern char *getPkgDataDir(void)
+{
+	if (!pkg_datadir)
+#ifndef WIN32
+		pkg_datadir = g_strdup(PKGDATADIR);
+#else
+		pkg_datadir = g_build_filename(getDataDir(), "doc", NULL);
+#endif
+	return pkg_datadir;
+}
+
+extern char *getDocDir(void)
+{
+		g_print("docdir %s\n", docdir);
+	if (!docdir)
+#ifndef WIN32
+		docdir = g_strdup(DOCDIR);
+#else
+		docdir = g_build_filename(getDataDir(), "doc", NULL);
+#endif
+		g_print("docdir %s\n", docdir);
+	return docdir;
+}
+
 
 void PrintError(const char* str)
 {

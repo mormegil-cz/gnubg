@@ -62,7 +62,7 @@ CreateSplash (void) {
 
   /* image */
 
-  fn = g_build_filename(PKGDATADIR, "pixmaps", "gnubg-big.png", NULL);
+  fn = g_build_filename(getPkgDataDir(), "pixmaps", "gnubg-big.png", NULL);
   pwImage = gtk_image_new_from_file(fn);
   g_free(fn);
   gtk_box_pack_start ( GTK_BOX ( pwvbox ), pwImage, FALSE, FALSE, 0 );

@@ -2302,14 +2302,14 @@ CommandShowMatchResult( char *UNUSED(sz) ) {
 
 extern void CommandShowManualWeb (char *UNUSED(sz))
 {
-	char *path = g_build_filename(DOCDIR, "gnubg.html", NULL);
+	char *path = g_build_filename(getDocDir(), "gnubg.html", NULL);
 	OpenURL (path);
 	g_free(path);
 }
 
 extern void CommandShowManualAbout (char *UNUSED(sz))
 {
-	char *path = g_build_filename(DOCDIR, "allabout.html", NULL);
+	char *path = g_build_filename(getDocDir(), "allabout.html", NULL);
 	OpenURL (path);
 	g_free(path);
 }

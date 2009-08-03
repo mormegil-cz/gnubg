@@ -1,3 +1,8 @@
+Mon Aug  3 23:57:49 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c, gtkgame.c, gtksplash.c, show.c, util.c, util.h: add options
+	to specify datadir, pkgdatadir and docdir
+
 Tue Jul 21 11:52:24 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, commands.inc, gnubg.c: add command to turn off output

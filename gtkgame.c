@@ -3375,7 +3375,7 @@ static void gnubg_set_default_icon(void)
 	};
 
 	for (i = 0; i < G_N_ELEMENTS(is); i++) {
-		ip = g_build_filename(DATADIR, "icons", "hicolor", is[i].dir, "apps", is[i].fn, NULL);
+		ip = g_build_filename(getDataDir(), "icons", "hicolor", is[i].dir, "apps", is[i].fn, NULL);
 		icon = gdk_pixbuf_new_from_file(ip, NULL);
 		g_free(ip);
 		if (icon)
@@ -5484,7 +5484,7 @@ extern void GTKShowVersion( void )
 	pwDialog = GTKCreateDialog(_("About GNU Backgammon"), DT_CUSTOM, NULL, DIALOG_FLAG_MODAL | DIALOG_FLAG_CLOSEBUTTON, NULL, NULL);
 	gtk_window_set_resizable(GTK_WINDOW(pwDialog), FALSE);
 
-	fn = g_build_filename(PKGDATADIR, "pixmaps", "gnubg-big.png", NULL);
+	fn = g_build_filename(getPkgDataDir(), "pixmaps", "gnubg-big.png", NULL);
 	image = gtk_image_new_from_file(fn);
 	g_free(fn);
 	gtk_misc_set_padding(GTK_MISC(image), 8, 8 );

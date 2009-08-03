@@ -24,18 +24,15 @@
 
 #include "stdio.h"
 
-#ifdef WIN32
-#define DOCDIR getDocDir()
-#define PKGDATADIR getInstallDir()
-#endif
-
-#define BuildFilename(file) g_build_filename(PKGDATADIR, file, NULL)
-#define BuildFilename2(file1, file2) g_build_filename(PKGDATADIR, file1, file2, NULL)
-
-#ifdef WIN32
-extern char *getInstallDir( void );
+extern char *datadir;
+extern char *pkg_datadir;
+extern char *docdir;
+extern char *getDataDir( void );
+extern char *getPkgDataDir( void );
 extern char *getDocDir( void );
-#endif
+
+#define BuildFilename(file) g_build_filename(getPkgDataDir(), file, NULL)
+#define BuildFilename2(file1, file2) g_build_filename(getPkgDataDir(), file1, file2, NULL)
 
 extern void PrintSystemError(const char* message);
 extern void PrintError(const char* message);

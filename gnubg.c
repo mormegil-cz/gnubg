@@ -4754,6 +4754,12 @@ int main(int argc, char *argv[])
 		 N_("Ignore tty input when using the graphical interface"), NULL},
 		{"debug", 'd', 0, G_OPTION_ARG_NONE, &debug,
 		 N_("Turn on debug"), NULL},
+		{"datadir", 'D', 0, G_OPTION_ARG_STRING, &datadir,
+		 N_("Specify location of general data"), NULL},
+		{"pkgdatadir", 'P', 0, G_OPTION_ARG_STRING, &pkg_datadir,
+		 N_("Specify location of program specific data"), NULL},
+		{"docdir", 'O', 0, G_OPTION_ARG_STRING, &docdir,
+		 N_("Specify location of program documentation"), NULL},
 		{NULL, 0, 0, 0, NULL, NULL, NULL}
 	};
 	GError *error = NULL;
