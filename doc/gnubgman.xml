@@ -19,7 +19,7 @@
     <refentrytitle>gnubg</refentrytitle>
     <manvolnum>6</manvolnum>
   </refmeta>
-  
+
   <refnamediv>
     <refname>gnubg</refname>
     <refpurpose>GNU Backgammon program</refpurpose>
@@ -36,7 +36,7 @@
                     <manvolnum>6</manvolnum> </citerefentry>
             plays and analyzes backgammon games and matches. It is able to play and
             analyze both money games and tournament matches, evaluate and roll out
-            positions, and more. 
+            positions, and more.
     </para>
 </refsect1>
 <refsect1>
@@ -49,7 +49,7 @@
         <para><option>-p, --python=FILE</option> Evaluate Python code in FILE and exit</para>
         <para><option>-q, --quiet</option> Disable sound effects</para>
         <para><option>-r, --no-rc</option> Do not read .gnubgrc and .gnubgautorc commands</para>
-        <para><option>-S, --no-splash</option> Don't show gtk splash screen</para>
+        <para><option>-S, --splash</option> Show gtk splash screen</para>
         <para><option>-t, --tty</option> Start on tty instead of using window system</para>
         <para><option>-v, --version</option> Show version information and exit</para>
         <para><option>-w, --window-system-only</option> Ignore tty input when using window system</para>
