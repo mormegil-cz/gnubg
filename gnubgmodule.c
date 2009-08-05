@@ -937,12 +937,13 @@ static PyObject *PythonPositionFromBearoff( PyObject* self UNUSED_PARAM, PyObjec
 #define CHARP_HACK
 #endif
 
-static inline void
-DictSetItemSteal(PyObject* dict, const char* key, PyObject* val)
+static void DictSetItemSteal(PyObject * dict, const char *key, PyObject * val)
 {
-  int const s = PyDict_SetItemString(dict, CHARP_HACK key, val);  
-  {                                                         g_assert( s == 0 ); }
-  Py_DECREF(val);
+	int const s = PyDict_SetItemString(dict, CHARP_HACK key, val);
+	{
+		g_assert(s == 0);
+	}
+	Py_DECREF(val);
 }
 
 typedef struct {

@@ -1,3 +1,8 @@
+Wed Aug  5 18:21:59 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gnubgmodlule.c: remove inline from DictItemSteal, isn't inlined
+	by gcc, and pointless anyway.
+
 Mon Aug  3 23:57:49 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c, gtkgame.c, gtksplash.c, show.c, util.c, util.h: add options
