@@ -4048,8 +4048,7 @@ extern void current_pmr_cubedata_update(evalsetup *pes, float output[][NUM_ROLLO
 
 extern moverecord *get_current_moverecord(int *pfHistory)
 {
-	if (plLastMove && plLastMove->plNext && plLastMove->plNext->p)
-	{
+	if (plLastMove && plLastMove->plNext && plLastMove->plNext->p) {
 		if (pfHistory)
 			*pfHistory = TRUE;
 		return plLastMove->plNext->p;
@@ -4058,29 +4057,31 @@ extern moverecord *get_current_moverecord(int *pfHistory)
 	if (pfHistory)
 		*pfHistory = FALSE;
 
-	if (ms.gs != GAME_PLAYING)
-	{
+	if (ms.gs != GAME_PLAYING) {
 		pmr_hint_destroy();
 		return NULL;
 	}
 
-	if (!pmr_hint)
-	{
+	/* invalidate on changed dice */
+	if (ms.anDice[0] > 0 && pmr_hint
+	    && (pmr_hint->anDice[0] != ms.anDice[0]
+		|| pmr_hint->anDice[1] != ms.anDice[1]))
+		pmr_hint_destroy();
+
+	if (!pmr_hint) {
 		pmr_hint = NewMoveRecord();
 		pmr_hint->fPlayer = ms.fTurn;
 	}
-	if (ms.anDice[0] > 0)
-	{
+
+	if (ms.anDice[0] > 0) {
 		pmr_hint->mt = MOVE_NORMAL;
 		pmr_hint->anDice[0] = ms.anDice[0];
 		pmr_hint->anDice[1] = ms.anDice[1];
-	}
-	else if (ms.fDoubled)
-	{
+	} else if (ms.fDoubled) {
 		pmr_hint->mt = MOVE_TAKE;
-	}
-	else
-	{
+	} else {
+		pmr_hint = NewMoveRecord();
+		pmr_hint->fPlayer = ms.fTurn;
 		pmr_hint->mt = MOVE_DOUBLE;
 	}
 	return pmr_hint;

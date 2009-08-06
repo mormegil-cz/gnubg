@@ -1,3 +1,7 @@
+Thu Aug  6 10:44:28 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* play.c: destroy pmr_hint on changed dice
+
 Wed Aug  5 18:21:59 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gnubgmodlule.c: remove inline from DictItemSteal, isn't inlined
