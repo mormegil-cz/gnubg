@@ -225,10 +225,7 @@ bearoffcontext *pbc2 = NULL;
 bearoffcontext *apbcHyper[ 3 ] = { NULL, NULL, NULL };
 
 static evalCache cEval;
-#define PRUNE_CACHE
-#if defined( PRUNE_CACHE )
 static evalCache cpEval;
-#endif
 static unsigned int cCache;
 int fInterrupt = FALSE;
 
@@ -630,9 +627,7 @@ EvalShutdown ( void ) {
   /* destroy cache */
 
   CacheDestroy( &cEval );
-#if defined( PRUNE_CACHE )
   CacheDestroy( &cpEval );
-#endif
 
   return 0;
 
@@ -722,13 +717,11 @@ extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 			return;
 		}
 
-#if defined( PRUNE_CACHE )
 		if( CacheCreate( &cpEval, 0x1 << 16) )
 		{
 			PrintError( "CacheCreate" );
 			return;
 		}
-#endif
 	    
 		ComputeTable();
 
@@ -5734,169 +5727,97 @@ ScoreMoves( movelist *pml, const cubeinfo* pci, const evalcontext* pec,
 
 #if !defined(REDUCTION_CODE)
 
-#define nPruneMoves 10
-static const int cubefullPrune = 1;
-
-static void
-FindBestMoveInEval(NNState *nnStates, int const nDice0, int const nDice1, const TanBoard anBoardIn,
-				   TanBoard anBoardOut, const cubeinfo* const pci, const evalcontext* pec)
+static inline void eval_prune(NNState * nnStates, int i, move *pm, TanBoard anBoardOut, positionclass pc,
+			      const cubeinfo *pci)
 {
-  unsigned int i;
-  float rScore, rBestScore;
-  movelist ml;
-  GenerateMoves(&ml, anBoardIn, nDice0, nDice1, FALSE);
-    
-  if( ml.cMoves == 0 ) {
-    /* no legal moves */
-    return;
-  }
-
-  if( ml.cMoves == 1 ) {
-    /* forced move */
-    ml.iMoveBest = 0;
-  } else {
-    int use = ml.cMoves > nPruneMoves;
-    unsigned int bmovesi[nPruneMoves];
-    float arOutput[5];
-    
-    ((cubeinfo*)pci)->fMove = !pci->fMove;
-    if( use ) {
-      positionclass evalClass = 0;
-      float arInput[200];
-      
-      for(i = 0; i < ml.cMoves; i++) {
-	move* const pm = &ml.amMoves[i];
-	
-	PositionFromKey(anBoardOut, pm->auch);
-	SwapSides(anBoardOut);
-
-	{
-	  positionclass pc = ClassifyPosition((ConstTanBoard)anBoardOut, VARIATION_STANDARD);
-	  if( i == 0 ) {
-	    if( pc < CLASS_RACE ) {
-	      break;
-	    }
-	    evalClass = pc;
-	  } else {
-	    if( pc != evalClass ) {
-	      break;
-	    }
-	  }
-
-#if defined(PRUNE_CACHE)
-{
-	  evalcache ec;
-	  unsigned long l;
-	  memcpy(ec.key.auch, pm->auch, sizeof(ec.key.auch));
-	  ec.nEvalContext = 0;
-	  if ( ( l = CacheLookup( &cpEval, &ec, arOutput, NULL ) ) != CACHEHIT ) {
-   
-#endif
-	    baseInputs((ConstTanBoard)anBoardOut, arInput);
-	    {
-	      neuralnet* nets[] = {&nnpRace, &nnpCrashed, &nnpContact};
-	      neuralnet* n = nets[pc - CLASS_RACE];
-		  if (nnStates)
-			  nnStates[pc - CLASS_RACE].state = (i == 0) ?  NNSTATE_INCREMENTAL : NNSTATE_DONE;
-	      NeuralNetEvaluate(n, arInput, arOutput, nnStates);
-	      SanityCheck((ConstTanBoard)anBoardOut, arOutput);
-	    }
-#if defined(PRUNE_CACHE)
-	    memcpy( ec.ar, arOutput, sizeof(float) * NUM_OUTPUTS );
-		ec.ar[5] = 0.f;
-	    CacheAdd(&cpEval, &ec, l);
-	}
-}
-#endif
-	  pm->rScore = UtilityME(arOutput, pci);
-	  if( i < nPruneMoves ) {
-	    bmovesi[i] = i;
-	    if( pm->rScore > ml.amMoves[ bmovesi[0] ].rScore ) {
-	      bmovesi[i] = bmovesi[0];
-	      bmovesi[0] = i;
-	    }
-	  } else if( pm->rScore < ml.amMoves[ bmovesi[0] ].rScore ) {
-	    int m = 0, k;
-	    bmovesi[0] = i;
-	    for(k = 1; k < nPruneMoves; ++k) {
-	      if( ml.amMoves[ bmovesi[k] ].rScore >
-		  ml.amMoves[ bmovesi[m] ].rScore ) {
-		m = k;
-	      }
-	    }
-	    bmovesi[0] = bmovesi[m];
-	    bmovesi[m] = i;
-	  }
-	}
-      }
-
-      if( i == ml.cMoves ) {
-	ml.cMoves = nPruneMoves;
-      } else {
-	use  = 0;
-      }
-    }
-
-    /* See if this is the problem */
-	if (cubefullPrune)
-	{
-	((cubeinfo*)pci)->fMove = !pci->fMove;
-	if( use ) {
-	move *amMoves = (move*) g_alloca(ml.cMoves * sizeof(move));
-	for(i = 0; i < ml.cMoves; i++) {
- unsigned int const j = bmovesi[i];
-	memcpy(&amMoves[i], &ml.amMoves[j], sizeof(amMoves[0]));
-	bmovesi[i] = i;
-	}
-	memcpy(&ml.amMoves[0], amMoves, ml.cMoves * sizeof(amMoves[0]));
-	}
-	ScoreMoves(&ml, pci, pec, 0);
-
-	/*
-	((cubeinfo*)pci)->fMove = !pci->fMove;
-	int c = ml.iMoveBest;
-	*/
-	} else {
-
-    nnStates[0].state = nnStates[1].state = nnStates[2].state = NNSTATE_INCREMENTAL;
-    rBestScore = 99999.9f;
-    for(i = 0; i < ml.cMoves; i++) {
-      unsigned int const j = use ? bmovesi[i] : i;
-      const move* const pm = &ml.amMoves[j];
-	
-      PositionFromKey(anBoardOut, pm->auch);
-      SwapSides(anBoardOut);
-      {
+	float arInput[200];
+	float arOutput[5];
 	evalcache ec;
 	unsigned long l;
+
 	memcpy(ec.key.auch, pm->auch, sizeof(ec.key.auch));
-	ec.nEvalContext =  pci->fMove << 14;
-
-	if ( ( l = CacheLookup( &cpEval, &ec, arOutput, NULL ) ) != CACHEHIT ) {
-	  positionclass pc = ClassifyPosition((ConstTanBoard)anBoardOut, VARIATION_STANDARD);
-
-	  acef[pc]((ConstTanBoard)anBoardOut, arOutput, VARIATION_STANDARD, nnStates);
-	  if ( pc > CLASS_PERFECT )
-	    SanityCheck((ConstTanBoard)anBoardOut, arOutput);
-
-	  memcpy( ec.ar, arOutput, sizeof(float) * NUM_OUTPUTS );
-	  ec.ar[5] = 0.f;
-	  CacheAdd(&cEval, &ec, l);
+	ec.nEvalContext = 0;
+	if ((l = CacheLookup(&cpEval, &ec, arOutput, NULL)) != CACHEHIT) {
+		baseInputs((ConstTanBoard) anBoardOut, arInput);
+		{
+			neuralnet *nets[] = { &nnpRace, &nnpCrashed, &nnpContact };
+			neuralnet *n = nets[pc - CLASS_RACE];
+			if (nnStates)
+				nnStates[pc - CLASS_RACE].state = (i == 0) ? NNSTATE_INCREMENTAL : NNSTATE_DONE;
+			NeuralNetEvaluate(n, arInput, arOutput, nnStates);
+			SanityCheck((ConstTanBoard) anBoardOut, arOutput);
+		}
+		memcpy(ec.ar, arOutput, sizeof(float) * NUM_OUTPUTS);
+		ec.ar[5] = 0.f;
+		CacheAdd(&cpEval, &ec, l);
 	}
-	rScore = UtilityME(arOutput, pci);
-	if( rScore < rBestScore ) {
-	  rBestScore = rScore;
-	  ml.iMoveBest = j;
-	}
-      }
-    }
-    nnStates[0].state = nnStates[1].state = nnStates[2].state = NNSTATE_NONE;
+	pm->rScore = UtilityME(arOutput, pci);
+}
 
-    ((cubeinfo*)pci)->fMove = !pci->fMove;
-  }
-  }
-  
-  PositionFromKey(anBoardOut, ml.amMoves[ml.iMoveBest].auch);
+static int sort_pruned(const void *a, const void *b)
+{
+	const move *aa = a;
+	const move *bb = b;
+	return (aa->rScore > bb->rScore ? 1 : -1);
+}
+
+#define PRUNE_MOVES 10
+
+static void FindBestMoveInEval(NNState * nnStates, int const nDice0, int const nDice1, const TanBoard anBoardIn,
+			       TanBoard anBoardOut, const cubeinfo *const pci, const evalcontext * pec)
+{
+	unsigned int i;
+	movelist ml;
+	positionclass evalClass = 0;
+
+	GenerateMoves(&ml, anBoardIn, nDice0, nDice1, FALSE);
+
+	if (ml.cMoves == 0) {
+		/* no legal moves */
+		return;
+	}
+
+	if (ml.cMoves == 1) {
+		/* forced move */
+		ml.iMoveBest = 0;
+		PositionFromKey(anBoardOut, ml.amMoves[ml.iMoveBest].auch);
+		return;
+	}
+
+	if (ml.cMoves <= PRUNE_MOVES) {
+		ScoreMoves(&ml, pci, pec, 0);
+		PositionFromKey(anBoardOut, ml.amMoves[ml.iMoveBest].auch);
+		return;
+	}
+
+	((cubeinfo *)pci)->fMove = !pci->fMove;
+
+	for (i = 0; i < ml.cMoves; i++) {
+		positionclass pc;
+		move *pm = &ml.amMoves[i];
+
+		PositionFromKey(anBoardOut, pm->auch);
+		SwapSides(anBoardOut);
+
+		pc = ClassifyPosition((ConstTanBoard) anBoardOut, VARIATION_STANDARD);
+		if (i == 0) {
+			if (pc < CLASS_RACE)
+				break;
+			evalClass = pc;
+		} else if (pc != evalClass)
+			break;
+
+		eval_prune(nnStates, i, pm, anBoardOut, pc, pci);
+	}
+
+	if (i == ml.cMoves) {
+		qsort(ml.amMoves, ml.cMoves, sizeof(move), sort_pruned);
+		ml.cMoves = PRUNE_MOVES;
+	}
+
+	((cubeinfo *)pci)->fMove = !pci->fMove;
+	ScoreMoves(&ml, pci, pec, 0);
+	PositionFromKey(anBoardOut, ml.amMoves[ml.iMoveBest].auch);
 }
 #endif
 

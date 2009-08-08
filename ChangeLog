@@ -1,3 +1,10 @@
+Sat Aug  8 14:42:20 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	*  eval.c: clean up the prune evaluation function (FindBestMoveInEval)
+	and circumvent a compiler bug causing invalid prune evaluation on
+	certain systems using gcc compiler optimization. This is a critical
+	function and should be optimized further if possible.
+
 Thu Aug  6 10:44:28 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* play.c: destroy pmr_hint on changed dice
