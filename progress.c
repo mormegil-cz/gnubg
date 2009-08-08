@@ -263,7 +263,7 @@ static GtkWidget *GTKStatPageWin ( const rolloutstat *prs, const int cGames ) {
 	GtkWidget *treeview;
 	GtkTreeModel *model;
 	char *headers[] = {N_("Win Single\n"), N_("Win Gammon\n"), N_("Win BG\n")};
-	int cGamesCount;
+	int cGamesCount = 0;
 	char *sz;
 
 	pw = gtk_vbox_new(FALSE, 0);
