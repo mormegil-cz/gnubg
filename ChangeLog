@@ -1,3 +1,8 @@
+Mon Aug 10 21:15:32 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* eval.c: more or less revert to a cleaned up version of
+	FindBestMoveInEval, but declare pm a volatile pointer.
+
 Sat Aug  8 20:07:51 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c: hint didn't annotate MOVE_DROP
