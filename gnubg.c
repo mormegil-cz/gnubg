@@ -4230,7 +4230,7 @@ move_rc_files (void)
    * their files moved.*/
   char *olddir, *oldfile, *newfile;
 #ifdef WIN32
-  olddir = g_strdup (getInstallDir());
+  olddir = g_strdup (getDataDir());
 #else
   olddir = g_build_filename (szHomeDirectory, "..", NULL);
 #endif
@@ -4800,7 +4800,7 @@ int main(int argc, char *argv[])
 #ifdef WIN32
 	/* data directory: initialise to the path where gnubg is installed */
 	{
-		const char *szDataDirectory = getInstallDir();
+		const char *szDataDirectory = getDataDir();
 		_chdir(szDataDirectory);
 	}
 #endif

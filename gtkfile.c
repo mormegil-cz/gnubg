@@ -88,7 +88,7 @@ char *programdir, *pc, *tmp;
     gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fc), name);
 
 #ifdef WIN32
-  programdir = g_strdup(getInstallDir());
+  programdir = g_strdup(getDataDir());
   if ((pc = strrchr(programdir, G_DIR_SEPARATOR)) != NULL) {
           *pc = '\0';
 
