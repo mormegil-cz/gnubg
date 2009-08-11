@@ -84,21 +84,19 @@ extern char *getPkgDataDir(void)
 #ifndef WIN32
 		pkg_datadir = g_strdup(PKGDATADIR);
 #else
-		pkg_datadir = g_build_filename(getDataDir(), "doc", NULL);
+		pkg_datadir = g_build_filename(getDataDir(), NULL);
 #endif
 	return pkg_datadir;
 }
 
 extern char *getDocDir(void)
 {
-		g_print("docdir %s\n", docdir);
 	if (!docdir)
 #ifndef WIN32
 		docdir = g_strdup(DOCDIR);
 #else
 		docdir = g_build_filename(getDataDir(), "doc", NULL);
 #endif
-		g_print("docdir %s\n", docdir);
 	return docdir;
 }
 
