@@ -396,10 +396,6 @@ extern void CommandShowAnalysis( char *UNUSED(sz) ) {
 
     if( fAnalyseMove ) {
 	outputl( _("Chequer play will be analysed.") );
-	if( cAnalysisMoves < 2 )
-	    outputl( _("Every legal move will be analysed.") );
-	else
-	    outputf( _("Up to %d moves will be analysed.\n"), cAnalysisMoves );
     } else
 	outputl( _("Chequer play will not be analysed.") );
 

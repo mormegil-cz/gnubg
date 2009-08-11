@@ -355,7 +355,6 @@ extern rolloutcontext rcRollout;
 extern skilltype TutorSkill;
 extern statcontext scMatch;
 extern unsigned int afCheatRoll[2];
-extern unsigned int cAnalysisMoves;
 extern unsigned int cAutoDoubles;
 extern unsigned int nBeavers;
 extern unsigned int nDefaultLength;

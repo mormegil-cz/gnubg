@@ -239,7 +239,6 @@ typedef struct _analysiswidget {
   evalsetup esCube; 
   movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
 
-  GtkAdjustment *padjMoves;
   GtkAdjustment *apadjSkill[3], *apadjLuck[4];
   GtkWidget *pwMoves, *pwCube, *pwLuck;
   GtkWidget *pwEvalCube, *pwEvalChequer;
@@ -2271,16 +2270,6 @@ static GtkWidget *AnalysisPage( analysiswidget *paw ) {
   hbox2 = gtk_hbox_new (FALSE, 0);
   gtk_box_pack_start (GTK_BOX (vbox2), hbox2, TRUE, TRUE, 0);
 
-  pwLabel = gtk_label_new (_("Move limit:"));
-  gtk_box_pack_start (GTK_BOX (hbox2), pwLabel, FALSE, FALSE, 0);
-
-  paw->padjMoves =  
-    GTK_ADJUSTMENT( gtk_adjustment_new( 0, 0, 1000, 1, 1, 0 ) );
-
-  pwSpin = gtk_spin_button_new (GTK_ADJUSTMENT (paw->padjMoves), 1, 0);
-  gtk_box_pack_start (GTK_BOX (hbox2), pwSpin, TRUE, TRUE, 0);
-  gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pwSpin), TRUE);
-
   pwFrame = gtk_frame_new (_("Skill thresholds"));
   gtk_box_pack_start (GTK_BOX (vbox1), pwFrame, TRUE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
@@ -2402,11 +2391,6 @@ static void AnalysisOK( GtkWidget *pw, analysiswidget *paw ) {
   CHECKUPDATE(paw->apwAnalysePlayers[ 1 ], afAnalysePlayers[ 1 ],
               "set analysis player 1 analyse %s")
 
-  if((n = (int)paw->padjMoves->value) != (int)cAnalysisMoves) {
-    sprintf(sz, "set analysis limit %d", n );
-    UserCommand(sz); 
-  }
-
   ADJUSTSKILLUPDATE( 0, SKILL_DOUBTFUL, "set analysis threshold doubtful %s" )
   ADJUSTSKILLUPDATE( 1, SKILL_BAD, "set analysis threshold bad %s" )
   ADJUSTSKILLUPDATE( 2, SKILL_VERYBAD, "set analysis threshold verybad %s" )
@@ -2448,8 +2432,6 @@ static void AnalysisSet( analysiswidget *paw) {
         GTK_TOGGLE_BUTTON( paw->apwAnalysePlayers[ i ] ), 
         afAnalysePlayers[ i ] );
 
-  gtk_adjustment_set_value ( paw->padjMoves, cAnalysisMoves );
-  
   gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjSkill[0] ),
 		 arSkillLevel[SKILL_DOUBTFUL] );
   gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjSkill[1] ),

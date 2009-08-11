@@ -305,27 +305,6 @@ extern void CommandSetAnalysisCube( char *sz ) {
 	UpdateSetting( &fAnalyseCube );
 }
 
-extern void CommandSetAnalysisLimit( char *sz ) {
-    
-    int n;
-    
-    if( ( n = ParseNumber( &sz ) ) <= 1 ) {
-	cAnalysisMoves = 1;
-	outputl( _("Every legal move will be analysed.") );
-    } else if( n >= 2 ) {
-	cAnalysisMoves = n;
-	outputf( _("Up to %d moves will be analysed.\n"), n );
-    } else {
-	outputl( _("If you specify a limit on the number of moves to analyse, "
-		 "it must be at least 2.") );
-	return;
-    }
-
-    if( !fAnalyseMove )
-	outputl( _("Note that no moves will be analysed until chequer "
-		 "play analysis is enabled\n(see `help set analysis moves').") );
-}
-
 extern void CommandSetAnalysisLuck( char *sz ) {
 
     if( SetToggle( "analysis luck", &fAnalyseDice, sz,

@@ -446,8 +446,6 @@ command cER = {
     { "cubedecision", CommandSetAnalysisCubedecision, N_("Specify parameters "
       "for the analysis of cube decisions"), NULL,
       acSetEvalParam },
-    { "limit", CommandSetAnalysisLimit, N_("Specify the maximum number of "
-      "possible moves analysed"), szOPTLIMIT, NULL },
     { "luck", CommandSetAnalysisLuck, N_("Select whether dice rolls will be "
       "analysed"), szONOFF, &cOnOff },
     { "luckanalysis", CommandSetAnalysisLuckAnalysis,
