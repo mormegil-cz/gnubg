@@ -71,7 +71,7 @@ extern char *getDataDir(void)
 			int pos = MAX(pos1, pos2);
 			if (pos > 0)
 				buf[pos] = '\0';
-			ret = g_strdup(buf);
+			datadir = g_strdup(buf);
 		}
 #endif
 	}
