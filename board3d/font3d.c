@@ -27,6 +27,7 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include <assert.h>
 
 struct _OGLFont
 {

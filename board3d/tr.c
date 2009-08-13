@@ -2,6 +2,11 @@
 
 /*
  * $Log$
+ * Revision 1.5  2009/08/13 20:09:20  mdpetch
+ * Added assert include for files callign assert macros but not explictly
+ * including the macro file. Fixes issues beuilding on some distros like
+ * Ubuntu
+ *
  * Revision 1.4  2009/06/24 18:38:46  Superfly_Jon
  * Fix compiler warnings
  *
@@ -50,6 +55,7 @@
 #include "config.h"
 #include "inc3d.h"
 #include "tr.h"
+#include <assert.h>
 
 #define DEFAULT_TILE_WIDTH  256
 #define DEFAULT_TILE_HEIGHT 256

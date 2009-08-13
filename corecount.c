@@ -85,6 +85,7 @@ unsigned char CPUCount(unsigned int *,
 #endif
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 
 char g_s3Levels[2048];
 

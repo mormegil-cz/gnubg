@@ -33,6 +33,7 @@
 #include <glib/gstdio.h>
 #include <string.h>
 #include "dbprovider.h"
+#include <assert.h>
 
 DBProviderType dbProviderType = (DBProviderType)0;
 int storeGameStats = TRUE;
