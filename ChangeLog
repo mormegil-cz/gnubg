@@ -1,3 +1,8 @@
+Fri Aug 14 21:05:09 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* dbprovider.c: width has size of size_t, which is different from int
+	on 64 bit platforms causing crash on db lookup
+
 Tue Aug 11 22:45:52 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* analysis.c, backgammon.h, commands.inc, gnubg.c, gtkgame.c, set.c,
