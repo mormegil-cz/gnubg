@@ -2254,7 +2254,14 @@ static void cmark_move_set(moverecord *pmr, gchar *sz, CMark cmark)
 
 	c = pmr->ml.cMoves;
 
+/* Mike Petch - This is a hack and is not thread safe under GLIB version < 2.12.5
+		Was added to allow cygwin to compile */
+
+#if GLIB_CHECK_VERSION(2,12,5)
 	while ((n = (int)g_ascii_strtoll(sz, &sz, 10)) != 0) {
+#else
+	while ((n = (int)strtoll(sz, &sz, 10)) != 0) {
+#endif
 		if (n > c) {
 			outputerrf("Only %d moves in movelist\n", c);
 			g_slist_free(list);
