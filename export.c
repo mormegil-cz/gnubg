@@ -42,7 +42,7 @@
 #include "boardpos.h"
 #include "boarddim.h"
 
-#if HAVE_CAIRO || HAVE_PANGOCAIRO
+#if HAVE_PANGOCAIRO
 #include <cairo.h>
 #include <cairo-svg.h>
 #include <cairo-pdf.h>
@@ -86,7 +86,7 @@ extern char *filename_from_iGame(const char *szBase, const int iGame)
 	}
 }
 
-#if HAVE_CAIRO
+#if HAVE_PANGOCAIRO
 static gchar *export_get_filename(char *sz)
 {
 	gchar *filename = NULL;
@@ -251,7 +251,7 @@ static int draw_cairo_pages(cairo_t * cairo, listOLD * game_ptr)
 
 extern void CommandExportPositionSVG(char *sz)
 {
-#if HAVE_CAIRO
+#if HAVE_PANGOCAIRO
 	gchar *filename;
 	int move_nr;
 	int game_nr;
@@ -286,7 +286,7 @@ extern void CommandExportPositionSVG(char *sz)
 
 extern void CommandExportPositionPDF(char *sz)
 {
-#if HAVE_CAIRO
+#if HAVE_PANGOCAIRO
 	gchar *filename;
 	int move_nr;
 	int game_nr;
@@ -321,7 +321,7 @@ extern void CommandExportPositionPDF(char *sz)
 
 extern void CommandExportPositionPS(char *sz)
 {
-#if HAVE_CAIRO
+#if HAVE_PANGOCAIRO
 	gchar *filename;
 	int move_nr;
 	int game_nr;
@@ -357,7 +357,7 @@ extern void CommandExportPositionPS(char *sz)
 
 extern void CommandExportGamePDF(char *sz)
 {
-#if HAVE_CAIRO
+#if HAVE_PANGOCAIRO
 	gchar *filename;
 	cairo_surface_t *surface;
 	cairo_t *cairo;
@@ -382,7 +382,7 @@ extern void CommandExportGamePDF(char *sz)
 
 extern void CommandExportGamePS(char *sz)
 {
-#if HAVE_CAIRO
+#if HAVE_PANGOCAIRO
 	gchar *filename;
 	cairo_surface_t *surface;
 	cairo_t *cairo;
@@ -407,7 +407,7 @@ extern void CommandExportGamePS(char *sz)
 
 extern void CommandExportMatchPDF(char *sz)
 {
-#if HAVE_CAIRO
+#if HAVE_PANGOCAIRO
 	listOLD *pl;
 	int nGames = 0;
 	int i;
@@ -439,7 +439,7 @@ extern void CommandExportMatchPDF(char *sz)
 
 extern void CommandExportMatchPS(char *sz)
 {
-#if HAVE_CAIRO
+#if HAVE_PANGOCAIRO
 	listOLD *pl;
 	int nGames = 0;
 	int i;
