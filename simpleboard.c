@@ -17,7 +17,7 @@
 */
 
 #include "config.h"
-#if HAVE_CAIRO
+#if HAVE_PANGOCAIRO
 #include <cairo.h>
 #include <pango/pangocairo.h>
 #include <glib.h>

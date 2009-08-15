@@ -42,7 +42,7 @@
 #include "boardpos.h"
 #include "boarddim.h"
 
-#if HAVE_CAIRO
+#if HAVE_PANGOCAIRO
 #include <cairo.h>
 #include <cairo-svg.h>
 #include <cairo-pdf.h>

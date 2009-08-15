@@ -1,4 +1,4 @@
-#if HAVE_CAIRO
+#if HAVE_PANGOCAIRO
 typedef struct _SimpleBoardColor SimpleBoardColor;
 
 /** \brief struct to hold the colors for points, dice, checkers, etc.*/
