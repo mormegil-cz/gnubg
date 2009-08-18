@@ -27,9 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-#ifndef WIN32
 #include <stdlib.h>
-#endif
 
 #include "neuralnet.h"
 #include "sse.h"
