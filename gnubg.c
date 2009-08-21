@@ -2113,12 +2113,14 @@ static int hint_cube(moverecord *pmr, cubeinfo *pci)
 	return 0;
 }
 
-static skilltype no_double_skill(float aarOutput[][NUM_ROLLOUT_OUTPUTS],
-				 cubeinfo *pci)
+static skilltype no_double_skill(moverecord *pmr, cubeinfo *pci)
 {
 	float arDouble[4];
 	float eq = 0.0f;
-	cubedecision cd = FindCubeDecision(arDouble, aarOutput, pci);
+	cubedecision cd;
+	if (pmr->CubeDecPtr->esDouble.et == EVAL_NONE)
+		return SKILL_NONE;
+	cd = FindCubeDecision(arDouble, pmr->CubeDecPtr->aarOutput, pci);
 	switch (cd) {
 	case DOUBLE_TAKE:
 	case DOUBLE_BEAVER:
@@ -2136,12 +2138,14 @@ static skilltype no_double_skill(float aarOutput[][NUM_ROLLOUT_OUTPUTS],
 	return Skill(eq);
 }
 
-static skilltype double_skill(float aarOutput[][NUM_ROLLOUT_OUTPUTS],
-			      cubeinfo *pci)
+static skilltype double_skill(moverecord *pmr, cubeinfo *pci)
 {
 	float arDouble[4];
 	float eq = 0.0f;
-	cubedecision cd = FindCubeDecision(arDouble, aarOutput, pci);
+	cubedecision cd;
+	if (pmr->CubeDecPtr->esDouble.et == EVAL_NONE)
+		return SKILL_NONE;
+	cd = FindCubeDecision(arDouble, pmr->CubeDecPtr->aarOutput, pci);
 
 	switch (cd) {
 	case NODOUBLE_TAKE:
@@ -2163,12 +2167,14 @@ static skilltype double_skill(float aarOutput[][NUM_ROLLOUT_OUTPUTS],
 	return Skill(eq);
 }
 
-static skilltype drop_skill(float aarOutput[][NUM_ROLLOUT_OUTPUTS],
-			    cubeinfo *pci)
+static skilltype drop_skill(moverecord *pmr, cubeinfo *pci)
 {
 	float arDouble[4];
 	float eq = 0.0f;
-	cubedecision cd = FindCubeDecision(arDouble, aarOutput, pci);
+	cubedecision cd;
+	if (pmr->CubeDecPtr->esDouble.et == EVAL_NONE)
+		return SKILL_NONE;
+	cd = FindCubeDecision(arDouble, pmr->CubeDecPtr->aarOutput, pci);
 	switch (cd) {
 	case DOUBLE_TAKE:
 	case DOUBLE_BEAVER:
@@ -2191,12 +2197,14 @@ static skilltype drop_skill(float aarOutput[][NUM_ROLLOUT_OUTPUTS],
 	return Skill(eq);
 }
 
-static skilltype take_skill(float aarOutput[][NUM_ROLLOUT_OUTPUTS],
-			    cubeinfo *pci)
+static skilltype take_skill(moverecord *pmr, cubeinfo *pci)
 {
 	float arDouble[4];
 	float eq = 0.0f;
-	cubedecision cd = FindCubeDecision(arDouble, aarOutput, pci);
+	cubedecision cd;
+	if (pmr->CubeDecPtr->esDouble.et == EVAL_NONE)
+		return SKILL_NONE;
+	cd = FindCubeDecision(arDouble, pmr->CubeDecPtr->aarOutput, pci);
 	switch (cd) {
 	case DOUBLE_PASS:
 	case REDOUBLE_PASS:
@@ -2215,11 +2223,16 @@ static skilltype take_skill(float aarOutput[][NUM_ROLLOUT_OUTPUTS],
 
 static skilltype move_skill(moverecord *pmr)
 {
-	if (pmr->n.iMove >= pmr->ml.cMoves)
+	move *move_i;
+	move *move_0;
+	if (pmr->n.iMove >= pmr->ml.cMoves || pmr->ml.amMoves)
+		return SKILL_NONE;
+	move_i = &pmr->ml.amMoves[pmr->n.iMove];
+	move_0 = &pmr->ml.amMoves[0];
+	if (move_i->esMove.et == EVAL_NONE || move_0->esMove.et == EVAL_NONE)
 		return SKILL_NONE;
 	else
-		return Skill(pmr->ml.amMoves[pmr->n.iMove].rScore -
-			     pmr->ml.amMoves[0].rScore);
+		return Skill(move_i->rScore - move_0->rScore);
 }
 
 extern void find_skills(moverecord *pmr, const matchstate *pms, int did_double,
@@ -2246,13 +2259,13 @@ extern void find_skills(moverecord *pmr, const matchstate *pms, int did_double,
 	} 
 
 	if (did_double == FALSE)
-		pmr->stCube = no_double_skill(pmr->CubeDecPtr->aarOutput, &ci);
+		pmr->stCube = no_double_skill(pmr, &ci);
 	else if (did_double == TRUE)
-		pmr->stCube = double_skill(pmr->CubeDecPtr->aarOutput, &ci);
+		pmr->stCube = double_skill(pmr, &ci);
 	else if (did_take == FALSE)
-		pmr->stCube = drop_skill(pmr->CubeDecPtr->aarOutput, &ci);
+		pmr->stCube = drop_skill(pmr, &ci);
 	else if (did_take == TRUE)
-		pmr->stCube = take_skill(pmr->CubeDecPtr->aarOutput, &ci);
+		pmr->stCube = take_skill(pmr, &ci);
 	else
 		pmr->stCube = SKILL_NONE;
 
