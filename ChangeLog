@@ -1,3 +1,7 @@
+Fri Aug 21 23:02:38 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* play.c: fix problems with storing computer cube evals
+
 Fri Aug 21 18:22:55 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c: check for et == EVAL_NONE before displaying skills

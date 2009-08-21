@@ -1256,7 +1256,6 @@ static int ComputerTurn( void ) {
 		  if (RunAsyncProcess((AsyncFun)asyncCubeDecision, &dd, _("Considering cube action...")) != 0)
 			return -1;
 
-	  current_pmr_cubedata_update(dd.pes, dd.aarOutput, dd.aarStdDev);
 
           cd = FindCubeDecision ( arDouble,  dd.aarOutput, &ci );
 
@@ -1267,9 +1266,10 @@ static int ComputerTurn( void ) {
           case DOUBLE_PASS:
           case REDOUBLE_PASS:
           case DOUBLE_BEAVER:
-
-            /* Double */
-
+		  if ( fTutor && fTutorCube )
+			  /* only store cube if tutoring or we get comments
+			   * where people don't want them */
+			  current_pmr_cubedata_update(dd.pes, dd.aarOutput, dd.aarStdDev);
             fComputerDecision = TRUE;
             CommandDouble ( NULL );
             fComputerDecision = FALSE;
@@ -1284,6 +1284,7 @@ static int ComputerTurn( void ) {
           case NODOUBLE_BEAVER:
           case NO_REDOUBLE_BEAVER:
 
+	    current_pmr_cubedata_update(dd.pes, dd.aarOutput, dd.aarStdDev);
             /* better leave cube where it is: no op */
             break;
 
@@ -1296,11 +1297,15 @@ static int ComputerTurn( void ) {
             if ( ap [ ms.fTurn ].esCube.et == EVAL_EVAL &&
                  ap [ ms.fTurn ].esCube.ec.nPlies == 0 ) {
 		/* double if 0-ply */
+	    if ( fTutor && fTutorCube )
+		    current_pmr_cubedata_update(dd.pes, dd.aarOutput, dd.aarStdDev);
 		fComputerDecision = TRUE;
 		CommandDouble ( NULL );
 		fComputerDecision = FALSE;
 		return 0;
 	    }
+	    else
+		    current_pmr_cubedata_update(dd.pes, dd.aarOutput, dd.aarStdDev);
 	    break;
 	    
           default:
@@ -4063,7 +4068,7 @@ extern moverecord *get_current_moverecord(int *pfHistory)
 	}
 
 	/* invalidate on changed dice */
-	if (ms.anDice[0] > 0 && pmr_hint
+	if (ms.anDice[0] > 0 && pmr_hint && pmr_hint->anDice[0] > 0 
 	    && (pmr_hint->anDice[0] != ms.anDice[0]
 		|| pmr_hint->anDice[1] != ms.anDice[1]))
 		pmr_hint_destroy();
@@ -4080,9 +4085,8 @@ extern moverecord *get_current_moverecord(int *pfHistory)
 	} else if (ms.fDoubled) {
 		pmr_hint->mt = MOVE_TAKE;
 	} else {
-		pmr_hint = NewMoveRecord();
-		pmr_hint->fPlayer = ms.fTurn;
 		pmr_hint->mt = MOVE_DOUBLE;
+		pmr_hint->fPlayer = ms.fTurn;
 	}
 	return pmr_hint;
 }
