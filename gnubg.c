@@ -2815,7 +2815,7 @@ static void LoadRCFiles(void)
 	g_free(szz);
 
 	outputon();
-	loading_rc = TRUE;
+	loading_rc = FALSE;
 }
 
 
