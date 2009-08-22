@@ -1,3 +1,7 @@
+Sat Aug 22 22:40:22 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c: silence unknown keyword error during load of rc files
+
 Fri Aug 21 23:02:38 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* play.c: fix problems with storing computer cube evals
