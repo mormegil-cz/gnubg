@@ -2225,7 +2225,7 @@ static skilltype move_skill(moverecord *pmr)
 {
 	move *move_i;
 	move *move_0;
-	if (pmr->n.iMove >= pmr->ml.cMoves || pmr->ml.amMoves)
+	if (pmr->n.iMove >= pmr->ml.cMoves || !pmr->ml.amMoves)
 		return SKILL_NONE;
 	move_i = &pmr->ml.amMoves[pmr->n.iMove];
 	move_0 = &pmr->ml.amMoves[0];
