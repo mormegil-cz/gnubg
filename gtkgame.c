@@ -4081,7 +4081,7 @@ typedef struct _rolloutpagegeneral {
   GtkWidget *pwTruncBearoff2, *pwTruncBearoffOS, *pwTruncBearoffOpts;
   GtkWidget *pwAdjLatePlies, *pwAdjTruncPlies, *pwAdjMinGames;
   GtkWidget *pwDoSTDStop, *pwAdjMaxError;
-  GtkWidget *pwJsdDoStop, *pwJsdDoMoveStop;
+  GtkWidget *pwJsdDoStop;
   GtkWidget *pwJsdMinGames, *pwJsdAdjMinGames, *pwJsdAdjLimit;
   GtkAdjustment *padjTrials, *padjTruncPlies, *padjLatePlies;
   GtkAdjustment *padjSeed, *padjMinGames, *padjMaxError;
@@ -4164,7 +4164,6 @@ static void GetRolloutSettings( GtkWidget *pw, rolloutwidget *prw ) {
   prw->rcRollout.rStdLimit = gtk_spin_button_get_value_as_float (GTK_SPIN_BUTTON (prw->prwGeneral->pwMaxError));
 
   prw->rcRollout.fStopOnJsd = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(prw->prwGeneral->pwJsdDoStop));
-  prw->rcRollout.fStopMoveOnJsd = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(prw->prwGeneral->pwJsdDoMoveStop));
   prw->rcRollout.nMinimumJsdGames = (unsigned int) gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (prw->prwGeneral->pwJsdMinGames));
   prw->rcRollout.rJsdLimit = gtk_spin_button_get_value_as_float (GTK_SPIN_BUTTON (prw->prwGeneral->pwJsdAdjLimit));
 
@@ -4310,12 +4309,10 @@ static void STDStopToggled( GtkWidget *pw, rolloutwidget *prw) {
 static void JsdStopToggled( GtkWidget *pw, rolloutwidget *prw) {
 
   int do_jsd_stop = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (prw->prwGeneral->pwJsdDoStop ) );
-  int do_jsd_move_stop = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (prw->prwGeneral->pwJsdDoMoveStop) );
-  int enable = do_jsd_stop | do_jsd_move_stop;
   
-  gtk_widget_set_sensitive (GTK_WIDGET (prw->prwGeneral->pwJsdAdjLimit), enable);
+  gtk_widget_set_sensitive (GTK_WIDGET (prw->prwGeneral->pwJsdAdjLimit), do_jsd_stop);
 
-  gtk_widget_set_sensitive (GTK_WIDGET (prw->prwGeneral->pwJsdAdjMinGames), enable);
+  gtk_widget_set_sensitive (GTK_WIDGET (prw->prwGeneral->pwJsdAdjMinGames), do_jsd_stop);
 
 }
 
@@ -4536,15 +4533,10 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   pwv = gtk_vbox_new( FALSE, 0 );
   gtk_container_add( GTK_CONTAINER( pw ), pwv);
 
-  prpw->pwJsdDoStop = gtk_check_button_new_with_label (_( "Stop rollout when one move appears to be best " ) );
+  prpw->pwJsdDoStop = gtk_check_button_new_with_label (_( "Enable Stop on Jsd" ) );
   gtk_container_add( GTK_CONTAINER( pwv ), prpw->pwJsdDoStop );
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( prw->prwGeneral->pwJsdDoStop ), prw->rcRollout.fStopOnJsd);
   g_signal_connect( G_OBJECT( prw->prwGeneral->pwJsdDoStop ), "toggled", G_CALLBACK (JsdStopToggled), prw);
-
-  prpw->pwJsdDoMoveStop = gtk_check_button_new_with_label (_( "Stop rollout of move when best move JSD appears better " ) );
-  gtk_container_add( GTK_CONTAINER( pwv ), prpw->pwJsdDoMoveStop );
-  gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( prw->prwGeneral->pwJsdDoMoveStop ), prw->rcRollout.fStopMoveOnJsd);
-  g_signal_connect( G_OBJECT( prw->prwGeneral->pwJsdDoMoveStop ), "toggled", G_CALLBACK (JsdStopToggled), prw);
 
   /* a vbox for the adjusters */
   pwv = gtk_vbox_new( FALSE, 0 );
@@ -4563,7 +4555,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   prpw->pwJsdAdjLimit = pwHBox = gtk_hbox_new( FALSE, 0 );
   gtk_container_add( GTK_CONTAINER( pwv ), pwHBox);
   gtk_container_add( GTK_CONTAINER( pwHBox ), 
-                   gtk_label_new( _("No of JSDs from best move" ) ) );
+                   gtk_label_new( _("JSDs from best choice" ) ) );
 
   prpw->padjJsdLimit = GTK_ADJUSTMENT( gtk_adjustment_new( 
                        prw->rcRollout.rJsdLimit, 0, 8, .0001, .0001, 0 ) );
@@ -4963,11 +4955,6 @@ extern void SetRollouts( gpointer p, guint n, GtkWidget *pwIgnore )
 
     if( rw.rcRollout.fStopOnJsd != rcRollout.fStopOnJsd ) {
       sprintf( sz, "set rollout jsd stop %s", rw.rcRollout.fStopOnJsd ? "on" : "off" );
-      UserCommand( sz );
-    }
-
-    if( rw.rcRollout.fStopMoveOnJsd != rcRollout.fStopMoveOnJsd ) {
-      sprintf( sz, "set rollout jsd move %s", rw.rcRollout.fStopMoveOnJsd ? "on" : "off" );
       UserCommand( sz );
     }
 

@@ -1140,7 +1140,7 @@ extern void RolloutLoopMT(void *unused)
 
 				ajiJSD[alt].rJSD = ajiJSD[alt].rEquity / denominator;
 
-				if ((rcRollout.fStopMoveOnJsd || rcRollout.fStopOnJsd) &&
+				if ((rcRollout.fStopOnJsd) &&
 				    (altGameCount[alt] >= (rcRollout.nMinimumJsdGames ))) {
 					if (ajiJSD[alt].rJSD > rcRollout.rJsdLimit) {
 						/* This move is no longer worth rolling out */
@@ -1272,7 +1272,7 @@ extern void RolloutLoopMT(void *unused)
 		}		/* if (rcRollout.fStopOnSTD) */
 		MT_Release();
 		multi_debug("exclusive release: rollout cycle update");
-		if (((active_alternatives < 2) && rcRollout.fStopOnJsd) || active_alternatives < 1)
+		if ((active_alternatives < 2 && rcRollout.fStopOnJsd) || active_alternatives < 1)
 			break;
 	}
 	free(rngctxMTRollout);
@@ -1346,7 +1346,6 @@ RolloutGeneral(ConstTanBoard * apBoard,
 
 	memcpy(&rcRolloutSave, &rcRollout, sizeof(rcRollout));
 	if (alternatives == 1) {
-		rcRollout.fStopMoveOnJsd = 0;
 		rcRollout.fStopOnJsd = 0;
 	}
 
@@ -1446,7 +1445,7 @@ RolloutGeneral(ConstTanBoard * apBoard,
 
 		/* we can't do JSD tricks on initial positions */
 		if (prc->fInitial) {
-			rcRollout.fStopMoveOnJsd = 0;
+			rcRollout.fStopOnJsd = 0;
 			show_jsds = 0;
 		}
 
@@ -1454,10 +1453,10 @@ RolloutGeneral(ConstTanBoard * apBoard,
 
 	/* we can't do JSD tricks if some rollouts are cubeful and some not */
 	if (nIsCubeful && nIsCubeless)
-		rcRollout.fStopMoveOnJsd = 0;
+		rcRollout.fStopOnJsd = 0;
 
 	/* if we're using stop on JSD, turn off stop on STD error */
-	if (rcRollout.fStopMoveOnJsd)
+	if (rcRollout.fStopOnJsd)
 		rcRollout.fStopOnSTD = 0;
 
 	/* Put parameters in global variables - urgh, would be better in task variable really... */
@@ -1596,7 +1595,6 @@ RolloutGeneral( ConstTanBoard *apBoard,
 
   memcpy (&rcRolloutSave, &rcRollout, sizeof (rcRollout));
   if (alternatives < 2) {
-    rcRollout.fStopMoveOnJsd = 0;
     rcRollout.fStopOnJsd = 0;
   }
 
@@ -1701,7 +1699,7 @@ RolloutGeneral( ConstTanBoard *apBoard,
 
     /* we can't do JSD tricks on initial positions */
     if (prc->fInitial) {
-      rcRollout.fStopMoveOnJsd = 0;
+      rcRollout.fStopOnJsd = 0;
       show_jsds = 0;
     }
 
@@ -1709,10 +1707,10 @@ RolloutGeneral( ConstTanBoard *apBoard,
   
   /* we can't do JSD tricks if some rollouts are cubeful and some not */
   if (nIsCubeful && nIsCubeless)
-    rcRollout.fStopMoveOnJsd = 0;
+    rcRollout.fStopOnJsd = 0;
 
   /* if we're using stop on JSD, turn off stop on STD error */
-  if (rcRollout.fStopMoveOnJsd)
+  if (rcRollout.fStopOnJsd)
     rcRollout.fStopOnSTD = 0;
 
   /* ============ begin rollout loop ============= */
@@ -1889,8 +1887,7 @@ RolloutGeneral( ConstTanBoard *apBoard,
 
         ajiJSD[ alt ].rJSD = ajiJSD[ alt ].rEquity / denominator;
         
-        if ((rcRollout.fStopMoveOnJsd || rcRollout.fStopOnJsd) &&
-            (i >= (rcRollout.nMinimumJsdGames - 1))) {
+        if (rcRollout.fStopOnJsd && (i >= (rcRollout.nMinimumJsdGames - 1))) {
           if (ajiJSD[ alt ].rJSD > rcRollout.rJsdLimit) {
             /* This move is no longer worth rolling out */
 
@@ -1924,7 +1921,7 @@ RolloutGeneral( ConstTanBoard *apBoard,
         }
       }
       
-      if (rcRollout.fStopMoveOnJsd || rcRollout.fStopOnJsd) {
+      if (rcRollout.fStopOnJsd) {
         i = reset_to;   
       }
 

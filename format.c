@@ -392,13 +392,13 @@ OutputRolloutContext ( const char *szIndent, const rolloutcontext *prc ) {
 
   strcat ( sz, "\n" );
 
-   if ( ( prc->fStopOnJsd || prc->fStopMoveOnJsd || prc->fStopOnSTD )
+   if ( ( prc->fStopOnJsd || prc->fStopOnSTD )
         && szIndent && *szIndent )
      strcat ( sz, szIndent );
 
     /* stop on std.err */
 
-   if ( prc->fStopOnSTD && !prc->fStopMoveOnJsd )
+   if ( prc->fStopOnSTD && !prc->fStopOnJsd )
    {
     sprintf( strchr( sz, 0 ),
              _("Stop when std.errs. are small enough: ratio "
@@ -408,7 +408,7 @@ OutputRolloutContext ( const char *szIndent, const rolloutcontext *prc ) {
    }
 
    /* stop on JSD */
-   if ( prc->fStopOnJsd || prc->fStopMoveOnJsd )
+   if ( prc->fStopOnJsd )
    {
      sprintf( strchr( sz, 0 ),
               _("Stop when best play is enough JSDs ahead: limit "

@@ -1,3 +1,8 @@
+Sat Aug 22 22:50:38 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, commands.inc, format.c, gnubg.c, gtkgame.c, rollout.c,
+	set.c: Simplify stop on jsd by just having one option.
+
 Sat Aug 22 22:40:22 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c: silence unknown keyword error during load of rc files

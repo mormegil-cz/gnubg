@@ -841,7 +841,6 @@ extern void CommandSetRolloutJsd(char *);
 extern void CommandSetRolloutJsdEnable(char *);
 extern void CommandSetRolloutJsdLimit(char *);
 extern void CommandSetRolloutJsdMinGames(char *);
-extern void CommandSetRolloutJsdMoveEnable(char *);
 extern void CommandSetRolloutLate(char *);
 extern void CommandSetRolloutLateChequerplay(char *);
 extern void CommandSetRolloutLateCubedecision(char *);

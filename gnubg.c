@@ -1252,9 +1252,10 @@ extern void HandleCommand( char *sz, command *ac )
 	if( !StrNCaseCmp( pch, pc->sz, cch ) )
 	    break;
 
-    if( !pc->sz && !loading_rc) {
-	outputerrf( _("Unknown keyword `%s'.\n"), pch );
-	return;
+    if( !pc->sz) {
+	    if (!loading_rc)
+		    outputerrf( _("Unknown keyword `%s'.\n"), pch );
+	    return;
     }
 
     if( pc->pf ) {
@@ -2936,7 +2937,6 @@ SaveRolloutSettings ( FILE *pf, const char *sz, rolloutcontext *prc ) {
             "%s limit minimumgames %d\n"
             "%s limit maxerror %s\n"
 	    "%s jsd stop %s\n"
-            "%s jsd move %s\n"
             "%s jsd minimumgames %d\n"
             "%s jsd limit %s\n",
             sz, prc->fCubeful ? "on" : "off",
@@ -2957,7 +2957,6 @@ SaveRolloutSettings ( FILE *pf, const char *sz, rolloutcontext *prc ) {
 	    sz, prc->nMinimumGames,
 	    sz, szTemp1,
             sz, prc->fStopOnJsd ? "on" : "off",
-            sz, prc->fStopMoveOnJsd ? "on" : "off",
             sz, prc->nMinimumJsdGames,
 	    sz, szTemp2
             );
