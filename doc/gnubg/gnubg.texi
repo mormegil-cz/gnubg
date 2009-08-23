@@ -12,9 +12,9 @@
 @top GNU Backgammon Manual V0.90.0
 
 @menu
-* Introduction::                Introduction to GNU Backgammon
-* Rules of the game::           Backgammon rules by Tom Keith
-* Starting GNU Backgammon::     Starting GNU Backgammon. Command line options.
+* Introduction::                   Introduction to GNU Backgammon
+* Rules of the game::              Courtesy of Tom Keith
+* Starting GNU Backgammon::        Command line options
 * Playing a game::
 * Getting hints and Tutor Mode::
 * Setting up a position::
@@ -252,9 +252,10 @@ Software Foundation at:
 @chapter Rules of the game
 
 This section describes how to play a game, a match or a session of
-money games against GNU
-Backgammon, or a human opponent. Authored by @uref{http://www.bkgm.com/rules.html,Tom Keith}. Skilled
-backgammon players may skip ahead to next section.
+money games against GNU Backgammon, or a human opponent. It is
+taken directly from the rules section of
+@uref{http://www.bkgm.com/,Backgammon Galore}, courtesy of
+Tom Keith.
 
 @menu
 * Setup::
