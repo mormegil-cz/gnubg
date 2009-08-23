@@ -13,9 +13,9 @@ GNU Backgammon Manual V0.90.0
 
 * Menu:
 
-* Introduction::                Introduction to GNU Backgammon
-* Rules of the game::           Backgammon rules by Tom Keith
-* Starting GNU Backgammon::     Starting GNU Backgammon. Command line options.
+* Introduction::                   Introduction to GNU Backgammon
+* Rules of the game::              Courtesy of Tom Keith
+* Starting GNU Backgammon::        Command line options
 * Playing a game::
 * Getting hints and Tutor Mode::
 * Setting up a position::
@@ -236,9 +236,9 @@ File: gnubg.info,  Node: Rules of the game,  Next: Starting GNU Backgammon,  Pre
 *******************
 
 This section describes how to play a game, a match or a session of
-money games against GNU Backgammon, or a human opponent. Authored by
-Tom Keith (http://www.bkgm.com/rules.html). Skilled backgammon players
-may skip ahead to next section.
+money games against GNU Backgammon, or a human opponent. It is taken
+directly from the rules section of Backgammon Galore
+(http://www.bkgm.com/), courtesy of Tom Keith.
 
 * Menu:
 
@@ -2650,7 +2650,7 @@ pruning at 1-ply.
    GNU Backgammon starts by finding all possible moves and evaluate
 those at 0-ply:
 
-1.           Cubeful      0-ply        8/4 6/4      Eq.:+0.189   
+1.           Cubeful      0-ply        8/4 6/4      Eq.:+0.189
 2.           Cubeful      0-ply        24/20 13/11  Eq.:+0.046   (-0.143)
 3.           Cubeful      0-ply        13/11 13/9   Eq.:+0.044   (-0.145)
 4.           Cubeful      0-ply        24/22 13/9   Eq.:+0.034   (-0.155)
@@ -2669,7 +2669,7 @@ that, so the move list after pruning at 0-ply consists of moves 1
 through 4. According to the move filter we do not perform any pruning
 at 1-ply, so moves 1 through 4 are submitted for evaluation at 2-ply;
 
-1.           Cubeful      2-ply        8/4 6/4      Eq.:+0.180   
+1.           Cubeful      2-ply        8/4 6/4      Eq.:+0.180
 2.           Cubeful      2-ply        24/20 13/11  Eq.:+0.052   (-0.127)
 3.           Cubeful      2-ply        13/11 13/9   Eq.:+0.043   (-0.137)
 4.           Cubeful      2-ply        24/22 13/9   Eq.:+0.035   (-0.145)
@@ -2686,9 +2686,9 @@ will use the move filters defined for 4-ply:
 Ply                Accept moves       Extra moves        Threshold for
                                                          extra moves
 0                  0                  8                  0.160
-1                  no pruning                            
+1                  no pruning
 2                  0                  2                  0.040
-3                  no pruning                            
+3                  no pruning
 
    The 4-ply move filter is identical to the 2-ply for pruning at
 0-ply, so after 0-ply we have the same three moves as above. Since
@@ -3501,12 +3501,12 @@ points: (MWC(w),+1) and (MWC(l),-1).
    For example, suppose the score is 3-1 to 5 with the cube on 2:
 MWC(l)=0% and MWC(w)=50%:
 
-MWC                      NEMG                     
-0%                       -1                       
-25%                      0                        
-50%                      +1                       
-75%                      +2                       
-100%                     +3                       
+MWC                      NEMG
+0%                       -1
+25%                      0
+50%                      +1
+75%                      +2
+100%                     +3
 
    Note that a w/g/bg distribution of 0 100 100 - 0 0 0 gives a NEMG of
 +3 whereas the corresponding money equity is only +2. This is because
@@ -4379,50 +4379,50 @@ Here is a list of CPU and Evaluations per second ( Analyze->Evaluation
 Speed). Feel free to add your CPU:
 
 Evals/sec    CPU          System/Main  RAM          OS           GNUBG-Version
-                          board                                  
+                          board
 28450 *1     AMD Sempron  K8T800-A     1024 MB      Win 2000     0.14-mingw
-             3000+ (1800                                         
-             MHz)                                                
+             3000+ (1800
+             MHz)
 28000        Intel Core   Mac mini     512 MB       Win XP SP2   0.14-mingw
-             Duo 1.66 GHz Core Duo                               
+             Duo 1.66 GHz Core Duo
 27000        Intel        AOpen 1557-J 1024 MB      Win XP SP2   0.14-mingw
-             Pentium M                                           
-             735 (1.7                                            
-             GHz)                                                
+             Pentium M
+             735 (1.7
+             GHz)
 26000        Celeron 331  Dell         512 MB       Win XP SP2   0.14.3-devel
-             2.66 GHz     Dimension                              
-                          3100                                   
+             2.66 GHz     Dimension
+                          3100
 24500        Sempron      Asus K8V-X   768 MB       Win XP SP2   0.14.3-devel
-             2800+ (rev                                          
-             E6_at_2000                                          
-             MHz)                                                
+             2800+ (rev
+             E6_at_2000
+             MHz)
 23000        P4 2.8 GHz   Asus P4P800D 1024 MB      Win XP SP2   0.14.3-devel
 21759        Athlon64     Acer Aspire  512 MB       Kubuntu 5.04 0.14.3-devel
-             3000+        1522                                   
-             (32bit mode)                                        
+             3000+        1522
+             (32bit mode)
 21500 *1     AMD Sempron  K8T800-A     1024 MB      Win 2000     0.14.3-devel
-             3000+ (1800                                         
-             MHz)                                                
+             3000+ (1800
+             MHz)
 20120        Athlon XP    MSI          1024 MB      Suse Linux   0.14.3-devel
-             2500+        K7N-Delta2                9.2          
-             (_at_1833                                           
-             Mhz)                                                
-20200        Pentium M    Sony Vaio    512 MB       FreeBSD 5.2  
-             1.7 GHz      Z1XSP                                  
+             2500+        K7N-Delta2                9.2
+             (_at_1833
+             Mhz)
+20200        Pentium M    Sony Vaio    512 MB       FreeBSD 5.2
+             1.7 GHz      Z1XSP
 19515        Intel        Sony Vaio    256 MB       Fedora       0.14.3-devel
-             Pentium M    PCG-SRX51P                FC6(T3)      
-             0.8 GHz *2                                          
+             Pentium M    PCG-SRX51P                FC6(T3)
+             0.8 GHz *2
 19200        Pentium M    IBM X41      1024 MB      Win XP SP2   0.14.3-devel
-             1.6 GHz                                             
+             1.6 GHz
 16900        P4 2 GHz     ?            256 MB       Win 2000     0.14-devel
 14400        P3 1GHz      Sony Vaio    256 MB       Win XP SP2   0.16-mingw
-                          PCG-R600HFPD                           
+                          PCG-R600HFPD
 13000 *3     AMD 1GHz     Jetway       1536 MB      Win 2000     0.14-devel
 10506        Intel        Sony Vaio    256 MB       Windows      0.14-mingw
-             Pentium M    PCG-SRX51P                XP(SP2)      
-             0.8 GHz                                             
+             Pentium M    PCG-SRX51P                XP(SP2)
+             0.8 GHz
 6200         Celeron 650  toshiba      256 MB       Win me       0.14-devel
-             MHz          laptop                                 
+             MHz          laptop
 
 *1                                   These are the two versions
                                      evaluated on the same machine. Big
@@ -5506,221 +5506,221 @@ their use in free software.
 
 Tag Table:
 Node: Top205
-Node: Introduction2360
-Node: GPL copying/warranty info6590
-Node: Rules of the game7085
-Node: Setup7673
-Ref: A board with the checkers in their initial position_8221
-Node: Object of the Game9773
-Ref: Direction of movement of White's checkers_ Red's checkers move in the opposite direction_10118
-Node: Movement of the Checkers10876
-Ref: White opens the game with 53_12180
-Node: Hitting and Entering13593
-Ref: White rolls 64 with a checker on the bar_14378
-Node: Bearing Off15586
-Ref: White rolls 64 and bears off two checkers_16462
-Node: Doubling17105
-Node: Gammons and Backgammons18130
-Node: Optional Rules18807
-Node: Rules for Match Play19773
-Node: Starting GNU Backgammon22013
-Node: Linux and Unix22265
-Node: Microsoft Windows22764
-Node: Mac OSX23506
-Node: Command line options24452
-Ref: GNU Backgammon startup options24849
-Node: Playing a game26409
-Node: Starting a new match26686
-Ref: The dialog for starting a new match_27046
-Node: Rolling the dice28472
-Ref: Click in the red rectangle to roll the dice_28828
-Node: Moving the checkers29040
-Node: Moving by drag and drop29318
-Node: Moving checkers by clicking29886
-Node: Undo a move30760
-Node: Some shortcuts31208
-Node: Using the double cube32041
-Node: Offering a double32277
-Node: Accepting or declining a cube32620
-Ref: The toolbar double buttons_33182
-Node: Resigning33532
-Node: Offering a resignation33728
-Node: Accepting or declining a resignation34302
-Node: Getting hints and Tutor Mode35303
-Node: Getting hints manually35538
-Node: Getting checker play hints while playing35825
-Ref: The hint window36238
-Node: Getting cube decision hints while playing39152
-Ref: The cube hint window39717
-Node: The hint tool buttons41297
-Node: Tutor mode43601
-Ref: The tutor window43946
-Ref: The tutor warning window44649
-Node: Setting up a position45438
-Node: Entering Edit mode46353
-Node: Editing47311
-Node: Clearing the board47641
-Ref: Click in the one of the areas marked with a red ellipse to clear the board_48072
-Ref: Click in the one of the areas marked with a red ellipse to get to the initial position_48363
-Node: Quick edit48576
-Node: Editing by drag and drop49610
-Node: Setting the player on turn50456
-Ref: Clicking the White checker image will set White on turn; clicking the Black image will set Black in turn_50762
-Node: Setting the dice51323
-Ref: Click inside the red rectangle to set the dice for Black_ Click inside the green rectangle to set the dice for White_51945
-Node: Setting the cube52470
-Node: Setting the score53075
-Node: Exiting Edit mode54032
-Node: Analyzing the position54494
-Node: Working with matches55752
-Node: Retrieving and storing backgammon files56040
-Node: The Smart Game Format56437
-Node: Opening and importing matches57014
-Node: Saving and exporting positions; games or matches58707
-Node: HTML export61191
-Node: LaTeX export63873
-Node: Entering live tournament matches64718
-Node: Entering illegal moves67301
-Node: Analyzing matches68316
-Node: Analysis settings69468
-Ref: Analyze settings dialog69747
-Node: Reviewing matches71273
-Node: Game record71477
-Ref: The Game record pane72027
-Node: Analysis panel74817
-Ref: The Analyze pane75380
-Node: Statistics78039
-Node: Checker play statistics78594
-Node: Luck analysis80373
-Node: Cube statistics82209
-Node: Overall rating84932
-Node: Rollouts88536
-Node: Introduction to rollouts88740
-Node: Rollouts in GNU Backgammon90950
-Node: Quasi-Random Dice93685
-Node: Customizing GNU Backgammon96922
-Node: Evaluation settings97136
-Node: Introduction to evaluation settings97642
-Node: The depth to search and plies98720
-Node: Defining evaluation settings101534
-Node: Playing skill;101900
-Node: Hints;102269
-Node: Analysis;103013
-Node: Rollouts;103549
-Node: Changing evaluation settings104497
-Ref: The evaluation settings dialog104760
-Node: Predefined settings106516
-Node: Move filters108019
-Node: Introduction to move filters108253
-Ref: Example of move filter settings109563
-Node: Defining move filters113254
-Ref: Move filter 1113895
-Ref: Move filter 2115412
-Ref: Move filter 3115485
-Node: Cubeful vs_ Cubeless116435
-Ref: Cubeful example116886
-Ref: Cubeful example 2117574
-Node: Reduced evaluations118376
-Node: Pruning neural networks119012
-Node: Noise119776
-Node: Appearance121022
-Ref: The appearance dialog121487
-Node: Technical Notes122649
-Node: Obtaining bearoff databases123072
-Node: Generate your own123580
-Node: Download126311
-Node: Verification of databases126928
-Node: One-sided bearoff databases [compressed]127299
-Node: Two-sided bearoff databases [with cubeless and cubeful equities]129209
-Node: Two-sided databases for Hypergammon130877
-Ref: Random position from hypergammon database131598
-Node: Match Equity Tables133047
-Node: Python scripting133310
-Node: gnubg module functions133748
-Node: Match description135000
-Node: Match info135367
-Node: Python game136900
-Node: Game actions137509
-Node: Guile scripting137663
-Node: Equities explained137961
-Node: Introduction to equities138278
-Node: Money equity138812
-Node: Match Winning Chance139678
-Node: Normalized equity141181
-Node: Cubeful equities143007
-Node: Basic formula for cubeful equities143600
-Node: Live cube equities144538
-Ref: Cubeful example 1145200
-Ref: mgtp145855
-Ref: mptp148978
-Node: 0-ply Cubeful equities150789
-Node: n-ply Cubeful equities151503
-Node: The cube efficiency152860
-Node: Cube decisions154711
-Ref: mgcd155323
-Node: Beyond the simple model157634
-Node: A technical description of the Position ID158462
-Node: A technical description of the Match ID164228
-Node: Description of the CSS style sheet168780
-Node: Frequently Asked Questions173754
-Node: General questions174089
-Node: What is GNU Backgammon?174785
-Node: What operating systems are supported?175197
-Node: Where do I get it?175857
-Node: What do I have to pay for GNU Backgammon?176322
-Node: This GNU stuff sounds interesting_177051
-Node: I want to learn more about backgammon_177426
-Node: Though I really read all the documentation I still have questions_177891
-Node: I want to make a few proposals_ I have new ideas_178540
-Node: How to install178948
-Node: Do I need some other software to run GNU Backgammon?179579
-Node: I want to install a newer version_180110
-Node: I would like to compile it from the source code_180441
-Node: What software do I need for compiling under GNU/Linux?180860
-Node: What software do I need for compiling under MS Windows?181298
-Node: It does not compile_181735
-Node: On what CPU will GNU Backgammon run fastest?182167
-Node: Running GNU Backgammon185985
-Node: I get an error message when starting_186972
-Node: GNU Backgammon complains about missing files_187374
-Node: Starting from the WinXP menu it plays like a beginner_189142
-Node: My screen mixes up while starting GNU Backgammon_189721
-Node: I only get a command-line interface_ Where is the nice board?190341
-Node: When I restart GNU Backgammon all my settings are gone_190977
-Node: I do not need this graphical stuff_ Where is the terminal for commands?191436
-Node: Playing backgammon192105
-Node: What is the difference of a new game or match or session?192748
-Node: What the heck is a beaver in Backgammon?193390
-Node: How do I move the checkers?193933
-Node: Why am I allowed to place more than 5 checkers on a point?194718
-Node: GNU Backgammon plays poorly_195516
-Node: GNU Backgammon is too strong for me_196101
-Node: I think the bot is cheating_ It always gets good dice_196514
-Node: Settings197052
-Node: Where can I change the name of the human player?197401
-Node: How do I change the colors?197767
-Node: How do I stop the annoying beeps?"198125
-Node: What are Plies?198475
-Node: What is noise?200371
-Node: What is reduced evaluation?200661
-Node: Analyzing200958
-Node: What are these funny letters at the right bottom?201419
-Node: How do I set up a position manually?201961
-Node: Which formats must I use to import matches and positions?202867
-Node: How can I switch the players sides?203500
-Node: What do ! and ? mean?203815
-Node: How is the error rate determined?204733
-Node: What does Pips mean?205591
-Node: What does epc mean?206401
-Node: Abbreviations208606
-Node: GWC208798
-Node: MWC?208938
-Node: DP?209093
-Node: CP?209494
-Ref: The double line210236
-Node: TG?210650
-Node: epc?210988
-Node: GNU Free Documentation License211243
+Node: Introduction2335
+Node: GPL copying/warranty info6565
+Node: Rules of the game7060
+Node: Setup7645
+Ref: A board with the checkers in their initial position_8193
+Node: Object of the Game9745
+Ref: Direction of movement of White's checkers_ Red's checkers move in the opposite direction_10090
+Node: Movement of the Checkers10848
+Ref: White opens the game with 53_12152
+Node: Hitting and Entering13565
+Ref: White rolls 64 with a checker on the bar_14350
+Node: Bearing Off15558
+Ref: White rolls 64 and bears off two checkers_16434
+Node: Doubling17077
+Node: Gammons and Backgammons18102
+Node: Optional Rules18779
+Node: Rules for Match Play19745
+Node: Starting GNU Backgammon21985
+Node: Linux and Unix22237
+Node: Microsoft Windows22736
+Node: Mac OSX23478
+Node: Command line options24424
+Ref: GNU Backgammon startup options24821
+Node: Playing a game26381
+Node: Starting a new match26658
+Ref: The dialog for starting a new match_27018
+Node: Rolling the dice28444
+Ref: Click in the red rectangle to roll the dice_28800
+Node: Moving the checkers29012
+Node: Moving by drag and drop29290
+Node: Moving checkers by clicking29858
+Node: Undo a move30732
+Node: Some shortcuts31180
+Node: Using the double cube32013
+Node: Offering a double32249
+Node: Accepting or declining a cube32592
+Ref: The toolbar double buttons_33154
+Node: Resigning33504
+Node: Offering a resignation33700
+Node: Accepting or declining a resignation34274
+Node: Getting hints and Tutor Mode35275
+Node: Getting hints manually35510
+Node: Getting checker play hints while playing35797
+Ref: The hint window36210
+Node: Getting cube decision hints while playing39124
+Ref: The cube hint window39689
+Node: The hint tool buttons41269
+Node: Tutor mode43573
+Ref: The tutor window43918
+Ref: The tutor warning window44621
+Node: Setting up a position45410
+Node: Entering Edit mode46325
+Node: Editing47283
+Node: Clearing the board47613
+Ref: Click in the one of the areas marked with a red ellipse to clear the board_48044
+Ref: Click in the one of the areas marked with a red ellipse to get to the initial position_48335
+Node: Quick edit48548
+Node: Editing by drag and drop49582
+Node: Setting the player on turn50428
+Ref: Clicking the White checker image will set White on turn; clicking the Black image will set Black in turn_50734
+Node: Setting the dice51295
+Ref: Click inside the red rectangle to set the dice for Black_ Click inside the green rectangle to set the dice for White_51917
+Node: Setting the cube52442
+Node: Setting the score53047
+Node: Exiting Edit mode54004
+Node: Analyzing the position54466
+Node: Working with matches55724
+Node: Retrieving and storing backgammon files56012
+Node: The Smart Game Format56409
+Node: Opening and importing matches56986
+Node: Saving and exporting positions; games or matches58679
+Node: HTML export61163
+Node: LaTeX export63845
+Node: Entering live tournament matches64690
+Node: Entering illegal moves67273
+Node: Analyzing matches68288
+Node: Analysis settings69440
+Ref: Analyze settings dialog69719
+Node: Reviewing matches71245
+Node: Game record71449
+Ref: The Game record pane71999
+Node: Analysis panel74789
+Ref: The Analyze pane75352
+Node: Statistics78011
+Node: Checker play statistics78566
+Node: Luck analysis80345
+Node: Cube statistics82181
+Node: Overall rating84904
+Node: Rollouts88508
+Node: Introduction to rollouts88712
+Node: Rollouts in GNU Backgammon90922
+Node: Quasi-Random Dice93657
+Node: Customizing GNU Backgammon96894
+Node: Evaluation settings97108
+Node: Introduction to evaluation settings97614
+Node: The depth to search and plies98692
+Node: Defining evaluation settings101506
+Node: Playing skill;101872
+Node: Hints;102241
+Node: Analysis;102985
+Node: Rollouts;103521
+Node: Changing evaluation settings104469
+Ref: The evaluation settings dialog104732
+Node: Predefined settings106488
+Node: Move filters107991
+Node: Introduction to move filters108225
+Ref: Example of move filter settings109535
+Node: Defining move filters113226
+Ref: Move filter 1113867
+Ref: Move filter 2115384
+Ref: Move filter 3115457
+Node: Cubeful vs_ Cubeless116407
+Ref: Cubeful example116858
+Ref: Cubeful example 2117546
+Node: Reduced evaluations118348
+Node: Pruning neural networks118984
+Node: Noise119748
+Node: Appearance120994
+Ref: The appearance dialog121459
+Node: Technical Notes122621
+Node: Obtaining bearoff databases123044
+Node: Generate your own123552
+Node: Download126283
+Node: Verification of databases126900
+Node: One-sided bearoff databases [compressed]127271
+Node: Two-sided bearoff databases [with cubeless and cubeful equities]129181
+Node: Two-sided databases for Hypergammon130849
+Ref: Random position from hypergammon database131570
+Node: Match Equity Tables133019
+Node: Python scripting133282
+Node: gnubg module functions133720
+Node: Match description134972
+Node: Match info135339
+Node: Python game136872
+Node: Game actions137481
+Node: Guile scripting137635
+Node: Equities explained137933
+Node: Introduction to equities138250
+Node: Money equity138784
+Node: Match Winning Chance139650
+Node: Normalized equity141153
+Node: Cubeful equities142979
+Node: Basic formula for cubeful equities143572
+Node: Live cube equities144510
+Ref: Cubeful example 1145172
+Ref: mgtp145827
+Ref: mptp148950
+Node: 0-ply Cubeful equities150761
+Node: n-ply Cubeful equities151475
+Node: The cube efficiency152832
+Node: Cube decisions154683
+Ref: mgcd155295
+Node: Beyond the simple model157606
+Node: A technical description of the Position ID158434
+Node: A technical description of the Match ID164200
+Node: Description of the CSS style sheet168752
+Node: Frequently Asked Questions173726
+Node: General questions174061
+Node: What is GNU Backgammon?174757
+Node: What operating systems are supported?175169
+Node: Where do I get it?175829
+Node: What do I have to pay for GNU Backgammon?176294
+Node: This GNU stuff sounds interesting_177023
+Node: I want to learn more about backgammon_177398
+Node: Though I really read all the documentation I still have questions_177863
+Node: I want to make a few proposals_ I have new ideas_178512
+Node: How to install178920
+Node: Do I need some other software to run GNU Backgammon?179551
+Node: I want to install a newer version_180082
+Node: I would like to compile it from the source code_180413
+Node: What software do I need for compiling under GNU/Linux?180832
+Node: What software do I need for compiling under MS Windows?181270
+Node: It does not compile_181707
+Node: On what CPU will GNU Backgammon run fastest?182139
+Node: Running GNU Backgammon185957
+Node: I get an error message when starting_186944
+Node: GNU Backgammon complains about missing files_187346
+Node: Starting from the WinXP menu it plays like a beginner_189114
+Node: My screen mixes up while starting GNU Backgammon_189693
+Node: I only get a command-line interface_ Where is the nice board?190313
+Node: When I restart GNU Backgammon all my settings are gone_190949
+Node: I do not need this graphical stuff_ Where is the terminal for commands?191408
+Node: Playing backgammon192077
+Node: What is the difference of a new game or match or session?192720
+Node: What the heck is a beaver in Backgammon?193362
+Node: How do I move the checkers?193905
+Node: Why am I allowed to place more than 5 checkers on a point?194690
+Node: GNU Backgammon plays poorly_195488
+Node: GNU Backgammon is too strong for me_196073
+Node: I think the bot is cheating_ It always gets good dice_196486
+Node: Settings197024
+Node: Where can I change the name of the human player?197373
+Node: How do I change the colors?197739
+Node: How do I stop the annoying beeps?"198097
+Node: What are Plies?198447
+Node: What is noise?200343
+Node: What is reduced evaluation?200633
+Node: Analyzing200930
+Node: What are these funny letters at the right bottom?201391
+Node: How do I set up a position manually?201933
+Node: Which formats must I use to import matches and positions?202839
+Node: How can I switch the players sides?203472
+Node: What do ! and ? mean?203787
+Node: How is the error rate determined?204705
+Node: What does Pips mean?205563
+Node: What does epc mean?206373
+Node: Abbreviations208578
+Node: GWC208770
+Node: MWC?208910
+Node: DP?209065
+Node: CP?209466
+Ref: The double line210208
+Node: TG?210622
+Node: epc?210960
+Node: GNU Free Documentation License211215
 
 End Tag Table
 

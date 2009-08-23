@@ -205,16 +205,12 @@ gnubg moves 8/5 6/5.
     </sect2>
   </sect1>
   <sect1 id="gnubg-rules">
-          <sect1info>
-    <abstract role="texinfo-node">
-      <para>Backgammon rules by Tom Keith</para>
-    </abstract>
-    </sect1info>
-    <title>Rules of the game</title>
-    <para>This section describes how to play a game, a match or a session of
+  <title>Rules of the game</title>
+    <para>This section describes how to play a game, a match, or a session of
       money games against <application moreinfo="none">GNU
-      Backgammon</application>, or a human opponent. Authored by <ulink url="http://www.bkgm.com/rules.html">Tom Keith</ulink>. Skilled
-      backgammon players may skip ahead to next section. </para>
+      Backgammon</application> or a human opponent. It is taken directly from
+      the rules section of <ulink url="http://www.bkgm.com/">Backgammon Galore
+      </ulink>, courtesy of Tom Keith.</para>
     <sect2 id="gnubg-rules_setup">
       <title>Setup</title>
       <para>Backgammon is a game for two players, played on a board consisting
