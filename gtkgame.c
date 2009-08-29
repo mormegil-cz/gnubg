@@ -3228,11 +3228,38 @@ static void Stop( GtkWidget *pw, gpointer unused )
 	}
 }
 #endif
+	gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idOutput, _("Process interrupted") );
+}
+
+static gboolean StopAnyAnimations()
+{
+	BoardData *bd = BOARD( pwBoard )->board_data;
+#if USE_BOARD3D
+	if (display_is_3d(bd->rd) && Animating3d(bd->bd3d))
+	{
+		StopIdle3d(bd, bd->bd3d);
+		RestrictiveRedraw();
+		return TRUE;
+	}
+	else
+#endif
+	if (!animation_finished)
+	{
+		fInterrupt = TRUE;
+		return TRUE;
+	}
+	return FALSE;
+}
+
+static void StopNotButton( GtkWidget *pw, gpointer unused )
+{	/* Interrupt any animations or show message in status bar */
+	if (!StopAnyAnimations())
+		gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idOutput, _("Press the stop button to interrupt the current process") );
 }
 
 static void CreateMainWindow(void)
 {
-	GtkWidget *pwVbox, *pwHbox, *pwHandle, *pwPanelHbox;
+	GtkWidget *pwVbox, *pwHbox, *pwHandle, *pwPanelHbox, *pwStopButton;
 
     pwMain = gtk_window_new( GTK_WINDOW_TOPLEVEL );
     gtk_window_maximize(GTK_WINDOW(pwMain));
@@ -3312,9 +3339,13 @@ static void CreateMainWindow(void)
 			G_CALLBACK( TextPopped ), NULL );
 
     pwStop = gtk_event_box_new();
-    gtk_container_add(GTK_CONTAINER(pwStop), gtk_image_new_from_stock(GTK_STOCK_STOP, GTK_ICON_SIZE_SMALL_TOOLBAR));
+    pwStopButton = gtk_event_box_new();
+    gtk_container_add(GTK_CONTAINER(pwStop), pwStopButton);
+    gtk_container_add(GTK_CONTAINER(pwStopButton), gtk_image_new_from_stock(GTK_STOCK_STOP, GTK_ICON_SIZE_SMALL_TOOLBAR));
 	gtk_box_pack_start( GTK_BOX( pwHbox ), pwStop, FALSE, FALSE, 2 );
-	g_signal_connect(G_OBJECT(pwStop), "button-press-event", G_CALLBACK( Stop ), NULL );
+	g_signal_connect(G_OBJECT(pwStop), "button-press-event", G_CALLBACK( StopNotButton ), NULL );
+	g_signal_connect(G_OBJECT(pwStopButton), "button-press-event", G_CALLBACK( Stop ), NULL );
+
 	pwGrab = pwStop;
 
     gtk_box_pack_start( GTK_BOX( pwHbox ),

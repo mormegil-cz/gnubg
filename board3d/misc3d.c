@@ -2265,6 +2265,7 @@ void CloseBoard3d(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
 	bd->direction = 1;
 	bd->resigned = 0;
 	fClockwise = 0;
+	GTKSuspendInput();
 
 	prd->showShadows = 0;
 	prd->showMoveIndicator = 0;
