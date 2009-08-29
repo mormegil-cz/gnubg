@@ -494,11 +494,14 @@ static void append_tutor_options(optionswidget *pow)
 	pwp = gtk_alignment_new(0, 0, 0, 0);
 	gtk_container_set_border_width(GTK_CONTAINER(pwp), 4);
 	gtk_notebook_append_page(GTK_NOTEBOOK(pow->pwNoteBook), pwp, gtk_label_new(_("Tutor")));
+	pwf = gtk_frame_new(NULL);
+	gtk_container_add(GTK_CONTAINER(pwp), pwf);
 	pwvbox = gtk_vbox_new(FALSE, 0);
-	gtk_container_add(GTK_CONTAINER(pwp), pwvbox);
+	gtk_container_set_border_width(GTK_CONTAINER(pwvbox), 6);
+	gtk_container_add(GTK_CONTAINER(pwf), pwvbox);
 
 	pow->pwTutor = gtk_check_button_new_with_label(_("Tutor mode"));
-	gtk_box_pack_start(GTK_BOX(pwvbox), pow->pwTutor, FALSE, FALSE, 0);
+	gtk_frame_set_label_widget(GTK_FRAME(pwf), pow->pwTutor);
 	gtk_widget_set_tooltip_text(pow->pwTutor,
 				    _("When using the tutor, GNU Backgammon will "
 				      "analyse your decisions during play and prompt "
@@ -515,7 +518,6 @@ static void append_tutor_options(optionswidget *pow)
 	gtk_widget_set_tooltip_text(pow->pwTutorChequer,
 				    _("Use the tutor for chequer play decisions."));
 
-	pwf = gtk_frame_new(_("Tutor decisions"));
 	gtk_box_pack_start(GTK_BOX(pwvbox), pwf, TRUE, TRUE, 0);
 	gtk_container_set_border_width(GTK_CONTAINER(pwf), 4);
 	pwb = gtk_vbox_new(FALSE, 0);
@@ -523,7 +525,7 @@ static void append_tutor_options(optionswidget *pow)
 
 	pwev = gtk_event_box_new();
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
-	gtk_box_pack_start(GTK_BOX(pwvbox), pwev, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwvbox), pwev, FALSE, FALSE, 4);
 	pwhbox = gtk_hbox_new(FALSE, 4);
 	gtk_container_add(GTK_CONTAINER(pwev), pwhbox);
 
