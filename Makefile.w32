@@ -9,7 +9,7 @@ TARGET = $(BINDIR)/gnubg.exe
 CMDTARGET = $(BINDIR)/gnubgCmd.exe
 
 SOURCE = analysis bearoff bearoffgammon non-src/copying non-src/credits \
-	dice drawboard eval export external gnubg \
+	dice drawboard eval evallock export external gnubg \
 	htmlimages play \
 	html import multithread latex matchequity \
 	matchid positionid record \

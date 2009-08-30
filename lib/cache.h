@@ -69,9 +69,19 @@ int CacheResize(evalCache *pc, unsigned int cNew);
 
 #define CACHEHIT ((unsigned int)-1)
 /* returns a value which is passed to CacheAdd (if a miss) */
-unsigned int CacheLookup(evalCache* pc, const cacheNodeDetail* e, float *arOut, float *arCubeful);
+unsigned int CacheLookupWithLocking(evalCache* pc, const cacheNodeDetail* e, float *arOut, float *arCubeful);
+unsigned int CacheLookupNoLocking(evalCache* pc, const cacheNodeDetail* e, float *arOut, float *arCubeful);
 
-void CacheAdd(evalCache* pc, const cacheNodeDetail* e, unsigned long l);
+void CacheAddWithLocking(evalCache* pc, const cacheNodeDetail* e, unsigned long l);
+static inline void CacheAddNoLocking(evalCache* pc, const cacheNodeDetail* e, unsigned long l)
+{
+	pc->entries[l].nd_secondary = pc->entries[l].nd_primary;
+	pc->entries[l].nd_primary = *e;
+#if CACHE_STATS
+  ++pc->nAdds;
+#endif
+}
+
 void CacheFlush(const evalCache* pc);
 void CacheDestroy(const evalCache* pc);
 void CacheStats(const evalCache* pc, unsigned int* pcLookup, unsigned int* pcHit, unsigned int* pcUsed);

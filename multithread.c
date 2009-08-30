@@ -408,6 +408,26 @@ void MT_SetNumThreads(unsigned int num)
 			MT_CloseThreads();
 		td.numThreads = num;
 		MT_CreateThreads();
+		if (num == 1)
+		{	/* No locking in evals */
+			EvaluatePosition = EvaluatePositionNoLocking;
+			GeneralCubeDecisionE = GeneralCubeDecisionENoLocking;
+			GeneralEvaluationE = GeneralEvaluationENoLocking;
+			ScoreMove = ScoreMoveNoLocking;
+			FindBestMove = FindBestMoveNoLocking;
+			FindnSaveBestMoves = FindnSaveBestMovesNoLocking;
+			BasicCubefulRollout = BasicCubefulRolloutNoLocking;
+		}
+		else
+		{	/* Locking version of evals */
+			EvaluatePosition = EvaluatePositionWithLocking;
+			GeneralCubeDecisionE = GeneralCubeDecisionEWithLocking;
+			GeneralEvaluationE = GeneralEvaluationEWithLocking;
+			ScoreMove = ScoreMoveWithLocking;
+			FindBestMove = FindBestMoveWithLocking;
+			FindnSaveBestMoves = FindnSaveBestMovesWithLocking;
+			BasicCubefulRollout = BasicCubefulRolloutWithLocking;
+		}
 	}
 }
 

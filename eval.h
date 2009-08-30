@@ -26,6 +26,12 @@
 #include "bearoff.h"
 #include "neuralnet.h"
 
+#define EXP_LOCK_FUN(ret, name, ...) \
+	typedef ret (*f_##name)( __VA_ARGS__); \
+	extern f_##name name; \
+	extern ret name##NoLocking( __VA_ARGS__); \
+	extern ret name##WithLocking( __VA_ARGS__);
+
 #define WEIGHTS_VERSION "0.15"
 #define WEIGHTS_VERSION_BINARY 0.15f
 #define WEIGHTS_MAGIC_BINARY 472.3782f
@@ -359,8 +365,8 @@ extern int EvalNewWeights( int nSize );
 extern int 
 EvalSave( const char *szWeights );
 
-extern int 
-EvaluatePosition( NNState *nnStates, const TanBoard anBoard, float arOutput[],
+
+EXP_LOCK_FUN(int, EvaluatePosition, NNState *nnStates, const TanBoard anBoard, float arOutput[],
                   const cubeinfo* pci, const evalcontext* pec );
 
 extern void
@@ -372,14 +378,12 @@ InvertEvaluation( float ar[ NUM_OUTPUTS ] );
 extern void 
 InvertEvaluationCf( float ar[ 4 ] );
 
-extern 
-int FindBestMove( int anMove[ 8 ], int nDice0, int nDice1,
+EXP_LOCK_FUN(int, FindBestMove, int anMove[ 8 ], int nDice0, int nDice1,
                   TanBoard anBoard, cubeinfo *pci,
                   evalcontext *pec,
                   movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ); 
 
-extern int 
-FindnSaveBestMoves( movelist *pml,
+EXP_LOCK_FUN(int, FindnSaveBestMoves, movelist *pml,
                     int nDice0, int nDice1, const TanBoard anBoard,
                     unsigned char *auchMove, const float rThr,
                     const cubeinfo* pci, const evalcontext* pec,
@@ -501,36 +505,15 @@ FindCubeDecision ( float arDouble[],
                    float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 		   const cubeinfo *pci );
 
-extern int
-GeneralCubeDecisionE ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+EXP_LOCK_FUN(int, GeneralCubeDecisionE, float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                        const TanBoard anBoard,
                        const cubeinfo* pci, const evalcontext* pec,
 		       const evalsetup* pes );
 
-extern int
-GeneralEvaluationE ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
+EXP_LOCK_FUN(int, GeneralEvaluationE, float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                      const TanBoard anBoard,
                      const cubeinfo* pci, const evalcontext* pec );
 
-extern int
-GeneralEvaluationEPlied ( NNState *nnStates, float arOutput [ NUM_ROLLOUT_OUTPUTS ],
-                          const TanBoard anBoard,
-                          const cubeinfo* pci, const evalcontext* pec,
-			  int nPlies );
-
-extern int 
-EvaluatePositionCubeful3( NNState *nnStates, const TanBoard anBoard,
-                          float arOutput[ NUM_OUTPUTS ],
-                          float arCubeful[],
-                          const cubeinfo aciCubePos[], int cci, 
-                          const cubeinfo* pciMove, const evalcontext* pec,
-			  int nPlies, int fTop );
-
-extern int 
-GeneralEvaluationEPliedCubeful ( NNState *nnStates, float arOutput [ NUM_ROLLOUT_OUTPUTS ],
-                                 const TanBoard anBoard,
-                                 const cubeinfo* pci, const evalcontext* pec,
-                                 int nPlies );
 extern int
 cmp_evalsetup ( const evalsetup *pes1, const evalsetup *pes2 );
 
@@ -585,8 +568,7 @@ getPercent ( const cubedecision cd,
 extern void
 RefreshMoveList ( movelist *pml, int *ai );
 
-extern int 
-ScoreMove( NNState *nnStates, move *pm, const cubeinfo* pci, const evalcontext* pec, int nPlies );
+EXP_LOCK_FUN(int, ScoreMove, NNState *nnStates, move *pm, const cubeinfo* pci, const evalcontext* pec, int nPlies );
 
 extern void
 CopyMoveList ( movelist *pmlDest, const movelist *pmlSrc );

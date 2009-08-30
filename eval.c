@@ -39,10 +39,6 @@
 #include "multithread.h"
 #include "util.h"
 
-#ifdef NO_ERF
-#include "erf.inc"	/* No erf on msdev so include code here... */
-#endif
-
 #ifdef WIN32
 #define BINARY O_BINARY
 #else
@@ -54,6 +50,45 @@ typedef int ( *classevalfunc )( const TanBoard anBoard, float arOutput[],
 
 typedef void ( *classstatusfunc )( char *szOutput );
 typedef int ( *cfunc )( const void *, const void * );
+
+#if !LOCKING_VERSION
+
+f_FindnSaveBestMoves FindnSaveBestMoves = FindnSaveBestMovesNoLocking;
+f_FindBestMove FindBestMove = FindBestMoveNoLocking;
+f_EvaluatePosition EvaluatePosition = EvaluatePositionNoLocking;
+f_ScoreMove ScoreMove = ScoreMoveNoLocking;
+f_GeneralCubeDecisionE GeneralCubeDecisionE = GeneralCubeDecisionENoLocking;
+f_GeneralEvaluationE GeneralEvaluationE = GeneralEvaluationENoLocking;
+
+#define FindnSaveBestMoves FindnSaveBestMovesNoLocking
+#define FindBestMove FindBestMoveNoLocking
+#define EvaluatePosition EvaluatePositionNoLocking
+#define ScoreMove ScoreMoveNoLocking
+#define GeneralCubeDecisionE GeneralCubeDecisionENoLocking
+#define GeneralEvaluationE GeneralEvaluationENoLocking
+#define EvaluatePositionCache EvaluatePositionCacheNoLocking
+#define FindBestMovePlied FindBestMovePliedNoLocking
+#define GeneralEvaluationEPlied GeneralEvaluationEPliedNoLocking
+#define EvaluatePositionCubeful3 EvaluatePositionCubeful3NoLocking
+#define ScoreMoves ScoreMovesNoLocking
+#define FindBestMoveInEval FindBestMoveInEvalNoLocking
+#define GeneralEvaluationEPliedCubeful GeneralEvaluationEPliedCubefulNoLocking
+#define EvaluatePositionCubeful4 EvaluatePositionCubeful4NoLocking
+#define CacheAdd CacheAddNoLocking
+#define CacheLookup CacheLookupNoLocking
+
+#ifdef NO_ERF
+#include "erf.inc"	/* No erf on msdev so include code here... */
+#endif
+
+static int EvaluatePositionCache( NNState *nnStates, const TanBoard anBoard, float arOutput[],
+                       const cubeinfo* pci, const evalcontext* pecx,
+		       int nPlies, positionclass pc );
+
+static int FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
+                   TanBoard anBoard, const cubeinfo* pci,
+                   const evalcontext* pec, int nPlies,
+                   movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] );
 
 /* Race inputs */
 enum {
@@ -214,9 +249,9 @@ enum {
 static int anEscapes[ 0x1000 ];
 static int anEscapes1[ 0x1000 ];
 
-static neuralnet nnContact, nnRace, nnCrashed;
+neuralnet nnContact, nnRace, nnCrashed;
 
-static neuralnet nnpContact, nnpRace, nnpCrashed;
+neuralnet nnpContact, nnpRace, nnpCrashed;
 
 bearoffcontext *pbcOS = NULL;
 bearoffcontext *pbcTS = NULL;
@@ -224,9 +259,9 @@ bearoffcontext *pbc1 = NULL;
 bearoffcontext *pbc2 = NULL;
 bearoffcontext *apbcHyper[ 3 ] = { NULL, NULL, NULL };
 
-static evalCache cEval;
-static evalCache cpEval;
-static unsigned int cCache;
+evalCache cEval;
+evalCache cpEval;
+unsigned int cCache;
 int fInterrupt = FALSE;
 
 /* variation of backgammon used by gnubg */
@@ -264,9 +299,9 @@ const char *aszEvalType[] =
    };
 
 #if defined (REDUCTION_CODE)
-static evalcontext ecBasic = { FALSE, 0, 0, TRUE, 0.0 };
+evalcontext ecBasic = { FALSE, 0, 0, TRUE, 0.0 };
 #else
-static evalcontext ecBasic = { FALSE, 0, FALSE, TRUE, 0.0 };
+evalcontext ecBasic = { FALSE, 0, FALSE, TRUE, 0.0 };
 #endif
 
 /* defaults for the filters  - 0 ply uses no filters */
@@ -557,7 +592,7 @@ static void ComputeTable( void )
 
 
 #if USE_MULTITHREAD
-	static NNState nnStatesStorage[MAX_NUMTHREADS][3] = {
+	NNState nnStatesStorage[MAX_NUMTHREADS][3] = {
 		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL},},
 		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
 		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
@@ -2489,7 +2524,7 @@ EvalOver( const TanBoard anBoard, float arOutput[], const bgvariation bgv, NNSta
 
 }
 
-static classevalfunc acef[ N_CLASSES ] = {
+classevalfunc acef[ N_CLASSES ] = {
     EvalOver, 
     EvalHypergammon1,
     EvalHypergammon2,
@@ -2499,7 +2534,7 @@ static classevalfunc acef[ N_CLASSES ] = {
     EvalRace, EvalCrashed, EvalContact
 };
 
-static float Noise( const evalcontext* pec, const TanBoard anBoard,
+extern float Noise( const evalcontext* pec, const TanBoard anBoard,
 		    int iOutput ) {
 
     float r;
@@ -2553,7 +2588,7 @@ static float Noise( const evalcontext* pec, const TanBoard anBoard,
     return r;
 }
 
-static int
+extern int
 EvalKey ( const evalcontext *pec, const int nPlies,
           const cubeinfo *pci, int fCubefulEquity ) {
 
@@ -2676,7 +2711,7 @@ PerfectCubeful ( bearoffcontext *pbc,
 }
 
 
-static int
+extern int
 EvaluatePerfectCubeful ( const TanBoard anBoard, float arEquity[],
                          const bgvariation bgv ) {
 
@@ -3167,7 +3202,7 @@ static int GenerateMovesSub( movelist *pml, int anRoll[], int nMoveDepth,
     return !fUsed || fPartial;
 }
 
-static int CompareMoves(const move *pm0, const move *pm1)
+extern int CompareMoves(const move *pm0, const move *pm1)
 {
 
 	/*high score first */
@@ -3990,9 +4025,9 @@ MoneyLive( const float rW, const float rL, const float p,
 }
 
 
-static float
-Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX ) {
-
+extern float
+Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX )
+{
   const float epsilon   = 0.0000001f;
   const float omepsilon = 0.9999999f;
 
@@ -4359,9 +4394,9 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCu
 }
 
 
-static float
-Cl2CfMatch ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX ) {
-
+extern float
+Cl2CfMatch ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX )
+{
   /* Check if this requires a cubeful evaluation */
 
   if ( ! fDoCubeful ( pci ) ) {
@@ -4388,9 +4423,9 @@ Cl2CfMatch ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX ) {
   
 
 
-static float
-EvalEfficiency( const TanBoard anBoard, positionclass pc ){
-
+extern float
+EvalEfficiency( const TanBoard anBoard, positionclass pc )
+{
   /* Since it's somewhat costly to call CalcInputs, the 
      inputs should preferebly be cached to same time. */
 
@@ -4950,7 +4985,7 @@ getMoneyPoints ( float aaarPoints[ 2 ][ 7 ][ 2 ],
 
 }
 
-static void 
+extern void
 GetECF3 ( float arCubeful[], int cci,
           float arCf[], cubeinfo aci[] ) {
 
@@ -5007,7 +5042,7 @@ GetECF3 ( float arCubeful[], int cci,
 }
 
 
-static void
+extern void
 MakeCubePos( const cubeinfo aciCubePos[], const int cci,
 	     const int fTop, cubeinfo aci[], const int fInvert )
 {
@@ -5709,21 +5744,64 @@ extern doubletype DoubleType(const int fDoubled, const int fMove,
 	return DT_NORMAL;
 }
 
-static int 
-EvaluatePositionCache( NNState *nnStates, const TanBoard anBoard, float arOutput[],
+#else
+
+#define FindnSaveBestMoves FindnSaveBestMovesWithLocking
+#define FindBestMove FindBestMoveWithLocking
+#define EvaluatePosition EvaluatePositionWithLocking
+#define ScoreMove ScoreMoveWithLocking
+#define GeneralCubeDecisionE GeneralCubeDecisionEWithLocking
+#define GeneralEvaluationE GeneralEvaluationEWithLocking
+#define EvaluatePositionCache EvaluatePositionCacheWithLocking
+#define FindBestMovePlied FindBestMovePliedWithLocking
+#define GeneralEvaluationEPlied GeneralEvaluationEPliedWithLocking
+#define EvaluatePositionCubeful3 EvaluatePositionCubeful3WithLocking
+#define ScoreMoves ScoreMovesWithLocking
+#define FindBestMoveInEval FindBestMoveInEvalWithLocking
+#define GeneralEvaluationEPliedCubeful GeneralEvaluationEPliedCubefulWithLocking
+#define EvaluatePositionCubeful4 EvaluatePositionCubeful4WithLocking
+#define CacheAdd CacheAddWithLocking
+#define CacheLookup CacheLookupWithLocking
+
+static int EvaluatePositionCache( NNState *nnStates, const TanBoard anBoard, float arOutput[],
                        const cubeinfo* pci, const evalcontext* pecx,
 		       int nPlies, positionclass pc );
 
-static int 
-FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
+static int FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
                    TanBoard anBoard, const cubeinfo* pci,
                    const evalcontext* pec, int nPlies,
                    movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] );
 
+extern neuralnet nnpContact, nnpRace, nnpCrashed;
+extern evalCache cEval;
+extern evalCache cpEval;
+extern classevalfunc acef[ N_CLASSES ];
+extern unsigned int cCache;
+extern evalcontext ecBasic;
+#if USE_MULTITHREAD
+NNState nnStatesStorage[MAX_NUMTHREADS][3];
+#else
+static NNState nnStatesStorage[3];
+#endif
+extern int CompareMoves(const move *pm0, const move *pm1);
+extern float EvalEfficiency( const TanBoard anBoard, positionclass pc );
+extern float Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX );
+extern float Cl2CfMatch ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX );
+extern float Noise( const evalcontext* pec, const TanBoard anBoard, int iOutput );
+extern int EvalKey ( const evalcontext *pec, const int nPlies, const cubeinfo *pci, int fCubefulEquity );
+extern void MakeCubePos( const cubeinfo aciCubePos[], const int cci, const int fTop, cubeinfo aci[], const int fInvert );
+extern void GetECF3 ( float arCubeful[], int cci, float arCf[], cubeinfo aci[] );
+extern int EvaluatePerfectCubeful ( const TanBoard anBoard, float arEquity[], const bgvariation bgv );
+#endif
 
-static int
-ScoreMoves( movelist *pml, const cubeinfo* pci, const evalcontext* pec,
-	    int nPlies );
+static int GeneralEvaluationEPlied (NNState *nnStates, float arOutput [ NUM_ROLLOUT_OUTPUTS ],
+                          const TanBoard anBoard, const cubeinfo* pci, const evalcontext* pec, int nPlies );
+static int EvaluatePositionCubeful3( NNState *nnStates, const TanBoard anBoard, float arOutput[ NUM_OUTPUTS ], float arCubeful[],
+										const cubeinfo aciCubePos[], int cci, const cubeinfo* pciMove, const evalcontext *pec, int nPlies, int fTop );
+
+/* Functions that have both locking and non-locking versions below here */
+
+static int ScoreMoves( movelist *pml, const cubeinfo* pci, const evalcontext* pec, int nPlies );
 
 #if !defined(REDUCTION_CODE)
 

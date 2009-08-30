@@ -109,7 +109,7 @@ extern unsigned long GetHashKey(unsigned long hashMask, const cacheNodeDetail* e
 	return (c & hashMask);
 }
 
-unsigned int CacheLookup(evalCache* pc, const cacheNodeDetail* e, float *arOut, float *arCubeful)
+unsigned int CacheLookupWithLocking(evalCache* pc, const cacheNodeDetail* e, float *arOut, float *arCubeful)
 {
 	unsigned long l = GetHashKey(pc->hashMask, e);
 
@@ -154,7 +154,42 @@ unsigned int CacheLookup(evalCache* pc, const cacheNodeDetail* e, float *arOut, 
     return CACHEHIT;
 }
 
-void CacheAdd(evalCache* pc, const cacheNodeDetail* e, unsigned long l)
+unsigned int CacheLookupNoLocking(evalCache* pc, const cacheNodeDetail* e, float *arOut, float *arCubeful)
+{
+	unsigned long l = GetHashKey(pc->hashMask, e);
+
+#if CACHE_STATS
+	++pc->cLookup;
+#endif
+	if ((pc->entries[l].nd_primary.nEvalContext != e->nEvalContext ||
+		memcmp(pc->entries[l].nd_primary.key.auch, e->key.auch, sizeof(e->key.auch)) != 0))
+	{	/* Not in primary slot */
+		if ((pc->entries[l].nd_secondary.nEvalContext != e->nEvalContext ||
+			memcmp(pc->entries[l].nd_secondary.key.auch, e->key.auch, sizeof(e->key.auch)) != 0))
+		{	/* Cache miss */
+			return l;
+		}
+		else
+		{	/* Found in second slot, promote "hot" entry */
+			cacheNodeDetail tmp = pc->entries[l].nd_primary;
+
+			pc->entries[l].nd_primary = pc->entries[l].nd_secondary;
+			pc->entries[l].nd_secondary = tmp;
+		}
+	}
+	/* Cache hit */
+#if CACHE_STATS
+    ++pc->cHit;
+#endif
+
+	memcpy(arOut, pc->entries[l].nd_primary.ar, sizeof(float) * 5/*NUM_OUTPUTS*/ );
+	if (arCubeful)
+		*arCubeful = pc->entries[l].nd_primary.ar[5];	/* Cubeful equity stored in slot 5 */
+
+    return CACHEHIT;
+}
+
+void CacheAddWithLocking(evalCache* pc, const cacheNodeDetail* e, unsigned long l)
 {
 #if USE_MULTITHREAD
 	cache_lock(pc, l);

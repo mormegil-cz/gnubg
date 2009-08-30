@@ -41,6 +41,11 @@
 #include "multithread.h"
 #include "rollout.h"
 
+#if !LOCKING_VERSION
+
+f_BasicCubefulRollout BasicCubefulRollout = BasicCubefulRolloutNoLocking;
+#define BasicCubefulRollout BasicCubefulRolloutNoLocking
+
 int log_rollouts = 0;
 char *log_file_name = 0;
 unsigned int initial_game_count;
@@ -49,14 +54,14 @@ unsigned int initial_game_count;
  * name template to work with
  */
 
-static void log_cube(FILE * logfp, const char *action, int side)
+extern void log_cube(FILE * logfp, const char *action, int side)
 {
 	if (!logfp)
 		return;
 	fprintf(logfp, ";%s[%s]\n", side ? "B" : "W", action);
 }
 
-static void log_move(FILE * logfp, const int *anMove, int side, int die0, int die1)
+extern void log_move(FILE * logfp, const int *anMove, int side, int die0, int die1)
 {
 	int i;
 	if (!logfp)
@@ -106,7 +111,7 @@ static void board_to_sgf(FILE * logfp, const unsigned int anBoard[25], int direc
 		fprintf(logfp, "[y]");
 }
 
-static FILE *log_game_start(const char *name, const cubeinfo * pci, int fCubeful, TanBoard anBoard)
+extern FILE *log_game_start(const char *name, const cubeinfo * pci, int fCubeful, TanBoard anBoard)
 {
 	time_t t = time(0);
 	struct tm *now = localtime(&t);
@@ -158,7 +163,7 @@ static FILE *log_game_start(const char *name, const cubeinfo * pci, int fCubeful
 	return logfp;
 }
 
-static void log_game_over(FILE * logfp)
+extern void log_game_over(FILE * logfp)
 {
 	if (!logfp)
 		return;
@@ -167,21 +172,7 @@ static void log_game_over(FILE * logfp)
 	logfp = 0;
 }
 
-static void
-initRolloutstat ( rolloutstat *prs );
-
-/* Quasi-random permutation array: the first index is the "generation" of the
-   permutation (0 permutes each set of 36 rolls, 1 permutes those sets of 36
-   into 1296, etc.); the second is the roll within the game (limited to 128,
-   so we use pseudo-random dice after that); the last is the permutation
-   itself.  6 generations are enough for 36^6 > 2^31 trials. */
-typedef struct _perArray
-{
-	unsigned char aaanPermutation[ 6 ][ 128 ][ 36 ];
-	int nPermutationSeed;
-} perArray;
-
-static void QuasiRandomSeed(perArray* pArray, int n ) {
+extern void QuasiRandomSeed(perArray* pArray, int n ) {
 
     int i, j, r;
 	unsigned char k, t;
@@ -215,7 +206,7 @@ static void QuasiRandomSeed(perArray* pArray, int n ) {
 
 static int nSkip;
 
-static int RolloutDice( int iTurn, int iGame,
+extern int RolloutDice( int iTurn, int iGame,
                             int fInitial,
                             unsigned int anDice[ 2 ],
                             rng *rngx,
@@ -278,7 +269,7 @@ static int RolloutDice( int iTurn, int iGame,
 }
 
 
-static void
+extern void
 ClosedBoard ( int afClosedBoard[ 2 ], const TanBoard anBoard ) {
 
   int i, j, n;
@@ -297,6 +288,28 @@ ClosedBoard ( int afClosedBoard[ 2 ], const TanBoard anBoard ) {
   }
 
 }
+
+#else
+
+#define BasicCubefulRollout BasicCubefulRolloutWithLocking
+
+static int nSkip;
+extern unsigned int initial_game_count;
+#if USE_GTK
+extern int fX;
+#endif
+
+extern FILE *log_game_start(const char *name, const cubeinfo * pci, int fCubeful, TanBoard anBoard);
+extern void log_cube(FILE * logfp, const char *action, int side);
+extern void log_move(FILE * logfp, const int *anMove, int side, int die0, int die1);
+extern int RolloutDice( int iTurn, int iGame, int fInitial, unsigned int anDice[ 2 ], rng *rngx, void *rngctx, const int fRotate, const perArray *dicePerms );
+extern void ClosedBoard ( int afClosedBoard[ 2 ], const TanBoard anBoard );
+extern void log_game_over(FILE * logfp);
+extern void QuasiRandomSeed(perArray* pArray, int n );
+
+#endif
+
+extern void initRolloutstat ( rolloutstat *prs );
 
 /* called with 
                cube decision                  move rollout
@@ -318,8 +331,7 @@ returns -1 on error/interrupt, fInterrupt TRUE if stopped by user
 aarOutput array(s) contain results
 */
 
-static int
-BasicCubefulRollout ( unsigned int aanBoard[][ 2 ][ 25 ],
+extern int BasicCubefulRollout ( unsigned int aanBoard[][ 2 ][ 25 ],
                       float aarOutput[][ NUM_ROLLOUT_OUTPUTS ], 
                       int iTurn, int iGame,
                       const cubeinfo aci[], int afCubeDecTop[], unsigned int cci,
@@ -872,6 +884,7 @@ BasicCubefulRollout ( unsigned int aanBoard[][ 2 ][ 25 ],
     return 0;
 }
 
+#if LOCKING_VERSION
 
 /* called with a collection of moves or a cube decision to be rolled out.
    when called with a cube decision, the number of alternatives is always 2
@@ -2253,7 +2266,7 @@ GeneralCubeDecisionR ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
  *
  */
 
-static void
+extern void
 initRolloutstat ( rolloutstat *prs ) {
 
   memset ( prs, 0, sizeof ( rolloutstat ) );
@@ -2430,4 +2443,4 @@ ScoreMoveRollout ( move **ppm, const cubeinfo** ppci, int cMoves,
   return 0;
 }
 
-
+#endif

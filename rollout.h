@@ -145,4 +145,18 @@ ScoreMoveRollout ( move **ppm, const cubeinfo** ppci, int cMoves,
                    void *pUserData );
 
 extern void RolloutLoopMT(void *unused);
+
+/* Quasi-random permutation array: the first index is the "generation" of the
+   permutation (0 permutes each set of 36 rolls, 1 permutes those sets of 36
+   into 1296, etc.); the second is the roll within the game (limited to 128,
+   so we use pseudo-random dice after that); the last is the permutation
+   itself.  6 generations are enough for 36^6 > 2^31 trials. */
+typedef struct _perArray
+{
+	unsigned char aaanPermutation[ 6 ][ 128 ][ 36 ];
+	int nPermutationSeed;
+} perArray;
+
+EXP_LOCK_FUN(int, BasicCubefulRollout, unsigned int aanBoard[][2][25], float aarOutput[][NUM_ROLLOUT_OUTPUTS], int iTurn, int iGame, const cubeinfo aci[], int afCubeDecTop[], unsigned int cci, rolloutcontext *prc, rolloutstat aarsStatistics[][2], int nBasisCube, perArray *dicePerms, rngcontext *rngctxRollout, FILE* logfp);
+
 #endif

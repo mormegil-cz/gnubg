@@ -45,6 +45,7 @@ gnubg_SOURCES = \
 		dice.h \
 		drawboard.c \
 		drawboard.h \
+		evallock.c \
 		eval.c \
 		eval.h \
 		export.c \
