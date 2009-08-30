@@ -33,7 +33,7 @@ void multi_debug(const char *str, ...);
 #define multi_debug(x)
 #endif
 
-#define MAX_NUMTHREADS 16
+#define MAX_NUMTHREADS 48
 
 typedef struct _Task
 {
