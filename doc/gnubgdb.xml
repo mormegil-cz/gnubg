@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.docbook.org/xml/4.4/docbookx.dtd">
 <article id="gnubg" lang="en">
   <articleinfo>
@@ -127,7 +127,7 @@ gnubg moves 8/5 6/5.
     </screenshot>
     <para><application moreinfo="none">GNU Backgammon</application> is a world
       class opponent and rates at around 2000 on FIBS, the First Internet
-      Backgammon Server – at its best, it is in the top 5 of over 6000 rated
+      Backgammon Server - at its best, it is in the top 5 of over 6000 rated
       players there). <application moreinfo="none">GNU Backgammon</application>
       can be played on numerous other on-line backgammon servers.</para>
     <para>The following features can be found in the current release of
@@ -2278,14 +2278,14 @@ To roll the dice the CL version type 'roll'.
         backgammons)? The model is exactly the same as if we had an urn with a
         googol balls in it (it's a big urn), and many of the balls have win
         written on them, and some say gammon loss, and if we look hard enough
-        there are a few that read backgammon win, and so on. ((Balls and urns
+        there are a few that read backgammon win, and so on. (Balls and urns
         are to probability theorists what teapots and checkerboards are to
         computer graphics researchers, or <emphasis>squeamish
-        ossifrage</emphasis> is to cryptographers – they seem to come with the
-        territory.)) Instead of having the patience to count the googol balls,
+        ossifrage</emphasis> is to cryptographers; they seem to come with the
+        territory.) Instead of having the patience to count the googol balls,
         we just give the urn a really good shake and then pull 100 balls out
         without looking, and say for instance "Well, I got 53 wins, 31 losses, 9
-        gammon wins, 6 gammon losses, and a backgammon win – looks like my
+        gammon wins, 6 gammon losses, and a backgammon win. It looks like my
         equity's roughly +0.26." and go home. If we were a bit more thorough, we
         could go a bit further and figure out that by cheating and measuring the
         sample proportions instead of the population proportions, we introduced
@@ -3106,7 +3106,7 @@ To roll the dice the CL version type 'roll'.
           you add into the field in the evaluations setting is the limit amount
           of noise that will be added to the evaluation.</para>
         <para>If noise is added to the evaluations <application>GNU
-          Backgammon</application> will take a Box Müller transform of a point
+          Backgammon</application> will take a Box M�ller transform of a point
           in the unit circle and add to each possible outcome probability. This
           means that the addition is random, but distributed so that it's more
           likely to have an noise addition close to zero than a noise addition
@@ -4511,7 +4511,7 @@ Equity
               </row>
               <row>
                 <entry>.result</entry>
-                <entry>Style for the text indicating the outcome of the game or match, e.g., Jørn<emphasis> Thyssen wins 16 points</emphasis>.</entry>
+                <entry>Style for the text indicating the outcome of the game or match, e.g., J�rn<emphasis> Thyssen wins 16 points</emphasis>.</entry>
               </row>
               <row>
                 <entry>.tiny</entry>
@@ -5193,7 +5193,7 @@ Equity
         <para>The pip count is a measurement showing the total number of pips
           required for a player to bear off all checkers from the current
           position. It can be regarded as a rough estimate of the
-            <emphasis>raceness</emphasis> of the position – a player with a
+            <emphasis>raceness</emphasis> of the position. A player with a
           lower pip count may in many situations want to try to race, whilst the
           opponent (with the higher pip count) may want to try blocking/holding.
           See also the <ulink url="http://www.bkgm.com/gloss/lookup.cgi?pip+count">explanation on
@@ -5207,7 +5207,7 @@ Equity
         <para>When bearing off checkers, you may notice a display showing the
           current <emphasis>epc</emphasis> value (next to the display of
             <emphasis>Pips</emphasis>). The epc display can be turned on or off
-          under menu <emphasis>Settings —&gt; Options —&gt;
+          under menu <emphasis>Settings -&gt; Options -&gt;
           Display</emphasis> (at least in the current version, as of June 2005).</para>
         <para><emphasis>epc</emphasis> stands for Effective Pip Count, and is an
           alternative measurement of the <emphasis>goodness</emphasis> of the
@@ -5219,7 +5219,7 @@ Equity
         <para>The effective pip count is defined as this expected number of
           remaining rolls, multiplied with the average number of pips in a roll,
           which is 8.167. (The average number of pips in a roll would be 7 if
-          rolling a double wouldn't yield a double pip count – i.e. a double-6
+          rolling a double wouldn't yield a double pip count. A double-6
           yields 24 pips, not 12.)</para>
         <para>Thus, epc takes into account not only the current pip count, but
           also the expected pip wastage:</para>
@@ -5891,3 +5891,8 @@ being LIST, and with the Back-Cover Texts being LIST.</screen>
   </simpara>
 </appendix>
 </article>
+<!--
+Local Variables:
+coding: ISO-8859-1
+End:
+ -->
