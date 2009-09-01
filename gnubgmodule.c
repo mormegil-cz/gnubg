@@ -2356,21 +2356,25 @@ extern void PythonShutdown( void )
 
 extern void PythonRun(const char *sz)
 {
-	if (*sz)
-	{
-		PyRun_SimpleString( sz );
-	}
-	else
-	{
-		PyRun_SimpleString( "import sys; print 'Python', sys.version" );
-		PyRun_AnyFile( stdin, NULL );
+	if (*sz) {
+		PyRun_SimpleString(sz);
+	} else {
+		PyRun_SimpleString("import sys\n"
+				   "print 'Python', sys.version\n");
+		while (PyRun_SimpleString(
+				   "while 1:\n"
+				   "    print '>>> ',\n"
+				   "    line = sys.stdin.readline()\n"
+				   "    if not line:\n"
+				   "        break\n"
+				   "    exec(line)\n"))
+		{};
 	}
 }
-
 extern int LoadPythonFile(const char *sz)
 {
-	FILE *pf;
 	char *path = NULL;
+	char *cmd = NULL;
 	int ret = FALSE;
 
 	if (g_file_test(sz, G_FILE_TEST_EXISTS))
@@ -2382,22 +2386,15 @@ extern int LoadPythonFile(const char *sz)
 			path = g_build_filename("scripts", sz, NULL);
 		}
 	}
-	if (!g_file_test(path, G_FILE_TEST_EXISTS)) {
+	if (!g_file_test(path, G_FILE_TEST_IS_REGULAR)) {
 		g_free(path);
 		outputerrf("Python file (%s) not found\n", sz);
 		return FALSE;
 	}
-
-	pf = g_fopen(path, "r");
-
-	if (pf)
-	{
-		ret = PyRun_AnyFile(pf, path);
-		fclose(pf);
-	}
-	else
-		outputerr(path);
+	cmd = g_strdup_printf("execfile('%s')", path);
+	PyRun_SimpleString(cmd);
 	g_free(path);
+	g_free(cmd);
 
 	return ret;
 }

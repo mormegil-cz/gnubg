@@ -1,3 +1,8 @@
+Tue Sep  1 22:41:46 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gnubgmodule.c: Avoid calling PyRun_File to allow linking against
+	official windows python. Needs testing.
+
 Tue Sep  1 21:12:24 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* eval.c, eval.h, gtkgame.c, rollout.c, rollout.h: silence prototype
