@@ -1,3 +1,7 @@
+Tue Sep 01 19:30:00 2009  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* eval.c: Remove noise entry from cache key and increase plies size
+
 Tue Sep 01 19:00:00 2009  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* various files: Remove the (currently unused) reduction evaluation code.

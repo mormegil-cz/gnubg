@@ -2484,45 +2484,41 @@ EvalKey ( const evalcontext *pec, const int nPlies,
 
   int iKey;
   /*
-   * Bit 00-01: nPlies
-   * Bit 02   : fCubeful
-   * Bit 03-10: rNoise
-   * Bit 11   : fMove
-   * Bit 12   : fUsePrune
-   * Bit 13-17: anScore[ 0 ]
-   * Bit 18-22: anScore[ 1 ]
-   * Bit 23-26: log2(nCube)
-   * Bit 27-28: fCubeOwner
-   * Bit 29   : fCrawford
+   * Bit 00-03: nPlies
+   * Bit 04   : fCubeful
+   * Bit 05   : fMove
+   * Bit 06   : fUsePrune
+   * Bit 07-11: anScore[ 0 ]
+   * Bit 12-16: anScore[ 1 ]
+   * Bit 17-20: log2(nCube)
+   * Bit 21-22: fCubeOwner
+   * Bit 23   : fCrawford
+   * Bit 24   : fJacoby
+   * Bit 25   : fBeavers
    */
 
-  iKey = (
-           ( nPlies ) |
-           ( pec->fCubeful << 2 ) | 
-           ( ( ( (int) ( pec->rNoise * 1000 ) ) & 0x00FF ) << 3 ) |
-           ( pci->fMove << 11 ) );
+  iKey = ( nPlies | ( pec->fCubeful << 4 ) | ( pci->fMove << 5 ) );
 
   if( nPlies )
-	  iKey ^= (( pec->fUsePrune ) << 12 );
+	  iKey ^= (( pec->fUsePrune ) << 6 );
 
   
   if ( nPlies || fCubefulEquity ) {
-
     /* In match play, the score and cube value and position are important. */
     if( pci->nMatchTo )
       iKey ^=
-        ( ( pci->nMatchTo - pci->anScore[ pci->fMove ] ) << 13 ) ^
-        ( ( pci->nMatchTo - pci->anScore[ !pci->fMove ] ) << 18 ) ^
-        ( LogCube( pci->nCube ) << 23 ) ^
+        ( ( pci->nMatchTo - pci->anScore[ pci->fMove ] ) << 7 ) ^
+        ( ( pci->nMatchTo - pci->anScore[ !pci->fMove ] ) << 12 ) ^
+        ( LogCube( pci->nCube ) << 17 ) ^
         ( ( pci->fCubeOwner < 0 ? 2 :
-            pci->fCubeOwner == pci->fMove ) << 27 ) ^
-        ( pci->fCrawford << 29 );
+            pci->fCubeOwner == pci->fMove ) << 21 ) ^
+        ( pci->fCrawford << 23 );
     else if( pec->fCubeful || fCubefulEquity )
       /* in cubeful money games the cube position and rules are important. */
       iKey ^=
         ( ( pci->fCubeOwner < 0 ? 2 :
-            pci->fCubeOwner == pci->fMove ) << 27 ) ^
-	( pci->fJacoby << 29 ) ^ ( pci->fBeavers << 30 );
+            pci->fCubeOwner == pci->fMove ) << 21 ) ^
+	( pci->fJacoby << 24 ) ^ ( pci->fBeavers << 25 );
     
     if( fCubefulEquity )
       iKey ^= 0x6a47b47e;
@@ -5851,10 +5847,10 @@ EvaluatePositionCache( NNState *nnStates, const TanBoard anBoard, float arOutput
     }
 }
 #endif
-    if( !cCache || ( !pecx->fDeterministic && pecx->rNoise != 0.0f ) )
-	/* non-deterministic noisy evaluations; cannot cache */
-	return EvaluatePositionFull( nnStates, anBoard, arOutput, pci, pecx, nPlies,
-				     pc );
+    if( !cCache || pecx->rNoise != 0.0f )
+	{	/* non-deterministic noisy evaluations; cannot cache */
+		return EvaluatePositionFull( nnStates, anBoard, arOutput, pci, pecx, nPlies, pc );
+	}
     
     PositionKey( anBoard, ec.key.auch );
 
@@ -6617,13 +6613,13 @@ EvaluatePositionCubeful3( NNState *nnStates, const TanBoard anBoard,
   evalcache ec;
   unsigned long l;
 
-  if( !cCache || ( !pec->fDeterministic && pec->rNoise != 0.0f ) )
+  if( !cCache || pec->rNoise != 0.0f )
       /* non-deterministic evaluation; never cache */
-{
+  {
       return EvaluatePositionCubeful4( nnStates, anBoard, arOutput, arCubeful,
 				       aciCubePos, cci, pciMove, pec,
 				       nPlies, fTop );
-}
+  }
 
   PositionKey ( anBoard, ec.key.auch );
 
