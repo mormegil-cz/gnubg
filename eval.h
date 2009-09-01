@@ -604,4 +604,15 @@ baseInputs(const TanBoard anBoard, float arInput[]);
 extern void 
 CalculateRaceInputs(const TanBoard anBoard, float inputs[]);
 
+
+extern float Noise( const evalcontext* pec, const TanBoard anBoard, int iOutput );
+extern int CompareMoves(const move *pm0, const move *pm1);
+extern float EvalEfficiency( const TanBoard anBoard, positionclass pc );
+extern float Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX );
+extern float Cl2CfMatch ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX );
+extern float Noise( const evalcontext* pec, const TanBoard anBoard, int iOutput );
+extern int EvalKey ( const evalcontext *pec, const int nPlies, const cubeinfo *pci, int fCubefulEquity );
+extern void MakeCubePos( const cubeinfo aciCubePos[], const int cci, const int fTop, cubeinfo aci[], const int fInvert );
+extern void GetECF3 ( float arCubeful[], int cci, float arCf[], cubeinfo aci[] );
+extern int EvaluatePerfectCubeful ( const TanBoard anBoard, float arEquity[], const bgvariation bgv );
 #endif

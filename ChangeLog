@@ -1,3 +1,8 @@
+Tue Sep  1 21:12:24 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* eval.c, eval.h, gtkgame.c, rollout.c, rollout.h: silence prototype
+	warnings
+
 Tue Sep 01 19:30:00 2009  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* eval.c: Remove noise entry from cache key and increase plies size

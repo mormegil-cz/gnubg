@@ -3119,7 +3119,7 @@ static void Stop( GtkWidget *pw, gpointer unused )
 	gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idOutput, _("Process interrupted") );
 }
 
-static gboolean StopAnyAnimations()
+static gboolean StopAnyAnimations(void)
 {
 	BoardData *bd = BOARD( pwBoard )->board_data;
 #if USE_BOARD3D

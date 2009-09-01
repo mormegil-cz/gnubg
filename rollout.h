@@ -159,4 +159,12 @@ typedef struct _perArray
 
 EXP_LOCK_FUN(int, BasicCubefulRollout, unsigned int aanBoard[][2][25], float aarOutput[][NUM_ROLLOUT_OUTPUTS], int iTurn, int iGame, const cubeinfo aci[], int afCubeDecTop[], unsigned int cci, rolloutcontext *prc, rolloutstat aarsStatistics[][2], int nBasisCube, perArray *dicePerms, rngcontext *rngctxRollout, FILE* logfp);
 
+
+extern FILE *log_game_start(const char *name, const cubeinfo * pci, int fCubeful, TanBoard anBoard);
+extern void log_cube(FILE * logfp, const char *action, int side);
+extern void log_move(FILE * logfp, const int *anMove, int side, int die0, int die1);
+extern int RolloutDice( int iTurn, int iGame, int fInitial, unsigned int anDice[ 2 ], rng *rngx, void *rngctx, const int fRotate, const perArray *dicePerms );
+extern void ClosedBoard ( int afClosedBoard[ 2 ], const TanBoard anBoard );
+extern void log_game_over(FILE * logfp);
+extern void QuasiRandomSeed(perArray* pArray, int n );
 #endif

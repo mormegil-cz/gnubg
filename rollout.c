@@ -299,14 +299,6 @@ extern unsigned int initial_game_count;
 extern int fX;
 #endif
 
-extern FILE *log_game_start(const char *name, const cubeinfo * pci, int fCubeful, TanBoard anBoard);
-extern void log_cube(FILE * logfp, const char *action, int side);
-extern void log_move(FILE * logfp, const int *anMove, int side, int die0, int die1);
-extern int RolloutDice( int iTurn, int iGame, int fInitial, unsigned int anDice[ 2 ], rng *rngx, void *rngctx, const int fRotate, const perArray *dicePerms );
-extern void ClosedBoard ( int afClosedBoard[ 2 ], const TanBoard anBoard );
-extern void log_game_over(FILE * logfp);
-extern void QuasiRandomSeed(perArray* pArray, int n );
-
 #endif
 
 extern void initRolloutstat ( rolloutstat *prs );
