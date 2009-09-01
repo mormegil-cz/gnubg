@@ -855,11 +855,7 @@ static void ShowAutoMove( const TanBoard anBoard, int anMove[ 8 ] ) {
 
 static void get_eq_before_resign(cubeinfo *pci, decisionData *pdd)
 {
-#if defined (REDUCTION_CODE)
-	const evalcontext ecResign = { FALSE, 2, 0, TRUE, 0.0 };
-#else
 	const evalcontext ecResign = { FALSE, 2, FALSE, TRUE, 0.0 };
-#endif
 
 	pdd->pboard = msBoard();
 	pdd->pci = pci;
@@ -1199,11 +1195,7 @@ static int ComputerTurn( void ) {
 
       if( ClassifyPosition( msBoard(), ms.bgv ) <= CLASS_RACE )
 	  {
-#if defined(REDUCTION_CODE)
-          evalcontext ecResign = { FALSE, 0, 0, TRUE, 0.0 };
-#else
           evalcontext ecResign = { FALSE, 0, FALSE, TRUE, 0.0 };
-#endif
           evalsetup esResign;
 
           esResign.et = EVAL_EVAL;
@@ -3237,11 +3229,7 @@ extern void CommandEndGame(char *sz)
 #if USE_BOARD3D
 	BoardData *bd = BOARD(pwBoard)->board_data;
 #endif
-#if defined (REDUCTION_CODE)
-	const evalcontext ec_quick = { FALSE, 0, 0, TRUE, 0.0 };
-#else
 	const evalcontext ec_quick = { FALSE, 0, FALSE, TRUE, 0.0 };
-#endif
 	int manual_dice = (rngCurrent == RNG_MANUAL); 
 	evalcontext ec_cheq_store[2];
 	evalcontext ec_cube_store[2];
@@ -4137,11 +4125,7 @@ OptimumRoll ( TanBoard anBoard,
 static int
 CheatDice ( unsigned int anDice[ 2 ], matchstate *pms, const int fBest ) {
 
-#if defined (REDUCTION_CODE)
-  static evalcontext ec0ply = { FALSE, 0, 0, TRUE, 0.0 };
-#else
   static evalcontext ec0ply = { FALSE, 0, FALSE, TRUE, 0.0 };
-#endif
   static cubeinfo ci;
     
   GetMatchStateCubeInfo( &ci, pms );

@@ -96,12 +96,7 @@ typedef struct {
        classes */
     unsigned int fCubeful : 1; /* cubeful evaluation */
     unsigned int nPlies   : 3;
-#if defined( REDUCTION_CODE )
-    unsigned int nReduced : 3; /* this will need to be expanded if we add
-				  support for nReduced != 3 */
-#else
     unsigned int fUsePrune : 1;
-#endif
     unsigned int fDeterministic : 1;
     float        rNoise;       /* standard deviation */
 } evalcontext;
@@ -116,11 +111,7 @@ typedef struct {
    data is present in the file based on the version number
 */
 
-#if defined( REDUCTION_CODE )
-#define SGF_FORMAT_VER 2
-#else
 #define SGF_FORMAT_VER 3
-#endif
 
 typedef struct {
 

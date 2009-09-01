@@ -560,11 +560,7 @@ static void InitEvalContext(evalcontext * pec)
 
     pec->nPlies = 0;
     pec->fCubeful = FALSE;
-#if defined( REDUCTION_CODE )
-    pec->nReduced = 0;
-#else
     pec->fUsePrune = FALSE;
-#endif
     pec->fDeterministic = FALSE;
     pec->rNoise = 0.0;
 
@@ -586,18 +582,13 @@ static void RestoreEvalContext(evalcontext * pec, char *pc)
     }
     if (ver < 3) {
 	red = strtol(pc, &pc, 10);
-#if defined( REDUCTION_CODE )
-	pec->nReduced = red;
-#endif
 	pec->fDeterministic = strtol(pc, &pc, 10);
 	pec->rNoise = g_ascii_strtod(pc, &pc);
     } else {
 	pec->fDeterministic = strtol(pc, &pc, 10);
 	pec->rNoise = g_ascii_strtod(pc, &pc);
 	fUsePrune = strtol(pc, &pc, 10);
-#ifndef REDUCTION_CODE
 	pec->fUsePrune = fUsePrune;
-#endif
     }
 }
 
@@ -931,11 +922,8 @@ static void RestoreDoubleAnalysis(property * pp,
 	    pes->ec.rNoise = g_ascii_strtod(pch, &pch);
 	    fUsePrune = strtol(pch, &pch, 10);
 	}
-#if defined( REDUCTION_CODE )
-	pes->ec.nReduced = nReduced;
-#else
 	pes->ec.fUsePrune = fUsePrune;
-#endif
+
 	for (i = 0; i < 2; i++)
 	    for (j = 0; j < 7; j++)
 		aarOutput[i][j] = g_ascii_strtod(pch, &pch);
@@ -1063,11 +1051,7 @@ static void RestoreMoveAnalysis(property * pp, int fPlayer,
 		pm->esMove.ec.rNoise = g_ascii_strtod(pch, &pch);
 		fUsePrune = strtol(pch, &pch, 10);
 	    }
-#if defined( REDUCTION_CODE )
-	    pm->esMove.ec.nReduced = nReduced;
-#else
 	    pm->esMove.ec.fUsePrune = fUsePrune;
-#endif
 	    break;
 
 	case 'R':
@@ -1650,25 +1634,13 @@ static void WriteEscapedString(FILE * pf, char *pch, int fEscapeColons)
 
 static void WriteEvalContext(FILE * pf, const evalcontext * pec)
 {
-
     gchar buffer[G_ASCII_DTOSTR_BUF_SIZE];
     g_ascii_formatd(buffer, sizeof(buffer), "%.6f", pec->rNoise);
-#if defined( REDUCTION_CODE )
-    fprintf(pf, "ver %d %d%s %d %d %s %d",
-	    SGF_FORMAT_VER,
-	    pec->nPlies,
-	    pec->fCubeful ? "C" : "",
-	    pec->nReduced, pec->fDeterministic, buffer,
-/*         , pec->fUsePrune */
-	    0);
-#else
     fprintf(pf, "ver %d %d%s %d %s %d",
 	    SGF_FORMAT_VER,
 	    pec->nPlies,
 	    pec->fCubeful ? "C" : "",
 	    pec->fDeterministic, buffer, pec->fUsePrune);
-#endif
-
 }
 
 static void
@@ -1814,21 +1786,12 @@ static void WriteDoubleAnalysis(FILE * pf,
     switch (pes->et) {
     case EVAL_EVAL:
 	g_ascii_formatd(buffer, sizeof(buffer), "%.6f", pes->ec.rNoise);
-#if defined( REDUCTION_CODE )
-	fprintf(pf, "E ver %d %d%s %d %d %s %d",
-		SGF_FORMAT_VER,
-		pes->ec.nPlies,
-		pes->ec.fCubeful ? "C" : "",
-		pes->ec.nReduced, pes->ec.fDeterministic, buffer,
-/*	     pes->ec.fUsePrune, */
-		0);
-#else
 	fprintf(pf, "E ver %d %d%s %d %s %d",
 		SGF_FORMAT_VER,
 		pes->ec.nPlies,
 		pes->ec.fCubeful ? "C" : "",
 		pes->ec.fDeterministic, buffer, pes->ec.fUsePrune);
-#endif
+
 	for (i = 0; i < 2; i++) {
 	    for (j = 0; j < 7; j++) {
 		g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
@@ -1919,18 +1882,9 @@ static void WriteMoveAnalysis(FILE * pf, int fPlayer, movelist * pml,
 	    fprintf(pf, "%d%s %d %d %s %d",
 		    pml->amMoves[i].esMove.ec.nPlies,
 		    pml->amMoves[i].esMove.ec.fCubeful ? "C" : "",
-#if defined( REDUCTION_CODE )
-		    pml->amMoves[i].esMove.ec.nReduced,
-#else
-		       /* FIXME: reduced shouldn't be saved/loaded */
 		    0,
-#endif
 		    pml->amMoves[i].esMove.ec.fDeterministic, buffer,
-#if !defined( REDUCTION_CODE )
 		    pml->amMoves[i].esMove.ec.fUsePrune
-#else
-		    0
-#endif
 		);
 	    break;
 

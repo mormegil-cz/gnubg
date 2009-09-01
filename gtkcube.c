@@ -762,11 +762,7 @@ CubeAnalysisEvalPly ( GtkWidget *pw, cubehintdata *pchd ) {
   evalcontext ec = {0, 0, 0, TRUE, 0.0};
 
   ec.fCubeful = esAnalysisCube.ec.fCubeful;
-#if defined( REDUCTION_CODE )
-  ec.nReduced = esAnalysisCube.ec.nReduced;
-#else
   ec.fUsePrune = esAnalysisCube.ec.fUsePrune;
-#endif
   ec.nPlies = atoi ( szPly );
 
   EvalCube ( pchd, &ec );

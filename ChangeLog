@@ -1,3 +1,7 @@
+Tue Sep 01 19:00:00 2009  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* various files: Remove the (currently unused) reduction evaluation code.
+
 Sun Aug 30 22:00:00 2009  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* eval.c/.h, rollout.c/.h, cache.c/.h, multithread.c: Try to speed up single threaded code

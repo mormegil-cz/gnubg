@@ -383,13 +383,9 @@ extern int BasicCubefulRollout ( unsigned int aanBoard[][ 2 ][ 25 ],
   int aanMoves[ 6 ][ 6 ][ 8 ];
   float aaar[ 6 ][ 6 ][ NUM_ROLLOUT_OUTPUTS ];
 
-#if defined(REDUCTION_CODE)
-  evalcontext ecCubeless0ply = { FALSE, 0, 0, TRUE, 0.0 };
-  evalcontext ecCubeful0ply = { TRUE, 0, 0, TRUE, 0.0 };
-#else
   evalcontext ecCubeless0ply = { FALSE, 0, FALSE, TRUE, 0.0 };
   evalcontext ecCubeful0ply = { TRUE, 0, FALSE, TRUE, 0.0 };
-#endif
+
   /* local pointers to the eval contexts to use */
   evalcontext *pecCube[2], *pecChequer[2];
 

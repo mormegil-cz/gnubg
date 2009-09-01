@@ -298,11 +298,7 @@ const char *aszEvalType[] =
      N_ ("Rollout")
    };
 
-#if defined (REDUCTION_CODE)
-evalcontext ecBasic = { FALSE, 0, 0, TRUE, 0.0 };
-#else
 evalcontext ecBasic = { FALSE, 0, FALSE, TRUE, 0.0 };
-#endif
 
 /* defaults for the filters  - 0 ply uses no filters */
 movefilter
@@ -312,98 +308,6 @@ defaultFilters[MAX_FILTER_PLIES][MAX_FILTER_PLIES] = {
   { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 2, 0.04f }, {  0, 0, 0 } }, 
   { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 2, 0.04f }, { -1, 0, 0 } },
 };
-
-#if defined( REDUCTION_CODE )
-static int nReductionGroup   = 0;
-
-static int all_d1[] = { 1, 1, 1, 1, 1, 1, 
-                        2, 2, 2, 2, 2, 
-                        3, 3, 3, 3, 
-                        4, 4, 4, 
-                        5, 5, 
-                        6 };
-static int all_d2[] = { 1, 2, 3, 4, 5, 6,
-                        2, 3, 4, 5, 6,
-                        3, 4, 5, 6,
-                        4, 5, 6,
-                        5, 6,
-                        6 };
-static int all_wt[] = { 1, 2, 2, 2, 2, 2,
-                        1, 2, 2, 2, 2,
-                        1, 2, 2, 2, 
-                        1, 2, 2,
-                        1, 2,
-                        1 };
-
-static int half1_d1[] = { 6, 2, 6, 6, 5, 5, 5, 4, 4, 2 };
-static int half1_d2[] = { 6, 2, 4, 3, 3, 2, 1, 3, 1, 1 };
-static int half1_wt[] = { 1, 1, 2, 2, 2, 2, 2, 2, 2, 2 };
-  
-static int half2_d1[] = { 5, 4, 3, 1, 6, 6, 6, 5, 4, 3, 3 };
-static int half2_d2[] = { 5, 4, 3, 1, 5, 2, 1, 4, 2, 2, 1 };
-static int half2_wt[] = { 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2 };
-
-static int third1_d1[] = { 2, 1, 6, 6, 5, 4, 4 };
-static int third1_d2[] = { 2, 1, 5, 3, 1, 3, 2 };
-static int third1_wt[] = { 1, 1, 2, 2, 2, 2, 2 };
-
-static int third2_d1[] = { 6, 3, 6, 5, 5, 4, 2 };
-static int third2_d2[] = { 6, 3, 4, 3, 2, 1, 1 };
-static int third2_wt[] = { 1, 1, 2, 2, 2, 2, 2 };
-
-static int third3_d1[] = { 5, 4, 6, 6, 5, 3, 3 };
-static int third3_d2[] = { 5, 4, 2, 1, 4, 2, 1 };
-static int third3_wt[] = { 1, 1, 2, 2, 2, 2, 2 };
-
-static int quarter1_d1[] = { 6, 3, 1, 6, 5, 4 };
-static int quarter1_d2[] = { 6, 3, 1, 1, 3, 2 };
-static int quarter1_wt[] = { 1, 1, 1, 2, 2, 2 };
-    
-static int quarter2_d1[] = { 5, 6, 6, 5, 4 };
-static int quarter2_d2[] = { 5, 3, 2, 2, 1 };
-static int quarter2_wt[] = { 1, 2, 2, 2, 2 };
-
-static int quarter3_d1[] = { 4, 6, 5, 3, 3 };
-static int quarter3_d2[] = { 4, 4, 1, 2, 1 };
-static int quarter3_wt[] = { 1, 2, 2, 2, 2 };
- 
-static int quarter4_d1[] = { 2, 6, 5, 4, 2 };
-static int quarter4_d2[] = { 2, 5, 4, 3, 1 };
-static int quarter4_wt[] = { 1, 2, 2, 2, 2 };
-
-typedef struct {
-    int numRolls;
-    int *d1;
-    int *d2;
-    int *wt;
-} laRollList_t;
-
-static laRollList_t halfLists[ 2 ] = {
-  { 10, half1_d1, half1_d2, half1_wt },
-  { 11, half2_d1, half2_d2, half2_wt } 
-};
-
-static  laRollList_t thirdLists[3] = {
-  {  7, third1_d1, third1_d2, third1_wt },
-  {  7, third2_d1, third2_d2, third2_wt },
-  {  7, third3_d1, third3_d2, third3_wt } 
-};
-
-static laRollList_t quarterLists[4] = {
-  {  6, quarter1_d1, quarter1_d2, quarter1_wt },
-  {  5, quarter2_d1, quarter2_d2, quarter2_wt },
-  {  5, quarter3_d1, quarter3_d2, quarter3_wt },
-  {  5, quarter4_d1, quarter4_d2, quarter4_wt } 
-};
-
-static  laRollList_t allLists[ 1 ] = { 
-  { 21, all_d1, all_d2, all_wt } 
-};
-
-static laRollList_t *rollLists[] = {
-  allLists, allLists, halfLists, thirdLists, quarterLists };
-
-#endif
 
 /* Random context, for generating non-deterministic noisy evaluations. */
 static randctx rc;
@@ -423,19 +327,6 @@ const char *aszSettings[ NUM_SETTINGS ] = {
   N_ ("setting|grandmaster") };
 
 /* which evaluation context does the predefined settings use */
-#if defined (REDUCTION_CODE)
-evalcontext aecSettings[ NUM_SETTINGS ] = {
-  { TRUE, 0, 0, TRUE, 0.060f }, /* casual play */
-  { TRUE, 0, 0, TRUE, 0.050f }, /* beginner */
-  { TRUE, 0, 0, TRUE, 0.040f }, /* intermediate */
-  { TRUE, 0, 0, TRUE, 0.015f }, /* advanced */
-  { TRUE, 0, 0, TRUE, 0.0f }, /* expert */
-  { TRUE, 2, 0, TRUE, 0.0f }, /* world class */
-  { TRUE, 2, 0, TRUE, 0.0f }, /* supremo */
-  { TRUE, 3, 0, TRUE, 0.0f }, /* grand master */
-};
-
-#else
 evalcontext aecSettings[ NUM_SETTINGS ] = {
   { TRUE, 0, FALSE, TRUE, 0.060f }, /* casual play */
   { TRUE, 0, FALSE, TRUE, 0.050f }, /* beginner */
@@ -446,9 +337,8 @@ evalcontext aecSettings[ NUM_SETTINGS ] = {
   { TRUE, 2, TRUE, TRUE, 0.0f }, /* supremo */
   { TRUE, 3, TRUE, TRUE, 0.0f }, /* grand master */
 };
-#endif
-/* which move filter does the predefined settings use */
 
+/* which move filter does the predefined settings use */
 int aiSettingsMoveFilter[ NUM_SETTINGS ] = {
   -1, /* beginner: n/a */
   -1, /* casual play: n/a */
@@ -2593,58 +2483,6 @@ EvalKey ( const evalcontext *pec, const int nPlies,
           const cubeinfo *pci, int fCubefulEquity ) {
 
   int iKey;
-#if defined( REDUCTION_CODE )
-  /*
-   * Bit 00-02: nReduced
-   * Bit 03-04: nPlies
-   * Bit 05   : fCubeful
-   * Bit 06-13: rNoise
-   * Bit 14-19: anScore[ 0 ]
-   * Bit 20-24: anScore[ 1 ]
-   * Bit 25-28: log2(nCube)
-   * Bit 29-30: fCubeOwner
-   * Bit 31   : fCrawford
-   */
-
-  /* Record the signature of important evaluation settings. */
-  iKey = (
-	   ( pec->nReduced ) | 
-           ( nPlies << 3 ) |
-           ( pec->fCubeful << 6 ) | 
-           ( ( ( (int) ( pec->rNoise * 1000 ) ) & 0x00FF ) << 7 ) |
-           ( pci->fMove << 14 ) );
-
-  if ( nPlies || fCubefulEquity ) {
-
-    /* 
-     * match score is only interesting for cubeful evaluations or
-     * for higher plies.
-     *
-     * Similarly for money play.
-     *
-     */
-
-    /* In match play, the score and cube value and position are important. */
-    if( pci->nMatchTo )
-      iKey ^=
-        ( ( pci->nMatchTo - pci->anScore[ pci->fMove ] ) << 15 ) ^
-        ( ( pci->nMatchTo - pci->anScore[ !pci->fMove ] ) << 20 ) ^
-        ( LogCube( pci->nCube ) << 25 ) ^
-        ( ( pci->fCubeOwner < 0 ? 2 :
-            pci->fCubeOwner == pci->fMove ) << 29 ) ^
-        ( pci->fCrawford << 31 );
-    else if( pec->fCubeful || fCubefulEquity )
-      /* in cubeful money games the cube position and rules are important. */
-      iKey ^=
-        ( ( pci->fCubeOwner < 0 ? 2 :
-            pci->fCubeOwner == pci->fMove ) << 29 ) ^
-	( pci->fJacoby << 31 ) ^ ( pci->fBeavers << 28 );
-    
-    if( fCubefulEquity )
-      iKey ^= 0x6a47b47e;
-
-  }
-#else
   /*
    * Bit 00-01: nPlies
    * Bit 02   : fCubeful
@@ -2689,7 +2527,6 @@ EvalKey ( const evalcontext *pec, const int nPlies,
     if( fCubefulEquity )
       iKey ^= 0x6a47b47e;
   }
-#endif
     
   return iKey;
 
@@ -4782,17 +4619,6 @@ cmp_evalcontext ( const evalcontext *pec1, const evalcontext *pec2 ) {
 
   }
 
-#if defined( REDUCTION_CODE )
-  if ( pec1->nPlies > 0 ) {
-
-    int n1 = ( pec1->nReduced != 21 ) ? pec1->nReduced : 0;
-    int n2 = ( pec2->nReduced != 21 ) ? pec2->nReduced : 0;
-    if ( n1 > n2 )
-      return -1;
-    else if ( n1 < n2 )
-      return +1;
-  }
-#else
   if ( pec1->nPlies > 0 ) {
     int nPrune1 = (pec1->fUsePrune);
     int nPrune2 = (pec2->fUsePrune);
@@ -4801,7 +4627,7 @@ cmp_evalcontext ( const evalcontext *pec1, const evalcontext *pec2 ) {
     else if (nPrune1 < nPrune2 )
 	    return +1;
   }
-#endif
+
   return 0;
 
 }
@@ -5803,8 +5629,6 @@ static int EvaluatePositionCubeful3( NNState *nnStates, const TanBoard anBoard, 
 
 static int ScoreMoves( movelist *pml, const cubeinfo* pci, const evalcontext* pec, int nPlies );
 
-#if !defined(REDUCTION_CODE)
-
 #define PRUNE_MOVES 10
 
 static void FindBestMoveInEval(NNState * nnStates, int const nDice0, int const nDice1, const TanBoard anBoardIn,
@@ -5910,25 +5734,15 @@ static void FindBestMoveInEval(NNState * nnStates, int const nDice0, int const n
 	ScoreMoves(&ml, pci, pec, 0);
 	PositionFromKey(anBoardOut, ml.amMoves[ml.iMoveBest].auch);
 }
-#endif
 
 static int EvaluatePositionFull( NNState *nnStates, const TanBoard anBoard, float arOutput[],
                       const cubeinfo* pci, const evalcontext* pec, unsigned int nPlies,
                       positionclass pc )
 {
   int i, n0, n1;
-#if defined( REDUCTION_CODE )
-  int fUseReduction, r;
-  laRollList_t *rolls = NULL;
-  laRollList_t *rollList = NULL;
-#endif
   float arVariationOutput[ NUM_OUTPUTS ];
   float rTemp;
-  int w
-#if defined( REDUCTION_CODE )
-    , sumW
-#endif
-    ;
+  int w;
   
   if( pc > CLASS_PERFECT && nPlies > 0 ) {
     /* internal node; recurse */
@@ -5936,45 +5750,16 @@ static int EvaluatePositionFull( NNState *nnStates, const TanBoard anBoard, floa
     TanBoard anBoardNew;
     /* int anMove[ 8 ]; */
     cubeinfo ciOpp;
-#if !defined(REDUCTION_CODE)
-    int const  usePrune =
-      pec->fUsePrune && !pec->rNoise && pci->bgv == VARIATION_STANDARD;
-#endif 
-      
+    int const usePrune = pec->fUsePrune && !pec->rNoise && pci->bgv == VARIATION_STANDARD;
+
     for( i = 0; i < NUM_OUTPUTS; i++ )
       arOutput[ i ] = 0.0;
 
-#if defined( REDUCTION_CODE )
-    /* reset reduction group */
-
-    if ( pec->nReduced && ( nPlies == pec->nPlies ) )
-      nReductionGroup = 0;
-
-    fUseReduction = pec->nReduced && ( nPlies == 1 ) && ( pec->nPlies > 0 );
-
-    if ( fUseReduction ) {
-      nReductionGroup = (nReductionGroup + 1) % pec->nReduced;
-      rollList = rollLists[ pec->nReduced ];
-      rolls = &rollList[ nReductionGroup ];
-    }
-    else
-      rolls = &allLists[ 0 ];
-#endif
-    
     /* loop over rolls */
 
-    
-#if defined( REDUCTION_CODE )
-    sumW = 0;
-    for ( r=0; r < rolls->numRolls; r++ ) {
-      n0 = rolls->d1[r];
-      n1 = rolls->d2[r];
-      w  = rolls->wt[r];
-#else
-      for( n0 = 1; n0 <= 6; n0++ ) {
+	for( n0 = 1; n0 <= 6; n0++ ) {
 	for( n1 = 1; n1 <= n0; n1++ ) {
 	  w = (n0 == n1) ? 1 : 2;
-#endif
 
       for( i = 0; i < 25; i++ ) {
         anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
@@ -5986,16 +5771,13 @@ static int EvaluatePositionFull( NNState *nnStates, const TanBoard anBoard, floa
         return -1;
       }
 
-#if !defined(REDUCTION_CODE)
       if( usePrune ) {
 	FindBestMoveInEval(nnStates, n0, n1, anBoard, anBoardNew, pci, pec);
       } else {
-#endif
+
 	FindBestMovePlied( NULL, n0, n1, anBoardNew, pci, pec, 0,
 			   defaultFilters );
-#if !defined(REDUCTION_CODE)
       }
-#endif
 
       SwapSides( anBoardNew );
 
@@ -6011,29 +5793,13 @@ static int EvaluatePositionFull( NNState *nnStates, const TanBoard anBoard, floa
 
       for( i = 0; i < NUM_OUTPUTS; i++ )
         arOutput[ i ] += w * arVariationOutput[ i ];
-#if defined( REDUCTION_CODE )
-      sumW += w;
-#endif
     }
 
-#if defined( REDUCTION_CODE )
-    /* reset reduction group */
-
-    if ( pec->nReduced && ( nPlies == pec->nPlies ) )
-      nReductionGroup = 0;
-#else
       }
-#endif
       
     /* normalize */
     for ( i = 0; i < NUM_OUTPUTS; i++ )
-      arOutput[ i ] /=
-#if defined( REDUCTION_CODE )
-	sumW
-#else
-	36
-#endif
-	;
+      arOutput[ i ] /= 36;
     
     /* flop eval */
     arOutput[ OUTPUT_WIN ] = 1.0f - arOutput[ OUTPUT_WIN ];
@@ -6547,16 +6313,7 @@ EvaluatePositionCubeful4( NNState *nnStates, const TanBoard anBoard,
   float *arCfTemp = (float*) g_alloca(2 * cci * sizeof(float));
   cubeinfo *aci = (cubeinfo*) g_alloca(2 * cci * sizeof(cubeinfo));
 
-#if defined( REDUCTION_CODE )
-  int fUseReduction, ir;
-  laRollList_t *rolls = NULL;
-  laRollList_t *rollList = NULL;
-#endif
-  int w
-#if defined( REDUCTION_CODE )
-    , sumW
-#endif
-    ;
+  int w;
   int n0, n1;
 
   pc = ClassifyPosition ( anBoard, pciMove->bgv );
@@ -6567,10 +6324,7 @@ EvaluatePositionCubeful4( NNState *nnStates, const TanBoard anBoard,
 
     TanBoard anBoardNew;
 
-#if !defined( REDUCTION_CODE )
-    int const  usePrune =
-      pec->fUsePrune && !pec->rNoise && pciMove->bgv == VARIATION_STANDARD;
-#endif
+    int const usePrune = pec->fUsePrune && !pec->rNoise && pciMove->bgv == VARIATION_STANDARD;
 
     for( i = 0; i < NUM_OUTPUTS; i++ )
       arOutput[ i ] = 0.0;
@@ -6582,39 +6336,11 @@ EvaluatePositionCubeful4( NNState *nnStates, const TanBoard anBoard,
 
     MakeCubePos ( aciCubePos, cci, fTop, aci, TRUE );
 
-#if defined( REDUCTION_CODE )
-    /* speed reduction */
-
-    /* make sure to reset nReductionGroup */
-
-    if ( pec->nReduced && ( nPlies == pec->nPlies ) )
-      nReductionGroup = 0;
-
-    fUseReduction = pec->nReduced && ( nPlies == 1 ) && ( pec->nPlies > 0 );
-
-    if ( fUseReduction ) {
-      nReductionGroup = (nReductionGroup + 1) % pec->nReduced;
-      rollList = rollLists[ pec->nReduced ];
-      rolls = &rollList[ nReductionGroup ];
-    }
-    else
-      rolls = &allLists[ 0 ];
-    
-#endif
-
     /* loop over rolls */
 
-#if defined( REDUCTION_CODE )
-    sumW = 0;
-    for ( ir=0; ir < rolls->numRolls; ir++ ) {
-      n0 = rolls->d1[ir];
-      n1 = rolls->d2[ir];
-      w  = rolls->wt[ir];
-#else
     for( n0 = 1; n0 <= 6; n0++ ) {
       for( n1 = 1; n1 <= n0; n1++ ) {
 	w = (n0 == n1) ? 1 : 2;
-#endif
 
       for( i = 0; i < 25; i++ ) {
         anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
@@ -6626,16 +6352,13 @@ EvaluatePositionCubeful4( NNState *nnStates, const TanBoard anBoard,
         return -1;
       }
 
-#if !defined( REDUCTION_CODE )
       if( usePrune ) {
 	FindBestMoveInEval(nnStates, n0, n1, anBoard, anBoardNew, pciMove, pec);
       } else {
-#endif
+
 	FindBestMovePlied( NULL, n0, n1, anBoardNew,
                          pciMove, pec, 0, defaultFilters );
-#if !defined( REDUCTION_CODE )
       }
-#endif
 
       SwapSides( anBoardNew );
 
@@ -6662,25 +6385,12 @@ EvaluatePositionCubeful4( NNState *nnStates, const TanBoard anBoard,
       for ( i = 0; i < 2 * cci; i++ )
         arCf[ i ] += w * arCfTemp[ i ];
 
-#if defined( REDUCTION_CODE )
-      sumW += w;
-#endif
-
     }
 
-#if defined( REDUCTION_CODE )
-    /* reset reduction group */
-
-    if ( pec->nReduced && ( nPlies == pec->nPlies ) )
-      nReductionGroup = 0;
-#else
     }
-#endif
 
     /* Flip evals */
-#if !defined( REDUCTION_CODE )
 #define sumW 36
-#endif
     
     arOutput[ OUTPUT_WIN ] =
       1.0f - arOutput[ OUTPUT_WIN ] / sumW;

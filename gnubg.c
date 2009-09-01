@@ -258,11 +258,7 @@ float    arLuckLevel[] = {
 	0,     /* SKILL_NONE */
     };
 
-#if defined (REDUCTION_CODE)
-evalcontext ecTD = { FALSE, 0, 0, TRUE, 0.0 };
-#else
 evalcontext ecTD = { FALSE, 0, FALSE, TRUE, 0.0 };
-#endif
 
 /* this is the "normal" movefilter*/
 #define MOVEFILTER \
@@ -273,116 +269,6 @@ evalcontext ecTD = { FALSE, 0, FALSE, TRUE, 0.0 };
   }
 
 rngcontext *rngctxRollout = NULL;
-
-#if defined (REDUCTION_CODE)
-rolloutcontext rcRollout =
-{
-  {
-	/* player 0/1 cube decision */
-        { TRUE, 0, 0, TRUE, 0.0 },
-	{ TRUE, 0, 0, TRUE, 0.0 }
-  }, 
-  {
-	/* player 0/1 chequerplay */
-	{ TRUE, 0, 0, TRUE, 0.0 },
-	{ TRUE, 0, 0, TRUE, 0.0 }
-  }, 
-
-  {
-	/* player 0/1 late cube decision */
-	{ TRUE, 0, 0, TRUE, 0.0 },
-	{ TRUE, 0, 0, TRUE, 0.0 }
-  }, 
-  {
-	/* player 0/1 late chequerplay */
-	{ TRUE, 0, 0, TRUE, 0.0 },
-	{ TRUE, 0, 0, TRUE, 0.0 } 
-  }, 
-  /* truncation point cube and chequerplay */
-  { TRUE, 0, 0, TRUE, 0.0 },
-  { TRUE, 0, 0, TRUE, 0.0 },
-
-  /* move filters */
-  { MOVEFILTER, MOVEFILTER },
-  { MOVEFILTER, MOVEFILTER },
-
-  FALSE, /* cubeful */
-  TRUE, /* variance reduction */
-  FALSE, /* initial position */
-  TRUE, /* rotate */
-  TRUE, /* truncate at BEAROFF2 for cubeless rollouts */
-  TRUE, /* truncate at BEAROFF2_OS for cubeless rollouts */
-  FALSE, /* late evaluations */
-  FALSE,  /* Truncation disabled */
-  FALSE,  /* no stop on STD */
-  FALSE,  /* no stop on JSD */
-  FALSE,  /* no move stop on JSD */
-  10, /* truncation */
-  1296, /* number of trials */
-  5,  /* late evals start here */
-  RNG_MERSENNE, /* RNG */
-  0,  /* seed */
-  144,    /* minimum games  */
-  0.1,	  /* stop when std's are under 10% of value */
-  144,    /* minimum games  */
-  1.96,   /* stop when best has j.s.d. for 95% confidence */
-  0
-
-};
-
-/* parameters for `eval' and `hint' */
-
-#define EVALSETUP  { \
-  /* evaltype */ \
-  EVAL_EVAL, \
-  /* evalcontext */ \
-  { TRUE, 0, 0, TRUE, 0.0 }, \
-  /* rolloutcontext */ \
-  { \
-    { \
-      { FALSE, 0, 0, TRUE, 0.0 }, /* player 0 cube decision */ \
-      { FALSE, 0, 0, TRUE, 0.0 } /* player 1 cube decision */ \
-    }, \
-    { \
-      { FALSE, 0, 0, TRUE, 0.0 }, /* player 0 chequerplay */ \
-      { FALSE, 0, 0, TRUE, 0.0 } /* player 1 chequerplay */ \
-    }, \
-    { \
-      { FALSE, 0, 0, TRUE, 0.0 }, /* p 0 late cube decision */ \
-      { FALSE, 0, 0, TRUE, 0.0 } /* p 1 late cube decision */ \
-    }, \
-    { \
-      { FALSE, 0, 0, TRUE, 0.0 }, /* p 0 late chequerplay */ \
-      { FALSE, 0, 0, TRUE, 0.0 } /* p 1 late chequerplay */ \
-    }, \
-    { FALSE, 0, 0, TRUE, 0.0 }, /* truncate cube decision */ \
-    { FALSE, 0, 0, TRUE, 0.0 }, /* truncate chequerplay */ \
-    { MOVEFILTER, MOVEFILTER }, \
-    { MOVEFILTER, MOVEFILTER }, \
-  FALSE, /* cubeful */ \
-  TRUE, /* variance reduction */ \
-  FALSE, /* initial position */ \
-  TRUE, /* rotate */ \
-  TRUE, /* truncate at BEAROFF2 for cubeless rollouts */ \
-  TRUE, /* truncate at BEAROFF2_OS for cubeless rollouts */ \
-  FALSE, /* late evaluations */ \
-  TRUE,  /* Truncation enabled */ \
-  FALSE,  /* no stop on STD */ \
-  FALSE,  /* no stop on JSD */ \
-  FALSE,  /* no move stop on JSD */ \
-  10, /* truncation */ \
-  36, /* number of trials */ \
-  5,  /* late evals start here */ \
-  RNG_MERSENNE, /* RNG */ \
-  0,  /* seed */ \
-  144,    /* minimum games  */ \
-  0.1,	  /* stop when std's are under 10% of value */ \
-  144,    /* minimum games  */ \
-  1.96,   /* stop when best has j.s.d. for 95% confidence */ \
-  0 \
-  } \
-} 
-#else /* REDUCTION_CODE */
 
 rolloutcontext rcRollout =
 { 
@@ -492,7 +378,6 @@ rolloutcontext rcRollout =
   0 \
   } \
 } 
-#endif
 
 evalsetup esEvalChequer = EVALSETUP;
 evalsetup esEvalCube = EVALSETUP;
@@ -589,9 +474,6 @@ static char szDICE[] = N_("<die> <die>"),
 	szWARNYN[] = N_("<warning> on|off"),
 #endif
     szJSDS[] = N_("<joint standard deviations>"),
-#if defined(REDUCTION_CODE)
-    szNUMBER[] = N_("<number>"),
-#endif
     szSTDDEV[] = N_("<std dev>");
 
 /* Command defines moved into separate file */
@@ -2887,20 +2769,12 @@ SaveEvalSettings( FILE *pf, const char *sz, evalcontext *pec ) {
     gchar buf[G_ASCII_DTOSTR_BUF_SIZE];
     gchar *szNoise = g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.3f",  pec->rNoise);
     fprintf( pf, "%s plies %d\n"
-#if defined( REDUCTION_CODE )
-	     "%s reduced %d\n"
-#else
 	     "%s prune %s\n"
-#endif
 	     "%s cubeful %s\n"
 	     "%s noise %s\n"
 	     "%s deterministic %s\n",
 	     sz, pec->nPlies, 
-#if defined( REDUCTION_CODE )
-	     sz, pec->nReduced,
-#else
 	     sz, pec->fUsePrune ? "on" : "off",
-#endif
 	     sz, pec->fCubeful ? "on" : "off",
 	     sz, szNoise,
              sz, pec->fDeterministic ? "on" : "off" );

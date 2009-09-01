@@ -1578,45 +1578,24 @@ static void FinishMove(gpointer p, guint n, GtkWidget * pw)
 
 
 typedef struct _evalwidget {
-    evalcontext *pec;
-    movefilter *pmf;
-    GtkWidget *pwCubeful,
-#if defined (REDUCTION_CODE)
-        *pwReduced, 
-#else
-        *pwUsePrune,
-#endif
-        *pwDeterministic;
-	
-    GtkAdjustment *padjPlies, *padjSearchCandidates, *padjSearchTolerance,
-	*padjNoise;
-    int *pfOK;
-  GtkWidget *pwOptionMenu;
-  int fMoveFilter;
-  GtkWidget *pwMoveFilter;
+	evalcontext *pec;
+	movefilter *pmf;
+	GtkWidget *pwCubeful, *pwUsePrune, *pwDeterministic;
+	GtkAdjustment *padjPlies, *padjSearchCandidates, *padjSearchTolerance, *padjNoise;
+	int *pfOK;
+	GtkWidget *pwOptionMenu;
+	int fMoveFilter;
+	GtkWidget *pwMoveFilter;
 } evalwidget;
 
 static void EvalGetValues ( evalcontext *pec, evalwidget *pew ) {
 
-#if defined( REDUCTION_CODE )
-  GtkWidget *pwMenu, *pwItem;
-  int *pi;
-#endif
   pec->nPlies = (int)pew->padjPlies->value;
   pec->fCubeful =
     gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pew->pwCubeful ) );
 
-  /* reduced */
-#if defined( REDUCTION_CODE )
-  pwMenu = gtk_option_menu_get_menu ( GTK_OPTION_MENU ( pew->pwReduced ) );
-  pwItem = gtk_menu_get_active ( GTK_MENU ( pwMenu ) );
-  pi = (int *) g_object_get_data ( G_OBJECT ( pwItem ), "user_data" );
-  pec->nReduced = *pi;
-#else
   pec->fUsePrune =
     gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pew->pwUsePrune ) );
-  
-#endif
 
   pec->rNoise = (float)pew->padjNoise->value;
   pec->fDeterministic =
@@ -1679,11 +1658,7 @@ static void EvalNoiseValueChanged( GtkAdjustment *padj, evalwidget *pew ) {
 }
 
 static void EvalPliesValueChanged( GtkAdjustment *padj, evalwidget *pew ) {
-#if defined (REDUCTION_CODE)
-    gtk_widget_set_sensitive( pew->pwReduced, padj->value > 0 );
-#else
     gtk_widget_set_sensitive( pew->pwUsePrune, padj->value > 0 );
-#endif
     EvalChanged ( NULL, pew );
 
 }
@@ -1707,13 +1682,8 @@ static void SettingsMenuActivate ( GtkWidget *pwItem,
   gtk_adjustment_set_value ( pew->padjPlies, pec->nPlies );
   gtk_adjustment_set_value ( pew->padjNoise, pec->rNoise );
 
-#if defined( REDUCTION_CODE )
-  gtk_option_menu_set_history ( GTK_OPTION_MENU ( pew->pwReduced ), 
-                                pec->nReduced );
-#else
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwUsePrune ),
                                 pec->fUsePrune );
-#endif
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwCubeful ),
                                 pec->fCubeful );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwDeterministic ),
@@ -1743,18 +1713,6 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
     GtkWidget *pwItem;
 
     GtkWidget *pwev;
-#if defined( REDUCTION_CODE )
-	GtkWidget *pw4;
-	char *pch;
-    const char *aszReduced[] = {
-      N_("No reduction"),
-      NULL,
-      N_("50%% speed"),
-      N_("33%% speed"),
-      N_("25%% speed") 
-    };
-#endif
-
     int i;
     int *pi;
 
@@ -1858,62 +1816,6 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
 		       gtk_label_new( _("Plies:") ) );
     gtk_container_add( GTK_CONTAINER( pw ),
 		       gtk_spin_button_new( pew->padjPlies, 1, 0 ) );
-
-#if defined( REDUCTION_CODE )
-    /* reduced evaluation */
-
-    /* FIXME if and when we support different values for nReduced, this
-       check button won't work */
-
-    pwev = gtk_event_box_new();
-	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
-    gtk_container_add ( GTK_CONTAINER ( pw2 ), pwev );
-
-    gtk_widget_set_tooltip_text(pwev,
-				/* xgettext: no-c-format */
-                          _("Instead of averaging over all 21 possible "
-                            "dice rolls it is possible to average over a "
-                            "reduced set, for example 7 rolls for the 33% "
-                            "speed option. The 33% speed option will "
-                            "typically be three times faster than the "
-                            "full search without reduction."));
-                          
-    pwFrame2 = gtk_frame_new ( _("Reduced evaluations") );
-    gtk_container_add ( GTK_CONTAINER ( pwev ), pwFrame2 );
-    pw4 = gtk_vbox_new ( FALSE, 0 );
-    gtk_container_add ( GTK_CONTAINER ( pwFrame2 ), pw4 );
-
-    pwMenu = gtk_menu_new ();
-    for ( i = 0; i < 5; ++i ) {
-      if ( i == 1 )
-        continue;
-      
-      pch = g_strdup_printf( gettext( aszReduced[ i ] ) );
-      pwItem = gtk_menu_item_new_with_label ( pch );
-      g_free( pch );
-      gtk_menu_append ( GTK_MENU ( pwMenu ), pwItem );
-      pi = g_malloc ( sizeof ( int ) );
-      *pi = i;
-      g_object_set_data_full ( G_OBJECT ( pwItem ), "user_data", 
-                                 pi, g_free );
-
-    }
-    
-    g_signal_connect( G_OBJECT( pwMenu ), "selection-done",
-                         G_CALLBACK( EvalChanged ), pew );
-
-    pew->pwReduced = gtk_option_menu_new ();
-    gtk_option_menu_set_menu( GTK_OPTION_MENU( pew->pwReduced ), pwMenu );
-
-    gtk_container_add( GTK_CONTAINER( pw4 ), pew->pwReduced );
-
-    /* UGLY fix for the fact the menu has entries only for values
-     * 0, 2, 3, 4 
-     */
-	gtk_option_menu_set_history( GTK_OPTION_MENU( pew->pwReduced ), 
-                                 (pec->nReduced < 2) ? 0 : 
-                                  pec->nReduced - 1 );
-#else
 	
     /* Use pruning neural nets */
     
@@ -1926,8 +1828,6 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwUsePrune ),
 				  pec->fUsePrune );
     /* FIXME This needs a tool tip */
-
-#endif
 
     /* cubeful */
     
@@ -2044,13 +1944,8 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
     g_signal_connect( G_OBJECT( pew->pwCubeful ), "toggled",
                          G_CALLBACK( EvalChanged ), pew );
     
-#if defined (REDUCTION_CODE)
-    g_signal_connect( G_OBJECT( pew->pwReduced ), "changed",
-                         G_CALLBACK( EvalChanged ), pew );
-#else
     g_signal_connect( G_OBJECT( pew->pwUsePrune ), "toggled",
                          G_CALLBACK( EvalChanged ), pew );
-#endif 
     
     g_object_set_data_full( G_OBJECT( pwEval ), "user_data", pew, free );
 
@@ -2083,17 +1978,10 @@ static void SetEvalCommands( const char *szPrefix, evalcontext *pec,
 	UserCommand( sz );
     }
 
-#if defined( REDUCTION_CODE )
-    if( pec->nReduced != pecOrig->nReduced ) {
-	sprintf( sz, "%s reduced %d", szPrefix, pec->nReduced );
-	UserCommand( sz );
-    }
-#else
     if( pec->fUsePrune != pecOrig->fUsePrune ) {
 	sprintf( sz, "%s prune %s", szPrefix, pec->fUsePrune ? "on" : "off" );
 	UserCommand( sz );
     }
-#endif
 
     if( pec->fCubeful != pecOrig->fCubeful ) {
 	sprintf( sz, "%s cubeful %s", szPrefix, pec->fCubeful ? "on" : "off" );
