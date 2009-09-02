@@ -2515,7 +2515,8 @@ extern void CommandSetCrawford( char *sz ) {
   moverecord *pmr;
   xmovegameinfo *pmgi;
     
-  if ( ms.nMatchTo > 0 ) {
+  if ( ms.nMatchTo > 0 )
+  {
     if ( ( ms.nMatchTo - ms.anScore[ 0 ] == 1 ) || 
 	 ( ms.nMatchTo - ms.anScore[ 1 ] == 1 ) ) {
 
@@ -2535,8 +2536,15 @@ extern void CommandSetCrawford( char *sz ) {
 	  pmgi->fCrawfordGame = ms.fCrawford;
       }
     } else {
-      outputl( _("Cannot set whether this is the Crawford game\n"
-	    "as none of the players are 1-away from winning.") );
+		if (ms.fCrawford)
+		{	/* Allow crawford to be turned off if set at incorrect score */
+		     SetToggle( "crawford", &ms.fCrawford, sz, 
+				 _("This game is the Crawford game (no doubling allowed)."),
+				 _("This game is not the Crawford game.") );
+			 return;
+		}
+		outputl( _("Cannot set whether this is the Crawford game\n"
+			"as none of the players are 1-away from winning.") );
     }
   }
   else if ( !ms.nMatchTo ) 
