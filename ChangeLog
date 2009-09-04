@@ -6,8 +6,8 @@ Tue Sep  4 00:48:46 MDT 2009 Michael Petch <mpetch@capp-sysware.com>
 
 Tue Sep  4 00:41:50 MDT 2009 Michael Petch <mpetch@capp-sysware.com>
 
-	* sgf.c: cmark data is not restored properly when an SGF file is
-	opened. The last candidate roll for each position will lose its 
+	* sgf.c: FIXED: cmark data is not restored properly when an SGF 
+	file is opened. The last candidate move for each position will lose its 
 	cmark status.
 	
 Tue Sep  1 22:41:46 CEST 2009 Christian Anthon <anthon@kiku.dk>
