@@ -952,7 +952,7 @@ static void RestoreMarkedMoves(property * pp, movelist * pml)
 	int val;
 	char *pch = pp->pl->plNext->p;
 	while ((val = strtol(pch, &pch, 10))) {
-		if (val >= (int) pml->cMoves || val < 0)
+		if (val > (int) pml->cMoves || val < 1)
 			continue;
 		pml->amMoves[val-1].cmark = CMARK_ROLLOUT;
 	}
