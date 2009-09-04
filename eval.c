@@ -2488,13 +2488,13 @@ EvalKey ( const evalcontext *pec, const int nPlies,
    * Bit 04   : fCubeful
    * Bit 05   : fMove
    * Bit 06   : fUsePrune
-   * Bit 07-11: anScore[ 0 ]
-   * Bit 12-16: anScore[ 1 ]
-   * Bit 17-20: log2(nCube)
-   * Bit 21-22: fCubeOwner
-   * Bit 23   : fCrawford
-   * Bit 24   : fJacoby
-   * Bit 25   : fBeavers
+   * Bit 07-12: anScore[ 0 ]
+   * Bit 13-18: anScore[ 1 ]
+   * Bit 19-22: log2(nCube)
+   * Bit 23-24: fCubeOwner
+   * Bit 25   : fCrawford
+   * Bit 26   : fJacoby
+   * Bit 27   : fBeavers
    */
 
   iKey = ( nPlies | ( pec->fCubeful << 4 ) | ( pci->fMove << 5 ) );
@@ -2507,18 +2507,18 @@ EvalKey ( const evalcontext *pec, const int nPlies,
     /* In match play, the score and cube value and position are important. */
     if( pci->nMatchTo )
       iKey ^=
-        ( ( pci->nMatchTo - pci->anScore[ pci->fMove ] ) << 7 ) ^
-        ( ( pci->nMatchTo - pci->anScore[ !pci->fMove ] ) << 12 ) ^
-        ( LogCube( pci->nCube ) << 17 ) ^
+        ( ( pci->nMatchTo - pci->anScore[ pci->fMove ] - 1) << 7 ) ^
+        ( ( pci->nMatchTo - pci->anScore[ !pci->fMove ] - 1) << 13 ) ^
+        ( LogCube( pci->nCube ) << 19 ) ^
         ( ( pci->fCubeOwner < 0 ? 2 :
-            pci->fCubeOwner == pci->fMove ) << 21 ) ^
-        ( pci->fCrawford << 23 );
+            pci->fCubeOwner == pci->fMove ) << 23 ) ^
+        ( pci->fCrawford << 25 );
     else if( pec->fCubeful || fCubefulEquity )
       /* in cubeful money games the cube position and rules are important. */
       iKey ^=
         ( ( pci->fCubeOwner < 0 ? 2 :
-            pci->fCubeOwner == pci->fMove ) << 21 ) ^
-	( pci->fJacoby << 24 ) ^ ( pci->fBeavers << 25 );
+            pci->fCubeOwner == pci->fMove ) << 23 ) ^
+	( pci->fJacoby << 26 ) ^ ( pci->fBeavers << 27 );
     
     if( fCubefulEquity )
       iKey ^= 0x6a47b47e;
