@@ -3448,7 +3448,7 @@ extern void board_edit( BoardData *bd )
 
           if ( nMatchToNew )
             for ( i = 0; i < 2; ++i )
-              if ( anScoreNew[ i ] > nMatchToNew )
+              if ( anScoreNew[ i ] >= nMatchToNew )
                 anScoreNew[ i ] = 0;
 	  if ( (bd->diceRoll[0] > 6) || (bd->diceRoll[1] > 6)) {
 	    bd->diceRoll[0] = bd->diceRoll[1] = 0;
