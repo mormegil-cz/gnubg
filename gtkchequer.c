@@ -235,7 +235,9 @@ MoveListMWC ( GtkWidget *pw, hintdata *phd )
 
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pw ), fOutputMWC );
 
+  /* Make sure display is up to date */
   MoveListUpdate ( phd );
+  SetAnnotation(pmrCurAnn);
 
 }
 
