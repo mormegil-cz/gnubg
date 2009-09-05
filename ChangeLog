@@ -1,3 +1,8 @@
+Sat Sep  5 14:10:46 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtkmovelist.c: Fix a bug where worst move were reported as outside
+	the list.
+
 Tue Sep  4 00:48:46 MDT 2009 Michael Petch <mpetch@capp-sysware.com>
 
 	* eval.c: Increased bits for score keys to allow appropriate 

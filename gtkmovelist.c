@@ -217,7 +217,7 @@ if (!psHighlight)
 		memcpy(dice, ms.anDice, sizeof(dice));
 		if (!dice[0])
 		{	/* If the dice have got lost, try to find them */
-			moverecord* pmr = (moverecord*)plLastMove->p;
+			moverecord* pmr = (moverecord*)plLastMove->plNext->p;
 			if (pmr)
 			{
 				dice[0] = pmr->anDice[0];
