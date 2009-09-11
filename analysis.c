@@ -952,9 +952,6 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const listOLD *plParentGame,
     return fInterrupt ? -1 : 0;
 }
 
-/* used by mulithread code */
-static int progress_offset;
-
 static int
 NumberMovesGame ( listOLD *plGame ) {
 
@@ -972,7 +969,7 @@ NumberMovesGame ( listOLD *plGame ) {
 
 static void UpdateProgressBar(void)
 {
-	ProgressValue(progress_offset + MT_GetDoneTasks());
+	ProgressValue(MT_GetDoneTasks());
 }
 
 static void AnalyseMoveMT(Task *task)
@@ -994,7 +991,7 @@ analyzeDouble:
     }
 }
 
-static int AnalyzeGame ( listOLD *plGame )
+static int AnalyzeGame ( listOLD *plGame, int wait )
 {
 	int result;
 	unsigned int i;
@@ -1062,13 +1059,18 @@ static int AnalyzeGame ( listOLD *plGame )
 	}
 	g_assert(pl->plNext == plGame);
 
-	multi_debug("wait for all task: analysis");
-	result = MT_WaitForTasks(UpdateProgressBar, 250);
+	if (wait)
+	{
+		multi_debug("wait for all task: analysis");
+		result = MT_WaitForTasks(UpdateProgressBar, 250);
 
-	if (result == -1)
-		IniStatcontext( psc );
+		if (result == -1)
+			IniStatcontext( psc );
 
-	return result;
+		return result;
+	}
+	else
+		return 0;
 }
 
 #else
@@ -1252,10 +1254,9 @@ extern void CommandAnalyseGame( char *UNUSED(sz) )
   
   nMoves = NumberMovesGame ( plGame );
 
-  progress_offset = 0;
   ProgressStartValue( _("Analysing game; move:"), nMoves );
     
-  AnalyzeGame( plGame );
+  AnalyzeGame( plGame, TRUE );
   
   ProgressEnd();
 
@@ -1283,25 +1284,26 @@ extern void CommandAnalyseMatch( char *UNUSED(sz) )
 
   nMoves = NumberMovesMatch ( &lMatch );
 
-  progress_offset = 0;
   ProgressStartValue( _("Analysing match; move:"), nMoves );
 
   IniStatcontext( &scMatch );
   
   for( pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext ) {
 
-      if( AnalyzeGame( pl->p ) < 0 ) {
+      if( AnalyzeGame( pl->p, FALSE ) < 0 ) {
 	  /* analysis incomplete; erase partial summary */
         
 	  IniStatcontext( &scMatch );
 	  break;
       }
-      progress_offset += NumberMovesGame ( pl -> p);
       pmr = (moverecord *) ( (listOLD *) pl->p )->plNext->p;
       g_assert( pmr->mt == MOVE_GAMEINFO );
       AddStatcontext( &pmr->g.sc, &scMatch );
   }
   
+  multi_debug("wait for all task: analysis");
+  MT_WaitForTasks(UpdateProgressBar, 250);
+
   ProgressEnd();
 
 #if USE_GTK
