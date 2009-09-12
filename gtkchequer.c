@@ -410,6 +410,7 @@ MoveListMove ( GtkWidget *pw, hintdata *phd )
 	if (!plSelList)
 		return;
   
+	ShowMove(phd, TRUE);
 	pm = MoveListGetMove(phd, plSelList);
 	MoveListFreeSelectionList(plSelList);
 

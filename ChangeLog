@@ -1,3 +1,8 @@
+Sat Sep 12 21:41:50 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtkchequer.c: Update board on MoveListMove to allow it to work with
+	tutor.
+
 Sat Sep  5 14:10:46 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gtkmovelist.c: Fix a bug where worst move were reported as outside
