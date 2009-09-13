@@ -1,3 +1,7 @@
+Tue Sep 13 06:30:12 MDT 2009 Michael Petch <mpetch@capp-sysware.com>
+
+	* eval.c: Properly initialize all thread specific data to NULL
+
 Tue Sep 13 00:03:19 MDT 2009 Michael Petch <mpetch@capp-sysware.com>
 
 	* analysis.c: Fixed non threaded build errors
