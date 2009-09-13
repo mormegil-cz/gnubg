@@ -1255,8 +1255,12 @@ extern void CommandAnalyseGame( char *UNUSED(sz) )
   nMoves = NumberMovesGame ( plGame );
 
   ProgressStartValue( _("Analysing game; move:"), nMoves );
-    
+
+#if USE_MULTITHREAD    
   AnalyzeGame( plGame, TRUE );
+#else
+  AnalyzeGame( plGame);
+#endif
   
   ProgressEnd();
 
@@ -1290,7 +1294,12 @@ extern void CommandAnalyseMatch( char *UNUSED(sz) )
   
   for( pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext ) {
 
-      if( AnalyzeGame( pl->p, FALSE ) < 0 ) {
+#if USE_MULTITHREAD    
+      if( AnalyzeGame( pl->p, FALSE ) < 0 ) 
+#else
+      if( AnalyzeGame( pl->p ) < 0 ) 
+#endif
+      {
 	  /* analysis incomplete; erase partial summary */
         
 	  IniStatcontext( &scMatch );
@@ -1301,8 +1310,10 @@ extern void CommandAnalyseMatch( char *UNUSED(sz) )
       AddStatcontext( &pmr->g.sc, &scMatch );
   }
   
+#if USE_MULTITHREAD    
   multi_debug("wait for all task: analysis");
   MT_WaitForTasks(UpdateProgressBar, 250);
+#endif
 
   ProgressEnd();
 
