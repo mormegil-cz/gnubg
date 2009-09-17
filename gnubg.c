@@ -4704,6 +4704,9 @@ int main(int argc, char *argv[])
 		const char *szDataDirectory = getDataDir();
 		_chdir(szDataDirectory);
 	}
+	/* Create a mutex so install can check if it's running */
+	CreateMutex(NULL, FALSE, "GNU Backgammon Mutex");
+
 #endif
 
 	/* print version and exit if -v option given */
