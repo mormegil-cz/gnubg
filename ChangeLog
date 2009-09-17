@@ -1,3 +1,7 @@
+Fri Sep 18 00:37:23 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtkcube.c: Print cubeless details in take/drop for EVAL_ROLLOUT.
+
 Wed Sep 16 23:30:00 2009  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c + others: Simplify analysis gui settings

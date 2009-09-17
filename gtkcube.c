@@ -195,7 +195,13 @@ TakeAnalysis(cubehintdata *pchd) {
 
     case EVAL_ROLLOUT:
 
-      /* FIXME: */
+      pw = OutputPercentsTable( cdec->aarOutput[ 1 ] );
+      gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
+                         0, 4, iRow, iRow + 1, 
+                         GTK_EXPAND | GTK_FILL, 
+                         GTK_EXPAND | GTK_FILL, 
+                         8, 4 );
+      iRow++;
 
       break;
 
