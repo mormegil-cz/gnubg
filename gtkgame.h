@@ -159,7 +159,7 @@ extern void RefreshGeometries(void);
 extern void RunGTK(GtkWidget * pwSplash, char *commands,
 		   char *python_script, char *match);
 extern void SetAnnotation(moverecord *pmr);
-extern void SetEvaluation(gpointer p, guint n, GtkWidget * pw);
+extern void SetAnalysis(gpointer p, guint n, GtkWidget * pw);
 extern void SetMET(GtkWidget * pw, gpointer p);
 extern void SetPanelWidget(gnubgwindow window, GtkWidget * pWin);
 extern void SetRollouts(gpointer p, guint n, GtkWidget * pw);

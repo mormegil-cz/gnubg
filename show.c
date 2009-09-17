@@ -707,11 +707,11 @@ extern void CommandShowEvaluation( char *UNUSED(sz) ) {
 
     outputl( _("`eval' and `hint' will use:") );
     outputl( _("    Chequer play:") );
-    ShowEvalSetup ( &esEvalChequer );
+    ShowEvalSetup ( GetEvalChequer() );
     outputl( _("    Move filters:") );
-    ShowMoveFilters ( aamfEval );
+    ShowMoveFilters ( *GetEvalMoveFilter() );
     outputl( _("    Cube decisions:") );
-    ShowEvalSetup ( &esEvalCube );
+    ShowEvalSetup ( GetEvalCube() );
 
 }
 
@@ -1573,7 +1573,7 @@ extern void CommandShowMarketWindow ( char * sz ) {
     /* calculate them based on current position */
 
     if ( getCurrentGammonRates ( aarRates, arOutput, msBoard(), 
-                                 &ci, &esEvalCube.ec ) < 0 ) 
+                                 &ci, &GetEvalCube()->ec ) < 0 ) 
       return;
 
   }

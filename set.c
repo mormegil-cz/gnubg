@@ -2829,6 +2829,12 @@ CommandSetEvalParamRollout ( char *sz ) {
 
 }
 
+extern void CommandSetEvalSameAsAnalysis(char *sz)
+{
+    SetToggle( "eval sameasanalysis", &fEvalSameAsAnalysis, sz, 
+               _("Evaluation settings will be same as analysis settings."), 
+               _("Evaluation settings separate from analysis settings.") );
+}
 
 extern void
 CommandSetAnalysisPlayer( char *sz ) {

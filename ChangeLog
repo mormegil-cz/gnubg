@@ -1,3 +1,7 @@
+Wed Sep 16 23:30:00 2009  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c + others: Simplify analysis gui settings
+
 Tue Sep 13 06:30:12 MDT 2009 Michael Petch <mpetch@capp-sysware.com>
 
 	* eval.c: Properly initialize all thread specific data to NULL

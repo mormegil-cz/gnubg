@@ -222,6 +222,7 @@ int fTruncEqualPlayer0 =TRUE;
 int fTutorChequer = TRUE;
 int fTutorCube = TRUE;
 int fTutor = FALSE;
+int fEvalSameAsAnalysis = TRUE;
 int nConfirmDefault = -1;
 int nThreadPriority = 0;
 int nToolbarStyle = 2;
@@ -386,6 +387,19 @@ evalsetup esAnalysisCube = EVALSETUP;
 
 movefilter aamfEval[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] = MOVEFILTER;
 movefilter aamfAnalysis[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] = MOVEFILTER;
+
+evalsetup *GetEvalChequer()
+{
+	return fEvalSameAsAnalysis ? &esAnalysisChequer : &esEvalChequer;
+}
+evalsetup *GetEvalCube()
+{
+	return fEvalSameAsAnalysis ? &esAnalysisCube : &esEvalCube;
+}
+TmoveFilter *GetEvalMoveFilter()
+{
+	return fEvalSameAsAnalysis ? &aamfAnalysis : &aamfEval;
+}
 
 exportsetup exsExport = {
   TRUE, /* include annotations */
@@ -1534,7 +1548,7 @@ extern void CommandEval( char *sz )
 
     /* Consider cube action */
 	dd.pboard = (ConstTanBoard)an;
-	dd.pec = &esEvalCube.ec;
+	dd.pec = &GetEvalCube()->ec;
 	dd.pci = &ci;
 	dd.szOutput = szOutput;
 	dd.n = n;
@@ -1934,7 +1948,7 @@ static void HintResigned( void )
 
   dd.pboard = msBoard();
   dd.pci = &ci;
-  dd.pec = &esEvalCube.ec;
+  dd.pec = &GetEvalCube()->ec;
   if (RunAsyncProcess((AsyncFun)asyncMoveDecisionE, &dd, _("Considering resignation...")) != 0)
 	return;
   
@@ -1986,7 +2000,7 @@ static int hint_cube(moverecord *pmr, cubeinfo *pci)
 		/* no analysis performed yet */
 		dd.pboard = msBoard();
 		dd.pci = pci;
-		dd.pes = &esEvalCube;
+		dd.pes = GetEvalCube();
 		if (RunAsyncProcess
 		    ((AsyncFun) asyncCubeDecision, &dd,
 		     _("Considering cube action...")) != 0)
@@ -2266,14 +2280,14 @@ extern void hint_move(char *sz, gboolean show)
 		fd.auchMove = NULL;
 		fd.rThr = arSkillLevel[SKILL_DOUBTFUL];
 		fd.pci = &ci;
-		fd.pec = &esEvalChequer.ec;
-		fd.aamf = aamfEval;
+		fd.pec = &GetEvalChequer()->ec;
+		fd.aamf = *GetEvalMoveFilter();
 		if ((RunAsyncProcess
 		     ((AsyncFun) asyncFindMove, &fd,
 		      _("Considering move...")) != 0) || fInterrupt)
 			return;
 
-		pmr_movelist_set(pmr, &esEvalChequer, &ml);
+		pmr_movelist_set(pmr, GetEvalChequer(), &ml);
 	}
 #if USE_GTK
 	if (!hist && fX)
@@ -3117,6 +3131,7 @@ static void SaveRuleSettings(FILE * pf)
 
 static void SaveEvaluationSettings(FILE * pf)
 {
+	fprintf(pf, "set eval sameasanalysis %s\n", fEvalSameAsAnalysis ? "on" : "off");
 	SaveEvalSetupSettings(pf, "set evaluation chequerplay", &esEvalChequer);
 	SaveEvalSetupSettings(pf, "set evaluation cubedecision", &esEvalCube);
 	SaveMoveFilterSettings(pf, "set evaluation movefilter", aamfEval);

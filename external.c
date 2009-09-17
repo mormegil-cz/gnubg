@@ -492,7 +492,7 @@ ExtFIBSBoard( extcmd *pec ) {
       /* take decision */
       if( GeneralCubeDecision( aarOutput, aarStdDev,
                                aarsStatistics, (ConstTanBoard)anBoard, &ci,
-                               &esEvalCube, NULL, NULL ) < 0 )
+                               GetEvalCube(), NULL, NULL ) < 0 )
         return NULL;
 	  
       switch( FindCubeDecision( arDouble,  aarOutput, &ci )) {
@@ -540,8 +540,8 @@ ExtFIBSBoard( extcmd *pec ) {
       /* move */
       char szMove[ 64 ];
       if( FindBestMove( anMove, anDice[ 0 ], anDice[ 1 ],
-                        anBoard, &ci, &esEvalChequer.ec,
-                        aamfEval ) < 0 )
+                        anBoard, &ci, &GetEvalChequer()->ec,
+                        *GetEvalMoveFilter() ) < 0 )
         return NULL;
 
       FormatMovePlain( szMove, anBoardOrig, anMove );
@@ -550,7 +550,7 @@ ExtFIBSBoard( extcmd *pec ) {
       /* double decision */
       if( GeneralCubeDecision( aarOutput, aarStdDev,
                                aarsStatistics, (ConstTanBoard)anBoard, &ci,
-                               &esEvalCube, NULL, NULL ) < 0 )
+                               GetEvalCube(), NULL, NULL ) < 0 )
         return NULL;
 		
       switch( FindCubeDecision( arDouble,  aarOutput, &ci )) {

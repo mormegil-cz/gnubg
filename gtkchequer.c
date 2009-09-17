@@ -295,7 +295,7 @@ EvalMoves ( hintdata *phd, evalcontext *pec )
 static void
 MoveListEval ( GtkWidget *UNUSED(pw), hintdata *phd )
 {
-  EvalMoves ( phd, &esEvalChequer.ec );
+  EvalMoves ( phd, &GetEvalChequer()->ec );
 }
 
 static void
@@ -315,7 +315,7 @@ static void
 MoveListEvalSettings ( GtkWidget *pw, void *UNUSED(unused) )
 {
 	GTKSetCurrentParent(pw);
-  SetEvaluation ( NULL, 0, NULL );
+	SetAnalysis ( NULL, 0, NULL );
 
   /* bring the dialog holding this button to the top */
   gtk_window_present ( GTK_WINDOW ( gtk_widget_get_toplevel( pw ) ) );

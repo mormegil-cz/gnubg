@@ -818,6 +818,8 @@ command cER = {
   { "movefilter", CommandSetEvalMoveFilter, 
     N_("Set parameters for choosing moves to evaluate"), 
     szFILTER, NULL},
+  { "sameasanalysis", CommandSetEvalSameAsAnalysis, N_("Select if evaluation settings should be the "
+	"same as the analysis setting"), szONOFF, &cOnOff },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetExportParameters[] = {
   { "evaluation", CommandSetExportParametersEvaluation,

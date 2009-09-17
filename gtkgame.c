@@ -239,9 +239,12 @@ typedef struct _analysiswidget {
   evalsetup esCube; 
   movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
 
+  evalsetup esEvalChequer;
+  evalsetup esEvalCube; 
+  movefilter aaEvalmf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
+
   GtkAdjustment *apadjSkill[3], *apadjLuck[4];
-  GtkWidget *pwMoves, *pwCube, *pwLuck;
-  GtkWidget *pwEvalCube, *pwEvalChequer;
+  GtkWidget *pwMoves, *pwCube, *pwLuck, *pwHintSame, *pwCubeSummary;
   GtkWidget *apwAnalysePlayers[ 2 ];
     
 } analysiswidget;
@@ -2005,238 +2008,169 @@ static void SetEvalCommands( const char *szPrefix, evalcontext *pec,
     outputresume();
 }
 
+typedef struct _AnalysisDetails
+{
+	const char *title;
+	evalcontext *esChequer;
+	movefilter *mfChequer;
+	evalcontext *esCube;
+	movefilter *mfCube;
+	GtkWidget *pwCube, *pwChequer, *pwOptionMenu, *pwSettingWidgets;
+} AnalysisDetails;
 
-typedef struct _setevalwidget {
-  GtkWidget *pwCube, *pwChequer;
-  int *pfOK;
-} setevalwidget;
-
-
-static void
-EvaluationOK ( GtkWidget *pw, setevalwidget *psew ) {
-
-  evalwidget *pew;
-
-  if ( psew->pfOK )
-    *psew->pfOK = TRUE;
-
-  pew = g_object_get_data ( G_OBJECT ( psew->pwChequer ), "user_data" );
-  EvalGetValues ( pew->pec, pew );
-
-  pew = g_object_get_data ( G_OBJECT ( psew->pwCube ), "user_data" );
-  EvalGetValues ( pew->pec, pew );
-
+void DetailedAnalysisOK(GtkWidget *pw, AnalysisDetails *pDetails)
+{
+  EvalOK(pDetails->pwChequer, pDetails->pwChequer);
+  EvalOK(pDetails->pwCube, pDetails->pwCube);
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }
 
-extern void
-SetEvaluation ( gpointer p, guint n, GtkWidget *pw )
+int EvalDefaultSetting(evalcontext *pec, movefilter *pmf)
 {
-    evalcontext ecChequer, ecCube;
-    GtkWidget *pwDialog;
-    GtkWidget *pwhbox, *pwFrame;
-    GtkWidget *pwvbox;
-    int fOK = FALSE;
-    movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
-    setevalwidget sew;
-    
-    memcpy( &ecChequer, &esEvalChequer.ec, sizeof ecChequer );
-    memcpy( &ecCube, &esEvalCube.ec, sizeof ecCube );
-    memcpy( aamf, aamfEval, sizeof ( aamfEval ) );
+	int i;
+	int fEval, fMoveFilter;
 
-    /* widgets */
+	/* Look for predefined settings */
+	for ( i = 0; i < NUM_SETTINGS; i++ )
+	{
+		fEval = ! cmp_evalcontext ( &aecSettings[ i ], pec );
+		fMoveFilter = ! aecSettings[ i ].nPlies ||
+			( !pmf || 
+					equal_movefilters ( (movefilter (*)[MAX_FILTER_PLIES]) pmf, 
+								aaamfMoveFilterSettings[ aiSettingsMoveFilter[ i ] ] ) );
 
-    sew.pwChequer = EvalWidget( &ecChequer, (movefilter *) aamf, NULL, TRUE );
-    sew.pwCube = EvalWidget( &ecCube, NULL, NULL, FALSE );
-    sew.pfOK = &fOK;
+		if (fEval && fMoveFilter)
+			return i;
+	}
 
-    pwhbox = gtk_hbox_new ( FALSE, 4 );
-
-    pwFrame = gtk_frame_new ( _("Chequer play") );
-    gtk_box_pack_start ( GTK_BOX ( pwhbox ), pwFrame, FALSE, FALSE, 0 );
-    gtk_container_add ( GTK_CONTAINER ( pwFrame ), sew.pwChequer );
-    
-    pwFrame = gtk_frame_new ( _("Cube decisions") );
-    gtk_box_pack_start ( GTK_BOX ( pwhbox ), pwFrame, FALSE, FALSE, 0 );
-    pwvbox = gtk_vbox_new ( FALSE, 0 );
-    gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwvbox );
-    gtk_box_pack_start ( GTK_BOX ( pwvbox ), sew.pwCube, FALSE, FALSE, 0 );
-    
-    pwDialog = GTKCreateDialog( _("GNU Backgammon - Evaluation settings"), 
-                             DT_QUESTION, NULL, DIALOG_FLAG_MODAL,
-                             G_CALLBACK( EvaluationOK ), &sew );
-
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-                       pwhbox );
-
-	GTKRunDialog(pwDialog);
-
-    if( fOK ) {
-
-      SetEvalCommands( "set evaluation chequer eval", &ecChequer,
-                       &esEvalChequer.ec );
-      SetEvalCommands( "set evaluation cubedecision eval", &ecCube,
-                       &esEvalCube.ec );
-      SetMovefilterCommands ( "set evaluation movefilter",
-                              aamf, aamfEval );
-    }
+	return NUM_SETTINGS;
 }
 
+static void UpdateSummaryEvalMenuSetting(AnalysisDetails *pAnalDetails )
+{
+	int chequerDefault = EvalDefaultSetting(pAnalDetails->esChequer, pAnalDetails->mfChequer);
+	int cubeDefault = EvalDefaultSetting(pAnalDetails->esCube, pAnalDetails->mfCube ? (movefilter*)&pAnalDetails->mfCube : NULL);
+	int setting = NUM_SETTINGS;
+	if (chequerDefault == cubeDefault
+		/* Special case as cube_supremo==cube_worldclass */
+		|| (chequerDefault == SETTINGS_SUPREMO && cubeDefault == SETTINGS_WORLDCLASS))
+		setting = chequerDefault;
 
+    gtk_option_menu_set_history ( GTK_OPTION_MENU ( pAnalDetails->pwOptionMenu ), setting );
+}
 
-static void AnalysisCheckToggled( GtkWidget *pw, analysiswidget *paw ) {
+void ShowDetailedAnalysis(GtkWidget *button, AnalysisDetails *pDetails)
+{
+	GtkWidget *pwvbox, *pwFrame, *pwDialog, *hbox;
+	pwDialog = GTKCreateDialog(pDetails->title,
+				   DT_INFO, button, DIALOG_FLAG_MODAL | DIALOG_FLAG_CLOSEBUTTON,
+				   G_CALLBACK(DetailedAnalysisOK), pDetails);
 
-  gint fMov = 
-     gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( paw->pwMoves ) ); 
-  gint fCub = 
-     gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( paw->pwCube ) ); 
-  /* FIXME: The Luck frame should be set inactive if Luck is checked off */  
-  /* FIXME: The Skill frame should be set inactive if both Moves and Chequer
-            are checked off */  
+	hbox = gtk_hbox_new (FALSE, 0);
+	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), hbox);
 
-  /*   gint fDic = 
-     gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( paw->pwLuck ) ); */
+	pwFrame = gtk_frame_new (_("Chequer play"));
+	gtk_box_pack_start (GTK_BOX (hbox), pwFrame, TRUE, TRUE, 0);
+	gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
 
-  gtk_widget_set_sensitive( paw->pwEvalCube, fCub );
-  gtk_widget_set_sensitive( paw->pwEvalChequer, fMov );
+	gtk_container_add(GTK_CONTAINER (pwFrame ), 
+		  pDetails->pwChequer = EvalWidget( pDetails->esChequer, pDetails->mfChequer,
+												   NULL, pDetails->mfChequer != NULL ));
 
-} 
+	pwFrame = gtk_frame_new (_("Cube decisions"));
+	gtk_box_pack_start (GTK_BOX (hbox), pwFrame, TRUE, TRUE, 0);
+	gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
 
-static GtkWidget *AnalysisPage( analysiswidget *paw ) {
+	pwvbox = gtk_vbox_new ( FALSE, 0 );
+	gtk_container_add( GTK_CONTAINER( pwFrame ), pwvbox );
 
-  const char *aszSkillLabel[3] = { N_("Doubtful:"), N_("Bad:"), N_("Very bad:") };
-  const char *aszLuckLabel[4] = { N_("Very lucky:"), N_("Lucky:"),
-	  N_("Unlucky:"), N_("Very unlucky:") };
-  int i;
+	gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
+					   pDetails->pwCube = EvalWidget( pDetails->esCube, (movefilter*)&pDetails->mfCube[9],
+														NULL, pDetails->mfCube != NULL ),
+					   FALSE, FALSE, 0 );
 
-  GtkWidget *pwPage, *pwFrame, *pwLabel, *pwSpin, *pwTable; 
-  GtkWidget *hbox1, *vbox1, *vbox2, *hbox2;
-  GtkWidget *pwvbox;
+	GTKRunDialog(pwDialog);
+	UpdateSummaryEvalMenuSetting(pDetails);
+}
 
-  pwPage = gtk_vbox_new ( FALSE, 0 );
-  gtk_container_set_border_width( GTK_CONTAINER( pwPage ), 8 );
-  
-  hbox1 = gtk_hbox_new (FALSE, 0);
-  gtk_box_pack_start (GTK_BOX (pwPage), hbox1, TRUE, TRUE, 0);
+static void SummaryMenuActivate(GtkWidget *pwItem, AnalysisDetails *pAnalDetails)
+{
+  int selected = *((int*)(g_object_get_data ( G_OBJECT ( pwItem ), "user_data" )));
+  if (selected == NUM_SETTINGS)
+    return; /* user defined */
 
-  vbox1 = gtk_vbox_new (FALSE, 0);
-  gtk_box_pack_start (GTK_BOX (hbox1), vbox1, TRUE, TRUE, 0);
+  /* set eval settings to predefined values */
+  *pAnalDetails->esChequer = aecSettings[selected];
+  *pAnalDetails->esCube = aecSettings[selected];
 
-  pwFrame = gtk_frame_new (_("Analysis"));
-  gtk_box_pack_start (GTK_BOX (vbox1), pwFrame, TRUE, TRUE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
+  if (pAnalDetails->mfChequer)
+    memcpy(pAnalDetails->mfChequer, aaamfMoveFilterSettings[aiSettingsMoveFilter[selected]], sizeof(aaamfMoveFilterSettings[aiSettingsMoveFilter[selected]]));
+  if (pAnalDetails->mfCube)
+    memcpy(pAnalDetails->mfCube, aaamfMoveFilterSettings[aiSettingsMoveFilter[selected]], sizeof(aaamfMoveFilterSettings[aiSettingsMoveFilter[selected]]));
+}
 
-  vbox2 = gtk_vbox_new (FALSE, 0);
-  gtk_container_add (GTK_CONTAINER (pwFrame), vbox2);
+GtkWidget *AddLevelSettings(GtkWidget *pwFrame, AnalysisDetails *pAnalDetails)
+{
+	GtkWidget *vbox, *hbox, *pw2, *pwMenu, *pwItem, *pwDetails, *vboxSpacer;
+	int i;
+	int *pi;
 
-  paw->pwMoves = gtk_check_button_new_with_label (_("Chequer play"));
-  gtk_box_pack_start (GTK_BOX (vbox2), paw->pwMoves, FALSE, FALSE, 0);
+	vboxSpacer = gtk_vbox_new (FALSE, 0);
+	gtk_container_set_border_width ( GTK_CONTAINER ( vboxSpacer ), 8 );
+	gtk_container_add ( GTK_CONTAINER ( pwFrame ), vboxSpacer );
 
-  paw->pwCube = gtk_check_button_new_with_label (_("Cube decisions"));
-  gtk_box_pack_start (GTK_BOX (vbox2), paw->pwCube, FALSE, FALSE, 0);
+	vbox = gtk_vbox_new (FALSE, 0);
+	gtk_container_add ( GTK_CONTAINER ( vboxSpacer ), vbox );
 
-  paw->pwLuck = gtk_check_button_new_with_label (_("Luck"));
-  gtk_box_pack_start (GTK_BOX (vbox2), paw->pwLuck, FALSE, FALSE, 0);
+	/*
+	 * Frame with prefined settings 
+	 */
 
-  for ( i = 0; i < 2; ++i ) {
+	pw2 = gtk_vbox_new ( FALSE, 4 );
+	gtk_box_pack_start(GTK_BOX(vbox), pw2, FALSE, FALSE, 0 );
 
-    char *sz = g_strdup_printf( _("Analyse player %s"), ap[ i ].szName );
+	/* option menu with selection of predefined settings */
 
-    paw->apwAnalysePlayers[ i ] = gtk_check_button_new_with_label ( sz );
-    gtk_box_pack_start (GTK_BOX (vbox2), paw->apwAnalysePlayers[ i ], 
-                        FALSE, FALSE, 0);
+	gtk_container_add ( GTK_CONTAINER ( pw2 ),
+						gtk_label_new ( _("Select a predefined setting:") ) );
 
-  }
+	gtk_widget_set_tooltip_text(pw2,
+						  _("Select a predefined setting, ranging from "
+							"beginner's play to the grandmaster setting "
+							"that will test your patience"));
 
-  g_signal_connect( G_OBJECT ( paw->pwMoves ), "toggled",
-                       G_CALLBACK ( AnalysisCheckToggled ), paw );
-  g_signal_connect( G_OBJECT ( paw->pwCube ), "toggled",
-                       G_CALLBACK ( AnalysisCheckToggled ), paw );
-  g_signal_connect( G_OBJECT ( paw->pwLuck ), "toggled",
-                       G_CALLBACK ( AnalysisCheckToggled ), paw );
+	pwMenu = gtk_menu_new ();
 
-  hbox2 = gtk_hbox_new (FALSE, 0);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox2, TRUE, TRUE, 0);
+	for ( i = 0; i <= NUM_SETTINGS; i++ ) {
 
-  pwFrame = gtk_frame_new (_("Skill thresholds"));
-  gtk_box_pack_start (GTK_BOX (vbox1), pwFrame, TRUE, TRUE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
+	  if ( i < NUM_SETTINGS )
+		gtk_menu_append ( GTK_MENU ( pwMenu ),
+						  pwItem = gtk_menu_item_new_with_label ( 
+						  Q_ ( aszSettings[ i ] ) ) );
+	  else
+		gtk_menu_append ( GTK_MENU ( pwMenu ),
+						  pwItem = gtk_menu_item_new_with_label (
+						  _("user defined") ) );
 
-  pwTable = gtk_table_new (5, 2, FALSE);
-  gtk_container_add (GTK_CONTAINER (pwFrame), pwTable);
+	  pi = malloc ( sizeof ( int ) );
+	  *pi = i;
+	  g_object_set_data_full( G_OBJECT( pwItem ), "user_data", pi, free );
 
-  for (i = 0; i < 3; i++){
-    pwLabel = gtk_label_new ( gettext ( aszSkillLabel[i] ) );
-    gtk_table_attach (GTK_TABLE (pwTable), pwLabel, 0, 1, i, i+1,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-    gtk_label_set_justify (GTK_LABEL (pwLabel), GTK_JUSTIFY_RIGHT);
-    gtk_misc_set_alignment (GTK_MISC (pwLabel), 0, 0.5);
-  }
-  
-  for (i = 0; i < 3; i++){
-    paw->apadjSkill[i] = 
-	  GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1, 0.01, 10, 0 ) );
+	  g_signal_connect( G_OBJECT ( pwItem ), "activate", G_CALLBACK ( SummaryMenuActivate ), (void*)pAnalDetails);
+	}
 
-    pwSpin = 
-	    gtk_spin_button_new (GTK_ADJUSTMENT (paw->apadjSkill[i]), 1, 2);
-    gtk_table_attach (GTK_TABLE (pwTable), pwSpin, 1, 2, i, i+1,
-                      (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-                      (GtkAttachOptions) (0), 0, 0);
-    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pwSpin), TRUE);
-  }
-  
-  pwFrame = gtk_frame_new (_("Luck thresholds"));
-  gtk_box_pack_start (GTK_BOX (vbox1), pwFrame, TRUE, TRUE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
+	pAnalDetails->pwOptionMenu = gtk_option_menu_new ();
+	gtk_option_menu_set_menu ( GTK_OPTION_MENU ( pAnalDetails->pwOptionMenu ), pwMenu );
 
-  pwTable = gtk_table_new (4, 2, FALSE);
-  gtk_container_add (GTK_CONTAINER (pwFrame), pwTable);
- 
-  for (i = 0; i < 4; i++){
-    pwLabel = gtk_label_new ( gettext ( aszLuckLabel[i] ) );
-    gtk_table_attach (GTK_TABLE (pwTable), pwLabel, 0, 1, i, i+1,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-    gtk_label_set_justify (GTK_LABEL (pwLabel), GTK_JUSTIFY_RIGHT);
-    gtk_misc_set_alignment (GTK_MISC (pwLabel), 0, 0.5);
-  }
-  
-  for (i = 0; i < 4; i++){
-    paw->apadjLuck[i] = 
-	  GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1, 0.01, 10, 0 ) );
+	gtk_container_add ( GTK_CONTAINER ( pw2 ), pAnalDetails->pwOptionMenu );
 
-    pwSpin = 
-	    gtk_spin_button_new (GTK_ADJUSTMENT (paw->apadjLuck[i]), 1, 2);
-    
-    gtk_table_attach (GTK_TABLE (pwTable), pwSpin, 1, 2, i, i+1,
-                      (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-                      (GtkAttachOptions) (0), 0, 0);
-    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pwSpin), TRUE);
-  }
-  
-  pwFrame = gtk_frame_new (_("Chequer play"));
-  gtk_box_pack_start (GTK_BOX (hbox1), pwFrame, TRUE, TRUE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
-
-  gtk_container_add(GTK_CONTAINER (pwFrame ), 
-		  paw->pwEvalChequer = EvalWidget( &paw->esChequer.ec, 
-                                                   (movefilter *) paw->aamf,
-                                                   NULL, TRUE ));
-
-  pwFrame = gtk_frame_new (_("Cube decisions"));
-  gtk_box_pack_start (GTK_BOX (hbox1), pwFrame, TRUE, TRUE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
-  
-  pwvbox = gtk_vbox_new ( FALSE, 0 );
-  gtk_container_add( GTK_CONTAINER( pwFrame ), pwvbox );
-    
-  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                       paw->pwEvalCube = EvalWidget( &paw->esCube.ec, NULL,
-                                                     NULL, FALSE ),
-                       FALSE, FALSE, 0 );
-
-  return pwPage;
+	pwDetails = gtk_button_new_with_label( _("Advanced Settings...") );
+	g_signal_connect( G_OBJECT( pwDetails ), "clicked", G_CALLBACK( ShowDetailedAnalysis ), (void *)pAnalDetails );
+	hbox = gtk_hbox_new (FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(hbox), pwDetails, FALSE, FALSE, 0 );
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 4 );
+	UpdateSummaryEvalMenuSetting(pAnalDetails);
+	return vboxSpacer;	/* Container */
 }
 
 #define CHECKUPDATE(button,flag,string) \
@@ -2288,14 +2222,20 @@ static void AnalysisOK( GtkWidget *pw, analysiswidget *paw ) {
   ADJUSTLUCKUPDATE( 2, LUCK_BAD, "set analysis threshold unlucky %s" )
   ADJUSTLUCKUPDATE( 3, LUCK_VERYBAD, "set analysis threshold veryunlucky %s" )
 
-  EvalOK( paw->pwEvalChequer, paw->pwEvalChequer );
-  EvalOK( paw->pwEvalCube, paw->pwEvalCube );
-  
   SetEvalCommands( "set analysis chequerplay eval", &paw->esChequer.ec,
 		  &esAnalysisChequer.ec );
   SetMovefilterCommands ( "set analysis movefilter", paw->aamf, aamfAnalysis );
   SetEvalCommands( "set analysis cubedecision eval", &paw->esCube.ec,
 		  &esAnalysisCube.ec );
+
+  fEvalSameAsAnalysis = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(paw->pwHintSame));
+
+  SetEvalCommands( "set evaluation chequer eval", &paw->esEvalChequer.ec,
+               &GetEvalChequer()->ec );
+  SetEvalCommands( "set evaluation cubedecision eval", &paw->esEvalCube.ec,
+               &GetEvalCube()->ec );
+  SetMovefilterCommands ( "set evaluation movefilter",
+					   paw->aaEvalmf, *GetEvalMoveFilter() );
 
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 
@@ -2334,27 +2274,186 @@ static void AnalysisSet( analysiswidget *paw) {
 		 arLuckLevel[LUCK_BAD] );
   gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjLuck[3] ),
 		 arLuckLevel[LUCK_VERYBAD] );
-}  
+}
 
-static void SetAnalysis(gpointer p, guint n, GtkWidget * pw)
+static void HintSameToggled( GtkWidget *notused, analysiswidget *paw )
 {
-	GtkWidget *pwDialog;
+	int active = !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(paw->pwHintSame));
+	gtk_widget_set_sensitive(paw->pwCubeSummary, active);
+}
+
+AnalysisDetails *CreateEvalSettings(GtkWidget *pwParent, const char *title, evalcontext *pechequer, movefilter *pmfchequer, evalcontext *pecube, movefilter *pmfcube)
+{
+	AnalysisDetails *pAnalDetail = malloc(sizeof(AnalysisDetails));
+	pAnalDetail->title = title;
+	pAnalDetail->esChequer = pechequer;
+	pAnalDetail->mfChequer = pmfchequer;
+	pAnalDetail->esCube = pecube;
+	pAnalDetail->mfCube = pmfcube;
+
+	pAnalDetail->pwSettingWidgets = AddLevelSettings(pwParent, pAnalDetail);
+	return pAnalDetail;
+}
+
+extern void SetAnalysis(gpointer p, guint n, GtkWidget * pw)
+{
+	const char *aszSkillLabel[3] = { N_("Doubtful:"), N_("Bad:"), N_("Very bad:") };
+	const char *aszLuckLabel[4] = { N_("Very lucky:"), N_("Lucky:"),
+	  N_("Unlucky:"), N_("Very unlucky:") };
+	int i;
+	AnalysisDetails *pAnalDetailSettings1, *pAnalDetailSettings2;
+	GtkWidget *pwDialog, *pwPage, *pwFrame, *pwLabel, *pwSpin, *pwTable; 
+	GtkWidget *hboxTop, *hboxBottom, *vbox1, *vbox2, *hbox;
 	analysiswidget aw;
 
 	memcpy(&aw.esCube, &esAnalysisCube, sizeof(aw.esCube));
 	memcpy(&aw.esChequer, &esAnalysisChequer, sizeof(aw.esChequer));
 	memcpy(&aw.aamf, aamfAnalysis, sizeof(aw.aamf));
 
+    memcpy( &aw.esEvalChequer, &esEvalChequer, sizeof esEvalChequer );
+    memcpy( &aw.esEvalCube, &esEvalCube, sizeof esEvalCube );
+    memcpy( aw.aaEvalmf, aamfEval, sizeof ( aamfEval ) );
+
 	pwDialog = GTKCreateDialog(_("GNU Backgammon - Analysis Settings"),
 				   DT_QUESTION, NULL, DIALOG_FLAG_MODAL,
 				   G_CALLBACK(AnalysisOK), &aw);
 
+  pwPage = gtk_hbox_new (FALSE, 6);
+  gtk_container_set_border_width( GTK_CONTAINER( pwPage ), 8 );
+
+  vbox1 = gtk_vbox_new (FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (pwPage), vbox1, TRUE, TRUE, 0);
+
+  hboxTop = gtk_hbox_new (FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (vbox1), hboxTop, TRUE, TRUE, 0);
+  hboxBottom = gtk_hbox_new (FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (vbox1), hboxBottom, TRUE, TRUE, 0);
+
+  pwFrame = gtk_frame_new (_("Analysis"));
+  gtk_box_pack_start (GTK_BOX (hboxTop), pwFrame, TRUE, TRUE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
+
+  vbox2 = gtk_vbox_new (FALSE, 0);
+  gtk_container_add (GTK_CONTAINER (pwFrame), vbox2);
+
+  aw.pwMoves = gtk_check_button_new_with_label (_("Chequer play"));
+  gtk_box_pack_start (GTK_BOX (vbox2), aw.pwMoves, FALSE, FALSE, 0);
+
+  aw.pwCube = gtk_check_button_new_with_label (_("Cube decisions"));
+  gtk_box_pack_start (GTK_BOX (vbox2), aw.pwCube, FALSE, FALSE, 0);
+
+  aw.pwLuck = gtk_check_button_new_with_label (_("Luck"));
+  gtk_box_pack_start (GTK_BOX (vbox2), aw.pwLuck, FALSE, FALSE, 0);
+
+  for ( i = 0; i < 2; ++i ) {
+
+    char *sz = g_strdup_printf( _("Analyse player %s"), ap[ i ].szName );
+
+    aw.apwAnalysePlayers[ i ] = gtk_check_button_new_with_label ( sz );
+    gtk_box_pack_start (GTK_BOX (vbox2), aw.apwAnalysePlayers[ i ], 
+                        FALSE, FALSE, 0);
+
+  }
+
+  pwFrame = gtk_frame_new (_("Skill thresholds"));
+  gtk_box_pack_start (GTK_BOX (hboxBottom), pwFrame, TRUE, TRUE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
+
+  pwTable = gtk_table_new (5, 2, FALSE);
+  gtk_container_add (GTK_CONTAINER (pwFrame), pwTable);
+
+  for (i = 0; i < 3; i++){
+    pwLabel = gtk_label_new ( gettext ( aszSkillLabel[i] ) );
+    gtk_table_attach (GTK_TABLE (pwTable), pwLabel, 0, 1, i, i+1,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+    gtk_label_set_justify (GTK_LABEL (pwLabel), GTK_JUSTIFY_RIGHT);
+    gtk_misc_set_alignment (GTK_MISC (pwLabel), 0, 0.5);
+  }
+  
+  for (i = 0; i < 3; i++){
+    aw.apadjSkill[i] = 
+	  GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1, 0.01, 10, 0 ) );
+
+    pwSpin = 
+	    gtk_spin_button_new (GTK_ADJUSTMENT (aw.apadjSkill[i]), 1, 2);
+    gtk_table_attach (GTK_TABLE (pwTable), pwSpin, 1, 2, i, i+1,
+                      (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+                      (GtkAttachOptions) (0), 0, 0);
+    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pwSpin), TRUE);
+  }
+
+  pwFrame = gtk_frame_new (_("Luck thresholds"));
+  gtk_box_pack_start (GTK_BOX (hboxBottom), pwFrame, TRUE, TRUE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
+
+  pwTable = gtk_table_new (4, 2, FALSE);
+  gtk_container_add (GTK_CONTAINER (pwFrame), pwTable);
+ 
+  for (i = 0; i < 4; i++){
+    pwLabel = gtk_label_new ( gettext ( aszLuckLabel[i] ) );
+    gtk_table_attach (GTK_TABLE (pwTable), pwLabel, 0, 1, i, i+1,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+    gtk_label_set_justify (GTK_LABEL (pwLabel), GTK_JUSTIFY_RIGHT);
+    gtk_misc_set_alignment (GTK_MISC (pwLabel), 0, 0.5);
+  }
+  
+  for (i = 0; i < 4; i++){
+    aw.apadjLuck[i] = 
+	  GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1, 0.01, 10, 0 ) );
+
+    pwSpin = 
+	    gtk_spin_button_new (GTK_ADJUSTMENT (aw.apadjLuck[i]), 1, 2);
+    
+    gtk_table_attach (GTK_TABLE (pwTable), pwSpin, 1, 2, i, i+1,
+                      (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+                      (GtkAttachOptions) (0), 0, 0);
+    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pwSpin), TRUE);
+  }
+
+  pwFrame = gtk_frame_new (_("Analysis Level"));
+  gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
+
+  vbox1 = gtk_vbox_new (FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (hboxTop), vbox1, FALSE, FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (vbox1), pwFrame, FALSE, FALSE, 0);
+
+  pAnalDetailSettings1 = CreateEvalSettings(pwFrame, _("Analysis settings"),
+										  &aw.esChequer.ec, (movefilter*)&aw.aamf, &aw.esCube.ec, NULL);
+
+  gtk_box_pack_start (GTK_BOX (pwPage), gtk_vseparator_new(), TRUE, TRUE, 0);
+
+  pwFrame = gtk_frame_new (_("Eval Hint/Tutor Level"));
+  gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
+  vbox2 = gtk_vbox_new (FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (vbox2), pwFrame, FALSE, FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (pwPage), vbox2, FALSE, FALSE, 0);
+
+  vbox1 = gtk_vbox_new (FALSE, 0);
+  gtk_container_add ( GTK_CONTAINER ( pwFrame ), vbox1 );
+
+  aw.pwHintSame = gtk_check_button_new_with_label(_("Same as analysis"));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(aw.pwHintSame), fEvalSameAsAnalysis);
+  g_signal_connect(G_OBJECT(aw.pwHintSame), "toggled", G_CALLBACK(HintSameToggled), &aw);
+  hbox = gtk_hbox_new (FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (hbox), aw.pwHintSame, FALSE, FALSE, 8);
+  gtk_box_pack_start(GTK_BOX(vbox1), hbox, FALSE, FALSE, 0 );
+
+  pAnalDetailSettings2 = CreateEvalSettings(vbox1, _("Hint/Tutor settings"),
+										  &aw.esEvalChequer.ec, (movefilter*)&aw.aaEvalmf, &aw.esEvalCube.ec, NULL);
+  aw.pwCubeSummary = pAnalDetailSettings2->pwSettingWidgets;
+
 	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)),
-			  AnalysisPage(&aw));
+			  pwPage);
 
 	AnalysisSet(&aw);
 
+
+	HintSameToggled(NULL, &aw);
 	GTKRunDialog(pwDialog);
+	free(pAnalDetailSettings1);
+	free(pAnalDetailSettings2);
 }
 
 typedef struct _playerswidget {
@@ -3047,12 +3146,10 @@ GtkItemFactoryEntry aife[] = {
 	  CMD_SHOW_CALIBRATION, NULL, NULL },
 	{ N_("/_Settings"), NULL, NULL, 0, "<Branch>", NULL },
 	{ N_("/_Settings/Analysis..."), NULL, SetAnalysis, 0, NULL, NULL },
-	{ N_("/_Settings/Appearance..."), NULL, Command, CMD_SET_APPEARANCE,
+	{ N_("/_Settings/Board Appearance..."), NULL, Command, CMD_SET_APPEARANCE,
 	  NULL, NULL },
-	{ N_("/_Settings/_Evaluation..."), NULL, SetEvaluation, 0, NULL,
-		NULL },
-        { N_("/_Settings/E_xport..."), NULL, Command, CMD_SHOW_EXPORT,
-          NULL, NULL },
+    { N_("/_Settings/E_xport..."), NULL, Command, CMD_SHOW_EXPORT,
+      NULL, NULL },
 	{ N_("/_Settings/_Players..."), NULL, SetPlayers, 0, NULL, NULL },
 	{ N_("/_Settings/_Rollouts..."), NULL, SetRollouts, 0, NULL, NULL },
 	{ N_("/_Settings/-"), NULL, NULL, 0, "<Separator>", NULL },

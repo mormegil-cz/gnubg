@@ -772,7 +772,7 @@ CubeAnalysisEvalPly ( GtkWidget *pw, cubehintdata *pchd ) {
 static void
 CubeAnalysisEval ( GtkWidget *UNUSED(pw), cubehintdata *pchd ) {
 
-  EvalCube ( pchd, &esEvalCube.ec );
+  EvalCube ( pchd, &GetEvalCube()->ec );
 
 }
 
@@ -780,7 +780,7 @@ static void
 CubeAnalysisEvalSettings ( GtkWidget *pw, void *UNUSED(data) )
 {
 	GTKSetCurrentParent(pw);
-	SetEvaluation ( NULL, 0, NULL );
+	SetAnalysis ( NULL, 0, NULL );
 
   /* bring the dialog holding this button to the top */
   gtk_window_present ( GTK_WINDOW ( gtk_widget_get_toplevel( pw ) ) );
