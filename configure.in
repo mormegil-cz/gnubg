@@ -126,9 +126,11 @@ if test "x$have_pangocairo" = "xyes"; then
 	AC_DEFINE(HAVE_PANGOCAIRO,1, [Define if you want to use pangocairo])
 fi
 
-if test "x$have_sqlite" = "xyes"; then
-	AC_DEFINE(HAVE_SQLITE,1, [Define if you want to use sqlite])
+AC_ARG_WITH(sqlite,[  --with-sqlite             use sqlite (Default if found)])
+if test "$with_sqlite" != "no" && test "x$have_sqlite" = "xyes"; then
+	AC_DEFINE(USE_SQLITE,1, [Define if you want to use sqlite])
 fi
+AM_CONDITIONAL(USE_SQLITE, test "$with_sqlite" != "no" && test "$have_sqlite" != "no" )
 
 if test "x$have_canberra" = "xyes"; then
 	AC_DEFINE(HAVE_CANBERRA,1, [Define if you want to use gstreamer])

@@ -1,3 +1,9 @@
+Fri Sep 18 11:40:40 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, backgammon.h, configure.in, dbprovider.c, dbprovider.h,
+	gnubg.c, gtkgame.c:  allow compiling without sqlite even when found.
+	Notice that HAVE_SQLITE is now USE_SQLITE in your config.h
+
 Fri Sep 18 00:37:23 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gtkcube.c: Print cubeless details in take/drop for EVAL_ROLLOUT.

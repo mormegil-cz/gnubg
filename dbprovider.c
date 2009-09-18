@@ -42,7 +42,7 @@ int storeGameStats = TRUE;
 PyObject *pdict;
 RowSet* ConvertPythonToRowset(PyObject *v);
 
-#if !HAVE_SQLITE
+#if !USE_SQLITE
 static int PySQLiteConnect(const char *dbfilename, const char *user, const char *password);
 #endif
 static int PyMySQLConnect(const char *dbfilename, const char *user, const char *password);
@@ -56,7 +56,7 @@ static GList *PyPostgreGetDatabaseList(const char *user, const char *password);
 static int PyMySQLDeleteDatabase(const char *dbfilename, const char *user, const char *password);
 static int PyPostgreDeleteDatabase(const char *dbfilename, const char *user, const char *password);
 #endif
-#if HAVE_SQLITE
+#if USE_SQLITE
 static int SQLiteConnect(const char *dbfilename, const char *user, const char *password);
 static void SQLiteDisconnect(void);
 static RowSet *SQLiteSelect(const char* str);
@@ -69,12 +69,12 @@ static int SQLiteDeleteDatabase(const char *dbfilename, const char *user, const 
 static GList *SQLiteGetDatabaseList(const char *user, const char *password);
 DBProvider providers[NUM_PROVIDERS] =
 {
-#if HAVE_SQLITE
+#if USE_SQLITE
 	{SQLiteConnect, SQLiteDisconnect, SQLiteSelect, SQLiteUpdateCommand, SQLiteCommit, SQLiteGetDatabaseList, SQLiteDeleteDatabase,
 		"SQLite", "SQLite", "Direct SQLite3 connection", FALSE, TRUE, "gnubg", "", ""},
 #endif
 #if USE_PYTHON
-#if !HAVE_SQLITE
+#if !USE_SQLITE
 	{PySQLiteConnect, PyDisconnect, PySelect, PyUpdateCommand, PyCommit, SQLiteGetDatabaseList, SQLiteDeleteDatabase,
 		"SQLite (Python)", "PythonSQLite", "SQLite3 connection included in latest Python version", FALSE, TRUE, "gnubg", "", ""},
 #endif
@@ -89,7 +89,7 @@ DBProvider providers[NUM_PROVIDERS] =
 DBProvider providers[1] = {{0, 0, 0, 0, 0, 0, 0, "No Providers", "No Providers", "No Providers", 0, 0, 0, 0, 0}};
 #endif
 
-#if USE_PYTHON || HAVE_SQLITE
+#if USE_PYTHON || USE_SQLITE
 static RowSet* MallocRowset(size_t rows, size_t cols)
 {
 	size_t i;
@@ -305,7 +305,7 @@ int PyPostgreConnect(const char *dbfilename, const char *user, const char *passw
 	}
 	return 1;
 }
-#if !HAVE_SQLITE
+#if !USE_SQLITE
 static int PySQLiteConnect(const char *dbfilename, const char *user, const char *password)
 {
 	PyObject *con;
@@ -550,7 +550,7 @@ int PyPostgreDeleteDatabase(const char *dbfilename, const char *user, const char
 }
 #endif
 
-#if HAVE_SQLITE
+#if USE_SQLITE
 
 #include <sqlite3.h>
 

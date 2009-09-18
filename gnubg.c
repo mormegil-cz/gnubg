@@ -388,15 +388,15 @@ evalsetup esAnalysisCube = EVALSETUP;
 movefilter aamfEval[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] = MOVEFILTER;
 movefilter aamfAnalysis[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] = MOVEFILTER;
 
-evalsetup *GetEvalChequer()
+extern evalsetup *GetEvalChequer(void)
 {
 	return fEvalSameAsAnalysis ? &esAnalysisChequer : &esEvalChequer;
 }
-evalsetup *GetEvalCube()
+extern evalsetup *GetEvalCube(void)
 {
 	return fEvalSameAsAnalysis ? &esAnalysisCube : &esEvalCube;
 }
-TmoveFilter *GetEvalMoveFilter()
+extern TmoveFilter *GetEvalMoveFilter(void)
 {
 	return fEvalSameAsAnalysis ? &aamfAnalysis : &aamfEval;
 }
@@ -506,7 +506,7 @@ char const *aszBuildInfo[] = {
 #if USE_PYTHON
     N_("Python supported."),
 #endif
-#if HAVE_SQLITE
+#if USE_SQLITE
     N_("SQLite database supported."),
 #endif
 #if USE_GTK

@@ -34,11 +34,11 @@ typedef struct _DBProvider
 
 typedef enum _DBProviderType {
 	INVALID_PROVIDER = -1,
-#if HAVE_SQLITE
+#if USE_SQLITE
 	SQLITE,
 #endif
 #if USE_PYTHON
-#if !HAVE_SQLITE
+#if !USE_SQLITE
 	PYTHON_SQLITE,
 #endif
 	PYTHON_MYSQL, PYTHON_POSTGRE
@@ -47,7 +47,7 @@ typedef enum _DBProviderType {
 
 #if USE_PYTHON
 #define NUM_PROVIDERS 3
-#elif HAVE_SQLITE
+#elif USE_SQLITE
 #define NUM_PROVIDERS 1
 #else
 #define NUM_PROVIDERS 0

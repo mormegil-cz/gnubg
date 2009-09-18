@@ -2018,14 +2018,14 @@ typedef struct _AnalysisDetails
 	GtkWidget *pwCube, *pwChequer, *pwOptionMenu, *pwSettingWidgets;
 } AnalysisDetails;
 
-void DetailedAnalysisOK(GtkWidget *pw, AnalysisDetails *pDetails)
+static void DetailedAnalysisOK(GtkWidget *pw, AnalysisDetails *pDetails)
 {
   EvalOK(pDetails->pwChequer, pDetails->pwChequer);
   EvalOK(pDetails->pwCube, pDetails->pwCube);
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }
 
-int EvalDefaultSetting(evalcontext *pec, movefilter *pmf)
+static int EvalDefaultSetting(evalcontext *pec, movefilter *pmf)
 {
 	int i;
 	int fEval, fMoveFilter;
@@ -2059,7 +2059,7 @@ static void UpdateSummaryEvalMenuSetting(AnalysisDetails *pAnalDetails )
     gtk_option_menu_set_history ( GTK_OPTION_MENU ( pAnalDetails->pwOptionMenu ), setting );
 }
 
-void ShowDetailedAnalysis(GtkWidget *button, AnalysisDetails *pDetails)
+static void ShowDetailedAnalysis(GtkWidget *button, AnalysisDetails *pDetails)
 {
 	GtkWidget *pwvbox, *pwFrame, *pwDialog, *hbox;
 	pwDialog = GTKCreateDialog(pDetails->title,
@@ -2109,7 +2109,7 @@ static void SummaryMenuActivate(GtkWidget *pwItem, AnalysisDetails *pAnalDetails
     memcpy(pAnalDetails->mfCube, aaamfMoveFilterSettings[aiSettingsMoveFilter[selected]], sizeof(aaamfMoveFilterSettings[aiSettingsMoveFilter[selected]]));
 }
 
-GtkWidget *AddLevelSettings(GtkWidget *pwFrame, AnalysisDetails *pAnalDetails)
+static GtkWidget *AddLevelSettings(GtkWidget *pwFrame, AnalysisDetails *pAnalDetails)
 {
 	GtkWidget *vbox, *hbox, *pw2, *pwMenu, *pwItem, *pwDetails, *vboxSpacer;
 	int i;
@@ -2282,7 +2282,7 @@ static void HintSameToggled( GtkWidget *notused, analysiswidget *paw )
 	gtk_widget_set_sensitive(paw->pwCubeSummary, active);
 }
 
-AnalysisDetails *CreateEvalSettings(GtkWidget *pwParent, const char *title, evalcontext *pechequer, movefilter *pmfchequer, evalcontext *pecube, movefilter *pmfcube)
+static AnalysisDetails *CreateEvalSettings(GtkWidget *pwParent, const char *title, evalcontext *pechequer, movefilter *pmfchequer, evalcontext *pecube, movefilter *pmfcube)
 {
 	AnalysisDetails *pAnalDetail = malloc(sizeof(AnalysisDetails));
 	pAnalDetail->title = title;
