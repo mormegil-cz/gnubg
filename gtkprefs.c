@@ -232,9 +232,9 @@ static boarddesign* FindDesign (renderdata* prdDesign)
 {
 	int i;
 	renderdata rdTest;
-	for (i = 0; i < (int)(g_list_length(plBoardDesigns) - 1); i++)
+	for (i = 0; i < (int)g_list_length(plBoardDesigns); i++)
 	{
-		boarddesign *pbde = g_list_nth_data(plBoardDesigns, i + 1);
+		boarddesign *pbde = g_list_nth_data(plBoardDesigns, i);
 		if (pbde)
 		{
 			ParsePreferences(pbde, &rdTest);
