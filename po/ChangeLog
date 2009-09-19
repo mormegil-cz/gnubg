@@ -1,3 +1,8 @@
+Sun Sep 20 00:26:44 CEST 2009 Petr Kadlec <mormegil@centrum.cz>
+
+	* gnubg.pot, *.po: merge and update.
+	* cs.po: update
+
 2007-06-05  gettextize  <bug-gnu-gettext@gnu.org>
 
 	* Makefile.in.in: Upgrade to gettext-0.16.1.
