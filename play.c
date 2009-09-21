@@ -3066,6 +3066,34 @@ static void CommandNextRolled( char *sz ) {
 
 }
 
+static int MoveIsCMarked(moverecord *pmr)
+{
+	unsigned int j;
+
+	if (pmr == 0)
+		return FALSE;
+
+	switch (pmr->mt) {
+	case MOVE_NORMAL:
+		if (pmr->CubeDecPtr->cmark != CMARK_NONE)
+			return TRUE;
+		for (j = 0; j < pmr->ml.cMoves; j++) {
+			if (pmr->ml.amMoves[j].cmark != CMARK_NONE)
+				return TRUE;
+		}
+		break;
+	case MOVE_DOUBLE:
+		if (pmr->CubeDecPtr->cmark != CMARK_NONE)
+			return TRUE;
+		break;
+
+	default:
+		break;
+	}
+
+	return FALSE;
+}
+
 static int MoveIsMarked (moverecord *pmr) {
   if (pmr == 0)
 	return FALSE;
@@ -3116,11 +3144,11 @@ static void ShowMark( moverecord *pmr ) {
 
 }
 
-int InternalCommandNext(int fMarkedMoves, int n)
+int InternalCommandNext(int mark, int cmark, int n)
 {
 	int done = 0;
 
-	if (fMarkedMoves) {
+	if (mark || cmark) {
 		listOLD *pgame = plGame;
 		moverecord *pmr = 0;
 		listOLD *p = plLastMove->plNext;
@@ -3132,12 +3160,16 @@ int InternalCommandNext(int fMarkedMoves, int n)
 			return 0;
 
 		/* we need to increment the count if we're pointing to a marked move */
-		if (p->p && MoveIsMarked((moverecord *)p->p))
+		if (p->p && (mark && MoveIsMarked((moverecord *)p->p)))
+			++n;
+		if (p->p && (cmark && MoveIsCMarked((moverecord *)p->p)))
 			++n;
 
 		while (p->p) {
 			pmr = (moverecord *)p->p;
-			if (MoveIsMarked(pmr) && (--n <= 0))
+			if (mark && MoveIsMarked(pmr) && (--n <= 0))
+				break;
+			if (cmark && MoveIsCMarked(pmr) && (--n <= 0))
 				break;
 			p = p->plNext;
 			if (!(p->p)) {
@@ -3181,7 +3213,8 @@ extern void CommandNext(char *sz)
 {
 	int n;
 	char *pch;
-	int fMarkedMoves = FALSE;
+	int mark = FALSE;
+	int cmark = FALSE;
 
 	if (!plGame) {
 		outputl(_("No game in progress (type `new game' to start one)."));
@@ -3203,7 +3236,18 @@ extern void CommandNext(char *sz)
 			CommandNextRolled(sz);
 			return;
 		} else if (!StrCaseCmp(pch, "marked")) {
-			fMarkedMoves = TRUE;
+			mark = TRUE;
+			if ((pch = NextToken(&sz))) {
+				n = ParseNumber(&pch);
+			}
+		} else if (!StrCaseCmp(pch, "cmarked")) {
+			cmark = TRUE;
+			if ((pch = NextToken(&sz))) {
+				n = ParseNumber(&pch);
+			}
+		} else if (!StrCaseCmp(pch, "anymarked")) {
+			mark = TRUE;
+			cmark = TRUE;
 			if ((pch = NextToken(&sz))) {
 				n = ParseNumber(&pch);
 			}
@@ -3217,7 +3261,7 @@ extern void CommandNext(char *sz)
 		return;
 	}
 
-	InternalCommandNext(fMarkedMoves, n);
+	InternalCommandNext(mark, cmark, n);
 }
 
 extern void CommandEndGame(char *sz)
@@ -3444,7 +3488,8 @@ extern void CommandPrevious(char *sz)
 
 	int n;
 	char *pch;
-	int fMarkedMoves = FALSE;
+	int mark = FALSE;
+	int cmark = FALSE;
 	listOLD *p;
 	moverecord *pmr = NULL;
 
@@ -3469,7 +3514,18 @@ extern void CommandPrevious(char *sz)
 			CommandPreviousRoll(sz);
 			return;
 		} else if (!StrCaseCmp(pch, "marked")) {
-			fMarkedMoves = TRUE;
+			mark = TRUE;
+			if ((pch = NextToken(&sz))) {
+				n = ParseNumber(&pch);
+			}
+		} else if (!StrCaseCmp(pch, "cmarked")) {
+			cmark = TRUE;
+			if ((pch = NextToken(&sz))) {
+				n = ParseNumber(&pch);
+			}
+		} else if (!StrCaseCmp(pch, "anymarked")) {
+			mark = TRUE;
+			cmark = TRUE;
 			if ((pch = NextToken(&sz))) {
 				n = ParseNumber(&pch);
 			}
@@ -3483,7 +3539,7 @@ extern void CommandPrevious(char *sz)
 		return;
 	}
 
-	if (fMarkedMoves) {
+	if (mark || cmark) {
 		listOLD *pgame;
 		p = plLastMove;
 
@@ -3495,7 +3551,9 @@ extern void CommandPrevious(char *sz)
 
 		while ((p->p) != 0) {
 			pmr = (moverecord *)p->p;
-			if (MoveIsMarked(pmr) && (--n <= 0))
+			if (mark && MoveIsMarked(pmr) && (--n <= 0))
+				break;
+			if (cmark && MoveIsCMarked(pmr) && (--n <= 0))
 				break;
 
 			p = p->plPrev;

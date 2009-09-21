@@ -2106,7 +2106,7 @@ PythonNavigate(PyObject* self UNUSED_PARAM, PyObject* args, PyObject* keywds)
     }
   
     if( nextRecord != INT_MIN ) {
-      recordsDiff = nextRecord - InternalCommandNext(0, nextRecord);
+      recordsDiff = nextRecord - InternalCommandNext(0, 0, nextRecord);
     }
 
     /* (HACK)

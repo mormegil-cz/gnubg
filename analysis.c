@@ -2430,7 +2430,7 @@ static void cmark_cube_rollout(moverecord *pmr, gboolean destroy)
 	gchar asz[2][40];
 	void *p;
 
-	if (!pmr->CubeDecPtr->cmark == CMARK_ROLLOUT)
+	if (pmr->CubeDecPtr->cmark != CMARK_ROLLOUT)
 		return;
 	pes = setup_cube_rollout(&pmr->CubeDecPtr->esDouble,
 				 pmr, aarOutput, aarStdDev);

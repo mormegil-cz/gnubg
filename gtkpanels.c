@@ -693,30 +693,6 @@ static GtkWidget *CreateAnalysisWindow( void )
 	}
 }
 
-static void ButtonCommand( GtkWidget *UNUSED(pw), char *szCommand )
-{
-    UserCommand( szCommand );
-}
-
-static GtkWidget *PixmapButton( GdkColormap *pcmap, char **xpm,
-				char *szCommand ) {
-    
-    GdkPixmap *ppm;
-    GdkBitmap *pbm;
-    GtkWidget *pw, *pwButton;
-
-    ppm = gdk_pixmap_colormap_create_from_xpm_d( NULL, pcmap, &pbm, NULL,
-						 xpm );
-    pw = gtk_pixmap_new( ppm, pbm );
-    pwButton = gtk_button_new();
-    gtk_container_add( GTK_CONTAINER( pwButton ), pw );
-    
-    g_signal_connect( G_OBJECT( pwButton ), "clicked",
-			G_CALLBACK( ButtonCommand ), szCommand );
-    
-    return pwButton;
-}
-
 extern void GTKGameSelectDestroy(void)
 {
 	game_select_combo = NULL;
@@ -789,17 +765,8 @@ static void CreateGameWindow( void ) {
 
     GtkWidget *psw = gtk_scrolled_window_new( NULL, NULL ),
 	*pvbox = gtk_vbox_new( FALSE, 0 ),
-	*phbox = gtk_hbox_new( FALSE, 0 ),
-	*pm = gtk_menu_new(),
-	*pw;
+	*phbox = gtk_hbox_new( FALSE, 0 );
     GdkColormap *pcmap;
-
-#include "xpm/prevgame.xpm"
-#include "xpm/prevmove.xpm"
-#include "xpm/nextmove.xpm"
-#include "xpm/nextgame.xpm"
-#include "xpm/prevmarked.xpm"
-#include "xpm/nextmarked.xpm"
 
     pcmap = gtk_widget_get_colormap( pwMain );
 	if (!woPanel[WINDOW_GAME].docked)
@@ -819,43 +786,6 @@ static void CreateGameWindow( void ) {
 	}
     gtk_box_pack_start( GTK_BOX( pvbox ), phbox, FALSE, FALSE, 4 );
 
-    gtk_box_pack_start( GTK_BOX( phbox ),
-			pw = PixmapButton( pcmap, prevgame_xpm,
-					   "previous game" ),
-			FALSE, FALSE, 4 );
-    gtk_widget_set_tooltip_text(pw, _("Move back to the previous game"));
-    gtk_box_pack_start( GTK_BOX( phbox ),
-			pw = PixmapButton( pcmap, prevmove_xpm,
-					   "previous roll" ),
-			FALSE, FALSE, 0 );
-    gtk_widget_set_tooltip_text(pw, _("Move back to the previous roll"));
-    gtk_box_pack_start( GTK_BOX( phbox ),
-			pw = PixmapButton( pcmap, nextmove_xpm,
-					   "next roll" ),
-			FALSE, FALSE, 4 );
-    gtk_widget_set_tooltip_text(pw, _("Move ahead to the next roll"));
-    gtk_box_pack_start( GTK_BOX( phbox ),
-			pw = PixmapButton( pcmap, nextgame_xpm,
-				      "next game" ),
-			FALSE, FALSE, 0 );
-    gtk_widget_set_tooltip_text(pw, _("Move ahead to the next game"));
-
-    gtk_box_pack_start( GTK_BOX( phbox ),
-			pw = PixmapButton( pcmap, prevmarked_xpm,
-					   "previous marked" ),
-			FALSE, FALSE, 4 );
-    gtk_widget_set_tooltip_text(pw, _("Move back to the previous marked "
-				     "decision" ));
-    gtk_box_pack_start( GTK_BOX( phbox ),
-			pw = PixmapButton( pcmap, nextmarked_xpm,
-					   "next marked" ),
-			FALSE, FALSE, 0 );
-    gtk_widget_set_tooltip_text(pw, _("Move ahead to the next marked "
-				     "decision" ));
-        
-    gtk_menu_append( GTK_MENU( pm ), gtk_menu_item_new_with_label(
-	_("(no game)") ) );
-    gtk_widget_show_all( pm );
     game_select_combo = gtk_combo_box_new_text();
     g_signal_connect (G_OBJECT (game_select_combo), "changed",
 		    G_CALLBACK (SelectGame), NULL);

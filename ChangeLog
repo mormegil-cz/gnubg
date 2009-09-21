@@ -1,3 +1,33 @@
+Mon Sep 21 09:41:27 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* analysis.c, backgammon.h, gnubgmodule.c, gnubgstock.c, gnubgstock.h,
+	gtkgame.c, gtkpanels.c, gtktoolbar.c, play.c, pixmaps/Makefile.am,
+	pixmaps/gnubg-stock-pixbufs.h,
+	pixmaps/16x16/actions/go-prev-marked_16.png,
+	pixmaps/16x16/actions/go_next_16.png,
+	pixmaps/16x16/actions/go_next_cmarked_16.png,
+	pixmaps/16x16/actions/go_next_game_16.png,
+	pixmaps/16x16/actions/go_next_marked_16.png,
+	pixmaps/16x16/actions/go_prev_16.png,
+	pixmaps/16x16/actions/go_prev_cmarked_16.png,
+	pixmaps/16x16/actions/go_prev_game_16.png,
+	pixmaps/16x16/actions/go_prev_marked_16.png,
+	pixmaps/24x24/actions/go-prev-marked_24.png,
+	pixmaps/24x24/actions/go_next_24.png,
+	pixmaps/24x24/actions/go_next_cmarked_24.png,
+	pixmaps/24x24/actions/go_next_game_24.png,
+	pixmaps/24x24/actions/go_next_marked_24.png,
+	pixmaps/24x24/actions/go_prev_24.png,
+	pixmaps/24x24/actions/go_prev_cmarked_24.png,
+	pixmaps/24x24/actions/go_prev_game_24.png,
+	pixmaps/24x24/actions/go_prev_marked_24.png,
+	pixmaps/scalable/actions/go_next_cmarked.svg,
+	pixmaps/scalable/actions/go_next_marked.svg,
+	pixmaps/scalable/actions/go_prev_cmarked.svg,
+	pixmaps/scalable/actions/go_prev_marked.svg: add cmark navigation,
+	move navigation toolbar to main toolbar. Works best with
+	toolbar->icons only.
+
 Fri Sep 18 11:40:40 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am, backgammon.h, configure.in, dbprovider.c, dbprovider.h,

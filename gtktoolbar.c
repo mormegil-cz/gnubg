@@ -55,6 +55,12 @@ typedef struct _toolbarwidget {
   GtkWidget *pwResign;       /* button for "Resign" */
   GtkWidget *pwEndGame;       /* button for "play game" */
   GtkWidget *pwHint;      /* button for "Hint" */
+  GtkWidget *pwPrev;      /* button for "Previous Roll" */
+  GtkWidget *pwPrevGame;      /* button for "Previous Game" */
+  GtkWidget *pwNextGame;      /* button for "Next Game" */
+  GtkWidget *pwNext;      /* button for "Next Roll" */
+  GtkWidget *pwNextCMarked;      /* button for "Next CMarked" */
+  GtkWidget *pwNextMarked;      /* button for "Next CMarked" */
   GtkWidget *pwReset;      /* button for "Reset" */
   GtkWidget *pwEdit;       /* button for "Edit" */
   GtkWidget *pwHideShowPanel; /* button hide/show panel */
@@ -253,6 +259,12 @@ ToolbarUpdate ( GtkWidget *pwToolbar,
   gtk_widget_set_sensitive ( ptw->pwSave,  plGame != NULL );
   gtk_widget_set_sensitive ( ptw->pwResign, fPlaying  && !fEdit);
   gtk_widget_set_sensitive ( ptw->pwHint, fPlaying  && !fEdit);
+  gtk_widget_set_sensitive ( ptw->pwPrev, fPlaying  && !fEdit);
+  gtk_widget_set_sensitive ( ptw->pwPrevGame, fPlaying  && !fEdit);
+  gtk_widget_set_sensitive ( ptw->pwNextGame, fPlaying  && !fEdit);
+  gtk_widget_set_sensitive ( ptw->pwNext, fPlaying  && !fEdit);
+  gtk_widget_set_sensitive ( ptw->pwNextCMarked, fPlaying  && !fEdit);
+  gtk_widget_set_sensitive ( ptw->pwNextMarked, fPlaying  && !fEdit);
   gtk_widget_set_sensitive ( ptw->pwEndGame, fPlaying  && !fEdit);
   gtk_widget_set_sensitive ( ptw->pwEdit, TRUE );
 
@@ -372,6 +384,14 @@ extern GtkWidget *ToolbarNew(void)
 
 	ToolbarAddWidget(GTK_TOOLBAR(pwToolbar), ptw->pwButtonClockwise, _("Reverse direction of play"));
 
+	ToolbarAddSeparator(GTK_TOOLBAR(pwToolbar));
+	ptw->pwPrev = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_PREV, _("Go to Previous Roll"), G_CALLBACK(ButtonClicked), "previous roll");
+	ptw->pwPrevGame = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_PREV_GAME, _("Go to Previous Game"), G_CALLBACK(ButtonClicked), "previous game");
+	ptw->pwNextGame = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_NEXT_GAME, _("Go to Next Game"), G_CALLBACK(ButtonClicked), "next game");
+	ptw->pwNext = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_NEXT, _("Go to Next Roll"), G_CALLBACK(ButtonClicked), "next roll");
+	ptw->pwNextCMarked = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_NEXT_CMARKED, _("Go to Next CMarked"), G_CALLBACK(ButtonClicked), "next cmarked");
+	ptw->pwNextMarked = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_NEXT_MARKED, _("Go to Next Marked"), G_CALLBACK(ButtonClicked), "next marked");
+
 	return vbox_toolbar;
 }
 
@@ -392,7 +412,7 @@ static void SetToolbarItemStyle(gpointer data, gpointer user_data)
 	GtkWidget *icon, *text;
 	GtkWidget* buttonParent;
 
-	buttonParent = firstChild(firstChild(widget));
+	buttonParent = firstChild(widget);
 	buttonParts = gtk_container_get_children(GTK_CONTAINER(buttonParent));
 	icon = g_list_nth_data(buttonParts, 0);
 	text = g_list_nth_data(buttonParts, 1);
@@ -416,17 +436,14 @@ extern void SetToolbarStyle(int value)
 {
 	if (value != nToolbarStyle)
 	{
-		GtkWidget* pwMainToolbar = firstChild(pwToolbar);
+		toolbarwidget *ptw = g_object_get_data ( G_OBJECT ( pwToolbar ), "toolbarwidget" );
 		/* Set last 2 toolbar items separately - as special widgets not covered in gtk_toolbar_set_style */
-		GList* toolbarItems = g_list_last(gtk_container_get_children(GTK_CONTAINER(pwMainToolbar)));
-		SetToolbarItemStyle(toolbarItems->data, GINT_TO_POINTER(value));
-		SetToolbarItemStyle(g_list_previous(toolbarItems)->data, GINT_TO_POINTER(value));
-		g_list_free(toolbarItems);
-
-		gtk_toolbar_set_style(GTK_TOOLBAR(pwMainToolbar), (GtkToolbarStyle)value);
+		SetToolbarItemStyle(ptw->pwEdit, GINT_TO_POINTER(value));
+		SetToolbarItemStyle(ptw->pwButtonClockwise, GINT_TO_POINTER(value));
+		gtk_toolbar_set_style(GTK_TOOLBAR(firstChild(pwToolbar)), (GtkToolbarStyle)value);
 
 		/* Resize handle box parent */
-		gtk_widget_queue_resize(gtk_widget_get_parent(pwToolbar));
+		gtk_widget_queue_resize(pwToolbar);
 		nToolbarStyle = value;
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget_by_action(pif, value + TOOLBAR_ACTION_OFFSET)), TRUE);
 	}

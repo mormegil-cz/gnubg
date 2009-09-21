@@ -460,7 +460,7 @@ extern int EvalCmp(const evalcontext *, const evalcontext *, const int);
 extern int getFinalScore(int *anScore);
 extern int GetInputYN(char *szPrompt);
 extern int GiveAdvice(skilltype Skill);
-extern int InternalCommandNext(int fMarkedMoves, int n);
+extern int InternalCommandNext(int mark, int cmark, int n);
 extern int NextTurn(int fPlayNext);
 extern int ParseKeyValue(char **ppch, char *apch[2]);
 extern int ParseNumber(char **ppch);
