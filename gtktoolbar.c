@@ -301,7 +301,8 @@ static void ToolbarAddSeparator(GtkToolbar *pwToolbar)
 
 extern GtkWidget *ToolbarNew(void)
 {
-	GtkWidget *vbox_toolbar, *ti;
+	GtkWidget *vbox_toolbar;
+	GtkToolItem *ti;
 	GtkWidget *pwToolbar, *pwvbox;
 
 	toolbarwidget *ptw;
@@ -371,8 +372,8 @@ extern GtkWidget *ToolbarNew(void)
 	gtk_container_add(GTK_CONTAINER(pwvbox), gtk_label_new(_("Edit")));
 	gtk_container_add(GTK_CONTAINER(ptw->pwEdit), pwvbox);
 	g_signal_connect(G_OBJECT(ptw->pwEdit), "toggled", G_CALLBACK(ToolbarToggleEdit), NULL);
-	ti = ToolbarAddWidget(GTK_TOOLBAR(pwToolbar), ptw->pwEdit, _("Toggle Edit Mode"));
-	gtk_tool_item_set_homogeneous(GTK_TOOL_ITEM(ti), TRUE);
+	ti = GTK_TOOL_ITEM(ToolbarAddWidget(GTK_TOOLBAR(pwToolbar), ptw->pwEdit, _("Toggle Edit Mode")));
+	gtk_tool_item_set_homogeneous(ti, TRUE);
 
 	/* direction of play */
 	ptw->pwButtonClockwise = toggle_button_from_images ( 
@@ -384,12 +385,20 @@ extern GtkWidget *ToolbarNew(void)
 
 	ToolbarAddWidget(GTK_TOOLBAR(pwToolbar), ptw->pwButtonClockwise, _("Reverse direction of play"));
 
-	ToolbarAddSeparator(GTK_TOOLBAR(pwToolbar));
+	ti = gtk_separator_tool_item_new();
+	gtk_tool_item_set_expand(GTK_TOOL_ITEM(ti), TRUE);
+	gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(ti), FALSE);
+	gtk_toolbar_insert(GTK_TOOLBAR(pwToolbar), ti, -1);
+
 	ptw->pwPrev = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_PREV, _("Go to Previous Roll"), G_CALLBACK(ButtonClicked), "previous roll");
+	gtk_tool_item_set_homogeneous(GTK_TOOL_ITEM(ptw->pwPrev), FALSE);
 	ptw->pwPrevGame = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_PREV_GAME, _("Go to Previous Game"), G_CALLBACK(ButtonClicked), "previous game");
+	gtk_tool_item_set_homogeneous(GTK_TOOL_ITEM(ptw->pwPrevGame), FALSE);
 	ptw->pwNextGame = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_NEXT_GAME, _("Go to Next Game"), G_CALLBACK(ButtonClicked), "next game");
+	gtk_tool_item_set_homogeneous(GTK_TOOL_ITEM(ptw->pwNextGame), FALSE);
 	ptw->pwNext = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_NEXT, _("Go to Next Roll"), G_CALLBACK(ButtonClicked), "next roll");
 	ptw->pwNextCMarked = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_NEXT_CMARKED, _("Go to Next CMarked"), G_CALLBACK(ButtonClicked), "next cmarked");
+	gtk_tool_item_set_homogeneous(GTK_TOOL_ITEM(ptw->pwNextCMarked), FALSE);
 	ptw->pwNextMarked = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_NEXT_MARKED, _("Go to Next Marked"), G_CALLBACK(ButtonClicked), "next marked");
 
 	return vbox_toolbar;
