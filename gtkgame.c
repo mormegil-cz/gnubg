@@ -5973,8 +5973,8 @@ extern void GTKSet( void *p ) {
 	/* Handle the game state. */
 	fAutoCommand = TRUE;
 
-	board_set_playing( BOARD( pwBoard ), ms.gs == GAME_PLAYING );
-        ToolbarSetPlaying( pwToolbar, ms.gs == GAME_PLAYING );
+	board_set_playing( BOARD( pwBoard ), plGame != NULL );
+        ToolbarSetPlaying( pwToolbar, plGame != NULL );
 
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget( pif,
 				"/File/Save..." ), plGame != NULL );

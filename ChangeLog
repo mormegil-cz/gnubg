@@ -1,3 +1,7 @@
+Wed Sep 23 23:18:09 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtkgame.c: fix problem with inactive navigation buttons
+
 Wed Sep 23 23:15:00 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gtkgame.c: only update eval/hint settings when sameasanalysis is
