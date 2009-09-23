@@ -1,3 +1,8 @@
+Wed Sep 23 23:15:00 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtkgame.c: only update eval/hint settings when sameasanalysis is
+	uncticked.
+
 Wed Sep 23 23:07:10 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* analysis.c, eval.c, evallock.c, gnubg.c, multithread.c,

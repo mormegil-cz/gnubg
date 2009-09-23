@@ -2234,12 +2234,15 @@ static void AnalysisOK( GtkWidget *pw, analysiswidget *paw ) {
 
   fEvalSameAsAnalysis = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(paw->pwHintSame));
 
-  SetEvalCommands( "set evaluation chequer eval", &paw->esEvalChequer.ec,
-               &GetEvalChequer()->ec );
-  SetEvalCommands( "set evaluation cubedecision eval", &paw->esEvalCube.ec,
-               &GetEvalCube()->ec );
-  SetMovefilterCommands ( "set evaluation movefilter",
-					   paw->aaEvalmf, *GetEvalMoveFilter() );
+  if (!fEvalSameAsAnalysis)
+  {
+	  SetEvalCommands( "set evaluation chequer eval", &paw->esEvalChequer.ec,
+			  &GetEvalChequer()->ec );
+	  SetEvalCommands( "set evaluation cubedecision eval", &paw->esEvalCube.ec,
+			  &GetEvalCube()->ec );
+	  SetMovefilterCommands ( "set evaluation movefilter",
+			  paw->aaEvalmf, *GetEvalMoveFilter() );
+  }
 
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 
