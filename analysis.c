@@ -965,11 +965,11 @@ NumberMovesGame ( listOLD *plGame ) {
 
 }
 
-#if USE_MULTITHREAD
 
-static void UpdateProgressBar(void)
+static gboolean UpdateProgressBar(gpointer unused)
 {
 	ProgressValue(MT_GetDoneTasks());
+	return TRUE;
 }
 
 static void AnalyseMoveMT(Task *task)
@@ -1073,36 +1073,6 @@ static int AnalyzeGame ( listOLD *plGame, int wait )
 		return 0;
 }
 
-#else
-
-static int AnalyzeGame ( listOLD *plGame )
-{
-    listOLD *pl;
-    moverecord *pmr;
-    moverecord *pmrx = (moverecord *) plGame->plNext->p; 
-    matchstate msAnalyse;
-	float doubleError;
-
-    g_assert( pmrx->mt == MOVE_GAMEINFO );
-    
-    for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
-	pmr = pl->p;
-
-	ProgressValueAdd( 1 );
-
-        if( AnalyzeMove ( pmr, &msAnalyse, plGame, &pmrx->g.sc, 
-                          &esAnalysisChequer,
-                          &esAnalysisCube, aamfAnalysis,
-                          afAnalysePlayers, &doubleError ) < 0 ) {
-	    /* analysis incomplete; erase partial summary */
-	    IniStatcontext( &pmrx->g.sc );
- 	    return -1;
-	}
-    }
-    
-    return 0;
-}
-#endif
 
 
 static void
@@ -1256,11 +1226,7 @@ extern void CommandAnalyseGame( char *UNUSED(sz) )
 
   ProgressStartValue( _("Analysing game; move:"), nMoves );
 
-#if USE_MULTITHREAD    
   AnalyzeGame( plGame, TRUE );
-#else
-  AnalyzeGame( plGame);
-#endif
   
   ProgressEnd();
 
@@ -1294,11 +1260,7 @@ extern void CommandAnalyseMatch( char *UNUSED(sz) )
   
   for( pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext ) {
 
-#if USE_MULTITHREAD    
       if( AnalyzeGame( pl->p, FALSE ) < 0 ) 
-#else
-      if( AnalyzeGame( pl->p ) < 0 ) 
-#endif
       {
 	  /* analysis incomplete; erase partial summary */
         
@@ -1310,10 +1272,8 @@ extern void CommandAnalyseMatch( char *UNUSED(sz) )
       AddStatcontext( &pmr->g.sc, &scMatch );
   }
   
-#if USE_MULTITHREAD    
   multi_debug("wait for all task: analysis");
   MT_WaitForTasks(UpdateProgressBar, 250);
-#endif
 
   ProgressEnd();
 

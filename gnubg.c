@@ -4049,20 +4049,20 @@ ProgressValueAdd ( int iValue ) {
 }
 
 
-static void Progress( void )
+static gboolean Progress( gpointer unused )
 {
     static int i = 0;
     static char ach[ 5 ] = "/-\\|";
    
     if( !fShowProgress )
-	return;
+	return FALSE;
 
     if( ProgressThrottle() )
-	return;
+	return TRUE;
 #if USE_GTK
     if( fX ) {
 	GTKProgress();
-	return;
+	return TRUE;
     }
 #endif
 
@@ -4070,6 +4070,7 @@ static void Progress( void )
     i &= 0x03;
     putchar( '\b' );
     fflush( stdout );
+    return TRUE;
 }
 
 #if !USE_MULTITHREAD
@@ -4092,7 +4093,7 @@ extern void CallbackProgress( void )
 #endif
 
     if( fInProgress && !iProgressMax )
-	Progress();
+	Progress(NULL);
 }
 #endif
 

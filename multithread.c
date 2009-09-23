@@ -372,9 +372,10 @@ static void MT_WorkerThreadFunction(void *id)
 	}
 }
 
-static void WaitingForThreads(void)
+static gboolean WaitingForThreads(gpointer unused)
 {	/* Unlikely to be called */
 	multi_debug("Waiting for threads to be created!");
+	return FALSE;
 }
 
 static void MT_CreateThreads(void)
@@ -529,7 +530,7 @@ static gboolean WaitForAllTasks(int time)
 	return TRUE;
 }
 
-int MT_WaitForTasks(void (*pCallback)(void), int callbackTime)
+int MT_WaitForTasks(gboolean (*pCallback)(gpointer), int callbackTime)
 {
     int callbackLoops = callbackTime / UI_UPDATETIME;
     int waits = 0;
@@ -548,7 +549,7 @@ int MT_WaitForTasks(void (*pCallback)(void), int callbackTime)
         if (pCallback && waits >= callbackLoops)
         {
             waits = 0;
-            pCallback();
+            pCallback(NULL);
         }
 
 #if USE_GTK
@@ -690,5 +691,80 @@ void multi_debug(const char *str, ...)
 #endif
 
 #else
+#include "multithread.h"
+#include <stdlib.h>
+#if USE_GTK
+#include <gtk/gtk.h>
+#include <gtkgame.h>
+#endif
+
+#define UI_UPDATETIME 250
+
+typedef struct _ThreadData {
+	int doneTasks;
+       	GList * tasks;
+	int result;
+} ThreadData;
+ThreadData td;
+
 int asyncRet;
+void MT_AddTask(Task *pt, gboolean lock)
+{
+	td.result = 0;		/* Reset result for new tasks */
+	td.tasks = g_list_append(td.tasks, pt);
+}
+
+void mt_add_tasks(unsigned int num_tasks, AsyncFun pFun, void *taskData, gpointer linked)
+{
+	unsigned int i;
+	for (i = 0; i < num_tasks; i++) {
+		Task *pt = (Task *)malloc(sizeof(Task));
+		pt->fun = pFun;
+		pt->data = taskData;
+		pt->pLinkedTask = linked;
+		MT_AddTask(pt, FALSE);
+	}
+}
+
+extern int MT_GetDoneTasks(void)
+{
+	return td.doneTasks;
+}
+
+int MT_WaitForTasks(gboolean (*pCallback) (gpointer), int callbackTime)
+{
+	GList *member;
+	guint cb_source;
+	td.doneTasks = 0;
+
+#if USE_GTK
+	GTKSuspendInput();
+#endif
+
+	multi_debug("Waiting for all tasks");
+
+	pCallback(NULL);
+	cb_source = g_timeout_add_seconds(1, (GSourceFunc)pCallback, NULL);
+	for (member = g_list_first(td.tasks); member; member = member->next, td.doneTasks++) {
+		Task *task = member->data;
+		task->fun(task->data);
+		free(task->pLinkedTask);
+		free(task);
+		while (g_main_context_pending(NULL))
+			g_main_context_iteration(NULL, TRUE);
+	}
+	g_list_free(td.tasks);
+	g_source_remove(cb_source);
+	td.tasks = NULL;
+
+#if USE_GTK
+	GTKResumeInput();
+#endif
+	return td.result;
+}
+
+extern void MT_AbortTasks(void)
+{
+	td.result = -1;
+}
 #endif

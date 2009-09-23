@@ -15,16 +15,7 @@
 #ifndef _MULTITHREAD_H
 #define _MULTITHREAD_H
 
-#if USE_MULTITHREAD
-
 #include "backgammon.h"
-#include <glib.h>
-
-#ifdef WIN32
-#ifndef GLIB_THREADS
-#include <windows.h>
-#endif
-#endif
 
 /*#define DEBUG_MULTITHREADED 1*/
 #ifdef DEBUG_MULTITHREADED
@@ -32,8 +23,6 @@ void multi_debug(const char *str, ...);
 #else
 #define multi_debug(x)
 #endif
-
-#define MAX_NUMTHREADS 48
 
 typedef struct _Task
 {
@@ -51,23 +40,36 @@ typedef struct _AnalyseMoveTask
 	matchstate ms;
 } AnalyseMoveTask;
 
+extern int MT_GetDoneTasks(void);
+extern void MT_AbortTasks(void);
+extern void MT_AddTask(Task *pt, gboolean lock);
+extern void mt_add_tasks(unsigned int num_tasks, AsyncFun pFun, void *taskData, gpointer linked);
+extern int MT_WaitForTasks(gboolean (*pCallback)(gpointer), int callbackTime);
+
+#if USE_MULTITHREAD
+
+#include <glib.h>
+
+#ifdef WIN32
+#ifndef GLIB_THREADS
+#include <windows.h>
+#endif
+#endif
+
+#define MAX_NUMTHREADS 48
+
 extern unsigned int MT_GetNumThreads(void);
+extern void MT_Release(void);
+extern void MT_Exclusive(void);
 extern void MT_InitThreads(void);
 extern void MT_StartThreads(void);
 extern void MT_Close(void);
-extern void MT_AddTask(Task *pt, gboolean lock);
-extern int MT_WaitForTasks(void (*pCallback)(void), int callbackTime);
 extern void MT_SetNumThreads(unsigned int num);
 extern int MT_GetThreadID(void);
-extern void mt_add_tasks(unsigned int num_tasks, AsyncFun pFun, void *taskData, gpointer linked);
-extern void MT_Release(void);
-extern int MT_GetDoneTasks(void);
 extern void MT_SyncInit(void);
 extern void MT_SyncStart(void);
 extern double MT_SyncEnd(void);
-extern void MT_Exclusive(void);
 extern void MT_SetResultFailed(void);
-extern void MT_AbortTasks(void);
 
 #ifdef GLIB_THREADS
   #define MT_SafeInc(x) g_atomic_int_add(x, 1)
@@ -86,7 +88,11 @@ extern void MT_AbortTasks(void);
 #endif
 
 #else /*USE_MULTITHREAD*/
+#define MAX_NUMTHREADS 1
 extern int asyncRet;
+#define MT_Exclusive(x) {}
+#define MT_Release(x) {}
+#define MT_GetNumThreads() 1
 #define MT_SetResultFailed() asyncRet = -1
 #define MT_SafeInc(x) (++(*x))
 #define MT_SafeIncValue(x) (++(*x))

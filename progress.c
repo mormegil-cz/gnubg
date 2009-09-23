@@ -1039,15 +1039,6 @@ static void TextRolloutProgress(float aarOutput[][NUM_ROLLOUT_OUTPUTS],
 	static int min_games_done = 0;
 
 	/* write progress 1/10th trial or just when called if mt */
-#if !USE_MULTITHREAD
-	if (!fInterrupt && (iGame < prp->iNextGame || iAlternative != prp->iNextAlternative)) {
-		/* To avoid *.po include \r. */
-		outputf(_("Rollout: %d/%d trials"), iGame, prc->nTrials);
-		output("      \r");
-		fflush(stdout);
-		return;
-	}
-#endif
 
 	if (!iAlternative)
 		outputl("");

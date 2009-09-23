@@ -1,3 +1,10 @@
+Wed Sep 23 23:07:10 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* analysis.c, eval.c, evallock.c, gnubg.c, multithread.c,
+	multithread.h, progress.c, rollout.c: use mt rollout code for
+	non-threaded rollouts. Only generate unlocked code with
+	--disable-threads
+
 Mon Sep 21 09:41:27 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* analysis.c, backgammon.h, gnubgmodule.c, gnubgstock.c, gnubgstock.h,

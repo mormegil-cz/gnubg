@@ -481,60 +481,7 @@ static void ComputeTable( void )
 }
 
 
-#if USE_MULTITHREAD
-	NNState nnStatesStorage[MAX_NUMTHREADS][3] = {
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
-		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}}
-	};
-#else
-	static NNState nnStatesStorage[3] = {{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}};
-#endif
+NNState nnStatesStorage[MAX_NUMTHREADS][3];
 
 static void
 DestroyWeights( void )
@@ -553,19 +500,12 @@ EvalShutdown ( void ) {
 
   int i;
 
-#if USE_MULTITHREAD
 	int j;
 	for (j = 0; j < MAX_NUMTHREADS; j++)
-#endif
 	for (i = 0; i < 3; i++)
 	{
-#if USE_MULTITHREAD
 		free(nnStatesStorage[j][i].savedBase); 
 		free(nnStatesStorage[j][i].savedIBase);
-#else
-		free(nnStatesStorage[i].savedBase); 
-		free(nnStatesStorage[i].savedIBase);
-#endif
 	}
 
   /* close bearoff databases */
@@ -813,7 +753,6 @@ extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 		}
 	}
 
-#if USE_MULTITHREAD
 {
 	int j;
 	for (j = 0; j < MAX_NUMTHREADS; j++)
@@ -826,14 +765,6 @@ extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 		nnStatesStorage[j][CLASS_CONTACT - CLASS_RACE].savedIBase = malloc( nnContact.cInput * sizeof( float ) ); 
 	}
 }
-#else
-	nnStatesStorage[CLASS_RACE - CLASS_RACE].savedBase = malloc( nnRace.cHidden * sizeof( float ) ); 
-	nnStatesStorage[CLASS_RACE - CLASS_RACE].savedIBase = malloc( nnRace.cInput * sizeof( float ) ); 
-	nnStatesStorage[CLASS_CRASHED - CLASS_RACE].savedBase = malloc( nnCrashed.cHidden * sizeof( float ) ); 
-	nnStatesStorage[CLASS_CRASHED - CLASS_RACE].savedIBase = malloc( nnCrashed.cInput * sizeof( float ) ); 
-	nnStatesStorage[CLASS_CONTACT - CLASS_RACE].savedBase = malloc( nnContact.cHidden * sizeof( float ) ); 
-	nnStatesStorage[CLASS_CONTACT - CLASS_RACE].savedIBase = malloc( nnContact.cInput * sizeof( float ) ); 
-#endif
 
 }
 
@@ -3110,11 +3041,7 @@ GenerateMoves( movelist *pml, const TanBoard anBoard,
                int n0, int n1, int fPartial ) {
 
   int anRoll[ 4 ], anMoves[ 8 ];
-#if USE_MULTITHREAD
   static move amMoves[MAX_NUMTHREADS][ MAX_INCOMPLETE_MOVES ];
-#else
-  static move amMoves[ MAX_INCOMPLETE_MOVES ];
-#endif
 
     anRoll[ 0 ] = n0;
     anRoll[ 1 ] = n1;
@@ -3122,12 +3049,7 @@ GenerateMoves( movelist *pml, const TanBoard anBoard,
     anRoll[ 2 ] = anRoll[ 3 ] = ( ( n0 == n1 ) ? n0 : 0 );
 
     pml->cMoves = pml->cMaxMoves = pml->cMaxPips = pml->iMoveBest = 0;
-#if USE_MULTITHREAD
 	pml->amMoves = amMoves[MT_GetThreadID()];
-#else
-    pml->amMoves = amMoves; /* use static array for top-level search, since
-			       it doesn't need to be re-entrant */
-#endif    
     GenerateMovesSub( pml, anRoll, 0, 23, 0, anBoard, anMoves,fPartial );
 
     if( anRoll[ 0 ] != anRoll[ 1 ] ) {
@@ -5632,11 +5554,7 @@ extern evalCache cpEval;
 extern classevalfunc acef[ N_CLASSES ];
 extern unsigned int cCache;
 extern evalcontext ecBasic;
-#if USE_MULTITHREAD
 NNState nnStatesStorage[MAX_NUMTHREADS][3];
-#else
-static NNState nnStatesStorage[3];
-#endif
 #endif
 
 static int GeneralEvaluationEPlied (NNState *nnStates, float arOutput [ NUM_ROLLOUT_OUTPUTS ],
@@ -5860,16 +5778,6 @@ EvaluatePositionCache( NNState *nnStates, const TanBoard anBoard, float arOutput
     /* This should be a part of the code that is called in all
        time-consuming operations at a relatively steady rate, so is a
        good choice for a callback function. */
-#if !USE_MULTITHREAD
-{
-	static int iTick;
-    if( ++iTick >= 0x400 )
-	{
-		iTick = 0;
-		CallbackProgress();
-    }
-}
-#endif
     if( !cCache || pecx->rNoise != 0.0f )
 	{	/* non-deterministic noisy evaluations; cannot cache */
 		return EvaluatePositionFull( nnStates, anBoard, arOutput, pci, pecx, nPlies, pc );
@@ -5954,11 +5862,7 @@ ScoreMoves( movelist *pml, const cubeinfo* pci, const evalcontext* pec,
  unsigned int i;
 	int r = 0;	/* return value */
 	NNState *nnStates;
-#if USE_MULTITHREAD
 	nnStates = nnStatesStorage[MT_GetThreadID()];
-#else
-	nnStates = nnStatesStorage;
-#endif    
 
   pml->rBestScore = -99999.9f;
 
