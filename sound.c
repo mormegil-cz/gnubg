@@ -24,7 +24,7 @@
  */
 
 #include "config.h"
-
+#include <string.h>
 #if USE_GTK
 #include "gtkgame.h"
 #else
