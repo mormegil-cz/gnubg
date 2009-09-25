@@ -90,8 +90,8 @@ extern void MT_SetResultFailed(void);
 #else /*USE_MULTITHREAD*/
 #define MAX_NUMTHREADS 1
 extern int asyncRet;
-#define MT_Exclusive(x) {}
-#define MT_Release(x) {}
+#define MT_Exclusive() {}
+#define MT_Release() {}
 #define MT_GetNumThreads() 1
 #define MT_SetResultFailed() asyncRet = -1
 #define MT_SafeInc(x) (++(*x))
@@ -100,7 +100,7 @@ extern int asyncRet;
 #define MT_SafeAdd(x, y) ((*x) += y)
 #define MT_SafeDec(x) (--(*x))
 #define MT_SafeDecCheck(x) ((--(*x)) == 0)
-#define MT_GetThreadID(x) 0
+#define MT_GetThreadID() 0
 #endif
 
 #endif
