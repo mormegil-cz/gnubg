@@ -2226,23 +2226,32 @@ static void AnalysisOK( GtkWidget *pw, analysiswidget *paw ) {
   ADJUSTLUCKUPDATE( 2, LUCK_BAD, "set analysis threshold unlucky %s" )
   ADJUSTLUCKUPDATE( 3, LUCK_VERYBAD, "set analysis threshold veryunlucky %s" )
 
+  /* Group output in one batch */
+  outputpostpone();
+
   SetEvalCommands( "set analysis chequerplay eval", &paw->esChequer.ec,
 		  &esAnalysisChequer.ec );
   SetMovefilterCommands ( "set analysis movefilter", paw->aamf, aamfAnalysis );
   SetEvalCommands( "set analysis cubedecision eval", &paw->esCube.ec,
 		  &esAnalysisCube.ec );
 
-  fEvalSameAsAnalysis = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(paw->pwHintSame));
+  n = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(paw->pwHintSame));
+  if (n != fEvalSameAsAnalysis)
+  {
+	sprintf( sz, "set eval sameasanalysis %s", n ? "yes" : "no" );
+	UserCommand( sz );
+  }
 
   if (!fEvalSameAsAnalysis)
   {
 	  SetEvalCommands( "set evaluation chequer eval", &paw->esEvalChequer.ec,
 			  &GetEvalChequer()->ec );
-	  SetEvalCommands( "set evaluation cubedecision eval", &paw->esEvalCube.ec,
-			  &GetEvalCube()->ec );
 	  SetMovefilterCommands ( "set evaluation movefilter",
 			  paw->aaEvalmf, *GetEvalMoveFilter() );
+	  SetEvalCommands( "set evaluation cubedecision eval", &paw->esEvalCube.ec,
+			  &GetEvalCube()->ec );
   }
+  outputresume();
 
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 
