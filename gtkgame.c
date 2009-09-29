@@ -6040,6 +6040,30 @@ extern void GTKSet( void *p ) {
 	    pif, CMD_SHOW_CALIBRATION ), TRUE );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SWAP_PLAYERS ), !ListEmpty( &lMatch ) );
+    gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+			    pif, CMD_CMARK_CUBE_CLEAR), !ListEmpty(&lMatch));
+    gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+			    pif, CMD_CMARK_CUBE_SHOW), !ListEmpty(&lMatch));
+    gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+			    pif, CMD_CMARK_MOVE_CLEAR), !ListEmpty(&lMatch));
+    gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+			    pif, CMD_CMARK_MOVE_SHOW), !ListEmpty(&lMatch));
+    gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+			    pif, CMD_CMARK_GAME_CLEAR), !ListEmpty(&lMatch));
+    gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+			    pif, CMD_CMARK_GAME_SHOW), !ListEmpty(&lMatch));
+    gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+			    pif, CMD_CMARK_MATCH_CLEAR), !ListEmpty(&lMatch));
+    gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+			    pif, CMD_CMARK_MATCH_SHOW), !ListEmpty(&lMatch));
+    gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+			    pif, CMD_ANALYSE_ROLLOUT_CUBE), !ListEmpty(&lMatch));
+    gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+			    pif, CMD_ANALYSE_ROLLOUT_MOVE), !ListEmpty(&lMatch));
+    gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+			    pif, CMD_ANALYSE_ROLLOUT_GAME), !ListEmpty(&lMatch));
+    gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+			    pif, CMD_ANALYSE_ROLLOUT_MATCH), !ListEmpty(&lMatch));
 
     gtk_widget_set_sensitive( 
        gtk_item_factory_get_widget( pif,

@@ -2339,17 +2339,15 @@ static int cmark_move_rollout(moverecord *pmr, gboolean destroy)
 		FormatMove(asz[j], msBoard(), m->anMove);
 	}
 
-	RolloutProgressStart(&ci, c, NULL, &rcRollout, asz, &p);
-	res = ScoreMoveRollout(ppm, (const cubeinfo **)ppci,
+	RolloutProgressStart(&ci, c, NULL, &rcRollout, asz, TRUE, &p);
+	ScoreMoveRollout(ppm, (const cubeinfo **)ppci,
 			       c, RolloutProgress, p);
-	RolloutProgressEnd(&p, destroy);
+	res = RolloutProgressEnd(&p, destroy);
 
 	g_free(asz);
 	g_free(ppm);
 	g_free(ppci);
 
-	if (res < 0)
-		return -1;
 	RefreshMoveList(&pmr->ml, NULL);
 #if USE_GTK
 	if (fX)
@@ -2357,7 +2355,7 @@ static int cmark_move_rollout(moverecord *pmr, gboolean destroy)
 	else
 #endif
 		ShowBoard();
-	return c;
+	return res == 0 ? c : res;
 }
 
 static evalsetup *setup_cube_rollout(evalsetup *pes, moverecord *pmr,
@@ -2380,7 +2378,7 @@ static evalsetup *setup_cube_rollout(evalsetup *pes, moverecord *pmr,
 	return pes;
 }
 
-static void cmark_cube_rollout(moverecord *pmr, gboolean destroy)
+static int cmark_cube_rollout(moverecord *pmr, gboolean destroy)
 {
 	evalsetup *pes;
 	cubeinfo ci;
@@ -2389,33 +2387,26 @@ static void cmark_cube_rollout(moverecord *pmr, gboolean destroy)
 	rolloutstat aarsStatistics[2][2];
 	gchar asz[2][40];
 	void *p;
+	int res;
 
 	if (pmr->CubeDecPtr->cmark != CMARK_ROLLOUT)
-		return;
-	pes = setup_cube_rollout(&pmr->CubeDecPtr->esDouble,
-				 pmr, aarOutput, aarStdDev);
+		return 0;
+	pes = setup_cube_rollout(&pmr->CubeDecPtr->esDouble, pmr, aarOutput, aarStdDev);
 
 	GetMatchStateCubeInfo(&ci, &ms);
 
 	FormatCubePositions(&ci, asz);
-	RolloutProgressStart(&ci, 2, aarsStatistics, &pes->rc, asz, &p);
-	if (GeneralCubeDecisionR(aarOutput, aarStdDev, aarsStatistics,
-				 (ConstTanBoard) msBoard(), &ci, &pes->rc, pes,
-				 RolloutProgress, p) < 0) {
-		RolloutProgressEnd(&p, destroy);
-		return;
-	}
+	RolloutProgressStart(&ci, 2, aarsStatistics, &pes->rc, asz, TRUE, &p);
+	GeneralCubeDecisionR(aarOutput, aarStdDev, aarsStatistics,
+			     (ConstTanBoard) msBoard(), &ci, &pes->rc, pes, RolloutProgress, p);
 
-	RolloutProgressEnd(&p, destroy);
+	res = RolloutProgressEnd(&p, destroy);
 
-	memcpy(pmr->CubeDecPtr->aarOutput, aarOutput,
-	       2 * NUM_ROLLOUT_OUTPUTS * sizeof(float));
-	memcpy(pmr->CubeDecPtr->aarStdDev, aarStdDev,
-	       2 * NUM_ROLLOUT_OUTPUTS * sizeof(float));
+	memcpy(pmr->CubeDecPtr->aarOutput, aarOutput, 2 * NUM_ROLLOUT_OUTPUTS * sizeof(float));
+	memcpy(pmr->CubeDecPtr->aarStdDev, aarStdDev, 2 * NUM_ROLLOUT_OUTPUTS * sizeof(float));
 
 	if (pes->et != EVAL_ROLLOUT)
-		memcpy(&pmr->CubeDecPtr->esDouble.rc, &rcRollout,
-		       sizeof(rcRollout));
+		memcpy(&pmr->CubeDecPtr->esDouble.rc, &rcRollout, sizeof(rcRollout));
 
 	pmr->CubeDecPtr->esDouble.et = EVAL_ROLLOUT;
 
@@ -2424,6 +2415,7 @@ static void cmark_cube_rollout(moverecord *pmr, gboolean destroy)
 		ChangeGame(NULL);
 #endif
 	ShowBoard();
+	return res;
 }
 
 static int move_change(listOLD *new_game, const listOLD *new_move)
@@ -2450,14 +2442,16 @@ static int move_change(listOLD *new_game, const listOLD *new_move)
 	return (plLastMove == new_move);
 }
 
-static void cmark_game_rollout(listOLD *game)
+static int cmark_game_rollout(listOLD *game)
 {
 	listOLD *pl, *pl_hint = NULL;
 
-	g_return_if_fail(game);
+	g_return_val_if_fail(game, -1);
 
 	if (game_is_last(game))
 		pl_hint = game_add_pmr_hint(game);
+
+	ChangeGame(game);
 
 	for (pl = game->plNext; pl != game; pl = pl->plNext) {
 		moverecord *pmr_prev;
@@ -2470,8 +2464,10 @@ static void cmark_game_rollout(listOLD *game)
 		case MOVE_NORMAL:
 			if (!move_change(game, pl->plPrev))
 				goto finished;
-			cmark_move_rollout(pmr, TRUE);
-			cmark_cube_rollout(pmr, TRUE);
+			if (cmark_move_rollout(pmr, TRUE) < -1)
+				goto finished;
+			if (cmark_cube_rollout(pmr, TRUE) < -1)
+				goto finished;
 			break;
 		case MOVE_DOUBLE:
 			pmr_prev = game->plPrev->p;
@@ -2479,15 +2475,20 @@ static void cmark_game_rollout(listOLD *game)
 				break;
 			if (!move_change(game, pl->plPrev))
 				goto finished;
-			cmark_cube_rollout(pmr, TRUE);
+			if (cmark_cube_rollout(pmr, TRUE) < -1)
+				goto finished;
 			break;
 		default:
 			break;
 		}
 	}
+	if (pl_hint)
+		game_remove_pmr_hint(pl_hint);
+	return 0;
 finished:
 	if (pl_hint)
 		game_remove_pmr_hint(pl_hint);
+	return -1;
 }
 
 static void cmark_match_rollout(listOLD *match)
@@ -2495,7 +2496,8 @@ static void cmark_match_rollout(listOLD *match)
 	listOLD *pl;
 
 	for (pl = match->plNext; pl != match; pl = pl->plNext) {
-		cmark_game_rollout(pl->p);
+		if (cmark_game_rollout(pl->p) < 0)
+			break;
 	}
 }
 
@@ -2681,7 +2683,7 @@ extern void CommandAnalyseRolloutMove(char *sz)
 	if (sz && *sz)
 		cmark_move_set(pmr, sz, CMARK_ROLLOUT);
 
-	if (!cmark_move_rollout(pmr, FALSE)) {
+	if (cmark_move_rollout(pmr, FALSE) == 0) {
 		outputerrf("No moves marked for rollout\n");
 		return;
 	}

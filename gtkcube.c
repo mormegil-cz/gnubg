@@ -703,7 +703,7 @@ CubeAnalysisRollout ( GtkWidget *pw, cubehintdata *pchd ) {
 
   FormatCubePositions( &ci, asz );
   GTKSetCurrentParent(pw);
-  RolloutProgressStart( &ci, 2, aarsStatistics, &pes->rc, asz, &p );
+  RolloutProgressStart( &ci, 2, aarsStatistics, &pes->rc, asz, FALSE, &p );
 
   if ( GeneralCubeDecisionR ( aarOutput, aarStdDev, aarsStatistics,
                               (ConstTanBoard)pchd->ms.anBoard, &ci, 

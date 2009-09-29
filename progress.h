@@ -28,7 +28,7 @@
 extern void
 RolloutProgressStart( const cubeinfo *pci, const int n,
                       rolloutstat aars[][ 2 ],
-                      rolloutcontext *pes, char asz[][ 40 ], void **pp );
+                      rolloutcontext *pes, char asz[][ 40 ], gboolean multiple, void **pp );
 
 extern void
 RolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
@@ -45,7 +45,7 @@ RolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 				 int fCubeRollout,
                  void *pUserData );
 
-extern void
+extern int
 RolloutProgressEnd( void **pp, gboolean destroy );
 
 #endif /* _PROGRESS_H_ */

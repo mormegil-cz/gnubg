@@ -62,6 +62,7 @@ typedef struct _rolloutprogress {
   GtkWidget *pwRolloutProgress;
   GtkWidget *pwRolloutOK;
   GtkWidget *pwRolloutStop;
+  GtkWidget *pwRolloutStopAll;
   GtkWidget *pwRolloutViewStat;
   guint nRolloutSignal;
   GtkWidget *pwElapsed;
@@ -69,6 +70,7 @@ typedef struct _rolloutprogress {
   GtkWidget *pwSE;
   int nGamesDone;
   char ***pListText;
+  int stopped;
 #endif
 
 } rolloutprogress;
@@ -665,11 +667,16 @@ static void RolloutCancel( GtkObject *UNUSED(po), rolloutprogress *prp )
     fInterrupt = TRUE;
 }
 
-static void RolloutStop( GtkObject *UNUSED(po), gpointer UNUSED(p) ) {
-
+static void RolloutStop( GtkObject *UNUSED(po), rolloutprogress *prp) {
     fInterrupt = TRUE;
+    prp->stopped = -1;
 }
 
+
+static void RolloutStopAll( GtkObject *UNUSED(po), rolloutprogress *prp) {
+    fInterrupt = TRUE;
+    prp->stopped = -2;
+}
 static GtkWidget *create_rollout_list(int n, char asz[][40])
 {
 	int i;
@@ -714,7 +721,7 @@ static void
 GTKRolloutProgressStart( const cubeinfo *UNUSED(pci), const int n,
                          rolloutstat aars[][ 2 ],
                          rolloutcontext *prc,
-                         char asz[][ 40 ], void **pp ) {
+                         char asz[][ 40 ], gboolean multiple, void **pp ) {
     
   gchar *sz;
   GtkWidget *pwVbox;
@@ -725,6 +732,7 @@ GTKRolloutProgressStart( const cubeinfo *UNUSED(pci), const int n,
   *pp = prp;
   prp->prs = (rolloutstat *) aars;
   prp->n = n;
+  prp->stopped = 0;
   fInterrupt = FALSE;
 
   AllocTextList(prp);
@@ -733,6 +741,8 @@ GTKRolloutProgressStart( const cubeinfo *UNUSED(pci), const int n,
 	  DIALOG_FLAG_MODAL | DIALOG_FLAG_MINMAXBUTTONS | DIALOG_FLAG_NOTIDY, NULL, NULL );
   prp->pwRolloutViewStat = gtk_button_new_with_label ( _("View statistics") );
   prp->pwRolloutStop = gtk_button_new_with_label( _("Stop") );
+  if (multiple)
+	  prp->pwRolloutStopAll = gtk_button_new_with_label( _("Stop All") );
     
   pwOldGrab = pwGrab;
   pwGrab = prp->pwRolloutDialog;
@@ -747,6 +757,7 @@ GTKRolloutProgressStart( const cubeinfo *UNUSED(pci), const int n,
   prp->pwRolloutOK = DialogArea( prp->pwRolloutDialog, DA_OK );
 
   gtk_container_add( GTK_CONTAINER( pwButtons ), prp->pwRolloutStop );
+  gtk_container_add( GTK_CONTAINER( pwButtons ), prp->pwRolloutStopAll );
     
   if ( aars && (prc->nGamesDone == 0) )
     gtk_container_add( GTK_CONTAINER( pwButtons ), prp->pwRolloutViewStat );
@@ -758,6 +769,11 @@ GTKRolloutProgressStart( const cubeinfo *UNUSED(pci), const int n,
 
   g_signal_connect( G_OBJECT( prp->pwRolloutStop ), "clicked",
                       G_CALLBACK( RolloutStop ), prp );
+
+  if (multiple)
+	  g_signal_connect( G_OBJECT( prp->pwRolloutStopAll ), "clicked",
+			  G_CALLBACK( RolloutStopAll ), prp);
+    
     
   g_signal_connect( G_OBJECT( prp->pwRolloutViewStat ), "clicked",
                       G_CALLBACK( GTKViewRolloutStatistics ), prp );
@@ -939,12 +955,12 @@ GTKRolloutProgress(float aarOutput[][NUM_ROLLOUT_OUTPUTS],
 	return;
 }
 
-static void GTKRolloutProgressEnd(void **pp, gboolean destroy)
+static int GTKRolloutProgressEnd(void **pp, gboolean destroy)
 {
 
 	gchar *gsz;
-
 	rolloutprogress *prp = *pp;
+	int stopped = prp->stopped;
 
 	fInterrupt = FALSE;
 
@@ -956,7 +972,7 @@ static void GTKRolloutProgressEnd(void **pp, gboolean destroy)
 	   already been destroyed */
 	if (!prp->pwRolloutDialog) {
 		g_free(*pp);
-		return;
+		return stopped;
 	}
 
 	gtk_widget_set_sensitive(prp->pwRolloutOK, TRUE);
@@ -981,6 +997,7 @@ static void GTKRolloutProgressEnd(void **pp, gboolean destroy)
 	prp->pwRolloutProgress = NULL;
 
 	g_free(*pp);
+	return stopped;
 }
 
 
@@ -989,7 +1006,7 @@ static void GTKRolloutProgressEnd(void **pp, gboolean destroy)
 static void
 TextRolloutProgressStart( const cubeinfo *UNUSED(pci), const int n,
                           rolloutstat UNUSED(aars[ 2 ][ 2 ]),
-                          rolloutcontext *prc, char asz[][ 40 ], void **pp ) {
+                          rolloutcontext *prc, char asz[][ 40 ], gboolean multiple, void **pp ) {
 
   int i;
 
@@ -1010,7 +1027,7 @@ TextRolloutProgressStart( const cubeinfo *UNUSED(pci), const int n,
 
 }
 
-static void
+static int
 TextRolloutProgressEnd( void **pp ) {
 
   rolloutprogress *prp = *pp;
@@ -1020,6 +1037,7 @@ TextRolloutProgressEnd( void **pp ) {
 
   output( "\r\n" );
   fflush( stdout );
+  return fInterrupt ? -1 : 0;
 
 }
 
@@ -1122,19 +1140,19 @@ static void TextRolloutProgress(float aarOutput[][NUM_ROLLOUT_OUTPUTS],
 extern void
 RolloutProgressStart( const cubeinfo *pci, const int n,
                       rolloutstat aars[ 2 ][ 2 ],
-                      rolloutcontext *prc, char asz[][ 40 ], void **pp ) {
+                      rolloutcontext *prc, char asz[][ 40 ], gboolean multiple, void **pp ) {
 
   if ( ! fShowProgress )
     return;
 
 #if USE_GTK
   if ( fX ) {
-    GTKRolloutProgressStart( pci, n, aars, prc, asz, pp );
+    GTKRolloutProgressStart( pci, n, aars, prc, asz, multiple, pp );
     return;
   }
 #endif /* USE_GTK */
 
-  TextRolloutProgressStart( pci, n, aars, prc, asz, pp );
+  TextRolloutProgressStart( pci, n, aars, prc, asz, multiple, pp );
 
 }
 
@@ -1170,20 +1188,19 @@ RolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 
 }
 
-extern void
+extern int
 RolloutProgressEnd( void **pp, gboolean destroy ) {
 
   if ( ! fShowProgress )
-    return;
+    return 0;
 
 #if USE_GTK
   if ( fX ) {
-    GTKRolloutProgressEnd( pp, destroy );
-    return;
+    return GTKRolloutProgressEnd( pp, destroy );
   }
 #endif /* USE_GTK */
 
-  TextRolloutProgressEnd( pp );
+  return TextRolloutProgressEnd( pp );
 
 }
 

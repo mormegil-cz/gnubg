@@ -1,3 +1,9 @@
+Wed Sep 30 00:07:22 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* analysis.c, gnubg.c, gtkchequer.c, gtkcube.c, gtkgame.c, progress.c,
+	progress.h: add button to stop all cmarked rollouts. Fix a few minor
+	cmark navigation problems
+
 Tue Sep 29 21:45:37 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* simpleboard.c: fix a language problem with fonts

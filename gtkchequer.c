@@ -77,7 +77,7 @@ static void MoveListRolloutClicked(GtkWidget *pw, hintdata *phd)
 	MoveListFreeSelectionList(plSelList);
 
 	GTKSetCurrentParent(pw);
-  RolloutProgressStart( &ci, c, NULL, &rcRollout, asz, &p );
+  RolloutProgressStart( &ci, c, NULL, &rcRollout, asz, FALSE, &p );
 
   res = ScoreMoveRollout ( ppm, (const cubeinfo**)ppci, c, RolloutProgress, p );
 
