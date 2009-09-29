@@ -1,3 +1,7 @@
+Tue Sep 29 21:45:37 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* simpleboard.c: fix a language problem with fonts
+
 Wed Sep 23 23:18:09 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gtkgame.c: fix problem with inactive navigation buttons

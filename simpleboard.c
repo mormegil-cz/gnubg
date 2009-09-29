@@ -143,16 +143,19 @@ static void draw_centered_text(cairo_t * cr, float color[3],
 	PangoLayout *layout;
 	gint width, height;
 	gchar *f_text;
+	gchar buf[G_ASCII_DTOSTR_BUF_SIZE];
+
 
 	cairo_save(cr);
 
 	layout = pango_cairo_create_layout(cr);
+	g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%.1f", text_size);
 	f_text = g_strdup_printf("<span "
-				 "font_desc=\"Sans %.1f\" "
+				 "font_desc=\"Sans %s\" "
 				 "foreground=\"#%.2x%.2x%.2x\" >"
 				 "%s"
 				 "</span>",
-				 text_size,
+				 buf,
 				 (int) (color[0] * 255.),
 				 (int) (color[1] * 255.),
 				 (int) (color[2] * 255.), text);
