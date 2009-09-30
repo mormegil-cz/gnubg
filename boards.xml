@@ -1264,4 +1264,56 @@
 
    </board-design>
 
+  <board-design>
+
+      <about>
+         <title>Playok</title>
+         <author>Andre Eppler</author>
+      </about>
+
+      <design>
+         board=#577457;0.00f
+         border=#5A3B3B
+         wood=paint
+         hinges=n
+         light=121;52
+         shape=0.3
+         chequers0=#EF0000;1.00;2.50;0.00;53.30
+         chequers1=#E6E6E6;1.00;3.20;0.10;39.10
+         dice0=#EF0000;0.00;53.30;y
+         dice1=#E6E6E6;0.10;39.10;y
+         dot0=#FFFFFF
+         dot1=#000000
+         cube=#D4D4C4
+         points0=#E7E7CF;0.00
+         points1=#CE1414;0.00
+         hinges3d=n
+         piecetype=0
+         piecetexturetype=0
+         roundededges=y
+         bgintrays=n
+         roundedpoints=n
+         lighttype=d
+         lightposx=3.000000 lightposy=0.000000 lightposz=3.000000
+         lightambient=50 lightdiffuse=70 lightspecular=70
+         chequers3d0=#E60000;#F00000;#E5E5E5;96;100
+         chequers3d1=#E6E6E6;#FFFFFF;#E5E5E5;81;100
+         dice3d0=#E60000;#F00000;#E5E5E5;96;100;y
+         dice3d1=#E6E6E6;#FFFFFF;#E5E5E5;81;100;y
+         dot3d0=#FFFFFF;#789D7A;#000000;100;100
+         dot3d1=#212121;#307834;#322B2B;100;100
+         cube3d=#8FCFEF;#D9D9BE;#E5E5E5;81;0
+         cubetext3d=#70006F;#1E1E1E;#000000;100;100
+         base3d=#3C5A3C;#3C5A3C;#FFEA9B;61;0
+         points3d0=#FFE6C1;#AAAA8C;#A85330;100;100
+         points3d1=#AA1414;#6D000C;#9E510C;100;100
+         border3d=#5A3C3C;#0A040A;#B5561E;79;100
+         hinge3d=#895B49;#E3CB1A;#EACE8E;100;0;hinge2.png
+         numbers3d=#FFFFFF;#FCCFCF;#E5E5E5;100;100
+         background3d=#8FCFEF;#8FCFEF;#FEFF7E;100;0
+
+   </design>
+
+   </board-design>
+
 </board-designs>
