@@ -418,13 +418,16 @@ extern void GTKOpen(gpointer p, guint n, GtkWidget * pw)
 extern void GTKCommandsOpen(gpointer p, guint n, GtkWidget *pw)
 {
 	gchar *filename = NULL;
+	gchar *quoted = NULL;
 	GtkWidget *fc =
 	    GnuBGFileDialog(_("Open Commands file"), NULL, NULL, GTK_FILE_CHOOSER_ACTION_OPEN);
 
 	if (gtk_dialog_run(GTK_DIALOG(fc)) == GTK_RESPONSE_ACCEPT) {
 		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fc));
-		CommandLoadCommands(filename);
+		quoted = g_strdup_printf("'%s'", filename);
+		CommandLoadCommands(quoted);
 		g_free(filename);
+		g_free(quoted);
 	}
 	gtk_widget_destroy(fc);
 }

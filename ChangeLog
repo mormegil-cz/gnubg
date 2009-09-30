@@ -1,3 +1,7 @@
+Wed Sep 30 08:57:54 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtkfile.c: quote filename input to Open Commands
+
 Wed Sep 30 00:07:22 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* analysis.c, gnubg.c, gtkchequer.c, gtkcube.c, gtkgame.c, progress.c,
