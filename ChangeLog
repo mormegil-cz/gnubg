@@ -1,3 +1,8 @@
+Thu Oct  1 15:18:32 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtktoolbar.c: remove labels from navigation buttons and add previous
+	marked and cmarked buttons.
+
 Wed Sep 30 08:57:54 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gtkfile.c: quote filename input to Open Commands

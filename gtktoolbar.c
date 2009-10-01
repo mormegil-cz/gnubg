@@ -55,6 +55,8 @@ typedef struct _toolbarwidget {
   GtkWidget *pwResign;       /* button for "Resign" */
   GtkWidget *pwEndGame;       /* button for "play game" */
   GtkWidget *pwHint;      /* button for "Hint" */
+  GtkWidget *pwPrevMarked;      /* button for "Previous Marked" */
+  GtkWidget *pwPrevCMarked;      /* button for "Previous CMarked" */
   GtkWidget *pwPrev;      /* button for "Previous Roll" */
   GtkWidget *pwPrevGame;      /* button for "Previous Game" */
   GtkWidget *pwNextGame;      /* button for "Next Game" */
@@ -259,6 +261,8 @@ ToolbarUpdate ( GtkWidget *pwToolbar,
   gtk_widget_set_sensitive ( ptw->pwSave,  plGame != NULL );
   gtk_widget_set_sensitive ( ptw->pwResign, fPlaying  && !fEdit);
   gtk_widget_set_sensitive ( ptw->pwHint, fPlaying  && !fEdit);
+  gtk_widget_set_sensitive ( ptw->pwPrevMarked, fPlaying  && !fEdit);
+  gtk_widget_set_sensitive ( ptw->pwPrevCMarked, fPlaying  && !fEdit);
   gtk_widget_set_sensitive ( ptw->pwPrev, fPlaying  && !fEdit);
   gtk_widget_set_sensitive ( ptw->pwPrevGame, fPlaying  && !fEdit);
   gtk_widget_set_sensitive ( ptw->pwNextGame, fPlaying  && !fEdit);
@@ -271,10 +275,12 @@ ToolbarUpdate ( GtkWidget *pwToolbar,
   return c;
 }
 
-static GtkWidget* ToolbarAddButton(GtkToolbar *pwToolbar, const char *stockID, const char *tooltip, GtkSignalFunc callback, void *data)
+static GtkWidget* ToolbarAddButton(GtkToolbar *pwToolbar, const char *stockID, const char *label, const char *tooltip, GtkSignalFunc callback, void *data)
 {
 	GtkToolItem* but = gtk_tool_button_new_from_stock(stockID);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(but), tooltip);
+	if (label)
+		gtk_tool_button_set_label(GTK_TOOL_BUTTON(but), label);
 	gtk_toolbar_insert(GTK_TOOLBAR(pwToolbar), but, -1);
 
 	g_signal_connect(G_OBJECT(but), "clicked", callback, data);
@@ -331,39 +337,39 @@ extern GtkWidget *ToolbarNew(void)
 	gtk_toolbar_set_tooltips ( GTK_TOOLBAR ( pwToolbar ), TRUE );
 
 	/* New button */
-	ptw -> pwNew = ToolbarAddButton(GTK_TOOLBAR ( pwToolbar ), GTK_STOCK_NEW, _("Start new game, match, session or position"), G_CALLBACK( GTKNew ), NULL);
+	ptw -> pwNew = ToolbarAddButton(GTK_TOOLBAR ( pwToolbar ), GTK_STOCK_NEW, NULL, _("Start new game, match, session or position"), G_CALLBACK( GTKNew ), NULL);
 
 	/* Open button */
-	ptw -> pwOpen = ToolbarAddButton(GTK_TOOLBAR ( pwToolbar ), GTK_STOCK_OPEN, _("Open game, match, session or position"), G_CALLBACK( GTKOpen ), NULL);
+	ptw -> pwOpen = ToolbarAddButton(GTK_TOOLBAR ( pwToolbar ), GTK_STOCK_OPEN, NULL, _("Open game, match, session or position"), G_CALLBACK( GTKOpen ), NULL);
 
 	/* Save button */
-	ptw->pwSave = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GTK_STOCK_SAVE, _("Save match, session, game or position"),  G_CALLBACK(GTKSave), NULL);
+	ptw->pwSave = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GTK_STOCK_SAVE, NULL, _("Save match, session, game or position"),  G_CALLBACK(GTKSave), NULL);
   
 	ToolbarAddSeparator(GTK_TOOLBAR(pwToolbar));
 
 	/* Take/accept button */
-	ptw->pwTake = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_ACCEPT, _("Take the offered cube or accept the offered resignation"), G_CALLBACK(ButtonClickedYesNo), "yes");
+	ptw->pwTake = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_ACCEPT, NULL, _("Take the offered cube or accept the offered resignation"), G_CALLBACK(ButtonClickedYesNo), "yes");
 
 	/* drop button */
-	ptw->pwDrop = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_REJECT, _("Drop the offered cube or decline the offered resignation"), G_CALLBACK(ButtonClickedYesNo), "no");
+	ptw->pwDrop = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_REJECT, NULL, _("Drop the offered cube or decline the offered resignation"), G_CALLBACK(ButtonClickedYesNo), "no");
 
 	/* Double button */
-	ptw->pwDouble = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_DOUBLE, _("Double or redouble(beaver)"), G_CALLBACK(ButtonClicked), "double");
+	ptw->pwDouble = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_DOUBLE, NULL, _("Double or redouble(beaver)"), G_CALLBACK(ButtonClicked), "double");
   
 	/* Resign button */
-	ptw->pwResign = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_RESIGN, _("Resign the current game"), G_CALLBACK(GTKResign), NULL);
+	ptw->pwResign = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_RESIGN, NULL, _("Resign the current game"), G_CALLBACK(GTKResign), NULL);
 
 	/* End game button */
-	ptw->pwEndGame = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_END_GAME, _("Let the computer end the game"), G_CALLBACK(ButtonClicked), "end game");
+	ptw->pwEndGame = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_END_GAME, NULL, _("Let the computer end the game"), G_CALLBACK(ButtonClicked), "end game");
 	gtk_tool_item_set_homogeneous(GTK_TOOL_ITEM(ptw->pwEndGame), FALSE);
 
 	ToolbarAddSeparator(GTK_TOOLBAR(pwToolbar));
   
 	/* reset button */
-	ptw-> pwReset = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GTK_STOCK_UNDO, _("Undo moves"), G_CALLBACK(GTKUndo), NULL);
+	ptw-> pwReset = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GTK_STOCK_UNDO, NULL, _("Undo moves"), G_CALLBACK(GTKUndo), NULL);
 
 	/* Hint button */
-	ptw->pwHint = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_HINT, _("Show the best moves or cube action"), G_CALLBACK(ButtonClicked), "hint");
+	ptw->pwHint = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_HINT, NULL, _("Show the best moves or cube action"), G_CALLBACK(ButtonClicked), "hint");
 
 	/* edit button */
 	ptw->pwEdit = gtk_toggle_button_new();
@@ -390,16 +396,22 @@ extern GtkWidget *ToolbarNew(void)
 	gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(ti), FALSE);
 	gtk_toolbar_insert(GTK_TOOLBAR(pwToolbar), ti, -1);
 
-	ptw->pwPrev = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_PREV, _("Go to Previous Roll"), G_CALLBACK(ButtonClicked), "previous roll");
+	ptw->pwPrevCMarked = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_PREV_MARKED, "", _("Go to Previous Marked"), G_CALLBACK(ButtonClicked), "previous marked");
+	gtk_tool_item_set_homogeneous(GTK_TOOL_ITEM(ptw->pwPrevCMarked), FALSE);
+	ptw->pwPrevMarked = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_PREV_CMARKED, "", _("Go to Previous CMarked"), G_CALLBACK(ButtonClicked), "previous cmarked");
+	gtk_tool_item_set_homogeneous(GTK_TOOL_ITEM(ptw->pwPrevMarked), FALSE);
+	ptw->pwPrev = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_PREV, "", _("Go to Previous Roll"), G_CALLBACK(ButtonClicked), "previous roll");
 	gtk_tool_item_set_homogeneous(GTK_TOOL_ITEM(ptw->pwPrev), FALSE);
-	ptw->pwPrevGame = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_PREV_GAME, _("Go to Previous Game"), G_CALLBACK(ButtonClicked), "previous game");
+	ptw->pwPrevGame = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_PREV_GAME, "", _("Go to Previous Game"), G_CALLBACK(ButtonClicked), "previous game");
 	gtk_tool_item_set_homogeneous(GTK_TOOL_ITEM(ptw->pwPrevGame), FALSE);
-	ptw->pwNextGame = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_NEXT_GAME, _("Go to Next Game"), G_CALLBACK(ButtonClicked), "next game");
+	ptw->pwNextGame = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_NEXT_GAME, "", _("Go to Next Game"), G_CALLBACK(ButtonClicked), "next game");
 	gtk_tool_item_set_homogeneous(GTK_TOOL_ITEM(ptw->pwNextGame), FALSE);
-	ptw->pwNext = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_NEXT, _("Go to Next Roll"), G_CALLBACK(ButtonClicked), "next roll");
-	ptw->pwNextCMarked = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_NEXT_CMARKED, _("Go to Next CMarked"), G_CALLBACK(ButtonClicked), "next cmarked");
+	ptw->pwNext = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_NEXT, "", _("Go to Next Roll"), G_CALLBACK(ButtonClicked), "next roll");
+	gtk_tool_item_set_homogeneous(GTK_TOOL_ITEM(ptw->pwNext), FALSE);
+	ptw->pwNextCMarked = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_NEXT_CMARKED, "", _("Go to Next CMarked"), G_CALLBACK(ButtonClicked), "next cmarked");
 	gtk_tool_item_set_homogeneous(GTK_TOOL_ITEM(ptw->pwNextCMarked), FALSE);
-	ptw->pwNextMarked = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_NEXT_MARKED, _("Go to Next Marked"), G_CALLBACK(ButtonClicked), "next marked");
+	ptw->pwNextMarked = ToolbarAddButton(GTK_TOOLBAR(pwToolbar), GNUBG_STOCK_GO_NEXT_MARKED, "", _("Go to Next Marked"), G_CALLBACK(ButtonClicked), "next marked");
+	gtk_tool_item_set_homogeneous(GTK_TOOL_ITEM(ptw->pwNextMarked), FALSE);
 
 	return vbox_toolbar;
 }
