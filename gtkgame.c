@@ -2053,7 +2053,7 @@ static int EvalDefaultSetting(evalcontext *pec, movefilter *pmf)
 static void UpdateSummaryEvalMenuSetting(AnalysisDetails *pAnalDetails )
 {
 	int chequerDefault = EvalDefaultSetting(pAnalDetails->esChequer, pAnalDetails->mfChequer);
-	int cubeDefault = EvalDefaultSetting(pAnalDetails->esCube, pAnalDetails->mfCube ? (movefilter*)&pAnalDetails->mfCube : NULL);
+	int cubeDefault = EvalDefaultSetting(pAnalDetails->esCube, pAnalDetails->mfCube);
 	int setting = NUM_SETTINGS;
 	if (chequerDefault == cubeDefault
 		/* Special case as cube_supremo==cube_worldclass */
