@@ -647,6 +647,7 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const listOLD *plParentGame,
         ! memcmp( anBoardMove, pms->anBoard, 2 * 25 * sizeof ( int ) );
     }
 
+    MT_Exclusive();
     switch( pmr->mt ) {
     case MOVE_GAMEINFO:
 
@@ -676,9 +677,11 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const listOLD *plParentGame,
 
 			if ( cmp_evalsetup ( pesCube, &pmr->CubeDecPtr->esDouble ) > 0 )
 			{
+				MT_Release();
 				if ( GeneralCubeDecision ( aarOutput, aarStdDev, NULL, 
 					(ConstTanBoard)pms->anBoard, &ci, pesCube, NULL, NULL  ) < 0 )
 					return -1;
+				MT_Exclusive();
 
 				pmr->CubeDecPtr->esDouble = *pesCube;
 
@@ -728,12 +731,14 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const listOLD *plParentGame,
 		  
 				/* find best moves */
 		  
+				MT_Release();
 				if( FindnSaveBestMoves ( &(pmr->ml), pmr->anDice[ 0 ],
 										pmr->anDice[ 1 ],
 										(ConstTanBoard)pms->anBoard, auch, 
 										arSkillLevel[ SKILL_DOUBTFUL ],
 										&ci, &pesChequer->ec, aamf ) < 0 )
 						return -1;
+				MT_Exclusive();
 
 				}
 		  
@@ -778,10 +783,12 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const listOLD *plParentGame,
 
 				if ( cmp_evalsetup ( pesCube, &pmr->CubeDecPtr->esDouble ) > 0 )
 				{
+					MT_Release();
 					if ( GeneralCubeDecision ( aarOutput, aarStdDev, 
 							NULL, (ConstTanBoard)pms->anBoard, &ci,
 							pesCube, NULL, NULL ) < 0 )
 						return -1;
+					MT_Exclusive();
 
 					pmr->CubeDecPtr->esDouble = *pesCube;
 				}
@@ -948,6 +955,7 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const listOLD *plParentGame,
       psc->fCube = fAnalyseCube;
       psc->fDice = fAnalyseDice;
     }
+    MT_Release();
   
     return fInterrupt ? -1 : 0;
 }
@@ -1062,7 +1070,7 @@ static int AnalyzeGame ( listOLD *plGame, int wait )
 	if (wait)
 	{
 		multi_debug("wait for all task: analysis");
-		result = MT_WaitForTasks(UpdateProgressBar, 250);
+		result = MT_WaitForTasks(UpdateProgressBar, 250, fAutoSaveAnalysis);
 
 		if (result == -1)
 			IniStatcontext( psc );
@@ -1273,7 +1281,7 @@ extern void CommandAnalyseMatch( char *UNUSED(sz) )
   }
   
   multi_debug("wait for all task: analysis");
-  MT_WaitForTasks(UpdateProgressBar, 250);
+  MT_WaitForTasks(UpdateProgressBar, 250, fAutoSaveAnalysis);
 
   ProgressEnd();
 

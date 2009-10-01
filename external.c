@@ -244,7 +244,7 @@ extern int ExternalRead( int h, char *pch, size_t cch ) {
     
     while( cch )
 	{
-		ProcessGtkEvents();
+		ProcessEvents();
 
 	if( fInterrupt )
 	    return -1;
@@ -305,7 +305,7 @@ extern int ExternalWrite( int h, char *pch, size_t cch ) {
 
     while( cch )
 	{
-		ProcessGtkEvents();
+		ProcessEvents();
 
 		if( fInterrupt )
 			return -1;
@@ -620,7 +620,7 @@ listenloop:
       }
       outputf( _("Waiting for a connection from %s...\n"), sz);
       outputx();
-      ProcessGtkEvents();
+      ProcessEvents();
 
       /* Must set length when using windows */
       saLen = sizeof(struct sockaddr);
@@ -628,7 +628,7 @@ listenloop:
 	  {
 		if( errno == EINTR )
 		{
-			ProcessGtkEvents();
+			ProcessEvents();
 
           if( fInterrupt ) {
             closesocket( h );
@@ -653,7 +653,7 @@ listenloop:
       outputf(_("Accepted connection from %s.\n"),
                  inet_ntoa( saRemote.sin_addr ) );
       outputx();
-      ProcessGtkEvents();
+      ProcessEvents();
 
       while( !ExternalRead( hPeer, szCommand, sizeof( szCommand ) ) ) {
 

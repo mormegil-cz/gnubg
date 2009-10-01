@@ -1,3 +1,11 @@
+Thu Oct  1 23:04:28 CEST 2009 Christian Anthon <anthon@kiku.dk>
+
+	* analysis.c, backgammon.h, commands.inc, external.c, gnubg.c,
+	gtkgame.c, gtkoptions.c, gtkprefs.c, gtksplash.c, import.c,
+	multithread.c, multithread.h, play.c, rollout.c, set.c, sgf.c, show.c,
+	speed.c: add autosave functionallity during analysis and rollout.
+	disabled by default -- needs testing.
+
 Thu Oct  1 15:18:32 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gtktoolbar.c: remove labels from navigation buttons and add previous

@@ -90,7 +90,7 @@ CreateSplash (void) {
 
   gtk_widget_show_all ( GTK_WIDGET ( pgs->pwWindow ) );
 
-  ProcessGtkEvents();
+  ProcessEvents();
 
   return pgs->pwWindow;
 
@@ -126,5 +126,5 @@ extern void PushSplash ( GtkWidget *pwSplash, const gchar *szText0, const gchar 
   gtk_label_set_text ( GTK_LABEL ( pgs->apwStatus[ 0 ] ), szText0 );
   gtk_label_set_text ( GTK_LABEL ( pgs->apwStatus[ 1 ] ), szText1 );
 
-  ProcessGtkEvents();
+  ProcessEvents();
 }

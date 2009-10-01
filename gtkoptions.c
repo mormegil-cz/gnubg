@@ -87,6 +87,10 @@ typedef struct _optionswidget {
 	GtkAdjustment *padjDelay;
 	GtkAdjustment *padjSeed;
 	GtkAdjustment *padjThreads;
+	GtkWidget *pwAutoSaveTime;
+	GtkWidget *pwAutoSaveRollout;
+	GtkWidget *pwAutoSaveAnalysis;
+	GtkWidget *pwAutoSaveConfirmDelete;
 	GtkWidget *pwIllegal;
 	GtkWidget *pwUseDiceIcon;
 	GtkWidget *pwShowIDs;
@@ -1246,7 +1250,33 @@ static void append_other_options(optionswidget *pow)
 				    _("The number of threads to use in multi-threaded operations,"
 				      " this should be set to the number of logical processing units available"));
 #endif
-	/* return notebook */
+	pwhbox = gtk_hbox_new(FALSE, 4);
+	gtk_box_pack_start(GTK_BOX(pwvbox), pwhbox, FALSE, FALSE, 0);
+
+	gtk_box_pack_start(GTK_BOX(pwhbox), gtk_label_new(_("Auto save frequency")), FALSE, FALSE, 0);
+
+	pow->pwAutoSaveTime = gtk_spin_button_new_with_range(1, 240, 1);
+	gtk_box_pack_start(GTK_BOX(pwhbox), pow->pwAutoSaveTime, FALSE, FALSE, 0);
+	gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(pow->pwAutoSaveTime), TRUE);
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(pow->pwAutoSaveTime), nAutoSaveTime);
+	gtk_widget_set_tooltip_text(pow->pwAutoSaveTime, _("Set the auto save frequency. You must also enable backup during analysis and/or during rollout"));
+	gtk_box_pack_start(GTK_BOX(pwhbox), gtk_label_new(_("minute(s)")), FALSE, FALSE, 0);
+
+	pow->pwAutoSaveRollout = gtk_check_button_new_with_label(_("Auto save rollouts"));
+	gtk_box_pack_start(GTK_BOX(pwvbox), pow->pwAutoSaveRollout, FALSE, FALSE, 0);
+	gtk_widget_set_tooltip_text(pow->pwAutoSaveRollout, _("Auto save during and after rollouts"));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pow->pwAutoSaveRollout), fAutoSaveRollout);
+
+	pow->pwAutoSaveAnalysis = gtk_check_button_new_with_label(_("Auto save analysis"));
+	gtk_box_pack_start(GTK_BOX(pwvbox), pow->pwAutoSaveAnalysis, FALSE, FALSE, 0);
+	gtk_widget_set_tooltip_text(pow->pwAutoSaveAnalysis, _("Auto save during and after analysis of games and matches"));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pow->pwAutoSaveAnalysis), fAutoSaveAnalysis);
+
+	pow->pwAutoSaveConfirmDelete = gtk_check_button_new_with_label(_("Confirm deletion of auto saves"));
+	gtk_box_pack_start(GTK_BOX(pwvbox), pow->pwAutoSaveConfirmDelete, FALSE, FALSE, 0);
+	gtk_widget_set_tooltip_text(pow->pwAutoSaveConfirmDelete, _("Ask before auto saves are deleted"));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pow->pwAutoSaveConfirmDelete), fAutoSaveConfirmDelete);
+
 }
 
 static GtkWidget *OptionsPages(optionswidget *pow)
@@ -1441,6 +1471,15 @@ static void OptionsOK(GtkWidget *pw, optionswidget *pow)
     UserCommand(sz); 
   }
 #endif
+
+  if(gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(pow->pwAutoSaveTime)) != nAutoSaveTime) {
+    sprintf(sz, "set autosave time %d", gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(pow->pwAutoSaveTime)));
+    UserCommand(sz); 
+  }
+
+  CHECKUPDATE(pow->pwAutoSaveAnalysis, fAutoSaveAnalysis, "set autosave analysis %s");
+  CHECKUPDATE(pow->pwAutoSaveRollout, fAutoSaveRollout, "set autosave rollout %s");
+  CHECKUPDATE(pow->pwAutoSaveConfirmDelete, fAutoSaveConfirmDelete, "set autosave confirm %s");
 
   if((n = (unsigned int)pow->padjDelay->value) != nDelay) {
     sprintf(sz, "set delay %d", n );

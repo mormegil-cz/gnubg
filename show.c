@@ -2295,3 +2295,14 @@ extern void CommandShowManualAbout (char *UNUSED(sz))
 	OpenURL (path);
 	g_free(path);
 }
+
+extern void CommandShowAutoSave(char *UNUSED(sz))
+{
+	outputf(ngettext
+		("Auto save frequency every %d minute\n", "Auto save every %d minutes\n",
+		 nAutoSaveTime), nAutoSaveTime);
+	outputf(fAutoSaveRollout ? _("Match will be autosaved during and after rollouts\n") :
+		_("Match will not be autosaved during and after rollouts\n"));
+	outputf(fAutoSaveAnalysis ? _("Match will be autosaved during and after analysis\n") :
+		_("Match will not be autosaved during and after analysis\n"));
+}

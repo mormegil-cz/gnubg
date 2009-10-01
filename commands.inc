@@ -87,6 +87,12 @@ command cER = {
     { "move", NULL, N_("CMark moves in movelist"), NULL, acCmarkMove },
     { "cube", NULL, N_("CMark cube"), NULL, acCmarkCube },
     { NULL, NULL, NULL, NULL, NULL }
+}, acSetAutoSave[] = {
+    { "rollout", CommandSetAutoSaveRollout, N_("Autosave during rollout"), szONOFF, &cOnOff },
+    { "analysis", CommandSetAutoSaveAnalysis, N_("Autosave after each analysed game"), szONOFF, &cOnOff },
+    { "confirm", CommandSetAutoSaveConfirmDelete, N_("Confirm deletion of autosaves"), szONOFF, &cOnOff },
+    { "time", CommandSetAutoSaveTime, N_("Set how often to autosave in minutes"), NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acAnalyse[] = {
     { "clear", NULL, 
       N_("Clear previous analysis"), NULL, acAnalyseClear },
@@ -1208,6 +1214,7 @@ command cER = {
     { "vsync3d", CommandSetVsync3d, N_("Turn vertical sync on/off"), szONOFF, &cOnOff },
 #if USE_GTK
     { "warning", CommandSetWarning, N_("Turn warnings on or off"), szWARNYN, NULL},
+    { "autosave", NULL, N_("Control autosave"), NULL, acSetAutoSave },
 #endif
     { NULL, NULL, NULL, NULL, NULL }
 }, acShowStatistics[] = {
@@ -1227,6 +1234,7 @@ command cER = {
 }, acShow[] = {
     { "analysis", CommandShowAnalysis, N_("Show parameters used for analysing "
       "moves"), NULL, NULL },
+    { "autosave", CommandShowAutoSave, N_("Show parameters used for autosaving"), NULL, NULL },
     { "automatic", CommandShowAutomatic, N_("List which functions will be "
       "performed without user input"), NULL, NULL },
     { "beavers", CommandShowBeavers, 

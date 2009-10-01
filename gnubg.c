@@ -158,6 +158,7 @@ int fReadingCommand;
 #endif
 #endif
 
+static char *autosave = NULL;
 static int loading_rc = FALSE;
 static int foutput_on = TRUE;
 const char *intro_string =
@@ -206,6 +207,10 @@ int fAutoRoll = TRUE;
 int fCheat = FALSE;
 int fConfirmNew = TRUE;
 int fConfirmSave = TRUE;
+int nAutoSaveTime = 15;
+int fAutoSaveRollout = FALSE;
+int fAutoSaveAnalysis = FALSE;
+int fAutoSaveConfirmDelete = TRUE;
 int fCubeEqualChequer = TRUE;
 int fCubeUse = TRUE;
 int fDisplay = TRUE;
@@ -2419,10 +2424,9 @@ extern void PromptForExit( void )
 
 	fExiting = TRUE;
 
-	if( fInteractive && fConfirmNew && ms.gs == GAME_PLAYING ) {
+	if( fInteractive) {
 		fInterrupt = FALSE;
-
-		if( !GetInputYN( _("Are you sure you want to exit and abort the game in progress?") ) )
+		if (!get_input_discard())
 		{
 			fInterrupt = FALSE;
 			fExiting = FALSE;
@@ -2450,7 +2454,7 @@ extern void PromptForExit( void )
 	if (fX && display_is_3d(bd->rd) && bd->rd->closeBoardOnExit && bd->rd->fHinges3d)
 		CloseBoard3d(bd, bd->bd3d, bd->rd);
 #endif
-	ProcessGtkEvents();
+	ProcessEvents();
 
 	SoundWait();    /* Wait for sound to finish before final close */
 
@@ -3143,6 +3147,14 @@ static void SaveEvaluationSettings(FILE * pf)
 #endif
 }
 
+static void SaveAutoSaveSettings(FILE * pf)
+{
+	fprintf(pf, "set autosave time %d\n", nAutoSaveTime);
+	fprintf(pf, "set autosave rollout %s\n", fAutoSaveRollout ? "on" : "off");
+	fprintf(pf, "set autosave analysis %s\n", fAutoSaveAnalysis ? "on" : "off");
+	fprintf(pf, "set autosave confirm %s\n", fAutoSaveConfirmDelete ? "on" : "off");
+}
+
 static void SaveMiscSettings(FILE * pf)
 {
 	gchar buf[G_ASCII_DTOSTR_BUF_SIZE];
@@ -3249,6 +3261,7 @@ extern void CommandSaveSettings(char *szParam)
 	RelationalSaveSettings(pf);
 
 	SaveMiscSettings(pf);
+	SaveAutoSaveSettings(pf);
 	if (pf != stdout)
 		fclose(pf);
 
@@ -4612,6 +4625,14 @@ static void init_defaults(void)
 
 }
 
+static void init_autosave(void)
+{
+	char *backupdir;
+	backupdir = g_build_filename(szHomeDirectory, "backup", NULL);
+	g_mkdir(backupdir, 0700);
+	g_free(backupdir);
+}
+
 static void null_debug (const gchar* dom, GLogLevelFlags logflags, const gchar* message, gpointer unused)
 {
 }
@@ -4717,6 +4738,8 @@ int main(int argc, char *argv[])
 
 	if (CreateGnubgDirectory())
 		exit(EXIT_FAILURE);
+
+	init_autosave();
 
 	RenderInitialise();
 
@@ -5467,7 +5490,7 @@ extern int RunAsyncProcess(AsyncFun fn, void *data, const char *msg)
 	ProgressStart(msg);
 	
 #if USE_MULTITHREAD
-	ret = MT_WaitForTasks(Progress, 100);
+	ret = MT_WaitForTasks(Progress, 100, FALSE);
 #else
 	asyncRet = 0;
 	fn(data);	/* Just call function in single threaded build */
@@ -5479,7 +5502,7 @@ extern int RunAsyncProcess(AsyncFun fn, void *data, const char *msg)
 	return ret;
 }
 
-extern void ProcessGtkEvents(void)
+extern void ProcessEvents(void)
 {
 #if USE_GTK
 	if (fX)
@@ -5487,7 +5510,12 @@ extern void ProcessGtkEvents(void)
 		while(gtk_events_pending())
 			gtk_main_iteration();
 	}
+	else
 #endif
+	{
+		while (g_main_context_pending(NULL))
+			g_main_context_iteration(NULL, TRUE);
+	}
 }
 
 extern int CheckGameExists(void)
@@ -5502,3 +5530,75 @@ extern int CheckGameExists(void)
 		return FALSE;
 	}
 }
+
+extern gboolean save_autosave(gpointer unused)
+{
+	int fd;
+	FILE *pf;
+	listOLD *pl;
+
+	g_return_val_if_fail(plGame, FALSE);
+
+	MT_Exclusive();
+	if (autosave)
+		g_unlink(autosave);
+
+	autosave = g_build_filename(szHomeDirectory, "backup", "XXXXXX.sgf", NULL);
+
+	fd = g_mkstemp(autosave);
+	if (fd < 0) {
+		g_free(autosave);
+		autosave = NULL;
+		MT_Release();
+		return FALSE;
+	}
+
+	close(fd);
+	g_unlink(autosave);
+
+	pf = g_fopen(autosave, "w");
+	if (!pf) {
+		autosave = NULL;
+		MT_Release();
+		return FALSE;
+	}
+
+	for (pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext)
+		SaveGame(pf, pl->p);
+
+	fclose(pf);
+	MT_Release();
+	return TRUE;
+}
+
+extern void delete_autosave(void)
+{
+    if (autosave)
+    {
+	    g_unlink(autosave);
+	    g_free(autosave);
+	    autosave = NULL;
+    }
+}
+
+extern int get_input_discard(void)
+{
+	if (fInterrupt)
+		return FALSE;
+
+	if (autosave && fAutoSaveConfirmDelete)
+	{
+		if (!GetInputYN(_("Are you sure you want to discard the current match and your existing autosave? ")))
+			return FALSE;
+		g_unlink(autosave);
+		g_free(autosave);
+		autosave = NULL;
+		return TRUE;
+	}
+	if (ms.gs == GAME_PLAYING && fConfirmNew)
+	       return GetInputYN(_("Are you sure you want to discard the current match? "));
+	
+	return TRUE;
+}
+
+

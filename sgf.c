@@ -1439,16 +1439,8 @@ extern void CommandLoadGame(char *sz)
     }
 
     if ((pl = LoadCollection(sz))) {
-	if (ms.gs == GAME_PLAYING && fConfirmNew) {
-	    if (fInterrupt)
+	if (!get_input_discard())
 		return;
-
-	    if (!GetInputYN
-		(_
-		 ("Are you sure you want to load a saved game, "
-		  "and discard the one in progress? ")))
-		return;
-	}
 #if USE_GTK
 	if (fX) {		/* Clear record to avoid ugly updates */
 	    GTKClearMoveRecord();
@@ -1498,16 +1490,8 @@ extern void CommandLoadPosition(char *sz)
     }
 
     if ((pl = LoadCollection(sz))) {
-	if (ms.gs == GAME_PLAYING && fConfirmNew) {
-	    if (fInterrupt)
+	if (!get_input_discard())
 		return;
-
-	    if (!GetInputYN
-		(_
-		 ("Are you sure you want to load a saved position, "
-		  "and discard the match in progress? ")))
-		return;
-	}
 #if USE_GTK
 	if (fX) {		/* Clear record to avoid ugly updates */
 	    GTKClearMoveRecord();
@@ -1556,16 +1540,8 @@ extern void CommandLoadMatch(char *sz)
     if ((pl = LoadCollection(sz))) {
 	/* FIXME make sure the root nodes have MI properties; if not,
 	   we're loading a session. */
-	if (ms.gs == GAME_PLAYING && fConfirmNew) {
-	    if (fInterrupt)
+	if (!get_input_discard())
 		return;
-
-	    if (!GetInputYN
-		(_
-		 ("Are you sure you want to load a saved match, "
-		  "and discard the game in progress? ")))
-		return;
-	}
 #if USE_GTK
 	if (fX) {		/* Clear record to avoid ugly updates */
 	    GTKClearMoveRecord();
@@ -2138,7 +2114,7 @@ static void AddRule(FILE * pf, const char *sz, int *pfFirst)
 
 }
 
-static void SaveGame(FILE * pf, listOLD * plGame)
+extern void SaveGame(FILE * pf, listOLD * plGame)
 {
     listOLD *pl;
     moverecord *pmr;
@@ -2442,6 +2418,7 @@ extern void CommandSaveMatch(char *sz)
 
     setDefaultFileName(sz);
 
+    delete_autosave();
 }
 
 extern void CommandSavePosition(char *sz)

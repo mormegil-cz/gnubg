@@ -721,14 +721,9 @@ static int NewGame( void )
     
     if( !fRecord && !ms.nMatchTo && lMatch.plNext->p ) {
 	/* only recording the active game of a session; discard any others */
-	if( fConfirmNew ) {
-	    if( fInterrupt )
+
+	if(!get_input_discard())
 		return -1;
-	    
-	    if( !GetInputYN( _("Are you sure you want to start a new game, "
-			     "and discard the one in progress? ") ) )
-		return -1;
-	}
 
 	PopGame( lMatch.plNext->p, TRUE );
     }
@@ -1580,7 +1575,7 @@ static void StartAutomaticPlay(void)
 		automaticTask = TRUE;
 #if USE_GTK
 		GTKSuspendInput();
-		ProcessGtkEvents();
+		ProcessEvents();
 #endif
 	}
 }
@@ -2791,14 +2786,8 @@ extern void CommandNewMatch( char *sz )
        return;
     }
 
-    if( (ms.gs == GAME_PLAYING || !move_is_last_in_match()) && fConfirmNew ) {
-	if( fInterrupt )
+    if(!get_input_discard())
 	    return;
-
-	if( !GetInputYN( _("Are you sure you want to start a new match, "
-			 "and discard the game in progress? ") ) )
-	    return;
-    }
     
     FreeMatch();
     ClearMatch();
@@ -2829,14 +2818,8 @@ extern void CommandNewMatch( char *sz )
 
 extern void CommandNewSession( char *sz ) {
 
-    if ((ms.gs == GAME_PLAYING || !move_is_last_in_match()) && fConfirmNew ) {
-	if( fInterrupt )
-	    return;
-	    
-	if( !GetInputYN( _("Are you sure you want to start a new session, "
-			 "and discard the game in progress? ") ) )
-	    return;
-    }
+    if (!get_input_discard())
+		    return;
     
     FreeMatch();
     ClearMatch();

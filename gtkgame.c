@@ -1077,7 +1077,7 @@ extern void SwapBoardToPanel(int ToPanel)
 	{
 		gtk_widget_reparent(pwEventBox, pwPanelGameBox);
 		gtk_widget_show(hpaned);
-		ProcessGtkEvents();
+		ProcessEvents();
 		gtk_widget_hide(pwGameBox);
 		gtk_paned_set_position(GTK_PANED(hpaned), pwMain->allocation.width - panelSize);
 
@@ -1098,7 +1098,7 @@ extern void SwapBoardToPanel(int ToPanel)
 
 		gtk_widget_reparent(pwEventBox, pwGameBox);
 		gtk_widget_show(pwGameBox);
-		ProcessGtkEvents();
+		ProcessEvents();
 		if (GTK_WIDGET_VISIBLE(hpaned))
 		{
 			panelSize = GetPanelSize();
@@ -5285,14 +5285,14 @@ extern void GTKProgressValue ( int iValue, int iMax )
     gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( pwProgress ), frac);
     g_free(gsz);
 
-	ProcessGtkEvents();
+	ProcessEvents();
 }
 
 extern void GTKProgress( void )
 {
     gtk_progress_bar_pulse( GTK_PROGRESS_BAR( pwProgress ) );
 
-	ProcessGtkEvents();
+	ProcessEvents();
 }
 
 extern void GTKProgressEnd( void )
@@ -5925,7 +5925,7 @@ extern void GTKBearoffProgress( int i ) {
 	gtk_widget_destroy( pwDialog );
     }
 
-    ProcessGtkEvents();
+    ProcessEvents();
 }
 
 static void enable_sub_menu( GtkWidget *pw, int f ); /* for recursion */
@@ -7273,7 +7273,7 @@ extern void *GTKCalibrationStart( void ) {
     
     gtk_widget_show_all( pwDialog );
 
-	ProcessGtkEvents();
+	ProcessEvents();
 
     gtk_widget_ref( pwResult );
     
@@ -7287,7 +7287,7 @@ extern void GTKCalibrationUpdate( void *context, float rEvalsPerSec ) {
     sprintf( sz, "%.0f", rEvalsPerSec );
     gtk_label_set_text( GTK_LABEL( context ), sz );
     
-	ProcessGtkEvents();
+	ProcessEvents();
 }
 
 extern void GTKCalibrationEnd( void *context ) {

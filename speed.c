@@ -142,7 +142,7 @@ extern void CommandCalibrate( char *sz )
 
 #if USE_MULTITHREAD
 		mt_add_tasks(MT_GetNumThreads(), RunEvals, NULL, NULL);
-		(void)MT_WaitForTasks(NULL, 0);
+		(void)MT_WaitForTasks(NULL, 0, FALSE);
 		iIter += MT_GetNumThreads();
 #else
 		RunEvals(NULL);

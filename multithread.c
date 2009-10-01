@@ -284,7 +284,7 @@ static void MT_CloseThreads(void)
 {
 	td.closingThreads = TRUE;
     mt_add_tasks(td.numThreads, CloseThread, NULL, NULL);
-    if (MT_WaitForTasks(NULL, 0) != (int)td.numThreads)
+    if (MT_WaitForTasks(NULL, 0, FALSE) != (int)td.numThreads)
 		g_print("Error closing threads!\n");
 }
 
@@ -338,7 +338,7 @@ static void MT_WorkerThreadFunction(void *id)
 #endif
 {
 	/* why do we need this align ? - because of a gcc bug */
-#if __GNUC__ && WIN32
+#if __GNUC__ && defined(WIN32)
 	/* Align stack pointer on 16 byte boundary so SSE variables work correctly */
 	int align_offset;
 	asm  __volatile__  ("andl $-16, %%esp" : : : "%esp");
@@ -363,7 +363,7 @@ static void MT_WorkerThreadFunction(void *id)
 		} while (!td.closingThreads);
 
 #ifdef GLIB_THREADS
-#if __GNUC__ && WIN32
+#if __GNUC__ && defined(WIN32)
 		/* De-align stack pointer to avoid crash on exit */
 		asm  __volatile__  ("addl %0, %%esp" : : "r"(align_offset) : "%esp");
 #endif
@@ -397,7 +397,7 @@ static void MT_CreateThreads(void)
     }
 	td.addedTasks = td.numThreads;
 	/* Wait for all the threads to be created (timeout after 1 second) */
-	if (MT_WaitForTasks(WaitingForThreads, 1000) != (int)td.numThreads)
+	if (MT_WaitForTasks(WaitingForThreads, 1000, FALSE) != (int)td.numThreads)
 		g_print("Error creating threads!\n");
 }
 
@@ -530,11 +530,12 @@ static gboolean WaitForAllTasks(int time)
 	return TRUE;
 }
 
-int MT_WaitForTasks(gboolean (*pCallback)(gpointer), int callbackTime)
+int MT_WaitForTasks(gboolean (*pCallback)(gpointer), int callbackTime, int autosave)
 {
     int callbackLoops = callbackTime / UI_UPDATETIME;
     int waits = 0;
 	int polltime = callbackLoops ? UI_UPDATETIME : callbackTime;
+	guint as_source = 0;
 
 	/* Set total tasks to wait for */
     td.totalTasks = td.addedTasks;
@@ -542,6 +543,8 @@ int MT_WaitForTasks(gboolean (*pCallback)(gpointer), int callbackTime)
 	GTKSuspendInput();
 #endif
 
+	if (autosave)
+		as_source = g_timeout_add(nAutoSaveTime*60000, save_autosave, NULL);
 	multi_debug("Waiting for all tasks");
     while (!WaitForAllTasks(polltime))
     {
@@ -551,11 +554,12 @@ int MT_WaitForTasks(gboolean (*pCallback)(gpointer), int callbackTime)
             waits = 0;
             pCallback(NULL);
         }
-
-#if USE_GTK
-		else
-			ProcessGtkEvents();
-#endif
+	ProcessEvents();
+	}
+	if (autosave)
+	{
+		g_source_remove(as_source);
+		save_autosave(NULL);
 	}
 	multi_debug("Done waiting for all tasks");
 
@@ -731,10 +735,11 @@ extern int MT_GetDoneTasks(void)
 	return td.doneTasks;
 }
 
-int MT_WaitForTasks(gboolean (*pCallback) (gpointer), int callbackTime)
+int MT_WaitForTasks(gboolean(*pCallback) (gpointer), int callbackTime, int autosave)
 {
 	GList *member;
-	guint cb_source;
+	guint cb_source = 0;
+	guint  as_source = 0;
 	td.doneTasks = 0;
 
 #if USE_GTK
@@ -744,17 +749,22 @@ int MT_WaitForTasks(gboolean (*pCallback) (gpointer), int callbackTime)
 	multi_debug("Waiting for all tasks");
 
 	pCallback(NULL);
-	cb_source = g_timeout_add_seconds(1, (GSourceFunc)pCallback, NULL);
+	cb_source = g_timeout_add(1000, pCallback, NULL);
+	if (autosave)
+		as_source = g_timeout_add(nAutoSaveTime*60000, save_autosave, NULL);
 	for (member = g_list_first(td.tasks); member; member = member->next, td.doneTasks++) {
 		Task *task = member->data;
 		task->fun(task->data);
 		free(task->pLinkedTask);
 		free(task);
-		while (g_main_context_pending(NULL))
-			g_main_context_iteration(NULL, TRUE);
+		ProcessEvents();
 	}
 	g_list_free(td.tasks);
-	g_source_remove(cb_source);
+	if (autosave)
+	{
+		g_source_remove(as_source);
+		save_autosave(NULL);
+	}
 	td.tasks = NULL;
 
 #if USE_GTK

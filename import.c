@@ -368,14 +368,8 @@ static int ImportJF( FILE * fp, char *szFileName) {
   char aszPlayer[ 2 ][ MAX_NAME_LEN ];
   int i;
   
-  if( ms.gs == GAME_PLAYING && fConfirmNew ) {
-    if( fInterrupt )
-      return -1;
-    
-    if( !GetInputYN( _("Are you sure you want to import a saved match, "
-                       "and discard the game in progress? ") ) )
-      return -1;
-  }
+  if( !get_input_discard())
+    	  return -1;
   
 #if USE_GTK
 	if( fX )
@@ -1050,11 +1044,8 @@ static int ImportMat(FILE * fp, char *szFilename)
 
 	bgvariation bgv;
 
-	if (ms.gs == GAME_PLAYING && fConfirmNew
-	    && !GetInputYN(_("Are you sure you want to import a saved match, "
-			     "and discard the game in progress? ")))
+	if (!get_input_discard())
 		return -1;
-
 	FreeMatch();
 	ClearMatch();
 
@@ -1475,6 +1466,9 @@ static int ImportOldmoves( FILE *pf, char *szFilename ) {
     char *p;
     int n, n0, n1, nLength, i;
 
+    if( !get_input_discard())
+	    return -1;
+
     fWarned = fPostCrawford = FALSE;
     
     p = FindScoreIs( pf, buffer );
@@ -1495,14 +1489,6 @@ static int ImportOldmoves( FILE *pf, char *szFilename ) {
       
     } 
     
-    if( ms.gs == GAME_PLAYING && fConfirmNew ) {
-	if( fInterrupt )
-	    return -1;
-	
-	if( !GetInputYN( _("Are you sure you want to import a saved match, "
-			 "and discard the game in progress? ") ) )
-	    return -1;
-    }
 
 #if USE_GTK
 	if( fX )
@@ -2211,10 +2197,12 @@ static int ImportSGG( FILE *pf, char *szFilename ) {
     int fAutoDoubles = 0;
     int fCubeUse = TRUE;
 	char buf[ 256 ], *pNext, *psz;
-    bgvariation bgv = VARIATION_STANDARD;
+	bgvariation bgv = VARIATION_STANDARD;
 
-    fWarned = FALSE;
+	if( !get_input_discard())
+		return -1;
 
+	fWarned = FALSE;
 	*sz0 = '\0';
 	while(fgets(buf, sizeof(buf), pf))
 	{
@@ -2250,14 +2238,6 @@ static int ImportSGG( FILE *pf, char *szFilename ) {
 		return -1;
 	}
 
-    if( ms.gs == GAME_PLAYING && fConfirmNew ) {
-	if( fInterrupt )
-	    return -1;
-	
-	if( !GetInputYN( _("Are you sure you want to import a saved match, "
-			 "and discard the game in progress? ") ) )
-	    return -1;
-    }
 
 #if USE_GTK
 	if( fX )
@@ -2933,14 +2913,8 @@ static int ImportBKG( FILE *pf, const char *szFilename ) {
 
     int i;
 
-    if( ms.gs == GAME_PLAYING && fConfirmNew ) {
-	if( fInterrupt )
+    if(!get_input_discard())
 	    return -1;
-	    
-	if( !GetInputYN( _("Are you sure you want to import a saved match, "
-			 "and discard the game in progress? ") ) )
-	    return -1;
-    }
 
 #if USE_GTK
 	if( fX )
@@ -3138,14 +3112,8 @@ ImportSnowieTxt( FILE *pf ) {
   TanBoard anBoard;
   char aszPlayer[ 2 ][ MAX_NAME_LEN ];
 
-  if( ms.gs == GAME_PLAYING && fConfirmNew ) {
-    if( fInterrupt )
-      return -1;
-    
-    if( !GetInputYN( _("Are you sure you want to import a saved match, "
-                       "and discard the game in progress? ") ) )
-      return -1;
-  }
+  if(!get_input_discard())
+    	  return -1;
   
 #if USE_GTK
 	if( fX )

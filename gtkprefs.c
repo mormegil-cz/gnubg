@@ -1277,7 +1277,7 @@ static void DoTestPerformance(GtkWidget *pw, GtkWidget* board)
 
 	BoardPrefsOK(pw, board);
 
-	ProcessGtkEvents();
+	ProcessEvents();
 
 	fps = TestPerformance3d(bd);
 

@@ -44,7 +44,7 @@ extern int MT_GetDoneTasks(void);
 extern void MT_AbortTasks(void);
 extern void MT_AddTask(Task *pt, gboolean lock);
 extern void mt_add_tasks(unsigned int num_tasks, AsyncFun pFun, void *taskData, gpointer linked);
-extern int MT_WaitForTasks(gboolean (*pCallback)(gpointer), int callbackTime);
+extern int MT_WaitForTasks(gboolean (*pCallback)(gpointer), int callbackTime, int autosave);
 
 #if USE_MULTITHREAD
 
