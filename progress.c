@@ -757,7 +757,8 @@ GTKRolloutProgressStart( const cubeinfo *UNUSED(pci), const int n,
   prp->pwRolloutOK = DialogArea( prp->pwRolloutDialog, DA_OK );
 
   gtk_container_add( GTK_CONTAINER( pwButtons ), prp->pwRolloutStop );
-  gtk_container_add( GTK_CONTAINER( pwButtons ), prp->pwRolloutStopAll );
+  if (multiple)
+	gtk_container_add( GTK_CONTAINER( pwButtons ), prp->pwRolloutStopAll );
     
   if ( aars && (prc->nGamesDone == 0) )
     gtk_container_add( GTK_CONTAINER( pwButtons ), prp->pwRolloutViewStat );

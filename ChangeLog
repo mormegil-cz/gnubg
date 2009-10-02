@@ -1,3 +1,8 @@
+Tue Oct  2 04:32:27 MDT 2009 Michael Petch <mpetch@capp-sysware.com>
+
+	* progress.c: Fix assert/crash when doing a single rollout 
+	when no stopall button is present
+
 Thu Oct  1 23:04:28 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* analysis.c, backgammon.h, commands.inc, external.c, gnubg.c,
