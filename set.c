@@ -4195,7 +4195,7 @@ extern void CommandSetAutoSaveAnalysis(char *sz)
 {
 	SetToggle("autosave analysis", &fAutoSaveAnalysis, sz,
 		  _("Auto save after each analysed game"),
-		  _("Don't auto after each analysed game"));
+		  _("Don't auto save after each analysed game"));
 }
 
 extern void CommandSetAutoSaveConfirmDelete(char *sz)
