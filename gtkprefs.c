@@ -98,23 +98,20 @@ static GtkWidget *apwDiceColourBox[ 2 ];
 static int /*fWood,*/ fUpdate;
 
 static void GetPrefs ( renderdata *prd );
-void AddPages(BoardData* bd, GtkWidget* pwNotebook);
+void AddPages(BoardData* bd, GtkWidget* pwNotebook, GList *plBoardDesigns);
 
 static void AddDesignRow ( gpointer data, gpointer user_data );
 static void AddDesignRowIfNew ( gpointer data, gpointer user_data );
 
+static GList *ParseBoardDesigns ( const char *szFile, const int fDeletable );
 
-static GList *
-ParseBoardDesigns ( const char *szFile, const int fDeletable );
-
-typedef struct _boarddesign {
-
+typedef struct _boarddesign
+{
   gchar *szTitle;        /* Title of board design */
   gchar *szAuthor;       /* Name of author */
   gchar *szBoardDesign;  /* Command for setting board */
 
   int fDeletable;       /* is the board design deletable */
-
 } boarddesign;
 
 static boarddesign *pbdeSelected = NULL, *pbdeModified;
@@ -228,7 +225,7 @@ static void ParsePreferences(boarddesign *pbde, renderdata* prdNew)
 	g_free(pch);
 }
 
-static boarddesign* FindDesign (renderdata* prdDesign)
+static boarddesign* FindDesign (GList *plBoardDesigns, renderdata* prdDesign)
 {
 	int i;
 	renderdata rdTest;
@@ -256,7 +253,7 @@ static void SetTitle(void)
 	/* Search for current settings in designs */
 	strcat(title, ": ");
 
-	pbde = FindDesign (&rdPrefs);
+	pbde = FindDesign (plBoardDesigns, &rdPrefs);
 	if (pbde)
 	{
 		char design[1024];
@@ -1214,7 +1211,7 @@ static void toggle_display_type(GtkWidget *widget, BoardData* bd)
 		board_create_pixmaps( pwPrevBoard, bd );
 	}
 
-	AddPages(bd, pwNotebook);
+	AddPages(bd, pwNotebook, plBoardDesigns);
 	gtk_widget_set_sensitive(pwTestPerformance, (display_is_3d(&rdPrefs)));
 
 #if USE_BOARD3D
@@ -2016,7 +2013,7 @@ DesignSave ( GtkWidget *pw, gpointer data ) {
 
   gchar *szFile;
   FILE *pf;
-  GList **pplBoardDesigns = (GList **) data;
+  GList *plBoardDesigns = (GList *) data;
 
   szFile = g_build_filename ( szHomeDirectory, "boards.xml", NULL);
 
@@ -2027,7 +2024,7 @@ DesignSave ( GtkWidget *pw, gpointer data ) {
   }
 
   WriteDesignHeader( szFile, pf );
-  g_list_foreach ( *pplBoardDesigns, WriteDesignOnlyDeletables, pf );
+  g_list_foreach ( plBoardDesigns, WriteDesignOnlyDeletables, pf );
   WriteDesignFooter( pf );
 
   fclose ( pf );
@@ -2369,7 +2366,7 @@ static void CopyNewSettingsToOtherDimension(renderdata* prd)
 static void DesignAdd ( GtkWidget *pw, gpointer data )
 {
   boarddesign *pbde;
-  GList **pplBoardDesigns = data;
+  GList *plBoardDesigns = data;
   renderdata rdNew;
 
   if ( ( pbde = (boarddesign *) g_malloc ( sizeof ( boarddesign ) ) ) == 0 ) {
@@ -2399,7 +2396,7 @@ static void DesignAdd ( GtkWidget *pw, gpointer data )
 
   pbde->fDeletable = TRUE;
 
-  *pplBoardDesigns = g_list_append(*pplBoardDesigns, (gpointer)pbde);
+  plBoardDesigns = g_list_append(plBoardDesigns, (gpointer)pbde);
   AddDesignRow(pbde, pwDesignList);
 
   DesignSave(pw, data);
@@ -2486,6 +2483,7 @@ static void ImportDesign ( GtkWidget *pw, gpointer data )
 	GList *new_designs;
 	gint old_length;
 	gint num_added;
+  GList *plBoardDesigns = (GList *) data;
 
         if ( (pch = szFile =
                                 GTKFileSelect(_("Import Design"), NULL, NULL, NULL,
@@ -2521,7 +2519,7 @@ static void ImportDesign ( GtkWidget *pw, gpointer data )
 
 	if (num_added > 0)
 	{
-		DesignSave(pw, data);
+		DesignSave(pw, plBoardDesigns);
 		pbdeSelected = g_list_nth_data(plBoardDesigns, old_length);
 		UseDesign();
 	}
@@ -2529,7 +2527,7 @@ static void ImportDesign ( GtkWidget *pw, gpointer data )
 
 static void RemoveDesign ( GtkWidget *pw, gpointer data )
 {
-  GList **pplBoardDesigns = (GList **) data;
+  GList *plBoardDesigns = (GList *) data;
   char prompt[200];
   sprintf(prompt, _("Permently remove design %s?"), pbdeSelected->szTitle);
   if (!GetInputYN(prompt))
@@ -2537,7 +2535,7 @@ static void RemoveDesign ( GtkWidget *pw, gpointer data )
 
   gtk_widget_set_sensitive ( GTK_WIDGET ( pwDesignRemove ), FALSE );
 
-  *pplBoardDesigns = g_list_remove ( *pplBoardDesigns, pbdeSelected );
+  plBoardDesigns = g_list_remove ( plBoardDesigns, pbdeSelected );
 
   RemoveListDesign(pbdeSelected);
 
@@ -2616,7 +2614,7 @@ static void AddDesignRowIfNew( gpointer data, gpointer user_data )
 	boarddesign *pbde = data;
 
 	ParsePreferences(pbde, &rdNew);
-	if (FindDesign(&rdNew))
+	if (FindDesign(plBoardDesigns, &rdNew))
 	{
 		outputf("Design %s already present\n", pbde->szTitle);
 		return;
@@ -2652,7 +2650,7 @@ static void DesignSelectNew(GtkTreeView *treeview, gpointer userdata)
 	UseDesign();
 }
 
-static GtkWidget *DesignPage ( GList **pplBoardDesigns, BoardData *bd )
+static GtkWidget *DesignPage ( GList *plBoardDesigns, BoardData *bd )
 {
 	GtkWidget *pwhbox;
 	GtkWidget *pwScrolled;
@@ -2667,7 +2665,7 @@ static GtkWidget *DesignPage ( GList **pplBoardDesigns, BoardData *bd )
 	g_object_set(renderer, "ypad", 0, NULL);
 
 	designListStore = gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_POINTER);
-	g_list_foreach(*pplBoardDesigns, AddDesignRow, pwDesignList);
+	g_list_foreach(plBoardDesigns, AddDesignRow, pwDesignList);
 
 	pwDesignList = gtk_tree_view_new_with_model(GTK_TREE_MODEL(designListStore));
 	g_object_unref(G_OBJECT(designListStore));	/* The view now holds a reference.  We can get rid of our own reference */
@@ -2696,7 +2694,7 @@ static GtkWidget *DesignPage ( GList **pplBoardDesigns, BoardData *bd )
   gtk_box_pack_start ( GTK_BOX ( pwhbox ), pwDesignAdd, FALSE, FALSE, 4 );
 
   g_signal_connect( G_OBJECT ( pwDesignAdd ), "clicked",
-                       G_CALLBACK ( DesignAdd ), pplBoardDesigns );
+                       G_CALLBACK ( DesignAdd ), plBoardDesigns );
 
   /* remove design */
 
@@ -2704,7 +2702,7 @@ static GtkWidget *DesignPage ( GList **pplBoardDesigns, BoardData *bd )
   gtk_box_pack_start ( GTK_BOX ( pwhbox ), pwDesignRemove, FALSE, FALSE, 4 );
 
   g_signal_connect( G_OBJECT ( pwDesignRemove ), "clicked",
-                       G_CALLBACK ( RemoveDesign ), pplBoardDesigns );
+                       G_CALLBACK ( RemoveDesign ), plBoardDesigns );
 
   gtk_widget_set_sensitive ( GTK_WIDGET ( pwDesignRemove ), FALSE );
 
@@ -2714,7 +2712,7 @@ static GtkWidget *DesignPage ( GList **pplBoardDesigns, BoardData *bd )
   gtk_box_pack_start ( GTK_BOX ( pwhbox ), pwDesignUpdate, FALSE, FALSE, 4 );
 
   g_signal_connect( G_OBJECT ( pwDesignUpdate ), "clicked",
-                     G_CALLBACK ( UpdateDesign ), pplBoardDesigns );
+                     G_CALLBACK ( UpdateDesign ), plBoardDesigns );
 
   gtk_widget_set_sensitive ( GTK_WIDGET ( pwDesignUpdate ), FALSE );
 
@@ -2727,7 +2725,7 @@ static GtkWidget *DesignPage ( GList **pplBoardDesigns, BoardData *bd )
   gtk_box_pack_start ( GTK_BOX ( pwhbox ), pwDesignExport, FALSE, FALSE, 4 );
 
   g_signal_connect( G_OBJECT ( pwDesignExport ), "clicked",
-                       G_CALLBACK ( ExportDesign ), pplBoardDesigns );
+                       G_CALLBACK ( ExportDesign ), NULL );
 
   /* import design */
 
@@ -2735,7 +2733,7 @@ static GtkWidget *DesignPage ( GList **pplBoardDesigns, BoardData *bd )
   gtk_box_pack_start ( GTK_BOX ( pwhbox ), pwDesignImport, FALSE, FALSE, 4 );
 
   g_signal_connect( G_OBJECT ( pwDesignImport ), "clicked",
-                       G_CALLBACK ( ImportDesign ), pplBoardDesigns );
+                       G_CALLBACK ( ImportDesign ), plBoardDesigns );
 
   gtk_widget_show_all( pwPage );
 
@@ -2743,12 +2741,9 @@ static GtkWidget *DesignPage ( GList **pplBoardDesigns, BoardData *bd )
 
 }
 
-
-static void
-BoardPrefsDestroy ( GtkWidget *pw, void * arg) {
-
+static void BoardPrefsDestroy ( GtkWidget *pw, GList *plBoardDesigns)
+{
 	fUpdate = FALSE;
-
 	free_board_designs ( plBoardDesigns );
 }
 
@@ -2902,7 +2897,7 @@ static void append_preview_page( GtkWidget *pwNotebook, GtkWidget *pwPage,
 			      gtk_label_new( szLabel ) );
 }
 
-void AddPages(BoardData* bd, GtkWidget* pwNotebook)
+void AddPages(BoardData* bd, GtkWidget* pwNotebook, GList *plBoardDesigns)
 {
 #if USE_BOARD3D
 	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
@@ -2914,7 +2909,7 @@ void AddPages(BoardData* bd, GtkWidget* pwNotebook)
 #endif
 
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
-			      DesignPage( &plBoardDesigns, bd ),
+			      DesignPage( plBoardDesigns, bd ),
 			      gtk_label_new(_("Designs") ) );
 
 #if USE_BOARD3D
@@ -3005,7 +3000,7 @@ extern void BoardPreferences(GtkWidget *pwBoard)
 	GtkWidget *pwDialog, *pwHbox;
 	BoardData *bd;
 
-	/* Set up board with current preferences, hide unwanted windows */
+	/* Set up board with current preferences, hide unwanted elements */
 	CopyAppearance(&rdPrefs);
 	rdPrefs.fShowIDs = FALSE;
 	rdPrefs.fDiceArea = FALSE;
@@ -3053,14 +3048,11 @@ extern void BoardPreferences(GtkWidget *pwBoard)
 			      gtk_label_new( _("General") ) );
 
     plBoardDesigns = read_board_designs ();
-	AddPages(bd, pwNotebook);
+	AddPages(bd, pwNotebook, plBoardDesigns);
 
-    g_signal_connect( G_OBJECT( pwNotebook ), "switch-page",
-			G_CALLBACK( ChangePage ), 0);
+    g_signal_connect( G_OBJECT( pwNotebook ), "switch-page", G_CALLBACK( ChangePage ), 0);
 
-	g_signal_connect( G_OBJECT( pwDialog ), "destroy",
-			G_CALLBACK( BoardPrefsDestroy ), NULL );
-
+	g_signal_connect( G_OBJECT( pwDialog ), "destroy", G_CALLBACK( BoardPrefsDestroy ), plBoardDesigns );
 
 	gtk_notebook_set_current_page(GTK_NOTEBOOK(pwNotebook), NUM_NONPREVIEW_PAGES);
 
@@ -3070,40 +3062,36 @@ extern void BoardPreferences(GtkWidget *pwBoard)
 	GTKRunDialog(pwDialog);
 }
 
-extern void BoardPreferencesStart( GtkWidget *pwBoard ) {
+/* External board preference helper functions */
 
-    BoardData *bd = BOARD( pwBoard )->board_data;
-
-    if( GTK_WIDGET_REALIZED( pwBoard ) )
-	board_free_pixmaps( bd );
-}
-
-extern void BoardPreferencesDone( GtkWidget *pwBoard )
+extern void SetBoardPreferences(GtkWidget *pwBoard, char *sz)
 {
-    BoardData *bd = BOARD( pwBoard )->board_data;
+	char *apch[2];
+	BoardData *bd = BOARD(pwBoard)->board_data;
 
-	if( GTK_WIDGET_REALIZED( pwBoard ) )
+	if (GTK_WIDGET_REALIZED(pwBoard))
+		board_free_pixmaps(bd);
+
+	while (ParseKeyValue(&sz, apch))
+		RenderPreferencesParam(GetMainAppearance(), apch[0], apch[1]);
+
+	if (GTK_WIDGET_REALIZED(pwBoard))
 	{
-		board_create_pixmaps( pwBoard, bd );
-{
+		board_create_pixmaps(pwBoard, bd);
 #if USE_BOARD3D
-		BoardData3d *bd3d = bd->bd3d;
-		renderdata *prd = bd->rd;
-
-		DisplayCorrectBoardType(bd, bd3d, prd);
-		if (display_is_3d(prd))
+		DisplayCorrectBoardType(bd, bd->bd3d, bd->rd);
+		if (display_is_3d(bd->rd))
 			UpdateShadows(bd->bd3d);
 		else
 			StopIdle3d(bd, bd->bd3d);
 
-		if (display_is_2d(prd))
+		if (display_is_2d(bd->rd))
 #endif
 		{
 			gtk_widget_queue_draw(bd->drawing_area);
 			gtk_widget_queue_draw(bd->dice_area);
 		}
 		gtk_widget_queue_draw(bd->table);
-}
 	}
 }
 
@@ -3123,7 +3111,7 @@ static int IsBlackColour3d(Material* pMat)
 		(pMat->specularColour[0] == 0) && (pMat->specularColour[1] == 0) && (pMat->specularColour[2] == 0);
 }
 
-void Default3dSettings(BoardData* bd)
+extern void Default3dSettings(BoardData* bd)
 {	/* If no 3d settings loaded, set 3d appearance to first design */
 	/* Check if colours are set to default values */
 	if (IsWhiteColour3d(&bd->rd->ChequerMat[0]) && IsBlackColour3d(&bd->rd->ChequerMat[1]) &&
@@ -3135,14 +3123,15 @@ void Default3dSettings(BoardData* bd)
 		IsWhiteColour3d(&bd->rd->PointNumberMat) &&
 		IsWhiteColour3d(&bd->rd->BackGroundMat))
 	{
-		/* Copy appearance to preserve current 2d settings */
+		GList *plDesigns;
+		/* Use new appearance settings to preserve current 2d settings */
 		renderdata rdNew;
 		CopyAppearance(&rdNew);
 
-		plBoardDesigns = read_board_designs ();
-		if (plBoardDesigns && g_list_length(plBoardDesigns) > 0)
+		plDesigns = read_board_designs();
+		if (plDesigns && g_list_length(plDesigns) > 0)
 		{
-			boarddesign *pbde = g_list_nth_data(plBoardDesigns, 1);
+			boarddesign *pbde = g_list_nth_data(plDesigns, 0);
 			if (pbde->szBoardDesign)
 			{
 				char *apch[ 2 ];
@@ -3197,12 +3186,12 @@ void Default3dSettings(BoardData* bd)
 				memcpy(&bd->rd->afDieColour3d, &rdNew.afDieColour3d, sizeof(rdNew.afDieColour3d));
 			}
 		}
-		free_board_designs ( plBoardDesigns );
+		free_board_designs ( plDesigns );
 	}
 }
 #endif
 
-/* --- Here --- */
+/* Xml board parsing code */
 
 typedef enum {
   STATE_NONE,
@@ -3278,6 +3267,7 @@ static void design_parser_end_element (GMarkupParseContext *context,
 			parser->state = STATE_NONE;
 		break;
 		case STATE_BOARD_DESIGN:
+			parser->current_design->fDeletable = parser->deletable;
 			parser->designs = g_list_prepend( parser->designs, parser->current_design);
 			parser->current_design = NULL;
 			parser->state = STATE_BOARD_DESIGNS;
@@ -3330,18 +3320,16 @@ static void design_parser_error (GMarkupParseContext *context,
 	g_warning("An error occured while parsing file: %s\n", parser->filename);
 }
 
-
-static GMarkupParser markup_parser = {
-	design_parser_start_element, 
-	design_parser_end_element,
-	design_parser_characters,
-	NULL,
-	design_parser_error
-};
-
-static GList *
-ParseBoardDesigns ( const char *szFile, const int fDeletable )
+static GList *ParseBoardDesigns ( const char *szFile, const int fDeletable )
 {
+	GMarkupParser markup_parser =
+	{
+		design_parser_start_element, 
+		design_parser_end_element,
+		design_parser_characters,
+		NULL,
+		design_parser_error
+	};
 
   GList *returnlist;
   GMarkupParseContext *context;
@@ -3382,5 +3370,4 @@ ParseBoardDesigns ( const char *szFile, const int fDeletable )
 
   return g_list_reverse(returnlist);
 }
-
 

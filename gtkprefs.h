@@ -25,8 +25,7 @@
 #include "gtkboard.h"
 
 extern void BoardPreferences( GtkWidget *pwBoard );
-extern void BoardPreferencesStart( GtkWidget *pwBoard );
-extern void BoardPreferencesDone( GtkWidget *pwBoard );
+extern void SetBoardPreferences(GtkWidget *pwBoard, char *sz);
 extern void Default3dSettings(BoardData* bd);
 extern void UpdatePreview(void);
 extern void gtk_color_button_get_array(GtkColorButton *button, double array[4]);

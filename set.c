@@ -692,22 +692,12 @@ extern void CommandSetClockwise( char *sz ) {
 #endif /* USE_GTK */
 }
 
-extern void CommandSetAppearance( char *sz ) {
-    
-    char *apch[ 2 ];
-    
+extern void CommandSetAppearance( char *sz )
+{
 #if USE_GTK
-    if( fX )
-	BoardPreferencesStart( pwBoard );
-#endif /* USE_GTK */
-    
-	while( ParseKeyValue( &sz, apch ) )
-		RenderPreferencesParam( GetMainAppearance(), apch[ 0 ], apch[ 1 ] );
-
-#if USE_GTK
-	if( fX )
-		BoardPreferencesDone( pwBoard );	    
-#endif /* USE_GTK */
+	if (fX)
+		SetBoardPreferences(pwBoard, sz);
+#endif
 }
 
 extern void CommandSetConfirmDefault( char *sz ) {
