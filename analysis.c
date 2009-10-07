@@ -723,24 +723,29 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const listOLD *plParentGame,
 			ApplyMove( anBoardMove, pmr->n.anMove, FALSE );
 			PositionKey ( (ConstTanBoard)anBoardMove, auch );
 		  
-				if ( cmp_evalsetup ( pesChequer,
-									&pmr->esChequer ) > 0 ) {
+			if (cmp_evalsetup(pesChequer, &pmr->esChequer) > 0) {
 
-				if( pmr->ml.cMoves )
-					free( pmr->ml.amMoves );
-		  
+				if (pmr->ml.cMoves)
+					free(pmr->ml.amMoves);
+
 				/* find best moves */
-		  
-				MT_Release();
-				if( FindnSaveBestMoves ( &(pmr->ml), pmr->anDice[ 0 ],
-										pmr->anDice[ 1 ],
-										(ConstTanBoard)pms->anBoard, auch, 
-										arSkillLevel[ SKILL_DOUBTFUL ],
-										&ci, &pesChequer->ec, aamf ) < 0 )
-						return -1;
-				MT_Exclusive();
 
+				{
+					movelist ml;
+					MT_Release();
+					if (FindnSaveBestMoves(&ml, pmr->anDice[0],
+								pmr->anDice[1],
+								(ConstTanBoard) pms->anBoard, auch,
+								arSkillLevel[SKILL_DOUBTFUL],
+								&ci, &pesChequer->ec, aamf) < 0)
+						return -1;
+					MT_Exclusive();
+					CopyMoveList(&ml, &pmr->ml);
+					if (ml.cMoves)
+						free(ml.amMoves);
 				}
+
+			}
 		  
 			for( pmr->n.iMove = 0; pmr->n.iMove < pmr->ml.cMoves;
 			pmr->n.iMove++ )
