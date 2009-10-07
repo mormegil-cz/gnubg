@@ -3446,10 +3446,6 @@ extern void InitGTK(int *argc, char ***argv)
 
 	cb = gdk_atom_intern("CLIPBOARD", TRUE);
 	clipboard = gtk_clipboard_get(cb);
-
-#if USE_BOARD3D
-	Default3dSettings(BOARD(pwBoard)->board_data);
-#endif
 }
 
 #ifndef WIN32
@@ -3473,6 +3469,11 @@ int reasonExited;
 
 extern void RunGTK( GtkWidget *pwSplash, char *commands, char *python_script, char *match )
 {
+#if USE_BOARD3D
+	/* Use 1st predefined board settings if none have been loaded */
+	Default3dSettings(BOARD(pwBoard)->board_data);
+#endif
+
 	do
 	{
 		reasonExited = RE_NONE;
