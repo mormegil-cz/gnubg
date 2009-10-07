@@ -3224,11 +3224,14 @@ static gboolean StopAnyAnimations(void)
 {
 	BoardData *bd = BOARD( pwBoard )->board_data;
 #if USE_BOARD3D
-	if (display_is_3d(bd->rd) && Animating3d(bd->bd3d))
+	if (display_is_3d(bd->rd))
 	{
-		StopIdle3d(bd, bd->bd3d);
-		RestrictiveRedraw();
-		return TRUE;
+		if (Animating3d(bd->bd3d))
+		{
+			StopIdle3d(bd, bd->bd3d);
+			RestrictiveRedraw();
+			return TRUE;
+		}
 	}
 	else
 #endif

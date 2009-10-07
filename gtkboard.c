@@ -72,7 +72,7 @@ int fGUIDragTargetHelp = TRUE;
 int fGUIGrayEdit = TRUE;
 
 unsigned int nGUIAnimSpeed = 4;
-int animate_player, *animate_move_list, animation_finished;
+int animate_player, *animate_move_list, animation_finished = TRUE;
 
 static GtkVBoxClass *parent_class = NULL;
 static randctx rc;
