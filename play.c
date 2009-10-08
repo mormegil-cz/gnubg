@@ -4324,7 +4324,7 @@ getFinalScore( int* anScore )
   return FALSE;
 }
 
-extern const char* GetMoveString(moverecord *pmr, int* pPlayer)
+extern const char* GetMoveString(moverecord *pmr, int* pPlayer, gboolean addSkillMarks)
 {
     doubletype dt;
     static char sz[40];
@@ -4346,8 +4346,11 @@ extern const char* GetMoveString(moverecord *pmr, int* pPlayer)
 		sz[ 2 ] = ':';
 		sz[ 3 ] = ' ';
 		FormatMove( sz + 4, msBoard(), pmr->n.anMove );
-		strcat( sz, aszSkillTypeAbbr[ pmr->n.stMove ] );
-		strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
+		if (addSkillMarks)
+		{
+			strcat( sz, aszSkillTypeAbbr[ pmr->n.stMove ] );
+			strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
+		}
 	break;
 
 	case MOVE_DOUBLE:
@@ -4370,21 +4373,24 @@ extern const char* GetMoveString(moverecord *pmr, int* pPlayer)
 			g_assert ( FALSE );
 			break;
 		}
-		strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
+		if (addSkillMarks)
+			strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
 	break;
 
 	case MOVE_TAKE:
 		*pPlayer = pmr->fPlayer;
 		strcpy( sz, _("Take") );
 		pch = sz;
-		strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
+		if (addSkillMarks)
+			strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
 	break;
 
 	case MOVE_DROP:
 		*pPlayer = pmr->fPlayer;
 		strcpy( sz, _("Drop") );
 		pch = sz;
-		strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
+		if (addSkillMarks)
+			strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
 	break;
 
 	case MOVE_RESIGN:
@@ -4443,7 +4449,7 @@ static void AddString(listOLD* buffers, char* str)
 
 extern char *GetMatchCheckSum(void)
 {
-	static char auchHex[33];
+	static char auchHex[33];	/* static buffer that holds result, not ideal but not hurting anyone */
 	unsigned char auch[16];
 	int i;
 	/* Work out md5 checksum */
@@ -4466,7 +4472,7 @@ extern char *GetMatchCheckSum(void)
 			char playerStr[4] = ".AB";
 			int player;
 			moverecord* pmr = plMove->p;
-			const char* moveString = GetMoveString(pmr, &player);
+			const char* moveString = GetMoveString(pmr, &player, FALSE);
 			if (moveString)
 			{
 				sprintf(buf, " %d%c %s", move, playerStr[player + 1], moveString);

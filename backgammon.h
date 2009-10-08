@@ -439,7 +439,7 @@ extern char *FormatPrompt(void);
 extern const char *GetBuildInfoString(void);
 extern char *GetInput(char *szPrompt);
 extern char *GetLuckAnalysis(const matchstate * pms, float rLuck);
-extern const char *GetMoveString(moverecord * pmr, int *pPlayer);
+extern const char *GetMoveString(moverecord * pmr, int *pPlayer, gboolean addSkillMarks);
 extern double get_time(void);
 extern char *locale_from_utf8(const char *sz);
 extern char *locale_to_utf8(const char *sz);
