@@ -259,10 +259,14 @@ extern DBProvider* GetDBProvider(DBProviderType dbType)
 			return NULL;
 	}
 #endif
+#if !NUM_PROVIDERS
+	return NULL;
+#else
 	if (dbType == INVALID_PROVIDER)
 		return NULL;
 
 	return &providers[dbType];
+#endif
 }
 
 #if USE_PYTHON
