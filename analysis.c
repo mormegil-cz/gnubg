@@ -740,7 +740,7 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const listOLD *plParentGame,
 								&ci, &pesChequer->ec, aamf) < 0)
 						return -1;
 					MT_Exclusive();
-					CopyMoveList(&ml, &pmr->ml);
+					CopyMoveList(&pmr->ml, &ml);
 					if (ml.cMoves)
 						free(ml.amMoves);
 				}
