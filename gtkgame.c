@@ -2020,6 +2020,7 @@ typedef struct _AnalysisDetails
 	evalcontext *esCube;
 	movefilter *mfCube;
 	GtkWidget *pwCube, *pwChequer, *pwOptionMenu, *pwSettingWidgets;
+	int cubeDisabled;
 } AnalysisDetails;
 
 static void DetailedAnalysisOK(GtkWidget *pw, AnalysisDetails *pDetails)
@@ -2093,6 +2094,9 @@ static void ShowDetailedAnalysis(GtkWidget *button, AnalysisDetails *pDetails)
 														NULL, pDetails->mfCube != NULL ),
 					   FALSE, FALSE, 0 );
 
+	if (pDetails->cubeDisabled)
+		gtk_widget_set_sensitive(pDetails->pwCube, FALSE);
+
 	GTKRunDialog(pwDialog);
 	UpdateSummaryEvalMenuSetting(pDetails);
 }
@@ -2135,15 +2139,12 @@ static GtkWidget *AddLevelSettings(GtkWidget *pwFrame, AnalysisDetails *pAnalDet
 
 	/* option menu with selection of predefined settings */
 
-	gtk_container_add ( GTK_CONTAINER ( pw2 ),
-						gtk_label_new ( _("Select a predefined setting:") ) );
+	pwMenu = gtk_menu_new ();
 
-	gtk_widget_set_tooltip_text(pw2,
+	gtk_widget_set_tooltip_text(pwMenu,
 						  _("Select a predefined setting, ranging from "
 							"beginner's play to the grandmaster setting "
 							"that will test your patience"));
-
-	pwMenu = gtk_menu_new ();
 
 	for ( i = 0; i <= NUM_SETTINGS; i++ ) {
 
@@ -2306,6 +2307,7 @@ static AnalysisDetails *CreateEvalSettings(GtkWidget *pwParent, const char *titl
 	pAnalDetail->mfChequer = pmfchequer;
 	pAnalDetail->esCube = pecube;
 	pAnalDetail->mfCube = pmfcube;
+	pAnalDetail->cubeDisabled = FALSE;
 
 	pAnalDetail->pwSettingWidgets = AddLevelSettings(pwParent, pAnalDetail);
 	return pAnalDetail;
@@ -2473,42 +2475,40 @@ extern void SetAnalysis(gpointer p, guint n, GtkWidget * pw)
 }
 
 typedef struct _playerswidget {
-    int *pfOK;
-    player *ap;
-    GtkWidget *apwName[ 2 ], *apwRadio[ 2 ][ 3 ], *apwEvalCube[ 2 ], *apwEvalChequer[ 2 ],
-	*apwSocket[ 2 ], *apwExternal[ 2 ];
-    char aszSocket[ 2 ][ 128 ];
+	int *pfOK;
+	player *ap;
+	GtkWidget *apwName[ 2 ], *apwRadio[ 2 ][ 3 ], *apwSocket[ 2 ], *apwExternal[ 2 ];
+	char aszSocket[ 2 ][ 128 ];
+	evalsetup esChequer[2];
+	evalsetup esCube[2]; 
+	AnalysisDetails *pLevelSettings[2];
 } playerswidget;
 
-static void PlayerTypeToggled( GtkWidget *pw, playerswidget *ppw ) {
+static void PlayerTypeToggled( GtkWidget *pw, playerswidget *ppw )
+{
+	int i;
 
-    int i;
-
-    for( i = 0; i < 2; i++ ) {
-	gtk_widget_set_sensitive(
-	    ppw->apwEvalCube[ i ], gtk_toggle_button_get_active(
-		GTK_TOGGLE_BUTTON( ppw->apwRadio[ i ][ 1 ] ) ) );
-	gtk_widget_set_sensitive(
-	    ppw->apwEvalChequer[ i ], gtk_toggle_button_get_active(
-		GTK_TOGGLE_BUTTON( ppw->apwRadio[ i ][ 1 ] ) ) );
-	gtk_widget_set_sensitive(
-	    ppw->apwExternal[ i ], gtk_toggle_button_get_active(
-		GTK_TOGGLE_BUTTON( ppw->apwRadio[ i ][ 2 ] ) ) );
-    }
+	for( i = 0; i < 2; i++ )
+	{
+		gtk_widget_set_sensitive(ppw->pLevelSettings[i]->pwSettingWidgets,
+				gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( ppw->apwRadio[ i ][ 1 ] ) ) );
+		gtk_widget_set_sensitive(ppw->apwExternal[ i ],
+				gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( ppw->apwRadio[ i ][ 2 ] ) ) );
+	}
 }
 
-static GtkWidget *PlayersPage( playerswidget *ppw, int i ) {
+static GtkWidget *PlayersPage( playerswidget *ppw, int i, const char *title )
+{
+    GtkWidget *pw, *pwFrame, *pwVBox;
 
-    GtkWidget *pwPage, *pw;
-    GtkWidget *pwHBox;
-    GtkWidget *pwFrame;
-    GtkWidget *pwvbox;
+	pwFrame = gtk_frame_new ( title );
+    gtk_container_set_border_width( GTK_CONTAINER( pwFrame ), 4 );
+	pwVBox = gtk_vbox_new(FALSE, 0);
+    gtk_container_add( GTK_CONTAINER( pwFrame ), pwVBox );
 
-    pwPage = gtk_vbox_new( FALSE, 0 );
-    gtk_container_set_border_width( GTK_CONTAINER( pwPage ), 8 );
-    
     pw = gtk_hbox_new( FALSE, 0 );
-    gtk_container_add( GTK_CONTAINER( pwPage ), pw );
+    gtk_container_set_border_width( GTK_CONTAINER( pw ), 4 );
+    gtk_container_add( GTK_CONTAINER( pwVBox ), pw );
     gtk_container_add( GTK_CONTAINER( pw ),
 		       gtk_label_new( _("Name:") ) );
     gtk_container_add( GTK_CONTAINER( pw ),
@@ -2516,54 +2516,31 @@ static GtkWidget *PlayersPage( playerswidget *ppw, int i ) {
     gtk_entry_set_text( GTK_ENTRY( ppw->apwName[ i ] ),
 			(ppw->ap[ i ].szName) );
     
-    gtk_container_add( GTK_CONTAINER( pwPage ),
+    gtk_container_add( GTK_CONTAINER( pwVBox ),
 		       ppw->apwRadio[ i ][ 0 ] =
 		       gtk_radio_button_new_with_label( NULL, _("Human") ) );
     
-    gtk_container_add( GTK_CONTAINER( pwPage ),
+    gtk_container_add( GTK_CONTAINER( pwVBox ),
 		       ppw->apwRadio[ i ][ 1 ] =
 		       gtk_radio_button_new_with_label_from_widget(
 			   GTK_RADIO_BUTTON( ppw->apwRadio[ i ][ 0 ] ),
 			   _("GNU Backgammon") ) );
 
-    pwHBox = gtk_hbox_new ( FALSE, 4 );
-    gtk_container_add ( GTK_CONTAINER ( pwPage ), pwHBox );
+	memcpy(&ppw->esCube[i], &ppw->ap[ i ].esChequer.ec, sizeof(ppw->esCube[i]));
+	memcpy(&ppw->esChequer[i], &ppw->ap[ i ].esCube.ec, sizeof(ppw->esChequer[i]));
 
-    pwFrame = gtk_frame_new ( _("Chequer play") );
-    gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwFrame, FALSE, FALSE, 0 );
-
-    gtk_container_add( GTK_CONTAINER( pwFrame ), ppw->apwEvalChequer[ i ] =
-		       EvalWidget( &ppw->ap[ i ].esChequer.ec, 
-                                   (movefilter *) ppw->ap[ i ].aamf, 
-                                   NULL, TRUE ) );
-    gtk_widget_set_sensitive( ppw->apwEvalChequer[ i ],
-			      ap[ i ].pt == PLAYER_GNU );
-
+	ppw->pLevelSettings[i] = CreateEvalSettings(pwVBox, _("GNU Backgammon settings"),
+								&ppw->ap[ i ].esChequer.ec, (movefilter*)ppw->ap[ i ].aamf, &ppw->ap[ i ].esCube.ec, NULL);
     
-    pwFrame = gtk_frame_new ( _("Cube decisions") );
-    gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwFrame, FALSE, FALSE, 0 );
-
-    pwvbox = gtk_vbox_new ( FALSE, 0 );
-    gtk_container_add( GTK_CONTAINER( pwFrame ), pwvbox );
-    
-    gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                         ppw->apwEvalCube[ i ] = 
-                            EvalWidget( &ppw->ap[ i ].esCube.ec, 
-                                        NULL, NULL, FALSE ),
-                         FALSE, FALSE, 0 );
-    gtk_widget_set_sensitive( ppw->apwEvalCube[ i ],
-			      ap[ i ].pt == PLAYER_GNU );
-
-    
-    gtk_container_add( GTK_CONTAINER( pwPage ),
+    gtk_container_add( GTK_CONTAINER( pwVBox ),
 		       ppw->apwRadio[ i ][ 2 ] =
 		       gtk_radio_button_new_with_label_from_widget(
 			   GTK_RADIO_BUTTON( ppw->apwRadio[ i ][ 0 ] ),
 			   _("External") ) );
     ppw->apwExternal[ i ] = pw = gtk_hbox_new( FALSE, 0 );
-    gtk_container_set_border_width( GTK_CONTAINER( pw ), 8 );
+    gtk_container_set_border_width( GTK_CONTAINER( pw ), 4 );
     gtk_widget_set_sensitive( pw, ap[ i ].pt == PLAYER_EXTERNAL );
-    gtk_container_add( GTK_CONTAINER( pwPage ), pw );
+    gtk_container_add( GTK_CONTAINER( pwVBox ), pw );
     gtk_container_add( GTK_CONTAINER( pw ),
 		       gtk_label_new( _("Socket:") ) );
     gtk_container_add( GTK_CONTAINER( pw ),
@@ -2580,7 +2557,7 @@ static GtkWidget *PlayersPage( playerswidget *ppw, int i ) {
     g_signal_connect( G_OBJECT( ppw->apwRadio[ i ][ 2 ] ), "toggled",
 			G_CALLBACK( PlayerTypeToggled ), ppw );
     
-    return pwPage;
+    return pwFrame;
 }
 
 static void PlayersOK( GtkWidget *pw, playerswidget *pplw ) {
@@ -2600,9 +2577,6 @@ static void PlayersOK( GtkWidget *pw, playerswidget *pplw ) {
 	    }
 	g_assert( j < 4 );
 
-	EvalOK( pplw->apwEvalChequer[ i ], pplw->apwEvalChequer[ i ] );
-	EvalOK( pplw->apwEvalCube[ i ], pplw->apwEvalCube[ i ] );
-
 	strcpyn( pplw->aszSocket[ i ], gtk_entry_get_text(
 	    GTK_ENTRY( pplw->apwSocket[ i ] ) ), 128 );
     }
@@ -2610,10 +2584,9 @@ static void PlayersOK( GtkWidget *pw, playerswidget *pplw ) {
     gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }
 
-static void SetPlayers(gpointer p, guint n, GtkWidget * pw)
+static void SetPlayers(gpointer p, guint n, GtkWidget *pw)
 {
-
-	GtkWidget *pwDialog, *pwNotebook;
+	GtkWidget *pwDialog, *pwHBox;
 	int i, fOK = FALSE;
 	player apTemp[2];
 	playerswidget plw;
@@ -2629,18 +2602,18 @@ static void SetPlayers(gpointer p, guint n, GtkWidget * pw)
 			    &plw);
 
 	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)),
-			  pwNotebook = gtk_notebook_new());
-	gtk_container_set_border_width(GTK_CONTAINER(pwNotebook), 4);
-	gtk_notebook_append_page(GTK_NOTEBOOK(pwNotebook),
-				 PlayersPage(&plw, 0),
-				 gtk_label_new(_("Player 0")));
-	gtk_notebook_append_page(GTK_NOTEBOOK(pwNotebook),
-				 PlayersPage(&plw, 1),
-				 gtk_label_new(_("Player 1")));
+			pwHBox = gtk_hbox_new(FALSE, 0));
+	gtk_box_pack_start(GTK_BOX(pwHBox), PlayersPage(&plw, 0, _("Player 0")), FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwHBox), PlayersPage(&plw, 1, _("Player 1")), FALSE, FALSE, 0);
+	PlayerTypeToggled(NULL, &plw);
 
 	GTKRunDialog(pwDialog);
 
-	if (fOK) {
+	free(plw.pLevelSettings[0]);
+	free(plw.pLevelSettings[1]);
+
+	if (fOK)
+	{
 		outputpostpone();
 
 		if (!CompareNames(apTemp[0].szName, ap[1].szName) && CompareNames(apTemp[0].szName, apTemp[1].szName)) {	/* Trying to swap names - change current name to avoid error */
@@ -3161,18 +3134,18 @@ GtkItemFactoryEntry aife[] = {
 	{ N_("/_Analyse/Evaluation speed"), NULL, Command,
 	  CMD_SHOW_CALIBRATION, NULL, NULL },
 	{ N_("/_Settings"), NULL, NULL, 0, "<Branch>", NULL },
-	{ N_("/_Settings/Analysis..."), NULL, SetAnalysis, 0, NULL, NULL },
-	{ N_("/_Settings/Board Appearance..."), NULL, Command, CMD_SET_APPEARANCE,
+	{ N_("/_Settings/_Analysis..."), NULL, SetAnalysis, 0, NULL, NULL },
+	{ N_("/_Settings/_Board Appearance..."), NULL, Command, CMD_SET_APPEARANCE,
 	  NULL, NULL },
     { N_("/_Settings/E_xport..."), NULL, Command, CMD_SHOW_EXPORT,
       NULL, NULL },
 	{ N_("/_Settings/_Players..."), NULL, SetPlayers, 0, NULL, NULL },
 	{ N_("/_Settings/_Rollouts..."), NULL, SetRollouts, 0, NULL, NULL },
 	{ N_("/_Settings/-"), NULL, NULL, 0, "<Separator>", NULL },
-	{ N_("/_Settings/Options..."), NULL, SetOptions, 0, NULL, NULL },
+	{ N_("/_Settings/_Options..."), NULL, SetOptions, 0, NULL, NULL },
 	{ N_("/_Settings/_Language..."), NULL, SetLanguage, 0, NULL, NULL },
 	{ N_("/_Settings/-"), NULL, NULL, 0, "<Separator>", NULL },
-	{ N_("/_Settings/Save settings"), 
+	{ N_("/_Settings/_Save settings"), 
           NULL, Command, CMD_SAVE_SETTINGS, NULL, NULL },
 	{ N_("/G_o"), NULL, NULL, 0, "<Branch>", NULL },
 	{ N_("/G_o/Previous marked move"), NULL, Command, CMD_PREV_MARKED, "<StockItem>", GNUBG_STOCK_GO_PREV_MARKED },
@@ -4089,10 +4062,8 @@ SetMET (GtkWidget * pw, gpointer p)
     }
 }
 
-
 typedef struct _rolloutpagewidget {
   int *pfOK;
-  GtkWidget *arpwEvCube, *arpwEvCheq;
   evalcontext *precCube, *precCheq;
   movefilter *pmf;
 } rolloutpagewidget;
@@ -4118,17 +4089,13 @@ typedef struct _rolloutwidget {
   rolloutcontext  rcRollout;
   rolloutpagegeneral  *prwGeneral;
   rolloutpagewidget *prpwPages[4], *prpwTrunc;
-  GtkWidget *RolloutNotebook;    
+  GtkWidget *RolloutNotebook, *frame[2];
+  AnalysisDetails *analysisDetails[5];
   int  fCubeEqualChequer, fPlayersAreSame, fTruncEqualPlayer0;
   int *pfOK;
   int *psaveAs;
   int *ploadRS;
 } rolloutwidget;
-/*
-int fCubeEqualChequer = 1;
-int fPlayersAreSame = 1;
-int fTruncEqualPlayer0 = 1;
-*/ 
 
 /***************************************************************************
  *****
@@ -4175,12 +4142,10 @@ static void GetRolloutSettings( GtkWidget *pw, rolloutwidget *prw ) {
   prw->rcRollout.nLate = (unsigned short)prw->prwGeneral->padjLatePlies->value;
 
   fCubeEqChequer = 
-    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( 
-                                                    prw->prwGeneral->pwCubeEqualChequer ) );
+    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( prw->prwGeneral->pwCubeEqualChequer ) );
 
   fPlayersAreSame = 
-    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( 
-                                                    prw->prwGeneral->pwPlayersAreSame ) );
+    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( prw->prwGeneral->pwPlayersAreSame ) );
 
   prw->rcRollout.fStopOnSTD = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(
                                             prw->prwGeneral->pwDoSTDStop));
@@ -4190,16 +4155,6 @@ static void GetRolloutSettings( GtkWidget *pw, rolloutwidget *prw ) {
   prw->rcRollout.fStopOnJsd = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(prw->prwGeneral->pwJsdDoStop));
   prw->rcRollout.nMinimumJsdGames = (unsigned int) gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (prw->prwGeneral->pwJsdMinGames));
   prw->rcRollout.rJsdLimit = gtk_spin_button_get_value_as_float (GTK_SPIN_BUTTON (prw->prwGeneral->pwJsdAdjLimit));
-
-  /* get all the evaluations out of the widgets */
-  for (i = 0; i < 4; ++i) {
-    EvalOK(prw->prpwPages[i]->arpwEvCube, prw->prpwPages[i]->arpwEvCube);
-    EvalOK(prw->prpwPages[i]->arpwEvCheq, prw->prpwPages[i]->arpwEvCheq);
-  }
-
-
-  EvalOK(prw->prpwTrunc->arpwEvCube, prw->prpwTrunc->arpwEvCube);
-  EvalOK(prw->prpwTrunc->arpwEvCheq, prw->prpwTrunc->arpwEvCheq);
 
   /* if the players are the same, copy player 0 settings to player 1 */
   if (fPlayersAreSame) {
@@ -4256,63 +4211,25 @@ static void load_rs_clicked (GtkWidget *pw, rolloutwidget *prw ) {
 
 /* create one page for rollout settings  for playes & truncation */
 
-static GtkWidget *RolloutPage( rolloutpagewidget *prpw, 
-                               const int fMoveFilter ) {
+static AnalysisDetails *RolloutPage( rolloutpagewidget *prpw, const char *title, const int fMoveFilter, GtkWidget **frameRet )
+{
+	GtkWidget *pwFrame;
+	pwFrame = gtk_frame_new ( title );
+	if (frameRet)
+		*frameRet = pwFrame;
 
-  GtkWidget *pwPage;
-  GtkWidget *pwHBox;
-  GtkWidget *pwFrame;
-  GtkWidget *pwvbox;
-
-  pwPage = gtk_vbox_new( FALSE, 0 );
-  gtk_container_set_border_width( GTK_CONTAINER( pwPage ), 8 );
-    
-  pwHBox = gtk_hbox_new( FALSE, 0 );
-  gtk_container_add( GTK_CONTAINER( pwPage ), pwHBox );
-    
-  pwFrame = gtk_frame_new ( _("Chequer play") );
-  gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwFrame, FALSE, FALSE, 0 );
-
-  pwvbox = gtk_vbox_new ( FALSE, 0 );
-  gtk_container_add( GTK_CONTAINER( pwFrame ), pwvbox );
-    
-  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                       prpw->arpwEvCheq =
-                       EvalWidget( prpw->precCheq, 
-                                   prpw->pmf, NULL, fMoveFilter ),
-                       FALSE, FALSE, 0 );
-
-  pwFrame = gtk_frame_new ( _("Cube decisions") );
-  gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwFrame, FALSE, FALSE, 0 );
-
-  pwvbox = gtk_vbox_new ( FALSE, 0 );
-  gtk_container_add( GTK_CONTAINER( pwFrame ), pwvbox );
-    
-  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                       prpw->arpwEvCube =
-                       EvalWidget( prpw->precCube, NULL, NULL, FALSE ),
-                       FALSE, FALSE, 0 );
-
-  return pwPage;
+	return CreateEvalSettings(pwFrame, title, prpw->precCheq, prpw->pmf, prpw->precCube, NULL);
 }
-
-typedef enum _rolloutpages { 
-  ROLL_GENERAL = 0, ROLL_P0, ROLL_P1, ROLL_P0_LATE, ROLL_P1_LATE, ROLL_TRUNC
-} rolloutpages;
 
 static void LateEvalToggled( GtkWidget *pw, rolloutwidget *prw) {
 
   int do_late = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
                                                  prw->prwGeneral->pwDoLate ) );
-  int   are_same = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
-                                                                     prw->prwGeneral->pwPlayersAreSame ) );
+  int   are_same = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON ( prw->prwGeneral->pwPlayersAreSame ) );
 
   /* turn on/off the late pages */
-  gtk_widget_set_sensitive ( gtk_notebook_get_nth_page (GTK_NOTEBOOK 
-                            (prw->RolloutNotebook), ROLL_P0_LATE), do_late);
-  gtk_widget_set_sensitive ( gtk_notebook_get_nth_page (GTK_NOTEBOOK 
-                             (prw->RolloutNotebook), ROLL_P1_LATE), 
-                             do_late && !are_same);
+  gtk_widget_set_sensitive(prw->analysisDetails[2]->pwSettingWidgets, do_late);
+  gtk_widget_set_sensitive(prw->analysisDetails[3]->pwSettingWidgets, do_late && !are_same);
 
   /* turn on/off the ply setting in the general page */
   gtk_widget_set_sensitive (GTK_WIDGET (prw->prwGeneral->pwAdjLatePlies),
@@ -4340,8 +4257,8 @@ static void JsdStopToggled( GtkWidget *pw, rolloutwidget *prw) {
 
 }
 
-static void TruncEnableToggled( GtkWidget *pw, rolloutwidget *prw) {
- 
+static void TruncEnableToggled( GtkWidget *pw, rolloutwidget *prw)
+{
   int do_trunc = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
                                                                    prw->prwGeneral->pwDoTrunc ) );
 
@@ -4349,8 +4266,7 @@ static void TruncEnableToggled( GtkWidget *pw, rolloutwidget *prw) {
 			prw->prwGeneral->pwTruncEqualPlayer0));
 
   /* turn on/off the truncation page */
-  gtk_widget_set_sensitive ( gtk_notebook_get_nth_page (GTK_NOTEBOOK
-                                                        (prw->RolloutNotebook), ROLL_TRUNC), do_trunc && !sameas_p0);
+  gtk_widget_set_sensitive(prw->analysisDetails[4]->pwSettingWidgets, do_trunc && !sameas_p0);
 
   /* turn on/off the truncation ply setting */
   gtk_widget_set_sensitive (GTK_WIDGET (prw->prwGeneral->pwAdjTruncPlies ),
@@ -4358,8 +4274,8 @@ static void TruncEnableToggled( GtkWidget *pw, rolloutwidget *prw) {
 
 }
 
-static void TruncEqualPlayer0Toggled( GtkWidget *pw, rolloutwidget *prw) {
-
+static void TruncEqualPlayer0Toggled( GtkWidget *pw, rolloutwidget *prw)
+{
   int do_trunc = 
 	gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
 									 prw->prwGeneral->pwDoTrunc ) );
@@ -4369,25 +4285,17 @@ static void TruncEqualPlayer0Toggled( GtkWidget *pw, rolloutwidget *prw) {
 
   prw->fTruncEqualPlayer0 = sameas_p0;
   /* turn on/off the truncation page */
-  gtk_widget_set_sensitive ( gtk_notebook_get_nth_page (GTK_NOTEBOOK
-               (prw->RolloutNotebook), ROLL_TRUNC), do_trunc && !sameas_p0);
+  gtk_widget_set_sensitive(prw->analysisDetails[4]->pwSettingWidgets, do_trunc && !sameas_p0);
 }
-  
 
-static void CubeEqCheqToggled( GtkWidget *pw, rolloutwidget *prw) {
-
-  int  i;
-  int are_same = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
-                                                                   prw->prwGeneral->pwCubeEqualChequer ) );
+static void CubeEqCheqToggled( GtkWidget *pw, rolloutwidget *prw)
+{
+  int i, are_same = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (prw->prwGeneral->pwCubeEqualChequer ) );
 
   prw->fCubeEqualChequer = are_same;
 
-  /* turn the cube evals on/off in the rollout pages */
-  for (i = 0; i < 4; ++i) {
-    gtk_widget_set_sensitive (prw->prpwPages[i]->arpwEvCube, !are_same);
-  }
-
-  gtk_widget_set_sensitive (prw->prpwTrunc->arpwEvCube, !are_same);
+  for (i = 0; i < 5; ++i)
+	  prw->analysisDetails[i]->cubeDisabled = are_same;
 }
 
 static void
@@ -4401,29 +4309,20 @@ CubefulToggled ( GtkWidget *pw, rolloutwidget *prw ) {
 
 }
 
-static void PlayersSameToggled( GtkWidget *pw, rolloutwidget *prw) {
-
-  int   are_same = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
-                                                                     prw->prwGeneral->pwPlayersAreSame ) );
-  int do_late = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
-                                                                  prw->prwGeneral->pwDoLate ) );
+static void PlayersSameToggled( GtkWidget *pw, rolloutwidget *prw)
+{
+  int   are_same = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON ( prw->prwGeneral->pwPlayersAreSame ) );
+  int do_late = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON ( prw->prwGeneral->pwDoLate ) );
 
   prw->fPlayersAreSame = are_same;
-  gtk_widget_set_sensitive ( gtk_notebook_get_nth_page (GTK_NOTEBOOK
-                                                        (prw->RolloutNotebook), ROLL_P1), !are_same);
 
-  gtk_widget_set_sensitive ( gtk_notebook_get_nth_page (GTK_NOTEBOOK
-                                                        (prw->RolloutNotebook), ROLL_P1_LATE), !are_same && do_late);
-
-  gtk_notebook_set_tab_label_text (GTK_NOTEBOOK (prw->RolloutNotebook),
-                                   gtk_notebook_get_nth_page (GTK_NOTEBOOK (prw->RolloutNotebook),
-                                                              ROLL_P0), are_same ? _("First Play Both") : _("First Play (0) ") );
-
-  gtk_notebook_set_tab_label_text (GTK_NOTEBOOK (prw->RolloutNotebook),
-                                   gtk_notebook_get_nth_page (GTK_NOTEBOOK (prw->RolloutNotebook),
-                                                              ROLL_P0_LATE), are_same ? _("Later Play Both") : _("Later Play (0) ") );
-
-}  
+  gtk_widget_set_sensitive(prw->analysisDetails[1]->pwSettingWidgets, !are_same);
+  gtk_widget_set_sensitive(prw->analysisDetails[3]->pwSettingWidgets, !are_same && do_late);
+  prw->analysisDetails[0]->title = are_same ? _("First Play Both") : _("First Play (0) ");
+  gtk_frame_set_label(GTK_FRAME(prw->frame[0]), prw->analysisDetails[0]->title);
+  prw->analysisDetails[2]->title = are_same ? _("Later Play Both") : _("Later Play (0) ");
+  gtk_frame_set_label(GTK_FRAME(prw->frame[1]), prw->analysisDetails[2]->title);
+}
 
 /* create the General page for rollouts */
 
@@ -4645,30 +4544,6 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   gtk_container_add( GTK_CONTAINER( pwHBox ), gtk_spin_button_new(
                                                                   prpw->padjSeed, 1, 0 ) );
  
-  prpw->pwCubeEqualChequer = gtk_check_button_new_with_label (
-                                                              _("Cube decisions use same settings as Chequer play") );
-  gtk_container_add ( GTK_CONTAINER (pwPage ), prpw->pwCubeEqualChequer );
-  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( prpw->pwCubeEqualChequer),
-                                prw->fCubeEqualChequer);
-  g_signal_connect( G_OBJECT( prpw->pwCubeEqualChequer ), "toggled",
-                      G_CALLBACK ( CubeEqCheqToggled ), prw);
-
-  prpw->pwPlayersAreSame = gtk_check_button_new_with_label (
-                                                            _("Use same settings for both players") );
-  gtk_container_add ( GTK_CONTAINER (pwPage ), prpw->pwPlayersAreSame );
-  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( prpw->pwPlayersAreSame),
-                                prw->fPlayersAreSame);
-  g_signal_connect( G_OBJECT( prpw->pwPlayersAreSame ), "toggled",
-                      G_CALLBACK ( PlayersSameToggled ), prw);
-
-  prpw->pwTruncEqualPlayer0 = gtk_check_button_new_with_label (
-            _("Use player0 setting for truncation point") );
-  gtk_container_add ( GTK_CONTAINER (pwPage ), prpw->pwTruncEqualPlayer0 );
-  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( prpw->pwTruncEqualPlayer0),
-                                prw->fTruncEqualPlayer0);
-  g_signal_connect( G_OBJECT( prpw->pwTruncEqualPlayer0 ), "toggled",
-                      G_CALLBACK ( TruncEqualPlayer0Toggled), prw);
-
   return pwPage;
 }
 
@@ -4734,7 +4609,7 @@ static void gtk_load_rollout_settings(void)
 
 extern void SetRollouts( gpointer p, guint n, GtkWidget *pwIgnore )
 {
-  GtkWidget *pwDialog;
+  GtkWidget *pwDialog, *pwTable, *pwVBox;
   GtkWidget *saveAsButton;
   GtkWidget *loadRSButton;
   int fOK = FALSE;
@@ -4805,38 +4680,60 @@ extern void SetRollouts( gpointer p, guint n, GtkWidget *pwIgnore )
                             RolloutPageGeneral (rw.prwGeneral, &rw),
                             gtk_label_new ( _("General Settings" ) ) );
 
-  gtk_notebook_append_page( GTK_NOTEBOOK( rw.RolloutNotebook ), 
-                            RolloutPage (rw.prpwPages[0], TRUE ),
-                            gtk_label_new ( _("First Play (0) ") ) );
+	pwVBox = gtk_vbox_new(FALSE, 0);
+	gtk_notebook_append_page(GTK_NOTEBOOK( rw.RolloutNotebook ), pwVBox, gtk_label_new (_("Play settings")));
 
-  gtk_notebook_append_page( GTK_NOTEBOOK( rw.RolloutNotebook ), 
-                            RolloutPage (rw.prpwPages[1], TRUE ),
-                            gtk_label_new ( _("First Play (1) ") ) );
+	pwTable = gtk_table_new( 3, 2, FALSE );
+	gtk_box_pack_start(GTK_BOX(pwVBox), pwTable, FALSE, FALSE, 0);
+	rw.analysisDetails[0] = RolloutPage (rw.prpwPages[0], _("First Play (0) "), TRUE, &rw.frame[0] );
+	gtk_table_attach(GTK_TABLE(pwTable), gtk_widget_get_parent(rw.analysisDetails[0]->pwSettingWidgets), 0, 1, 0, 1, 0, 0, 4, 4 );
+	rw.analysisDetails[1] = RolloutPage (rw.prpwPages[1], _("First Play (1) "), TRUE, NULL );
+	gtk_table_attach(GTK_TABLE(pwTable), gtk_widget_get_parent(rw.analysisDetails[1]->pwSettingWidgets), 1, 2, 0, 1, 0, 0, 4, 4 );
+	rw.analysisDetails[2] = RolloutPage (rw.prpwPages[2], _("Later Play (0) "), TRUE, &rw.frame[1] );
+	gtk_table_attach(GTK_TABLE(pwTable), gtk_widget_get_parent(rw.analysisDetails[2]->pwSettingWidgets), 0, 1, 1, 2, 0, 0, 4, 4 );
+	rw.analysisDetails[3] = RolloutPage (rw.prpwPages[3], _("Later Play (1) "), TRUE, NULL );
+	gtk_table_attach(GTK_TABLE(pwTable), gtk_widget_get_parent(rw.analysisDetails[3]->pwSettingWidgets), 1, 2, 1, 2, 0, 0, 4, 4 );
+	rw.prpwTrunc->pmf = NULL;
+	rw.analysisDetails[4] = RolloutPage (rw.prpwTrunc, _("Truncation Pt."), FALSE, NULL );
+	gtk_table_attach(GTK_TABLE(pwTable), gtk_widget_get_parent(rw.analysisDetails[4]->pwSettingWidgets), 0, 1, 2, 3, 0, 0, 4, 4 );
 
-  gtk_notebook_append_page( GTK_NOTEBOOK( rw.RolloutNotebook ), 
-                            RolloutPage (rw.prpwPages[2], TRUE ),
-                            gtk_label_new ( _("Later Play (0) ") ) );
+	RPGeneral.pwPlayersAreSame = gtk_check_button_new_with_label ( _("Use same settings for both players") );
+	gtk_box_pack_start(GTK_BOX(pwVBox), RPGeneral.pwPlayersAreSame, FALSE, FALSE, 0);
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RPGeneral.pwPlayersAreSame), rw.fPlayersAreSame);
+	g_signal_connect( G_OBJECT( RPGeneral.pwPlayersAreSame ), "toggled", G_CALLBACK ( PlayersSameToggled ), &rw);
 
-  gtk_notebook_append_page( GTK_NOTEBOOK( rw.RolloutNotebook ), 
-                            RolloutPage (rw.prpwPages[3], TRUE ),
-                            gtk_label_new ( _("Later Play (1) ") ) );
+	RPGeneral.pwCubeEqualChequer = gtk_check_button_new_with_label (
+															  _("Cube decisions use same settings as Chequer play") );
+	gtk_box_pack_start(GTK_BOX(pwVBox), RPGeneral.pwCubeEqualChequer, FALSE, FALSE, 0);
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RPGeneral.pwCubeEqualChequer),
+								rw.fCubeEqualChequer);
+	g_signal_connect( G_OBJECT( RPGeneral.pwCubeEqualChequer ), "toggled",
+					  G_CALLBACK ( CubeEqCheqToggled ), &rw);
 
-  gtk_notebook_append_page( GTK_NOTEBOOK( rw.RolloutNotebook ), 
-                            RolloutPage (rw.prpwTrunc, FALSE ),
-                            gtk_label_new ( _("Truncation Pt.") ) );
+	RPGeneral.pwTruncEqualPlayer0 = gtk_check_button_new_with_label (
+			_("Use player0 setting for truncation point") );
+	gtk_box_pack_start(GTK_BOX(pwVBox), RPGeneral.pwTruncEqualPlayer0, FALSE, FALSE, 0);
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RPGeneral.pwTruncEqualPlayer0),
+								rw.fTruncEqualPlayer0);
+	g_signal_connect( G_OBJECT( RPGeneral.pwTruncEqualPlayer0 ), "toggled",
+					  G_CALLBACK ( TruncEqualPlayer0Toggled), &rw);
 
-  /* cheap and nasty way to get things set correctly */
-  LateEvalToggled (NULL, &rw);
-  STDStopToggled (NULL, &rw);
-  JsdStopToggled (NULL, &rw);
-  TruncEnableToggled (NULL, &rw);
-  CubeEqCheqToggled (NULL, &rw);
-  PlayersSameToggled (NULL, &rw);
-  CubefulToggled (NULL, &rw);
-  
-  GTKRunDialog(pwDialog);
+	/* Set things up correctly */
+	LateEvalToggled (NULL, &rw);
+	STDStopToggled (NULL, &rw);
+	JsdStopToggled (NULL, &rw);
+	TruncEnableToggled (NULL, &rw);
+	CubeEqCheqToggled (NULL, &rw);
+	PlayersSameToggled (NULL, &rw);
+	CubefulToggled (NULL, &rw);
 
-  if( fOK || saveAs ) {
+	GTKRunDialog(pwDialog);
+
+	for (i = 0; i < 5; i++)
+		free(rw.analysisDetails[i]);
+
+  if( fOK || saveAs ) 
+  {
     unsigned int fCubeful;
     outputoff();
 
@@ -5341,12 +5238,8 @@ extern void GTKShowScoreSheet( void )
 	listOLD *pl;
 
 	sprintf(title, _("Score Sheet - "));
-	if ( ms.nMatchTo > 0 )
-		sprintf(title + strlen(title),
-			ngettext("Match to %d point",
-				 "Match to %d points",
-				 ms.nMatchTo),
-			ms.nMatchTo);
+	if (ms.nMatchTo > 0)
+		sprintf(title + strlen(title), _("%d point match"), ms.nMatchTo);
 	else
 		strcat(title, _("Money Session"));
 
