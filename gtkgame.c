@@ -263,6 +263,7 @@ GtkWidget *pwMenuBar;
 GtkWidget *pwToolbar;
 
 static GtkWidget *pwStatus;
+GtkWidget *pwIDBox, *pwGnubgID;
 static GtkWidget *pwProgress;
 GtkWidget *pwMessageText;
 GtkWidget *pwPanelVbox;
@@ -1171,60 +1172,27 @@ static GtkWidget *GetFocusedWidget(void)
 		return NULL;
 }
 
-static void CopyText(void)
+static void PasteIDs(void)
 {
-	GtkTextIter start, end;
-	GtkTextBuffer *buffer;
-	const char *text;
-	GtkWidget *pFocus = GetFocusedWidget();
-	if (!pFocus)
-		return;
-	if (GTK_IS_ENTRY(pFocus)) {
-		text = gtk_entry_get_text(GTK_ENTRY(pFocus));
-	} else if (GTK_IS_TEXT_VIEW(pFocus)) {
-		buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pFocus));
-		gtk_text_buffer_get_selection_bounds(buffer, &start, &end);
-		text =
-		    gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
-	} else
-		return;
-	GTKTextToClipboard(text);
-}
+    BoardData *bd = BOARD( pwBoard )->board_data;
+	char *text = gtk_clipboard_wait_for_text(clipboard);
+	int editing = ToolbarIsEditing(pwToolbar);
+	char *sz;
 
-static void PasteText(void)
-{
-	GtkTextBuffer *buffer;
-	char *text;
-	GtkWidget *pFocus = GetFocusedWidget();
-	if (!pFocus)
+	if (!text)
 		return;
-	text = gtk_clipboard_wait_for_text(clipboard);
-	if (!pFocus || !text)
-		return;
-	if (GTK_IS_ENTRY(pFocus))
-	{
-		BoardData *bd = BOARD(pwBoard)->board_data;
-		if (pFocus == bd->gnubg_id)
-		{	/* Replace text in these boxes */
-			gtk_entry_set_text(GTK_ENTRY(pFocus), text);
-			board_set_gnubg_id(0, bd);
-		}
-		else
-		{	/* Insert text */
-			int pos = gtk_editable_get_position(GTK_EDITABLE(pFocus));
-			gtk_editable_insert_text(GTK_EDITABLE(pFocus), text, strlen(text), &pos);
-			gtk_editable_set_position(GTK_EDITABLE(pFocus), pos);
-		}
-	}
-	else if (GTK_IS_TEXT_VIEW(pFocus))
-	{
-		if (gtk_text_view_get_editable(GTK_TEXT_VIEW(pFocus)))
-		{
-			buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pFocus));
-			gtk_text_buffer_insert_at_cursor(buffer, text, -1);
-		}
-	}
+
+	if (editing)
+		click_edit();
+
+	sz = g_strdup_printf("set gnubgid %s", text);
 	g_free(text);
+
+	UserCommand(sz);
+	g_free(sz);
+
+	if (editing)
+		click_edit();
 }
 
 extern void GTKTextToClipboard(const char *text)
@@ -1252,7 +1220,7 @@ static void CopyAsGOL(gpointer p, guint n, GtkWidget * pw)
 
 }
 
-static void CopyAsIDs(gpointer p, guint n, GtkWidget * pw)
+static void CopyIDs(gpointer p, guint n, GtkWidget * pw)
 {				/* Copy the position and match ids to the clipboard */
 	char buffer[1024];
 
@@ -1261,6 +1229,8 @@ static void CopyAsIDs(gpointer p, guint n, GtkWidget * pw)
 		MatchIDFromMatchState(&ms));
 
 	GTKTextToClipboard(buffer);
+
+	gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idOutput, _("Position and Match IDs copied to the clipboard") );
 }
 
 static void TogglePanel(gpointer p, guint n, GtkWidget * pw)
@@ -1476,7 +1446,7 @@ static void DoFullScreenMode(gpointer p, guint n, GtkWidget * pw)
 			    ((state & GDK_WINDOW_STATE_MAXIMIZED) ==
 			     GDK_WINDOW_STATE_MAXIMIZED);
 			SetFullscreenWindowSettings(ArePanelsShowing(),
-						    bd->rd->fShowIDs,
+						    fShowIDs,
 						    maximised);
 		}
 
@@ -1492,7 +1462,7 @@ static void DoFullScreenMode(gpointer p, guint n, GtkWidget * pw)
 		fFullScreen = FALSE;
 		HideAllPanels(NULL, 0, NULL);
 		fFullScreen = TRUE;
-		bd->rd->fShowIDs = 0;
+		fShowIDs = FALSE;
 
 		gtk_widget_hide(pwToolbar);
 		gtk_widget_hide(pwHandle);
@@ -1525,7 +1495,7 @@ static void DoFullScreenMode(gpointer p, guint n, GtkWidget * pw)
 		gtk_widget_show(pwStop);
 
 		GetFullscreenWindowSettings(&showingPanels,
-					    &bd->rd->fShowIDs, &maximised);
+					    &fShowIDs, &maximised);
 
 		if (g_signal_handler_is_connected(G_OBJECT(ptl), id))
 			g_signal_handler_disconnect(G_OBJECT(ptl), id);
@@ -1551,7 +1521,7 @@ static void DoFullScreenMode(gpointer p, guint n, GtkWidget * pw)
 			changedDP = FALSE;
 		}
 	}
-	UpdateSetting(&bd->rd->fShowIDs);
+	UpdateSetting(&fShowIDs);
 }
 
 extern void FullScreenMode(int state)
@@ -2955,7 +2925,7 @@ GtkItemFactoryEntry aife[] = {
 	},
 	{ N_("/_File/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ N_("/_File/Open _Commands..."), NULL, GTKCommandsOpen, 0, 
-		"<StockItem>", GTK_STOCK_OPEN
+		NULL, NULL
 	},
 	{ N_("/_File/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ N_("/_File/Match information..."), NULL, GTKMatchInfo, 0, NULL,
@@ -2975,7 +2945,7 @@ GtkItemFactoryEntry aife[] = {
 	},
 	{ N_("/_Edit/-"), NULL, NULL, 0, "<Separator>", NULL },
 
-	{ N_("/_Edit/_Copy"), "<control>C", CopyText, 0,
+	{ N_("/_Edit/_Copy Position ID"), "<control>C", CopyIDs, 0,
 		"<StockItem>", GTK_STOCK_COPY
 	},
 
@@ -2984,10 +2954,8 @@ GtkItemFactoryEntry aife[] = {
 	  CommandCopy, 0, NULL, NULL },
 	{ N_("/_Edit/Copy as/GammOnLine (HTML)"), NULL,
 	  CopyAsGOL, 0, NULL, NULL },
-	{ N_("/_Edit/Copy as/Position and Match IDs"), NULL,
-	  CopyAsIDs, 0, NULL, NULL },
 
-	{ N_("/_Edit/_Paste"), "<control>V", PasteText, 0,
+	{ N_("/_Edit/_Paste Position ID"), "<control>V", PasteIDs, 0,
 		"<StockItem>", GTK_STOCK_PASTE},
 
 	{ N_("/_Edit/-"), NULL, NULL, 0, "<Separator>", NULL },
@@ -3222,9 +3190,19 @@ static void StopNotButton( GtkWidget *pw, gpointer unused )
 		gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idOutput, _("Press the stop button to interrupt the current process") );
 }
 
+static gboolean ContextMenu(GtkWidget *widget, GdkEventButton *event, GtkWidget* menu)
+{
+	if (event->type != GDK_BUTTON_PRESS || event->button != 3)
+		return FALSE;
+
+	gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL, event->button, event->time);
+
+	return TRUE;
+}
+
 static void CreateMainWindow(void)
 {
-	GtkWidget *pwVbox, *pwHbox, *pwHandle, *pwPanelHbox, *pwStopButton;
+	GtkWidget *pwVbox, *pwHbox, *pwHbox2, *pwHandle, *pwPanelHbox, *pwStopButton, *idMenu, *menu_item;
 
     pwMain = gtk_window_new( GTK_WINDOW_TOPLEVEL );
     gtk_window_maximize(GTK_WINDOW(pwMain));
@@ -3302,6 +3280,30 @@ static void CreateMainWindow(void)
 					       "progress" );
     g_signal_connect( G_OBJECT( pwStatus ), "text-popped",
 			G_CALLBACK( TextPopped ), NULL );
+
+	idMenu = gtk_menu_new ();
+
+	menu_item = gtk_menu_item_new_with_label (_("Copy Position ID"));
+	gtk_menu_shell_append (GTK_MENU_SHELL (idMenu), menu_item);
+	gtk_widget_show (menu_item);
+	g_signal_connect( G_OBJECT( menu_item ), "activate", G_CALLBACK( CopyIDs ), NULL );
+
+	menu_item = gtk_menu_item_new_with_label (_("Paste Position ID"));
+	gtk_menu_shell_append (GTK_MENU_SHELL (idMenu), menu_item);
+	gtk_widget_show (menu_item);
+	g_signal_connect( G_OBJECT( menu_item ), "activate", G_CALLBACK( PasteIDs ), NULL );
+
+    pwIDBox = gtk_event_box_new();
+	gtk_box_pack_start( GTK_BOX( pwHbox ), pwIDBox, FALSE, FALSE, 0 );
+
+	pwHbox2 = gtk_hbox_new( FALSE, 0 );
+	gtk_container_add(GTK_CONTAINER(pwIDBox), pwHbox2);
+
+	gtk_box_pack_start( GTK_BOX( pwHbox2 ), gtk_label_new("Gnubg id: "), FALSE, FALSE, 0 );
+	pwGnubgID = gtk_label_new("");
+	gtk_box_pack_start( GTK_BOX( pwHbox2 ), pwGnubgID, FALSE, FALSE, 0 );
+
+g_signal_connect( G_OBJECT( pwIDBox ), "button-press-event", G_CALLBACK( ContextMenu ), idMenu );
 
     pwStop = gtk_event_box_new();
     pwStopButton = gtk_event_box_new();
@@ -3459,7 +3461,7 @@ extern void RunGTK( GtkWidget *pwSplash, char *commands, char *python_script, ch
 		GTKSet( ap );
 		GTKSet( &ms.fTurn );
 		GTKSet( &ms.gs );
-		GTKSet( &GetMainAppearance()->fShowIDs);
+		GTKSet( &fShowIDs);
 	    
 		PushSplash ( pwSplash, _("Rendering"), _("Board") );
 
@@ -6006,19 +6008,21 @@ extern void GTKSet( void *p ) {
 			}
 		}}
     }
-	else if( p == &bd->rd->fShowIDs )
+	else if( p == &fShowIDs )
 	{
 		inCallback = TRUE;
-		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/View/Show IDs above board" )), bd->rd->fShowIDs);
+		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/View/Show IDs above board" )), fShowIDs);
 		inCallback = FALSE;
 
 		if( GTK_WIDGET_REALIZED( pwBoard ) )
 		{
-			if( GTK_WIDGET_VISIBLE( bd->vbox_ids ) && !bd->rd->fShowIDs )
-				gtk_widget_hide( bd->vbox_ids );
-			else if( !GTK_WIDGET_VISIBLE( bd->vbox_ids ) && bd->rd->fShowIDs )
-				gtk_widget_show_all( bd->vbox_ids );
-			gtk_widget_queue_resize(pwBoard);
+			if (GTK_WIDGET_VISIBLE(pwIDBox) != fShowIDs)
+			{
+				if (!fShowIDs)
+					gtk_widget_hide(pwIDBox);
+				else
+					gtk_widget_show_all(pwIDBox);
+			}
 		}
 	}
 	else if( p == &gui_show_pips )
@@ -6050,16 +6054,6 @@ GtkWidget *pwStatDialog;
 int fGUIUseStatsPanel = TRUE;
 GtkWidget *pswList;
 GtkWidget *pwNotebook;
-
-static gboolean ContextCopyMenu(GtkWidget *widget, GdkEventButton *event, GtkWidget* copyMenu)
-{
-	if (event->type != GDK_BUTTON_PRESS || event->button != 3)
-		return FALSE;
-
-	gtk_menu_popup (GTK_MENU (copyMenu), NULL, NULL, NULL, NULL, event->button, event->time);
-
-	return TRUE;
-}
 
 static void AddList(char* pStr, GtkCList* pList, const char* pTitle)
 {
@@ -6536,7 +6530,7 @@ extern void GTKDumpStatcontext( int game )
 	gtk_widget_show (menu_item);
 	g_signal_connect( G_OBJECT( menu_item ), "activate", G_CALLBACK( CopyAll ), pwNotebook );
 
-	g_signal_connect( G_OBJECT( pwList ), "button-press-event", G_CALLBACK( ContextCopyMenu ), copyMenu );
+	g_signal_connect( G_OBJECT( pwList ), "button-press-event", G_CALLBACK( ContextMenu ), copyMenu );
 
 	/* dialog size */
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwUsePanels ) ) )
@@ -6560,7 +6554,7 @@ extern void GTKDumpStatcontext( int game )
 	gtk_widget_show (menu_item);
 	g_signal_connect( G_OBJECT( menu_item ), "activate", G_CALLBACK( CopyAll ), pwNotebook );
 
-	g_signal_connect( G_OBJECT( pwNotebook ), "button-press-event", G_CALLBACK( ContextCopyMenu ), copyMenu );
+	g_signal_connect( G_OBJECT( pwNotebook ), "button-press-event", G_CALLBACK( ContextMenu ), copyMenu );
 
 	StatsSelectGame(0, game);
 

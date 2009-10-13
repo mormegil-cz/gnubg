@@ -1,3 +1,7 @@
+Tue Oct 13 19:30:00 2009  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c, gtkboard.c + others: Move gnubgid into status bar
+
 Mon Oct 12 21:30:00 2009  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c: Simplify player and rollout evaluation settings

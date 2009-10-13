@@ -46,6 +46,7 @@ extern GtkWidget *pwMoveAnalysis;
 extern GtkWidget *pwOldGrab;
 extern GtkWidget *pwPanelVbox;
 extern GtkWidget *pwToolbar;
+extern GtkWidget *pwGnubgID;
 extern guint nNextTurn;		/* GTK idle function */
 extern int fEndDelay;
 extern int fNeedPrompt;

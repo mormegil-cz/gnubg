@@ -189,7 +189,7 @@ void GetStyleFromRCFile(GtkStyle** ppStyle, char* name, GtkStyle* psBase)
 	gtk_widget_ensure_style(dummy);
 	gtk_widget_set_name(dummy, styleName);
 	/* Pack in box to make sure style is loaded */
-	gtk_box_pack_start(GTK_BOX(bd->vbox_ids), dummy, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(bd->table), dummy, FALSE, FALSE, 0);
 	psNew = gtk_widget_get_style(dummy);
 
 	/* Base new style on base style passed in */

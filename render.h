@@ -64,7 +64,6 @@ typedef struct _renderdata {
     int fHinges; /* TRUE if hinges should be drawn */
     int fLabels; /* TRUE if point numbers should be drawn */
     int fClockwise; /* orientation for board point numbers */
-    int fShowIDs; /* Position + match ids */
     int fDiceArea; /* Show dice below board */
     int fShowGameInfo;
     int fDynamicLabels; /* TRUE if the point numbers are dynamic, i.e.,

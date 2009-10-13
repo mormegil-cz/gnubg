@@ -3035,12 +3035,12 @@ static void SaveGUISettings(FILE * pf)
 	fprintf(pf, "set fullscreen %s\n", fFullScreen ? "on" : "off");
 	if (fFullScreen)
 	{
-		GetFullscreenWindowSettings(&dummy, &GetMainAppearance()->fShowIDs, &dummy);
-		fprintf(pf, "set gui showids %s\n", GetMainAppearance()->fShowIDs ? "on" : "off");
-		GetMainAppearance()->fShowIDs = FALSE;
+		GetFullscreenWindowSettings(&dummy, &fShowIDs, &dummy);
+		fprintf(pf, "set gui showids %s\n", fShowIDs ? "on" : "off");
+		fShowIDs = FALSE;
 	}
 	else
-		fprintf(pf, "set gui showids %s\n", GetMainAppearance()->fShowIDs ? "on" : "off");
+		fprintf(pf, "set gui showids %s\n", fShowIDs ? "on" : "off");
 
 	fprintf(pf, "set gui animation %s\n", aszAnimation[animGUI]);
 	fprintf(pf, "set gui animation speed %d\n", nGUIAnimSpeed);

@@ -145,7 +145,6 @@ renderdata rdDefault = {
     TRUE, /* fHinges */
     TRUE, /* fLabels */
     FALSE, /* fClockwise */
-    TRUE, /* position+match ids */
     FALSE, /* Dice area */
     TRUE, /* Show game info */
     TRUE,  /* dynamic labels */

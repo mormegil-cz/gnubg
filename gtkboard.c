@@ -67,6 +67,7 @@ animation animGUI = ANIMATE_SLIDE;
 int fGUIBeep = TRUE;
 int fGUIHighDieFirst = TRUE;
 int fGUIIllegal = FALSE;
+int fShowIDs = TRUE;
 GuiShowPips gui_show_pips = GUI_SHOW_PIPS_EPC;
 int fGUIDragTargetHelp = TRUE;
 int fGUIGrayEdit = TRUE;
@@ -508,7 +509,7 @@ extern void update_gnubg_id(BoardData * bd, const TanBoard points)
 				      ms.fDoubled, ms.fMove, fCubeOwner,
 				      bd->crawford_game, bd->match_to,
 				      anScore, bd->cube, ms.gs));
-	gtk_entry_set_text(GTK_ENTRY(bd->gnubg_id), str);
+	gtk_label_set_text(GTK_LABEL(pwGnubgID), str);
 	g_free(str);
 }
 
@@ -3184,18 +3185,6 @@ static void board_size_allocate( GtkWidget *board, GtkAllocation *allocation )
 
     /* position ID, match ID: just below toolbar */
 
-    if ( bd->rd->fShowIDs ) {
-
-      gtk_widget_get_child_requisition( bd->vbox_ids, &requisition );
-      allocation->height -= requisition.height;
-      child_allocation.x = allocation->x;
-      child_allocation.y = allocation->y;
-      child_allocation.width = allocation->width;
-      child_allocation.height = requisition.height;
-      allocation->y += requisition.height;
-      gtk_widget_size_allocate( bd->vbox_ids, &child_allocation );
-      
-    }
     if ( bd->rd->fShowGameInfo ) {
       gtk_widget_get_child_requisition( bd->table, &requisition );
       allocation->height -= requisition.height;
@@ -3292,9 +3281,6 @@ static void board_size_request( GtkWidget *pw, GtkRequisition *pr )
 
     bd = BOARD( pw )->board_data;
 
-    if ( bd->rd->fShowIDs )
-      AddChild( bd->vbox_ids, pr );
-
     AddChild( bd->table, pr );
 
     if (bd->rd->fDiceArea)
@@ -3315,24 +3301,6 @@ static void board_realize( GtkWidget *board )
 	GTK_WIDGET_CLASS( parent_class )->realize( board );
 
     board_create_pixmaps( board, bd );
-}
-
-extern void board_set_gnubg_id(GtkWidget * pw, BoardData * bd)
-{
-	int editing;
-	char *sz;
-	char *tmp;
-	tmp = g_strdup(gtk_entry_get_text(GTK_ENTRY(bd->gnubg_id)));
-
-	editing = ToolbarIsEditing(pwToolbar);
-	if (editing)
-		click_edit();
-	sz = g_strdup_printf("set gnubgid %s", tmp);
-	g_free(tmp);
-	UserCommand(sz);
-	g_free(sz);
-	if (editing)
-		click_edit();
 }
 
 static void board_show_child( GtkWidget *pwChild, BoardData *pbd )
@@ -3681,23 +3649,7 @@ static void board_init( Board *board )
 		bd->bd3d = NULL;
 #endif
 
-    /* Position and match ID */
-
-    bd->vbox_ids = gtk_vbox_new( FALSE, 0 );
-    gtk_box_pack_start( GTK_BOX( board ), bd->vbox_ids, FALSE, FALSE, 0 );
-
-    pw = gtk_hbox_new ( FALSE, 0 );
-    gtk_box_pack_start( GTK_BOX( bd->vbox_ids ), pw, FALSE, FALSE, 0 );
-
-    gtk_box_pack_start ( GTK_BOX ( pw ), 
-                         gtk_label_new ( _("GNUBg ID: ") ),
-                         FALSE, FALSE, 4 );
-
-    gtk_box_pack_start ( GTK_BOX ( pw ), 
-                         bd->gnubg_id = gtk_entry_new(),
-                         TRUE, TRUE, 0 );
-
-    /* the rest */
+    /* the board */
 
     bd->table = gtk_hbox_new ( FALSE, 0 );
     gtk_box_pack_start( GTK_BOX ( board ), bd->table, FALSE, TRUE, 0 );
@@ -3902,11 +3854,6 @@ static void board_init( Board *board )
     gtk_widget_set_size_request(bd->dice_area , 2 * DIE_WIDTH + 1, DIE_HEIGHT );
     gtk_widget_add_events( GTK_WIDGET( bd->dice_area ), GDK_EXPOSURE_MASK |
 			   GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK );
-
-    g_signal_connect( G_OBJECT( bd->gnubg_id ), "activate",
-			G_CALLBACK( board_set_gnubg_id ), bd );
-    g_signal_connect( G_OBJECT( bd->gnubg_id ), "paste-clipboard",
-			G_CALLBACK( board_set_gnubg_id ), bd );
 
     g_signal_connect( G_OBJECT( bd->drawing_area ), "expose_event",
 			G_CALLBACK( board_expose ), bd );    

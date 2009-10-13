@@ -1092,7 +1092,6 @@ static void BoardPrefsOK( GtkWidget *pw, GtkWidget *mainBoard )
 	}
 	board_free_pixmaps( bd );
 
-	rdPrefs.fShowIDs = bd->rd->fShowIDs;
 	rdPrefs.fDiceArea = bd->rd->fDiceArea;
 	rdPrefs.fShowGameInfo = bd->rd->fShowGameInfo;
 	rdPrefs.nSize = bd->rd->nSize;
@@ -3002,7 +3001,6 @@ extern void BoardPreferences(GtkWidget *pwBoard)
 
 	/* Set up board with current preferences, hide unwanted elements */
 	CopyAppearance(&rdPrefs);
-	rdPrefs.fShowIDs = FALSE;
 	rdPrefs.fDiceArea = FALSE;
 	rdPrefs.fShowGameInfo = FALSE;
 	/* Create preview board */

@@ -1096,7 +1096,7 @@ extern void CommandSetGUIShowIDs(char *sz)
 {
 	if (!inCallback)
 	{
-	    SetToggle("gui showids", &GetMainAppearance()->fShowIDs, sz,
+	    SetToggle("gui showids", &fShowIDs, sz,
 		      _("The position and match IDs will be shown above the board."),
 			  _("The position and match IDs will not be shown."));
 	}

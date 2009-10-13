@@ -606,8 +606,8 @@ static void append_display_options(optionswidget *pow)
 				      "where the dice will land."));
 
 	pow->pwShowIDs =
-	    gtk_check_button_new_with_label(_("Show Position ID and Match ID above board"));
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pow->pwShowIDs), bd->rd->fShowIDs);
+	    gtk_check_button_new_with_label(_("Show Position ID in status bar"));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pow->pwShowIDs), fShowIDs);
 	gtk_box_pack_start(GTK_BOX(pwvbox), pow->pwShowIDs, FALSE, FALSE, 0);
 	gtk_widget_set_tooltip_text(pow->pwShowIDs,
 				    _("One entry field will be shown above the board, "
@@ -1497,7 +1497,7 @@ static void OptionsOK(GtkWidget *pw, optionswidget *pow)
 
   CHECKUPDATE( pow->pwIllegal, fGUIIllegal, "set gui illegal %s" )
   CHECKUPDATE( pow->pwUseDiceIcon, bd->rd->fDiceArea, "set gui dicearea %s" )
-  CHECKUPDATE( pow->pwShowIDs, bd->rd->fShowIDs, "set gui showids %s" )
+  CHECKUPDATE( pow->pwShowIDs, fShowIDs, "set gui showids %s" )
   CHECKUPDATE( pow->pwHigherDieFirst, fGUIHighDieFirst, "set gui highdiefirst %s" )
   CHECKUPDATE( pow->pwSetWindowPos, fGUISetWindowPos,
 	       "set gui windowpositions %s" )

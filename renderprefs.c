@@ -416,9 +416,6 @@ int c, fValueError = FALSE;
   else if (!StrNCaseCmp (szParam, "diceicon", c))
     /* FIXME deprecated in favour of "set gui dicearea" */
     prd->fDiceArea = toupper (*szValue) == 'Y';
-  else if (!StrNCaseCmp (szParam, "show_ids", c))
-    /* FIXME deprecated in favour of "set gui showids" */
-    prd->fShowIDs = toupper (*szValue) == 'Y';
   else if (!StrNCaseCmp (szParam, "show pips", c)) {
     /* FIXME deprecated in favour of "set gui animation ..." */
     switch (toupper (*szValue)) {
