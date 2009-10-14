@@ -3910,14 +3910,15 @@ static GtkWidget *NewWidget( newwidget *pnw)
   apXPM[9] = stock_new17_xpm;
   
   for(i = 1; i < 19; i=i+2, j++ ){			     
-     char sz[40];
+     gchar *sz;
      int *pi;
 
-     sprintf(sz, _("Start a new %d point match"), i);
+     sz = g_strdup_printf(_("Start a new %d point match"), i);
      pwButtons = button_from_image( image_from_xpm_d ( apXPM[j],
                                                       pwToolbar ) );
      gtk_toolbar_append_widget( GTK_TOOLBAR( pwToolbar ),
                              pwButtons, sz, NULL );
+     g_free(sz);
      
       pi = malloc ( sizeof ( int ) );
       *pi = i;
