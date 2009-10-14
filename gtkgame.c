@@ -1153,28 +1153,8 @@ static void ToolbarStyle(gpointer    callback_data,
 
 GtkClipboard *clipboard = NULL;
 
-static int isActive(const void *item, const void *data)
-{
-	if (gtk_window_is_active(GTK_WINDOW(item)))
-		return 0;
-	else
-		return 1;
-}
-
-static GtkWidget *GetFocusedWidget(void)
-{
-	GList *windows = gtk_window_list_toplevels();
-	/* Find widget that has focus */
-	GList *activeWindow = g_list_find_custom(windows, 0, isActive);
-	if (activeWindow)
-		return gtk_window_get_focus(activeWindow->data);
-	else
-		return NULL;
-}
-
 static void PasteIDs(void)
 {
-    BoardData *bd = BOARD( pwBoard )->board_data;
 	char *text = gtk_clipboard_wait_for_text(clipboard);
 	int editing = ToolbarIsEditing(pwToolbar);
 	char *sz;
@@ -2980,7 +2960,7 @@ GtkItemFactoryEntry aife[] = {
 	{ N_("/_View/Restore panels"), NULL, ShowAllPanels, 0, NULL, NULL },
 	{ N_("/_View/Hide panels"), NULL, HideAllPanels, 0, NULL, NULL },
 	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>", NULL },
-	{ N_("/_View/Show _IDs above board"), NULL, ToggleShowingIDs, 0, "<CheckItem>", NULL },
+	{ N_("/_View/Show _IDs in status bar"), NULL, ToggleShowingIDs, 0, "<CheckItem>", NULL },
 	{ N_("/_View/_Toolbar"), NULL, NULL, 0, "<Branch>", NULL},
 	{ N_("/_View/_Toolbar/_Hide Toolbar"), NULL, HideToolbar, 0, NULL, NULL },
 	{ N_("/_View/_Toolbar/_Show Toolbar"), NULL, ShowToolbar, 0, NULL, NULL },
@@ -3303,7 +3283,9 @@ static void CreateMainWindow(void)
 	pwGnubgID = gtk_label_new("");
 	gtk_box_pack_start( GTK_BOX( pwHbox2 ), pwGnubgID, FALSE, FALSE, 0 );
 
-g_signal_connect( G_OBJECT( pwIDBox ), "button-press-event", G_CALLBACK( ContextMenu ), idMenu );
+	gtk_widget_set_tooltip_text(pwIDBox, _("This is a unique id for this position."
+		" Ctrl+C copies the current ID and Ctrl+V pastes an ID from the clipboard"));
+	g_signal_connect( G_OBJECT( pwIDBox ), "button-press-event", G_CALLBACK( ContextMenu ), idMenu );
 
     pwStop = gtk_event_box_new();
     pwStopButton = gtk_event_box_new();
@@ -6011,7 +5993,7 @@ extern void GTKSet( void *p ) {
 	else if( p == &fShowIDs )
 	{
 		inCallback = TRUE;
-		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/View/Show IDs above board" )), fShowIDs);
+		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/View/Show IDs in status bar" )), fShowIDs);
 		inCallback = FALSE;
 
 		if( GTK_WIDGET_REALIZED( pwBoard ) )
