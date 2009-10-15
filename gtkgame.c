@@ -3182,7 +3182,7 @@ static gboolean ContextMenu(GtkWidget *widget, GdkEventButton *event, GtkWidget*
 
 static void CreateMainWindow(void)
 {
-	GtkWidget *pwVbox, *pwHbox, *pwHbox2, *pwHandle, *pwPanelHbox, *pwStopButton, *idMenu, *menu_item;
+	GtkWidget *pwVbox, *pwHbox, *pwHbox2, *pwHandle, *pwPanelHbox, *pwStopButton, *idMenu, *menu_item, *pwFrame;
 
     pwMain = gtk_window_new( GTK_WINDOW_TOPLEVEL );
     gtk_window_maximize(GTK_WINDOW(pwMain));
@@ -3279,9 +3279,13 @@ static void CreateMainWindow(void)
 	pwHbox2 = gtk_hbox_new( FALSE, 0 );
 	gtk_container_add(GTK_CONTAINER(pwIDBox), pwHbox2);
 
-	gtk_box_pack_start( GTK_BOX( pwHbox2 ), gtk_label_new("Gnubg id: "), FALSE, FALSE, 0 );
+	gtk_box_pack_start( GTK_BOX( pwHbox2 ), gtk_label_new("Gnubg id:"), FALSE, FALSE, 0 );
+	pwFrame = gtk_frame_new(NULL);
+	gtk_box_pack_start( GTK_BOX( pwHbox2 ), pwFrame, FALSE, FALSE, 0 );
+
 	pwGnubgID = gtk_label_new("");
-	gtk_box_pack_start( GTK_BOX( pwHbox2 ), pwGnubgID, FALSE, FALSE, 0 );
+	gtk_container_add(GTK_CONTAINER(pwFrame), pwGnubgID);
+	gtk_container_set_border_width(GTK_CONTAINER pwFrame), 2);
 
 	gtk_widget_set_tooltip_text(pwIDBox, _("This is a unique id for this position."
 		" Ctrl+C copies the current ID and Ctrl+V pastes an ID from the clipboard"));
@@ -3443,7 +3447,6 @@ extern void RunGTK( GtkWidget *pwSplash, char *commands, char *python_script, ch
 		GTKSet( ap );
 		GTKSet( &ms.fTurn );
 		GTKSet( &ms.gs );
-		GTKSet( &fShowIDs);
 	    
 		PushSplash ( pwSplash, _("Rendering"), _("Board") );
 
@@ -3461,6 +3464,8 @@ extern void RunGTK( GtkWidget *pwSplash, char *commands, char *python_script, ch
 
 		/* Show everything */
 		gtk_widget_show_all( pwMain );
+
+		GTKSet( &fShowIDs);
 
 		/* Set the default arrow cursor in the stop window so obvious it can be clicked */
 		gdk_window_set_cursor(pwStop->window, gdk_cursor_new(GDK_ARROW));
@@ -5997,16 +6002,10 @@ extern void GTKSet( void *p ) {
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/View/Show IDs in status bar" )), fShowIDs);
 		inCallback = FALSE;
 
-		if( GTK_WIDGET_REALIZED( pwBoard ) )
-		{
-			if (GTK_WIDGET_VISIBLE(pwIDBox) != fShowIDs)
-			{
-				if (!fShowIDs)
-					gtk_widget_hide(pwIDBox);
-				else
-					gtk_widget_show_all(pwIDBox);
-			}
-		}
+		if (!fShowIDs)
+			gtk_widget_hide(pwIDBox);
+		else
+			gtk_widget_show_all(pwIDBox);
 	}
 	else if( p == &gui_show_pips )
 		ShowBoard(); /* this is overkill, but it works */
