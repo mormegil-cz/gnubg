@@ -3285,7 +3285,7 @@ static void CreateMainWindow(void)
 
 	pwGnubgID = gtk_label_new("");
 	gtk_container_add(GTK_CONTAINER(pwFrame), pwGnubgID);
-	gtk_container_set_border_width(GTK_CONTAINER pwFrame), 2);
+	gtk_container_set_border_width(GTK_CONTAINER(pwFrame), 2);
 
 	gtk_widget_set_tooltip_text(pwIDBox, _("This is a unique id for this position."
 		" Ctrl+C copies the current ID and Ctrl+V pastes an ID from the clipboard"));
