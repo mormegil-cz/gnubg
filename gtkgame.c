@@ -1204,6 +1204,13 @@ static void CopyIDs(gpointer p, guint n, GtkWidget * pw)
 {				/* Copy the position and match ids to the clipboard */
 	char buffer[1024];
 
+	if( ms.gs == GAME_NONE )
+	{
+		output( _("No game in progress.") );
+		outputx();
+		return;
+	}
+
 	sprintf(buffer, "%s %s\n%s %s\n", _("Position ID:"),
 		PositionID(msBoard()), _("Match ID:"),
 		MatchIDFromMatchState(&ms));
@@ -2960,7 +2967,7 @@ GtkItemFactoryEntry aife[] = {
 	{ N_("/_View/Restore panels"), NULL, ShowAllPanels, 0, NULL, NULL },
 	{ N_("/_View/Hide panels"), NULL, HideAllPanels, 0, NULL, NULL },
 	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>", NULL },
-	{ N_("/_View/Show _IDs in status bar"), NULL, ToggleShowingIDs, 0, "<CheckItem>", NULL },
+	{ N_("/_View/Show _ID in status bar"), NULL, ToggleShowingIDs, 0, "<CheckItem>", NULL },
 	{ N_("/_View/_Toolbar"), NULL, NULL, 0, "<Branch>", NULL},
 	{ N_("/_View/_Toolbar/_Hide Toolbar"), NULL, HideToolbar, 0, NULL, NULL },
 	{ N_("/_View/_Toolbar/_Show Toolbar"), NULL, ShowToolbar, 0, NULL, NULL },
@@ -5999,7 +6006,7 @@ extern void GTKSet( void *p ) {
 	else if( p == &fShowIDs )
 	{
 		inCallback = TRUE;
-		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/View/Show IDs in status bar" )), fShowIDs);
+		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/View/Show ID in status bar" )), fShowIDs);
 		inCallback = FALSE;
 
 		if (!fShowIDs)
