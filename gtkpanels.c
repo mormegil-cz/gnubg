@@ -1013,12 +1013,12 @@ void DockPanels(void)
 		}
 		CreatePanels();
 		if (fDisplayPanels)
-			SwapBoardToPanel(TRUE);
+			SwapBoardToPanel(TRUE, TRUE);
 	}
 	else
 	{
 		if (fDisplayPanels)
-			SwapBoardToPanel(FALSE);
+			SwapBoardToPanel(FALSE, TRUE);
 
 		gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Panels/Commentary"));
 		gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Hide panels"));
@@ -1101,7 +1101,7 @@ extern void ShowAllPanels ( gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUS
 	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Panels/Command"), TRUE);
 	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Panels/Theory"), TRUE);
 
-	SwapBoardToPanel(TRUE);
+	SwapBoardToPanel(TRUE, TRUE);
 
 #if USE_BOARD3D
 	if (display_is_3d(bd->rd))
@@ -1111,7 +1111,7 @@ extern void ShowAllPanels ( gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUS
 		gtk_widget_show(bd->drawing_area);
 }
 
-extern void HideAllPanels ( gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw) )
+void DoHideAllPanels(int updateEvents)
 {
 	BoardData *bd = BOARD( pwBoard )->board_data;
 	int i;
@@ -1139,6 +1139,7 @@ extern void HideAllPanels ( gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUS
 	}
 
 	gtk_widget_show(gtk_item_factory_get_widget(pif, "/View/Restore panels"));
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Restore panels"), TRUE);
 	gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Hide panels"));
 
 	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Panels/Message"), FALSE);
@@ -1148,7 +1149,7 @@ extern void HideAllPanels ( gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUS
 	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Panels/Theory"), FALSE);
 	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Panels/Command"), FALSE);
 
-	SwapBoardToPanel(FALSE);
+	SwapBoardToPanel(FALSE, updateEvents);
 
 	/* Resize screen */
 	SetMainWindowSize();
@@ -1159,6 +1160,11 @@ extern void HideAllPanels ( gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUS
 	else
 #endif
 		gtk_widget_show(bd->drawing_area);
+}
+
+extern void HideAllPanels ( gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw) )
+{
+	DoHideAllPanels(TRUE);
 }
 
 extern void ToggleDockPanels( gpointer UNUSED(p), guint UNUSED(n), GtkWidget *pw )
