@@ -1458,11 +1458,9 @@ static void DoFullScreenMode(gpointer p, guint n, GtkWidget * pw)
 		gtk_widget_hide(pwToolbar);
 		gtk_widget_hide(pwHandle);
 
-		/* Make window maximal - need to restore first (so title bar is removed) */
-		if (maximised)
-			gtk_window_unmaximize(ptl);
+		gtk_window_fullscreen(ptl);
 		gtk_window_set_decorated(ptl, FALSE);
-		gtk_window_maximize(ptl);
+
 		if (pmiRP)
 			gtk_widget_set_sensitive(pmiRP, FALSE);
 		if (pmiDP)
@@ -1491,9 +1489,7 @@ static void DoFullScreenMode(gpointer p, guint n, GtkWidget * pw)
 		if (g_signal_handler_is_connected(G_OBJECT(ptl), id))
 			g_signal_handler_disconnect(G_OBJECT(ptl), id);
 
-		/* Restore window */
-		if (!maximised)
-			gtk_window_unmaximize(ptl);
+		gtk_window_unfullscreen(ptl);
 		gtk_window_set_decorated(ptl, TRUE);
 
 		if (showingPanels)

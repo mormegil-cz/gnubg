@@ -1,3 +1,7 @@
+Sun Oct 18 12:30:00 2009  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c: Sort out full screen transitions
+
 Tue Oct 13 19:30:00 2009  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gtkboard.c + others: Move gnubgid into status bar
