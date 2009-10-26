@@ -62,8 +62,8 @@ const char *aszRNG[ NUM_RNGS ] = {
 rng rngCurrent = RNG_MERSENNE;
 rngcontext *rngctxCurrent = NULL;
 
-static int (*getDiceRandomDotOrg) (void);
-static int (*GetManualDice) (unsigned int[2]);
+extern int getDiceRandomDotOrg(void);
+extern int GetManualDice(unsigned int anDice[2]);
 
 struct _rngcontext {
 
@@ -634,13 +634,6 @@ RNGSystemSeed( const rng rngx, void *p, unsigned long *pnSeed ) {
 
     return f;
 
-}
-
-extern void dice_init_callback(int (*rdo_callback) (void),
-				int (*gmd_callback) (unsigned int[2]))
-{
-	getDiceRandomDotOrg = rdo_callback;
-	GetManualDice = gmd_callback;
 }
 
 extern void free_rngctx(rngcontext * rngctx)

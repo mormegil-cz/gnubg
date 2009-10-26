@@ -4382,7 +4382,7 @@ static void init_nets(int nNewWeights, int fNoBearoff)
 	g_free(gnubg_weights_binary);
 }
 
-static int GetManualDice(unsigned int anDice[2])
+extern int GetManualDice(unsigned int anDice[2])
 {
 
 	char *pz;
@@ -4445,7 +4445,7 @@ static int GetManualDice(unsigned int anDice[2])
 
 #if HAVE_SOCKETS
 
-static int getDiceRandomDotOrg(void)
+extern int getDiceRandomDotOrg(void)
 {
 
 #define BUFLENGTH 500
@@ -4572,8 +4572,6 @@ static void init_rng(void)
 	   could happen if InitRNG had to use the current time as a seed) -- mix
 	   it up a little bit */
 	rcRollout.nSeed ^= 0x792A584B;
-
-	dice_init_callback(getDiceRandomDotOrg, GetManualDice);
 }
 
 #if defined(WIN32) && HAVE_SOCKETS
