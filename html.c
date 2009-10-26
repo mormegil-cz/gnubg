@@ -3414,9 +3414,9 @@ extern void CommandExportMatchHtml( char *sz ) {
 
         if ( ! confirmOverwrite ( sz, fConfirmSave ) ) {
 		  for ( j = 0; j < 4; j++ )
-			free (filenames [ j ] );
+			g_free (filenames [ j ] );
 
-		  free ( szCurrent );
+		  g_free ( szCurrent );
           return;
 		}
 
@@ -3430,9 +3430,9 @@ extern void CommandExportMatchHtml( char *sz ) {
       else if( !( pf = g_fopen( szCurrent, "w" ) ) ) {
 	outputerr( szCurrent );
 		for ( j = 0; j < 4; j++ )
-		  free (filenames [ j ] );
+		  g_free (filenames [ j ] );
 
-		free ( szCurrent );
+		g_free ( szCurrent );
 	return;
       }
 
@@ -3443,9 +3443,9 @@ extern void CommandExportMatchHtml( char *sz ) {
                        aszLinks );
 
       for ( j = 0; j < 4; j++ )
-        free (filenames [ j ] );
+        g_free (filenames [ j ] );
 
-      free ( szCurrent );
+      g_free ( szCurrent );
 
       if( pf != stdout )
         fclose( pf );
