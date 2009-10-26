@@ -609,6 +609,10 @@ static void RenderObjects(void)
 
 	rd.fLabels = TRUE; 
 	rd.nSize = s;
+#if USE_BOARD3D
+	/* Use 2d colours for dice */
+	rd.fDisplayType = DT_2D;
+#endif
 
 	RenderBoard( &rd, auchBoard, boardStride );
 	RenderChequers( &rd, auchChequer[ 0 ], auchChequer[ 1 ], asRefract[ 0 ],
@@ -627,12 +631,13 @@ static void RenderObjects(void)
 	RenderBoardLabels(&rd, auchLoRev, auchHiRev, BOARD_WIDTH * s * 4);
 	rd.fClockwise = clockwise;
 
-	/* cubes and dices are rendered a bit smaller */
+	/* cubes and dice are rendered a bit smaller */
 	rd.nSize = ss;
 
 	RenderCube( &rd, auchCube, CUBE_WIDTH * ss * 4 );
 	RenderCubeFaces( &rd, auchCubeFaces, CUBE_LABEL_WIDTH * ss * 3, auchCube, CUBE_WIDTH * ss * 4 );
-	RenderDice( &rd, auchDice[ 0 ], auchDice[ 1 ], DIE_WIDTH * ss * 4 );
+
+	RenderDice( &rd, auchDice[ 0 ], auchDice[ 1 ], DIE_WIDTH * ss * 4, TRUE);
 	RenderPips( &rd, auchPips[ 0 ], auchPips[ 1 ], ss * 3 );
 }
 

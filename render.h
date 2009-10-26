@@ -173,7 +173,7 @@ extern void RenderCubeFaces( renderdata *prd, unsigned char *puch,
 			     int nStride, unsigned char *puchCube,
 			     int nStrideCube );
 extern void RenderDice( renderdata *prd, unsigned char *puch0,
-			unsigned char *puch1, int nStride );
+			unsigned char *puch1, int nStride, int alpha );
 extern void RenderPips( renderdata *prd, unsigned char *puch0,
 			unsigned char *puch1, int nStride );
 extern void RenderImages( renderdata *prd, renderimages *pri );

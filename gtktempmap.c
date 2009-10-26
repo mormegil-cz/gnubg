@@ -397,10 +397,8 @@ static void ExposeQuadrant(GtkWidget * pw, GdkEventExpose *UNUSED(pev), tempmapw
 	g_string_free(str, TRUE);
 }
 
-static void
-ExposeDie( GtkWidget *pw, GdkEventExpose *pev,
-           tempmapwidget *ptmw ) {
-
+static void ExposeDie( GtkWidget *pw, GdkEventExpose *pev, tempmapwidget *ptmw )
+{
   int *pi = (int *) g_object_get_data( G_OBJECT( pw ), "user_data" );
   GdkGC *gc = ( ( BoardData *) ( BOARD( pwBoard ) )->board_data )->gc_copy;
   int x, y;
@@ -410,8 +408,8 @@ ExposeDie( GtkWidget *pw, GdkEventExpose *pev,
   if ( nSizeDie > ( ( pw->allocation.height - 4 ) / 7 ) )
     nSizeDie = ( pw->allocation.height - 4 )/ 7;
 
-  if ( ptmw->nSizeDie != nSizeDie ) {
-
+  if ( ptmw->nSizeDie != nSizeDie )
+  {
     int i;
     renderdata rd;
 
@@ -431,9 +429,8 @@ ExposeDie( GtkWidget *pw, GdkEventExpose *pev,
       ptmw->achPips[ i ] = (unsigned char*)g_malloc ( nSizeDie * nSizeDie * 3 );
     }
 
-    RenderDice( &rd, ptmw->achDice[ 0 ], ptmw->achDice[ 1 ], nSizeDie * 7 * 4 );
+    RenderDice( &rd, ptmw->achDice[ 0 ], ptmw->achDice[ 1 ], nSizeDie * 7 * 4, FALSE );
     RenderPips( &rd, ptmw->achPips[ 0 ], ptmw->achPips[ 1 ], nSizeDie * 3 );
-
   }
 
   x = ( pw->allocation.width - ptmw->nSizeDie * 7 ) / 2;
@@ -442,14 +439,11 @@ ExposeDie( GtkWidget *pw, GdkEventExpose *pev,
   gdk_window_clear_area( pw->window, pev->area.x, pev->area.y,
 			 pev->area.width, pev->area.height);
   DrawDie( pw->window, ptmw->achDice, ptmw->achPips, ptmw->nSizeDie,
-           gc, x, y, ptmw->atm[ 0 ].pms->fMove, *pi + 1 );
-
+           gc, x, y, ptmw->atm[ 0 ].pms->fMove, *pi + 1, FALSE );
 }
 
-
-static void
-TempMapPlyToggled( GtkWidget *pw, tempmapwidget *ptmw ) {
-
+static void TempMapPlyToggled( GtkWidget *pw, tempmapwidget *ptmw )
+{
   int *pi = (int *) g_object_get_data( G_OBJECT( pw ), "user_data" );
 
   evalcontext ec = { TRUE, 0, FALSE, TRUE, 0.0 };

@@ -3501,14 +3501,16 @@ static void DrawAlphaImage( GdkDrawable *pd, int x, int y,
 
 extern void DrawDie( GdkDrawable *pd, unsigned char *achDice[ 2 ], unsigned
 		char *achPip[ 2 ], const int s, GdkGC *gc, int x, int y, int
-		fColour, int n )
+		fColour, int n, int alpha )
 {
 
     int ix, iy, afPip[ 9 ];
 
-    DrawAlphaImage( pd, x, y, achDice[ fColour ], DIE_WIDTH * s * 4,
-		    DIE_WIDTH * s, DIE_HEIGHT * s );
-    
+	if (alpha)
+	    DrawAlphaImage( pd, x, y, achDice[ fColour ], DIE_WIDTH * s * 4, DIE_WIDTH * s, DIE_HEIGHT * s );
+	else
+		gdk_draw_rgb_image(pd, gc, x, y, DIE_WIDTH * s, DIE_HEIGHT * s, GDK_RGB_DITHER_MAX, achDice[ fColour ], DIE_WIDTH * s * 3);
+
     afPip[ 0 ] = afPip[ 8 ] = ( n == 2 ) || ( n == 3 ) || ( n == 4 ) ||
 	( n == 5 ) || ( n == 6 );
     afPip[ 1 ] = afPip[ 7 ] = 0;
@@ -3533,11 +3535,11 @@ static gboolean dice_expose( GtkWidget *dice, GdkEventExpose *event,
 
     DrawDie( dice->window, bd->ri.achDice, bd->ri.achPip,
 	     bd->rd->nSize, bd->gc_copy,
-             0, 0, bd->turn > 0, bd->diceRoll[ 0 ] );
+             0, 0, bd->turn > 0, bd->diceRoll[ 0 ], TRUE );
     DrawDie( dice->window, bd->ri.achDice, bd->ri.achPip,
 	     bd->rd->nSize, bd->gc_copy,
              ( DIE_WIDTH + 1 ) * bd->rd->nSize, 0,
-	     bd->turn > 0, bd->diceRoll[ 1 ] );
+	     bd->turn > 0, bd->diceRoll[ 1 ], TRUE );
 
     return TRUE;
 }
@@ -4018,9 +4020,9 @@ static gboolean dice_widget_expose(GtkWidget *dice, GdkEventExpose * event, Boar
 	int n = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(dice), "user_data"));
 
 	DrawDie(dice->window, TTachDice, TTachPip, setSize, bd->gc_copy,
-		0, 0, ((n % 6) <= n / 6), n % 6 + 1);
+		0, 0, ((n % 6) <= n / 6), n % 6 + 1, FALSE);
 	DrawDie(dice->window, TTachDice, TTachPip, setSize, bd->gc_copy,
-		DIE_WIDTH * setSize, 0, ((n % 6) < n / 6), n / 6 + 1);
+		DIE_WIDTH * setSize, 0, ((n % 6) < n / 6), n / 6 + 1, FALSE);
 
 	return TRUE;
 }
@@ -4101,7 +4103,7 @@ extern GtkWidget *board_dice_widget(Board * board)
 	TTachPip[0] = malloc(pipStride * setSize);
 	TTachPip[1] = malloc(pipStride * setSize);
 
-	RenderDice(&rd, TTachDice[0], TTachDice[1], diceStride);
+	RenderDice(&rd, TTachDice[0], TTachDice[1], diceStride, FALSE);
 	RenderPips(&rd, TTachPip[0], TTachPip[1], pipStride);
 
 	for (y = 0; y < 6; y++) {

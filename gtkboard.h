@@ -187,7 +187,7 @@ extern void DestroyPanel(gnubgwindow window);
 extern void
 DrawDie( GdkDrawable *pd, 
          unsigned char *achDice[ 2 ], unsigned char *achPip[ 2 ],
-         const int s, GdkGC *gc, int x, int y, int fColour, int n );
+         const int s, GdkGC *gc, int x, int y, int fColour, int n, int alpha );
 
 extern int UpdateMove( BoardData *bd, TanBoard anBoard );
 extern void stop_board_expose(BoardData *bd);

@@ -2176,7 +2176,7 @@ static void RenderResignFaces( renderdata *prd, unsigned char *puch,
 #define circ(x,y) ssqrt( (x*x) + (y*y) )
 
 extern void RenderDice( renderdata *prd, unsigned char *puch0,
-			unsigned char *puch1, int nStride ) {
+			unsigned char *puch1, int nStride, int alpha ) {
     
     unsigned int ix, iy;
     int in, fx, fy, i;
@@ -2252,12 +2252,14 @@ extern void RenderDice( renderdata *prd, unsigned char *puch0,
 	    for( i = 0; i < 3; i++ )
 		*puch0++ = clamp( ( diffuse * aarDiceColour[ 0 ][ i ] +
 				    specular_x ) * 64.0 );
-	    *puch0++ = 255 * ( 4 - in ) / 4; /* alpha channel */
+		if (alpha)
+		    *puch0++ = 255 * ( 4 - in ) / 4; /* alpha channel */
 	    
 	    for( i = 0; i < 3; i++ )
 		*puch1++ = clamp( ( diffuse * aarDiceColour[ 1 ][ i ] +
 				    specular_o ) * 64.0 );
-	    *puch1++ = 255 * ( 4 - in ) / 4; /* alpha channel */
+		if (alpha)
+		    *puch1++ = 255 * ( 4 - in ) / 4; /* alpha channel */
 	    
 	    x_loop += 2.0 / ( DIE_WIDTH * prd->nSize );
 	}
@@ -2813,7 +2815,7 @@ extern void RenderImages( renderdata *prd, renderimages *pri ) {
 		    nSize * CHEQUER_WIDTH * 4 );
     RenderChequerLabels( prd, pri->achChequerLabels, nSize * 
 			 CHEQUER_LABEL_WIDTH * 3 );
-    RenderDice( prd, pri->achDice[ 0 ], pri->achDice[ 1 ], nSize * DIE_WIDTH * 4 );
+    RenderDice( prd, pri->achDice[ 0 ], pri->achDice[ 1 ], nSize * DIE_WIDTH * 4, TRUE );
     RenderPips( prd, pri->achPip[ 0 ], pri->achPip[ 1 ], nSize * 3 );
     RenderCube( prd, pri->achCube, nSize * CUBE_WIDTH * 4 );
     RenderCubeFaces( prd, pri->achCubeFaces, nSize * CUBE_LABEL_WIDTH * 3,

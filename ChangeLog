@@ -1,5 +1,9 @@
 Sun Oct 18 12:30:00 2009  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
+	* render.c, gtkboard.c + others: Sort out 2d dice colours when in 3d mode
+
+Sun Oct 18 12:30:00 2009  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
 	* gtkgame.c: Sort out full screen transitions
 
 Tue Oct 13 19:30:00 2009  Jon Kinsey <Jon_Kinsey@hotmail.com>
