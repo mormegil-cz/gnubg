@@ -1313,6 +1313,10 @@ SwitchDisplayMode( gpointer p, guint n, GtkWidget *pw )
 		if (bd->diceShown == DICE_ON_BOARD)
 			setDicePos(bd, bd3d);	/* Make sure dice appear ok */
 		RestrictiveRedraw();
+
+		/* Needed for 2d dice+chequer widgets */
+		board_free_pixmaps(bd);
+		board_create_pixmaps(pwBoard, bd);
 	}
 	else
 	{
@@ -1327,6 +1331,8 @@ SwitchDisplayMode( gpointer p, guint n, GtkWidget *pw )
 
 	DisplayCorrectBoardType(bd, bd3d, prd);
 	SetSwitchModeMenuText();
+	/* Make sure chequers correct below board */
+	gtk_widget_queue_draw(bd->table);
 }
 
 #endif
