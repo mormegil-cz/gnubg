@@ -3183,6 +3183,34 @@ static void StopNotButton( GtkWidget *pw, gpointer unused )
 		gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idOutput, _("Press the stop button to interrupt the current process") );
 }
 
+#define FILE_URI "file:///"
+void FileDragDropped(GtkWidget *widget, GdkDragContext *drag_context,
+		gint x, gint y, GtkSelectionData *data, guint info, guint time)
+{
+	char* file = g_uri_unescape_string(data->data, NULL);
+	if (!strncmp(FILE_URI, file, strlen(FILE_URI)))
+	{	/* Adjust URI to quoted filename */
+		int fileLen = strlen(file);
+		char *multiple, *filename = malloc(fileLen);
+		filename[0] = '"';
+		strcpy(filename + 1, file + strlen(FILE_URI));
+		if ((multiple = strstr(filename, FILE_URI)) != NULL)
+			*multiple = '\0';	/* Skip multiple files */
+
+		fileLen = strlen(filename) - 1;
+		while (isspace(filename[fileLen]))
+			filename[fileLen--] = '\0';
+		strcpy(filename + 1 + fileLen, "\"");
+
+		gtk_window_present(GTK_WINDOW(pwMain));
+		/* Open file */
+		CommandImportAuto(filename);
+		free(filename);
+	}
+	g_free(file);
+}
+
+
 static gboolean ContextMenu(GtkWidget *widget, GdkEventButton *event, GtkWidget* menu)
 {
 	if (event->type != GDK_BUTTON_PRESS || event->button != 3)
@@ -3196,6 +3224,7 @@ static gboolean ContextMenu(GtkWidget *widget, GdkEventButton *event, GtkWidget*
 static void CreateMainWindow(void)
 {
 	GtkWidget *pwVbox, *pwHbox, *pwHbox2, *pwHandle, *pwPanelHbox, *pwStopButton, *idMenu, *menu_item, *pwFrame;
+	GtkTargetEntry fileDrop = {"text/uri-list", GTK_TARGET_OTHER_APP, 1};
 
     pwMain = gtk_window_new( GTK_WINDOW_TOPLEVEL );
     gtk_window_maximize(GTK_WINDOW(pwMain));
@@ -3204,9 +3233,11 @@ static void CreateMainWindow(void)
     gtk_window_set_type_hint( GTK_WINDOW( pwMain ),
 			      GDK_WINDOW_TYPE_HINT_NORMAL );
     gtk_window_set_title( GTK_WINDOW( pwMain ), _("GNU Backgammon") );
-    /* FIXME add an icon */
-    gtk_container_add( GTK_CONTAINER( pwMain ),
-		       pwVbox = gtk_vbox_new( FALSE, 0 ) );
+	/* Enable dropping of files on to main window */
+	gtk_drag_dest_set(pwMain, GTK_DEST_DEFAULT_ALL, &fileDrop, 1, GDK_ACTION_DEFAULT);
+	g_signal_connect(G_OBJECT(pwMain), "drag_data_received", G_CALLBACK(FileDragDropped), NULL);
+
+    gtk_container_add( GTK_CONTAINER( pwMain ), pwVbox = gtk_vbox_new( FALSE, 0 ) );
 
     pagMain = gtk_accel_group_new();
     pif = gtk_item_factory_new( GTK_TYPE_MENU_BAR, "<main>", pagMain );

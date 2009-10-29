@@ -1,3 +1,8 @@
+Thu Oct 29 11:30:00 2009  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c: Allow files to be dropped onto gnubg to open them
+		Bug #27685 suggested by Eric.
+
 Mon Oct 26 16:30:00 2009  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* render.c, gtkboard.c + others: Sort out 2d dice colours when in 3d mode
