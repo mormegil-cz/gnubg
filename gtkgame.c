@@ -3183,31 +3183,33 @@ static void StopNotButton( GtkWidget *pw, gpointer unused )
 		gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idOutput, _("Press the stop button to interrupt the current process") );
 }
 
-#define FILE_URI "file:///"
-void FileDragDropped(GtkWidget *widget, GdkDragContext *drag_context,
-		gint x, gint y, GtkSelectionData *data, guint info, guint time)
+static void FileDragDropped(GtkWidget *widget, GdkDragContext * drag_context,
+			    gint x, gint y, GtkSelectionData * data, guint info, guint time)
 {
-	char* file = g_uri_unescape_string(data->data, NULL);
-	if (!strncmp(FILE_URI, file, strlen(FILE_URI)))
-	{	/* Adjust URI to quoted filename */
-		int fileLen = strlen(file);
-		char *multiple, *filename = malloc(fileLen);
-		filename[0] = '"';
-		strcpy(filename + 1, file + strlen(FILE_URI));
-		if ((multiple = strstr(filename, FILE_URI)) != NULL)
-			*multiple = '\0';	/* Skip multiple files */
+#define RET_CHAR '\r'
+	if (data->length > 0) {
+		char *next, *file, *quoted;
+		char *uri = (char *)data->data;
+		if (StrNCaseCmp("file:", uri, 5) != 0) {
+			outputerrf(_("Only local files supported in dnd"));
+			return;
+		}
 
-		fileLen = strlen(filename) - 1;
-		while (isspace(filename[fileLen]))
-			filename[fileLen--] = '\0';
-		strcpy(filename + 1 + fileLen, "\"");
+		file = g_filename_from_uri(uri, NULL, NULL);
 
-		gtk_window_present(GTK_WINDOW(pwMain));
-		/* Open file */
-		CommandImportAuto(filename);
-		free(filename);
+		if (!file) {
+			outputerrf(_("Failed to parse uri"));
+			return;
+		}
+
+		next = strchr(file, RET_CHAR);
+		if (next)
+			*next = 0;
+		quoted = g_strdup_printf("\"%s\"", file);
+		CommandImportAuto(quoted);
+		g_free(quoted);
+		g_free(file);
 	}
-	g_free(file);
 }
 
 
@@ -3234,8 +3236,8 @@ static void CreateMainWindow(void)
 			      GDK_WINDOW_TYPE_HINT_NORMAL );
     gtk_window_set_title( GTK_WINDOW( pwMain ), _("GNU Backgammon") );
 	/* Enable dropping of files on to main window */
-	gtk_drag_dest_set(pwMain, GTK_DEST_DEFAULT_ALL, &fileDrop, 1, GDK_ACTION_DEFAULT);
-	g_signal_connect(G_OBJECT(pwMain), "drag_data_received", G_CALLBACK(FileDragDropped), NULL);
+	gtk_drag_dest_set(pwMain, GTK_DEST_DEFAULT_ALL, &fileDrop, 1, GDK_ACTION_COPY);
+	g_signal_connect(G_OBJECT(pwMain), "drag-data-received", G_CALLBACK(FileDragDropped), NULL);
 
     gtk_container_add( GTK_CONTAINER( pwMain ), pwVbox = gtk_vbox_new( FALSE, 0 ) );
 

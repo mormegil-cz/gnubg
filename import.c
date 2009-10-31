@@ -3773,9 +3773,14 @@ extern void CommandImportAuto(char *sz)
 		outputerrf(_("You must specify a file to import (see `help " "import auto')."));
 		return;
 	}
+	if (!g_file_test(sz, G_FILE_TEST_EXISTS))
+	{
+		outputerrf(_("The file `%s' doesn't exist"), sz);
+		return;
+	}
 	fdp = ReadFilePreview(sz);
 	if (!fdp) {
-		outputerrf(_("%s is not a backgammon file"), sz);
+		outputerrf(_("`%s' is not a backgammon file"), sz);
 		g_free(fdp);
 		return;
 	} else if (fdp->type == N_IMPORT_TYPES) {
