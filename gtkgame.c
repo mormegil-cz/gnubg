@@ -485,28 +485,44 @@ static void gui_clear_turn(GtkWidget *pw, GtkWidget *dialog)
 
 extern int GTKGetManualDice(unsigned int an[2])
 {
-
 	GtkWidget *dialog;
 	GtkWidget *dice;
-	GtkContainer *buttons;
+	GtkWidget *buttons;
 	GtkWidget *clear;
+	BoardData *bd = BOARD( pwBoard )->board_data;
 
-	dialog =
-	    GTKCreateDialog(_("GNU Backgammon - Dice"), DT_INFO, NULL,
+	manualDiceType mdt;
+	if (ToolbarIsEditing(pwToolbar))
+		mdt = MT_EDIT;
+	else if (plLastMove && ((moverecord*)plLastMove->p)->mt == MOVE_GAMEINFO)
+		mdt = MT_FIRSTMOVE;
+	else
+		mdt = MT_STANDARD;
+
+	dialog = GTKCreateDialog(_("GNU Backgammon - Dice"), DT_INFO, NULL,
 			    DIALOG_FLAG_MODAL | DIALOG_FLAG_CLOSEBUTTON, NULL, NULL);
-	dice = board_dice_widget(BOARD(pwBoard));
-	buttons = GTK_CONTAINER(DialogArea(dialog, DA_BUTTONS));
-	clear = gtk_button_new_with_label(_("Clear"));
-
-	an[0] = 0;
+	dice = board_dice_widget(BOARD(pwBoard), mdt);
 
 	gtk_container_add(GTK_CONTAINER(DialogArea(dialog, DA_MAIN)), dice);
-	gtk_container_add(buttons, clear);
-	g_object_set_data(G_OBJECT(dice), "user_data", an);
-	g_signal_connect(G_OBJECT(dice), "destroy", G_CALLBACK(DestroySetDice), dialog);
+
+	buttons = DialogArea(dialog, DA_BUTTONS);
+	clear = gtk_button_new_with_label(_("Clear Dice"));
+	gtk_container_add(GTK_CONTAINER(buttons), clear);
 	g_signal_connect(G_OBJECT(clear), "clicked", G_CALLBACK(gui_clear_turn), dialog);
+	gtk_widget_set_sensitive(GTK_WIDGET(clear), bd->diceShown == DICE_ON_BOARD);
+
+	g_object_set_data(G_OBJECT(dice), "user_data", an);
+	an[0] = 0;
 
 	GTKRunDialog(dialog);
+
+	if (mdt == MT_EDIT && an[0])
+	{
+		if (an[0] > an[1] && bd->turn != -1)
+			UserCommand( "set turn 0");
+		else if (an[0] < an[1] && bd->turn != 1)
+			UserCommand( "set turn 1");
+	}
 
 	return an[0] ? 0 : -1;
 }
@@ -3187,7 +3203,6 @@ static void StopNotButton( GtkWidget *pw, gpointer unused )
 static void FileDragDropped(GtkWidget *widget, GdkDragContext * drag_context,
 			    gint x, gint y, GtkSelectionData * data, guint info, guint time)
 {
-#define RET_CHAR '\r'
 	if (data->length > 0) {
 		char *next, *file, *quoted;
 		char *uri = (char *)data->data;
@@ -3203,7 +3218,7 @@ static void FileDragDropped(GtkWidget *widget, GdkDragContext * drag_context,
 			return;
 		}
 
-		next = strchr(file, RET_CHAR);
+		next = strchr(file, '\r');
 		if (next)
 			*next = 0;
 		quoted = g_strdup_printf("\"%s\"", file);
@@ -3237,8 +3252,8 @@ static void CreateMainWindow(void)
 			      GDK_WINDOW_TYPE_HINT_NORMAL );
     gtk_window_set_title( GTK_WINDOW( pwMain ), _("GNU Backgammon") );
 	/* Enable dropping of files on to main window */
-	gtk_drag_dest_set(pwMain, GTK_DEST_DEFAULT_ALL, &fileDrop, 1, GDK_ACTION_COPY);
-	g_signal_connect(G_OBJECT(pwMain), "drag-data-received", G_CALLBACK(FileDragDropped), NULL);
+	gtk_drag_dest_set(pwMain, GTK_DEST_DEFAULT_ALL, &fileDrop, 1, GDK_ACTION_DEFAULT);
+	g_signal_connect(G_OBJECT(pwMain), "drag_data_received", G_CALLBACK(FileDragDropped), NULL);
 
     gtk_container_add( GTK_CONTAINER( pwMain ), pwVbox = gtk_vbox_new( FALSE, 0 ) );
 

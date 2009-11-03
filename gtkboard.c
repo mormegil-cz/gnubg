@@ -77,7 +77,16 @@ int animate_player, *animate_move_list, animation_finished = TRUE;
 
 static GtkVBoxClass *parent_class = NULL;
 static randctx rc;
-static unsigned char *TTachCube, *TTachCubeFaces, *TTachDice[2], *TTachPip[2];
+
+typedef struct _SetDiceData
+{
+	unsigned char *TTachDice[2], *TTachPip[2], *TTachGrayDice, *TTachGrayPip;
+	BoardData *bd;
+	manualDiceType mdt;
+} SetDiceData;
+/*todo - tidy set cube like above */
+char *TTachCube, *TTachCubeFaces;
+
 #define RAND irand( &rc )
 
 static gint board_set( Board *board, const gchar *board_text,
@@ -1669,7 +1678,7 @@ extern gboolean board_button_press(GtkWidget *board, GdkEventButton *event,
     if (editing && (bd->drag_point == POINT_DICE ||
 		bd->drag_point == POINT_LEFT || bd->drag_point == POINT_RIGHT))
 	{
-		if (bd->drag_point == POINT_LEFT && bd->turn != 0)
+		if (bd->drag_point == POINT_LEFT && bd->turn != -1)
 			UserCommand( "set turn 0" );
 		else if (bd->drag_point == POINT_RIGHT && bd->turn != 1)
 			UserCommand( "set turn 1" );
@@ -4013,24 +4022,39 @@ extern GtkWidget *board_cube_widget( Board *board )
 }
 
 
-static gboolean dice_widget_expose(GtkWidget *dice, GdkEventExpose * event, BoardData *bd)
+static gboolean setdice_widget_expose(GtkWidget *dice, GdkEventExpose * event, SetDiceData *sdd)
 {
-
-	int setSize = bd->rd->nSize;
+	int setSize = sdd->bd->rd->nSize;
 	int n = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(dice), "user_data"));
 
-	DrawDie(dice->window, TTachDice, TTachPip, setSize, bd->gc_copy,
-		0, 0, ((n % 6) <= n / 6), n % 6 + 1, FALSE);
-	DrawDie(dice->window, TTachDice, TTachPip, setSize, bd->gc_copy,
-		DIE_WIDTH * setSize, 0, ((n % 6) < n / 6), n / 6 + 1, FALSE);
+	if (sdd->mdt == MT_FIRSTMOVE && (n % 6 == n / 6))
+	{
+		DrawDie(dice->window, &sdd->TTachGrayDice, &sdd->TTachGrayPip, setSize, sdd->bd->gc_copy,
+			0, 0, 0, n % 6 + 1, FALSE);
+		DrawDie(dice->window, &sdd->TTachGrayDice, &sdd->TTachGrayPip, setSize, sdd->bd->gc_copy,
+			DIE_WIDTH * setSize, 0, 0, n / 6 + 1, FALSE);
+	}
+	else
+	{
+		int col1, col2;
+		if (sdd->mdt == MT_STANDARD)
+			col1 = col2 = (sdd->bd->turn == 1) ? 1 : 0;
+		else if (sdd->mdt == MT_EDIT && (n % 6 == n / 6))
+			col1 = 1, col2 = 0;
+		else
+			col1 = col2 = ((n % 6) <= n / 6);
 
+		DrawDie(dice->window, sdd->TTachDice, sdd->TTachPip, setSize, sdd->bd->gc_copy,
+			0, 0, col1, n % 6 + 1, FALSE);
+		DrawDie(dice->window, sdd->TTachDice, sdd->TTachPip, setSize, sdd->bd->gc_copy,
+			DIE_WIDTH * setSize, 0, col2, n / 6 + 1, FALSE);
+	}
 	return TRUE;
 }
 
 static gboolean dice_widget_press( GtkWidget *dice, GdkEvent *event, BoardData
 		*bd )
 {
-
     GtkWidget *pwTable = dice->parent->parent;
     int n = GPOINTER_TO_INT(g_object_get_data( G_OBJECT( dice ), "user_data" ));
     int *an = g_object_get_data( G_OBJECT( pwTable ), "user_data" );
@@ -4038,18 +4062,21 @@ static gboolean dice_widget_press( GtkWidget *dice, GdkEvent *event, BoardData
     an[ 0 ] = n % 6 + 1;
     an[ 1 ] = n / 6 + 1;
 
-    gtk_widget_destroy( pwTable );
+    gtk_widget_destroy( gtk_widget_get_toplevel(dice) );
     
     return TRUE;
 }
 
-extern void DestroySetDice(GtkObject *po, GtkWidget *pw)
+extern void DestroySetDice(GtkWidget *po, void *data)
 {
-	free(TTachDice[0]);
-	free(TTachDice[1]);
-	free(TTachPip[0]);
-	free(TTachPip[1]);
-	gtk_widget_destroy(pw);
+	SetDiceData *sdd = (SetDiceData *)data;
+	free(sdd->TTachDice[0]);
+	free(sdd->TTachDice[1]);
+	free(sdd->TTachPip[0]);
+	free(sdd->TTachPip[1]);
+	free(sdd->TTachGrayDice);
+	free(sdd->TTachGrayPip);
+	gtk_widget_destroy(gtk_widget_get_toplevel(po));
 }
 
 #if USE_BOARD3D
@@ -4071,25 +4098,57 @@ extern void Copy3dDiceColour(renderdata* prd)
 }
 #endif
 
-extern GtkWidget *board_dice_widget(Board * board)
+extern GtkWidget *board_dice_widget(Board * board, manualDiceType mdt)
 {
 	GtkWidget *main_table = gtk_table_new(2, 2, FALSE);
 	GtkWidget *pw = gtk_table_new(6, 6, TRUE);
 	GtkWidget *pwDice;
 	GtkWidget *label;
+	char *str;
 	BoardData *bd = board->board_data;
 	int x, y;
 	int setSize = bd->rd->nSize;
 	int diceStride = setSize * DIE_WIDTH * 4;
 	int pipStride = setSize * 3;
 	renderdata rd;
+	SetDiceData* sdd = (SetDiceData*)malloc(sizeof(SetDiceData));
+	sdd->bd = bd;
+	sdd->mdt = mdt;
 
-	label = gtk_label_new(_("High die right (or bottom player wins opening roll)"));
-	gtk_label_set_angle(GTK_LABEL(label), 90);
-	gtk_table_attach_defaults(GTK_TABLE(main_table), label, 0, 1, 1, 2);
-
-	label = gtk_label_new(_("High die left (or top player wins opening roll)"));
+	if (mdt == MT_FIRSTMOVE)
+	{
+		str = g_strdup_printf(_("%s wins opening roll"), ap[0].szName);
+		label = gtk_label_new(str);
+		g_free(str);
+	}
+	else
+	{
+		int player = 0;
+		if (mdt == MT_STANDARD)
+			player = (bd->turn == 1) ? 1 : 0;
+		str = g_strdup_printf(_("%s to roll"), ap[player].szName);
+		label = gtk_label_new(str);
+		g_free(str);
+	}
 	gtk_table_attach_defaults(GTK_TABLE(main_table), label, 1, 2, 0, 1);
+
+	if (mdt != MT_STANDARD)
+	{
+		if (mdt == MT_FIRSTMOVE)
+		{
+			str = g_strdup_printf(_("%s wins opening roll"), ap[1].szName);
+			label = gtk_label_new(str);
+			g_free(str);
+		}
+		else
+		{
+			str = g_strdup_printf(_("%s to roll"), ap[1].szName);
+			label = gtk_label_new(str);
+			g_free(str);
+		}
+		gtk_label_set_angle(GTK_LABEL(label), 90);
+		gtk_table_attach_defaults(GTK_TABLE(main_table), label, 0, 1, 1, 2);
+	}
 
 	gtk_table_attach_defaults(GTK_TABLE(main_table), pw, 1, 2, 1, 2);
 
@@ -4098,13 +4157,30 @@ extern GtkWidget *board_dice_widget(Board * board)
 #if USE_BOARD3D
 	Copy3dDiceColour(&rd);
 #endif
-	TTachDice[0] = malloc(diceStride * setSize * DIE_HEIGHT);
-	TTachDice[1] = malloc(diceStride * setSize * DIE_HEIGHT);
-	TTachPip[0] = malloc(pipStride * setSize);
-	TTachPip[1] = malloc(pipStride * setSize);
+	sdd->TTachDice[0] = malloc(diceStride * setSize * DIE_HEIGHT);
+	sdd->TTachDice[1] = malloc(diceStride * setSize * DIE_HEIGHT);
+	sdd->TTachPip[0] = malloc(pipStride * setSize);
+	sdd->TTachPip[1] = malloc(pipStride * setSize);
 
-	RenderDice(&rd, TTachDice[0], TTachDice[1], diceStride, FALSE);
-	RenderPips(&rd, TTachPip[0], TTachPip[1], pipStride);
+	RenderDice(&rd, sdd->TTachDice[0], sdd->TTachDice[1], diceStride, FALSE);
+	RenderPips(&rd, sdd->TTachPip[0], sdd->TTachPip[1], pipStride);
+
+	if (mdt == MT_FIRSTMOVE)
+	{	/* Gray dice for doubles on first move */
+		sdd->TTachGrayDice = malloc(diceStride * setSize * DIE_HEIGHT);
+		sdd->TTachGrayPip = malloc(pipStride * setSize);
+
+	    rd.aarDiceColour[0][0] = rd.aarDiceColour[0][1] = rd.aarDiceColour[0][2] = .75;
+	    rd.aarDiceColour[1][0] = rd.aarDiceColour[1][1] = rd.aarDiceColour[1][2] = .75;
+		rd.aarDiceDotColour[0][0] = rd.aarDiceDotColour[0][1] = rd.aarDiceDotColour[0][2] = .25;
+	    rd.aarDiceDotColour[1][0] = rd.aarDiceDotColour[1][1] = rd.aarDiceDotColour[1][2] = .25;
+		rd.afDieColour[0] = rd.afDieColour[1] = 0;
+
+		RenderDice(&rd, sdd->TTachGrayDice, sdd->TTachGrayDice, diceStride, FALSE);
+		RenderPips(&rd, sdd->TTachGrayPip, sdd->TTachGrayPip, pipStride);
+	}
+	else
+		sdd->TTachGrayDice = sdd->TTachGrayPip = NULL;
 
 	for (y = 0; y < 6; y++) {
 		for (x = 0; x < 6; x++) {
@@ -4117,7 +4193,7 @@ extern GtkWidget *board_dice_widget(Board * board)
 					      GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK |
 					      GDK_STRUCTURE_MASK);
 			g_signal_connect(G_OBJECT(pwDice), "expose_event",
-					 G_CALLBACK(dice_widget_expose), bd);
+					 G_CALLBACK(setdice_widget_expose), sdd);
 			g_signal_connect(G_OBJECT(pwDice), "button_press_event",
 					 G_CALLBACK(dice_widget_press), bd);
 			gtk_table_attach_defaults(GTK_TABLE(pw), pwDice, x, x + 1, y, y + 1);
@@ -4127,6 +4203,8 @@ extern GtkWidget *board_dice_widget(Board * board)
 	gtk_table_set_row_spacings(GTK_TABLE(pw), 2 * setSize);
 	gtk_table_set_col_spacings(GTK_TABLE(pw), 1 * setSize);
 	gtk_container_set_border_width(GTK_CONTAINER(pw), setSize);
+
+	g_signal_connect(G_OBJECT(main_table), "destroy", G_CALLBACK(DestroySetDice), sdd);
 
 	return main_table;
 }

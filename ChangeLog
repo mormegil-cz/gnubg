@@ -1,3 +1,7 @@
+Tue Nov 03 17:30:00 2009  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c, gtkboard.c: Improve manual dice selection colours and text
+
 Sat Oct 31 21:48:27 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, gtkgame.c, import.c, timer.c: dnd didn't work under

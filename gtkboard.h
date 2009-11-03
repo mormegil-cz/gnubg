@@ -142,8 +142,8 @@ extern GtkWidget *board_new(renderdata* prd);
 extern GtkWidget *board_cube_widget( Board *board );
 extern void DestroySetCube(GtkObject *po, GtkWidget *pw);
 extern void Copy3dDiceColour(renderdata* prd);
-extern GtkWidget *board_dice_widget( Board *board );
-extern void DestroySetDice(GtkObject *po, GtkWidget *pw);
+typedef enum {MT_STANDARD, MT_FIRSTMOVE, MT_EDIT} manualDiceType;
+extern GtkWidget *board_dice_widget( Board *board, manualDiceType mdt );
 extern gint game_set( Board *board, TanBoard points, int roll,
 		      const gchar *name, const gchar *opp_name, gint match,
 		      gint score, gint opp_score, gint die0, gint die1,

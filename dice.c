@@ -62,9 +62,6 @@ const char *aszRNG[ NUM_RNGS ] = {
 rng rngCurrent = RNG_MERSENNE;
 rngcontext *rngctxCurrent = NULL;
 
-extern int getDiceRandomDotOrg(void);
-extern int GetManualDice(unsigned int anDice[2]);
-
 struct _rngcontext {
 
   /* RNG_FILE */
@@ -677,7 +674,7 @@ extern void *InitRNG( unsigned long *pnSeed, int *pfInitFrom,
 
 extern int RollDice(unsigned int anDice[2], rng *prng, rngcontext *rngctx)
 {
-	anDice[0] = anDice[1] = UINT_MAX;
+	anDice[0] = anDice[1] = 0;
 
 	switch (*prng) {
 	case RNG_ANSI:
