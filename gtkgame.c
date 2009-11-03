@@ -23,6 +23,7 @@
 #include "config.h"
 
 #include <glib.h>
+#include <ctype.h>
 #include <glib/gstdio.h>
 #include <fcntl.h>
 #include <math.h>
