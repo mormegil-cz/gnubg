@@ -1030,8 +1030,8 @@ static int ImportMatVariation(FILE * fp, char *szFilename, bgvariation bgVariati
 
 #if USE_GTK
 	if (fX) {
-		GTKThaw();
 		GTKSet(ap);
+		GTKThaw();
 	}
 #endif
 
