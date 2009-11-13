@@ -48,15 +48,27 @@
 #endif
 
 const char *aszRNG[ NUM_RNGS ] = {
-   N_("manual dice"),
    N_("ANSI"),
    N_("Blum, Blum and Shub"),
    N_("BSD"),
    N_("ISAAC"),
    N_("MD5"),
    N_("Mersenne Twister"),
+   N_("manual dice"),
    N_("www.random.org"),
    N_("read from file")
+};
+const char *aszRNGTip[NUM_RNGS] = {
+	N_("The rand() generator specified by ANSI C (typically linear congruential)"),
+	N_("Blum, Blum and Shub's verifiably strong generator"),
+	N_("The random() non-linear additive feedback generator from 4.3 BSD Unix"),
+	N_("Bob Jenkin's Indirection, Shift, Accumulate, Add and Count "
+	   "cryptographic generator"),
+	N_("A generator based on the Message Digest 5 algorithm"),
+	N_("Makoto Matsumoto and Takuji Nishimura's generator"),
+	N_("Enter each dice roll by hand"),
+	N_("The online non-deterministic generator from random.org"),
+	N_("Dice loaded from a file"),
 };
 
 rng rngCurrent = RNG_MERSENNE;

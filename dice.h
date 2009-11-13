@@ -25,14 +25,15 @@
 #include <stdio.h>
 
 typedef enum _rng {
-    RNG_MANUAL, RNG_ANSI, RNG_BBS, RNG_BSD, RNG_ISAAC, RNG_MD5, RNG_MERSENNE, 
-    RNG_RANDOM_DOT_ORG, RNG_FILE,
+    RNG_ANSI, RNG_BBS, RNG_BSD, RNG_ISAAC, RNG_MD5, RNG_MERSENNE, 
+    RNG_MANUAL, RNG_RANDOM_DOT_ORG, RNG_FILE,
     NUM_RNGS
 } rng;
 
 typedef struct _rngcontext rngcontext;
 
 extern const char *aszRNG[ NUM_RNGS ];
+extern const char *aszRNGTip[ NUM_RNGS ];
 extern char szDiceFilename[];
 extern rng rngCurrent;
 extern rngcontext *rngctxCurrent;

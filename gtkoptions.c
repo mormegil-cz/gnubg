@@ -74,6 +74,7 @@ typedef struct _optionswidget {
 	GtkWidget *pwConfStart;
 	GtkWidget *pwConfOverwrite;
 	GtkWidget *apwDice[NUM_RNGS];
+	GtkWidget *pwRngComboBox;
 	GtkWidget *pwBeavers;
 	GtkWidget *pwBeaversLabel;
 	GtkWidget *pwAutomatic;
@@ -160,9 +161,10 @@ static void UseCubeToggled(GtkWidget *UNUSED(pw), optionswidget *pow){
 
 static void DiceToggled(GtkWidget *UNUSED(pw), optionswidget *pow)
 {
-	gint n = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pow->apwDice[RNG_MANUAL]));
+	gint n = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pow->apwDice[0]));
 	gint m = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pow->pwCheat));
-	gtk_widget_set_sensitive(pow->pwSeed, (!n && !m));
+	gtk_widget_set_sensitive(pow->pwRngComboBox, n);
+	gtk_widget_set_sensitive(pow->pwSeed, n);
 	gtk_widget_set_sensitive(pow->pwCheatRollBox, m);
 }
 
@@ -962,37 +964,20 @@ static void append_sound_options(optionswidget *pow)
 
 static void append_dice_options(optionswidget *pow)
 {
-	static const char *aszRNGTip[NUM_RNGS] = {
-		N_("Enter each dice roll by hand"),
-		N_("The rand() generator specified by ANSI C (typically linear congruential)"),
-		N_("Blum, Blum and Shub's verifiably strong generator"),
-		N_("The random() non-linear additive feedback generator from 4.3 BSD Unix"),
-		N_("Bob Jenkin's Indirection, Shift, Accumulate, Add and Count "
-		   "cryptographic generator"),
-		N_("A generator based on the Message Digest 5 algorithm"),
-		N_("Makoto Matsumoto and Takuji Nishimura's generator"),
-		N_("The online non-deterministic generator from random.org"),
-		N_("Dice loaded from a file"),
-	};
-	static const char *aszCheatRoll[] = {
-		N_("best"), N_("second best"), N_("third best"),
-		N_("4th best"), N_("5th best"), N_("6th best"),
-		N_("7th best"), N_("8th best"), N_("9th best"),
-		N_("10th best"),
-		N_("median"),
-		N_("10th worst"),
-		N_("9th worst"), N_("8th worst"), N_("7th worst"),
-		N_("6th worst"), N_("5th worst"), N_("4th worst"),
-		N_("third worst"), N_("second worst"), N_("worst"),
-		NULL
-	};
-	GtkWidget *pwp;
-	GtkWidget *pwvbox;
-	GtkWidget *pwhbox;
-	GtkWidget *pw;
+	GtkWidget *pwp, *pwvbox, *pwhbox, *pwvbox2, *pwvbox3, *pw, *frame;
 	unsigned int i;
 	unsigned long nRandom;
-	const char **ppch;
+	int blumblum = TRUE;
+    int bsd = TRUE;
+	int rngsAdded = 0, rngSelected = -1;
+
+#if !HAVE_LIBGMP
+	blumblum = FALSE;
+#endif
+#if !HAVE_RANDOM
+    bsd = FALSE;
+#endif
+
 	InitRNG(&nRandom, NULL, FALSE, rngCurrent);
 
 	pwp = gtk_alignment_new(0, 0, 0, 0);
@@ -1001,44 +986,78 @@ static void append_dice_options(optionswidget *pow)
 	pwvbox = gtk_vbox_new(FALSE, 0);
 	gtk_container_add(GTK_CONTAINER(pwp), pwvbox);
 
-	pow->pwHigherDieFirst = gtk_check_button_new_with_label(_("Show higher die on left"));
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pow->pwHigherDieFirst), fGUIHighDieFirst);
-	gtk_box_pack_start(GTK_BOX(pwvbox), pow->pwHigherDieFirst, FALSE, FALSE, 0);
-	gtk_widget_set_tooltip_text(pow->pwHigherDieFirst,
-				    _("Force the higher of the two dice to be shown "
-				      "on the left."));
+	frame = gtk_frame_new(_("Dice generation"));
+	gtk_box_pack_start(GTK_BOX(pwvbox), frame, TRUE, TRUE, 0);
+	pwvbox2 = gtk_vbox_new(FALSE, 1);
+	gtk_container_set_border_width(GTK_CONTAINER(pwvbox2), 4);
+	gtk_container_add(GTK_CONTAINER(frame), pwvbox2);
 
-	for (i = 0; i < NUM_RNGS; i++) {
-		if (i == 0)
-			pow->apwDice[0] = gtk_radio_button_new_with_label(NULL, gettext(aszRNG[i]));
-		else
-			pow->apwDice[i] =
-			    gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON
-									(pow->apwDice[0]),
-									gettext(aszRNG[i]));
-		gtk_box_pack_start(GTK_BOX(pwvbox), pow->apwDice[i], FALSE, FALSE, 0);
-		gtk_widget_set_tooltip_text(pow->apwDice[i], gettext(aszRNGTip[i]));
-		g_signal_connect(G_OBJECT(pow->apwDice[i]), "toggled", G_CALLBACK(DiceToggled),
-				 pow);
+	pow->pwRngComboBox = NULL;
+
+	for (i = 0; i < NUM_RNGS; i++)
+	{
+		if (i >= NUM_RNGS - 3)
+		{
+			pow->apwDice[i] = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(pow->apwDice[0]),gettext(aszRNG[i]));
+			gtk_box_pack_start(GTK_BOX(pwvbox2), pow->apwDice[i], FALSE, FALSE, 0);
+			gtk_widget_set_tooltip_text(pow->apwDice[i], gettext(aszRNGTip[i]));
+			g_signal_connect(G_OBJECT(pow->apwDice[i]), "toggled", G_CALLBACK(DiceToggled), pow);
+		}
+		if (i >= 0 && i < NUM_RNGS - 3)
+		{
+			if (i == 0)
+			{
+				pow->apwDice[0] = gtk_radio_button_new_with_label(NULL, _("Random number generator"));
+				gtk_box_pack_start(GTK_BOX(pwvbox2), pow->apwDice[0], FALSE, FALSE, 0);
+				g_signal_connect(G_OBJECT(pow->apwDice[0]), "toggled", G_CALLBACK(DiceToggled), pow);
+
+				pwvbox3 = gtk_vbox_new(FALSE, 0);
+				gtk_box_pack_start(GTK_BOX(pwvbox2), pwvbox3, FALSE, FALSE, 0);
+				pwhbox = gtk_hbox_new(FALSE, 0);
+				gtk_box_pack_start(GTK_BOX(pwvbox3), pwhbox, FALSE, FALSE, 0);
+
+				/* Rng types */
+				pow->pwRngComboBox = gtk_combo_box_new_text();
+				gtk_box_pack_start(GTK_BOX(pwhbox), pow->pwRngComboBox, FALSE, FALSE, 26);
+				/* NB. Doesn't look like gtk currently supports tooltips for individual combobox entries */
+				gtk_widget_set_tooltip_text(pow->pwRngComboBox, _("Select a random number generator to use"));
+
+				/* Seed */
+				pwhbox = gtk_hbox_new(FALSE, 0);
+				gtk_box_pack_start(GTK_BOX(pwvbox3), pwhbox, FALSE, FALSE, 0);
+				pow->pwSeed = gtk_hbox_new(FALSE, 0);
+				gtk_box_pack_start(GTK_BOX(pwhbox), pow->pwSeed, TRUE, TRUE, 26);
+				gtk_box_pack_start(GTK_BOX(pow->pwSeed), gtk_label_new(_("Seed: ")), FALSE, FALSE, 0);
+
+				pow->padjSeed = GTK_ADJUSTMENT(gtk_adjustment_new(nRandom, 0, INT_MAX, 1, 1, 0));
+
+				pw = gtk_spin_button_new(GTK_ADJUSTMENT(pow->padjSeed), 1, 0);
+				gtk_box_pack_start(GTK_BOX(pow->pwSeed), pw, FALSE, FALSE, 0);
+				gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(pw), TRUE);
+
+				gtk_widget_set_tooltip_text(pow->pwSeed,
+								_("Specify the \"seed\" (generator state), which "
+								  "can be useful in some circumstances to provide "
+								  "duplicate dice sequences."));
+
+				pow->fChanged = 0;
+				g_signal_connect(G_OBJECT(pw), "changed", G_CALLBACK(SeedChanged), &pow->fChanged);
+
+			}
+
+			if (!((i == RNG_BSD && !bsd) || (i == RNG_BBS && !blumblum)))
+			{
+				gtk_combo_box_append_text(GTK_COMBO_BOX(pow->pwRngComboBox), aszRNG[i]);
+				if ((int)i == rngCurrent)
+					rngSelected = rngsAdded;
+				rngsAdded++;
+			}
+		}
 	}
 
-	pow->pwSeed = gtk_hbox_new(FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pwvbox), pow->pwSeed, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(pow->pwSeed), gtk_label_new(_("Seed: ")), FALSE, FALSE, 1);
-
-	pow->padjSeed = GTK_ADJUSTMENT(gtk_adjustment_new(nRandom, 0, INT_MAX, 1, 1, 0));
-
-	pw = gtk_spin_button_new(GTK_ADJUSTMENT(pow->padjSeed), 1, 0);
-	gtk_box_pack_start(GTK_BOX(pow->pwSeed), pw, TRUE, TRUE, 0);
-	gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(pw), TRUE);
-
-	gtk_widget_set_tooltip_text(pow->pwSeed,
-				    _("Specify the \"seed\" (generator state), which "
-				      "can be useful in some circumstances to provide "
-				      "duplicate dice sequences."));
-
-	pow->fChanged = 0;
-	g_signal_connect(G_OBJECT(pw), "changed", G_CALLBACK(SeedChanged), &pow->fChanged);
+	if (rngSelected == -1)
+		rngSelected = rngsAdded - 1;
+	gtk_combo_box_set_active(GTK_COMBO_BOX(pow->pwRngComboBox), rngSelected);
 
 	/* dice manipulation */
 
@@ -1049,16 +1068,29 @@ static void append_dice_options(optionswidget *pow)
 							(pow->apwDice[NUM_RNGS - 1]),
 							_("Dice manipulation"));
 
-	gtk_box_pack_start(GTK_BOX(pwvbox), pow->pwCheat, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwvbox2), pow->pwCheat, FALSE, FALSE, 0);
 
 	/* select rolls for player */
 
 	pow->pwCheatRollBox = gtk_vbox_new(FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pwvbox), pow->pwCheatRollBox, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwvbox2), pow->pwCheatRollBox, FALSE, FALSE, 0);
 
-	for (i = 0; i < 2; ++i) {
-
+	for (i = 0; i < 2; ++i)
+	{
+		static const char *aszCheatRoll[] = {
+			N_("best"), N_("second best"), N_("third best"),
+			N_("4th best"), N_("5th best"), N_("6th best"),
+			N_("7th best"), N_("8th best"), N_("9th best"),
+			N_("10th best"),
+			N_("median"),
+			N_("10th worst"),
+			N_("9th worst"), N_("8th worst"), N_("7th worst"),
+			N_("6th worst"), N_("5th worst"), N_("4th worst"),
+			N_("third worst"), N_("second worst"), N_("worst"),
+			NULL
+		};
 		char *sz;
+		const char **ppch;
 
 		pwhbox = gtk_hbox_new(FALSE, 4);
 		gtk_box_pack_start(GTK_BOX(pow->pwCheatRollBox), pwhbox, TRUE, TRUE, 0);
@@ -1071,8 +1103,7 @@ static void append_dice_options(optionswidget *pow)
 		gtk_container_set_border_width(GTK_CONTAINER(pow->apwCheatRoll[i]), 1);
 
 		for (ppch = aszCheatRoll; *ppch; ++ppch)
-			gtk_combo_box_append_text(GTK_COMBO_BOX(pow->apwCheatRoll[i]),
-						  gettext(*ppch));
+			gtk_combo_box_append_text(GTK_COMBO_BOX(pow->apwCheatRoll[i]), gettext(*ppch));
 
 		sz = g_strdup_printf(_("roll for player %s."), ap[i].szName);
 
@@ -1081,7 +1112,6 @@ static void append_dice_options(optionswidget *pow)
 		g_free(sz);
 
 	}
-
 	gtk_widget_set_tooltip_text(pow->pwCheat,
 				    _("Now it's proven! GNU Backgammon is able to "
 				      "manipulate the dice. This is meant as a "
@@ -1091,9 +1121,15 @@ static void append_dice_options(optionswidget *pow)
 				      "while things are going bad, (c) learn to play "
 				      "very good or very bad rolls, or (d) just have fun. "));
 
+	pow->pwHigherDieFirst = gtk_check_button_new_with_label(_("Show higher die on left"));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pow->pwHigherDieFirst), fGUIHighDieFirst);
+	gtk_box_pack_start(GTK_BOX(pwvbox), pow->pwHigherDieFirst, FALSE, FALSE, 0);
+	gtk_widget_set_tooltip_text(pow->pwHigherDieFirst,
+				    _("Force the higher of the two dice to be shown "
+				      "on the left."));
+
 	/* get the sensitivity of the widgets right */
 	DiceToggled(NULL, pow);
-
 }
 
 static void append_other_options(optionswidget *pow)
@@ -1344,13 +1380,13 @@ static void OptionsOK(GtkWidget *pw, optionswidget *pow)
   gchar *filename, *command, *tmp, *newfolder;
   const gchar *new_browser;
   static const char* set_rng_cmds[NUM_RNGS] = {
-	  "set rng manual",
 	  "set rng ansi",
 	  "set rng bbs",
 	  "set rng bsd",
 	  "set rng isaac",
 	  "set rng md5",
 	  "set rng mersenne",
+	  "set rng manual",
 	  "set rng random.org",
 	  NULL,
   };
@@ -1438,11 +1474,24 @@ static void OptionsOK(GtkWidget *pw, optionswidget *pow)
     sprintf(sz, "set matchlength %d", n );
     UserCommand(sz); 
   }
-  
-  for (i = 0; i < NUM_RNGS; i++)
+
+  if (gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->apwDice[0])))
+  {	/* rng selected */
+	char *selRNG = gtk_combo_box_get_active_text(GTK_COMBO_BOX(pow->pwRngComboBox));
+	for (i = 0; i < NUM_RNGS - 3; i++)
+	{
+		if (!strcmp(selRNG, aszRNG[i]))
+			break;
+	}
+	g_free(selRNG);
+  }
+  else
   {
-	  if (gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->apwDice[i])))
-		  break;
+	  for (i = NUM_RNGS - 3; i < NUM_RNGS; i++)
+	  {
+		  if (gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->apwDice[i])))
+			  break;
+	  }
   }
   if (i < RNG_FILE && i != (unsigned int)rngCurrent ) {
 	  UserCommand(set_rng_cmds[i]);
@@ -1663,7 +1712,8 @@ OptionsSet( optionswidget *pow) {
     gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON( pow->apwVariations[ i ] ),
                                    bgvDefault == (bgvariation)i );
 
-     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->apwDice[rngCurrent] ), TRUE );
+	if (rngCurrent >= NUM_RNGS - 3)
+		gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->apwDice[rngCurrent] ), TRUE );
  
   /* dice manipulation */
 

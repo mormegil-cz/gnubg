@@ -1,3 +1,7 @@
+Fri Nov 13 23:30:00 2009  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkoptions.c, dice.c: Simplify dice entry method dialog
+
 Tue Nov 03 17:30:00 2009  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gtkboard.c: Improve manual dice selection colours and text
