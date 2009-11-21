@@ -1,3 +1,8 @@
+Sat Nov 21 21:56:58 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtkoptions.c, gtkpanels.c: Minor warnings, fix resizing of
+	commentary panel.
+
 Fri Nov 13 23:30:00 2009  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkoptions.c, dice.c: Simplify dice entry method dialog

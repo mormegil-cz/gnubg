@@ -1003,7 +1003,7 @@ static void append_dice_options(optionswidget *pow)
 			gtk_widget_set_tooltip_text(pow->apwDice[i], gettext(aszRNGTip[i]));
 			g_signal_connect(G_OBJECT(pow->apwDice[i]), "toggled", G_CALLBACK(DiceToggled), pow);
 		}
-		if (i >= 0 && i < NUM_RNGS - 3)
+		if (i < NUM_RNGS - 3)
 		{
 			if (i == 0)
 			{
@@ -1048,7 +1048,7 @@ static void append_dice_options(optionswidget *pow)
 			if (!((i == RNG_BSD && !bsd) || (i == RNG_BBS && !blumblum)))
 			{
 				gtk_combo_box_append_text(GTK_COMBO_BOX(pow->pwRngComboBox), aszRNG[i]);
-				if ((int)i == rngCurrent)
+				if (i == rngCurrent)
 					rngSelected = rngsAdded;
 				rngsAdded++;
 			}

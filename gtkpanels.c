@@ -675,7 +675,7 @@ static GtkWidget *CreateAnalysisWindow( void )
     gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(sw), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
     gtk_container_add(GTK_CONTAINER(sw), pwCommentary);
     gtk_box_pack_start(GTK_BOX(pHbox), sw, TRUE, TRUE, 0);
-    gtk_widget_set_size_request (sw, -1, 150);
+    gtk_widget_set_size_request (sw, 100, 150);
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwCommentary));
     g_signal_connect( G_OBJECT( buffer ), "changed",
 		    G_CALLBACK( CommentaryChanged ), buffer );
