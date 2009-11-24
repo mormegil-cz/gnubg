@@ -127,7 +127,7 @@ add_level ( GtkTreeStore *model, GtkTreeIter *iter,
   /* add average equity */
 
   szEquity = OutputMWC ( arOutput[ OUTPUT_CUBEFUL_EQUITY ],  
-                         ! fInvert ? pci : &ci, TRUE );
+                         fInvert ? pci : &ci, TRUE );
 
   gtk_tree_store_append ( model, &child_iter, iter );
 
