@@ -1,4 +1,8 @@
-Tue Nov 24 21:51:56 CET 2009 Christian Anthon <anthon@kiku.dk>
+Mon Nov 30 19:54:56 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtkgame.c: add keyboard short-cuts to marked navigation menu items
+
+Tue Nov 24 21:51:56 CET 2009 Christian Anthon <anthon@kiku.dk>: 
 
 	* gtkrolls.c: fix a bug where the printed average equity was wrong
 	when MWC printed as EM
