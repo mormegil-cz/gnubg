@@ -202,14 +202,17 @@ static void ToolbarToggleEdit(GtkWidget *pw)
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pw))) {
 		if (ms.gs == GAME_NONE)
 			edit_new(nDefaultLength);
-		/* Undo any partial move that may have been made when entering edit mode */
-		editing = TRUE;
+		/* Undo any partial move that may have been made when 
+		 * entering edit mode, should be done before editing is true */
 		GTKUndo();
+		editing = TRUE;
 	} else
 		editing = FALSE;
 
 	inCallback = TRUE;
-	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/Edit/Edit Position" )), editing);
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM
+				       (gtk_item_factory_get_widget(pif, "/Edit/Edit Position")),
+				       editing);
 	inCallback = FALSE;
 
 	board_edit(pbd);

@@ -1,3 +1,7 @@
+Sat Dec 12 15:25:58 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* gtktoolbar.c: reset of board when entering edit mode didn't work
+
 Mon Nov 30 19:54:56 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gtkgame.c: add keyboard short-cuts to marked navigation menu items
