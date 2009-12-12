@@ -5167,6 +5167,11 @@ extern void
 GTKHint( moverecord *pmr, int hist)
 {
     GtkWidget *pwMoves, *pwHint;
+    if (!pmr || pmr->ml.cMoves < 1)
+    {
+	    outputerrf(_("There are no legal moves. Figure it out yourself."));
+	    return;
+    }
 
     if (GetPanelWidget(WINDOW_HINT))
 	gtk_widget_destroy(GetPanelWidget(WINDOW_HINT));
