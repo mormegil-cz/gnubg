@@ -3302,13 +3302,19 @@ static void check_for_html_images(gchar *path)
 {
 	gchar *folder;
 	gchar *img;
+	char *url = exsExport.szHTMLPictureURL;
 
-	folder  = g_path_get_dirname(path);
-	img = g_build_filename(folder, "html-images", NULL);
-	if (! g_file_test(img, G_FILE_TEST_EXISTS))
-		CommandExportHTMLImages(img);
-	g_free(img);
-	g_free(folder);
+	if (url && g_path_is_absolute(url)) {
+		if (!g_file_test(url, G_FILE_TEST_EXISTS))
+			CommandExportHTMLImages(url);
+	} else {
+		folder = g_path_get_dirname(path);
+		img = g_build_filename(folder, url, NULL);
+		if (!g_file_test(img, G_FILE_TEST_EXISTS))
+			CommandExportHTMLImages(img);
+		g_free(img);
+		g_free(folder);
+	}
 }
 
 
