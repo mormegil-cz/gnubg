@@ -4462,7 +4462,7 @@ extern int getDiceRandomDotOrg(void)
 	struct sockaddr *psa;
 	char szHostname[80];
 	char szHTTP[] =
-	    "GET http://www.random.org/cgi-bin/randnum?num=500&min=0&max=5&col=1\n";
+	    "GET http://www.random.org/integers/?num=600&min=0&max=5&col=1&base=10&format=plain&rnd=new\n";
 	char acBuf[2048];
 
 	/* 
