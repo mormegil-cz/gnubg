@@ -45,6 +45,9 @@ static int fReadingOther;
 static char szCommandSeparators[] = " \t\n\r\v\f";
 #endif
 
+#define STRINGIZEAUX(num) #num
+#define STRINGIZE(num) STRINGIZEAUX(num)
+
 #include "analysis.h"
 #include "backgammon.h"
 #include "dice.h"
@@ -4448,13 +4451,17 @@ extern int GetManualDice(unsigned int anDice[2])
 extern int getDiceRandomDotOrg(void)
 {
 
+#define RANDOMORGSITEPORT 80
+#define RANDOMORGSITE "www.random.org"
 #define BUFLENGTH 500
+
+#define BUFLENGTH_STR STRINGIZE(BUFLENGTH)
+#define RANDOMORGSITEPORT_STR STRINGIZE(RANDOMORGSITEPORT)
 
 	static int nCurrent = -1;
 	static int anBuf[BUFLENGTH];
 	static int nRead;
-
-
+	
 	int h;
 	int cb;
 
@@ -4462,7 +4469,9 @@ extern int getDiceRandomDotOrg(void)
 	struct sockaddr *psa;
 	char szHostname[80];
 	char szHTTP[] =
-	    "GET http://www.random.org/integers/?num=600&min=0&max=5&col=1&base=10&format=plain&rnd=new\n";
+	    "GET http://" RANDOMORGSITE  "/integers/?num=" BUFLENGTH_STR "&min=0&max=5&col=1&base=10&format=plain&rnd=new\n" \
+	    "User-Agent: GNUBG/" PACKAGE_VERSION " (email: " PACKAGE_BUGREPORT ")\n";
+
 	char acBuf[2048];
 
 	/* 
@@ -4478,14 +4487,14 @@ extern int getDiceRandomDotOrg(void)
 		return anBuf[nCurrent++];
 	else {
 
-		outputf(_("Fetching %d random numbers from <www.random.org>\n"), BUFLENGTH);
+		outputf(_("Fetching %d random numbers from <" RANDOMORGSITE ">\n"), BUFLENGTH);
 		outputx();
 
 		/* fetch new numbers */
 
 		/* open socket */
 
-		strcpy(szHostname, "www.random.org:80");
+		strcpy(szHostname, RANDOMORGSITE ":" RANDOMORGSITEPORT_STR);
 
 		if ((h = ExternalSocket(&psa, &cb, szHostname)) < 0) {
 			SockErr(szHostname);
