@@ -1,3 +1,8 @@
+Tue Dec 29 07:36:41 MST 2009 Michael Petch <mpetch@capp-sysware.com>
+
+	* gnubg.c: Fix random.org buffer overrun, Cleanup code and
+	add appropriate User-Agent string
+
 Wed Dec 23 22:34:19 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c: random.org has been restructered, update the GET
