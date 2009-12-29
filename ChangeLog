@@ -1,4 +1,10 @@
-Tue Dec 29 07:36:41 MST 2009 Michael Petch <mpetch@capp-sysware.com>
+Tue Dec 29 19:56:07 CET 2009 Christian Anthon <anthon@kiku.dk>
+
+	* rollout.c: minor fixes: a) check jsd's before rollout b) fix a minor
+	jsd bug where the number of trials where checked for the wrong
+	alternative. c) allow trials to catch up when extending rollouts
+
+Tue Dec 29 07:36:41 MST 2009 Michael Petch <mpetch@capp-sysware.com>: 
 
 	* gnubg.c: Fix random.org buffer overrun, Cleanup code and
 	add appropriate User-Agent string

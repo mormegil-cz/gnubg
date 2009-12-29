@@ -259,9 +259,6 @@ extern int RolloutDice( int iTurn, int iGame,
 
 		anDice[ 0 ] = j / 6 + 1;
 		anDice[ 1 ] = j % 6 + 1;
-#if 0
-		printf ("Game: %d Turn: %d %d%d\n", iGame, iTurn, anDice[ 0 ],anDice[ 1 ]);
-#endif
 		return 0;
 	}
 	else 
@@ -718,9 +715,6 @@ extern int BasicCubefulRollout ( unsigned int aanBoard[][ 2 ][ 25 ],
 
 	if( aarsStatistics && ! afHit [ pci->fMove ] && 
             ( aiBar[ 0 ] < aanBoard[ ici ][ 0 ][ 24 ]  ) ) {
-#if 0
-	  printf ("Game %d Turn %d Player %d hit\n",iGame, iTurn, pci->fMove);
-#endif
           MT_SafeInc(&aarsStatistics[ ici ][ pci->fMove ].nOpponentHit);
           MT_SafeAdd(&aarsStatistics[ ici ][ pci->fMove ].rOpponentHitMove, iTurn);
           afHit[ pci->fMove ] = TRUE;
@@ -969,15 +963,200 @@ int ro_NextTrial;
 unsigned int *altGameCount;
 int *altTrialCount;
 
+static void check_jsds(int *active)
+{
+	int alt;
+	float v, s, denominator;
+	rolloutcontext *prc;
+
+	for (alt = 0; alt < ro_alternatives; ++alt) {
+
+		/* 1) For each move, calculate the cubeful (or cubeless if that's what we're doing)
+		   equity */
+		prc = &ro_apes[alt]->rc;
+		if (prc->fCubeful) {
+			v = aarMu[alt][OUTPUT_CUBEFUL_EQUITY];
+			s = aarSigma[alt][OUTPUT_CUBEFUL_EQUITY];
+
+			/* if we're doing a cube rollout, we need aciLocal[0] for generating the
+			   equity. If we're doing moves, we use the cubeinfo that goes with this move. */
+			if (ms.nMatchTo && !fOutputMWC) {
+				v = mwc2eq(v, &aciLocal[(ro_fCubeRollout ? 0 : alt)]);
+				s = se_mwc2eq(s, &aciLocal[(ro_fCubeRollout ? 0 : alt)]);
+			}
+		} else {
+			v = aarMu[alt][OUTPUT_EQUITY];
+			s = aarSigma[alt][OUTPUT_EQUITY];
+
+			if (ms.nMatchTo && fOutputMWC) {
+				v = eq2mwc(v, &aciLocal[(ro_fCubeRollout ? 0 : alt)]);
+				s = se_eq2mwc(s, &aciLocal[(ro_fCubeRollout ? 0 : alt)]);
+
+			}
+		}
+		ajiJSD[alt].rEquity = v;
+		ajiJSD[alt].rJSD = s;
+	}
+
+	if (!ro_fCubeRollout) {
+		/* 2 sort the list in order of decreasing equity (best move first) */
+		qsort((void *)ajiJSD, ro_alternatives, sizeof(jsdinfo), comp_jsdinfo_equity);
+
+		/* 3 replace the equities with the equity difference from the best move (ajiJSD[0]), the JSDs
+		   with the number of JSDs the equity difference represents and decide if we should either stop 
+		   or resume rolling a move out */
+		v = ajiJSD[0].rEquity;
+		s = ajiJSD[0].rJSD;
+		s *= s;
+		for (alt = ro_alternatives - 1; alt > 0; --alt) {
+
+			ajiJSD[alt].nRank = alt;
+			ajiJSD[alt].rEquity = v - ajiJSD[alt].rEquity;
+
+			denominator = (float)sqrt(s + ajiJSD[alt].rJSD * ajiJSD[alt].rJSD);
+
+			if (denominator < 1e-8f)
+				denominator = 1e-8f;
+
+			ajiJSD[alt].rJSD = ajiJSD[alt].rEquity / denominator;
+
+			if ((rcRollout.fStopOnJsd) &&
+			    (altGameCount[ajiJSD[alt].nOrder] >= (rcRollout.nMinimumJsdGames))) {
+				if (ajiJSD[alt].rJSD > rcRollout.rJsdLimit) {
+					/* This move is no longer worth rolling out */
+
+					fNoMore[ajiJSD[alt].nOrder] = 1;
+					(*active)--;
+
+				} else {
+					/* this move needs to roll out further. It may need to be caught up
+					   with other moves, because it's been stopped for a few trials */
+					if (fNoMore[ajiJSD[alt].nOrder]) {
+						/* it was stopped, catch it up to the other moves and resume
+						   rolling it out. While we're catching up, we don't want to do 
+						   these calculations any more so we'll change the minimum
+						   games to do */
+						fNoMore[ajiJSD[alt].nOrder] = 0;
+						if (rcRollout.nMinimumJsdGames <= altGameCount[alt])
+							rcRollout.nMinimumJsdGames =
+							    altGameCount[ajiJSD[alt].nOrder];
+					}
+				}
+			}
+		}
+
+		/* fill out details of best move */
+		ajiJSD[0].rEquity = ajiJSD[0].rJSD = 0.0f;
+		ajiJSD[0].nRank = 0;
+
+		/* rearrange ajiJSD in move order rather than equity order */
+		qsort((void *)ajiJSD, ro_alternatives, sizeof(jsdinfo), comp_jsdinfo_order);
+
+	} else {
+		float eq_dp = fOutputMWC ? eq2mwc(1.0, &aciLocal[0]) : 1.0f;
+		float eq_dt = ajiJSD[1].rEquity;
+
+		if (eq_dp < eq_dt) {
+			/* compare nd to dp */
+			ajiJSD[0].rEquity = ajiJSD[0].rEquity - eq_dp;
+			ajiJSD[0].rJSD = (float)fabs(ajiJSD[0].rEquity / ajiJSD[0].rJSD);
+		} else {
+			/* compare nd to dt */
+			ajiJSD[0].rEquity = ajiJSD[0].rEquity - ajiJSD[1].rEquity;
+			denominator =
+			    (float)sqrt(ajiJSD[0].rJSD * ajiJSD[0].rJSD +
+					ajiJSD[1].rJSD * ajiJSD[1].rJSD);
+			if (denominator < 1e-8f)
+				denominator = 1e-8f;
+			ajiJSD[0].rJSD = (float)fabs(ajiJSD[0].rEquity / denominator);
+		}
+		/* compare dt to dp */
+		ajiJSD[1].rEquity = ajiJSD[1].rEquity - eq_dp;
+		ajiJSD[1].rJSD = (float)fabs(ajiJSD[1].rEquity / ajiJSD[1].rJSD);
+		if (rcRollout.fStopOnJsd &&
+		    (altGameCount[0] >= (rcRollout.nMinimumJsdGames)) &&
+		    rcRollout.rJsdLimit < MIN(ajiJSD[0].rJSD, ajiJSD[1].rJSD)) {
+			fNoMore[0] = 1;
+			fNoMore[1] = 1;
+			*active = 0;
+		}
+	}
+}
+
+static void check_sds(int *active)
+{
+	int alt;
+	for (alt = 0; alt < ro_alternatives; ++alt) {
+		double v, s;
+		int output;
+		int err_too_big = 0;
+		rolloutcontext *prc;
+		if (fNoMore[alt] || altGameCount[alt] < (rcRollout.nMinimumGames))
+			continue;
+		prc = &ro_apes[alt]->rc;
+		for (output = 0; output < NUM_ROLLOUT_OUTPUTS; output++) {
+			if (output < OUTPUT_EQUITY) {
+				v = fabs(aarMu[alt][output]);
+				s = fabs(aarSigma[alt][output]);
+			} else if (output == OUTPUT_EQUITY) {
+				if (!ms.nMatchTo) {	/* money game */
+					v = fabs(aarMu[alt][output]);
+					s = fabs(aarSigma[alt][output]);
+					if (ro_fCubeRollout) {
+						v *= aciLocal[alt].nCube / aciLocal[0].nCube;
+						s *= aciLocal[alt].nCube / aciLocal[0].nCube;
+					}
+				} else {	/* match play */
+					v = fabs(mwc2eq(eq2mwc(aarMu[alt][output],
+							       &aciLocal[alt]),
+							&aciLocal[(ro_fCubeRollout ? 0 : alt)]));
+					s = fabs(se_mwc2eq(se_eq2mwc(aarSigma[alt][output],
+								     &aciLocal[alt]),
+							   &aciLocal[(ro_fCubeRollout ? 0 : alt)]));
+				}
+			} else {
+				if (!prc->fCubeful)
+					continue;
+
+				if (!ms.nMatchTo) {	/* money game */
+					v = fabs(aarMu[alt][output]);
+					s = fabs(aarSigma[alt][output]);
+				} else {
+					v = fabs(mwc2eq(aarMu[alt][output], &aciLocal[alt]));
+					s = fabs(se_mwc2eq(aarSigma[alt][output],
+							   &aciLocal[(ro_fCubeRollout ? 0 : alt)]));
+				}
+			}
+
+			if ((v >= .0001) && (v * rcRollout.rStdLimit < s)) {
+				err_too_big = 1;
+				break;
+			}
+		}		/* for (output = 0; output < NUM_ROLLOUT_OUTPUTS; output++) */
+
+		if (!err_too_big) {
+			fNoMore[alt] = 1;
+			(*active)--;
+		}
+
+	}			/* alt = 0; alt < ro_alternatives; ++alt) */
+	if (ro_fCubeRollout && (!fNoMore[0] || !fNoMore[1])) {
+		/* cube rollouts should run the same number
+		 * of trials for nd and dt */
+		fNoMore[0] = fNoMore[1] = 0;
+		*active = 2;
+	}
+
+}
+
 extern void RolloutLoopMT(void *unused)
 {
 	TanBoard anBoardEval;
 	float aar[NUM_ROLLOUT_OUTPUTS];
-	int err_too_big;
-	double v, s;
 	int active_alternatives;
 	unsigned int j;
 	int alt;
+	unsigned int this_trial;
 	FILE *logfp = NULL;
 	rolloutcontext *prc = NULL;
 	/* Each thread gets a copy of the rngctxRollout */
@@ -987,13 +1166,13 @@ extern void RolloutLoopMT(void *unused)
 
 	/* ============ begin rollout loop ============= */
 
-	while (MT_SafeIncValue(&ro_NextTrial) <= (int) cGames) {
+	while ((this_trial = MT_SafeIncValue(&ro_NextTrial)) <= cGames) {
 		active_alternatives = ro_alternatives;
 
 		for (alt = 0; alt < ro_alternatives; ++alt) {
 			unsigned int trial = MT_SafeIncValue(&altTrialCount[alt]) - 1;
 			/* skip this one if it's already finished */
-			if (fNoMore[alt] || (trial > cGames - 1)) {
+			if (fNoMore[alt] || (trial > this_trial - 1)) {
 				MT_SafeDec(&altTrialCount[alt]);
 				continue;
 			}
@@ -1088,194 +1267,19 @@ extern void RolloutLoopMT(void *unused)
 		multi_debug("exclusive lock: rollout cycle update");
 		MT_Exclusive();
 		if (show_jsds) {
-			float v, s, denominator;
-
-			for (alt = 0; alt < ro_alternatives; ++alt) {
-
-				/* 1) For each move, calculate the cubeful (or cubeless if that's what we're doing)
-				   equity */
-				prc = &ro_apes[alt]->rc;
-				if (prc->fCubeful) {
-					v = aarMu[alt][OUTPUT_CUBEFUL_EQUITY];
-					s = aarSigma[alt][OUTPUT_CUBEFUL_EQUITY];
-
-					/* if we're doing a cube rollout, we need aciLocal[0] for generating the
-					   equity. If we're doing moves, we use the cubeinfo that goes with this move. */
-					if (ms.nMatchTo && !fOutputMWC) {
-						v = mwc2eq(v, &aciLocal[(ro_fCubeRollout ? 0 : alt)]);
-						s = se_mwc2eq(s, &aciLocal[(ro_fCubeRollout ? 0 : alt)]);
-					}
-				} else {
-					v = aarMu[alt][OUTPUT_EQUITY];
-					s = aarSigma[alt][OUTPUT_EQUITY];
-
-					if (ms.nMatchTo && fOutputMWC) {
-						v = eq2mwc(v, &aciLocal[(ro_fCubeRollout ? 0 : alt)]);
-						s = se_eq2mwc(s, &aciLocal[(ro_fCubeRollout ? 0 : alt)]);
-
-					}
-				}
-				ajiJSD[alt].rEquity = v;
-				ajiJSD[alt].rJSD = s;
-			}
-
-			if (!ro_fCubeRollout)
-			{
-			/* 2 sort the list in order of decreasing equity (best move first) */
-			qsort((void *) ajiJSD, ro_alternatives, sizeof(jsdinfo), comp_jsdinfo_equity);
-
-			/* 3 replace the equities with the equity difference from the best move (ajiJSD[0]), the JSDs
-			   with the number of JSDs the equity difference represents and decide if we should either stop 
-			   or resume rolling a move out */
-			v = ajiJSD[0].rEquity;
-			s = ajiJSD[0].rJSD;
-			s *= s;
-			for (alt = ro_alternatives - 1; alt > 0; --alt) {
-
-				ajiJSD[alt].nRank = alt;
-				ajiJSD[alt].rEquity = v - ajiJSD[alt].rEquity;
-
-				denominator = (float) sqrt(s + ajiJSD[alt].rJSD * ajiJSD[alt].rJSD);
-
-				if (denominator < 1e-8f)
-					denominator = 1e-8f;
-
-				ajiJSD[alt].rJSD = ajiJSD[alt].rEquity / denominator;
-
-				if ((rcRollout.fStopOnJsd) &&
-				    (altGameCount[alt] >= (rcRollout.nMinimumJsdGames ))) {
-					if (ajiJSD[alt].rJSD > rcRollout.rJsdLimit) {
-						/* This move is no longer worth rolling out */
-
-						fNoMore[ajiJSD[alt].nOrder] = 1;
-						active_alternatives--;
-
-					} else {
-						/* this move needs to roll out further. It may need to be caught up
-						   with other moves, because it's been stopped for a few trials */
-						if (fNoMore[ajiJSD[alt].nOrder]) {
-							/* it was stopped, catch it up to the other moves and resume
-							   rolling it out. While we're catching up, we don't want to do 
-							   these calculations any more so we'll change the minimum
-							   games to do */
-							fNoMore[ajiJSD[alt].nOrder] = 0;
-							if (rcRollout.nMinimumJsdGames <= altGameCount[alt])
-								rcRollout.nMinimumJsdGames = altGameCount[alt];
-						}
-					}
-				}
-			}
-
-			/* fill out details of best move */
-			ajiJSD[0].rEquity = ajiJSD[0].rJSD = 0.0f;
-			ajiJSD[0].nRank = 0;
-
-			/* rearrange ajiJSD in move order rather than equity order */
-			qsort((void *) ajiJSD, ro_alternatives, sizeof(jsdinfo), comp_jsdinfo_order);
-
-			}
-			else
-			{
-				float eq_dp = fOutputMWC ? eq2mwc(1.0, &aciLocal[0]) : 1.0f;
-				float eq_dt = ajiJSD[1].rEquity;
-				
-				if (eq_dp < eq_dt)
-				{
-					/* compare nd to dp */
-					ajiJSD[0].rEquity = ajiJSD[0].rEquity - eq_dp;
-					ajiJSD[0].rJSD = (float)fabs(ajiJSD[0].rEquity / ajiJSD[0].rJSD);
-				}
-				else
-				{
-					/* compare nd to dt */
-					ajiJSD[0].rEquity = ajiJSD[0].rEquity - ajiJSD[1].rEquity;
-					denominator = (float) sqrt(ajiJSD[0].rJSD * ajiJSD[0].rJSD + ajiJSD[1].rJSD * ajiJSD[1].rJSD);
-					if (denominator < 1e-8f)
-						denominator = 1e-8f;
-					ajiJSD[0].rJSD = (float)fabs(ajiJSD[0].rEquity / denominator);
-				}
-				/* compare dt to dp */
-				ajiJSD[1].rEquity = ajiJSD[1].rEquity - eq_dp;
-				ajiJSD[1].rJSD = (float)fabs(ajiJSD[1].rEquity / ajiJSD[1].rJSD);
-				if (rcRollout.fStopOnJsd &&
-						(altGameCount[0] >= (rcRollout.nMinimumJsdGames )) &&
-						rcRollout.rJsdLimit < MIN(ajiJSD[0].rJSD, ajiJSD[1].rJSD))
-				{ 
-					fNoMore[0] = 1;
-					fNoMore[1] = 1;
-				       	active_alternatives = 0;
-				}
-			}
+			check_jsds(&active_alternatives);
 		}
-
-		/* see if we can quit because the answers are good enough */
 		if (rcRollout.fStopOnSTD) {
-			for (alt = 0; alt < ro_alternatives; ++alt) {
-				int output;
-				err_too_big = 0;
-				if (fNoMore[alt] || altGameCount[alt] < (rcRollout.nMinimumGames ))
-					continue;
-				prc = &ro_apes[alt]->rc;
-				for (output = 0; output < NUM_ROLLOUT_OUTPUTS; output++) {
-					if (output < OUTPUT_EQUITY) {
-						v = fabs(aarMu[alt][output]);
-						s = fabs(aarSigma[alt][output]);
-					} else if (output == OUTPUT_EQUITY) {
-						if (!ms.nMatchTo) {	/* money game */
-							v = fabs(aarMu[alt][output]);
-							s = fabs(aarSigma[alt][output]);
-							if (ro_fCubeRollout) {
-								v *= aciLocal[alt].nCube / aciLocal[0].nCube;
-								s *= aciLocal[alt].nCube / aciLocal[0].nCube;
-							}
-						} else {	/* match play */
-							v = fabs(mwc2eq(eq2mwc(aarMu[alt][output],
-									       &aciLocal[alt]),
-									&aciLocal[(ro_fCubeRollout ? 0 : alt)]));
-							s = fabs(se_mwc2eq(se_eq2mwc(aarSigma[alt][output],
-										     &aciLocal[alt]),
-									   &aciLocal[(ro_fCubeRollout ? 0 : alt)]));
-						}
-					} else {
-						if (!prc->fCubeful)
-							continue;
-
-						if (!ms.nMatchTo) {	/* money game */
-							v = fabs(aarMu[alt][output]);
-							s = fabs(aarSigma[alt][output]);
-						} else {
-							v = fabs(mwc2eq(aarMu[alt][output], &aciLocal[alt]));
-							s = fabs(se_mwc2eq(aarSigma[alt][output],
-									   &aciLocal[(ro_fCubeRollout ? 0 : alt)]));
-						}
-					}
-
-					if ((v >= .0001) && (v * rcRollout.rStdLimit < s)) {
-						err_too_big = 1;
-						break;
-					}
-				}	/* for (output = 0; output < NUM_ROLLOUT_OUTPUTS; output++) */
-
-				if (!err_too_big) {
-					fNoMore[alt] = 1;
-					active_alternatives--;
-				}
-
-			}	/* alt = 0; alt < ro_alternatives; ++alt) */
-			if (ro_fCubeRollout && (!fNoMore[0] || !fNoMore[1]))
-			{
-				/* cube rollouts should run the same number
-				 * of trials for nd and dt */
-				fNoMore[0] = fNoMore[1] = 0;
-				active_alternatives = 2;
-			}
-
-
-		}		/* if (rcRollout.fStopOnSTD) */
-		MT_Release();
-		multi_debug("exclusive release: rollout cycle update");
+			check_sds(&active_alternatives);
+		}
 		if ((active_alternatives < 2 && rcRollout.fStopOnJsd) || active_alternatives < 1)
+		{
+			multi_debug("exclusive release: rollout done early");
+			MT_Release();
 			break;
+		}
+		multi_debug("exclusive release: rollout cycle update");
+		MT_Release();
 	}
 	free(rngctxMTRollout);
 }
@@ -1325,6 +1329,8 @@ RolloutGeneral(ConstTanBoard * apBoard,
 	int nIsCubeless = 0;
 	int nIsCubeful = 0;
 	int fOutputMWCSave = fOutputMWC;
+	int active_alternatives;
+	int previous_rollouts=0;
 
 	show_jsds = 1;
 
@@ -1415,6 +1421,8 @@ RolloutGeneral(ConstTanBoard * apBoard,
 			int nGames = prc->nGamesDone;
 			double r;
 
+			previous_rollouts++;
+
 			/* make sure the saved rollout contexts are consistent for cubeful/not cubeful */
 			prc->fCubeful = prc->aecCubeTrunc.fCubeful =
 			    prc->aecChequerTrunc.fCubeful = (prc->fCubeful || fCubeRollout);
@@ -1473,14 +1481,33 @@ RolloutGeneral(ConstTanBoard * apBoard,
 	ro_fInvert = fInvert;
 	ro_NextTrial = nFirstTrial;
 
-	multi_debug("rollout adding tasks");
-	mt_add_tasks(MT_GetNumThreads(), RolloutLoopMT, NULL, NULL);
+	active_alternatives = ro_alternatives;
 
-	ro_pfProgress = pfProgress;
-	ro_pUserData = pUserData;
+	/* check if rollout alterntives are done, but only when extending
+	 * all candidates */
+	if (previous_rollouts == active_alternatives)
+	{
+		if (show_jsds) {
+			check_jsds(&active_alternatives);
+		}
+		if (rcRollout.fStopOnSTD) {
+			check_sds(&active_alternatives);
+		}
+	}
+	
 
-	multi_debug("rollout waiting for tasks to complete");
-	MT_WaitForTasks(UpdateProgress, 2000, fAutoSaveRollout);
+	if (active_alternatives > 1 || (!rcRollout.fStopOnJsd && active_alternatives > 0))
+	{
+		multi_debug("rollout adding tasks");
+		mt_add_tasks(MT_GetNumThreads(), RolloutLoopMT, NULL, NULL);
+
+		ro_pfProgress = pfProgress;
+		ro_pUserData = pUserData;
+
+		multi_debug("rollout waiting for tasks to complete");
+		MT_WaitForTasks(UpdateProgress, 2000, fAutoSaveRollout);
+		multi_debug("rollout finished waiting for tasks to complete");
+	}
 
 	/* Make sure final output is upto date */
 #if USE_GTK
