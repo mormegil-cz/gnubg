@@ -4470,7 +4470,7 @@ extern int getDiceRandomDotOrg(void)
 	char szHostname[80];
 	char szHTTP[] =
 	    "GET http://" RANDOMORGSITE  "/integers/?num=" BUFLENGTH_STR "&min=0&max=5&col=1&base=10&format=plain&rnd=new\n" \
-	    "User-Agent: GNUBG/" PACKAGE_VERSION " (email: " PACKAGE_BUGREPORT ")\n";
+	    "User-Agent: GNUBG/" VERSION " (email: " PACKAGE_BUGREPORT ")\n";
 
 	char acBuf[2048];
 
