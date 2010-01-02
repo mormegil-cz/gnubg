@@ -4487,7 +4487,7 @@ extern int getDiceRandomDotOrg(void)
 		return anBuf[nCurrent++];
 	else {
 
-		outputf(_("Fetching %d random numbers from <" RANDOMORGSITE ">\n"), BUFLENGTH);
+		outputf(_("Fetching %d random numbers from <%s>\n"), BUFLENGTH, RANDOMORGSITE);
 		outputx();
 
 		/* fetch new numbers */
