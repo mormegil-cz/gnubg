@@ -14,8 +14,10 @@
      is permitted in any medium provided the copyright notice and this
      permission notice are preserved.
 
-     This match equity table is based rollouts by GNU Backgammon. It's still
-     work in progress.
+     This match equity table is based on rollouts by GNU Backgammon.
+
+     In practice, it is a subset of the more recent Rockwell-Kazaross
+     table and you should use the latter rather than this one.
 
      $Id$
 
