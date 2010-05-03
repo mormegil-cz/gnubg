@@ -1,3 +1,7 @@
+2010-05-03  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* allabout.xml: mention Rockwell-Kazaross as the choice MET
+
 Mon May 10 22:39:53 CEST 2004  JOern Thyssen  <jth@gnubg.org>
 
 	* Makefile.am: add missing files to Makefile.am 
