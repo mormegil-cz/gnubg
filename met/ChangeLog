@@ -1,3 +1,8 @@
+2010-05-03  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* Rockwell-Kazaross.xml: new file
+	* Makefile.am: install the above
+
 Mon Feb 21 23:12:17 2005 Jim Segrave  <jes@jes-2.demon.nl>
 
 	* Makefile, Makefile.in, Makefile.am - fixes for catalog.xml, catalog.dtd
