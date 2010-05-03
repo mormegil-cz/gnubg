@@ -4778,7 +4778,7 @@ int main(int argc, char *argv[])
 	init_rng();
 
 	PushSplash(pwSplash, _("Initialising"), _("match equity table"));
-	met = BuildFilename2("met", "g11.xml");
+	met = BuildFilename2("met", "Rockwell-Kazaross.xml");
 	InitMatchEquity(met);
 	g_free(met);
 
