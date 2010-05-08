@@ -830,18 +830,18 @@ static void ExportGameText(FILE * pf, listOLD *plGame,
 		gsz = g_string_new(NULL);
 		g_string_append_printf(gsz, _("\n\nGame statistics for game %d\n\n"), iGame + 1);
 		TextDumpStatcontext(gsz, psc, msOrig.nMatchTo);
-		if (msOrig.nMatchTo)
-			g_string_append_printf(gsz, _("Match statistics\n\n"));
-		else
-			g_string_append_printf(gsz, _("Session statistics\n\n"));
 		fputs(gsz->str, pf);
 		g_string_free(gsz, TRUE);
 	}
 
 	if (fLastGame) {
 		gsz = g_string_new(NULL);
+		if (msOrig.nMatchTo)
+			g_string_append_printf(gsz, _("Match statistics\n\n"));
+		else
+			g_string_append_printf(gsz, _("Session statistics\n\n"));
 		TextDumpStatcontext(gsz, &scTotal, msOrig.nMatchTo);
-		fputs(gsz->str, pf);
+
 		psc_rel = relational_player_stats_get(ap[0].szName, ap[1].szName);
 		if (psc_rel)
 		{
