@@ -355,7 +355,7 @@ the section entitled &#8220;GNU Free Documentation License&#8221;.<xref linkend=
         </imageobject>
       </mediaobject>
       <para>Under the tab Game, select Standard backgammon with Nackgammon starting position. This way it will set up a game of Nackgammon instead of normal backgammon.</para>
-      <para>Hypergammon – Hypergammon is a very different game, though it too follows the standard rules of backgammon. In it, each player starts with only 3 checkers in the opponent's board and must of course cross the board and bear them off as in normal backgammon. To play Hypergammon in GNU you must first build the Hypergammon databases using the tool makehyper.exe or you can download the bases <ulink url="ftp://ftp.demon.nl/pub/games/gnubg/databases/hyper">here</ulink>.</para>
+      <para>Hypergammon – Hypergammon is a very different game, though it too follows the standard rules of backgammon. In it, each player starts with only 3 checkers in the opponent's board and must of course cross the board and bear them off as in normal backgammon. To play Hypergammon in GNU you must first build the Hypergammon databases using the tool makehyper.exe or you can download the bases <ulink url="ftp://ftp.demon.nl/pub/Demon/games/gnubg/databases/hyper">here</ulink>.</para>
     </sect2>
   </sect1>
   <sect1 id="Advanced_Playing_Information" xreflabel="Advanced Playing Information">
