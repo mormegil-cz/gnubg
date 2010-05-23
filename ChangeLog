@@ -1,5 +1,8 @@
 2010-05-23  Philippe Michel  <philippe.michel7@sfr.fr>
 
+	* gtkpanels.c: Crawford game highlighted in the games pulldown in
+	the Game record panel. Bug #28463.
+
 	* rollout.c: change "Stop when STD is small enough" criterion for
 	rollouts. Parameter is stdev of equity, not the ratio of
 	stdev/value for every output. See rationale at
