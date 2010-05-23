@@ -327,7 +327,7 @@ rolloutcontext rcRollout =
   RNG_MERSENNE, /* RNG */
   0,  /* seed */
   144,    /* minimum games  */
-  0.1,	  /* stop when std's are under 10% of value */
+  0.01,	  /* stop when std's are lower than 0.01 */
   144,    /* minimum games  */
   1.96,   /* stop when best has j.s.d. for 95% confidence */
   0,      /* nGamesDone */
@@ -380,7 +380,7 @@ rolloutcontext rcRollout =
   RNG_MERSENNE, /* RNG */ \
   0,  /* seed */ \
   144,    /* minimum games  */ \
-  0.1,	  /* stop when std's are under 10% of value */ \
+  0.01,	  /* stop when std's are lower than 0.01 */ \
   144,    /* minimum games  */ \
   1.96,   /* stop when best has j.s.d. for 95% confidence */ \
   0, \

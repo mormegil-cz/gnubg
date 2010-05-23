@@ -4458,7 +4458,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   gtk_container_add ( GTK_CONTAINER ( pwFrame ), pw);
    
   prpw->pwDoSTDStop = gtk_check_button_new_with_label (
-                               _( "Stop when STDs are small enough " ) );
+                               _( "Stop when STD is small enough " ) );
   gtk_container_add( GTK_CONTAINER( pw ), prpw->pwDoSTDStop );
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( 
                                       prw->prwGeneral->pwDoSTDStop ), 
@@ -4486,7 +4486,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   prpw->pwAdjMaxError = pwHBox = gtk_hbox_new( FALSE, 0 );
   gtk_container_add( GTK_CONTAINER( pwv ), pwHBox);
   gtk_container_add( GTK_CONTAINER( pwHBox ), 
-                   gtk_label_new( _("Ratio |Standard Deviation/Value|:" ) ) );
+                   gtk_label_new( _("Equity Standard Deviation:" ) ) );
 
   prpw->padjMaxError = GTK_ADJUSTMENT( gtk_adjustment_new( 
                        prw->rcRollout.rStdLimit, 0, 1, .0001, .0001, 0 ) );

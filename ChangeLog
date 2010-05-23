@@ -1,3 +1,14 @@
+2010-05-23  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* rollout.c: change "Stop when STD is small enough" criterion for
+	rollouts. Parameter is stdev of equity, not the ratio of
+	stdev/value for every output. See rationale at
+	http://lists.gnu.org/archive/html/bug-gnubg/2009-02/msg00035.html
+	and
+	http://lists.gnu.org/archive/html/bug-gnubg/2009-10/msg00159.html
+	* gtkgame.c: GUI change
+	* gnubg.c, sgf.c: older default values for maxerr become inadequate
+
 2010-05-08  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* text.c: fix double output of match statistics in plain text export

@@ -936,7 +936,7 @@ the section entitled &#8220;GNU Free Documentation License&#8221;.<xref linkend=
           <imagedata align="center" fileref="images/m23e0471c.png"/>
         </imageobject>
       </mediaobject>
-      <para>In the figure above, the margin was set to 0.100 and a minimum of 144 games were requested. </para>
+      <para>In the figure above, the rollout was set to stop when the standard deviation of the equity is less than 0.100 and a minimum of 144 games were requested. </para>
     </sect2>
     <sect2 id="Stop_at_specific_Joint_Standard_Deviation" xreflabel="Stop at specific Joint Standard Deviation">
       <title>Stop at specific Joint Standard Deviation</title>
