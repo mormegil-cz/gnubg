@@ -1037,9 +1037,7 @@ static void check_jsds(int *active)
 						   these calculations any more so we'll change the minimum
 						   games to do */
 						fNoMore[ajiJSD[alt].nOrder] = 0;
-						if (rcRollout.nMinimumJsdGames <= altGameCount[alt])
-							rcRollout.nMinimumJsdGames =
-							    altGameCount[ajiJSD[alt].nOrder];
+						(*active)++;
 					}
 				}
 			}
