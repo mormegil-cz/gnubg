@@ -3821,7 +3821,7 @@ Equity
         <para>For match play there is no simple formula, since redoubles can
           only occur a limited number of times.</para>
         <para>The live cube take point is generally calculated as</para>
-        <para>TP(live, n Cube)=TP(dead, n cube) * (1 - TP(live, 2n cube)</para>
+        <para>TP(live, n Cube)=TP(dead, n cube) * (1 - TP(live, 2n cube))</para>
         <para>So to calculate the live cube take points for a 1-cube at 3-0 to 7
           we need the live cube take points for the 4-cube and the 2-cube. For
           the position above and using Woolsey's match equity table the live
