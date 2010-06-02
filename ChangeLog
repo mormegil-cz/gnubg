@@ -1,5 +1,8 @@
 2010-06-02  Philippe Michel  <philippe.michel7@sfr.fr>
 
+	* commands.inc, file.c: if an export format is not supported by
+	the build, #if it out of the UI.
+
 	* configure.in, export.c, gnubgmodule.c : patches by Christopher
 	Hofmann via bug-gnubg@gnu.org
 

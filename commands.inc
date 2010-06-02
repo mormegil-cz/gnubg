@@ -215,12 +215,14 @@ command cER = {
       N_("Copy the current position in .html format to clipboard"
          "(special for GammOnLine)"), 
       szFILENAME, &cFilename },
+#if HAVE_PANGOCAIRO
     { "ps", CommandExportPositionPS, N_("Save the current position in "
       "PostScript format"), szFILENAME, &cFilename },
     { "pdf", CommandExportPositionPDF, N_("Save the current position in "
       "PDF format"), szFILENAME, &cFilename },
     { "svg", CommandExportPositionSVG, N_("Save the current position in "
       "SVG format"), szFILENAME, &cFilename },
+#endif /* HAVE_PANGOCAIRO */
     { "html", CommandExportPositionHtml,
       N_("Save the current position in .html format"), 
       szFILENAME, &cFilename },
