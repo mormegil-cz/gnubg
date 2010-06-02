@@ -527,8 +527,8 @@ extern int WritePNG (const char *sz, unsigned char *puch, unsigned int nStride,
   atext[1].compression = PNG_TEXT_COMPRESSION_NONE;
 
 #ifdef PNG_iTXt_SUPPORTED
-  text_ptr[0].lang = NULL;
-  text_ptr[1].lang = NULL;
+  atext[0].lang = NULL;
+  atext[1].lang = NULL;
 #endif
   png_set_text (ppng, pinfo, atext, 2);
 

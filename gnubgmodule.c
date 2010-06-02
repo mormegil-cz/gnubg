@@ -867,7 +867,7 @@ PythonPositionBearoff( PyObject* self UNUSED_PARAM, PyObject *args )
   PyObject *pyBoard = NULL;
   int nChequers = 15;
   int nPoints = 6;
-  unsigned int anBoard[ 25 ];
+  TanBoard anBoard;
 
   memcpy( anBoard, msBoard(), sizeof(anBoard) );
 
@@ -883,7 +883,7 @@ PythonPositionBearoff( PyObject* self UNUSED_PARAM, PyObject *args )
 
 static PyObject *PythonPositionFromBearoff( PyObject* self UNUSED_PARAM, PyObject *args )
 {
-  unsigned int anBoard[ 25 ];
+  TanBoard anBoard;
   int iPos = 0;
   int nChequers = 15;
   int nPoints = 6;
