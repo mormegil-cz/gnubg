@@ -1331,7 +1331,7 @@ extern int main( int argc, char **argv )
 	  { "no-compress", 'c', G_OPTION_FLAG_REVERSE, G_OPTION_ARG_NONE, &fCompress, 
 		  "Do not use compression scheme for one-sided databases", NULL},
 	  { "no-gammon", 'g', G_OPTION_FLAG_REVERSE, G_OPTION_ARG_NONE, &fGammon,
-		  "Include gammon distribution for one-sided databases", NULL},
+		  "Do not include gammon distribution for one-sided databases", NULL},
 	  { "normal-dist", 'n', 0, G_OPTION_ARG_NONE, &fND, 
 		  "Approximate one-sided bearoff database with normal distributions", NULL},
 	  { "version", 'v', 0, G_OPTION_ARG_NONE, &show_version, 
