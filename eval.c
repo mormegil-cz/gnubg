@@ -274,7 +274,7 @@ int anChequers[ NUM_VARIATIONS ] = { 15, 15, 1, 2, 3 };
 
 const char *aszVariations[ NUM_VARIATIONS ] = {
   N_("Standard backgammon"),
-  N_("Standard backgammon with Nackgammon starting position"),
+  N_("Nackgammon"),
   N_("1-chequer hypergammon"),
   N_("2-chequer hypergammon"),
   N_("3-chequer hypergammon") 

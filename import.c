@@ -522,17 +522,15 @@ ExpandMatMove ( const TanBoard anBoard, int anMove[ 8 ], int *pc,
 
   }
   else {
-  
+
     for ( i = 0; i < c; ++i ) {
 
       /* if this is a consolidated move then "expand" it */
 
-      j = ( anMove[ 2 * i ] - anMove[ 2 * i + 1 ] ) / anDice[ 0 ];
+      j = ( anDice [ 0 ] - 1 + anMove[ 2 * i ] - anMove[ 2 * i + 1 ] ) / anDice[ 0 ];
 
       for ( k = 1; k < j; ++k ) {
-
         /* new move */
-
         anMove[ 2 * *pc ] = anMove[ 2 * *pc +1 ] = anMove[ 2 * i ];
         anMove[ 2 * *pc + 1 ] -= anDice[ 0 ];
 
@@ -1016,7 +1014,7 @@ static int ImportMatVariation(FILE * fp, char *szFilename, bgvariation bgVariati
 			game = atoi(szLine + START_STRING_LEN);
 			if (!game)
 				outputf(_("WARNING! Unrecognized line in mat file: '%s'\n"),
-					szLine);
+						szLine);
 			{
 				if (ImportGame(fp, game - 1, nLength, bgVariation, &warned))
 					break;	/* import failed */
@@ -1050,8 +1048,17 @@ static int ImportMat(FILE * fp, char *szFilename)
 	ClearMatch();
 
 	for (bgv = VARIATION_STANDARD; bgv < NUM_VARIATIONS; bgv++) {
+		gchar *str;
 		if (ImportMatVariation(fp, szFilename, bgv, FALSE) == 0)
 			return 0;
+		str = g_strdup_printf(N_("Import as a %s match had errors. Try a different variation?"), aszVariations[bgv]);
+		if (!GetInputYN(str))
+		{
+			g_free(str);
+			return 0;
+		}
+		g_free(str);
+
 		/* reset and try a different format */
 		if (fseek(fp, 0L, SEEK_SET) != 0)
 			return -1;
