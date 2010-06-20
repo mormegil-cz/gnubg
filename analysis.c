@@ -2327,6 +2327,7 @@ static int cmark_move_rollout(moverecord *pmr, gboolean destroy)
 	move **ppm;
 	void *p;
 	GSList *list = NULL;
+	guchar auch[10];
 
 	g_return_val_if_fail(pmr, -1);
 
@@ -2342,7 +2343,7 @@ static int cmark_move_rollout(moverecord *pmr, gboolean destroy)
 	ppm = g_new(move *, c);
 	ppci = g_new(cubeinfo *, c);
 	asz = (char (*)[40])g_malloc(40 * c);
-
+	memcpy(auch, pmr->ml.amMoves[pmr->n.iMove].auch, 10);
 	GetMatchStateCubeInfo(&ci, &ms);
 
 	for (pl = list, j = 0; pl; pl = g_slist_next(pl), j++) {
@@ -2353,8 +2354,7 @@ static int cmark_move_rollout(moverecord *pmr, gboolean destroy)
 	}
 
 	RolloutProgressStart(&ci, c, NULL, &rcRollout, asz, TRUE, &p);
-	ScoreMoveRollout(ppm, (const cubeinfo **)ppci,
-			       c, RolloutProgress, p);
+	ScoreMoveRollout(ppm, (const cubeinfo **)ppci, c, RolloutProgress, p);
 	res = RolloutProgressEnd(&p, destroy);
 
 	g_free(asz);
@@ -2362,6 +2362,14 @@ static int cmark_move_rollout(moverecord *pmr, gboolean destroy)
 	g_free(ppci);
 
 	RefreshMoveList(&pmr->ml, NULL);
+
+	for (pmr->n.iMove = 0; pmr->n.iMove < pmr->ml.cMoves; pmr->n.iMove++)
+		if (EqualKeys(auch, pmr->ml.amMoves[pmr->n.iMove].auch)) {
+			pmr->n.stMove =
+			    Skill(pmr->ml.amMoves[pmr->n.iMove].rScore - pmr->ml.amMoves[0].rScore);
+
+			break;
+		}
 #if USE_GTK
 	if (fX)
 		ChangeGame(NULL);
