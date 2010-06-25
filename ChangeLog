@@ -1,3 +1,8 @@
+Fri Jun 25 10:49:12 CEST 2010 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, commands.inc, gnubg.c, gtkboard.c, set.c: support for
+	xg ids - please test
+
 Thu Jun 24 01:31:48 CEST 2010 Christian Anthon <anthon@kiku.dk>
 
 	* analysis.c: don't refind move, when none made

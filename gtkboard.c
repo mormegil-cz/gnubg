@@ -4067,7 +4067,7 @@ static gboolean dice_widget_press( GtkWidget *dice, GdkEvent *event, BoardData
     return TRUE;
 }
 
-extern void DestroySetDice(GtkWidget *po, void *data)
+static void DestroySetDice(GtkWidget *po, void *data)
 {
 	SetDiceData *sdd = (SetDiceData *)data;
 	free(sdd->TTachDice[0]);

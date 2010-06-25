@@ -1155,6 +1155,7 @@ command cER = {
       N_("Read match equity table from XML file"), szFILENAME, &cFilename },
     { "matchid", CommandSetMatchID, N_("set Match ID"), szMATCHID, NULL },
     { "gnubgid", CommandSetGNUBgID, N_("set gnubg ID"), szGNUBGID, NULL },
+    { "xgid", CommandSetXGID, N_("set gnubg ID from XGID"), szXGID, NULL },
     { "matchinfo", NULL, N_("Record auxiliary match information"), NULL,
       acSetMatchInfo },
     { "matchlength", CommandSetMatchLength,

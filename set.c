@@ -4111,6 +4111,165 @@ CommandSetSGFFolder (char *sz)
   SetFolder (&default_sgf_folder, NextToken (&sz));
 }
 
+static int SetXGID(char *sz)
+{
+
+	int nMaxCube = -1;
+	int nMatchTo = -1;
+	int nRules = -1;
+	int fCrawford = 0;
+	int anScore[2];
+	int fMove = -1;
+	int fTurn;
+	unsigned int anDice[2] = { 0, 0 };
+	int fCubeOwner = -1;
+	int nCube = -1;
+	int fDoubled = 0;
+	matchstate msxg;
+	TanBoard anBoard;
+	char *gnubgid;
+	char *pos;
+
+	char *s = g_strdup(sz);
+
+	char *c;
+	int i;
+	char v[9][4];
+
+	for (i = 0; i < 9 && (c = strrchr(s, ':')); i++) {
+		strncpy(v[i], c + 1, 4);
+		v[i][4] = '\0';
+		*c = '\0';
+	}
+
+	nMaxCube = atoi(v[0]);
+
+	nMatchTo = atoi(v[1]);
+
+	nRules = atoi(v[2]);
+	if (nMatchTo > 0) {
+		fCrawford = (nRules == 1);
+	} else {
+		fJacoby = nRules - (nRules / 2) * 2;
+		nBeavers = (nRules / 2) * 8;
+	}
+
+	anScore[0] = atoi(v[3]);
+	anScore[1] = atoi(v[4]);
+
+	fMove = atoi(v[6]) == 1 ? 1 : 0;
+
+	switch (v[5][0]) {
+	case 'D':
+		fTurn = !fMove;
+		fDoubled = 1;
+		anDice[0] = anDice[1] = 0;
+		break;
+	case '0':
+	case '1':
+	case '2':
+	case '3':
+	case '4':
+	case '5':
+	case '6':
+		if (strlen(v[5]) != 2) {
+			g_free(s);
+			return 1;
+		}
+		fTurn = fMove;
+		anDice[1] = atoi(v[5] + 1);
+		v[5][1] = '\0';
+		anDice[0] = atoi(v[5]);
+		break;
+	default:
+		g_free(s);
+		return 1;
+	}
+
+	nCube = atoi(v[8]) + 1;
+
+	switch (atoi(v[7])) {
+		case 1:
+			fCubeOwner=1;
+			break;
+		case 0:
+			fCubeOwner=-1;
+			break;
+		case -1:
+			fCubeOwner=0;
+	}
+
+	printf("nCube %d fCubeOwner %d", nCube, fCubeOwner);
+
+	msxg.anDice[0] = anDice[0];
+	msxg.anDice[1] = anDice[1];
+	msxg.fResigned = 0;
+	msxg.fResignationDeclined = 0;
+	msxg.fDoubled = fDoubled;
+	msxg.cGames = 0;
+	msxg.fMove = fMove;
+	msxg.fCubeOwner = fCubeOwner;
+	msxg.fCrawford = fCrawford;
+	msxg.fPostCrawford = !fCrawford && (anScore[0] == nMatchTo - 1
+					    || anScore[1] == nMatchTo - 1);
+	msxg.nMatchTo = nMatchTo;
+	msxg.anScore[0] = anScore[0];
+	msxg.anScore[1] = anScore[1];
+	msxg.nCube = nCube;
+	msxg.bgv = bgvDefault;
+	msxg.fCubeUse = fCubeUse;
+	msxg.fJacoby = fJacoby;
+	msxg.gs = GAME_PLAYING;
+
+	c = strrchr(s, '=');
+	pos = c ? c + 1 : s;
+
+	if (strlen(pos) != 26) {
+		g_free(s);
+		return 1;
+	}
+	for (i = 0; i < 26; i++) {
+		int p0, p1;
+
+		if (i == 0) {
+			p0 = 24;
+			p1 = -1;
+		} else if (i == 25) {
+			p0 = -1;
+			p1 = 24;
+		} else {
+			p0 = 24 - i;
+			p1 = i - 1;
+		}
+
+		if (pos[i] >= 'A' && pos[i] <= 'P') {
+			if (p0 > -1)
+				anBoard[0][p0] = 0;
+			anBoard[1][p1] = pos[i] - 'A' + 1;
+		} else if (pos[i] >= 'a' && pos[i] <= 'p') {
+			anBoard[0][p0] = pos[i] - 'a' + 1;
+			if (p1 > -1)
+				anBoard[1][p1] = 0;
+		} else if (pos[i] ==  '-') {
+			if (p0 > -1)
+				anBoard[0][p0] = 0;
+			if (p1 > -1)
+				anBoard[1][p1] = 0;
+		} else {
+			g_free(s);
+			return 1;
+		}
+	}
+	if (!fMove)
+		SwapSides(anBoard);
+	gnubgid = g_strdup_printf("%s:%s", MatchIDFromMatchState(&msxg), PositionID((ConstTanBoard)anBoard));
+	CommandSetGNUBgID(gnubgid);
+	g_free(gnubgid);
+	g_free(s);
+
+	return 0;
+}
+
 static char *get_base64(char *inp, char **next)
 {
 	char *first, *last;
@@ -4138,11 +4297,20 @@ static char *get_base64(char *inp, char **next)
 	return g_strndup(first, l);
 }
 
+extern void CommandSetXGID(char *sz)
+{
+	if (SetXGID(sz))
+		outputerrf(_("Not a valid XGID '%s'"), sz);
+}
+
 extern void CommandSetGNUBgID(char *sz)
 {
 	char *out;
 	char *posid = NULL;
 	char *matchid = NULL;
+
+	if (SetXGID(sz) == 0)
+		return;
 
 	while (sz && *sz) {
 		out = get_base64(sz, &sz);
@@ -4162,7 +4330,7 @@ extern void CommandSetGNUBgID(char *sz)
 			break;
 	}
 	if (!posid && !matchid) {
-		outputerrf(_("No valid GNUBG id's found"));
+		outputerrf(_("No valid id's found"));
 		return;
 	}
 	if (matchid)
