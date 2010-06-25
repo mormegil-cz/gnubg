@@ -754,6 +754,7 @@ extern void GTKBatchAnalyse(gpointer p, guint n, GtkWidget * pw)
 	GtkWidget *fc;
 	static gchar *last_folder = NULL;
 	GtkWidget *add_to_db;
+	int fConfirmNew_s;
 
 	folder = last_folder ? last_folder : default_import_folder;
 
@@ -761,8 +762,6 @@ extern void GTKBatchAnalyse(gpointer p, guint n, GtkWidget * pw)
 			     GTK_FILE_CHOOSER_ACTION_OPEN);
 	gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(fc), TRUE);
 	add_import_filters(GTK_FILE_CHOOSER(fc));
-
-
 
 	add_to_db = gtk_check_button_new_with_label (_("Add to relational database"));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (add_to_db), TRUE);
@@ -781,7 +780,13 @@ extern void GTKBatchAnalyse(gpointer p, guint n, GtkWidget * pw)
 							(fc));
 		add_to_db_set = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(add_to_db));
 		gtk_widget_destroy(fc);
+
+		if( !get_input_discard())
+			return;
+		fConfirmNew_s = fConfirmNew;
+		fConfirmNew = 0;
 		batch_create_dialog_and_run(filenames, add_to_db_set);
+		fConfirmNew = fConfirmNew_s;
 	} else
 		gtk_widget_destroy(fc);
 }

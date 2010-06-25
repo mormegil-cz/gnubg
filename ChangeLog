@@ -1,3 +1,7 @@
+Fri Jun 25 16:00:08 CEST 2010 Christian Anthon <anthon@kiku.dk>
+
+	* gtkfile.c: Show the discard dialog before batch analyse starts.
+
 Fri Jun 25 10:49:12 CEST 2010 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, commands.inc, gnubg.c, gtkboard.c, set.c: support for
