@@ -4127,7 +4127,7 @@ static int SetXGID(char *sz)
 	int fDoubled = 0;
 	matchstate msxg;
 	TanBoard anBoard;
-	char *gnubgid;
+	char *posid, *matchid;
 	char *pos;
 
 	char *s = g_strdup(sz);
@@ -4142,85 +4142,6 @@ static int SetXGID(char *sz)
 		*c = '\0';
 	}
 
-	nMaxCube = atoi(v[0]);
-
-	nMatchTo = atoi(v[1]);
-
-	nRules = atoi(v[2]);
-	if (nMatchTo > 0) {
-		fCrawford = (nRules == 1);
-	} else {
-		fJacoby = nRules - (nRules / 2) * 2;
-		nBeavers = (nRules / 2) * 8;
-	}
-
-	anScore[0] = atoi(v[3]);
-	anScore[1] = atoi(v[4]);
-
-	fMove = atoi(v[6]) == 1 ? 1 : 0;
-
-	switch (v[5][0]) {
-	case 'D':
-		fTurn = !fMove;
-		fDoubled = 1;
-		anDice[0] = anDice[1] = 0;
-		break;
-	case '0':
-	case '1':
-	case '2':
-	case '3':
-	case '4':
-	case '5':
-	case '6':
-		if (strlen(v[5]) != 2) {
-			g_free(s);
-			return 1;
-		}
-		fTurn = fMove;
-		anDice[1] = atoi(v[5] + 1);
-		v[5][1] = '\0';
-		anDice[0] = atoi(v[5]);
-		break;
-	default:
-		g_free(s);
-		return 1;
-	}
-
-	nCube = atoi(v[8]) + 1;
-
-	switch (atoi(v[7])) {
-		case 1:
-			fCubeOwner=1;
-			break;
-		case 0:
-			fCubeOwner=-1;
-			break;
-		case -1:
-			fCubeOwner=0;
-	}
-
-	printf("nCube %d fCubeOwner %d", nCube, fCubeOwner);
-
-	msxg.anDice[0] = anDice[0];
-	msxg.anDice[1] = anDice[1];
-	msxg.fResigned = 0;
-	msxg.fResignationDeclined = 0;
-	msxg.fDoubled = fDoubled;
-	msxg.cGames = 0;
-	msxg.fMove = fMove;
-	msxg.fCubeOwner = fCubeOwner;
-	msxg.fCrawford = fCrawford;
-	msxg.fPostCrawford = !fCrawford && (anScore[0] == nMatchTo - 1
-					    || anScore[1] == nMatchTo - 1);
-	msxg.nMatchTo = nMatchTo;
-	msxg.anScore[0] = anScore[0];
-	msxg.anScore[1] = anScore[1];
-	msxg.nCube = nCube;
-	msxg.bgv = bgvDefault;
-	msxg.fCubeUse = fCubeUse;
-	msxg.fJacoby = fJacoby;
-	msxg.gs = GAME_PLAYING;
-
 	c = strrchr(s, '=');
 	pos = c ? c + 1 : s;
 
@@ -4228,6 +4149,7 @@ static int SetXGID(char *sz)
 		g_free(s);
 		return 1;
 	}
+
 	for (i = 0; i < 26; i++) {
 		int p0, p1;
 
@@ -4250,7 +4172,7 @@ static int SetXGID(char *sz)
 			anBoard[0][p0] = pos[i] - 'a' + 1;
 			if (p1 > -1)
 				anBoard[1][p1] = 0;
-		} else if (pos[i] ==  '-') {
+		} else if (pos[i] == '-') {
 			if (p0 > -1)
 				anBoard[0][p0] = 0;
 			if (p1 > -1)
@@ -4260,12 +4182,121 @@ static int SetXGID(char *sz)
 			return 1;
 		}
 	}
+
+	g_free(s);
+
+	nMaxCube = atoi(v[0]);
+
+	nMatchTo = atoi(v[1]);
+
+	nRules = atoi(v[2]);
+
+	if (nMatchTo > 0) {
+		switch (nRules) {
+		case 0:
+			fCrawford = 0;
+			break;
+		case 1:
+			fCrawford = 1;
+			break;
+		default:
+			return (1);
+		}
+	} else {
+		switch (nRules) {
+		case 0:
+			fJacoby = 0;
+			nBeavers = 0;
+			break;
+		case 1:
+			fJacoby = 1;
+			nBeavers = 0;
+			break;
+		case 2:
+			fJacoby = 0;
+			nBeavers = 3;
+			break;
+		case 3:
+			fJacoby = 1;
+			nBeavers = 3;
+			break;
+		default:
+			return 1;
+		}
+	}
+
+	anScore[0] = atoi(v[3]);
+	anScore[1] = atoi(v[4]);
+
+	fMove = atoi(v[6]) == 1 ? 1 : 0;
+
+	switch (v[5][0]) {
+	case 'D':
+		fTurn = !fMove;
+		fDoubled = 1;
+		anDice[0] = anDice[1] = 0;
+		break;
+	case '0':
+	case '1':
+	case '2':
+	case '3':
+	case '4':
+	case '5':
+	case '6':
+		if (strlen(v[5]) != 2) {
+			return 1;
+		}
+		fTurn = fMove;
+		anDice[1] = atoi(v[5] + 1);
+		v[5][1] = '\0';
+		anDice[0] = atoi(v[5]);
+		break;
+	default:
+		return 1;
+	}
+
+	nCube = atoi(v[8]) + 1;
+
+	switch (atoi(v[7])) {
+	case 1:
+		fCubeOwner = 1;
+		break;
+	case 0:
+		fCubeOwner = -1;
+		break;
+	case -1:
+		fCubeOwner = 0;
+	}
+
+	msxg.anDice[0] = anDice[0];
+	msxg.anDice[1] = anDice[1];
+	msxg.fResigned = 0;
+	msxg.fResignationDeclined = 0;
+	msxg.fDoubled = fDoubled;
+	msxg.cGames = 0;
+	msxg.fMove = fMove;
+	msxg.fCubeOwner = fCubeOwner;
+	msxg.fCrawford = fCrawford;
+	msxg.fPostCrawford = !fCrawford && (anScore[0] == nMatchTo - 1
+					    || anScore[1] == nMatchTo - 1);
+	msxg.nMatchTo = nMatchTo;
+	msxg.anScore[0] = anScore[0];
+	msxg.anScore[1] = anScore[1];
+	msxg.nCube = nCube;
+	msxg.bgv = bgvDefault;
+	msxg.fCubeUse = fCubeUse;
+	msxg.fJacoby = fJacoby;
+	msxg.gs = GAME_PLAYING;
+
+	matchid = g_strdup(MatchIDFromMatchState(&msxg));
+	CommandSetMatchID(matchid);
+	g_free(matchid);
+
+	posid = g_strdup(PositionID((ConstTanBoard)anBoard));
 	if (!fMove)
 		SwapSides(anBoard);
-	gnubgid = g_strdup_printf("%s:%s", MatchIDFromMatchState(&msxg), PositionID((ConstTanBoard)anBoard));
-	CommandSetGNUBgID(gnubgid);
-	g_free(gnubgid);
-	g_free(s);
+	CommandSetBoard(posid);
+	g_free(posid);
 
 	return 0;
 }
