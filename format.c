@@ -959,9 +959,9 @@ OutputCubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
     }
 
-	sprintf(sz, "%s:\n", _("Rollout details"));
+	sprintf(strchr ( sz, 0 ), "\n%s:\n", _("Rollout details"));
 
-    strcat ( sz, 
+    strcat ( strchr ( sz, 0 ),
              OutputRolloutResult ( NULL, asz, aarOutput, aarStdDev,
                                    aci, 2, pes->rc.fCubeful ) );
              
@@ -969,7 +969,8 @@ OutputCubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
   }
 
   if ( pes->et == EVAL_ROLLOUT && exsExport.afCubeParameters[ 1 ] )
-    strcat ( sz, OutputRolloutContext ( NULL, &pes->rc ) );
+    strcat ( strchr ( sz, 0 ),
+    	OutputRolloutContext ( NULL, &pes->rc ) );
     
   return sz;
 }

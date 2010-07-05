@@ -1,3 +1,7 @@
+Mon Jul  5 20:00:46 CEST 2010 Christian Anthon <anthon@kiku.dk>
+
+	* format.c: fix text output of rolled out cube analysis
+
 Mon Jul  5 19:39:35 CEST 2010 Christian Anthon <anthon@kiku.dk>
 
 	* play.c: remove TurnDone from CancelCubeAction. Fixes a batch analyse
