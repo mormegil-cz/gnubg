@@ -1554,15 +1554,14 @@ static void TurnDone( void ) {
 extern void CancelCubeAction( void ) {
     
     if( ms.fDoubled ) {
-	outputf( _("(%s's double has been cancelled.)\n"),
-		 ap[ ms.fMove ].szName );
 	ms.fDoubled = FALSE;
 
 	if( fDisplay )
 	    ShowBoard();
 
 	/* FIXME should fTurn be set to fMove? */
-	TurnDone(); /* FIXME is this right? */
+	/* TurnDone(); Removed. Causes problems when called during
+	 * analysematch */
 	/* FIXME delete all MOVE_DOUBLE records */
     }
 }

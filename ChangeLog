@@ -1,3 +1,8 @@
+Mon Jul  5 19:39:35 CEST 2010 Christian Anthon <anthon@kiku.dk>
+
+	* play.c: remove TurnDone from CancelCubeAction. Fixes a batch analyse
+	bug.
+
 Fri Jun 25 16:00:08 CEST 2010 Christian Anthon <anthon@kiku.dk>
 
 	* gtkfile.c: Show the discard dialog before batch analyse starts.
