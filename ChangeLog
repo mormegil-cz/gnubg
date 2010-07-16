@@ -1,3 +1,8 @@
+Fri Jul 16 18:12:30 CEST 2010 Christian Anthon <anthon@kiku.dk>
+
+	* gtkboard.c: fix redraw bug when navigating an unfinished move where
+	dice are rolled.
+
 Fri Jul 16 14:03:13 CEST 2010 Christian Anthon <anthon@kiku.dk>
 
 	* render.c: fix clockwise display. Bar was reversed.

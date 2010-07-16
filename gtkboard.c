@@ -2349,6 +2349,7 @@ static gint board_set( Board *board, const gchar *board_text, const gint
     int old_resigned;
     int old_xResign, old_yResign;
     int old_turn;
+    int old_diceShown;
     int redrawNeeded = 0;
     gint failed = 0;
     
@@ -2361,6 +2362,7 @@ static gint board_set( Board *board, const gchar *board_text, const gint
 
     old_dice[ 0 ] = bd->diceRoll[ 0 ];
     old_dice[ 1 ] = bd->diceRoll[ 1 ];
+    old_diceShown = bd->diceShown;
     old_turn = bd->turn;
     
     editing = bd->playing && ToolbarIsEditing( pwToolbar );
@@ -2495,7 +2497,8 @@ static gint board_set( Board *board, const gchar *board_text, const gint
 	    swap_us( bd->diceRoll, bd->diceRoll + 1 );
 
 	if (bd->diceRoll[0] != old_dice[0] ||
-		bd->diceRoll[1] != old_dice[1] ||
+		bd->diceRoll[1] != old_dice[1] || 
+		(bd->diceRoll[0] > 0 && old_diceShown == DICE_BELOW_BOARD) ||
 		editing)
 	{
 		redrawNeeded = 1;
