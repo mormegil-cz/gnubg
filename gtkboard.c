@@ -1788,14 +1788,12 @@ extern gboolean board_button_press(GtkWidget *board, GdkEventButton *event,
 	   rolling the dice if bottom player clicks the right side of
 	   the board, or the top player clicks the left side of the
 	   board (his/her right side). */
-		if (bd->diceShown == DICE_BELOW_BOARD &&
-			((bd->drag_point == POINT_RIGHT && bd->turn == 1) ||
-			(bd->drag_point == POINT_LEFT && bd->turn == -1)))
+		if (bd->diceShown == DICE_BELOW_BOARD)
 		{
 			/* NB: the UserCommand() call may cause reentrancies,
 			   so it is vital to reset bd->drag_point first! */
 			bd->drag_point = -1;
-			UserCommand("roll");
+			quick_roll();
 			return TRUE;
 		}
 		bd->drag_point = -1;
@@ -3560,8 +3558,7 @@ static gboolean dice_press( GtkWidget *dice, GdkEvent *event,
 			    BoardData *bd )
 {
 
-    UserCommand( "roll" );
-    
+	quick_roll();
     return TRUE;
 }
 
