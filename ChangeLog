@@ -1,3 +1,7 @@
+Fri Jul 16 14:03:13 CEST 2010 Christian Anthon <anthon@kiku.dk>
+
+	* render.c: fix clockwise display. Bar was reversed.
+
 Mon Jul  5 20:00:46 CEST 2010 Christian Anthon <anthon@kiku.dk>
 
 	* format.c: fix text output of rolled out cube analysis
