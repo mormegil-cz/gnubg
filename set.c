@@ -4292,9 +4292,9 @@ static int SetXGID(char *sz)
 	CommandSetMatchID(matchid);
 	g_free(matchid);
 
-	posid = g_strdup(PositionID((ConstTanBoard)anBoard));
 	if (!fMove)
 		SwapSides(anBoard);
+	posid = g_strdup(PositionID((ConstTanBoard)anBoard));
 	CommandSetBoard(posid);
 	g_free(posid);
 
