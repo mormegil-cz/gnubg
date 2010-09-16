@@ -4512,7 +4512,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   pwv = gtk_vbox_new( FALSE, 0 );
   gtk_container_add( GTK_CONTAINER( pw ), pwv);
 
-  prpw->pwJsdDoStop = gtk_check_button_new_with_label (_( "Enable Stop on Jsd" ) );
+  prpw->pwJsdDoStop = gtk_check_button_new_with_label (_( "Enable Stop on JSD" ) );
   gtk_container_add( GTK_CONTAINER( pwv ), prpw->pwJsdDoStop );
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( prw->prwGeneral->pwJsdDoStop ), prw->rcRollout.fStopOnJsd);
   g_signal_connect( G_OBJECT( prw->prwGeneral->pwJsdDoStop ), "toggled", G_CALLBACK (JsdStopToggled), prw);
