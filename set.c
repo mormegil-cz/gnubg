@@ -4255,7 +4255,7 @@ static int SetXGID(char *sz)
 		return 1;
 	}
 
-	nCube = atoi(v[8]) + 1;
+	nCube = 1 << atoi(v[8]);
 
 	switch (atoi(v[7])) {
 	case 1:
