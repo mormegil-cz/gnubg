@@ -136,7 +136,7 @@ static char fhReadNextChar(FileHelper * fh)
 static int fhPeekNextIsWS(FileHelper * fh)
 {
 	char c = fhPeekNextChar(fh);
-	return (c == ' ' || c == '\t' || c == '\n');
+	return (c == ' ' || c == '\t' || c == '\r' || c == '\n');
 }
 
 static void fhSkipWS(FileHelper * fh)

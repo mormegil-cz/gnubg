@@ -1,5 +1,7 @@
 2010-10-17  Philippe Michel  <philippe.michel7@sfr.fr>
 
+	* file.c: Fix in automatic import. Detect sgg now.
+
 	* gtkfile.c: In the Open File panel, with supported files filters,
 	show both lowercase and uppercase file extensions.
 
