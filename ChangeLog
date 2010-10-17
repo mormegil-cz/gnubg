@@ -1,3 +1,8 @@
+2010-10-17  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* gtkfile.c: In the Open File panel, with supported files filters,
+	show both lowercase and uppercase file extensions.
+
 2010-09-27  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* set.c: XGIDs with large cubes were not correctly decoded
