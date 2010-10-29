@@ -478,16 +478,21 @@ int SSE_Supported(void)
 
 #else
 
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__FreeBSD__)
 #include <sys/sysctl.h>
 #endif
 
 static int CheckSSE(void)
 {
         int result;
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__FreeBSD__)
     size_t length = sizeof( result );
+#if defined(__APPLE__)
     int error = sysctlbyname("hw.optional.sse", &result, &length, NULL, 0);
+#endif
+#if defined(__FreeBSD__)
+    int error = sysctlbyname("hw.instruction_sse", &result, &length, NULL, 0);
+#endif
     if ( 0 != error ) result = 0;
     return result;
 
