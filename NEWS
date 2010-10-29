@@ -130,7 +130,7 @@ in gnubg.gtkrc)
 ** Import from BKG and TMG formats.
 
 ** Export in PDF, (Encapsulated) PostScript, LaTeX, HTML, plain text and PNG.
-*** export settings dialog avaiable from Settings->Export
+*** export settings dialog available from Settings->Export
    (warning: only html export uses some of the options).
 
 ** New dice generators:

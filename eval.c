@@ -3492,7 +3492,7 @@ FindBestCubeDecision ( float arDouble[],
 
   int f;
 
-  /* Check if cube is avaiable */
+  /* Check if cube is available */
 
   if ( ! GetDPEq ( NULL, NULL, pci ) ) {
 
@@ -4866,7 +4866,7 @@ MakeCubePos( const cubeinfo aciCubePos[], const int cci,
                     aciCubePos[ ici ].fBeavers,
                     aciCubePos[ ici ].bgv );
     else
-      /* mark cube position as unavaiable */
+      /* mark cube position as unavailable */
       aci[ i ].nCube = -1;
 
     i++;

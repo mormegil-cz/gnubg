@@ -31,7 +31,7 @@
 #include <unistd.h>
 #endif
 #include <stdlib.h>
-#include "string.h"
+#include <string.h>
 
 #ifdef WIN32
 #include <io.h>

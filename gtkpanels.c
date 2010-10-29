@@ -292,7 +292,7 @@ void UpdateTheoryData(BoardData* bd, int UpdateType, const TanBoard points)
 			float arEPC[ 2 ];
 
 			if ( EPC( points, arEPC, NULL, NULL, NULL, TRUE ) )
-			{	/* no EPCs avaiable */
+			{	/* no EPCs available */
 				gtk_clist_set_text(GTK_CLIST(pwTheoryList), 1, 1, "");
 			}
 			else

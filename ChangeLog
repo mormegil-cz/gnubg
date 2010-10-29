@@ -1,3 +1,9 @@
+2010-10-29  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* NEWS, dice.c, eval.c, gtkpanels.c, show.c: typos
+	* doc/gnubg/gnubg.6: cosmetic change
+	Picked from Debian and FreeBSD ports.
+
 2010-10-17  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* file.c: Fix in automatic import. Detect sgg now.

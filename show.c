@@ -2244,7 +2244,7 @@ CommandShowMatchResult( char *UNUSED(sz) ) {
                    psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ] );
       }
       else
-        outputf( _("%10d no info avaiable\n"), n );
+        outputf( _("%10d no info available\n"), n );
       
       r = psc->arActualResult[ 0 ];
       arSum[ 0 ] += r;
