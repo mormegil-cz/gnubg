@@ -302,7 +302,7 @@ static void SoundPlayClicked(GtkWidget *UNUSED(widget), gpointer UNUSED(userdata
 
 static gchar* CacheSizeString(GtkScale *UNUSED(scale), gdouble value)
 {
-  return g_strdup_printf ("%imb", GetCacheMB(value));
+  return g_strdup_printf ("%iMb", GetCacheMB(value));
 }
 
 static void append_game_options(optionswidget *pow)
@@ -1249,7 +1249,7 @@ static void append_other_options(optionswidget *pow)
 	pw = gtk_hbox_new(FALSE, 0);
 	gtk_container_add(GTK_CONTAINER(pwev), pw);
 
-	pow->padjCache = GTK_ADJUSTMENT(gtk_adjustment_new(GetEvalCacheSize(), 0, 6, 1, 1, 0));
+	pow->padjCache = GTK_ADJUSTMENT(gtk_adjustment_new(GetEvalCacheSize(), 0, CACHE_SIZE_GUIMAX - 16 , 1, 1, 0));
 	pwScale = gtk_hscale_new(pow->padjCache);
 	gtk_widget_set_size_request(pwScale, 100, -1);
 	gtk_scale_set_draw_value(GTK_SCALE(pwScale), TRUE);

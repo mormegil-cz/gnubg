@@ -1,3 +1,8 @@
+2010-10-31  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* eval.h, eval.c, gtkoptions.c: bump up evaluation cache size
+	default x4 to 21Mb, maximum settable from GUI x2 to 336Mb
+
 2010-10-29  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* NEWS, dice.c, eval.c, gtkpanels.c, show.c: typos

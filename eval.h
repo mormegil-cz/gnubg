@@ -335,6 +335,10 @@ typedef enum  {
 
 #define CLASS_PERFECT CLASS_BEAROFF_TS
 
+/* Evaluation cache size is 2^SIZE entries */
+#define CACHE_SIZE_DEFAULT 19
+#define CACHE_SIZE_GUIMAX 23
+
 #define CFMONEY(arEquity,pci) \
    ( ( (pci)->fCubeOwner == -1 ) ? arEquity[ 2 ] : \
    ( ( (pci)->fCubeOwner == (pci)->fMove ) ? arEquity[ 1 ] : arEquity[ 3 ] ) )
