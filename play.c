@@ -1337,8 +1337,6 @@ static int ComputerTurn( void ) {
       pmr->anDice[ 1 ] = ms.anDice[ 1 ];
       pmr->fPlayer = ms.fTurn;
       pmr->esChequer = ap[ ms.fTurn ].esChequer;
-      pmr->rLuck = LuckAnalysis(msBoard(), ms.anDice[0], ms.anDice[1], &ms);
-      pmr->lt = Luck(pmr->rLuck);
 
 
 	  fd.pml = &pmr->ml;
@@ -2645,8 +2643,6 @@ CommandMove( char *sz ) {
 		    free(pmr);
 		    return;
 	    }
-	    pmr->rLuck = LuckAnalysis(msBoard(), ms.anDice[0], ms.anDice[1], &ms);
-	    pmr->lt = Luck(pmr->rLuck);
     }
 
 #if USE_GTK

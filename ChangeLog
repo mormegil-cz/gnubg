@@ -1,5 +1,10 @@
 2010-10-31  Philippe Michel  <philippe.michel7@sfr.fr>
 
+	* play.c: don't do luck analysis while playing as highlighting
+	very lucky or unlucky moves in the game record panel gives away
+	big equity swings.
+	http://lists.gnu.org/archive/html/bug-gnubg/2010-06/msg00034.html
+
 	* eval.h, eval.c, gtkoptions.c: bump up evaluation cache size
 	default x4 to 21Mb, maximum settable from GUI x2 to 336Mb
 
