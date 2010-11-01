@@ -3923,9 +3923,10 @@ extern void SetMatchID(const char *szMatchID)
 	}
 
 	if (fDoubled) {
-		outputerrf(_
-			   ("I'm sorry, but SetMatchID cannot handle positions where a double has been offered"));
-		return;
+		outputl(_("SetMatchID cannot handle positions where a double has been offered."));
+		outputf(_("Stepping back to the offering of the cube. "));
+		fMove = fTurn = !fTurn;
+		fDoubled = 0;
 	}
 
 	if (nMatchTo == 1)
