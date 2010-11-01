@@ -3654,7 +3654,6 @@ extern void CommandExportPositionGammOnLine ( char *sz ) {
 
 }
 
-
 extern void CommandExportPositionGOL2Clipboard( char *sz )
 {
     char *szClipboard;
@@ -3711,3 +3710,109 @@ extern void CommandExportPositionGOL2Clipboard( char *sz )
     g_free(tmpFile);
 }
 
+/* 
+ * UGH! FIXME
+ *  find handy urlencode function to import.
+ * 
+ */
+/* 
+   When Nori posted this to bug-gnubg, some suggested that using glib
+   functions would be better than redoing the decoding here.
+   That's what I did in the #if'd out code below, only to realize that
+   we would need glib 2.16 or newer and some still widely used Linux
+   distributions don't have it.
+   We will have to use the original code for some time.
+*/
+static int
+surlencode(char * dst, const char * to_encode)
+{
+   int i = 0;
+   char * s = dst;
+   unsigned char c;
+   while ( c = to_encode[i++] ) {
+           if( (c >= '0' && c <= '9')
+           ||  (c >= 'A' && c <= 'Z')
+           ||  (c >= 'a' && c <= 'z')
+           ||  (c == '-')
+           ||  (c == '.')
+           ||  (c == '_') )
+               s += sprintf(s, "%c", c);
+           else if( c == ' ' )
+               s += sprintf(s, "+");
+           else
+               s += sprintf(s, "%%%02X", c);
+   }
+   return s - dst;
+}
+
+
+/*
+ * Print URL of position image
+ *  i.e. http://image.backgammonbase.com/image?gnubgid=4HPwATDgc%2FABMA%3AMAAAAAAAAAAA&height=300&width=400&css=minimal&format=png 
+ *
+ * Input:
+ *   pf: output file
+ *   ms: current match state
+ *
+ */
+
+
+extern void CommandExportPositionBGbase2Clipboard(char *sz)
+{
+    char szClipboard[256];
+    int fHistory;
+    moverecord *pmr = get_current_moverecord ( &fHistory );
+    const matchstate *pms = &ms;
+    char * s = szClipboard;
+
+    if( ms.gs == GAME_NONE ) {
+      outputl( _("No game in progress (type `new game' to start one).") );
+      return;
+    }
+
+    if (!pmr)
+    {
+	    outputerrf(_("Unable to export this position"));
+	    return;
+    }
+
+    
+    s += sprintf(s, "http://image.backgammonbase.com/image?gnubgid=");
+    s += surlencode(s, PositionID ( (ConstTanBoard)pms->anBoard ));
+    s += sprintf(s, ":");
+    s += surlencode(s, MatchIDFromMatchState ( pms ));
+    s += sprintf(s, "&height=300&width=400&css=nature&format=png");
+
+    TextToClipboard( szClipboard );
+}
+
+#if 0
+extern void CommandExportPositionBGbase2Clipboard(char *sz)
+{
+    GString *gs;
+    int fHistory;
+    moverecord *pmr = get_current_moverecord ( &fHistory );
+    const matchstate *pms = &ms;
+
+    if( ms.gs == GAME_NONE ) {
+      outputl( _("No game in progress (type `new game' to start one).") );
+      return;
+    }
+
+    if (!pmr)
+    {
+	    outputerrf(_("Unable to export this position"));
+	    return;
+    }
+
+    gs = g_string_new("http://image.backgammonbase.com/image?gnubgid=");
+    gs = g_string_append_uri_escaped(gs, PositionID((ConstTanBoard)pms->anBoard), NULL, FALSE);
+    gs = g_string_append(gs, ":");
+    gs = g_string_append_uri_escaped(gs, MatchIDFromMatchState (pms), NULL, FALSE);
+    gs = g_string_append(gs, "&height=300&width=400&css=nature&format=png");
+
+    TextToClipboard(gs->str);
+
+    g_string_free(gs, TRUE);
+}
+#endif

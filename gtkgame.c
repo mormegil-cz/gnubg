@@ -1212,6 +1212,13 @@ static void NewClicked(gpointer  p, guint n, GtkWidget * pw)
 	GTKNew();
 }
 
+static void CopyAsBGbase(gpointer p, guint n, GtkWidget * pw)
+{
+
+	UserCommand("export position backgammonbase2clipboard");
+
+}
+
 static void CopyAsGOL(gpointer p, guint n, GtkWidget * pw)
 {
 
@@ -2964,6 +2971,8 @@ GtkItemFactoryEntry aife[] = {
 	  CommandCopy, 0, NULL, NULL },
 	{ N_("/_Edit/Copy as/GammOnLine (HTML)"), NULL,
 	  CopyAsGOL, 0, NULL, NULL },
+	{ N_("/_Edit/Copy as/BackgammonBase.com (URL)"), NULL,
+	  CopyAsBGbase, 0, NULL, NULL },
 
 	{ N_("/_Edit/_Paste Position ID"), "<control>V", PasteIDs, 0,
 		"<StockItem>", GTK_STOCK_PASTE},

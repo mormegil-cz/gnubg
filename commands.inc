@@ -211,6 +211,10 @@ command cER = {
       N_("Save the current position in .html format "
          "(special for GammOnLine)"), 
       szFILENAME, &cFilename },
+    { "backgammonbase2clipboard", CommandExportPositionBGbase2Clipboard,
+      N_("Save the current position in html img tag fragment to clipboard"
+         "(special for BackgammonBase)"), 
+      szFILENAME, &cFilename },
     { "gol2clipboard", CommandExportPositionGOL2Clipboard,
       N_("Copy the current position in .html format to clipboard"
          "(special for GammOnLine)"), 

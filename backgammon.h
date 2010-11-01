@@ -588,6 +588,7 @@ extern void CommandExportMatchPDF(char *);
 extern void CommandExportMatchPS(char *);
 extern void CommandExportMatchText(char *);
 extern void CommandExportPositionGammOnLine(char *);
+extern void CommandExportPositionBGbase2Clipboard(char *);
 extern void CommandExportPositionGOL2Clipboard(char *);
 extern void CommandExportPositionHtml(char *);
 extern void CommandExportPositionJF(char *);
