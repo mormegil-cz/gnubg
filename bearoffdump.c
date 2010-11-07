@@ -89,8 +89,8 @@ main( int argc, char **argv ) {
 
   if (argc != 2)
   {
-	  g_printerr("A bearoff database file should be given as an"
-	     	     "argument\nFor more help try `bearoffdump --help'\n");
+	  g_printerr("A bearoff database file should be given as an argument\n"
+	     	     "For more help try `bearoffdump --help'\n");
 	  exit(EXIT_FAILURE);
   }
   filename = argv[ 1 ];
