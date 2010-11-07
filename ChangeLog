@@ -1,5 +1,7 @@
 2010-11-01  Philippe Michel  <philippe.michel7@sfr.fr>
 
+	* play.c: workaround for bug #27178
+
 	* backgammon.h, commands.inc, gtkgame.c, html.c: copy position as
 	URL to image.backammonbase.com. Submitted by Nori :
 	http://lists.gnu.org/archive/html/bug-gnubg/2010-04/msg00024.html
@@ -4323,7 +4325,7 @@ Mon Feb 16 21:57:18 CET 2004   Joern Thyssen  <jth@gnubg.org>
 
 	* bearoff.c (HeuristicDatabase): align heuristic database
 	with GetBearoffDistUncompressed (a.k.a. the 40 byte offset).
-	(reported by Daniel Murhpy)
+	(reported by Daniel Murphy)
 
 Mon Feb 16 9:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
