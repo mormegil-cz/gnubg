@@ -1767,6 +1767,7 @@ extern char *FormatMoveHint( char *sz, const matchstate *pms, movelist *pml,
                                        ( float (*)[NUM_ROLLOUT_OUTPUTS] )
                                        arStdDev,
                                        &ci,
+                                       0,
                                        1, 
                                        pml->amMoves[ i ].esMove.rc.fCubeful ) );
         break;

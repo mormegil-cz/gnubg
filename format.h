@@ -59,6 +59,7 @@ OutputRolloutResult ( const char *szIndent,
                       float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                       float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
                       const cubeinfo aci[],
+                      const int alt,
                       const int cci,
                       const int fCubeful );
 

@@ -47,6 +47,7 @@ OutputRolloutResult( const char *szIndent,
 		     float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 		     float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
 		     const cubeinfo aci[],
+		     const int alt,
 		     const int cci,
 		     const int fCubeful ) {
 
@@ -75,7 +76,7 @@ OutputRolloutResult( const char *szIndent,
     strcat ( sz, OutputPercents ( aarOutput[ ici ], TRUE ) );
     strcat ( sz, " CL " );
     strcat ( sz, OutputEquityScale ( aarOutput[ ici ][ OUTPUT_EQUITY ], 
-                                     &aci[ ici ], &aci[ 0 ], TRUE ) );
+                                     &aci[ alt + ici ], &aci[ 0 ], TRUE ) );
 
     if ( fCubeful ) {
       strcat ( sz, " CF " );
@@ -94,7 +95,7 @@ OutputRolloutResult( const char *szIndent,
     strcat ( sz, OutputPercents ( aarStdDev[ ici ], FALSE ) );
     strcat ( sz, " CL " );
     strcat ( sz, OutputEquityScale ( aarStdDev[ ici ][ OUTPUT_EQUITY ], 
-                                     &aci[ ici ], &aci[ 0 ], FALSE ) );
+                                     &aci[ alt + ici ], &aci[ 0 ], FALSE ) );
 
     if ( fCubeful ) {
       strcat ( sz, " CF " );
@@ -963,7 +964,7 @@ OutputCubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
     strcat ( strchr ( sz, 0 ),
              OutputRolloutResult ( NULL, asz, aarOutput, aarStdDev,
-                                   aci, 2, pes->rc.fCubeful ) );
+                                   aci, 0, 2, pes->rc.fCubeful ) );
              
 
   }

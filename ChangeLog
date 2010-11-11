@@ -1,3 +1,8 @@
+2010-11-11  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* progress.c, format.c, format.h, gnubg.c: fix TextOutputProgress()
+	display of match cubes (bug #27149).
+
 2010-11-01  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* play.c: workaround for bug #27178
