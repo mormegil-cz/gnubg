@@ -1,5 +1,9 @@
 2010-11-11  Philippe Michel  <philippe.michel7@sfr.fr>
 
+	* rollout.c: In multithreaded rollouts, make every alternative
+	stop at the right number of trials instead of when the speedier
+	reach it.
+
 	* progress.c, format.c, format.h, gnubg.c: fix TextOutputProgress()
 	display of match cubes (bug #27149).
 

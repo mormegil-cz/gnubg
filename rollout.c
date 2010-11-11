@@ -1167,7 +1167,7 @@ extern void RolloutLoopMT(void *unused)
 		for (alt = 0; alt < ro_alternatives; ++alt) {
 			unsigned int trial = MT_SafeIncValue(&altTrialCount[alt]) - 1;
 			/* skip this one if it's already finished */
-			if (fNoMore[alt] || (trial > this_trial - 1)) {
+			if (fNoMore[alt] || (trial > cGames)) {
 				MT_SafeDec(&altTrialCount[alt]);
 				continue;
 			}
