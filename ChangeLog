@@ -1,3 +1,8 @@
+2010-11-13  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* gtktempmap.c: Retain temperature map's checkboxes status (for a
+	given instance, not in gnubgautorc). Bug/wish #27150.
+
 2010-11-11  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* rollout.c: In multithreaded rollouts, make every alternative

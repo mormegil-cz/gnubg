@@ -84,6 +84,9 @@ typedef struct _tempmapwidget {
 
 } tempmapwidget;
 
+/* Retain these from one GTKShowTempMap() to the next */
+static int fShowEquity = FALSE;
+static int fShowBestMove = FALSE;
 
 static int
 TempMapEquities( evalcontext *pec, matchstate *pms, 
@@ -470,7 +473,7 @@ ShowEquityToggled( GtkWidget *pw, tempmapwidget *ptmw ) {
   int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) );
 
   if ( f != ptmw->fShowEquity ) {
-    ptmw->fShowEquity = f;
+    fShowEquity = ptmw->fShowEquity = f;
     UpdateTempMapEquities( ptmw );
   }
 
@@ -483,7 +486,7 @@ ShowBestMoveToggled( GtkWidget *pw, tempmapwidget *ptmw ) {
   int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) );
 
   if ( f != ptmw->fShowBestMove ) {
-    ptmw->fShowBestMove = f;
+    fShowBestMove = ptmw->fShowBestMove = f;
     UpdateTempMapEquities( ptmw );
   }
 }
@@ -537,8 +540,8 @@ GTKShowTempMap( const matchstate ams[], const int n,
 	  DT_INFO, NULL, DIALOG_FLAG_MODAL, NULL, NULL );
 
   ptmw = (tempmapwidget *) g_malloc( sizeof ( tempmapwidget ) );
-  ptmw->fShowBestMove = FALSE;
-  ptmw->fShowEquity = FALSE;
+  ptmw->fShowBestMove = fShowBestMove;
+  ptmw->fShowEquity = fShowEquity;
   ptmw->fInvert = fInvert;
   ptmw->n = n;
   ptmw->nSizeDie = -1;
@@ -763,6 +766,7 @@ GTKShowTempMap( const matchstate ams[], const int n,
   gtk_box_pack_start( GTK_BOX( pwv ), pwh, FALSE, FALSE, 0 );
   
   pw = gtk_check_button_new_with_label( _("Show equities") );
+  gtk_toggle_button_set_active((GtkToggleButton *)pw, ptmw->fShowEquity);
   gtk_box_pack_end( GTK_BOX( pwh ), pw, FALSE, FALSE, 0 );
   
   g_signal_connect( G_OBJECT( pw ), "toggled",
@@ -770,6 +774,7 @@ GTKShowTempMap( const matchstate ams[], const int n,
 
 
   pw = gtk_check_button_new_with_label( _("Show best move") );
+  gtk_toggle_button_set_active((GtkToggleButton *)pw, ptmw->fShowBestMove);
   gtk_box_pack_end( GTK_BOX( pwh ), pw, FALSE, FALSE, 0 );
   
   g_signal_connect( G_OBJECT( pw ), "toggled",
