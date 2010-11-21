@@ -1,5 +1,8 @@
 2010-11-21  Philippe Michel  <philippe.michel7@sfr.fr>
 
+	* rollout.c: Fix for crashes in rollouts. This is essentially
+	Guido Flohr's patch from the discussion of bug #29880.
+
 	* gtkcube.c: Avoid assertion failure when asking for a cube
 	decision hint after rolling the dice. Bug #31713.
 
@@ -11,8 +14,8 @@
 2010-11-11  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* rollout.c: In multithreaded rollouts, make every alternative
-	stop at the right number of trials instead of when the speedier
-	reach it.
+	stop at the right number of trials instead of when the speediest
+	one reaches it.
 
 	* progress.c, format.c, format.h, gnubg.c: fix TextOutputProgress()
 	display of match cubes (bug #27149).

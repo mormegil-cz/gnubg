@@ -951,7 +951,7 @@ double (*aarVariance)[NUM_ROLLOUT_OUTPUTS];
 int *fNoMore;
 jsdinfo *ajiJSD;
 
-int ro_alternatives;
+int ro_alternatives = -1;
 evalsetup **ro_apes;
 ConstTanBoard *ro_apBoard;
 const cubeinfo **ro_apci;
@@ -1203,7 +1203,7 @@ extern void RolloutLoopMT(void *unused)
 			}
 
 			if (fInterrupt)
-				return;
+                                break;
 
 			multi_debug("exclusive lock: update result for alternative");
 			MT_Exclusive();
@@ -1251,6 +1251,9 @@ extern void RolloutLoopMT(void *unused)
 
 		}		/* for (alt = 0; alt < ro_alternatives; ++alt) */
 
+                if (fInterrupt)
+                        break;
+
 		/* we've rolled everything out for this trial, check stopping conditions */
 		/* Stop rolling out moves whose Equity is more than a user selected multiple of the joint standard
 		   deviation of the equity difference with the best move in the list. */
@@ -1284,7 +1287,7 @@ void *ro_pUserData;
 
 static gboolean UpdateProgress(gpointer unused)
 {
-	if (fShowProgress) {
+	if (fShowProgress && ro_alternatives > 0) {
 		int alt;
 		rolloutcontext *prc;
 
@@ -1325,7 +1328,7 @@ RolloutGeneral(ConstTanBoard * apBoard,
 	int nIsCubeful = 0;
 	int fOutputMWCSave = fOutputMWC;
 	int active_alternatives;
-	int previous_rollouts=0;
+	int previous_rollouts = 0;
 
 	show_jsds = 1;
 
@@ -1475,10 +1478,12 @@ RolloutGeneral(ConstTanBoard * apBoard,
 	ro_fCubeRollout = fCubeRollout;
 	ro_fInvert = fInvert;
 	ro_NextTrial = nFirstTrial;
+	ro_pfProgress = pfProgress;
+	ro_pUserData = pUserData;
 
 	active_alternatives = ro_alternatives;
 
-	/* check if rollout alterntives are done, but only when extending
+	/* check if rollout alternatives are done, but only when extending
 	 * all candidates */
 	if (previous_rollouts == active_alternatives)
 	{
@@ -1490,14 +1495,12 @@ RolloutGeneral(ConstTanBoard * apBoard,
 		}
 	}
 	
+	UpdateProgress(NULL);
 
 	if (active_alternatives > 1 || (!rcRollout.fStopOnJsd && active_alternatives > 0))
 	{
 		multi_debug("rollout adding tasks");
 		mt_add_tasks(MT_GetNumThreads(), RolloutLoopMT, NULL, NULL);
-
-		ro_pfProgress = pfProgress;
-		ro_pUserData = pUserData;
 
 		multi_debug("rollout waiting for tasks to complete");
 		MT_WaitForTasks(UpdateProgress, 2000, fAutoSaveRollout);
@@ -1508,8 +1511,15 @@ RolloutGeneral(ConstTanBoard * apBoard,
 #if USE_GTK
 	if (!fX)
 #endif
-		outputf(_("\nRollout done. Printing final results.\n"));
-	UpdateProgress(NULL);
+                if (!fInterrupt)
+		        outputf(_("\nRollout done. Printing final results.\n"));
+
+	if (!fInterrupt) UpdateProgress(NULL);
+
+        /* Signal to UpdateProgress() called from pending events that no
+         * more progress should be displayed.
+         */
+        ro_alternatives = -1;
 
 	for (alt = 0, trialsDone = 0; alt < alternatives; ++alt) {
 		if (apes[alt]->rc.nGamesDone > trialsDone)
@@ -1534,7 +1544,7 @@ RolloutGeneral(ConstTanBoard * apBoard,
 				(*apStdDev[alt])[i] = aarSigma[alt][i];
 	}
 
-	if (fShowProgress
+	if (fShowProgress && !fInterrupt
 #if USE_GTK
 	    && !fX
 #endif
