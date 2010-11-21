@@ -1060,6 +1060,11 @@ extern GtkWidget *CreateCubeAnalysis(moverecord *pmr, const matchstate *pms, int
 	switch (pmr->mt) {
 
 	case MOVE_NORMAL:
+	case MOVE_SETDICE:
+		/*
+		   We're stepping back in the game record after rolling and
+		   asking for a hint on the missed cube decision, for instance
+		*/
 	case MOVE_DOUBLE:
 		if (dt == DT_NORMAL)
 			pchd->pwFrame = CubeAnalysis(pchd);
