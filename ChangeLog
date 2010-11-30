@@ -1,3 +1,9 @@
+2010-11-29  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* gtkcube.c: More unwarranted assertion failures.
+
+	* speed.c: Fix speed calibrating.
+
 2010-11-21  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* rollout.c: Fix for crashes in rollouts. This is essentially
