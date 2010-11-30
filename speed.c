@@ -152,7 +152,7 @@ extern void CommandCalibrate( char *sz )
 		if (timeTaken == 0)
 			spd = 0;
 		else
-			spd = iIter * (EVALS_PER_ITERATION * CLOCKS_PER_SEC / timeTaken);
+			spd = iIter * (EVALS_PER_ITERATION * 1000 / timeTaken);
 #if USE_GTK
 		if( fX )
 			GTKCalibrationUpdate(pcc, (float)spd);
@@ -172,7 +172,7 @@ extern void CommandCalibrate( char *sz )
     if( timeTaken )
 	{
 		rEvalsPerSec = iIter * (float)(EVALS_PER_ITERATION *
-			CLOCKS_PER_SEC / timeTaken);
+			1000 / timeTaken);
 		outputf( "\rCalibration result: %.0f static evaluations/second.\n",
 				rEvalsPerSec );
     }
