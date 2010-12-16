@@ -3729,7 +3729,7 @@ surlencode(char * dst, const char * to_encode)
    int i = 0;
    char * s = dst;
    unsigned char c;
-   while ( c = to_encode[i++] ) {
+   while ( (c = to_encode[i++]) ) {
            if( (c >= '0' && c <= '9')
            ||  (c >= 'A' && c <= 'Z')
            ||  (c >= 'a' && c <= 'z')
