@@ -4134,7 +4134,7 @@ static int SetXGID(char *sz)
 
 	char *c;
 	int i;
-	char v[9][4];
+	char v[9][5];
 
 	for (i = 0; i < 9 && (c = strrchr(s, ':')); i++) {
 		strncpy(v[i], c + 1, 4);
