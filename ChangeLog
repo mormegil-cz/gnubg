@@ -1,3 +1,8 @@
+2010-12-21  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* import.c: Fix handling of resignations in .mat files created by
+	eXtreme Gammon.
+
 2010-11-29  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* gtkcube.c: More unwarranted assertion failures.
