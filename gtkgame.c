@@ -2378,7 +2378,7 @@ extern void SetAnalysis(gpointer p, guint n, GtkWidget * pw)
   
   for (i = 0; i < 3; i++){
     aw.apadjSkill[i] = 
-	  GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1, 0.01, 10, 0 ) );
+	  GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1, 0.01, 0.05, 0 ) );
 
     pwSpin = 
 	    gtk_spin_button_new (GTK_ADJUSTMENT (aw.apadjSkill[i]), 1, 2);
@@ -2406,7 +2406,7 @@ extern void SetAnalysis(gpointer p, guint n, GtkWidget * pw)
   
   for (i = 0; i < 4; i++){
     aw.apadjLuck[i] = 
-	  GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1, 0.01, 10, 0 ) );
+	  GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1, 0.01, 0.05, 0 ) );
 
     pwSpin = 
 	    gtk_spin_button_new (GTK_ADJUSTMENT (aw.apadjLuck[i]), 1, 2);

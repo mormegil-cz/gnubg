@@ -230,7 +230,7 @@ MoveFilterPage ( const int i, const int j,
                        FALSE, FALSE, 0 );
   pmfsw->aapadjAccept[ i ][ j ] = 
     GTK_ADJUSTMENT ( gtk_adjustment_new ( 0, 0, 1000,
-                                          1, 5, 5 ) );
+                                          1, 5, 0 ) );
 
   pw = gtk_spin_button_new ( GTK_ADJUSTMENT ( pmfsw->aapadjAccept[ i ][ j ] ), 
                              1, 0 );
@@ -259,7 +259,7 @@ MoveFilterPage ( const int i, const int j,
 
   pmfsw->aapadjExtra[ i ][ j ] = 
     GTK_ADJUSTMENT ( gtk_adjustment_new ( 0, 0, 1000,
-                                          1, 5, 5 ) );
+                                          1, 5, 0 ) );
 
   pw = gtk_spin_button_new ( GTK_ADJUSTMENT ( pmfsw->aapadjExtra[ i ][ j ] ), 
                              1, 0 );
@@ -280,7 +280,7 @@ MoveFilterPage ( const int i, const int j,
 
   pmfsw->aapadjThreshold[ i ][ j ] = 
     GTK_ADJUSTMENT ( gtk_adjustment_new ( 0, 0, 10,
-                                          0.001, 0.1, 0.1 ) );
+                                          0.001, 0.1, 0 ) );
 
   pw = 
     gtk_spin_button_new ( GTK_ADJUSTMENT ( pmfsw->aapadjThreshold[ i ][ j ] ), 

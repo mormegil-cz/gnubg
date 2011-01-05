@@ -1,3 +1,13 @@
+2011-01-05  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* gtkmovefilter.c, gtktheory.c: Prevent warnings about deprecated
+	usage of GtkSpinButton that appeared with a recent gtk2 update.
+
+	* gtkgame.c: Decrease absurdly high page_increments in some
+	GtkSpinButtons.
+
+	* gtktheory.c: Decrease a page_increment that seemed too high.
+
 2010-12-21  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* import.c: Fix handling of resignations in .mat files created by
