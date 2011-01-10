@@ -1,3 +1,11 @@
+2011-01-10  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* latex.c: Escapes characters reserved by TeX/LaTeX (%, $, _,
+	etc...) + other minor fixes.
+
+	* gnubg.c, html.c, latex.c, text.c : Should avoid ??-numbered
+	moves in exports.
+
 2011-01-05  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* gtkmovefilter.c, gtktheory.c: Prevent warnings about deprecated
@@ -520,7 +528,8 @@ Fri May  8 14:29:05 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 Fri May  8 13:08:57 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
-	* gnubg.c, html.c, latex.c, text.c: checkin of Michel's export patch.
+	* gnubg.c, html.c, latex.c, text.c: checkin of Philippe Michel's
+	export patch.
 
 Wed May  6 21:24:09 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
@@ -585,7 +594,7 @@ Mon Apr 20 17:42:19 CEST 2009 Christian Anthon <anthon@kiku.dk>
 Sat Apr 18 23:45:02 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
 	* gtkchequer.c, play.c: fix two problems with the update of skill
-	labels reported by Michel.
+	labels reported by Philippe Michel.
 
 Sat Apr 18 22:29:37 CEST 2009 Christian Anthon <anthon@kiku.dk>
 
@@ -689,7 +698,7 @@ Thu Mar 26 13:56:00 CET 2009 Christian Anthon <anthon@kiku.dk>
 Thu Mar 26 11:48:33 CET 2009 Christian Anthon <anthon@kiku.dk>
 
 	* analysis.c, eval.c, play.c, sgf.c: make hint and cmark features work
-	together and fix save match / hint bug report by Michel.
+	together and fix save match / hint bug report by Philippe Michel.
 
 Wed Mar 25 22:30:30 CET 2009 Christian Anthon <anthon@kiku.dk>
 
