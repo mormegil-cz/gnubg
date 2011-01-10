@@ -452,7 +452,8 @@ static void ExportGameLaTeX( FILE *pf, listOLD *plGame ) {
 		putc( i == pmr->n.iMove ? '*' : ' ', pf );
 		FormatMoveHint( sz, &msExport, &pmr->ml, i,
 				i != pmr->n.iMove ||
-				i != pmr->ml.cMoves - 1, TRUE, TRUE );
+				i != pmr->ml.cMoves - 1 ||
+				i < exsExport.nMoves, TRUE, TRUE );
 		fputs( sz, pf );
 	    }
 	    fputs( "\\end{verbatim}}", pf );    

@@ -505,7 +505,7 @@ TextPrintMoveAnalysis ( GString *gsz, const matchstate *pms, moverecord *pmr ) {
                              i != pmr->n.iMove ||
                              i != pmr->ml.cMoves - 1 ||
                              pmr->ml.cMoves == 1 ||
-                             i < exsExport.nMoves - 1,
+                             i < exsExport.nMoves,
                              exsExport.fMovesDetailProb,
                              exsExport.afMovesParameters 
                              [ pmr->ml.amMoves[ i ].esMove.et - 1 ] ) );

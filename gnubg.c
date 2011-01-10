@@ -1282,7 +1282,7 @@ static void DisplayAnalysis( moverecord *pmr ) {
 				    i != pmr->n.iMove ||
 				    i != pmr->ml.cMoves - 1 ||
                                     pmr->ml.cMoves == 1 ||
-                                    i < exsExport.nMoves - 1, TRUE, TRUE ) );
+                                    i < exsExport.nMoves, TRUE, TRUE ) );
 
 	}
 	
