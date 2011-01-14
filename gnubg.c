@@ -4471,10 +4471,10 @@ extern int getDiceRandomDotOrg(void)
 	struct sockaddr *psa;
 	char szHostname[80];
 	char szHTTP[] =
-	    "GET http://" RANDOMORGSITE  "/integers/?num=" BUFLENGTH_STR "&min=0&max=5&col=1&base=10&format=plain&rnd=new\n" \
-	    "User-Agent: GNUBG/" VERSION " (email: " PACKAGE_BUGREPORT ")\n";
+	    "GET http://" RANDOMORGSITE  "/integers/?num=" BUFLENGTH_STR "&min=0&max=5&col=1&base=10&format=plain&rnd=new HTTP/1.0\n" \
+	    "User-Agent: GNUBG/" VERSION " (email: " PACKAGE_BUGREPORT ")\n\n";
 
-	char acBuf[2048];
+	char acBuf[4096];
 
 	/* 
 	 * Suggestions for improvements:
