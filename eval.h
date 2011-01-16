@@ -252,8 +252,8 @@ extern const char* aszDoubleTypes[ NUM_DOUBLE_TYPES ];
 #define SETTINGS_GRANDMASTER    7
 #define SETTINGS_SUPREMO        6
 #define SETTINGS_WORLDCLASS     5
-#define SETTINGS_ADVANCED       4
-#define SETTINGS_EXPERT         3
+#define SETTINGS_EXPERT         4
+#define SETTINGS_ADVANCED       3
 #define SETTINGS_INTERMEDIATE   2
 #define SETTINGS_NOVICE         1
 #define SETTINGS_BEGINNER       0
