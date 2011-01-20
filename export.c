@@ -724,34 +724,34 @@ extern void CommandExportPositionPNG (char *sz)
  */
 
 static void
-ExportSnowieTxt (FILE * pf, const matchstate * pms)
+ExportSnowieTxt (char * sz, const matchstate * pms)
 {
 
   int i, j;
 
   /* length of match */
 
-  fprintf (pf, "%d;", pms->nMatchTo);
+  sz += sprintf (sz, "%d;", pms->nMatchTo);
 
   /* Jacoby rule */
 
-  fprintf (pf, "%d;", (!pms->nMatchTo && fJacoby) ? 1 : 0);
+  sz += sprintf (sz, "%d;", (!pms->nMatchTo && fJacoby) ? 1 : 0);
 
   /* unknown field (perhaps variant */
 
-  fputs ("0;", pf);
+  sz += sprintf (sz, "%d;", 0);
 
   /* unknown field */
 
-  fprintf (pf, "%d;", pms->nMatchTo ? 0 : 1);
+  sz += sprintf (sz, "%d;", pms->nMatchTo ? 0 : 1);
 
   /* player on roll (0 = 1st player) */
 
-  fprintf (pf, "%d;", pms->fMove);
+  sz += sprintf (sz, "%d;", pms->fMove);
 
   /* player names */
 
-  fprintf (pf, "%s;%s;", ap[pms->fMove].szName, ap[!pms->fMove].szName);
+  sz += sprintf (sz, "%s;%s;", ap[pms->fMove].szName, ap[!pms->fMove].szName);
 
   /* crawford game */
 
@@ -760,15 +760,15 @@ ExportSnowieTxt (FILE * pf, const matchstate * pms)
      (pms->anScore[1] == (pms->nMatchTo - 1))) &&
     pms->fCrawford && !pms->fPostCrawford;
 
-  fprintf (pf, "%d;", i);
+  sz += sprintf (sz, "%d;", i);
 
   /* scores */
 
-  fprintf (pf, "%d;%d;", pms->anScore[pms->fMove], pms->anScore[!pms->fMove]);
+  sz += sprintf (sz, "%d;%d;", pms->anScore[pms->fMove], pms->anScore[!pms->fMove]);
 
   /* cube value */
 
-  fprintf (pf, "%d;", pms->nCube);
+  sz += sprintf (sz, "%d;", pms->nCube);
 
   /* cube owner */
 
@@ -779,11 +779,11 @@ ExportSnowieTxt (FILE * pf, const matchstate * pms)
   else
     i = -1;
 
-  fprintf (pf, "%d;", i);
+  sz += sprintf (sz, "%d;", i);
 
   /* chequers on the bar for player on roll */
 
-  fprintf (pf, "%d;", -(int)pms->anBoard[0][24]);
+  sz += sprintf (sz, "%d;", -(int)pms->anBoard[0][24]);
 
   /* chequers on the board */
 
@@ -794,22 +794,19 @@ ExportSnowieTxt (FILE * pf, const matchstate * pms)
       else
 	j = -(int)pms->anBoard[0][23 - i];
 
-      fprintf (pf, "%d;", j);
+      sz += sprintf (sz, "%d;", j);
 
     }
 
   /* chequers on the bar for opponent */
 
-  fprintf (pf, "%d;", pms->anBoard[1][24]);
+  sz += sprintf (sz, "%d;", pms->anBoard[1][24]);
 
   /* dice */
 
-  fprintf (pf, "%d;%d;",
+  sz += sprintf (sz, "%d;%d;",
 	   (pms->anDice[0] > 0) ? pms->anDice[0] : 0,
 	   (pms->anDice[1] > 0) ? pms->anDice[1] : 0);
-
-  fputs ("\n", pf);
-
 
 }
 
@@ -818,6 +815,7 @@ extern void CommandExportPositionSnowieTxt (char *sz)
 {
 
   FILE *pf;
+  char buffer[256];
 
   sz = NextToken (&sz);
 
@@ -841,7 +839,9 @@ extern void CommandExportPositionSnowieTxt (char *sz)
       return;
     }
 
-  ExportSnowieTxt (pf, &ms);
+  ExportSnowieTxt (buffer, &ms);
+  fputs(buffer, pf);
+  fputs ("\n", pf);
 
   if (pf != stdout)
     fclose (pf);
