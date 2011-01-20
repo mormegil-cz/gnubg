@@ -1044,12 +1044,12 @@ write_failed:
 	return;
 }
 
-static void ExportGameJF( FILE *pf, listOLD *plGame, int iGame,
-			  int anScore[ 2 ] ) {
+static void ExportGameJF( FILE *pf, listOLD *plGame, int iGame, int withScore )
+{
     listOLD *pl;
     moverecord *pmr;
     char sz[ 128 ];
-    int i = 0, n, nFileCube = 1, fWarned = FALSE;
+    int i = 0, n, nFileCube = 1, fWarned = FALSE, diceRolled = 0;
 	TanBoard anBoard;
 
     /* FIXME It would be nice if this function was updated to use the
@@ -1059,23 +1059,20 @@ static void ExportGameJF( FILE *pf, listOLD *plGame, int iGame,
     if( iGame >= 0 )
 	fprintf( pf, " Game %d\n", iGame + 1 );
 
-    if( anScore ) {
-	sprintf( sz, "%s : %d", ap[ 0 ].szName, anScore[ 0 ] );
-	fprintf( pf, " %-31s%s : %d\n", sz, ap[ 1 ].szName, anScore[ 1 ] );
-    } else
-	fprintf( pf, " %-31s%s\n", ap[ 0 ].szName, ap[ 1 ].szName );
-
-    
     InitBoard( anBoard, ms.bgv );
     
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
 	pmr = pl->p;
 	switch( pmr->mt ) {
 	case MOVE_GAMEINFO:
-	    /* no-op */
-	    /* FIXME what about automatic doubles? */
+	  if( withScore ) {
+	    sprintf( sz, "%s : %d", ap[ 0 ].szName, pmr->g.anScore[ 0 ] );
+	    fprintf( pf, " %-31s%s : %d\n", sz, ap[ 1 ].szName, pmr->g.anScore[ 1 ] );
+	  } else
+	    fprintf( pf, " %-31s%s\n", ap[ 0 ].szName, ap[ 1 ].szName );
+	  /* FIXME what about automatic doubles? */
           continue;
-	    break;
+	  break;
 	case MOVE_NORMAL:
 	    sprintf( sz, "%d%d: ", pmr->anDice[ 0 ], pmr->anDice[ 1 ] );
 	    FormatMovePlain( sz + 4, anBoard, pmr->n.anMove );
@@ -1083,6 +1080,7 @@ static void ExportGameJF( FILE *pf, listOLD *plGame, int iGame,
 	    SwapSides( anBoard );
          /*   if (( sz[ strlen(sz)-1 ] == ' ') && (strlen(sz) > 5 ))
               sz[ strlen(sz) - 1 ] = 0;  Don't need this..  */
+            diceRolled = 0;
 	    break;
 	case MOVE_DOUBLE:
 	    sprintf( sz, " Doubles => %d", nFileCube <<= 1 );
@@ -1094,25 +1092,27 @@ static void ExportGameJF( FILE *pf, listOLD *plGame, int iGame,
             sprintf( sz, " Drops%sWins %d point%s",
                    (i & 1) ? "\n      " : "                       ",
                    nFileCube / 2, (nFileCube == 2) ? "" :"s" );
-	    if( anScore )
-		anScore[ ( i + 1 ) & 1 ] += nFileCube / 2;
 	    break;
         case MOVE_RESIGN:
             if (pmr->fPlayer)
-              sprintf( sz, "%s      Wins %d point%s\n", (i & 1) ? "\n" : "",
+              sprintf( sz, "%s      Wins %d point%s\n", ((i & 1) ^ diceRolled) ? "\n" : "",
                        pmr->r.nResigned * nFileCube,
                        ((pmr->r.nResigned * nFileCube ) > 1) ? "s" : "");
             else
-              sprintf( sz, "%sWins %d point%s\n", (i & 1) ? " " :
-                        "                                  ",
-                        pmr->r.nResigned * nFileCube,
-                        ((pmr->r.nResigned * nFileCube ) > 1) ? "s" : "");
-            if( anScore )
-                anScore[ !pmr->fPlayer ] += pmr->r.nResigned * nFileCube;
+	      if (i & 1) {
+		sprintf( sz, "%sWins %d point%s\n", ((i & 1) ^ diceRolled) ? " " : "                        ",
+			 pmr->r.nResigned * nFileCube,
+			 ((pmr->r.nResigned * nFileCube ) > 1) ? "s" : "");
+	      } else {
+		sprintf( sz, "%sWins %d point%s\n", ((i & 1) ^ diceRolled) ? " " : "                                  ",
+			 pmr->r.nResigned * nFileCube,
+			 ((pmr->r.nResigned * nFileCube ) > 1) ? "s" : "");
+	      }
             break;
 	case MOVE_SETDICE:
-	    /* Could be rolled dice just before resign */
+	    /* Could be rolled dice just before resign or an illegal move */
 	    sprintf( sz, "%d%d: ", pmr->anDice[ 0 ], pmr->anDice[ 1 ] );
+            diceRolled = 1;
 	    break;
 	case MOVE_SETBOARD:
 	case MOVE_SETCUBEVAL:
@@ -1125,6 +1125,17 @@ static void ExportGameJF( FILE *pf, listOLD *plGame, int iGame,
 	    break;
 	}
 
+	if ( pmr->mt == MOVE_SETBOARD
+	     || pmr->mt == MOVE_SETCUBEVAL
+	     || pmr->mt == MOVE_SETCUBEPOS) {
+	  if ( !(i & 1) ) /* We're off by one here since the "right" i is
+			     the one from the preceding MOVE_SETDICE */
+	    fprintf( pf, "\n");	/* Illegal move */
+	  else
+	    fprintf( pf, "%-22s ", ""); /* Illegal move */
+	  continue;
+	}
+
 	if( !i && pmr->mt == MOVE_NORMAL && pmr->fPlayer ) {
 	    fputs( "  1)                             ", pf );
 	    i++;
@@ -1132,9 +1143,13 @@ static void ExportGameJF( FILE *pf, listOLD *plGame, int iGame,
 
 	if(( i & 1 ) || (pmr->mt == MOVE_RESIGN)) {
 	    fputs( sz, pf );
-	    fputc( '\n', pf );
+	    if (pmr->mt != MOVE_SETDICE)
+	      fputc( '\n', pf );
 	} else 
+	  if (pmr->mt != MOVE_SETDICE)
 	    fprintf( pf, "%3d) %-27s ", ( i >> 1 ) + 1, sz );
+	  else
+	    fprintf( pf, "%3d) %-3s ", ( i >> 1 ) + 1, sz );
 
         if ( pmr->mt == MOVE_DROP ) {
           fputc( '\n', pf );
@@ -1147,9 +1162,6 @@ static void ExportGameJF( FILE *pf, listOLD *plGame, int iGame,
 		   i & 1 ? "                                  " : "\n      ",
 		   n * nFileCube, n * nFileCube > 1 ? "s" : "",
 		   "" /* FIXME " and the match" if appropriate */ );
-
-	    if( anScore )
-		anScore[ i & 1 ] += n * nFileCube;
 	}
 	
 	i++;
@@ -1181,7 +1193,7 @@ extern void CommandExportGameGam( char *sz ) {
 	return;
     }
 
-    ExportGameJF( pf, plGame, -1, NULL );
+    ExportGameJF( pf, plGame, -1, FALSE );
     
     if( pf != stdout )
 	fclose( pf );
@@ -1193,7 +1205,7 @@ extern void CommandExportGameGam( char *sz ) {
 extern void CommandExportMatchMat( char *sz ) {
 
     FILE *pf;
-    int i, anScore[ 2 ];
+    int i;
     listOLD *pl;
 
     /* FIXME what should be done if nMatchTo == 0? */
@@ -1220,10 +1232,8 @@ extern void CommandExportMatchMat( char *sz ) {
 
     fprintf( pf, " %d point match\n\n", ms.nMatchTo );
 
-    anScore[ 0 ] = anScore[ 1 ] = 0;
-    
     for( i = 0, pl = lMatch.plNext; pl != &lMatch; i++, pl = pl->plNext )
-	ExportGameJF( pf, pl->p, i, anScore );
+	ExportGameJF( pf, pl->p, i, TRUE );
     
     if( pf != stdout )
 	fclose( pf );

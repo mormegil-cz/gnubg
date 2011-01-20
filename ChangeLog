@@ -1,3 +1,8 @@
+2011-01-20  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* export.c : More robust .mat export in case of illegal moves.
+	Stepping stone to Snowie standard text export.
+
 2011-01-10  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* latex.c: Escapes characters reserved by TeX/LaTeX (%, $, _,
