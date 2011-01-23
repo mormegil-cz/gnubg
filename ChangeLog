@@ -1,3 +1,7 @@
+2011-01-23  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* positionid.h : Speed improvement.
+
 2011-01-20  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* export.c : More robust .mat export in case of illegal moves.
