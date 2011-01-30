@@ -41,7 +41,7 @@ ExportFormat export_format[] = {
 #if HAVE_PANGOCAIRO
 	{EXPORT_PS, ".ps", N_("Postscript"), "ps", {TRUE, TRUE, TRUE}},
 #endif
-	{EXPORT_SNOWIETXT, ".txt", N_("Snowie Text"), "snowietxt", {FALSE, FALSE, TRUE}},
+	{EXPORT_SNOWIETXT, ".txt", N_("Snowie Text"), "snowietxt", {TRUE, TRUE, TRUE}},
 #if HAVE_PANGOCAIRO
 	{EXPORT_SVG, ".svg", N_("SVG"), "svg", {FALSE, FALSE, TRUE}},
 #endif

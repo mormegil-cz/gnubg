@@ -1044,17 +1044,21 @@ write_failed:
 	return;
 }
 
-static void ExportGameJF( FILE *pf, listOLD *plGame, int iGame, int withScore )
+static void ExportGameJF( FILE *pf, listOLD *plGame, int iGame, int withScore, int fSst )
 {
     listOLD *pl;
     moverecord *pmr;
-    char sz[ 128 ];
+    matchstate msExport;
+    char sz[ 128 ], buffer[ 256 ];
     int i = 0, n, nFileCube = 1, fWarned = FALSE, diceRolled = 0;
 	TanBoard anBoard;
 
     /* FIXME It would be nice if this function was updated to use the
        new matchstate struct and ApplyMoveRecord()... but otherwise
        it's not broken, so I won't fix it. */
+
+    if (fSst && iGame == -1) /* Snowie export of single game */
+      fprintf( pf, " 0 point match\n\n Game 1\n" );
     
     if( iGame >= 0 )
 	fprintf( pf, " Game %d\n", iGame + 1 );
@@ -1068,22 +1072,45 @@ static void ExportGameJF( FILE *pf, listOLD *plGame, int iGame, int withScore )
 	  if( withScore ) {
 	    sprintf( sz, "%s : %d", ap[ 0 ].szName, pmr->g.anScore[ 0 ] );
 	    fprintf( pf, " %-31s%s : %d\n", sz, ap[ 1 ].szName, pmr->g.anScore[ 1 ] );
+	    msExport.anScore[0] = pmr->g.anScore[0];
+	    msExport.anScore[1] = pmr->g.anScore[1];
+	    msExport.fCrawford = pmr->g.fCrawford;
+	    msExport.fPostCrawford = !pmr->g.fCrawfordGame;
+	  } else if (fSst && iGame == -1) { /* Snowie export of single game */
+	    sprintf( sz, "%s : 0", ap[ 0 ].szName );
+	    fprintf( pf, " %-31s%s : 0\n", sz, ap[ 1 ].szName );
 	  } else
 	    fprintf( pf, " %-31s%s\n", ap[ 0 ].szName, ap[ 1 ].szName );
+          msExport.fCubeOwner = -1;
 	  /* FIXME what about automatic doubles? */
           continue;
 	  break;
 	case MOVE_NORMAL:
+            diceRolled = 0;
 	    sprintf( sz, "%d%d: ", pmr->anDice[ 0 ], pmr->anDice[ 1 ] );
-	    FormatMovePlain( sz + 4, anBoard, pmr->n.anMove );
+	    if (fSst) { /* Snowie standard text */
+	      moverecord *pnextmr;
+	      if (pl->plNext && pl->plNext->p) {
+		pnextmr = pl->plNext->p;
+		if (pnextmr->mt == MOVE_SETBOARD)
+		  /* Illegal move entered in gnubg as bogus move followed by
+		     editing position : don't export the move, only the dice */
+		  diceRolled = 1;
+		else 
+		  FormatMovePlain( sz + 4, anBoard, pmr->n.anMove );
+	      } else
+		FormatMovePlain( sz + 4, anBoard, pmr->n.anMove );
+	    }
+	    else 
+	      FormatMovePlain( sz + 4, anBoard, pmr->n.anMove );
 	    ApplyMove( anBoard, pmr->n.anMove, FALSE );
 	    SwapSides( anBoard );
          /*   if (( sz[ strlen(sz)-1 ] == ' ') && (strlen(sz) > 5 ))
               sz[ strlen(sz) - 1 ] = 0;  Don't need this..  */
-            diceRolled = 0;
 	    break;
 	case MOVE_DOUBLE:
 	    sprintf( sz, " Doubles => %d", nFileCube <<= 1 );
+            msExport.fCubeOwner = !(i & 1);
 	    break;
 	case MOVE_TAKE:
 	    strcpy( sz, " Takes" ); /* FIXME beavers? */
@@ -1117,10 +1144,11 @@ static void ExportGameJF( FILE *pf, listOLD *plGame, int iGame, int withScore )
 	case MOVE_SETBOARD:
 	case MOVE_SETCUBEVAL:
 	case MOVE_SETCUBEPOS:
-	    if( !fWarned ) {
+	    if( !fWarned && !fSst) {
 		fWarned = TRUE;
 		outputl( _("Warning: this game was edited during play and "
-			 "cannot be recorded in this format.") );
+			 "cannot be exported correctly in this format.\n"
+			  "Use Snowie text format instead.") );
 	    }
 	    break;
 	}
@@ -1128,13 +1156,41 @@ static void ExportGameJF( FILE *pf, listOLD *plGame, int iGame, int withScore )
 	if ( pmr->mt == MOVE_SETBOARD
 	     || pmr->mt == MOVE_SETCUBEVAL
 	     || pmr->mt == MOVE_SETCUBEPOS) {
-	  if ( !(i & 1) ) /* We're off by one here since the "right" i is
-			     the one from the preceding MOVE_SETDICE */
-	    fprintf( pf, "\n");	/* Illegal move */
+          PositionFromKey(anBoard, pmr->sb.auchKey);
+	  if (i & 1)
+            SwapSides(anBoard);
+
+	  if (fSst) { /* Snowie standard text */
+	    moverecord *pnextmr = pl->plNext->p;
+	    char *ct;
+
+	    msExport.nMatchTo = ms.nMatchTo;
+	    msExport.nCube = nFileCube;
+	    msExport.fMove = (i & 1);
+	    msExport.fTurn = (i & 1);
+	    PositionFromKey(msExport.anBoard, pmr->sb.auchKey);
+	    msExport.anDice[0] = pnextmr->anDice[0];
+	    msExport.anDice[1] = pnextmr->anDice[1];
+	    if (i & 1)
+	      SwapSides(msExport.anBoard);
+	    ExportSnowieTxt (buffer, &msExport);
+	    
+	  /* I don't understand why we need to swap this field! */
+	    ct = strstr(buffer, ";");
+	    ct[7] = '0' + ('1' - ct[7]);
+	  }
+	  if ( !(i & 1) )
+	    if (fSst)
+	      fprintf( pf, "Illegal play (%s)\n", buffer);
+	    else
+	      fprintf( pf, "\n");
 	  else
-	    fprintf( pf, "%-22s ", ""); /* Illegal move */
+	    if (fSst)
+	      fprintf( pf, "Illegal play (%-22s) ", buffer);
+	    else
+	    fprintf( pf, "%-23s ", "");
 	  continue;
-	}
+	  }
 
 	if( !i && pmr->mt == MOVE_NORMAL && pmr->fPlayer ) {
 	    fputs( "  1)                             ", pf );
@@ -1143,13 +1199,13 @@ static void ExportGameJF( FILE *pf, listOLD *plGame, int iGame, int withScore )
 
 	if(( i & 1 ) || (pmr->mt == MOVE_RESIGN)) {
 	    fputs( sz, pf );
-	    if (pmr->mt != MOVE_SETDICE)
+	    if (pmr->mt != MOVE_SETDICE && !(pmr->mt == MOVE_NORMAL && diceRolled == 1))
 	      fputc( '\n', pf );
 	} else 
 	  if (pmr->mt != MOVE_SETDICE)
 	    fprintf( pf, "%3d) %-27s ", ( i >> 1 ) + 1, sz );
 	  else
-	    fprintf( pf, "%3d) %-3s ", ( i >> 1 ) + 1, sz );
+	    fprintf( pf, "%3d) %-3s", ( i >> 1 ) + 1, sz );
 
         if ( pmr->mt == MOVE_DROP ) {
           fputc( '\n', pf );
@@ -1163,13 +1219,12 @@ static void ExportGameJF( FILE *pf, listOLD *plGame, int iGame, int withScore )
 		   n * nFileCube, n * nFileCube > 1 ? "s" : "",
 		   "" /* FIXME " and the match" if appropriate */ );
 	}
-	
 	i++;
     }
 }
 
 
-extern void CommandExportGameGam( char *sz ) {
+static void ExportGameGam( char *sz , int fSst) {
     
     FILE *pf;
 
@@ -1193,7 +1248,7 @@ extern void CommandExportGameGam( char *sz ) {
 	return;
     }
 
-    ExportGameJF( pf, plGame, -1, FALSE );
+    ExportGameJF( pf, plGame, -1, FALSE, fSst );
     
     if( pf != stdout )
 	fclose( pf );
@@ -1202,7 +1257,16 @@ extern void CommandExportGameGam( char *sz ) {
 
 }
 
-extern void CommandExportMatchMat( char *sz ) {
+extern void CommandExportGameGam( char *sz ) {
+  ExportGameGam( sz, FALSE);
+}
+
+extern void CommandExportGameSnowieTxt( char *sz ) {
+  ExportGameGam( sz, TRUE);
+}
+
+
+static void ExportMatchMat( char *sz, int fSst ) {
 
     FILE *pf;
     int i;
@@ -1233,11 +1297,19 @@ extern void CommandExportMatchMat( char *sz ) {
     fprintf( pf, " %d point match\n\n", ms.nMatchTo );
 
     for( i = 0, pl = lMatch.plNext; pl != &lMatch; i++, pl = pl->plNext )
-	ExportGameJF( pf, pl->p, i, TRUE );
+      ExportGameJF( pf, pl->p, i, TRUE, fSst );
     
     if( pf != stdout )
 	fclose( pf );
 
     setDefaultFileName ( sz );
 
+}
+
+extern void CommandExportMatchMat( char *sz ) {
+  ExportMatchMat(sz, FALSE);
+}
+
+extern void CommandExportMatchSnowieTxt( char *sz ) {
+  ExportMatchMat(sz, TRUE);
 }

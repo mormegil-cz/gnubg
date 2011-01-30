@@ -177,6 +177,7 @@ command cER = {
 }, acExportGame[] = {
     { "gam", CommandExportGameGam, N_("Records a log of the game in .gam "
       "format"), szFILENAME, &cFilename },
+    { "snowietxt", CommandExportGameSnowieTxt, N_("Records a log of the game in Snowie .txt format"), szFILENAME, &cFilename },
     { "html", CommandExportGameHtml,
       N_("Records a log of the game in .html format"), szFILENAME,
       &cFilename },
@@ -192,6 +193,7 @@ command cER = {
 }, acExportMatch[] = {
     { "mat", CommandExportMatchMat, N_("Records a log of the match in .mat "
       "format"), szFILENAME, &cFilename },
+    { "snowietxt", CommandExportMatchSnowieTxt, N_("Records a log of the match in Snowie .txt format"), szFILENAME, &cFilename },
     { "html", CommandExportMatchHtml,
       N_("Records a log of the match in .html format"), szFILENAME,
       &cFilename },

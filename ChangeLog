@@ -1,3 +1,8 @@
+2011-01-30  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* export.c, commands.inc, file.c, backgammon.h : Export games and
+	matches in Snowie standard text format.
+
 2011-01-23  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* positionid.h : Speed improvement.
@@ -63,7 +68,7 @@
 	* play.c: workaround for bug #27178
 
 	* backgammon.h, commands.inc, gtkgame.c, html.c: copy position as
-	URL to image.backammonbase.com. Submitted by Nori :
+	URL to image.backammonbase.com. Submitted by Noriyuki Hosaka :
 	http://lists.gnu.org/archive/html/bug-gnubg/2010-04/msg00024.html
 
 2010-10-31  Philippe Michel  <philippe.michel7@sfr.fr>
