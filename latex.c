@@ -222,7 +222,7 @@ static void PrintLaTeXBoard( FILE *pf, matchstate *pms, int fPlayer ) {
   etc...). Just to be safe, we escape everything but simple accented
   characters.
 */
-static void LaTeXEscape( FILE *pf, unsigned char *pch ) {
+static void LaTeXEscape( FILE *pf, char *pch ) {
 
     /* Translation table from GNU recode, by François Pinard. */
     static struct translation {

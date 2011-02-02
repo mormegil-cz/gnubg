@@ -791,7 +791,11 @@ extern void BearoffClose(bearoffcontext * pbc)
 #if (GLIB_MAJOR_VERSION > 2) || ((GLIB_MAJOR_VERSION > 1) && (GLIB_MINOR_VERSION > 7))
 	if (pbc->map)
 	{
+#if defined(G_DISABLE_DEPRECATED) && G_DISABLE_DEPRECATED
+		 g_mapped_file_unref(pbc->map);
+#else
 		 g_mapped_file_free(pbc->map);
+#endif
 		 pbc->p = NULL;
 	}
 #endif
