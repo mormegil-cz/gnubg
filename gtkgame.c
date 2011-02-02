@@ -5282,29 +5282,21 @@ extern void GTKProgressEnd( void )
 
 int colWidth;
 
-static void MoveListIntoView(GtkWidget *pwList, int *row)
-{
-  if (gtk_clist_row_is_visible(GTK_CLIST(pwList), (*row-1)) != GTK_VISIBILITY_FULL)
-  {
-    gtk_clist_moveto(GTK_CLIST(pwList), (*row-1), 0, 0, 0);
-    gtk_widget_set_size_request(GTK_WIDGET(pwList), colWidth * 2 + 50, -1);
-  }
-}
-
 extern void GTKShowScoreSheet( void )
 {
 	GtkWidget *pwDialog, *pwBox;
 	GtkWidget *hbox;
-	GtkWidget *pwList;
+	GtkWidget *view;
 	GtkWidget* pwScrolled;
+	GtkCellRenderer *renderer;
+	GtkTreeViewColumn *column;
+	GtkListStore *store;
 	PangoRectangle logical_rect;
 	PangoLayout *layout;
 	int width1, width2;
 	int i;
 	int numRows = 0;
 	char title[100];
-	char *titles[2];
-	char *data[2];
 	listOLD *pl;
 
 	sprintf(title, _("Score Sheet - "));
@@ -5319,37 +5311,17 @@ extern void GTKShowScoreSheet( void )
 
 	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), pwBox);
 
-	gtk_widget_set_size_request(GTK_WIDGET (pwDialog), -1, 200);
 	gtk_container_set_border_width(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), 4);
 
 	hbox = gtk_hbox_new (FALSE, 0);
 	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), hbox);
 
-	titles[0] = ap[0].szName;
-	titles[1] = ap[1].szName;
-
-	pwList = gtk_clist_new_with_titles( 2, titles );
-	GTK_WIDGET_UNSET_FLAGS(pwList, GTK_CAN_FOCUS);
-	gtk_clist_column_titles_passive( GTK_CLIST( pwList ) );
-
-	layout = gtk_widget_create_pango_layout(pwList, titles[0]);
-	pango_layout_get_pixel_extents (layout, NULL, &logical_rect);
-	g_object_unref (layout);
-	width1 = logical_rect.width;
-
-	layout = gtk_widget_create_pango_layout(pwList, titles[1]);
-	pango_layout_get_pixel_extents (layout, NULL, &logical_rect);
-	g_object_unref (layout);
-	width2 = logical_rect.width;
-
-	colWidth = MAX(width1, width2);
-
-	data[0] = malloc(10);
-	data[1] = malloc(10);
+	store = gtk_list_store_new(2, G_TYPE_INT, G_TYPE_INT);
 
 	for (pl = lMatch.plNext; pl->p; pl = pl->plNext )
 	{
 		int score[2];
+		GtkTreeIter iter;
 		listOLD *plGame = pl->plNext->p;
 
 		if (plGame)
@@ -5379,35 +5351,30 @@ extern void GTKShowScoreSheet( void )
 			else
 				score[pmr->g.fWinner] += pmr->g.nPoints;
 		}
-		sprintf(data[0], "%d", score[0]);
-		sprintf(data[1], "%d", score[1]);
-		gtk_clist_append(GTK_CLIST(pwList), data);
+		gtk_list_store_append(store, &iter);
+		gtk_list_store_set(store, &iter, 0, score[0], 1, score[1], -1);
 		numRows++;
-	}
-
-	free(data[0]);
-	free(data[1]);
-
-	for( i = 0; i < 2; i++ )
-	{
-	gtk_clist_set_column_justification(GTK_CLIST(pwList), i, GTK_JUSTIFY_CENTER);
-	gtk_clist_set_column_width( GTK_CLIST( pwList ), i, colWidth);
-	gtk_clist_set_column_resizeable(GTK_CLIST(pwList), i, FALSE);
 	}
 
 	pwScrolled = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(pwScrolled),
-				GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	gtk_container_add(GTK_CONTAINER(pwScrolled), pwList);
+				GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 
-	gtk_widget_set_size_request(GTK_WIDGET(pwList), colWidth * 2 + 20, -1);
+	view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+	g_object_unref(store);
 
-	gtk_box_pack_start(GTK_BOX(hbox), pwScrolled, TRUE, FALSE, 0);
+	renderer = gtk_cell_renderer_text_new();
+	column = gtk_tree_view_column_new_with_attributes(ap[0].szName, renderer, "text", 0, NULL);
+	gtk_tree_view_column_set_min_width(column, 75);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 
-	gtk_clist_select_row(GTK_CLIST(pwList), numRows - 1, 1);
+	renderer = gtk_cell_renderer_text_new();
+	column = gtk_tree_view_column_new_with_attributes(ap[1].szName, renderer, "text", 0, NULL);
+	gtk_tree_view_column_set_min_width(column, 75);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 
-	g_signal_connect(G_OBJECT(pwList), "realize",
-			G_CALLBACK(MoveListIntoView), &numRows );
+	gtk_container_add(GTK_CONTAINER(pwScrolled), view);
+	gtk_box_pack_start(GTK_BOX(hbox), pwScrolled, TRUE, TRUE, 0);
 
 	GTKRunDialog(pwDialog);
 }
@@ -6518,10 +6485,6 @@ extern void GTKDumpStatcontext( int game )
 	pwNotebook = gtk_notebook_new();
 	gtk_notebook_set_scrollable( GTK_NOTEBOOK( pwNotebook ), TRUE );
 	gtk_notebook_popup_disable( GTK_NOTEBOOK( pwNotebook ) );
-
-/* Not sure if this is a good idea...
-	gtk_widget_set_tooltip_text(pwNotebook, _("Right click to copy statistics"));
-*/
 
 	pvbox = gtk_vbox_new( FALSE, 0 ),
     gtk_box_pack_start( GTK_BOX( pvbox ), pwNotebook, TRUE, TRUE, 0);
