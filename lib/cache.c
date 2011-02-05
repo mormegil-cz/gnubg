@@ -28,6 +28,7 @@
 #endif
 
 #include "cache.h"
+#include "positionid.h"
 
 #if USE_MULTITHREAD
 #include "multithread.h"
@@ -111,7 +112,7 @@ extern unsigned long GetHashKey(unsigned long hashMask, const cacheNodeDetail* e
 
 unsigned int CacheLookupWithLocking(evalCache* pc, const cacheNodeDetail* e, float *arOut, float *arCubeful)
 {
-	unsigned long l = GetHashKey(pc->hashMask, e);
+	unsigned long const l = GetHashKey(pc->hashMask, e);
 
 #if CACHE_STATS
 	++pc->cLookup;
@@ -119,11 +120,11 @@ unsigned int CacheLookupWithLocking(evalCache* pc, const cacheNodeDetail* e, flo
 #if USE_MULTITHREAD
 	cache_lock(pc, l);
 #endif
-	if ((pc->entries[l].nd_primary.nEvalContext != e->nEvalContext ||
-		memcmp(pc->entries[l].nd_primary.key.auch, e->key.auch, sizeof(e->key.auch)) != 0))
+	if (pc->entries[l].nd_primary.nEvalContext != e->nEvalContext ||
+		!EqualKeys(pc->entries[l].nd_primary.key.auch, e->key.auch))
 	{	/* Not in primary slot */
-		if ((pc->entries[l].nd_secondary.nEvalContext != e->nEvalContext ||
-			memcmp(pc->entries[l].nd_secondary.key.auch, e->key.auch, sizeof(e->key.auch)) != 0))
+		if (pc->entries[l].nd_secondary.nEvalContext != e->nEvalContext ||
+			!EqualKeys(pc->entries[l].nd_secondary.key.auch, e->key.auch))
 		{	/* Cache miss */
 #if USE_MULTITHREAD
 			cache_unlock(pc, l);
@@ -156,16 +157,16 @@ unsigned int CacheLookupWithLocking(evalCache* pc, const cacheNodeDetail* e, flo
 
 unsigned int CacheLookupNoLocking(evalCache* pc, const cacheNodeDetail* e, float *arOut, float *arCubeful)
 {
-	unsigned long l = GetHashKey(pc->hashMask, e);
+	unsigned long const l = GetHashKey(pc->hashMask, e);
 
 #if CACHE_STATS
 	++pc->cLookup;
 #endif
-	if ((pc->entries[l].nd_primary.nEvalContext != e->nEvalContext ||
-		memcmp(pc->entries[l].nd_primary.key.auch, e->key.auch, sizeof(e->key.auch)) != 0))
+	if (pc->entries[l].nd_primary.nEvalContext != e->nEvalContext ||
+		!EqualKeys(pc->entries[l].nd_primary.key.auch, e->key.auch))
 	{	/* Not in primary slot */
-		if ((pc->entries[l].nd_secondary.nEvalContext != e->nEvalContext ||
-			memcmp(pc->entries[l].nd_secondary.key.auch, e->key.auch, sizeof(e->key.auch)) != 0))
+		if (pc->entries[l].nd_secondary.nEvalContext != e->nEvalContext ||
+			!EqualKeys(pc->entries[l].nd_secondary.key.auch, e->key.auch))
 		{	/* Cache miss */
 			return l;
 		}
