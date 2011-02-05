@@ -255,14 +255,16 @@ static void CreateMessageWindow( void )
 	CreatePanel(WINDOW_MESSAGE, psw, _("Messages - GNU Backgammon"), "messages");
 }
 
-GtkWidget *pwTheoryList = NULL;
+static GtkWidget *pwTheoryView = NULL;
 
 
 void UpdateTheoryData(BoardData* bd, int UpdateType, const TanBoard points)
 {
 	char* pc;
-
-	if (!pwTheoryList)
+	GtkTreeIter iter;
+	GtkListStore *store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(pwTheoryView)));
+	
+	if (!pwTheoryView)
 		return;
 
 	if (UpdateType & TT_PIPCOUNT)
@@ -280,8 +282,8 @@ void UpdateTheoryData(BoardData* bd, int UpdateType, const TanBoard points)
     			pc = g_strdup_printf("%d %s", abs(anPip[0] - anPip[1]),
     				(diff > 0) ? _("ahead") : _("behind"));
 
-			gtk_clist_set_text(GTK_CLIST(pwTheoryList), 0, 1, pc);
-
+			gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(store), &iter, NULL, 0);
+			gtk_list_store_set(store, &iter, 1, pc, -1);
 			g_free(pc);
 		}
 	}
@@ -293,13 +295,15 @@ void UpdateTheoryData(BoardData* bd, int UpdateType, const TanBoard points)
 
 			if ( EPC( points, arEPC, NULL, NULL, NULL, TRUE ) )
 			{	/* no EPCs available */
-				gtk_clist_set_text(GTK_CLIST(pwTheoryList), 1, 1, "");
+				gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(store), &iter, NULL, 1);
+				gtk_list_store_set(store, &iter, 1, "", -1);
 			}
 			else
 			{
 				pc = g_strdup_printf("%.2f (%+.1f)", 
 									arEPC[1], arEPC[1] - arEPC[0]);
-				gtk_clist_set_text(GTK_CLIST(pwTheoryList), 1, 1, pc);
+				gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(store), &iter, NULL, 1);
+				gtk_list_store_set(store, &iter, 1, pc, -1);
 				g_free( pc );
 			}
 		}
@@ -316,11 +320,15 @@ void UpdateTheoryData(BoardData* bd, int UpdateType, const TanBoard points)
 		}
 		if (pc)
 		{
-			gtk_clist_set_text(GTK_CLIST(pwTheoryList), 2, 1, pc);
+			gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(store), &iter, NULL, 2);
+			gtk_list_store_set(store, &iter, 1, pc, -1);
 			g_free( pc );
 		}
-		else
-			gtk_clist_set_text(GTK_CLIST(pwTheoryList), 2, 1, "");
+		else 
+		{
+			gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(store), &iter, NULL, 2);
+			gtk_list_store_set(store, &iter, 1, "", -1);
+		}
 	}
 
 	if (UpdateType & TT_KLEINCOUNT)
@@ -335,35 +343,44 @@ void UpdateTheoryData(BoardData* bd, int UpdateType, const TanBoard points)
 			if (fKC != -1)
 			{
     			pc = g_strdup_printf("%.4f", fKC);
-				gtk_clist_set_text(GTK_CLIST(pwTheoryList), 3, 1, pc);
-				g_free(pc);
+			gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(store), &iter, NULL, 3);
+			gtk_list_store_set(store, &iter, 1, pc, -1);
+			g_free( pc );
 			}
-			else
-				gtk_clist_set_text(GTK_CLIST(pwTheoryList), 3, 1, "");
+			else 
+			{
+				gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(store), &iter, NULL, 3);
+				gtk_list_store_set(store, &iter, 1, "", -1);
+			}
 		}
 	}
 }
 
 static GtkWidget *CreateTheoryWindow( void )
 {
-	static char *row[] = { NULL, NULL };
-	pwTheoryList = gtk_clist_new(2);
+	GtkListStore *store;
+	GtkTreeIter iter;
+	GtkCellRenderer *renderer;
 
-	gtk_clist_set_column_auto_resize( GTK_CLIST( pwTheoryList ), 0, TRUE );
-	gtk_clist_set_column_auto_resize( GTK_CLIST( pwTheoryList ), 1, TRUE );
-	gtk_clist_set_column_justification( GTK_CLIST( pwTheoryList ), 0, GTK_JUSTIFY_RIGHT );
+	store  = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING, -1);
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, _("Pip_Count"), 1, "", -1);
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, _("EPC"), 1, "", -1);
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, _("Return hits"), 1, "", -1);
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, _("Kleinman count"), 1, "", -1);
 
-	CreatePanel(WINDOW_THEORY, pwTheoryList, _("Theory - GNU Backgammon"), "theory");
+	pwTheoryView = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+	g_object_unref(store);
+	renderer = gtk_cell_renderer_text_new();
+	gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(pwTheoryView), -1, NULL, renderer, "text", 0, NULL);
+	renderer = gtk_cell_renderer_text_new();
+	gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(pwTheoryView), -1, NULL, renderer, "text", 1, NULL);
+	gtk_tree_view_set_headers_visible (GTK_TREE_VIEW(pwTheoryView), FALSE);
 
-	row[0] = _("Pip count");
-	gtk_clist_append(GTK_CLIST(pwTheoryList), row);
-	row[0] = _("EPC");
-	gtk_clist_append(GTK_CLIST(pwTheoryList), row);
-	row[0] = _("Return hits");
-	gtk_clist_append(GTK_CLIST(pwTheoryList), row);
-	row[0] = _("Kleinman count");
-	gtk_clist_append(GTK_CLIST(pwTheoryList), row);
-
+	CreatePanel(WINDOW_THEORY, pwTheoryView, _("Theory - GNU Backgammon"), "theory");
 	return woPanel[WINDOW_THEORY].pwWin;
 }
 
@@ -1573,5 +1590,5 @@ extern void ClosePanels(void)
 			}
 		}
 	}
-	pwTheoryList = NULL;	/* Reset this to stop errors - may be other ones that need reseting? */
+	pwTheoryView = NULL;	/* Reset this to stop errors - may be other ones that need reseting? */
 }

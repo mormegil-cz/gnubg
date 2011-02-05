@@ -1,6 +1,10 @@
+Sat Feb  5 18:27:35 CET 2011 Christian Anthon <anthon@kiku.dk>
+
+	* gtkpanels.c: one less clist
+
 Wed Feb  2 22:00:24 CET 2011 Christian Anthon <anthon@kiku.dk>
 
-	* gtkgame.c: one list clist.
+	* gtkgame.c: one less clist.
 
 2011-01-30  Philippe Michel  <philippe.michel7@sfr.fr>
 
