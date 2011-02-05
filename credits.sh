@@ -430,3 +430,5 @@ sed -e 's/"/\\"/g' AUTHORS | sed -e 's/.*/"&\\n"/g' >> credits.c
 cat >> credits.c <<EOF
 ;
 EOF
+
+rm -f $authors $contributors $support $translations $credit $extra
