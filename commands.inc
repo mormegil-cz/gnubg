@@ -625,7 +625,7 @@ command cER = {
     { "comment", CommandSetMatchComment,
       N_("Record miscellaneous notes about the match"), szOPTVALUE, NULL },
     { "date", CommandSetMatchDate,
-      N_("Record the date when the match was played"), szOPTVALUE, NULL },
+      N_("Record the date when the match was played"), szOPTDATE, NULL },
     { "event", CommandSetMatchEvent,
       N_("Record the name of the event the match is from"), szOPTVALUE, NULL },
     { "place", CommandSetMatchPlace,
