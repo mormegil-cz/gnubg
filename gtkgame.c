@@ -3971,7 +3971,6 @@ static GtkWidget *NewWidget( newwidget *pnw)
 
      sz = g_strdup_printf(_("Start a new %d point match"), i);
      sprintf(stock, "gnubg-stock-new%d", i);
-     puts(stock);
      pwButtons = button_from_image(gtk_image_new_from_stock(stock, GTK_ICON_SIZE_LARGE_TOOLBAR));
      gtk_toolbar_append_widget( GTK_TOOLBAR( pwToolbar ),
                              pwButtons, sz, NULL );
