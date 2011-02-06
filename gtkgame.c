@@ -1,4 +1,3 @@
-
 /*
  * gtkgame.c
  *
@@ -3432,8 +3431,6 @@ static void gnubg_set_default_icon(void)
 }
 extern void InitGTK(int *argc, char ***argv)
 {
-#include "xpm/gnu.xpm"
-#include "xpm/question.xpm"
 	char *sz;
 	GtkIconFactory *pif;
 	GdkAtom cb;
@@ -3463,14 +3460,6 @@ extern void InitGTK(int *argc, char ***argv)
 	/*add two xpm based icons*/
 	pif = gtk_icon_factory_new();
 	gtk_icon_factory_add_default(pif);
-	gtk_icon_factory_add(pif, GTK_STOCK_DIALOG_GNU,
-			     gtk_icon_set_new_from_pixbuf
-			     (gdk_pixbuf_new_from_xpm_data
-			      ((const char **) gnu_xpm)));
-	gtk_icon_factory_add(pif, GTK_STOCK_DIALOG_GNU_QUESTION,
-			     gtk_icon_set_new_from_pixbuf
-			     (gdk_pixbuf_new_from_xpm_data
-			      ((const char **) question_xpm)));
 
 #if (GTK_MAJOR_VERSION < 3) && (GTK_MINOR_VERSION < 12)
 	ptt = gtk_tooltips_new();
@@ -3718,7 +3707,7 @@ extern int GtkTutor ( char *sz )
           *pwButtons, *pwPrompt, *pwHint;
 
 	pwTutorDialog = GTKCreateDialog( _("GNU Backgammon - Tutor"),
-		DT_GNUQUESTION, NULL, DIALOG_FLAG_MODAL, G_CALLBACK(OK), (void*)&f);
+		DT_QUESTION, NULL, DIALOG_FLAG_MODAL, G_CALLBACK(OK), (void*)&f);
 
 	pwOK = DialogArea(pwTutorDialog, DA_OK);
 	gtk_button_set_label(GTK_BUTTON(pwOK), _("Play Anyway"));
@@ -3944,8 +3933,6 @@ static GtkWidget *NewWidget( newwidget *pnw)
   char **apXPM[10];
   GtkWidget *pwVbox, *pwHbox, *pwLabel, *pwToolbar;
   GtkWidget *pwButtons, *pwFrame, *pwVbox2; 
-#include "xpm/stock_new_all.xpm"
-#include "xpm/stock_new_money.xpm"
   pwVbox = gtk_vbox_new(FALSE, 0);
   pwToolbar = gtk_toolbar_new ();
 
@@ -3969,8 +3956,7 @@ static GtkWidget *NewWidget( newwidget *pnw)
 
   gtk_toolbar_append_space(GTK_TOOLBAR(pwToolbar));
 
-  pwButtons = button_from_image( image_from_xpm_d ( stock_new_money_xpm,
-                                                      pwToolbar ) );
+  pwButtons = button_from_image(gtk_image_new_from_stock(GNUBG_STOCK_NEW0, GTK_ICON_SIZE_LARGE_TOOLBAR));
   gtk_toolbar_append_widget( GTK_TOOLBAR( pwToolbar ),
                    pwButtons, _("Start a new money game session"), NULL );
   g_signal_connect( G_OBJECT( pwButtons ), "clicked",
@@ -3978,24 +3964,15 @@ static GtkWidget *NewWidget( newwidget *pnw)
 
   gtk_toolbar_append_space(GTK_TOOLBAR(pwToolbar));
 
-  apXPM[0] = stock_new_xpm;
-  apXPM[1] = stock_new1_xpm;
-  apXPM[2] = stock_new3_xpm;
-  apXPM[3] = stock_new5_xpm;
-  apXPM[4] = stock_new7_xpm;
-  apXPM[5] = stock_new9_xpm;
-  apXPM[6] = stock_new11_xpm;
-  apXPM[7] = stock_new13_xpm;
-  apXPM[8] = stock_new15_xpm;
-  apXPM[9] = stock_new17_xpm;
-  
   for(i = 1; i < 19; i=i+2, j++ ){			     
      gchar *sz;
+     gchar stock[50];
      int *pi;
 
      sz = g_strdup_printf(_("Start a new %d point match"), i);
-     pwButtons = button_from_image( image_from_xpm_d ( apXPM[j],
-                                                      pwToolbar ) );
+     sprintf(stock, "gnubg-stock-new%d", i);
+     puts(stock);
+     pwButtons = button_from_image(gtk_image_new_from_stock(stock, GTK_ICON_SIZE_LARGE_TOOLBAR));
      gtk_toolbar_append_widget( GTK_TOOLBAR( pwToolbar ),
                              pwButtons, sz, NULL );
      g_free(sz);
@@ -6235,24 +6212,6 @@ static void StatsSelectGame(GtkWidget *pw, int i)
 	SetStats(GetStatContext(curStatGame));
 }
 
-static void StatsAllGames( GtkWidget *pw, char *szCommand )
-{
-	if (curStatGame != 0)
-		StatsSelectGame(pw, 0);
-}
-
-static void StatsFirstGame( GtkWidget *pw, char *szCommand )
-{
-	if (curStatGame != 1)
-		StatsSelectGame(pw, 1);
-}
-
-static void StatsLastGame( GtkWidget *pw, char *szCommand )
-{
-	if (curStatGame != numStatGames)
-		StatsSelectGame(pw, numStatGames);
-}
-
 static void StatsPreviousGame( GtkWidget *pw, char *szCommand )
 {
 	if (curStatGame > 1)
@@ -6265,64 +6224,22 @@ static void StatsNextGame( GtkWidget *pw, char *szCommand )
 		StatsSelectGame(pw, curStatGame + 1);
 }
 
-extern GtkWidget *StatsPixmapButton(GdkColormap *pcmap, char **xpm,
-				void (*fn)(GtkWidget*, char*))
-{
-    GdkPixmap *ppm;
-    GdkBitmap *pbm;
-    GtkWidget *pw, *pwButton;
-
-    ppm = gdk_pixmap_colormap_create_from_xpm_d( NULL, pcmap, &pbm, NULL,
-						 xpm );
-    pw = gtk_pixmap_new( ppm, pbm );
-    pwButton = gtk_button_new();
-    gtk_container_add( GTK_CONTAINER( pwButton ), pw );
-    
-    g_signal_connect( G_OBJECT( pwButton ), "clicked",
-			G_CALLBACK( fn ), 0 );
-    
-    return pwButton;
-}
-
 static void AddNavigation(GtkWidget* pvbox)
 {
 	GtkWidget *phbox, *pm, *pw;
 	GdkColormap *pcmap;
     char sz[128];
     listOLD *pl;
-
-#include "xpm/prevgame.xpm"
-#include "xpm/prevmove.xpm"
-#include "xpm/nextmove.xpm"
-#include "xpm/nextgame.xpm"
-#include "xpm/allgames.xpm"
-
-	pcmap = gtk_widget_get_colormap( pwMain );
-
 	phbox = gtk_hbox_new( FALSE, 0 ),
 	gtk_box_pack_start( GTK_BOX( pvbox ), phbox, FALSE, FALSE, 4 );
-
-	gtk_box_pack_start( GTK_BOX( phbox ),
-			pw = StatsPixmapButton(pcmap, allgames_xpm, StatsAllGames),
-			FALSE, FALSE, 4 );
-	gtk_widget_set_tooltip_text(pw, _("Show all games"));
-	gtk_box_pack_start( GTK_BOX( phbox ),
-			pw = StatsPixmapButton(pcmap, prevgame_xpm, StatsFirstGame),
-			FALSE, FALSE, 4 );
-	gtk_widget_set_tooltip_text(pw, _("Move to first game"));
-	gtk_box_pack_start( GTK_BOX( phbox ),
-			pw = StatsPixmapButton(pcmap, prevmove_xpm, StatsPreviousGame),
-			FALSE, FALSE, 0 );
+	pw = button_from_image(gtk_image_new_from_stock(GNUBG_STOCK_GO_PREV_GAME, GTK_ICON_SIZE_LARGE_TOOLBAR));
+	g_signal_connect(G_OBJECT(pw), "clicked", G_CALLBACK(StatsPreviousGame), NULL);
+	gtk_box_pack_start( GTK_BOX( phbox ), pw, FALSE, FALSE, 0 );
 	gtk_widget_set_tooltip_text(pw, _("Move back to the previous game"));
-	gtk_box_pack_start( GTK_BOX( phbox ),
-			pw = StatsPixmapButton(pcmap, nextmove_xpm, StatsNextGame),
-			FALSE, FALSE, 4 );
+	pw = button_from_image(gtk_image_new_from_stock(GNUBG_STOCK_GO_NEXT_GAME, GTK_ICON_SIZE_LARGE_TOOLBAR));
+	g_signal_connect(G_OBJECT(pw), "clicked", G_CALLBACK(StatsNextGame), NULL);
+	gtk_box_pack_start( GTK_BOX( phbox ),pw, FALSE, FALSE, 4 );
 	gtk_widget_set_tooltip_text(pw, _("Move ahead to the next game"));
-	gtk_box_pack_start( GTK_BOX( phbox ),
-			pw = StatsPixmapButton(pcmap, nextgame_xpm, StatsLastGame),
-			FALSE, FALSE, 0 );
-	gtk_widget_set_tooltip_text(pw, _("Move ahead to last game"));
-
 	pm = gtk_menu_new();
 
 	{
@@ -7232,16 +7149,11 @@ extern void GTKResign(gpointer p, guint n, GtkWidget * pw)
 {
 	GtkWidget *pwDialog, *pwVbox, *pwHbox, *pwButtons;
 	int i;
-	char **apXPM[3];
 	const char *asz[3] = { N_("Resign normal"),
 		N_("Resign gammon"),
 		N_("Resign backgammon")
 	};
-
-#include "xpm/resigns.xpm"
-	apXPM[0] = resign_n_xpm;
-	apXPM[1] = resign_g_xpm;
-	apXPM[2] = resign_bg_xpm;
+	const char *resign_stocks[3] = {GNUBG_STOCK_RESIGNSN, GNUBG_STOCK_RESIGNSG, GNUBG_STOCK_RESIGNSB};
 
 	if (ap[ !ms.fTurn ].pt != PLAYER_HUMAN && check_resigns(NULL) != -1
 		&& GTKShowWarning(WARN_RESIGN, NULL))
@@ -7260,7 +7172,7 @@ extern void GTKResign(gpointer p, guint n, GtkWidget * pw)
 		pwButtons = gtk_button_new();
 		pwHbox = gtk_hbox_new(FALSE, 0);
 		gtk_container_add(GTK_CONTAINER(pwButtons), pwHbox);
-		gtk_box_pack_start(GTK_BOX(pwHbox), image_from_xpm_d(apXPM[i], pwButtons), FALSE, FALSE, 0);
+		gtk_box_pack_start(GTK_BOX(pwHbox), gtk_image_new_from_stock(resign_stocks[i], GTK_ICON_SIZE_LARGE_TOOLBAR), FALSE, FALSE, 0);
 		gtk_box_pack_start(GTK_BOX(pwHbox), gtk_label_new(_(asz[i])), TRUE, TRUE, 10);
 		gtk_container_add(GTK_CONTAINER(pwVbox), pwButtons);
 		g_signal_connect(G_OBJECT(pwButtons), "clicked", G_CALLBACK(CallbackResign), GINT_TO_POINTER(i));

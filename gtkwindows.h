@@ -41,8 +41,6 @@ typedef enum _dialogtype {
 	DT_AREYOUSURE,
 	DT_WARNING,
 	DT_ERROR,
-	DT_GNU,
-	DT_GNUQUESTION,
 	DT_CUSTOM,
 	NUM_DIALOG_TYPES
 } dialogtype;

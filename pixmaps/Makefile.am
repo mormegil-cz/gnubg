@@ -29,19 +29,34 @@ STOCK_MENU_IMAGES = \
 		    16x16/actions/runit_16.png
 
 STOCK_BUTTON_IMAGES = \
+		      24x24/actions/anti_clockwise_24.png \
 		      24x24/actions/cancel_24.png \
+		      24x24/actions/clockwise_24.png \
 		      24x24/actions/double_24.png \
 		      24x24/actions/go_next_24.png \
 		      24x24/actions/go_next_cmarked_24.png \
 		      24x24/actions/go_next_game_24.png \
 		      24x24/actions/go_next_marked_24.png \
 		      24x24/actions/go_prev_24.png \
-		      24x24/actions/go_prev_marked_24.png \
-		      24x24/actions/go_prev_game_24.png \
 		      24x24/actions/go_prev_cmarked_24.png \
+		      24x24/actions/go_prev_game_24.png \
+		      24x24/actions/go_prev_marked_24.png \
 		      24x24/actions/hint_24.png \
+		      24x24/actions/new0_24.png \
+		      24x24/actions/new11_24.png \
+		      24x24/actions/new1_24.png \
+		      24x24/actions/new13_24.png \
+		      24x24/actions/new15_24.png \
+		      24x24/actions/new17_24.png \
+		      24x24/actions/new3_24.png \
+		      24x24/actions/new5_24.png \
+		      24x24/actions/new7_24.png \
+		      24x24/actions/new9_24.png \
 		      24x24/actions/ok_24.png \
 		      24x24/actions/resign_24.png \
+		      24x24/actions/resignsb_24.png \
+		      24x24/actions/resignsg_24.png \
+		      24x24/actions/resignsn_24.png \
 		      24x24/actions/runit_24.png
 
 STOCK_IMAGES = \

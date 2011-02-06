@@ -1,3 +1,20 @@
+Sun Feb  6 21:04:11 CET 2011 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, configure.in, gnubgstock.c, gnubgstock.h, gtkgame.c,
+	gtkpanels.c, gtktoolbar.c, gtkwindows.c, gtkwindows.h,
+	pixmaps/Makefile.am, pixmaps/gnubg-stock-pixbufs.h,
+	pixmaps/24x24/actions/anti_clockwise_24.png,
+	pixmaps/24x24/actions/clockwise_24.png,
+	pixmaps/24x24/actions/new0_24.png, pixmaps/24x24/actions/new11_24.png,
+	pixmaps/24x24/actions/new13_24.png,
+	pixmaps/24x24/actions/new15_24.png,
+	pixmaps/24x24/actions/new17_24.png, pixmaps/24x24/actions/new1_24.png,
+	pixmaps/24x24/actions/new3_24.png, pixmaps/24x24/actions/new5_24.png,
+	pixmaps/24x24/actions/new7_24.png, pixmaps/24x24/actions/new9_24.png,
+	pixmaps/24x24/actions/resignsb_24.png,
+	pixmaps/24x24/actions/resignsg_24.png,
+	pixmaps/24x24/actions/resignsn_24.png, R xpm/*: Cleanup of the pixmaps
+
 Sat Feb  5 18:27:35 CET 2011 Christian Anthon <anthon@kiku.dk>
 
 	* gtkpanels.c: one less clist

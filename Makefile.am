@@ -4,7 +4,7 @@ ACLOCAL_AMFLAGS = -I m4
 
 AM_CPPFLAGS = -DDOCDIR='"$(datadir)/doc/gnubg/"' -DDATADIR='"$(datadir)"' -DPKGDATADIR='"$(datadir)/gnubg"'
 
-SUBDIRS = lib doc met po m4 xpm sounds board3d textures scripts flags fonts non-src pixmaps .
+SUBDIRS = lib doc met po m4 sounds board3d textures scripts flags fonts non-src pixmaps .
 
 bin_PROGRAMS = gnubg makebearoff makehyper bearoffdump makeweights
 
