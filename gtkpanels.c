@@ -832,7 +832,6 @@ static void CreateHeadWindow(gnubgwindow panel, const char* sz, GtkWidget* pwWid
 	GtkWidget* pwLab = gtk_label_new( sz );
 	GtkWidget* pwVbox = gtk_vbox_new(FALSE, 0);
 	GtkWidget* pwHbox = gtk_hbox_new(FALSE, 0);
-	GdkColormap *pcmap = gtk_widget_get_colormap( pwMain );
 	GtkWidget* pwX = gtk_button_new();
 	gtk_button_set_image(GTK_BUTTON(pwX), gtk_image_new_from_stock(GTK_STOCK_CLOSE, GTK_ICON_SIZE_MENU));
        	g_signal_connect(G_OBJECT(pwX), "clicked", G_CALLBACK(woPanel[panel].hideFun), NULL);
