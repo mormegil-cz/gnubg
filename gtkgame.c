@@ -1619,7 +1619,7 @@ static void EvalChanged ( GtkWidget *pw, evalwidget *pew ) {
 
       /* current settings equal to a predefined setting */
 
-      gtk_option_menu_set_history ( GTK_OPTION_MENU ( pew->pwOptionMenu ), i );
+      gtk_combo_box_set_active(GTK_COMBO_BOX ( pew->pwOptionMenu ), i );
       fFound = TRUE;
       break;
 
@@ -1631,7 +1631,7 @@ static void EvalChanged ( GtkWidget *pw, evalwidget *pew ) {
   /* user defined setting */
 
   if ( ! fFound )
-    gtk_option_menu_set_history ( GTK_OPTION_MENU ( pew->pwOptionMenu ),
+    gtk_combo_box_set_active( GTK_COMBO_BOX ( pew->pwOptionMenu ),
                                   NUM_SETTINGS );
 
   
@@ -1656,21 +1656,19 @@ static void EvalPliesValueChanged( GtkAdjustment *padj, evalwidget *pew ) {
 
 }
 
-static void SettingsMenuActivate ( GtkWidget *pwItem,
-                                   evalwidget *pew ) {
+static void SettingsMenuActivate ( GtkComboBox *box, evalwidget *pew ) {
   
   evalcontext *pec;
-  int *piSelected;
+  int iSelected;
   
 
-  piSelected = g_object_get_data ( G_OBJECT ( pwItem ), "user_data" );
-
-  if ( *piSelected == NUM_SETTINGS )
+  iSelected = gtk_combo_box_get_active(box);
+  if ( iSelected == NUM_SETTINGS )
     return; /* user defined */
 
   /* set all widgets to predefined values */
 
-  pec = &aecSettings[ *piSelected ];
+  pec = &aecSettings[ iSelected ];
  
   gtk_adjustment_set_value ( pew->padjPlies, pec->nPlies );
   gtk_adjustment_set_value ( pew->padjNoise, pec->rNoise );
@@ -1684,7 +1682,7 @@ static void SettingsMenuActivate ( GtkWidget *pwItem,
 
   if ( pew->fMoveFilter )
     MoveFilterSetPredefined ( pew->pwMoveFilter, 
-                              aiSettingsMoveFilter[ *piSelected ] );
+                              aiSettingsMoveFilter[ iSelected ] );
 
 }
 
@@ -1742,34 +1740,12 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
                             "beginner's play to the grandmaster setting "
                             "that will test your patience"));
 
-    pwMenu = gtk_menu_new ();
+    pew->pwOptionMenu = gtk_combo_box_new_text();
 
-    for ( i = 0; i <= NUM_SETTINGS; i++ ) {
-
-      if ( i < NUM_SETTINGS )
-        gtk_menu_append ( GTK_MENU ( pwMenu ),
-                          pwItem = gtk_menu_item_new_with_label ( 
-                          Q_ ( aszSettings[ i ] ) ) );
-      else
-        gtk_menu_append ( GTK_MENU ( pwMenu ),
-                          pwItem = gtk_menu_item_new_with_label (
-                          _("user defined") ) );
-
-      pi = malloc ( sizeof ( int ) );
-      *pi = i;
-      g_object_set_data_full( G_OBJECT( pwItem ), "user_data", 
-                                pi, free );
-
-      g_signal_connect( G_OBJECT ( pwItem ), "activate",
-                           G_CALLBACK ( SettingsMenuActivate ),
-                           (void *) pew );
-
-    }
-
-    pew->pwOptionMenu = gtk_option_menu_new ();
-    gtk_option_menu_set_menu ( GTK_OPTION_MENU ( pew->pwOptionMenu ), pwMenu );
-
-
+    for ( i = 0; i < NUM_SETTINGS; i++ )
+	    gtk_combo_box_append_text(GTK_COMBO_BOX(pew->pwOptionMenu), Q_(aszSettings[i]));
+    gtk_combo_box_append_text(GTK_COMBO_BOX(pew->pwOptionMenu), _("user defined"));
+    g_signal_connect(G_OBJECT(pew->pwOptionMenu), "changed", G_CALLBACK(SettingsMenuActivate), pew);
     gtk_container_add ( GTK_CONTAINER ( pw2 ), pew->pwOptionMenu );
                                                                
 
@@ -2047,7 +2023,7 @@ static void UpdateSummaryEvalMenuSetting(AnalysisDetails *pAnalDetails )
 		|| (chequerDefault == SETTINGS_SUPREMO && cubeDefault == SETTINGS_WORLDCLASS))
 		setting = chequerDefault;
 
-    gtk_option_menu_set_history ( GTK_OPTION_MENU ( pAnalDetails->pwOptionMenu ), setting );
+    gtk_combo_box_set_active(GTK_COMBO_BOX ( pAnalDetails->pwOptionMenu ), setting );
 }
 
 static void ShowDetailedAnalysis(GtkWidget *button, AnalysisDetails *pDetails)
@@ -2087,9 +2063,9 @@ static void ShowDetailedAnalysis(GtkWidget *button, AnalysisDetails *pDetails)
 	UpdateSummaryEvalMenuSetting(pDetails);
 }
 
-static void SummaryMenuActivate(GtkWidget *pwItem, AnalysisDetails *pAnalDetails)
+static void SummaryMenuActivate(GtkComboBox *box, AnalysisDetails *pAnalDetails)
 {
-  int selected = *((int*)(g_object_get_data ( G_OBJECT ( pwItem ), "user_data" )));
+  int selected = gtk_combo_box_get_active(box);
   if (selected == NUM_SETTINGS)
     return; /* user defined */
 
@@ -2132,27 +2108,12 @@ static GtkWidget *AddLevelSettings(GtkWidget *pwFrame, AnalysisDetails *pAnalDet
 							"beginner's play to the grandmaster setting "
 							"that will test your patience"));
 
-	for ( i = 0; i <= NUM_SETTINGS; i++ ) {
+	pAnalDetails->pwOptionMenu = gtk_combo_box_new_text();
 
-	  if ( i < NUM_SETTINGS )
-		gtk_menu_append ( GTK_MENU ( pwMenu ),
-						  pwItem = gtk_menu_item_new_with_label ( 
-						  Q_ ( aszSettings[ i ] ) ) );
-	  else
-		gtk_menu_append ( GTK_MENU ( pwMenu ),
-						  pwItem = gtk_menu_item_new_with_label (
-						  _("user defined") ) );
-
-	  pi = malloc ( sizeof ( int ) );
-	  *pi = i;
-	  g_object_set_data_full( G_OBJECT( pwItem ), "user_data", pi, free );
-
-	  g_signal_connect( G_OBJECT ( pwItem ), "activate", G_CALLBACK ( SummaryMenuActivate ), (void*)pAnalDetails);
-	}
-
-	pAnalDetails->pwOptionMenu = gtk_option_menu_new ();
-	gtk_option_menu_set_menu ( GTK_OPTION_MENU ( pAnalDetails->pwOptionMenu ), pwMenu );
-
+	for ( i = 0; i < NUM_SETTINGS; i++ )
+		gtk_combo_box_append_text(GTK_COMBO_BOX(pAnalDetails->pwOptionMenu), Q_(aszSettings[i]));
+	gtk_combo_box_append_text(GTK_COMBO_BOX(pAnalDetails->pwOptionMenu), _("user defined"));
+	g_signal_connect(G_OBJECT(pAnalDetails->pwOptionMenu), "changed", G_CALLBACK(SummaryMenuActivate), pAnalDetails);
 	gtk_container_add ( GTK_CONTAINER ( pw2 ), pAnalDetails->pwOptionMenu );
 
 	pwDetails = gtk_button_new_with_label( _("Advanced Settings...") );
