@@ -88,8 +88,6 @@ gnubg_SOURCES = \
 		positionid.h \
 		progress.c \
 		progress.h \
-		record.c \
-		record.h \
 		relational.c \
 		relational.h \
 		render.c \

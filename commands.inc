@@ -25,9 +25,6 @@ command cER = {
 }, cExportCubeDisplay = {
     /* dummy command used for player cube to display */
     NULL, NULL, NULL, NULL, &cExportCubeDisplay
-}, cRecordName = {
-    /* dummy command used for player record names */
-    NULL, NULL, NULL, NULL, &cRecordName
 }, acAnalyseClear[] = {
     { "game", CommandAnalyseClearGame, 
       N_("Clear analysis for this game"), NULL, NULL },
@@ -333,12 +330,6 @@ command cER = {
     { "session", CommandNewSession, N_("Start a new (money) session"), NULL,
       NULL },
     { NULL, NULL, NULL, NULL, NULL }
-}, acRecord[] = {
-    { "eraseall", CommandRecordEraseAll,
-      N_("Remove all player record statistics"), NULL, NULL },
-    { "show", CommandRecordShow, N_("View the player records"), szOPTNAME,
-      &cRecordName },
-    { NULL, NULL, NULL, NULL, NULL }    
 }, acRelationalAdd[] = {
     { "match", CommandRelationalAddMatch,
       N_("Log the match to the external relational database"), 
@@ -1341,8 +1332,6 @@ command cER = {
       N_("See if this is post-Crawford play"), NULL, NULL },
     { "prompt", CommandShowPrompt, N_("Show the prompt that will be printed "
       "when ready for commands"), NULL, NULL },
-    { "record", CommandRecordShow, N_("View the player records"), szOPTNAME,
-      &cRecordName },
     { "rng", CommandShowRNG, N_("Display which random number generator "
       "is being used"), NULL, NULL },
     { "rollout", CommandShowRollout, N_("Display the evaluation settings used "
@@ -1451,8 +1440,6 @@ command cER = {
       "than it was offered"), NULL, NULL },
     { "reject", CommandReject, N_("Reject a cube or resignation"), 
       NULL, NULL },
-    { "record", NULL, N_("Keep statistics on player histories"), NULL,
-      acRecord },
     { "relational", NULL, 
       N_("Log matches to an external relational database"), NULL,
       acRelational },

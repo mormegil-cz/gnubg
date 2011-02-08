@@ -20,6 +20,8 @@
  */
 
 #include "config.h"
+#undef GTK_DISABLE_DEPRECATED
+#undef GSEAL_ENABLE
 
 #include <glib.h>
 #include <ctype.h>
@@ -60,7 +62,6 @@
 #include "matchequity.h"
 #include "openurl.h"
 #include "positionid.h"
-#include "record.h"
 #include "sound.h"
 #include "gtkoptions.h"
 #include "gtktoolbar.h"
@@ -135,7 +136,6 @@ typedef enum _gnubgcommand {
     CMD_PREV_ROLL,
     CMD_PREV_ROLLED,
     CMD_QUIT,
-    CMD_RECORD_SHOW,
     CMD_REJECT,
     CMD_RELATIONAL_ADD_MATCH,
     CMD_ROLL,
@@ -207,7 +207,6 @@ static const char *aszCommands[ NUM_CMDS ] = {
     "previous roll",
 	"previous rolled",
     "quit",
-    "record show",
     "reject",
     "relational add match",
     "roll",
@@ -1069,7 +1068,7 @@ static void TextPopped( GtkWidget *pw, guint id, gchar *text, void *p ) {
 
 extern int GetPanelSize(void)
 {
-    if (!fFullScreen && fX && GTK_WIDGET_REALIZED(pwMain))
+    if (!fFullScreen && fX && gtk_widget_get_realized(pwMain))
 	{
 		int pos = gtk_paned_get_position(GTK_PANED(hpaned));
 		return pwMain->allocation.width - pos;
@@ -1081,7 +1080,7 @@ extern int GetPanelSize(void)
 extern void SetPanelWidth(int size)
 {
 	panelSize = size;
-    if( GTK_WIDGET_REALIZED( pwMain ) )
+    if( gtk_widget_get_realized( pwMain ) )
 	{
 		if (panelSize > pwMain->allocation.width * .8)
 			panelSize = (int)(pwMain->allocation.width * .8);
@@ -1136,7 +1135,7 @@ static void MainSize( GtkWidget *pw, GtkRequisition *preq, gpointer p ) {
     
 	int width;
 
-    if( GTK_WIDGET_REALIZED( pw ) )
+    if( gtk_widget_get_realized( pw ) )
 	g_signal_handlers_disconnect_by_func( G_OBJECT( pw ), G_CALLBACK( MainSize ), p );
 
     else if (!SetMainWindowSize())
@@ -1544,7 +1543,7 @@ extern void FullScreenMode(int state)
 {
 	BoardData *bd = BOARD( pwBoard )->board_data;
 	GtkWidget *pw = gtk_item_factory_get_widget(pif, "/View/Full screen");
-	if (GTK_WIDGET_REALIZED(bd->table))
+	if (gtk_widget_get_realized(bd->table))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(pw), state);
 }
 
@@ -3044,8 +3043,6 @@ GtkItemFactoryEntry aife[] = {
 	{ N_("/_Analyse/Match or session statistics"), NULL, Command,
           CMD_SHOW_STATISTICS_MATCH, NULL, NULL },
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>", NULL },
-	{ N_("/_Analyse/Old Player records"), NULL, Command,
-	  CMD_RECORD_SHOW, NULL, NULL },
     { N_("/_Analyse/Add match or session to database"), NULL,
         GtkRelationalAddMatch, 0,
 	"<StockItem>", GTK_STOCK_ADD},
@@ -3225,9 +3222,6 @@ static void CreateMainWindow(void)
     gtk_item_factory_set_translate_func ( pif, GTKTranslate, NULL, NULL );
 
     gtk_item_factory_create_items( pif, sizeof( aife ) / sizeof( aife[ 0 ] ), aife, NULL );
-
-    if (!records_exist())
-	    gtk_item_factory_delete_item(pif, "/Analyse/Old Player records");
 
 	/* Tick default toolbar style */
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget_by_action(pif, nToolbarStyle + TOOLBAR_ACTION_OFFSET)), TRUE);
@@ -3583,7 +3577,7 @@ extern void RunGTK( GtkWidget *pwSplash, char *commands, char *python_script, ch
 extern void GtkChangeLanguage(void)
 {
 	gtk_set_locale();
-	if (pwMain && GTK_WIDGET_REALIZED(pwMain))
+	if (pwMain && gtk_widget_get_realized(pwMain))
 	{
 		reasonExited = RE_LANGUAGE_CHANGE;
 		custom_cell_renderer_invalidate_size();	/* Recalulate widget sizes */
@@ -5947,7 +5941,7 @@ extern void GTKSet( void *p ) {
     } else if (IsPanelShowVar(WINDOW_COMMAND, p)) {
 		ShowHidePanel(WINDOW_COMMAND);
 	} else if( p == &bd->rd->fDiceArea ) {
-	if( GTK_WIDGET_REALIZED( pwBoard ) )
+	if( gtk_widget_get_realized( pwBoard ) )
 	{
 #if USE_BOARD3D
 		/* If in 3d mode may need to update sizes */
@@ -5956,7 +5950,7 @@ extern void GTKSet( void *p ) {
 		else
 #endif
 		{    
-			if( GTK_WIDGET_REALIZED( pwBoard ) ) {
+			if( gtk_widget_get_realized( pwBoard ) ) {
 			    if( GTK_WIDGET_VISIBLE( bd->dice_area ) && !bd->rd->fDiceArea )
 				gtk_widget_hide( bd->dice_area );
 			    else if( ! GTK_WIDGET_VISIBLE( bd->dice_area ) && bd->rd->fDiceArea )
@@ -6451,314 +6445,6 @@ typedef struct _recordwindowinfo {
     GtkWidget *pwList, *pwTable, *apwStats[ 22 ];
     int nRow;
 } recordwindowinfo;
-
-static void RecordSelect( GtkCList *pw, gint nRow, gint nCol,
-			  GdkEventButton *pev, recordwindowinfo *prwi ) {
-    char *pch;
-    int i;
-    
-    for( i = 0; i < 22; i++ ) {
-	gtk_clist_get_text( pw, nRow, i, &pch );
-	gtk_label_set_text( GTK_LABEL( prwi->apwStats[ i ] ), pch );
-    }
-
-    prwi->nRow = nRow;
-}
-
-static void RecordUnselect( GtkCList *pw, gint nRow, gint nCol,
-			    GdkEventButton *pev, recordwindowinfo *prwi ) {
-    int i;
-    
-    for( i = 0; i < 22; i++ )
-	gtk_label_set_text( GTK_LABEL( prwi->apwStats[ i ] ), NULL );
-}
-
-static void RecordEraseAll( GtkWidget *pw, recordwindowinfo *prwi ) {
-
-    FILE *pf;
-    char *sz = g_build_filename (szHomeDirectory, "gnubgpr", NULL);
-    
-    UserCommand( "record eraseall" );
-
-    /* FIXME this is a horrible hack to determine whether the records were
-       really erased */
-    
-    if( ( pf = g_fopen( sz, "r" ) ) ) {
-	fclose( pf );
-        g_free( sz );
-	return;
-    }
-    g_free(sz);
-
-    gtk_clist_clear( GTK_CLIST( prwi->pwList ) );
-}
-
-static gint RecordRowCompare( GtkCList *pcl, GtkCListRow *p0,
-			      GtkCListRow *p1 ) {
-
-    return StrCaseCmp( GTK_CELL_TEXT( p0->cell[ pcl->sort_column ] )->text,
-		       GTK_CELL_TEXT( p1->cell[ pcl->sort_column ] )->text );
-}
-
-/* 0: name [visible]
-   1: chequer (20)
-   2: cube (20)
-   3: combined (20)
-   4: chequer (100)
-   5: cube (100)
-   6: combined (100)
-   7: chequer (500)
-   8: cube (500)
-   9: combined (500)
-   10: chequer (total) [visible]
-   11: cube (total) [visible]
-   12: combined (total) [visible]
-   13: luck (20)
-   14: luck (100)
-   15: luck (500)
-   16: luck (total) [visible]
-   17: games [visible]
-   18: chequer rating
-   19: cube rating
-   20: combined rating
-   21: luck rating */
-
-extern void GTKRecordShow( FILE *pfIn, char *szFile, char *szPlayer ) {
-
-	GtkWidget *pw = NULL, *pwList = NULL, *pwScrolled, *pwHbox, *pwVbox,
-	*pwEraseAll;
-    static int ay[ 22 ] = { 0, 3, 5, 7, 3, 5, 7, 3, 5, 7, 3, 5, 7, 9, 9, 9, 9,
-			    1, 4, 6, 8, 10 };
-    static int ax[ 22 ] = { 1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 1, 2, 3, 4,
-			    1, 1, 1, 1, 1 };
-    static int axEnd[ 22 ] = { 5, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 2, 3, 4,
-			       5, 5, 5, 5, 5, 5 };
-    char *asz[ 22 ];
-    char sz[ 16 ];
-    int i, f = FALSE;
-    playerrecord pr;
-    recordwindowinfo rwi;
-    
-    while( !RecordReadItem( pfIn, szFile, &pr ) ) {
-	if( !f ) {
-	    f = TRUE;
-	    pw = GTKCreateDialog( _("GNU Backgammon - Player records"), DT_INFO,
-			NULL, DIALOG_FLAG_MODAL, NULL, NULL );
-	    
-	    for( i = 0; i < 22; i++ )
-		asz[ i ] = "";
-	    
-	    rwi.pwList = pwList = gtk_clist_new_with_titles( 22, asz );
-	    gtk_clist_set_compare_func(
-		GTK_CLIST( pwList ), (GtkCListCompareFunc) RecordRowCompare );
-	    
-	    for( i = 0; i < 22; i++ ) {
-		gtk_clist_set_column_auto_resize( GTK_CLIST( pwList ), i,
-						  TRUE );
-		gtk_clist_set_column_justification( GTK_CLIST( pwList ), i,
-						    i ? GTK_JUSTIFY_RIGHT :
-						    GTK_JUSTIFY_LEFT );
-		gtk_clist_set_column_visibility( GTK_CLIST( pwList ), i,
-						 FALSE );
-	    }
-
-	    gtk_clist_set_column_title( GTK_CLIST( pwList ), 0, _("Name") );
-	    gtk_clist_set_column_visibility( GTK_CLIST( pwList ), 0, TRUE );
-	    gtk_clist_set_column_title( GTK_CLIST( pwList ), 10,
-					_("Chequer") );
-	    gtk_clist_set_column_visibility( GTK_CLIST( pwList ), 10, TRUE );
-	    gtk_clist_set_column_title( GTK_CLIST( pwList ), 11, _("Cube") );
-	    gtk_clist_set_column_visibility( GTK_CLIST( pwList ), 11, TRUE );
-	    gtk_clist_set_column_title( GTK_CLIST( pwList ), 12,
-					_("Overall") );
-	    gtk_clist_set_column_visibility( GTK_CLIST( pwList ), 12, TRUE );
-	    gtk_clist_set_column_title( GTK_CLIST( pwList ), 16, _("Luck") );
-	    gtk_clist_set_column_visibility( GTK_CLIST( pwList ), 16, TRUE );
-	    gtk_clist_set_column_title( GTK_CLIST( pwList ), 17, _("Games") );
-	    gtk_clist_set_column_visibility( GTK_CLIST( pwList ), 17, TRUE );
-	    
-	    gtk_clist_column_titles_passive( GTK_CLIST( pwList ) );
-	    g_signal_connect( G_OBJECT( pwList ), "select-row",
-			G_CALLBACK( RecordSelect ), &rwi );
-	    g_signal_connect( G_OBJECT( pwList ), "unselect-row",
-			G_CALLBACK( RecordUnselect ), &rwi );
-	    pwScrolled = gtk_scrolled_window_new( NULL, NULL );
-	    pwHbox = gtk_hbox_new( FALSE, 0 );
-	    pwVbox = gtk_vbox_new( FALSE, 0 );
-	    gtk_container_add( GTK_CONTAINER( DialogArea( pw, DA_MAIN ) ),
-			       pwHbox );
-	    gtk_container_add( GTK_CONTAINER( pwHbox ), pwScrolled );
-	    gtk_container_add( GTK_CONTAINER( pwScrolled ), pwList );
-	    gtk_container_add( GTK_CONTAINER( pwHbox ), pwVbox );
-	    rwi.pwTable = gtk_table_new( 11, 5, TRUE );
-	    gtk_table_attach_defaults( GTK_TABLE( rwi.pwTable ),
-				       gtk_label_new( _("Name:") ), 0, 1,
-				       0, 1 );
-	    gtk_table_attach_defaults( GTK_TABLE( rwi.pwTable ),
-				       gtk_label_new( _("Games:") ), 0, 1,
-				       1, 2 );
-	    gtk_table_attach_defaults( GTK_TABLE( rwi.pwTable ),
-				       gtk_label_new( _("Chequer:") ), 0, 1,
-				       3, 5 );
-	    gtk_table_attach_defaults( GTK_TABLE( rwi.pwTable ),
-				       gtk_label_new( _("Cube:") ), 0, 1,
-				       5, 7 );
-	    gtk_table_attach_defaults( GTK_TABLE( rwi.pwTable ),
-				       gtk_label_new( _("Overall:") ), 0, 1,
-				       7, 9 );
-	    gtk_table_attach_defaults( GTK_TABLE( rwi.pwTable ),
-				       gtk_label_new( _("Luck:") ), 0, 1,
-				       9, 11 );
-	    gtk_table_attach_defaults( GTK_TABLE( rwi.pwTable ),
-				       gtk_label_new( _("20") ), 1, 2,
-				       2, 3 );
-	    gtk_table_attach_defaults( GTK_TABLE( rwi.pwTable ),
-				       gtk_label_new( _("100") ), 2, 3,
-				       2, 3 );
-	    gtk_table_attach_defaults( GTK_TABLE( rwi.pwTable ),
-				       gtk_label_new( _("500") ), 3, 4,
-				       2, 3 );
-	    gtk_table_attach_defaults( GTK_TABLE( rwi.pwTable ),
-				       gtk_label_new( _("Total") ), 4, 5,
-				       2, 3 );
-	    for( i = 0; i < 22; i++ )
-		gtk_table_attach_defaults( GTK_TABLE( rwi.pwTable ),
-					   rwi.apwStats[ i ] =
-					   gtk_label_new( NULL ),
-					   ax[ i ], axEnd[ i ],
-					   ay[ i ], ay[ i ] + 1 );
-	    gtk_container_add( GTK_CONTAINER( pwVbox ), rwi.pwTable );
-	    pwEraseAll = gtk_button_new_with_label( _("Erase All" ) );
-	    g_signal_connect( G_OBJECT( pwEraseAll ), "clicked",
-			G_CALLBACK( RecordEraseAll ), &rwi );
-	    gtk_box_pack_start( GTK_BOX( pwVbox ), pwEraseAll, FALSE, FALSE,
-				0 );
-	}
-
-	i = gtk_clist_append( GTK_CLIST( pwList ), asz );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 0, pr.szName );
-	
-	if( pr.cGames >= 20 )
-	    sprintf( sz, "%.4f", -pr.arErrorChequerplay[ EXPAVG_20 ] );
-	else
-	    strcpy( sz, _("n/a") );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 1, sz );
-	
-	if( pr.cGames >= 20 )
-	    sprintf( sz, "%.4f", -pr.arErrorCube[ EXPAVG_20 ] );
-	else
-	    strcpy( sz, _("n/a") );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 2, sz );
-	
-	if( pr.cGames >= 20 )
-	    sprintf( sz, "%.4f", -pr.arErrorCombined[ EXPAVG_20 ] );
-	else
-	    strcpy( sz, _("n/a") );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 3, sz );
-	
-	if( pr.cGames >= 100 )
-	    sprintf( sz, "%.4f", -pr.arErrorChequerplay[ EXPAVG_100 ] );
-	else
-	    strcpy( sz, _("n/a") );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 4, sz );
-	
-	if( pr.cGames >= 100 )
-	    sprintf( sz, "%.4f", -pr.arErrorCube[ EXPAVG_100 ] );
-	else
-	    strcpy( sz, _("n/a") );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 5, sz );
-	
-	if( pr.cGames >= 100 )
-	    sprintf( sz, "%.4f", -pr.arErrorCombined[ EXPAVG_100 ] );
-	else
-	    strcpy( sz, _("n/a") );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 6, sz );
-	
-	if( pr.cGames >= 500 )
-	    sprintf( sz, "%.4f", -pr.arErrorChequerplay[ EXPAVG_500 ] );
-	else
-	    strcpy( sz, _("n/a") );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 7, sz );
-	
-	if( pr.cGames >= 500 )
-	    sprintf( sz, "%.4f", -pr.arErrorCube[ EXPAVG_500 ] );
-	else
-	    strcpy( sz, _("n/a") );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 8, sz );
-	
-	if( pr.cGames >= 500 )
-	    sprintf( sz, "%.4f", -pr.arErrorCombined[ EXPAVG_500 ] );
-	else
-	    strcpy( sz, _("n/a") );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 9, sz );
-	
-	sprintf( sz, "%.4f", -pr.arErrorChequerplay[ EXPAVG_TOTAL ] );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 10, sz );
-	
-	sprintf( sz, "%.4f", -pr.arErrorCube[ EXPAVG_TOTAL ] );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 11, sz );
-	
-	sprintf( sz, "%.4f", -pr.arErrorCombined[ EXPAVG_TOTAL ] );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 12, sz );
-	
-	if( pr.cGames >= 20 )
-	    sprintf( sz, "%.4f", pr.arLuck[ EXPAVG_20 ] );
-	else
-	    strcpy( sz, _("n/a") );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 13, sz );
-	
-	if( pr.cGames >= 100 )
-	    sprintf( sz, "%.4f", pr.arLuck[ EXPAVG_100 ] );
-	else
-	    strcpy( sz, _("n/a") );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 14, sz );
-	
-	if( pr.cGames >= 500 )
-	    sprintf( sz, "%.4f", pr.arLuck[ EXPAVG_500 ] );
-	else
-	    strcpy( sz, _("n/a") );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 15, sz );
-	
-	sprintf( sz, "%.4f", pr.arLuck[ EXPAVG_TOTAL ] );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 16, sz );
-
-	sprintf( sz, "%d", pr.cGames );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 17, sz );
-
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 18,
-			    Q_ ( aszRating[ GetRating( (float)pr.arErrorChequerplay[
-				EXPAVG_TOTAL ] ) ] ) );
-	
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 19,
-			    Q_ ( aszRating[ GetRating( (float)pr.arErrorCube[
-				EXPAVG_TOTAL ] ) ] ) );
-	
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 20,
-			    Q_ ( aszRating[ GetRating( (float)pr.arErrorCombined[
-				EXPAVG_TOTAL ] ) ] ) );
-	
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 21,
-			    Q_(aszLuckRating[ getLuckRating( (float)pr.arLuck[EXPAVG_TOTAL ] / 20 ) ]) );
-	
-	if( !CompareNames( pr.szName, szPlayer ) )
-	    gtk_clist_select_row( GTK_CLIST( pwList ), i, 0 );
-    }
-
-    if( ferror( pfIn ) )
-	outputerr( szFile );
-    else if( !f )
-	outputl( _("No player records found.") );
-
-    fclose( pfIn );    
-
-    if( f ) {
-	gtk_clist_sort( GTK_CLIST( pwList ) );
-	
-	gtk_window_set_default_size( GTK_WINDOW( pw ), 600, 400 );
-
-	GTKRunDialog(pw);
-    }
-}
 
 static void UpdateMatchinfo( const char *pch, const char *szParam, char **ppch ) {
 

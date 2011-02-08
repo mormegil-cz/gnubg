@@ -634,8 +634,6 @@ extern void CommandNotImplemented(char *);
 extern void CommandPlay(char *);
 extern void CommandPrevious(char *);
 extern void CommandQuit(char *);
-extern void CommandRecordEraseAll(char *);
-extern void CommandRecordShow(char *);
 extern void CommandRedouble(char *);
 extern void CommandReject(char *);
 extern void CommandRelationalAddMatch(char *);

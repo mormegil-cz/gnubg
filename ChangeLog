@@ -1,4 +1,9 @@
-Tue Feb  8 19:54:13 CET 2011 Christian Anthon <anthon@kiku.dk>
+Tue Feb  8 20:23:42 CET 2011 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, backgammon.h, commands.inc, gtkgame.c, R record.c, R
+	record.h: remove the rest of old player records
+
+Tue Feb  8 19:54:13 CET 2011 Christian Anthon <anthon@kiku.dk>: :
 
 	* gtkgame.c: cleanup after previous commit
 	* progress.a: convert the rollout clist to tree view, sortable and
