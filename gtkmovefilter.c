@@ -310,8 +310,6 @@ static GtkWidget *MoveFilterSetup(movefilter aamf[MAX_FILTER_PLIES][MAX_FILTER_P
 	movefiltersetupwidget *pmfsw;
 	GtkWidget *pwNotebook;
 	GtkWidget *pwvbox;
-	GtkWidget *pwMenu;
-	int *pi;
 
 	pwSetup = gtk_vbox_new(FALSE, 4);
 
@@ -479,9 +477,7 @@ extern GtkWidget *MoveFilterWidget(movefilter * pmf, int *UNUSED(pfOK),
 	movefilterwidget *pmfw;
 	GtkWidget *pw;
 	GtkWidget *pwButton;
-	GtkWidget *pwMenu;
 	int i;
-	int *pi;
 
 	pwFrame = gtk_frame_new(_("Move filter"));
 	pmfw = (movefilterwidget *) g_malloc(sizeof(movefilterwidget));
