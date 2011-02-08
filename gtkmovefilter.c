@@ -127,32 +127,29 @@ MoveFilterSetupGetValues ( movefilter *pmf, const movefiltersetupwidget *pmfsw )
 }
 
 
-static void
-AcceptChanged ( GtkWidget *UNUSED(pw), movefiltersetupwidget *pmfsw ) {
+static void AcceptChanged(GtkWidget *UNUSED(pw), movefiltersetupwidget * pmfsw)
+{
 
-  int fFound;
-  unsigned int i;
-  movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
+	int fFound;
+	unsigned int i;
+	movefilter aamf[MAX_FILTER_PLIES][MAX_FILTER_PLIES];
 
-  /* see if current settings match a predefined one */
+	/* see if current settings match a predefined one */
 
-  fFound = FALSE;
+	fFound = FALSE;
 
-  
-  MoveFilterSetupGetValues ( aamf[0], pmfsw );
+	MoveFilterSetupGetValues(aamf[0], pmfsw);
 
-  for ( i = 0; i < NUM_MOVEFILTER_SETTINGS; ++i ) 
-    if ( equal_movefilters ( aamf, 
-                             aaamfMoveFilterSettings[ i ] ) ) {
-      gtk_option_menu_set_history ( GTK_OPTION_MENU ( pmfsw->pwOptionMenu ), i );
-      fFound = TRUE;
-      break;
-    }
+	for (i = 0; i < NUM_MOVEFILTER_SETTINGS; ++i)
+		if (equal_movefilters(aamf, aaamfMoveFilterSettings[i])) {
+			gtk_combo_box_set_active(GTK_COMBO_BOX(pmfsw->pwOptionMenu), i);
+			fFound = TRUE;
+			break;
+		}
 
-  if ( ! fFound )
-      gtk_option_menu_set_history ( GTK_OPTION_MENU ( pmfsw->pwOptionMenu ),
-                                    NUM_MOVEFILTER_SETTINGS );
-
+	if (!fFound)
+		gtk_combo_box_set_active(GTK_COMBO_BOX(pmfsw->pwOptionMenu),
+					 NUM_MOVEFILTER_SETTINGS);
 }
 
 
@@ -181,15 +178,15 @@ EnableToggled ( GtkWidget *pw, movefiltersetupwidget *pmfsw )
 
 
 static void
-SetupSettingsMenuActivate ( GtkWidget *pwItem,
+SetupSettingsMenuActivate ( GtkWidget *combo,
                             const movefiltersetupwidget *pfmsw ) {
 
-  int *piSelected = (int*)g_object_get_data ( G_OBJECT ( pwItem ), "user_data" );
+  int iSelected = gtk_combo_box_get_active(GTK_COMBO_BOX(combo));
 
-  if ( *piSelected == NUM_MOVEFILTER_SETTINGS )
+  if ( iSelected == NUM_MOVEFILTER_SETTINGS )
     return; /* user defined */
 
-  MoveFilterSetupSetValues ( aaamfMoveFilterSettings[ *piSelected ],
+  MoveFilterSetupSetValues ( aaamfMoveFilterSettings[ iSelected ],
                              pfmsw );
 
 }
@@ -304,101 +301,80 @@ MoveFilterPage ( const int i, const int j,
 
 
 
-static GtkWidget *
-MoveFilterSetup ( movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
-                  int *pfOK ) {
+static GtkWidget *MoveFilterSetup(movefilter aamf[MAX_FILTER_PLIES][MAX_FILTER_PLIES], int *pfOK)
+{
 
-  GtkWidget *pwSetup;
-  GtkWidget *pwFrame;
-  int i, j;
-  movefiltersetupwidget *pmfsw;
-  GtkWidget *pwNotebook;
-  GtkWidget *pwvbox;
-  GtkWidget *pwMenu;
-  GtkWidget *pwItem;
-  int *pi;
+	GtkWidget *pwSetup;
+	GtkWidget *pwFrame;
+	int i, j;
+	movefiltersetupwidget *pmfsw;
+	GtkWidget *pwNotebook;
+	GtkWidget *pwvbox;
+	GtkWidget *pwMenu;
+	int *pi;
 
-  pwSetup = gtk_vbox_new ( FALSE, 4 );
+	pwSetup = gtk_vbox_new(FALSE, 4);
 
-  pmfsw = 
-    (movefiltersetupwidget *) g_malloc ( sizeof ( movefiltersetupwidget ) );
+	pmfsw = (movefiltersetupwidget *) g_malloc(sizeof(movefiltersetupwidget));
 
-  /* predefined settings */
+	/* predefined settings */
 
-  /* output widget (with "User defined", or "Large" etc */
+	/* output widget (with "User defined", or "Large" etc */
 
-  pwFrame = gtk_frame_new ( _("Predefined move filters:" ) );
-  gtk_box_pack_start ( GTK_BOX ( pwSetup ), pwFrame, TRUE, TRUE, 0 );
+	pwFrame = gtk_frame_new(_("Predefined move filters:"));
+	gtk_box_pack_start(GTK_BOX(pwSetup), pwFrame, TRUE, TRUE, 0);
+	pmfsw->pwOptionMenu = gtk_combo_box_new_text();
+	for (i = 0; i <= NUM_MOVEFILTER_SETTINGS; i++) {
 
-  pwMenu = gtk_menu_new ();
+		if (i < NUM_MOVEFILTER_SETTINGS)
+			gtk_combo_box_append_text(GTK_COMBO_BOX(pmfsw->pwOptionMenu),
+						  Q_(aszMoveFilterSettings[i]));
+		else
+			gtk_combo_box_append_text(GTK_COMBO_BOX(pmfsw->pwOptionMenu),
+						  _("user defined"));
+	}
 
-  for ( i = 0; i <= NUM_MOVEFILTER_SETTINGS; i++ ) {
+	g_signal_connect(G_OBJECT(pmfsw->pwOptionMenu), "changed",
+			 G_CALLBACK(SetupSettingsMenuActivate), pmfsw);
 
-    if ( i < NUM_MOVEFILTER_SETTINGS )
-      gtk_menu_append ( GTK_MENU ( pwMenu ),
-                        pwItem = gtk_menu_item_new_with_label ( 
-                                    Q_ ( aszMoveFilterSettings[ i ] ) ) );
-    else
-      gtk_menu_append ( GTK_MENU ( pwMenu ),
-                        pwItem = gtk_menu_item_new_with_label (
-                                    _("user defined") ) );
+	gtk_container_add(GTK_CONTAINER(pwFrame), pmfsw->pwOptionMenu);
 
-    pi = (int*)g_malloc ( sizeof ( int ) );
-    *pi = i;
-    g_object_set_data_full( G_OBJECT( pwItem ), "user_data", 
-                              pi, g_free );
+	/* notebook with pages for each ply */
 
-    g_signal_connect( G_OBJECT ( pwItem ), "activate",
-                         G_CALLBACK ( SetupSettingsMenuActivate ),
-                         (void *) pmfsw );
+	pwNotebook = gtk_notebook_new();
+	gtk_box_pack_start(GTK_BOX(pwSetup), pwNotebook, FALSE, FALSE, 0);
 
-    }
+	for (i = 0; i < MAX_FILTER_PLIES; ++i) {
 
-  pmfsw->pwOptionMenu = gtk_option_menu_new ();
-  gtk_option_menu_set_menu ( GTK_OPTION_MENU ( pmfsw->pwOptionMenu ), pwMenu );
+		char *sz = g_strdup_printf(_("%d-ply"), i + 1);
 
-  gtk_container_add ( GTK_CONTAINER ( pwFrame ), pmfsw->pwOptionMenu );
+		pwvbox = gtk_vbox_new(FALSE, 4);
+		gtk_notebook_append_page(GTK_NOTEBOOK(pwNotebook), pwvbox, gtk_label_new(sz));
+		g_free(sz);
 
-  /* notebook with pages for each ply */
+		for (j = 0; j <= i; ++j) {
 
-  pwNotebook = gtk_notebook_new ();
-  gtk_box_pack_start ( GTK_BOX ( pwSetup ), pwNotebook, FALSE, FALSE, 0 );
+			sz = g_strdup_printf(_("%d-ply"), j);
+			pwFrame = gtk_frame_new(sz);
+			g_free(sz);
 
-  for ( i = 0; i < MAX_FILTER_PLIES; ++i ) {
+			gtk_box_pack_start(GTK_BOX(pwvbox), pwFrame, FALSE, FALSE, 4);
 
-    char *sz = g_strdup_printf ( _("%d-ply"), i + 1 );
+			gtk_container_add(GTK_CONTAINER(pwFrame),
+					  MoveFilterPage(i, j, aamf, pmfsw));
 
-    pwvbox = gtk_vbox_new ( FALSE, 4 );
-    gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
-                               pwvbox,
-                               gtk_label_new ( sz ) );
-    g_free ( sz );
+		}
 
-    for ( j = 0; j <= i; ++j ) {
+	}
 
-      sz = g_strdup_printf ( _("%d-ply"), j );
-      pwFrame = gtk_frame_new ( sz );
-      g_free ( sz );
+	g_object_set_data_full(G_OBJECT(pwSetup), "user_data", pmfsw, g_free);
 
-      gtk_box_pack_start ( GTK_BOX ( pwvbox ), pwFrame, FALSE, FALSE, 4 );
+	pmfsw->pfOK = pfOK;
+	pmfsw->pmf = aamf[0];
 
-      gtk_container_add ( GTK_CONTAINER ( pwFrame ),
-                          MoveFilterPage ( i, j, aamf, pmfsw ) );
+	MoveFilterSetupSetValues(aamf, pmfsw);
 
-    }
-
-  }
-
-  g_object_set_data_full( G_OBJECT( pwSetup ), "user_data", 
-                            pmfsw, g_free );
-
-  pmfsw->pfOK = pfOK;
-  pmfsw->pmf = aamf[0];
-
-  MoveFilterSetupSetValues ( aamf, pmfsw );
-
-  return pwSetup;
-
+	return pwSetup;
 
 }
 
@@ -422,47 +398,44 @@ MoveFilterSetupOK ( GtkWidget *pw, GtkWidget *pwMoveFilterSetup ) {
 
 typedef void (*changed) ( GtkWidget *pw, gpointer p );
 
-static void
-MoveFilterChanged ( const movefilterwidget *pmfw ) {
+static void MoveFilterChanged(const movefilterwidget * pmfw)
+{
 
-  unsigned int i;
-  int fFound = FALSE;
-  movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
-  
+	unsigned int i;
+	int fFound = FALSE;
+	movefilter aamf[MAX_FILTER_PLIES][MAX_FILTER_PLIES];
 
-  memcpy ( aamf, pmfw->pmf, sizeof ( aamf ) );
+	memcpy(aamf, pmfw->pmf, sizeof(aamf));
 
-  for ( i = 0; i < NUM_MOVEFILTER_SETTINGS; ++i ) 
-    if ( equal_movefilters ( aamf, 
-                             aaamfMoveFilterSettings[ i ] ) ) {
-      gtk_option_menu_set_history ( GTK_OPTION_MENU ( pmfw->pwOptionMenu ),
-                                    i );
-      fFound = TRUE;
-      break;
-    }
+	for (i = 0; i < NUM_MOVEFILTER_SETTINGS; ++i)
+		if (equal_movefilters(aamf, aaamfMoveFilterSettings[i])) {
+			gtk_combo_box_set_active(GTK_COMBO_BOX(pmfw->pwOptionMenu), i);
+			fFound = TRUE;
+			break;
+		}
 
-  if ( ! fFound )
-      gtk_option_menu_set_history ( GTK_OPTION_MENU ( pmfw->pwOptionMenu ),
-                                    NUM_MOVEFILTER_SETTINGS );
+	if (!fFound)
+		gtk_combo_box_set_active(GTK_COMBO_BOX(pmfw->pwOptionMenu),
+					 NUM_MOVEFILTER_SETTINGS);
 
-  /* callback for parent */
+	/* callback for parent */
 
-  if ( pmfw->pfChanged )
-    ((changed) (*pmfw->pfChanged)) ( NULL, pmfw->userdata );
-  
+	if (pmfw->pfChanged)
+		((changed) (*pmfw->pfChanged)) (NULL, pmfw->userdata);
+
 }
 
 
 static void
-SettingsMenuActivate ( GtkWidget *pwItem,
+SettingsMenuActivate ( GtkWidget *combo,
                        movefilterwidget *pmfw ) {
 
-  int *piSelected = (int*)g_object_get_data ( G_OBJECT ( pwItem ), "user_data" );
+  int iSelected = gtk_combo_box_get_active(GTK_COMBO_BOX(combo));
 
-  if ( *piSelected == NUM_MOVEFILTER_SETTINGS )
+  if ( iSelected == NUM_MOVEFILTER_SETTINGS )
     return; /* user defined */
 
-  memcpy ( pmfw->pmf, aaamfMoveFilterSettings[ *piSelected ],
+  memcpy ( pmfw->pmf, aaamfMoveFilterSettings[ iSelected ],
            MAX_FILTER_PLIES * MAX_FILTER_PLIES * sizeof ( movefilter ) );
 
   MoveFilterChanged ( pmfw );
@@ -498,80 +471,62 @@ ModifyClickButton ( GtkWidget *pw, movefilterwidget *pmfw ) {
 }
 
 
-extern GtkWidget *
-MoveFilterWidget ( movefilter *pmf, int *UNUSED(pfOK),
-                   GCallback pfChanged, gpointer userdata ) {
+extern GtkWidget *MoveFilterWidget(movefilter * pmf, int *UNUSED(pfOK),
+				   GCallback pfChanged, gpointer userdata)
+{
 
-  GtkWidget *pwFrame;
-  movefilterwidget *pmfw;
-  GtkWidget *pw;
-  GtkWidget *pwButton;
-  GtkWidget *pwMenu;
-  GtkWidget *pwItem;
-  int i;
-  int *pi;
-  
-  pwFrame = gtk_frame_new ( _("Move filter") );
-  pmfw = (movefilterwidget *) g_malloc ( sizeof ( movefilterwidget ) );
-  pmfw->pmf = pmf;
-  pmfw->userdata = userdata;
-  pmfw->pfChanged = NULL; /* UGLY; see comment later */
+	GtkWidget *pwFrame;
+	movefilterwidget *pmfw;
+	GtkWidget *pw;
+	GtkWidget *pwButton;
+	GtkWidget *pwMenu;
+	int i;
+	int *pi;
 
-  /* output widget (with "User defined", or "Large" etc */
+	pwFrame = gtk_frame_new(_("Move filter"));
+	pmfw = (movefilterwidget *) g_malloc(sizeof(movefilterwidget));
+	pmfw->pmf = pmf;
+	pmfw->userdata = userdata;
+	pmfw->pfChanged = NULL;	/* UGLY; see comment later */
 
-  pw = gtk_hbox_new ( FALSE, 4 );
-  gtk_container_add ( GTK_CONTAINER ( pwFrame ), pw );
+	/* output widget (with "User defined", or "Large" etc */
 
-  pwMenu = gtk_menu_new ();
+	pw = gtk_hbox_new(FALSE, 4);
+	gtk_container_add(GTK_CONTAINER(pwFrame), pw);
+	pmfw->pwOptionMenu = gtk_combo_box_new_text();
+	for (i = 0; i <= NUM_MOVEFILTER_SETTINGS; i++) {
 
-  for ( i = 0; i <= NUM_MOVEFILTER_SETTINGS; i++ ) {
+		if (i < NUM_MOVEFILTER_SETTINGS)
+			gtk_combo_box_append_text(GTK_COMBO_BOX(pmfw->pwOptionMenu),
+						  Q_(aszMoveFilterSettings[i]));
+		else
+			gtk_combo_box_append_text(GTK_COMBO_BOX(pmfw->pwOptionMenu),
+						  _("user defined"));
 
-    if ( i < NUM_MOVEFILTER_SETTINGS )
-      gtk_menu_append ( GTK_MENU ( pwMenu ),
-                        pwItem = gtk_menu_item_new_with_label ( 
-                                    Q_( aszMoveFilterSettings[ i ] ) ) );
-    else
-      gtk_menu_append ( GTK_MENU ( pwMenu ),
-                        pwItem = gtk_menu_item_new_with_label (
-                                    _("user defined") ) );
+	}
+	g_signal_connect(G_OBJECT(pmfw->pwOptionMenu), "changed", G_CALLBACK(SettingsMenuActivate),
+			 pmfw);
 
-    pi = (int*)g_malloc ( sizeof ( int ) );
-    *pi = i;
-    g_object_set_data_full( G_OBJECT( pwItem ), "user_data", 
-                              pi, g_free );
+	gtk_box_pack_start(GTK_BOX(pw), pmfw->pwOptionMenu, TRUE, TRUE, 0);
 
-    g_signal_connect( G_OBJECT ( pwItem ), "activate",
-                         G_CALLBACK ( SettingsMenuActivate ),
-                         (void *) pmfw );
+	/* Button */
 
-    }
+	pwButton = gtk_button_new_with_label(_("Modify..."));
+	gtk_box_pack_end(GTK_BOX(pw), pwButton, FALSE, FALSE, 0);
 
-  pmfw->pwOptionMenu = gtk_option_menu_new ();
-  gtk_option_menu_set_menu ( GTK_OPTION_MENU ( pmfw->pwOptionMenu ), pwMenu );
+	g_signal_connect(G_OBJECT(pwButton), "clicked", G_CALLBACK(ModifyClickButton), pmfw);
 
-  gtk_box_pack_start ( GTK_BOX ( pw ), pmfw->pwOptionMenu, TRUE, TRUE, 0 );
+	/* save movefilterwidget */
 
-  /* Button */
+	g_object_set_data_full(G_OBJECT(pwFrame), "user_data", pmfw, g_free);
 
-  pwButton = gtk_button_new_with_label ( _("Modify...") );
-  gtk_box_pack_end ( GTK_BOX ( pw ), pwButton, FALSE, FALSE, 0 );
+	MoveFilterChanged(pmfw);
 
-  
-  g_signal_connect( G_OBJECT ( pwButton ), "clicked",
-                       G_CALLBACK ( ModifyClickButton ), pmfw );
+	/* don't set pfChanged until here, as we don't want to call EvalChanged
+	   just yet. This is a big ugly... */
+	pmfw->pfChanged = pfChanged;
 
-  /* save movefilterwidget */
-
-  g_object_set_data_full( G_OBJECT( pwFrame ), "user_data", pmfw, g_free );
-
-  MoveFilterChanged ( pmfw );
-
-  /* don't set pfChanged until here, as we don't want to call EvalChanged
-     just yet. This is a big ugly... */
-  pmfw->pfChanged = pfChanged;
-
-  return pwFrame;
-
+	return pwFrame;
 
 }
 
@@ -615,7 +570,7 @@ MoveFilterSetPredefined ( GtkWidget *pwMoveFilter,
   memcpy ( pmfw->pmf, aaamfMoveFilterSettings[ i ],
            MAX_FILTER_PLIES * MAX_FILTER_PLIES * sizeof ( movefilter ) );
 
-  gtk_option_menu_set_history ( GTK_OPTION_MENU ( pmfw->pwOptionMenu ), (unsigned)i );
+  gtk_combo_box_set_active(GTK_COMBO_BOX( pmfw->pwOptionMenu ), i);
 
   MoveFilterChanged ( pmfw );
 
