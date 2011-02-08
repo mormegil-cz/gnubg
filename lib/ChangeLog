@@ -1,7 +1,7 @@
 2011-02-08  Philippe Michel  <philippe.michel7@sfr.fr>
 
-	* neuralnetsse.c : Øystein Johansen's patch to handle a different
-	number of hidden nodes with SSE.
+	* neuralnetsse.c, neuralnet.h : Øystein Johansen's patch to handle
+	a different number of hidden nodes with SSE.
 
 2010-10-29  Philippe Michel  <philippe.michel7@sfr.fr>
 
