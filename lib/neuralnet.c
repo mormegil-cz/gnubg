@@ -154,12 +154,12 @@ extern void NeuralNetDestroy( neuralnet *pnn )
 static void Evaluate( const neuralnet *pnn, const float arInput[], float ar[],
                         float arOutput[], float *saveAr )
 {
-
+    const unsigned int cHidden = pnn->cHidden;
     unsigned int i, j;
     float *prWeight;
 
     /* Calculate activity at hidden nodes */
-    for( i = 0; i < pnn->cHidden; i++ )
+    for( i = 0; i < cHidden; i++ )
 		ar[ i ] = pnn->arHiddenThreshold[ i ];
 
     prWeight = pnn->arHiddenWeight;
@@ -171,20 +171,19 @@ static void Evaluate( const neuralnet *pnn, const float arInput[], float ar[],
 	    float *pr = ar;
 
 	    if( ari == 1.0f )
-		for( j = pnn->cHidden; j; j-- )
+		for( j = cHidden; j; j-- )
 		    *pr++ += *prWeight++;
 	    else
-		for( j = pnn->cHidden; j; j-- )
+		for( j = cHidden; j; j-- )
 		    *pr++ += *prWeight++ * ari;
 	} else
-	    prWeight += pnn->cHidden;
+	    prWeight += cHidden;
     }
 
     if( saveAr)
-      memcpy( saveAr, ar, pnn->cHidden * sizeof( *saveAr));
+      memcpy( saveAr, ar, cHidden * sizeof( *saveAr));
 
-
-    for( i = 0; i < pnn->cHidden; i++ )
+    for( i = 0; i < cHidden; i++ )
 		ar[ i ] = sigmoid( -pnn->rBetaHidden * ar[ i ] );
 
     /* Calculate activity at output nodes */
@@ -193,7 +192,7 @@ static void Evaluate( const neuralnet *pnn, const float arInput[], float ar[],
     for( i = 0; i < pnn->cOutput; i++ ) {
 		float r = pnn->arOutputThreshold[ i ];
 	
-		for( j = 0; j < pnn->cHidden; j++ )
+		for( j = 0; j < cHidden; j++ )
 			r += ar[ j ] * *prWeight++;
 
 		arOutput[ i ] = sigmoid( -pnn->rBetaOutput * r );
@@ -203,7 +202,6 @@ static void Evaluate( const neuralnet *pnn, const float arInput[], float ar[],
 static void EvaluateFromBase( const neuralnet *pnn, const float arInputDif[], float ar[],
 		     float arOutput[] )
 {
-
     unsigned int i, j;
     float *prWeight;
 
@@ -220,15 +218,14 @@ static void EvaluateFromBase( const neuralnet *pnn, const float arInputDif[], fl
 	    float *pr = ar;
 
 	    if( ari == 1.0f )
-		for( j = pnn->cHidden; j; j-- )
-		    *pr++ += *prWeight++;
-	    else
-            if(ari == -1.0f)
+	      for( j = pnn->cHidden; j; j-- )
+		*pr++ += *prWeight++;
+	    else if(ari == -1.0f)
               for(j = pnn->cHidden; j; j-- ) 
                 *pr++ -= *prWeight++;
             else
-				for( j = pnn->cHidden; j; j-- )
-					*pr++ += *prWeight++ * ari;
+	      for( j = pnn->cHidden; j; j-- )
+		*pr++ += *prWeight++ * ari;
 	} else
 	    prWeight += pnn->cHidden;
     }
