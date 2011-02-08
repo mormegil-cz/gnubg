@@ -6048,8 +6048,7 @@ char *aszStatHeading [ NUM_STAT_TYPES ] = {
   N_("Luck Statistics:"),
   N_("Overall Statistics:")};
 static GtkWidget* statLists[NUM_STAT_TYPES], *pwList;
-static int numStatGames, curStatGame;
-static GtkWidget* statPom;
+static int numStatGames;
 GtkWidget *pwStatDialog;
 int fGUIUseStatsPanel = TRUE;
 GtkWidget *pswList;
@@ -6186,18 +6185,12 @@ static const statcontext *GetStatContext(int game)
 	}
 }
 
-static void StatsSelectGame(GtkWidget *pw, int i)
+static void StatsSelectGame(GtkWidget *box, int i)
 {
-	curStatGame = i;
-
-    gtk_option_menu_set_history( GTK_OPTION_MENU( statPom ), curStatGame );
-
-	if (!curStatGame)
-	{
+	int curStatGame = gtk_combo_box_get_active(GTK_COMBO_BOX(box));
+	if (!curStatGame) {
 		gtk_window_set_title(GTK_WINDOW(pwStatDialog), _("Statistics for all games"));
-	}
-	else
-	{
+	} else {
 		char sz[100];
 		strcpy(sz, _("Statistics for game "));
 		sprintf(sz + strlen(sz), "%d", curStatGame);
@@ -6206,75 +6199,62 @@ static void StatsSelectGame(GtkWidget *pw, int i)
 	SetStats(GetStatContext(curStatGame));
 }
 
-static void StatsPreviousGame( GtkWidget *pw, char *szCommand )
+static void StatsPreviousGame( GtkWidget *button, GtkWidget *combo )
 {
-	if (curStatGame > 1)
-		StatsSelectGame(pw, curStatGame - 1);
+	int i = gtk_combo_box_get_active(GTK_COMBO_BOX(combo));
+	if (i > 0)
+		gtk_combo_box_set_active(GTK_COMBO_BOX(combo), i -1 );
 }
 
-static void StatsNextGame( GtkWidget *pw, char *szCommand )
+static void StatsNextGame( GtkWidget *button, GtkWidget *combo)
 {
-	if (curStatGame < numStatGames)
-		StatsSelectGame(pw, curStatGame + 1);
+	int i = gtk_combo_box_get_active(GTK_COMBO_BOX(combo));
+	if (i < numStatGames)
+		gtk_combo_box_set_active(GTK_COMBO_BOX(combo), gtk_combo_box_get_active(GTK_COMBO_BOX(combo))+1);
 }
 
-static void AddNavigation(GtkWidget* pvbox)
+static GtkWidget *AddNavigation(GtkWidget *pvbox)
 {
-	GtkWidget *phbox, *pm, *pw;
-    char sz[128];
-    listOLD *pl;
-	phbox = gtk_hbox_new( FALSE, 0 ),
-	gtk_box_pack_start( GTK_BOX( pvbox ), phbox, FALSE, FALSE, 4 );
-	pw = button_from_image(gtk_image_new_from_stock(GNUBG_STOCK_GO_PREV_GAME, GTK_ICON_SIZE_LARGE_TOOLBAR));
-	g_signal_connect(G_OBJECT(pw), "clicked", G_CALLBACK(StatsPreviousGame), NULL);
-	gtk_box_pack_start( GTK_BOX( phbox ), pw, FALSE, FALSE, 0 );
+	GtkWidget *phbox, *pw, *box;
+	char sz[128];
+	int anFinalScore[2];
+	listOLD *pl;
+
+	box = gtk_combo_box_new_text();
+
+	if (getFinalScore(anFinalScore))
+		sprintf(sz, _("All games: %s %d, %s %d"), ap[0].szName,
+			anFinalScore[0], ap[1].szName, anFinalScore[1]);
+	else
+		sprintf(sz, _("All games: %s, %s"), ap[0].szName, ap[1].szName);
+	phbox = gtk_hbox_new(FALSE, 0), gtk_box_pack_start(GTK_BOX(pvbox), phbox, FALSE, FALSE, 4);
+	pw = button_from_image(gtk_image_new_from_stock
+			       (GNUBG_STOCK_GO_PREV_GAME, GTK_ICON_SIZE_LARGE_TOOLBAR));
+	g_signal_connect(G_OBJECT(pw), "clicked", G_CALLBACK(StatsPreviousGame), box);
+	gtk_box_pack_start(GTK_BOX(phbox), pw, FALSE, FALSE, 0);
 	gtk_widget_set_tooltip_text(pw, _("Move back to the previous game"));
-	pw = button_from_image(gtk_image_new_from_stock(GNUBG_STOCK_GO_NEXT_GAME, GTK_ICON_SIZE_LARGE_TOOLBAR));
-	g_signal_connect(G_OBJECT(pw), "clicked", G_CALLBACK(StatsNextGame), NULL);
-	gtk_box_pack_start( GTK_BOX( phbox ),pw, FALSE, FALSE, 4 );
+
+	pw = button_from_image(gtk_image_new_from_stock
+			       (GNUBG_STOCK_GO_NEXT_GAME, GTK_ICON_SIZE_LARGE_TOOLBAR));
+	g_signal_connect(G_OBJECT(pw), "clicked", G_CALLBACK(StatsNextGame), box);
+	gtk_box_pack_start(GTK_BOX(phbox), pw, FALSE, FALSE, 4);
 	gtk_widget_set_tooltip_text(pw, _("Move ahead to the next game"));
-	pm = gtk_menu_new();
 
-	{
-		int anFinalScore[ 2 ];
-
-		if ( getFinalScore( anFinalScore ) )
-			sprintf( sz, _("All games: %s %d, %s %d"), ap[ 0 ].szName,
-				 anFinalScore[ 0 ], ap[ 1 ].szName, anFinalScore[ 1 ] );
-		else
-			sprintf( sz, _("All games: %s, %s"), ap[ 0 ].szName,
-				 ap[ 1 ].szName );
-	}
-
-	pw = gtk_menu_item_new_with_label(sz);
-	gtk_menu_append(GTK_MENU(pm), pw);
-	g_signal_connect( G_OBJECT( pw ), "activate",
-			G_CALLBACK(StatsSelectGame), 0);
-
+	gtk_combo_box_append_text(GTK_COMBO_BOX(box), sz);
 	numStatGames = 0;
-	curStatGame = 0;
-	for (pl = lMatch.plNext; pl->p; pl = pl->plNext )
-	{
+	for (pl = lMatch.plNext; pl->p; pl = pl->plNext) {
 		listOLD *plGame = pl->p;
 		moverecord *pmr = plGame->plNext->p;
 		numStatGames++;
 
-		sprintf(sz, _("Game %d: %s %d, %s %d"), pmr->g.i + 1, ap[ 0 ].szName,
-			 pmr->g.anScore[ 0 ], ap[ 1 ].szName, pmr->g.anScore[ 1 ] );
-		pw = gtk_menu_item_new_with_label(sz);
-
-		g_signal_connect( G_OBJECT( pw ), "activate",
-				G_CALLBACK(StatsSelectGame), GINT_TO_POINTER(numStatGames));
-
-		gtk_widget_show( pw );
-		gtk_menu_append( GTK_MENU( pm ), pw );
+		sprintf(sz, _("Game %d: %s %d, %s %d"), pmr->g.i + 1, ap[0].szName,
+			pmr->g.anScore[0], ap[1].szName, pmr->g.anScore[1]);
+		gtk_combo_box_append_text(GTK_COMBO_BOX(box), sz);
 	}
+	g_signal_connect(G_OBJECT(box), "changed", G_CALLBACK(StatsSelectGame), NULL);
+	gtk_box_pack_start(GTK_BOX(phbox), box, TRUE, TRUE, 4);
 
-    gtk_widget_show_all( pm );
-    gtk_option_menu_set_menu( GTK_OPTION_MENU( statPom = gtk_option_menu_new() ), pm );
-    gtk_option_menu_set_history( GTK_OPTION_MENU( statPom ), 0 );
-
-    gtk_box_pack_start( GTK_BOX( phbox ), statPom, TRUE, TRUE, 4 );
+	return box;
 }
 
 static void toggle_fGUIUseStatsPanel(GtkWidget *widget, GtkWidget *pw)
@@ -6384,6 +6364,7 @@ static void stat_dialog_map(GtkWidget *window, GtkWidget *pwUsePanels)
 extern void GTKDumpStatcontext( int game )
 {
 	GtkWidget *copyMenu, *menu_item, *pvbox, *pwUsePanels;
+	GtkWidget *navi_combo;
 #if USE_BOARD3D
 	int i;
 	GtkWidget *pw;
@@ -6420,7 +6401,7 @@ extern void GTKDumpStatcontext( int game )
 
 	gtk_box_pack_start (GTK_BOX (pvbox), pswList, TRUE, TRUE, 0);
 
-	AddNavigation(pvbox);
+	navi_combo = AddNavigation(pvbox);
 	gtk_container_add( GTK_CONTAINER( DialogArea( pwStatDialog, DA_MAIN ) ), pvbox );
 
 #if USE_BOARD3D
@@ -6491,7 +6472,7 @@ extern void GTKDumpStatcontext( int game )
 
 	g_signal_connect( G_OBJECT( pwNotebook ), "button-press-event", G_CALLBACK( ContextMenu ), copyMenu );
 
-	StatsSelectGame(0, game);
+	gtk_combo_box_set_active(GTK_COMBO_BOX(navi_combo), game);
 
 	g_signal_connect(pwStatDialog, "map", G_CALLBACK(stat_dialog_map), pwUsePanels);
 
