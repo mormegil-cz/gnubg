@@ -1,3 +1,8 @@
+2011-02-08  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* eval.c, lib/neuralnetsse.c : Øystein Johansen's patch to handle
+	a different number of hidden nodes with SSE.
+
 Tue Feb  8 20:23:42 CET 2011 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am, backgammon.h, commands.inc, gtkgame.c, R record.c, R
@@ -6,7 +11,7 @@ Tue Feb  8 20:23:42 CET 2011 Christian Anthon <anthon@kiku.dk>
 Tue Feb  8 19:54:13 CET 2011 Christian Anthon <anthon@kiku.dk>: :
 
 	* gtkgame.c: cleanup after previous commit
-	* progress.a: convert the rollout clist to tree view, sortable and
+	* progress.c: convert the rollout clist to tree view, sortable and
 	simpler, but fewer details than before.
 
 Tue Feb  8 19:16:12 CET 2011 Christian Anthon <anthon@kiku.dk>: 

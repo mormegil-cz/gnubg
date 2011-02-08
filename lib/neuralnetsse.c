@@ -43,7 +43,6 @@
 #include <glib.h>
 #include "sigmoid.h"
 
-#define HIDDEN_NODES 128
 
 float *sse_malloc(size_t size)
 {
@@ -108,9 +107,10 @@ static inline __m128 sigmoid_ps( __m128 xin )
 #endif  // USE_SSE2
 
 static void
-Evaluate128( const neuralnet *pnn, const float arInput[], float ar[],
+EvaluateSSE( const neuralnet *pnn, const float arInput[], float ar[],
                         float arOutput[], float *saveAr ) {
 
+    const unsigned int cHidden = pnn->cHidden;
     unsigned int i, j;
     float *prWeight;
 #if USE_SSE2
@@ -119,7 +119,7 @@ Evaluate128( const neuralnet *pnn, const float arInput[], float ar[],
     __m128 vec0, vec1, vec3, scalevec, sum;
     
     /* Calculate activity at hidden nodes */
-    memcpy(ar, pnn->arHiddenThreshold, HIDDEN_NODES * sizeof(float));
+    memcpy(ar, pnn->arHiddenThreshold, cHidden * sizeof(float));
 
     prWeight = pnn->arHiddenWeight;
     
@@ -132,7 +132,7 @@ Evaluate128( const neuralnet *pnn, const float arInput[], float ar[],
 			float *pr = ar;
 			if (ari == 1.0f)
 			{
-				for( j = 32; j; j--, pr += 4, prWeight += 4 )
+				for( j = (cHidden >> 2); j; j--, pr += 4, prWeight += 4 )
 				{
                    vec0 = _mm_load_ps( pr );  
                    vec1 = _mm_load_ps( prWeight );  
@@ -143,7 +143,7 @@ Evaluate128( const neuralnet *pnn, const float arInput[], float ar[],
 			else
 			{
                 scalevec = _mm_set1_ps( ari );
-				for( j = 32; j; j--, pr += 4, prWeight += 4 )
+				for( j = (cHidden >> 2); j; j--, pr += 4, prWeight += 4 )
 				{
 					vec0 = _mm_load_ps( pr );  
 					vec1 = _mm_load_ps( prWeight ); 
@@ -154,22 +154,22 @@ Evaluate128( const neuralnet *pnn, const float arInput[], float ar[],
 			}
 		}
 		else
-			prWeight += HIDDEN_NODES;
+			prWeight += cHidden;
     }
 
     if( saveAr)
-      memcpy( saveAr, ar, HIDDEN_NODES * sizeof( *saveAr));
+      memcpy( saveAr, ar, cHidden * sizeof( *saveAr));
     
 #if USE_SSE2
 	scalevec = _mm_set1_ps(pnn->rBetaHidden);
-	for (par = ar, i = 32; i; i--, par += 4) {
+	for (par = ar, i = (cHidden >> 2); i; i--, par += 4) {
 		__m128 vec = _mm_load_ps(par);
 		vec = _mm_mul_ps(vec, scalevec);
 		vec = sigmoid_ps(vec);
 		_mm_store_ps(par, vec);
 	}
 #else
-	for (i = 0; i < HIDDEN_NODES; i++)
+	for (i = 0; i < cHidden; i++)
 		ar[i] = sigmoid(-pnn->rBetaHidden * ar[i]);
 #endif
     
@@ -181,7 +181,7 @@ Evaluate128( const neuralnet *pnn, const float arInput[], float ar[],
        float r;
        float *pr = ar;
        sum = _mm_setzero_ps();
-       for( j = 32; j ; j--, prWeight += 4, pr += 4 ){
+       for( j = (cHidden >> 2); j ; j--, prWeight += 4, pr += 4 ){
          vec0 = _mm_load_ps( pr );           /* Four floats into vec0 */
          vec1 = _mm_load_ps( prWeight );     /* Four weights into vect1 */ 
          vec3 = _mm_mul_ps ( vec0, vec1 );   /* Multiply */
@@ -199,19 +199,18 @@ Evaluate128( const neuralnet *pnn, const float arInput[], float ar[],
 }
 
 
-extern int NeuralNetEvaluate128(const neuralnet *pnn, /*lint -e{818}*/ float arInput[],
+extern int NeuralNetEvaluateSSE(const neuralnet *pnn, /*lint -e{818}*/ float arInput[],
 			      float arOutput[], NNState * UNUSED(pnState))
 {
-    SSE_ALIGN(float ar[HIDDEN_NODES]);
+    SSE_ALIGN(float ar[pnn->cHidden]);
 
 #if DEBUG_SSE
 	/* Not 64bit robust (pointer truncation) - causes strange crash */
     assert(sse_aligned(ar));
     assert(sse_aligned(arInput));
-    assert(pnn->cHidden == HIDDEN_NODES);
 #endif
 
-	Evaluate128(pnn, arInput, ar, arOutput, 0);
+	EvaluateSSE(pnn, arInput, ar, arOutput, 0);
     return 0;
 }
 

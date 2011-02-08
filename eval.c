@@ -2172,7 +2172,7 @@ EvalRace(const TanBoard anBoard, float arOutput[], const bgvariation bgv, NNStat
   CalculateRaceInputs( anBoard, arInput );
 
 #if USE_SSE_VECTORIZE
-	if ( NeuralNetEvaluate128( &nnRace, arInput, arOutput, nnStates ? nnStates + (CLASS_RACE - CLASS_RACE) : NULL) )
+	if ( NeuralNetEvaluateSSE( &nnRace, arInput, arOutput, nnStates ? nnStates + (CLASS_RACE - CLASS_RACE) : NULL) )
 #else
 	if ( NeuralNetEvaluate( &nnRace, arInput, arOutput, nnStates ? nnStates + (CLASS_RACE - CLASS_RACE) : NULL) )
 #endif
@@ -2276,7 +2276,7 @@ EvalContact(const TanBoard anBoard, float arOutput[], const bgvariation bgv, NNS
   CalculateContactInputs( anBoard, arInput );
     
 #if USE_SSE_VECTORIZE
-  return NeuralNetEvaluate128(&nnContact, arInput, arOutput, nnStates ? nnStates + (CLASS_CONTACT - CLASS_RACE) : NULL);
+  return NeuralNetEvaluateSSE(&nnContact, arInput, arOutput, nnStates ? nnStates + (CLASS_CONTACT - CLASS_RACE) : NULL);
 #else
   return NeuralNetEvaluate(&nnContact, arInput, arOutput, nnStates ? nnStates + (CLASS_CONTACT - CLASS_RACE) : NULL);
 #endif
@@ -2290,7 +2290,7 @@ EvalCrashed(const TanBoard anBoard, float arOutput[], const bgvariation bgv, NNS
   CalculateCrashedInputs( anBoard, arInput );
     
 #if USE_SSE_VECTORIZE
-  return NeuralNetEvaluate128( &nnCrashed, arInput, arOutput, nnStates ? nnStates + (CLASS_CRASHED - CLASS_RACE) : NULL);
+  return NeuralNetEvaluateSSE( &nnCrashed, arInput, arOutput, nnStates ? nnStates + (CLASS_CRASHED - CLASS_RACE) : NULL);
 #else
   return NeuralNetEvaluate( &nnCrashed, arInput, arOutput, nnStates ? nnStates + (CLASS_CRASHED - CLASS_RACE) : NULL);
 #endif
@@ -3593,7 +3593,7 @@ FindBestCubeDecision ( float arDouble[],
 
         /* 1. ND > DT > DP: Too good, pass */
 
-        /* sanety check: don't play on gammon if none is possible... */
+        /* sanity check: don't play on for a gammon if none is possible... */
 
         if ( winGammon ( aarOutput[ 0 ] ) )
           return ( pci->fCubeOwner == -1 ) ? TOOGOOD_PASS : TOOGOODRE_PASS;
@@ -4214,7 +4214,7 @@ extern float
 EvalEfficiency( const TanBoard anBoard, positionclass pc )
 {
   /* Since it's somewhat costly to call CalcInputs, the 
-     inputs should preferebly be cached to same time. */
+     inputs should preferably be cached to save time. */
 
   switch ( pc ) {
   case CLASS_OVER:

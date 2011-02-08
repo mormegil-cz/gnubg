@@ -1,3 +1,8 @@
+2011-02-08  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* neuralnetsse.c : Øystein Johansen's patch to handle a different
+	number of hidden nodes with SSE.
+
 2010-10-29  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* neuralnet.c: On FreeBSD, check sse from sysctl
@@ -9,7 +14,7 @@ Tue Feb 20 21:25:01 GMT 2007  Jim Segrave <jes@j-e-s.net>
 	
 Fri Apr 29 21:16:41 CEST 2004  Jon Kinsey
 
-	* neualnetsse.c: Split out SSE code to seperate file
+	* neuralnetsse.c: Split out SSE code to seperate file
 
 Wed May  4 18:10:43 GMT  2005  Jim Segrave <jes@jes-2.demon.nl>
 
