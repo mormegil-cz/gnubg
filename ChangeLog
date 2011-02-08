@@ -1,4 +1,10 @@
-Tue Feb  8 19:16:12 CET 2011 Christian Anthon <anthon@kiku.dk>
+Tue Feb  8 19:54:13 CET 2011 Christian Anthon <anthon@kiku.dk>
+
+	* gtkgame.c: cleanup after previous commit
+	* progress.a: convert the rollout clist to tree view, sortable and
+	simpler, but fewer details than before.
+
+Tue Feb  8 19:16:12 CET 2011 Christian Anthon <anthon@kiku.dk>: 
 
 	* gtkgame.c, gtkgame.h: update the evaluation summary to gtk_combo_box
 

@@ -42,7 +42,10 @@
 #if USE_GTK
 #include "gtkgame.h"
 #include "gtkwindows.h"
-#define N_ROLLOUT_COLS NUM_ROLLOUT_OUTPUTS + 3
+typedef enum _rollout_colls {
+	TITLE_C, RANK_C, TRIALS_C, WIN_C, WIN_G_C, WIN_BG_C, LOOSE_G_C, LOOSE_BG_C, CLESS_C, CFUL_C, CFUL_S_C, JSD_C, N_ROLLOUT_COLS
+} rollout_cols;
+
 #endif /* USE_GTK */
 
 
@@ -59,6 +62,7 @@ typedef struct _rolloutprogress {
   rolloutstat *prs;
   GtkWidget *pwRolloutDialog;
   GtkWidget *pwRolloutResult;
+  GtkListStore *pwRolloutResultList;
   GtkWidget *pwRolloutProgress;
   GtkWidget *pwRolloutOK;
   GtkWidget *pwRolloutStop;
@@ -104,16 +108,6 @@ static void FreeTextList(rolloutprogress *prp)
 	free(prp->pListText);
 }
 
-static void SetRolloutText(rolloutprogress *prp, int x, int y, const char* sz)
-{	/* Cache set text to reduce flicker (and speed things up a bit) */
-	if (!prp->pListText[x][y] || strcmp(prp->pListText[x][y - 1], sz))
-	{
-		gtk_clist_set_text(GTK_CLIST(prp->pwRolloutResult), x, y, sz);
-		free(prp->pListText[x][y - 1]);
-		prp->pListText[x][y - 1] = malloc(strlen(sz) + 1);
-		strcpy(prp->pListText[x][y - 1], sz);
-	}
-}
 #endif
 
 
@@ -621,7 +615,7 @@ GTKViewRolloutStatistics(GtkWidget *UNUSED(widget), gpointer data){
   rolloutprogress *prp = (rolloutprogress *) data;
   rolloutstat *prs = prp->prs;
   int cGames = prp->nGamesDone;
-  int nRollouts = GTK_CLIST( prp->pwRolloutResult )->rows / 2;
+  int nRollouts = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(prp->pwRolloutResultList), NULL );
   int i;
 
   /* GTK Widgets */
@@ -648,11 +642,12 @@ GTKViewRolloutStatistics(GtkWidget *UNUSED(widget), gpointer data){
 
   for ( i = 0; i < nRollouts; i++ )
   {
-    gtk_clist_get_text ( GTK_CLIST ( prp->pwRolloutResult ),
-                              i * 2, 0, &sz );
-
-    gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
-		GTKRolloutStatPage ( &prs[ i * 2 ], cGames ), gtk_label_new ( sz ) );
+	  GtkTreeIter iter;
+	  gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(prp->pwRolloutResultList), &iter, NULL, i);
+	  gtk_tree_model_get(GTK_TREE_MODEL(prp->pwRolloutResultList), &iter, 0, &sz, -1);
+	  gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
+			  GTKRolloutStatPage ( &prs[ i * 2 ], cGames ), gtk_label_new ( sz ) );
+	  g_free(sz);
   }
 
   GTKRunDialog(pwDialog);
@@ -663,6 +658,7 @@ static void RolloutCancel( GtkObject *UNUSED(po), rolloutprogress *prp )
     pwGrab = pwOldGrab;
     prp->pwRolloutDialog = NULL;
     prp->pwRolloutResult = NULL;
+    prp->pwRolloutResultList = NULL;
     prp->pwRolloutProgress = NULL;
     fInterrupt = TRUE;
 }
@@ -677,12 +673,14 @@ static void RolloutStopAll( GtkObject *UNUSED(po), rolloutprogress *prp) {
     fInterrupt = TRUE;
     prp->stopped = -2;
 }
-static GtkWidget *create_rollout_list(int n, char asz[][40])
+
+static void create_rollout_list(int n, char asz[][40], GtkWidget **View, GtkListStore **List, gboolean cubeful)
 {
 	int i;
-	GtkWidget *list;
+	GtkTreeModel *sort_model;
 	static const char *aszTitle[N_ROLLOUT_COLS] = {
 		NULL,
+		N_("Rank"),
 		N_("Trials"),
 		N_("Win"),
 		N_("Win (g)"),
@@ -691,30 +689,48 @@ static GtkWidget *create_rollout_list(int n, char asz[][40])
 		N_("Lose (bg)"),
 		N_("Cubeless"),
 		N_("Cubeful"),
-		N_("Rank/no. JSDs")
+		N_("Std dev"),
+		N_("JSDs")
 	};
-	char *aszEmpty[N_ROLLOUT_COLS] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 	char *aszTemp[N_ROLLOUT_COLS];
 
 	for (i = 0; i < N_ROLLOUT_COLS; i++)
 		aszTemp[i] = aszTitle[i] ? gettext(aszTitle[i]) : "";
 
-	list = gtk_clist_new_with_titles(N_ROLLOUT_COLS, aszTemp);
-	gtk_clist_column_titles_passive(GTK_CLIST(list));
-
-	for (i = 0; i < N_ROLLOUT_COLS; i++) {
-		gtk_clist_set_column_auto_resize(GTK_CLIST(list), i, TRUE);
-		gtk_clist_set_column_justification(GTK_CLIST(list), i, GTK_JUSTIFY_RIGHT);
-	}
+	*List = gtk_list_store_new(N_ROLLOUT_COLS,
+			G_TYPE_STRING,
+			G_TYPE_INT,
+			G_TYPE_INT,
+			G_TYPE_STRING,
+			G_TYPE_STRING,
+			G_TYPE_STRING,
+			G_TYPE_STRING,
+			G_TYPE_STRING,
+			G_TYPE_STRING,
+			G_TYPE_STRING,
+			G_TYPE_STRING,
+			G_TYPE_STRING,
+			G_TYPE_STRING);
 
 	for (i = 0; i < n; i++) {
-		gtk_clist_append(GTK_CLIST(list), aszEmpty);
-		gtk_clist_append(GTK_CLIST(list), aszEmpty);
-
-		gtk_clist_set_text(GTK_CLIST(list), 2 * i, 0, asz[i]);
-		gtk_clist_set_text(GTK_CLIST(list), 2 * i + 1, 0, _("Standard error"));
+		GtkTreeIter iter;
+		gtk_list_store_append(*List, &iter);
+		gtk_list_store_set(*List, &iter, TITLE_C, asz[i], RANK_C, i, TRIALS_C, 0, -1);
 	}
-	return list;
+	sort_model = gtk_tree_model_sort_new_with_model (GTK_TREE_MODEL(*List));
+	*View = gtk_tree_view_new_with_model(GTK_TREE_MODEL(sort_model));
+
+	for (i=0; i < N_ROLLOUT_COLS; i++) {
+		GtkCellRenderer *renderer;
+		GtkTreeViewColumn *column;
+		if (i == CFUL_C && ! cubeful)
+			continue;
+		renderer = gtk_cell_renderer_text_new();
+		column = gtk_tree_view_column_new_with_attributes(aszTemp[i], renderer, "text", i, NULL);
+		gtk_tree_view_append_column(GTK_TREE_VIEW(*View), column);
+		gtk_tree_view_column_set_sort_column_id(column, i);
+	}
+	gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (sort_model), RANK_C, GTK_SORT_ASCENDING);
 }
 
 static void 
@@ -780,7 +796,7 @@ GTKRolloutProgressStart( const cubeinfo *UNUSED(pci), const int n,
                       G_CALLBACK( GTKViewRolloutStatistics ), prp );
 
   pwVbox = gtk_vbox_new( FALSE, 4 );
-  prp->pwRolloutResult = create_rollout_list(n, asz);
+  create_rollout_list(n, asz, &prp->pwRolloutResult, &prp->pwRolloutResultList, prc->fCubeful);
   prp->pwRolloutProgress = gtk_progress_bar_new();
   
   gtk_box_pack_start( GTK_BOX( pwVbox ), prp->pwRolloutResult, TRUE, TRUE, 0 );
@@ -851,13 +867,13 @@ GTKRolloutProgress(float aarOutput[][NUM_ROLLOUT_OUTPUTS],
 	int i;
 	gchar *gsz;
 	double frac;
+	GtkTreeIter iter;
 
 	if (!prp || !prp->pwRolloutResult)
 		return;
 
-	sprintf(sz, "%d", iGame + 1);
-	SetRolloutText(prp, iAlternative * 2, 1, sz);
-
+	gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(prp->pwRolloutResultList), &iter, NULL, iAlternative);
+	gtk_list_store_set(prp->pwRolloutResultList, &iter, TRIALS_C, iGame + 1, -1);
 	for (i = 0; i < NUM_ROLLOUT_OUTPUTS; i++) {
 
 		/* result */
@@ -872,38 +888,21 @@ GTKRolloutProgress(float aarOutput[][NUM_ROLLOUT_OUTPUTS],
 			       prc->fCubeful ? OutputMWC(aarOutput[iAlternative][i],
 							 &aci[0], TRUE) : "n/a");
 
-		SetRolloutText(prp, iAlternative * 2, i + 2, sz);
-
-		/* standard errors */
-
-		if (i < OUTPUT_EQUITY)
-			strcpy(sz, OutputPercent(aarStdDev[iAlternative][i]));
-		else if (i == OUTPUT_EQUITY)
-			strcpy(sz, OutputEquityScale(aarStdDev[iAlternative][i],
-						     &aci[iAlternative], &aci[0], FALSE));
-		else
-			strcpy(sz,
-			       prc->fCubeful ? OutputMWC(aarStdDev[iAlternative][i],
-							 &aci[0], FALSE) : "n/a");
-
-		SetRolloutText(prp, iAlternative * 2 + 1, i + 2, sz);
+		gtk_list_store_set(prp->pwRolloutResultList, &iter, i + 3, sz, -1);
 
 	}
-
+	if (prc->fCubeful)
+			strcpy(sz, OutputMWC(aarStdDev[iAlternative][OUTPUT_CUBEFUL_EQUITY], &aci[0], FALSE));
+	else
+			strcpy(sz, OutputEquityScale(aarStdDev[iAlternative][OUTPUT_EQUITY], &aci[iAlternative], &aci[0], FALSE));
+	gtk_list_store_set(prp->pwRolloutResultList, &iter, i + 3, sz, -1);
 	if (fShowRanks && iGame > 1) {
-		if (fCubeRollout)
-			sprintf(sz, "%s", fStopped ? "s" : "r");
-		else
-			sprintf(sz, "%d %s", nRank, fStopped ? "s" : "r");
-		SetRolloutText(prp, iAlternative * 2, i + 2, sz);
+		gtk_list_store_set(prp->pwRolloutResultList, &iter, RANK_C, nRank, -1);
 		if (nRank != 1 || fCubeRollout)
 			sprintf(sz, "%5.3f", rJsd);
 		else
 			strcpy(sz, " ");
-
-		SetRolloutText(prp, iAlternative * 2 + 1, i + 2, sz);
-	} else {
-		SetRolloutText(prp, iAlternative * 2, i + 2, "n/a");
+		gtk_list_store_set(prp->pwRolloutResultList, &iter, i + 4, sz, -1);
 	}
 
 	/* Update progress bar with highest number trials for all the alternatives */
