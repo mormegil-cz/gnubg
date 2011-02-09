@@ -1786,7 +1786,7 @@ MaxTurns( int id )
 extern void
 SanityCheck( const TanBoard anBoard, float arOutput[] )
 {
-  int i, j, ac[ 2 ], anBack[ 2 ], anCross[ 2 ], anGammonCross[ 2 ],
+  int i, j, nciq, ac[ 2 ], anBack[ 2 ], anCross[ 2 ], anGammonCross[ 2 ],
     anBackgammonCross[ 2 ], anMaxTurns[ 2 ], fContact;
 
   if( arOutput[ OUTPUT_WIN ] < 0.0f )
@@ -1798,17 +1798,50 @@ SanityCheck( const TanBoard anBoard, float arOutput[] )
     anCross[ 1 ] = anBackgammonCross[ 0 ] = anBackgammonCross[ 1 ] = 0;
   anGammonCross[ 0 ] = anGammonCross[ 1 ] = 1;
 	
-  for( j = 0; j < 2; j++ )
-	for( i = 0; i < 25; i++ )
+  for( j = 0; j < 2; j++ ) {
+	for( i = 0, nciq = 0; i < 6; i++ )
 	    if( anBoard[ j ][ i ] ) {
 		anBack[ j ] = i;
-		ac[ j ] += anBoard[ j ][ i ];
-		anCross[ j ] += ( i / 6 + 1 ) * anBoard[ j ][ i ];
-		anGammonCross[ j ] += i / 6 * anBoard[ j ][ i ];
-		if( i >= 18 )
-		    anBackgammonCross[ j ] += ( i - 12 ) / 6 *
-			anBoard[ j ][ i ];
+                nciq += anBoard[ j ][ i ];
 	    }
+        ac[ j ] = anCross[ j ] = nciq;
+
+	for( i = 6, nciq = 0; i < 12; i++ )
+	    if( anBoard[ j ][ i ] ) {
+		anBack[ j ] = i;
+                nciq += anBoard[ j ][ i ];
+	    }
+            ac[ j ] += nciq;
+            anCross[ j ] += 2*nciq;
+            anGammonCross[ j ] += nciq;
+
+	for( i = 12, nciq = 0; i < 18; i++ )
+	    if( anBoard[ j ][ i ] ) {
+		anBack[ j ] = i;
+                nciq += anBoard[ j ][ i ];
+	    }
+            ac[ j ] += nciq;
+            anCross[ j ] += 3*nciq;
+            anGammonCross[ j ] += 2*nciq;
+
+	for( i = 18, nciq = 0; i < 24; i++ )
+	    if( anBoard[ j ][ i ] ) {
+		anBack[ j ] = i;
+                nciq += anBoard[ j ][ i ];
+	    }
+            ac[ j ] += nciq;
+            anCross[ j ] += 4*nciq;
+            anGammonCross[ j ] += 3*nciq;
+            anBackgammonCross[ j ] = nciq;
+
+	if( anBoard[ j ][ 24 ] ) {
+	  anBack[ j ] = 24;
+	  ac[ j ] += anBoard[ j ][ 24 ];
+	  anCross[ j ] += 5 * anBoard[ j ][ 24 ];
+	  anGammonCross[ j ] += 4 * anBoard[ j ][ 24 ];
+	  anBackgammonCross[ j ] += 2 * anBoard[ j ][ 24 ];
+	}
+  }
 
   fContact = anBack[ 0 ] + anBack[ 1 ] >= 24;
 

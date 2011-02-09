@@ -1,3 +1,7 @@
+2011-02-09  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* eval.c: Small speed improvements.
+
 2011-02-08  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* eval.c, lib/neuralnetsse.c, lib/neuralnet.h : Øystein Johansen's
