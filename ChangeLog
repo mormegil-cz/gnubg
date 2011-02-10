@@ -1,3 +1,8 @@
+2011-02-10  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* po/ro.po, configure.in, gtkgame.c, flags/romania.png,
+	flags/Makefile.am : Romanian translation by Mihai Varzaru.
+
 2011-02-09  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* eval.c: Small speed improvements.

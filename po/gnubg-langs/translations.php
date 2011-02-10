@@ -38,6 +38,8 @@
 
 <TR><TH> ja.po <TD>Yoshito Takeuchi
 
+<TR><TH> ro.po <TD>Mihai Varzaru
+
 <TR><TH> ru.po <TD>Dmitri I Gouliaev
 
 <TR><TH> tr.po <TD>Akif Dinç
