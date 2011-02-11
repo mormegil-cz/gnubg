@@ -67,8 +67,9 @@ Achim Mueller,German
 Hlynur Sigurgislason,Icelandic
 Renzo Campagna,Italian
 Yoshito Takeuchi,Japanese
+Mihai Varzaru,Romanian
+Dmitri I Gouliaev,Russian
 Akif Dinc,Turkish
-Dmitri I GOULIAEV,Russian
 EOF
 
 cat > $credit <<EOF
