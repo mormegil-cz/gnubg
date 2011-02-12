@@ -5992,35 +5992,30 @@ char *aszStatHeading [ NUM_STAT_TYPES ] = {
   N_("Cube Statistics:"),
   N_("Luck Statistics:"),
   N_("Overall Statistics:")};
-static GtkWidget* statLists[NUM_STAT_TYPES], *pwList;
+static GtkWidget* statViews[NUM_STAT_TYPES], *statView;
 static int numStatGames;
 GtkWidget *pwStatDialog;
 int fGUIUseStatsPanel = TRUE;
 GtkWidget *pswList;
 GtkWidget *pwNotebook;
 
-static void AddList(char* pStr, GtkCList* pList, const char* pTitle)
+static void AddList(char *pStr, GtkWidget *view, const char *pTitle)
 {
-	int i;
 	gchar *sz;
+	GtkTreeIter iter;
+	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
 
-	sprintf ( strchr ( pStr, 0 ), "%s\n", pTitle);
-
-	for (i = 0; i < pList->rows; i++ )
-	{
-		sprintf ( strchr ( pStr, 0 ), "%-37s ", 
-			  ( gtk_clist_get_text ( pList, i, 0, &sz ) ) ?
-			  sz : "" );
-
-		sprintf ( strchr ( pStr, 0 ), "%-20s ", 
-			  ( gtk_clist_get_text ( pList, i, 1, &sz ) ) ?
-			  sz : "" );
-
-		sprintf ( strchr ( pStr, 0 ), "%-20s\n", 
-			  ( gtk_clist_get_text ( pList, i, 2, &sz ) ) ?
-			  sz : "" );
-	}
-	sprintf ( strchr ( pStr, 0 ), "\n");
+	sprintf(strchr(pStr, 0), "%s\n", pTitle);
+	if (gtk_tree_model_get_iter_first(model, &iter))
+		do {
+			gtk_tree_model_get(model, &iter, 0, &sz, -1);
+			sprintf(strchr(pStr, 0), "%-37s ", sz ? sz : "");
+			gtk_tree_model_get(model, &iter, 1, &sz, -1);
+			sprintf(strchr(pStr, 0), "%-20s ", sz ? sz : "");
+			gtk_tree_model_get(model, &iter, 1, &sz, -1);
+			sprintf(strchr(pStr, 0), "%-20s\n", sz ? sz : "");
+		} while (gtk_tree_model_iter_next(model, &iter));
+	sprintf(strchr(pStr, 0), "\n");
 }
 
 static void CopyData(GtkWidget *pwNotebook, int page)
@@ -6030,13 +6025,13 @@ static void CopyData(GtkWidget *pwNotebook, int page)
 	sprintf(szOutput, "%-37s %-20s %-20s\n", "", ap[ 0 ].szName, ap[ 1 ].szName);
 
 	if (page == FORMATGS_CHEQUER || page == FORMATGS_ALL)
-		AddList(szOutput, GTK_CLIST(statLists[FORMATGS_CHEQUER]), aszStatHeading[FORMATGS_CHEQUER]);
+		AddList(szOutput, statViews[FORMATGS_CHEQUER], aszStatHeading[FORMATGS_CHEQUER]);
 	if (page == FORMATGS_LUCK || page == FORMATGS_ALL)
-		AddList(szOutput, GTK_CLIST(statLists[FORMATGS_LUCK]), aszStatHeading[FORMATGS_LUCK]);
+		AddList(szOutput, statViews[FORMATGS_LUCK], aszStatHeading[FORMATGS_LUCK]);
 	if (page == FORMATGS_CUBE || page == FORMATGS_ALL)
-		AddList(szOutput, GTK_CLIST(statLists[FORMATGS_CUBE]), aszStatHeading[FORMATGS_CUBE]);
+		AddList(szOutput, statViews[FORMATGS_CUBE], aszStatHeading[FORMATGS_CUBE]);
 	if (page == FORMATGS_OVERALL || page == FORMATGS_ALL)
-		AddList(szOutput, GTK_CLIST(statLists[FORMATGS_OVERALL]), aszStatHeading[FORMATGS_OVERALL]);
+		AddList(szOutput, statViews[FORMATGS_OVERALL], aszStatHeading[FORMATGS_OVERALL]);
 
 	TextToClipboard(szOutput);
 }
@@ -6066,49 +6061,55 @@ static void CopyAll( GtkWidget *pwWidget, GtkWidget *pwNotebook )
 }
 
 static void FillStats(const statcontext *psc, const matchstate *pms,
-                      const enum _formatgs gs, GtkWidget* statList )
+		      const enum _formatgs gs, GtkWidget *statView)
 {
 
-  GList *list = formatGS( psc, pms->nMatchTo, gs );
-  GList *pl;
-  
-  for ( pl = g_list_first( list ); pl; pl = g_list_next( pl ) ) {
-    
-    char **aasz = pl->data;
-    
-    gtk_clist_append( GTK_CLIST( statList ), aasz );
-    
-  }
-  
-  freeGS( list );
-  
+	GList *list = formatGS(psc, pms->nMatchTo, gs);
+	GList *pl;
+	GtkListStore *store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(statView)));
+
+	for (pl = g_list_first(list); pl; pl = g_list_next(pl)) {
+		GtkTreeIter iter;
+		char **aasz = pl->data;
+		gtk_list_store_append(store, &iter);
+		gtk_list_store_set(store, &iter, 0, aasz[0], 1, aasz[1], 2, aasz[2], -1);
+	}
+	freeGS(list);
 }
 
 static void SetStats(const statcontext *psc)
 {
-    char *aszLine[] = { NULL, NULL, NULL };
+	char *aszLine[] = { NULL, NULL, NULL };
 	int i;
+	GtkListStore *store;
+	GtkTreeIter iter;
 
-	for ( i = 0; i < NUM_STAT_TYPES; ++i )
-		gtk_clist_clear(GTK_CLIST(statLists[i]));
+	for (i = 0; i < NUM_STAT_TYPES; ++i)
+	{
+		store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+		gtk_tree_view_set_model(GTK_TREE_VIEW(statViews[i]), GTK_TREE_MODEL(store));
+		FillStats(psc, &ms, i, statViews[i]);
+		g_object_unref(store);
+	}
 
-	for ( i = 0; i < NUM_STAT_TYPES; ++i )
-		FillStats( psc, &ms, i, statLists[ i ] );
-
-	gtk_clist_clear(GTK_CLIST(pwList));
-
+	store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(statView), GTK_TREE_MODEL(store));
+	g_object_unref(store);
 	aszLine[0] = aszStatHeading[FORMATGS_CHEQUER];
-	gtk_clist_append( GTK_CLIST( pwList ), aszLine );
-	FillStats( psc, &ms, FORMATGS_CHEQUER, pwList );
-	FillStats( psc, &ms, FORMATGS_LUCK, pwList );
-	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, aszLine[0], -1);
+	FillStats(psc, &ms, FORMATGS_CHEQUER, statView);
+	FillStats(psc, &ms, FORMATGS_LUCK, statView);
+
 	aszLine[0] = aszStatHeading[FORMATGS_CUBE];
-	gtk_clist_append( GTK_CLIST( pwList ), aszLine );
-	FillStats( psc, &ms, FORMATGS_CUBE, pwList );
-	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, aszLine[0], -1);
+	FillStats(psc, &ms, FORMATGS_CUBE, statView);
+
 	aszLine[0] = aszStatHeading[FORMATGS_OVERALL];
-	gtk_clist_append( GTK_CLIST( pwList ), aszLine );
-	FillStats( psc, &ms, FORMATGS_OVERALL, pwList );
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, aszLine[0], -1);
+	FillStats(psc, &ms, FORMATGS_OVERALL, statView);
 }
 
 static const statcontext *GetStatContext(int game)
@@ -6218,87 +6219,83 @@ static void toggle_fGUIUseStatsPanel(GtkWidget *widget, GtkWidget *pw)
 	}
 }
 
-static gint 
-compare_func( gconstpointer a, gconstpointer b ) {
-
-  gint i = GPOINTER_TO_INT( a );
-  gint j = GPOINTER_TO_INT( b );
-
-  if ( i < j )
-    return -1;
-  else if ( i == j )
-    return 0;
-  else
-    return 1;
-
-}
-
-static void StatcontextCopy(GtkWidget *pw, GtkWidget *pwList)
+static void StatcontextCopy(GtkWidget *pw, GtkTreeView *view)
 {
-  GList *pl;
-  GList *plCopy;
-  int i;
-  static char szOutput[ 4096 ];
-  char *pc;
-  gchar *sz;
+	static char szOutput[4096];
+	GtkTreeSelection *selection;
+	GtkTreeModel *model;
+	GList *row;
+	GList *rows;
 
-  sprintf ( szOutput, 
-            "%-37s %-20s %-20s\n",
-            "", ap[ 0 ].szName, ap[ 1 ].szName );
+	selection = gtk_tree_view_get_selection(view);
 
-  /* copy list (note that the integers in the list are NOT copied) */
-  plCopy = g_list_copy( GTK_CLIST ( pwList )->selection );
+	if (gtk_tree_selection_count_selected_rows(selection) < 1)
+		return;
 
-  /* sort list; otherwise the lines are returned in whatever order the
-     user clicked the lines (bug #4160) */
-  plCopy = g_list_sort( plCopy, compare_func );
+	sprintf(szOutput, "%-37s %-20s %-20s\n", "", ap[0].szName, ap[1].szName);
 
-  for ( pl = plCopy; pl; pl = pl->next ) {
+	rows = gtk_tree_selection_get_selected_rows(selection, &model);
 
-    i = GPOINTER_TO_INT( pl->data );
+	for (row = rows ; row; row = row->next) {
+		GtkTreeIter iter;
+		gchar *sz;
+		GtkTreePath *path = row->data;
+		gchar *pc;
+		gtk_tree_model_get_iter(model, &iter, path);
 
-    sprintf ( pc = strchr ( szOutput, 0 ), "%-37s ", 
-              ( gtk_clist_get_text ( GTK_CLIST ( pwList ), i, 0, &sz ) ) ?
-              sz : "" );
-      
-    sprintf ( pc = strchr ( szOutput, 0 ), "%-20s ", 
-              ( gtk_clist_get_text ( GTK_CLIST ( pwList ), i, 1, &sz ) ) ?
-              sz : "" );
-      
-    sprintf ( pc = strchr ( szOutput, 0 ), "%-20s\n", 
-              ( gtk_clist_get_text ( GTK_CLIST ( pwList ), i, 2, &sz ) ) ?
-              sz : "" );
-      
-  }
+		gtk_tree_model_get(model, &iter, 0, &sz, -1);
+		sprintf(pc = strchr(szOutput, 0), "%-37s ", sz ? sz : "");
+		g_free(sz);
 
-  /* garbage collect */
-  g_list_free(plCopy);
-  
-  GTKTextToClipboard(szOutput);
+		gtk_tree_model_get(model, &iter, 1, &sz, -1);
+		sprintf(pc = strchr(szOutput, 0), "%-20s ", sz ? sz : "");
+		g_free(sz);
+
+		gtk_tree_model_get(model, &iter, 2, &sz, -1);
+		sprintf(pc = strchr(szOutput, 0), "%-20s\n", sz ? sz : "");
+		g_free(sz);
+
+		gtk_tree_path_free(path);
+	}
+	g_list_free(rows);
+	GTKTextToClipboard(szOutput);
 }
 
 
 static GtkWidget *CreateList(void)
 {
 	int i;
-        static char *aszEmpty[] = { NULL, NULL, NULL };
-	GtkWidget *pwList = gtk_clist_new_with_titles( 3, aszEmpty );
-
-	for( i = 0; i < 3; i++ ) {
-          gtk_clist_set_column_auto_resize( GTK_CLIST( pwList ), i, TRUE );
-          gtk_clist_set_column_justification( GTK_CLIST( pwList ), 
-                                              i, GTK_JUSTIFY_RIGHT );
+	GtkWidget *view;
+	GtkWidget *copyMenu;
+	GtkWidget *menu_item;
+       
+	view = gtk_tree_view_new();
+	
+	for (i=0; i < 3; i++) {
+		GtkCellRenderer *renderer;
+		GtkTreeViewColumn *column;
+		renderer = gtk_cell_renderer_text_new();
+		g_object_set(renderer, "xalign", 1.0, NULL);
+		column = gtk_tree_view_column_new_with_attributes("", renderer, "text", i, NULL);
+		gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	}
+	gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(view)), GTK_SELECTION_MULTIPLE);
+	/* list view (selections) */
+	copyMenu = gtk_menu_new ();
 
-	gtk_clist_column_titles_passive( GTK_CLIST( pwList ) );
-  
-	gtk_clist_set_column_title( GTK_CLIST( pwList ), 1, (ap[0].szName));
-	gtk_clist_set_column_title( GTK_CLIST( pwList ), 2, (ap[1].szName));
+	menu_item = gtk_menu_item_new_with_label ("Copy selection");
+	gtk_menu_shell_append (GTK_MENU_SHELL (copyMenu), menu_item);
+	gtk_widget_show (menu_item);
+	g_signal_connect( G_OBJECT( menu_item ), "activate", G_CALLBACK( StatcontextCopy ), view );
 
-	gtk_clist_set_selection_mode( GTK_CLIST( pwList ), 
-                                      GTK_SELECTION_EXTENDED );
+	menu_item = gtk_menu_item_new_with_label ("Copy all");
+	gtk_menu_shell_append (GTK_MENU_SHELL (copyMenu), menu_item);
+	gtk_widget_show (menu_item);
+	g_signal_connect( G_OBJECT( menu_item ), "activate", G_CALLBACK( CopyAll ), pwNotebook );
 
-	return pwList;
+	g_signal_connect( G_OBJECT( view ), "button-press-event", G_CALLBACK( ContextMenu ), copyMenu );
+
+	return view;
 }
 
 static void stat_dialog_map(GtkWidget *window, GtkWidget *pwUsePanels)
@@ -6325,24 +6322,24 @@ extern void GTKDumpStatcontext( int game )
 	pvbox = gtk_vbox_new( FALSE, 0 ),
     gtk_box_pack_start( GTK_BOX( pvbox ), pwNotebook, TRUE, TRUE, 0);
 
-	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), statLists[FORMATGS_OVERALL] = CreateList(),
+	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), statViews[FORMATGS_OVERALL] = CreateList(),
 					  gtk_label_new(_("Overall")));
 
-	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), statLists[FORMATGS_CHEQUER] = CreateList(),
+	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), statViews[FORMATGS_CHEQUER] = CreateList(),
 					  gtk_label_new(_("Chequer play")));
 
-	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), statLists[FORMATGS_CUBE] = CreateList(),
+	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), statViews[FORMATGS_CUBE] = CreateList(),
 					  gtk_label_new(_("Cube decisions")));
 
-	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), statLists[FORMATGS_LUCK] = CreateList(),
+	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), statViews[FORMATGS_LUCK] = CreateList(),
 					  gtk_label_new(_("Luck")));
 
-	pwList = CreateList();
+	statView = CreateList();
 
 	pswList = gtk_scrolled_window_new( NULL, NULL );
 	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pswList ),
 				GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
-	gtk_container_add( GTK_CONTAINER( pswList ), pwList );
+	gtk_container_add( GTK_CONTAINER( pswList ), statView );
 
 	gtk_box_pack_start (GTK_BOX (pvbox), pswList, TRUE, TRUE, 0);
 
@@ -6384,14 +6381,14 @@ extern void GTKDumpStatcontext( int game )
 	menu_item = gtk_menu_item_new_with_label ("Copy selection");
 	gtk_menu_shell_append (GTK_MENU_SHELL (copyMenu), menu_item);
 	gtk_widget_show (menu_item);
-	g_signal_connect( G_OBJECT( menu_item ), "activate", G_CALLBACK( StatcontextCopy ), pwList );
+	g_signal_connect( G_OBJECT( menu_item ), "activate", G_CALLBACK( StatcontextCopy ), statView );
 
 	menu_item = gtk_menu_item_new_with_label ("Copy all");
 	gtk_menu_shell_append (GTK_MENU_SHELL (copyMenu), menu_item);
 	gtk_widget_show (menu_item);
 	g_signal_connect( G_OBJECT( menu_item ), "activate", G_CALLBACK( CopyAll ), pwNotebook );
 
-	g_signal_connect( G_OBJECT( pwList ), "button-press-event", G_CALLBACK( ContextMenu ), copyMenu );
+	g_signal_connect( G_OBJECT( statView ), "button-press-event", G_CALLBACK( ContextMenu ), copyMenu );
 
 	/* dialog size */
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwUsePanels ) ) )

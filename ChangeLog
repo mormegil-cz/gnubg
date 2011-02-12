@@ -1,3 +1,7 @@
+Sat Feb 12 22:19:18 CET 2011 Christian Anthon <anthon@kiku.dk>
+
+	* gtkgame.c: Just one clist to go.
+
 2011-02-10  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* po/ro.po, configure.in, gtkgame.c, flags/romania.png,
