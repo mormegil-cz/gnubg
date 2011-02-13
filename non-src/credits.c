@@ -62,8 +62,9 @@ credEntry ceTranslations[] = {
   {"Hlynur Sigurgislason", N_("Icelandic") },
   {"Renzo Campagna", N_("Italian") },
   {"Yoshito Takeuchi", N_("Japanese") },
+  {"Mihai Varzaru", N_("Romanian") },
+  {"Dmitri I Gouliaev", N_("Russian") },
   {"Akif Dinc", N_("Turkish") },
-  {"Dmitri I GOULIAEV", N_("Russian") },
   {0, 0}
 };
 
@@ -85,13 +86,13 @@ credEntry ceCredits[] = {
   {"Olivier Croisille", 0},
   {"Ned Cross", 0},
   {"Ian Curtis", 0},
+  {"Christopher D. Yep", 0},
   {"Bill Davidson", 0},
   {"Giulio De Marco", 0},
   {"Michael Depreli", 0},
   {"Alberta di Silvio", 0},
   {"Ian Dunstan", 0},
   {"Max Durbano", 0},
-  {"Christopher D. Yep", 0},
   {"Peter Eberhard", 0},
   {"Robert Eberlein", 0},
   {"James F. Kibler", 0},
@@ -167,8 +168,8 @@ credEntry ceCredits[] = {
   {"Sander van Rijnswou", 0},
   {"Robert-Jan Veldhuizen", 0},
   {"Morten Wang", 0},
-  {"Jeff White", 0},
   {"JP White", 0},
+  {"Jeff White", 0},
   {"Mike Whitton", 0},
   {"Chris Wilson", 0},
   {"Kit Woolsey", 0},
@@ -181,7 +182,7 @@ credEntry ceCredits[] = {
 
 credits creditList[] =
 {
-	{N_("AUTHORS"), ceAuthors},
+	{N_("Authors"), ceAuthors},
 	{N_("Code Contributors"), ceContrib},
 	{N_("Translations"), ceTranslations},
 	{N_("Support"), ceSupport},
@@ -215,8 +216,9 @@ const char aszAUTHORS[] =
 "     Hlynur Sigurgislason (Icelandic)\n"
 "     Renzo Campagna (Italian)\n"
 "     Yoshito Takeuchi (Japanese)\n"
+"     Mihai Varzaru (Romanian)\n"
+"     Dmitri I Gouliaev (Russian)\n"
 "     Akif Dinc (Turkish)\n"
-"     Dmitri I GOULIAEV (Russian)\n"
 "\n"
 "             Contributors (of bug reports and suggestions) include:\n"
 "\n"

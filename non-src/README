@@ -13,15 +13,13 @@ TARGET                     SOURCE
 
 ../credits.c               ../credits.sh
 ../credits.h               ../credits.sh
+../AUTHORS                 ../credits.sh
 
 ../external_l.c            ../external_l.l
 
 ../external_y.c            ../external_y.y
 ../external_y.h            ../external_y.y
 
-../doc/gnubg.xml           ../doc/gnubg.texi
-
 ../sgfl.c                  ../sgf.l
 ../sgfp.c                  ../sgf.y
 ../sgfp.h                  ../sgf.y
-
