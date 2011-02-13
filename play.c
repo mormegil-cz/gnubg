@@ -4333,7 +4333,6 @@ extern const char* GetMoveString(moverecord *pmr, int* pPlayer, gboolean addSkil
 		/* no need to list this */
 		break;
 
-
 	case MOVE_NORMAL:
 	*pPlayer = pmr->fPlayer;
 		pch = sz;
@@ -4410,13 +4409,13 @@ extern const char* GetMoveString(moverecord *pmr, int* pPlayer, gboolean addSkil
 
 	case MOVE_SETCUBEPOS:
 		*pPlayer = -1;
-		if( pmr->scp.fCubeOwner < 0 )
-			pch = " (set cube centre)";
+		if ( pmr->scp.fCubeOwner < 0 )
+		  sprintf( sz, " (set cube centre)");
 		else
-			sprintf( sz, " (set cube owner %s)",
-				ap[ pmr->scp.fCubeOwner ].szName );
+		  sprintf( sz, " (set cube owner %s)",
+			   ap[ pmr->scp.fCubeOwner ].szName );
 		pch = sz;
-	break;
+		break;
 
 	case MOVE_SETCUBEVAL:
 		*pPlayer = -1;
