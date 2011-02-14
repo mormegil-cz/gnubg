@@ -1136,20 +1136,16 @@ static void RestoreNode(listOLD * pl)
 
 		pmr->mt = MOVE_TAKE;
 		pmr->fPlayer = fPlayer;
-		if (!LinkToDouble(pmr)) {
-		    free(pmr);
-		    continue;
-		}
+		LinkToDouble(pmr);
+
 	    } else if (!strcmp(pch, "drop")) {
 
 		pmr = NewMoveRecord();
 
 		pmr->mt = MOVE_DROP;
 		pmr->fPlayer = fPlayer;
-		if (!LinkToDouble(pmr)) {
-		    free(pmr);
-		    continue;
-		}
+		LinkToDouble(pmr);
+
 	    } else {
 
 		pmr = NewMoveRecord();
@@ -1469,6 +1465,7 @@ extern void CommandLoadGame(char *sz)
 
 #endif
 
+        /* FIXME : don't do this if we just loaded a single position */
 	if (fGotoFirstGame)
 	    CommandFirstGame(NULL);
 
@@ -1569,6 +1566,7 @@ extern void CommandLoadMatch(char *sz)
 
 	setDefaultFileName(sz);
 
+        /* FIXME : don't do this if we just loaded a single position */
 	if (fGotoFirstGame)
 	    CommandFirstGame(NULL);
 

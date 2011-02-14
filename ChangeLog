@@ -1,3 +1,9 @@
+2011-02-14  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* sgf.c, eval.h (comment only), gtkgame.c, gnubg.c, analysis.c:
+	Fix crash when loading a take or drop saved as a position (bug
+	#32270).
+
 Mon Feb 14 21:11:28 CET 2011 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, commands.inc, gnubg.c, gtkchequer.c, gtkcube.c,

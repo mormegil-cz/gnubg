@@ -522,7 +522,7 @@ updateStatcontext(statcontext*       psc,
   case MOVE_TAKE:
 
     tt = (taketype) DoubleType ( pms->fDoubled, pms->fMove, pms->fTurn );
-    if ( tt != TT_NORMAL )
+    if ( tt > TT_NORMAL )
 	    break;
 
     GetMatchStateCubeInfo ( &ci, pms );
@@ -837,7 +837,7 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const listOLD *plParentGame,
           break;
       
         tt = (taketype) DoubleType ( pms->fDoubled, pms->fMove, pms->fTurn );
-        if ( tt != TT_NORMAL )
+        if ( tt > TT_NORMAL )
           break;
 
 		if( fAnalyseCube && pmgi->fCubeUse && doubleError && (*doubleError != (float)ERR_VAL))
@@ -858,7 +858,7 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const listOLD *plParentGame,
           break;
       
         tt = (taketype) DoubleType ( pms->fDoubled, pms->fMove, pms->fTurn );
-        if ( tt != TT_NORMAL )
+        if ( tt > TT_NORMAL )
           break;
 
 		if( fAnalyseCube && pmgi->fCubeUse && doubleError && (*doubleError != (float)ERR_VAL) )
@@ -1989,7 +1989,7 @@ static int MoveAnalysed(moverecord * pmr, matchstate * pms, listOLD * plGame,
 
 		tt = (taketype) DoubleType(pms->fDoubled, pms->fMove,
 					   pms->fTurn);
-		if (tt != TT_NORMAL)
+		if (tt > TT_NORMAL)
 			break;
 
 		if (fAnalyseCube && pmgi->fCubeUse
@@ -2005,7 +2005,7 @@ static int MoveAnalysed(moverecord * pmr, matchstate * pms, listOLD * plGame,
 
 		tt = (taketype) DoubleType(pms->fDoubled, pms->fMove,
 					   pms->fTurn);
-		if (tt != TT_NORMAL)
+		if (tt > TT_NORMAL)
 			break;
 
 		if (pmr->CubeDecPtr->esDouble.et == EVAL_NONE)

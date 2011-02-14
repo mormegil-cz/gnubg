@@ -962,7 +962,7 @@ extern void SetAnnotation( moverecord *pmr) {
 	    gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwBox, FALSE, FALSE,
 				0 );
 
-            if ( tt == TT_NORMAL ) {
+            if ( tt <= TT_NORMAL ) {
               if ( ( pw = CreateCubeAnalysis( pmr, &ms, -1, pmr->mt == MOVE_TAKE, TRUE ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
 				    FALSE, 0 );

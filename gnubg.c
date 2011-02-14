@@ -2164,7 +2164,7 @@ extern void find_skills(moverecord *pmr, const matchstate *pms, int did_double,
 		pmr->stCube = SKILL_NONE;
 		return;
 	}
-	if (pmr->mt == MOVE_TAKE && tt != TT_NORMAL) {
+	if (pmr->mt == MOVE_TAKE && tt > TT_NORMAL) {
 		pmr->stCube = SKILL_NONE;
 		return;
 	} 
@@ -2237,7 +2237,7 @@ extern void hint_take(int show, int did_take)
 	moverecord *pmr;
 	int hist;
 	taketype tt = (taketype) DoubleType ( ms.fDoubled, ms.fMove, ms.fTurn );
-        if ( tt != TT_NORMAL )
+        if ( tt > TT_NORMAL )
 	{
 		if (show)
 			outputerrf( _("This decision is part of beaver/raccoon sequence and cannot be hinted"));

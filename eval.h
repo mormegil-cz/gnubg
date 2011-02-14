@@ -235,6 +235,10 @@ typedef enum {
   NUM_DOUBLE_TYPES
 } doubletype;
 
+/*
+   TT_NA can happen if a single position was loaded from a sgf file.
+   To check for beavers, use "> TT_NORMAL", not "!= TT_NORMAL".
+*/
 typedef enum {
   TT_NA,
   TT_NORMAL,
