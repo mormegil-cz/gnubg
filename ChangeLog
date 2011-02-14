@@ -1,3 +1,7 @@
+Mon Feb 14 18:05:09 CET 2011 Christian Anthon <anthon@kiku.dk>
+
+	* sound.c: Fix sound in cl interface (unix)
+
 2011-02-13  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* play.c: Fix display of MOVE_SETCUBEPOS in game record panel.
