@@ -1,3 +1,12 @@
+Mon Feb 14 21:11:28 CET 2011 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, commands.inc, gnubg.c, gtkchequer.c, gtkcube.c,
+	gtkexport.c, gtkfile.c, gtkgame.c, gtkmet.c, gtkmovefilter.c,
+	gtkoptions.c, gtktoolbar.c, gtkwindows.c, play.c, set.c: Have
+	different default and current player names. Only change default 
+	player names in dialog, not in edit mode. Attempt to autosave
+	settings.
+
 Mon Feb 14 18:05:09 CET 2011 Christian Anthon <anthon@kiku.dk>
 
 	* sound.c: Fix sound in cl interface (unix)

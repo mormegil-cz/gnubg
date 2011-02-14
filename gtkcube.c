@@ -845,6 +845,7 @@ CubeAnalysisMWC ( GtkWidget *pw, cubehintdata *pchd ) {
     sprintf ( sz, "set output mwc %s", fOutputMWC ? "off" : "on" );
     
     UserCommand ( sz );
+    UserCommand("save settings");
   }
 
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pw ), fOutputMWC );

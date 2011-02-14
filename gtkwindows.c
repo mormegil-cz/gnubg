@@ -378,6 +378,7 @@ WarningOK ( GtkWidget *pw, warningType warning )
 		char cmd[200];
 		sprintf(cmd, "set warning %s off", warnings[warning].warningName);
 		UserCommand(cmd);
+		UserCommand("save settings");
 	}
 	warningResult = TRUE;
 	gtk_widget_destroy(gtk_widget_get_toplevel(pw));

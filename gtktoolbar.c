@@ -165,6 +165,7 @@ static void ToolbarToggleClockwise( GtkWidget *pw, toolbarwidget *ptw )
     gchar *sz = g_strdup_printf( "set clockwise %s", f ? "on" : "off" );
     UserCommand( sz );
     g_free( sz );
+    UserCommand("save settings");
   }
 }
 

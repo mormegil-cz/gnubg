@@ -1471,6 +1471,47 @@ extern void CommandSetPlayer( char *sz ) {
     outputf( _("Unknown player `%s' (see `help set player').\n"), pch );
 }
 
+
+extern void CommandSetDefaultNames(char *sz)
+{
+	char *names[2] = { NextToken(&sz), NextToken(&sz) };
+	int i;
+
+	for (i = 0; i < 2; i++) {
+		char *pch = names[i];
+		if (!pch || !*pch) {
+			outputl(_("You must specify two player names use."));
+			return;
+		}
+
+		if (strlen(pch) > 31)
+			pch[31] = 0;
+
+		if ((*pch == '0' || *pch == '1') && !pch[1]) {
+			outputf(_("`%c' is not a valid name.\n"), *pch);
+			return;
+		}
+
+		if (!StrCaseCmp(pch, "both")) {
+			outputl(_("`both' is a reserved word; you can't call a player " "that.\n"));
+			return;
+		}
+	}
+
+	if (!CompareNames(names[0], names[1])) {
+		outputl(_("Player names identical"));
+		return;
+	}
+	if (StrCaseCmp(names[0], default_names[0]) == 0 && StrCaseCmp(names[1], default_names[1]) == 0)
+		return;
+
+	strcpy(default_names[0], names[0]);
+	strcpy(default_names[1], names[1]);
+
+	outputf(_("Players will be known as `%s' and `%s'.\n This setting will take effect when a new match is started.\n"),
+		default_names[0], default_names[1]);
+}
+
 extern void CommandSetPrompt( char *szParam ) {
 
     static char sz[ 128 ]; /* FIXME check overflow */

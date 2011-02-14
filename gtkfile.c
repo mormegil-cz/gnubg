@@ -243,6 +243,7 @@ static void SaveCommon (guint f, gchar * prompt)
 	  g_free (last_export_folder);
 	  last_export_folder = gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (so.fc));
 	  UserCommand (cmd);
+	  UserCommand("save settings");
 	  g_free (cmd);
 	}
       g_free (fn);
@@ -403,6 +404,7 @@ extern void GTKOpen(gpointer p, guint n, GtkWidget * pw)
 			if (import_type == N_IMPORT_TYPES)
 			{	/* Load command file */
 				CommandLoadCommands(fn);
+				UserCommand("save settings");
 			}
 			else
 			{	/* Import as specific type */

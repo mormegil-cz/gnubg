@@ -1366,6 +1366,7 @@ static void ToggleShowingIDs( gpointer p, guint n, GtkWidget *pw )
 			"off");
 	UserCommand(sz);
 	g_free(sz);
+	UserCommand("save settings");
 }
 
 int fToolbarShowing = TRUE;
@@ -2187,6 +2188,7 @@ static void AnalysisOK( GtkWidget *pw, analysiswidget *paw ) {
 	  SetEvalCommands( "set evaluation cubedecision eval", &paw->esEvalCube.ec,
 			  &GetEvalCube()->ec );
   }
+  UserCommand("save settings");
   outputresume();
 
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
@@ -2445,7 +2447,7 @@ static GtkWidget *PlayersPage( playerswidget *ppw, int i, const char *title )
     gtk_container_set_border_width( GTK_CONTAINER( pw ), 4 );
     gtk_container_add( GTK_CONTAINER( pwVBox ), pw );
     gtk_container_add( GTK_CONTAINER( pw ),
-		       gtk_label_new( _("Name:") ) );
+		       gtk_label_new( _("Default Name:") ) );
     gtk_container_add( GTK_CONTAINER( pw ),
 		       ppw->apwName[ i ] = gtk_entry_new() );
     gtk_entry_set_text( GTK_ENTRY( ppw->apwName[ i ] ),
@@ -2551,19 +2553,13 @@ static void SetPlayers(gpointer p, guint n, GtkWidget *pw)
 	{
 		outputpostpone();
 
-		if (!CompareNames(apTemp[0].szName, ap[1].szName) && CompareNames(apTemp[0].szName, apTemp[1].szName)) {	/* Trying to swap names - change current name to avoid error */
-			sprintf(ap[1].szName, "_%s", apTemp[0].szName);
-		}
+		sprintf(sz, "set defaultnames \"%s\" \"%s\"", apTemp[0].szName, apTemp[1].szName);
+	       	UserCommand(sz);
+
 		for (i = 0; i < 2; i++) {
 			/* NB: this comparison is case-sensitive, and does not use
 			   CompareNames(), so that the user can modify the case of
 			   names. */
-			if (strcmp(ap[i].szName, apTemp[i].szName)) {
-				sprintf(sz, "set player %d name %s", i,
-					apTemp[i].szName);
-				UserCommand(sz);
-			}
-
 			switch (apTemp[i].pt) {
 			case PLAYER_HUMAN:
 				if (ap[i].pt != PLAYER_HUMAN) {
@@ -2611,6 +2607,7 @@ static void SetPlayers(gpointer p, guint n, GtkWidget *pw)
 			}
 		}
 
+		UserCommand("save settings");
 		outputresume();
 	}
 }
@@ -2870,6 +2867,7 @@ static void SetLanguage( gpointer p, guint n, GtkWidget *pw )
 		CommandSetLang(newLang);	/* Set new language (after dialog has closed) */
 	else
 		SetupLanguage(szLang);	/* If cancelled make sure language stays the same */
+	UserCommand("save settings");
 }
 
 
@@ -3817,6 +3815,7 @@ static void UpdatePlayerSettings( newwidget *pnw ) {
   if((!fTM) && (fTutor))
 	  UserCommand("set tutor mode off");
 
+  UserCommand("save settings");
 }
 
 static void SettingsPressed( GtkWidget *pw, gpointer data )
@@ -4045,6 +4044,7 @@ SetMET (GtkWidget * pw, gpointer p)
       if (p && GTK_WIDGET_VISIBLE (p))
 	gtk_label_set_text (GTK_LABEL (p), (char *) miCurrent.szFileName);
     }
+  UserCommand("save settings");
 }
 
 typedef struct _rolloutpagewidget {
@@ -4919,6 +4919,7 @@ extern void SetRollouts( gpointer p, guint n, GtkWidget *pwIgnore )
 	  UserCommand( sz );
 	}
 
+    UserCommand("save settings");
     outputon();
     if (saveAs)
             gtk_save_rollout_settings();
@@ -6614,6 +6615,7 @@ static void CalibrationOK( GtkWidget *pw, GtkWidget *ppw ) {
     } else if( rEvalsPerSec > 0 )
 	UserCommand( "set calibration" );
     
+    UserCommand("save settings");
     gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }
 

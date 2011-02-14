@@ -325,6 +325,7 @@ SetExportCommands ( const exportsetup *pexsOrig,
     UserCommand ( sz );
     g_free ( sz );
   }
+  UserCommand("save settings");
 }
 
 
@@ -495,6 +496,7 @@ static void ExportHTMLImages(void)
 						expfolder, "\"", NULL);
 				UserCommand(command);
 				g_free(command);
+				UserCommand("save settings");
 			}
 			g_free(expfolder);
 			g_free(folder);

@@ -549,6 +549,7 @@ SetMovefilterCommands ( const char *sz,
       }
       
     }
+  UserCommand("save settings");
 
 }
 

@@ -1667,6 +1667,7 @@ switch(gtk_combo_box_get_active(GTK_COMBO_BOX(pow->pwShowPips)))
 	if (relPageActivated)
 		RelationalSaveOptions();
 
+  UserCommand("save settings");
   /* Destroy widget on exit */
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }

@@ -191,6 +191,7 @@ static void invertMETlocal( GtkWidget *UNUSED(widget), const metwidget *pmw ){
   else
     UserCommand( "set invert met on" );
 
+  UserCommand("save settings");
   UpdateAllTables ( pmw );
 }
 

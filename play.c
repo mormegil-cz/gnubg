@@ -2787,6 +2787,8 @@ extern void CommandNewMatch( char *sz )
     FreeMatch();
     ClearMatch();
     
+    strcpy(ap[0].szName,default_names[0]);
+    strcpy(ap[1].szName,default_names[1]);
     plLastMove = NULL;
 
     ms.nMatchTo = n;

@@ -447,6 +447,8 @@ player ap[ 2 ] = {
     { "user", PLAYER_HUMAN, EVALSETUP, EVALSETUP, MOVEFILTER, 0, NULL } 
 };
 
+char default_names[2][31] = {"gnubg", "user"};
+
 /* Usage strings */
 static char szDICE[] = N_("<die> <die>"),
     szCOMMAND[] = N_("<command>"),
@@ -3092,6 +3094,7 @@ static void SavePlayerSettings(FILE * pf)
 {
 	int i;
 	char szTemp[4096];
+	fprintf(pf, "set defaultnames \"%s\" \"%s\"\n", default_names[0], default_names[1]);
 	for (i = 0; i < 2; i++) {
 		fprintf(pf, "set player %d name %s\n", i, ap[i].szName);
 
@@ -4626,6 +4629,7 @@ static void init_defaults(void)
 	SetMatchDate(&mi);
 
 	strcpy(ap[1].szName, g_get_user_name());
+	strcpy(default_names[1], g_get_user_name());
 
 	ListCreate(&lMatch);
 	IniStatcontext(&scMatch);
