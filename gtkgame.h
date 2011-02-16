@@ -36,6 +36,10 @@ extern GtkTooltips *ptt;
 #define gtk_widget_set_tooltip_text(pw,text) gtk_tooltips_set_tip(ptt, (pw), (text), NULL)
 #endif
 
+#if (GTK_MAJOR_VERSION < 3) && (GTK_MINOR_VERSION < 20)
+#define gtk_widget_get_realized(p)  GTK_WIDGET_REALIZED((p))
+#endif
+
 extern GtkWidget *pwAnalysis;
 extern GtkWidget *pwBoard;
 extern GtkWidget *pwCommentary;
