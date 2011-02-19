@@ -538,7 +538,7 @@ char const *aszBuildInfo[] = {
 #endif
 #if defined(WIN32)
     N_("Windows sound system supported."),
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) && !defined(__LP64__)
     N_("Apple QuickTime sound system supported."),
 #elif HAVE_CANBERRA
     N_("libcanberra sound system supported."),

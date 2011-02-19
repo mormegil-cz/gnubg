@@ -40,7 +40,7 @@
 #include "windows.h"
 #include <mmsystem.h>
 
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) && !defined(__LP64__)
 #include <QuickTime/QuickTime.h>
 #include <pthread.h>
 #include "lib/list.h"
@@ -257,7 +257,7 @@ playSoundFile (char *file, /*lint -e{715}*/gboolean sync)
 	    }
 	  Sleep (1);		/* Wait (1ms) for current sound to finish */
       }
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) && !defined(__LP64__)
 	PlaySound_QuickTime (file);
 #elif HAVE_CANBERRA
 	if (!canberracontext)
