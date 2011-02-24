@@ -1,3 +1,8 @@
+2011-02-24  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* gnubg.c: In Tutor/Hint, always evaluate the tried move at the
+	deepest ply. Problem pointed by Michael Depreli in bug-gnubg.
+
 2011-02-14  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* sgf.c, eval.h (comment only), gtkgame.c, gnubg.c, analysis.c:

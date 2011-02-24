@@ -2278,6 +2278,8 @@ extern void hint_move(char *sz, gboolean show)
 	moverecord *pmr;
 	cubeinfo ci;
 	int hist;
+	movelist ml;
+	findData fd;
 
 	GetMatchStateCubeInfo(&ci, &ms);
 
@@ -2286,8 +2288,6 @@ extern void hint_move(char *sz, gboolean show)
 		return;
 
 	if (pmr->esChequer.et == EVAL_NONE) {
-		movelist ml;
-		findData fd;
 		fd.pml = &ml;
 		fd.pboard = msBoard();
 		fd.auchMove = NULL;
@@ -2299,7 +2299,6 @@ extern void hint_move(char *sz, gboolean show)
 		     ((AsyncFun) asyncFindMove, &fd,
 		      _("Considering move...")) != 0) || fInterrupt)
 			return;
-
 		pmr_movelist_set(pmr, GetEvalChequer(), &ml);
 	}
 #if USE_GTK
@@ -2314,6 +2313,18 @@ extern void hint_move(char *sz, gboolean show)
 	else if (pmr->n.anMove[0] != -1)
 	{
 		pmr->n.iMove = locateMove(msBoard(), pmr->n.anMove, &pmr->ml);
+		/* Tutor mode may have called asyncFindMove() above before
+		   n.iMove was known. Do it again, ensuring that the actual
+		   move is evaluated at the best ply. */
+		fd.pml = &ml;
+		fd.pboard = msBoard();
+		fd.auchMove = pmr->ml.amMoves[pmr->n.iMove].auch;
+		fd.rThr = arSkillLevel[SKILL_DOUBTFUL];
+		fd.pci = &ci;
+		fd.pec = &GetEvalChequer()->ec;
+		fd.aamf = *GetEvalMoveFilter();
+		asyncFindMove(&fd);
+		pmr_movelist_set(pmr, GetEvalChequer(), &ml);
 		find_skills(pmr, &ms, FALSE, -1);
 	}
 
