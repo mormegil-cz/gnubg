@@ -190,9 +190,9 @@ gnubg moves 8/5 6/5.
         <para>Python Scripting ability.</para>
       </listitem>
       <listitem>
-        <para>Native language support; 12 languages are complete or in progress:
+        <para>Native language support; 13 languages are complete or in progress:
           (cs_CZ, da_DK, en_GB, en_US, es_ES, fr_FR, de_DE, is_IS, it_IT,
-          ja_JP, ru_RU, and tr_TR)</para>
+          ja_JP, ro_RO, ru_RU and tr_TR)</para>
       </listitem>
     </itemizedlist>
     <sect2 id="gnubg-intro_gpl">
@@ -667,7 +667,6 @@ Application Options:
 -c, --commands=FILE          Evaluate commands in FILE and exit
 -d, --datadir=DIR            Read database and weight files from DIR
 -l, --lang=LANG              Set language to LANG
--n, --new-weights=N          Create new neural net (of size N)
 -p, --python=FILE            Evaluate Python code in FILE and exit
 -q, --quiet                  Disable sound effects
 -r, --no-rc                  Do not read .gnubgrc and .gnubgautorc commands
@@ -1509,7 +1508,7 @@ To roll the dice the CL version type 'roll'.
             </listitem>
             <listitem>
               <para>the fibs2html images used by the Joseph Heled's program
-                  <ulink url="http://fibs2html.sf.net/">fibs2html</ulink>
+                  <ulink url="http://fibs2html.sourceforge.net/">fibs2html</ulink>
               </para>
             </listitem>
             <listitem>
@@ -1532,9 +1531,7 @@ To roll the dice the CL version type 'roll'.
             Also, you may enter a specific URL to the pictures used to compose
             the board which is useful for posting positions on web-based
             discussion groups such as Kit Woolsey's GammOnLine, the Danish
-            Backgammon Federation's Debat Forum, or you may opt to use a default
-            set of images available from the <ulink url="http://www.gnubg.org/images/html-images/">gnubg.org</ulink>
-            web site.</para>
+            Backgammon Federation's Debat Forum.</para>
           <para>If you want to have html images locally on your computer, you
             can have <application>GNU Backgammon</application> generate these.
             The html images will be generated based on the current appearance
@@ -2090,7 +2087,7 @@ To roll the dice the CL version type 'roll'.
                 decisions, except that no-doubles are only included if they're
                 considered <emphasis>close</emphasis>. <application>GNU
                   Backgammon</application> considers a cube decision close if
-                the relevant equities are within 0.25 from each other or if the
+                the relevant equities are within 0.16 from each other or if the
                 position is too good. </para>
             </listitem>
             <listitem>
@@ -2195,10 +2192,10 @@ To roll the dice the CL version type 'roll'.
               <para>Luck adjusted result: The luck adjusted result is calculated
                 as the <emphasis>actual result</emphasis> plus the total
                 unnormalized luck rate. This is also called <emphasis>variance
-                  reduction of skill</emphasis> as described in Douglas Zare's
-                excellent article <ulink url="http://math.columbia.edu/~zare/vrskill.html">Hedging
-                  Toward Skill</ulink>. This should give an unbiased measure of
-                the strengths of the players. </para>
+                reduction of skill</emphasis> as described in Douglas Zare's
+                excellent article <ulink url="http://www.bkgm.com/articles/Zare/HedgingTowardSkill.html">
+                Hedging Toward Skill</ulink>. This should give an unbiased
+                measure of the strengths of the players. </para>
             </listitem>
             <listitem>
               <para>MWC against current opponent: For match play
