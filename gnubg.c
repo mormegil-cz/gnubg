@@ -4393,7 +4393,7 @@ static void PushSplash(char *unused, char *heading, char *message)
 }
 #endif
 
-static void init_nets(int nNewWeights, int fNoBearoff)
+static void init_nets(int fNoBearoff)
 {
 	char *gnubg_weights = BuildFilename("gnubg.weights");
 	char *gnubg_weights_binary =  BuildFilename("gnubg.wd");
@@ -4674,7 +4674,7 @@ int main(int argc, char *argv[])
 	char *met = NULL;
 
 	static char *pchCommands = NULL, *pchPythonScript = NULL, *lang = NULL;
-	static int nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE, fNoX = FALSE, fSplash = FALSE, fNoTTY =
+	static int fNoRC = FALSE, fNoBearoff = FALSE, fNoX = FALSE, fSplash = FALSE, fNoTTY =
 	    FALSE, show_version = FALSE, debug = FALSE;
 	GOptionEntry ao[] = {
 		{"no-bearoff", 'b', 0, G_OPTION_ARG_NONE, &fNoBearoff,
@@ -4683,8 +4683,6 @@ int main(int argc, char *argv[])
 		 N_("Evaluate commands in FILE and exit"), "FILE"},
 		{"lang", 'l', 0, G_OPTION_ARG_STRING, &lang,
 		 N_("Set language to LANG"), "LANG"},
-		{"new-weights", 'n', 0, G_OPTION_ARG_INT, &nNewWeights,
-		 N_("Create new neural net (of size N)"), "N"},
 		{"python", 'p', 0, G_OPTION_ARG_FILENAME, &pchPythonScript,
 		 N_("Evaluate Python code in FILE and exit"), "FILE"},
 		{"quiet", 'q', 0, G_OPTION_ARG_NONE, &fQuiet,
@@ -4802,7 +4800,7 @@ int main(int argc, char *argv[])
 	g_free(met);
 
 	PushSplash(pwSplash, _("Initialising"), _("neural nets"));
-	init_nets(nNewWeights, fNoBearoff);
+	init_nets(fNoBearoff);
 
 #if defined(WIN32) && HAVE_SOCKETS
 	PushSplash(pwSplash, _("Initialising"), _("Windows sockets"));

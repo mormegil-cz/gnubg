@@ -26,7 +26,7 @@
   </refnamediv>
   <refsect1>
           <title>SYNOPSIS</title>
-            gnubg -bcdlnpqrStvw [file.sgf]
+            gnubg -bcdlpqrStvw [file.sgf]
     </refsect1>
   <refsect1>
     <title>DESCRIPTIONS</title>
@@ -45,7 +45,6 @@
         <para><option>-c, --commands=FILE</option> Evaluate commands in FILE and exit</para>
         <para><option>-d, --datadir=DIR</option> Read database and weight files from DIR</para>
         <para><option>-l, --lang=LANG</option> Set language to LANG</para>
-        <para><option>-n, --new-weights=N</option> Create new neural net (of size N)</para>
         <para><option>-p, --python=FILE</option> Evaluate Python code in FILE and exit</para>
         <para><option>-q, --quiet</option> Disable sound effects</para>
         <para><option>-r, --no-rc</option> Do not read .gnubgrc and .gnubgautorc commands</para>
