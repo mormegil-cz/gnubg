@@ -2,7 +2,13 @@
 
 set -x
 aclocal -I m4
-libtoolize --force --copy
+if [ `uname -s` = Darwin ]
+then
+    LIBTOOLIZE=glibtoolize
+else
+    LIBTOOLIZE=libtoolize
+fi
+$LIBTOOLIZE --force --copy
 autoheader
 automake --add-missing --copy -Wno-portability
 autoconf
