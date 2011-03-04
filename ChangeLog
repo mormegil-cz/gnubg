@@ -1,3 +1,8 @@
+2011-03-04  Michael Petch  <mpetch@capp-sysware.com>
+
+	* gtkgame.c: Fixed problem with language change getting stuck
+	in loop
+
 2011-02-24  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* gnubg.c: In Tutor/Hint, always evaluate the tried move at the

@@ -2867,7 +2867,6 @@ static void SetLanguage( gpointer p, guint n, GtkWidget *pw )
 		CommandSetLang(newLang);	/* Set new language (after dialog has closed) */
 	else
 		SetupLanguage(szLang);	/* If cancelled make sure language stays the same */
-	UserCommand("save settings");
 }
 
 
