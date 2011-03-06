@@ -5,7 +5,7 @@
  *
  * An implementation of the position key/IDs at:
  *
- *   http://www.cs.arizona.edu/~gary/backgammon/positionid.html
+ *   http://www.gnu.org/manual/gnubg/html_node/A-technical-description-of-the-Position-ID.html
  *
  * Please see that page for more information.
  *
@@ -57,6 +57,10 @@ static inline void addBits(unsigned char auchKey[10], unsigned int bitPos, unsig
   }
 }
 
+#if defined (__i386) || defined (__x86_64)
+
+/* See https://savannah.gnu.org/bugs/index.php?28421 regarding the code below */
+
 extern void PositionKey(const TanBoard anBoard, unsigned char auchKey[10])
 {
 	unsigned int i;
@@ -98,6 +102,113 @@ extern void PositionKey(const TanBoard anBoard, unsigned char auchKey[10])
 		}
 	}
 }
+
+extern void PositionFromKey(TanBoard anBoard, const unsigned char* pauch)
+{
+	int i = 0, j = 0, xtest;
+	int *ptest = (int*)pauch;
+
+	memset(anBoard, 0, sizeof(TanBoard));
+
+	xtest = 1;
+	do
+	{
+		if ((*ptest) & xtest)
+			++anBoard[i][j];
+		else if( ++j == 25 )
+		{
+			++i;
+			j = 0;
+		}
+	} while (xtest <<= 1);
+	xtest = 1;
+	ptest++;
+	do
+	{
+		if ((*ptest) & xtest)
+			++anBoard[i][j];
+		else if( ++j == 25 )
+		{
+			++i;
+			j = 0;
+		}
+	} while (xtest <<= 1);
+	xtest = 1;
+	ptest++;
+	do
+	{
+		if ((*ptest) & xtest)
+			++anBoard[i][j];
+		else if( ++j == 25 )
+		{
+			++i;
+			j = 0;
+		}
+	} while ((short)(xtest <<= 1));
+}
+
+#else
+
+/* Portable code */
+
+extern void PositionKey(const TanBoard anBoard, unsigned char auchKey[10])
+{
+  unsigned int i, iBit = 0;
+  const unsigned int* j;
+
+  memset(auchKey, 0, 10 * sizeof(*auchKey));
+
+  for(i = 0; i < 2; ++i) {
+    const unsigned int* const b = anBoard[i];
+    for(j = b; j < b + 25; ++j)
+	{
+      const unsigned int nc = *j;
+
+      if( nc ) {
+        addBits(auchKey, iBit, nc);
+        iBit += nc + 1;
+      } else {
+        ++iBit;
+      }
+    }
+  }
+}
+
+extern void PositionFromKey(TanBoard anBoard, const unsigned char* pauch)
+{
+  int i = 0, j  = 0, k;
+  const unsigned char* a;
+
+  memset(anBoard[0], 0, sizeof(anBoard[0]));
+  memset(anBoard[1], 0, sizeof(anBoard[1]));
+  
+  for(a = pauch; a < pauch + 10; ++a) {
+    unsigned char cur = *a;
+    
+    for(k = 0; k < 8; ++k)
+	{
+      if( (cur & 0x1) )
+	  {
+        if (i >= 2 || j >= 25)
+        {	/* Error, so return - will probably show error message */
+          return;
+        }
+        ++anBoard[i][j];
+      }
+	  else
+	  {
+		if( ++j == 25 )
+		{
+		  ++i;
+		  j = 0;
+		}
+      }
+      cur >>= 1;
+    }
+  }
+}
+
+#endif
 
 extern char *PositionIDFromKey( const unsigned char auchKey[ 10 ] ) {
 
@@ -202,50 +313,6 @@ extern void ClosestLegalPosition( TanBoard anBoard )
 
     if( anBoard[ 0 ][ 24 ] )
 		anBoard[ 1 ][ 24 ] = 0;
-}
-
-extern void PositionFromKey(TanBoard anBoard, const unsigned char* pauch)
-{
-	int i = 0, j = 0, xtest;
-	int *ptest = (int*)pauch;
-
-	memset(anBoard, 0, sizeof(TanBoard));
-
-	xtest = 1;
-	do
-	{
-		if ((*ptest) & xtest)
-			++anBoard[i][j];
-		else if( ++j == 25 )
-		{
-			++i;
-			j = 0;
-		}
-	} while (xtest <<= 1);
-	xtest = 1;
-	ptest++;
-	do
-	{
-		if ((*ptest) & xtest)
-			++anBoard[i][j];
-		else if( ++j == 25 )
-		{
-			++i;
-			j = 0;
-		}
-	} while (xtest <<= 1);
-	xtest = 1;
-	ptest++;
-	do
-	{
-		if ((*ptest) & xtest)
-			++anBoard[i][j];
-		else if( ++j == 25 )
-		{
-			++i;
-			j = 0;
-		}
-	} while ((short)(xtest <<= 1));
 }
 
 extern unsigned char Base64( const unsigned char ch )
