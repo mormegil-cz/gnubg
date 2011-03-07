@@ -821,7 +821,10 @@ NTH_STATIC void drawDice(const BoardData* bd, int num)
 	SetupSimpleMat(&whiteMat, 1.f, 1.f, 1.f);
 
 	value = bd->diceRoll[num];
-	value--;	/* Zero based for array access */
+
+        /* During program startup value may be zero, if so don't draw */
+        if (!value) return;
+        value--;        /* Zero based for array access */
 
 	/* Get dice rotation */
 	if (bd->diceShown == DICE_BELOW_BOARD)

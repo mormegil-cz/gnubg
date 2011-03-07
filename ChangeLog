@@ -1,3 +1,11 @@
+2011-03-07  Michael Petch  <mpetch@capp-sysware.com>
+
+	*  board3d/drawboard3d.c: Fixed array indexing issue in drawDice that
+	would cause hangs/crashes on OS/X when "set gui dicearea on" with
+	3D boards were on. Crash would occur during program startup. May be
+	related to fix commited on 2009-03-26 by Christian. 
+	Reported by Pierre Viau. 
+
 2011-03-04  Michael Petch  <mpetch@capp-sysware.com>
 
 	* gtkgame.c: Fixed problem with language change getting stuck
