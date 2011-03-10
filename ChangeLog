@@ -1,3 +1,10 @@
+2011-03-10  Michael Petch  <mpetch@capp-sysware.com>
+
+	*  gnubg.c: Fixed bug with random numbers being read from
+	www.random.org preventing GNUBG from exiting. We now skip HTTP 
+	headers and make sure we don't read more numbers than the
+	dice array can hold. Reported by Leo Bueno.
+
 2011-03-07  Michael Petch  <mpetch@capp-sysware.com>
 
 	*  board3d/drawboard3d.c: Fixed array indexing issue in drawDice that
