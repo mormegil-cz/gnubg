@@ -4475,6 +4475,7 @@ extern int getDiceRandomDotOrg(void)
 
 #define BUFLENGTH_STR STRINGIZE(BUFLENGTH)
 #define RANDOMORGSITEPORT_STR STRINGIZE(RANDOMORGSITEPORT)
+#define EOH "\r\n\r\n"
 
 	static int nCurrent = -1;
 	static int anBuf[BUFLENGTH];
@@ -4491,6 +4492,7 @@ extern int getDiceRandomDotOrg(void)
 	    "User-Agent: GNUBG/" VERSION " (email: " PACKAGE_BUGREPORT ")\n\n";
 
 	char acBuf[4096];
+	char *startOfNums;
 
 	/* 
 	 * Suggestions for improvements:
@@ -4562,12 +4564,20 @@ extern int getDiceRandomDotOrg(void)
 		outputl(_("Done."));
 		outputx();
 
+		/* Skip over the HTTP headers if they exist */
+		acBuf[nBytesRead]='\0';
+		startOfNums = strstr(acBuf, EOH);
+		if (startOfNums)
+			startOfNums = startOfNums + (sizeof(EOH)-1);
+		else
+			startOfNums = acBuf;
+
 		i = 0;
 		nRead = 0;
-		for (i = 0; i < nBytesRead; i++) {
+		for (i = 0; i < nBytesRead && nRead < BUFLENGTH; i++) {
 
-			if ((acBuf[i] >= '0') && (acBuf[i] <= '5')) {
-				anBuf[nRead] = 1 + (int) (acBuf[i] - '0');
+			if ((startOfNums[i] >= '0') && (startOfNums[i] <= '5')) {
+				anBuf[nRead] = 1 + (int) (startOfNums[i] - '0');
 				nRead++;
 			}
 
