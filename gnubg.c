@@ -4548,9 +4548,9 @@ extern int getDiceRandomDotOrg(void)
 		   use recv instead */
 		if (!
 		    (nBytesRead =
-		     recv((SOCKET) h, acBuf, sizeof(acBuf), 0))) {
+		     recv((SOCKET) h, acBuf, sizeof(acBuf)-1, 0))) {
 #else
-		if (!(nBytesRead = read(h, acBuf, sizeof(acBuf)))) {
+		if (!(nBytesRead = read(h, acBuf, sizeof(acBuf)-1))) {
 #endif
 			SockErr("reading data");
 			closesocket(h);
