@@ -133,18 +133,28 @@ if test "$with_sqlite" != "no" && test "x$have_sqlite" = "xyes"; then
 fi
 AM_CONDITIONAL(USE_SQLITE, test "$with_sqlite" != "no" && test "$have_sqlite" != "no" )
 
+dnl If OSX version < 10.5 then try to build with Quicktime
+dnl otherwise use CoreAudio if it is available
 if test "x$darwin" = "xyes"; then
-	coreaudio=no
-	quicktime=no
-	AC_CHECK_HEADER([AudioToolbox/AudioToolbox.h], [AC_CHECK_HEADER([CoreAudio/CoreAudioTypes.h],[coreaudio=yes])])
-	AC_CHECK_HEADER([QuickTime/QuickTime.h], [quicktime=yes])
+	needquicktime=no
+	AS_VERSION_COMPARE("$(uname -r)", "10.5", needquicktime=yes, [], [])
 
-	if test "x$coreaudio" = "xyes"; then
-		AC_DEFINE(HAVE_APPLE_COREAUDIO,1, [Define if you have Apple CoreAudio])
-		LDFLAGS="$LDFLAGS -framework AudioUnit -framework CoreServices -framework AudioToolBox -framework CoreAudio"
-	elif test "x$quicktime" = "xyes"; then
-		AC_DEFINE(HAVE_APPLE_QUICKTIME,1, [Define if you have Apple QuickTime])
-		LDFLAGS="$LDFLAGS -framework QuickTime"
+	if test "x$needquicktime" = "xyes"; then
+		quicktime=no
+	 	AC_CHECK_HEADER([QuickTime/QuickTime.h2], [quicktime=yes])
+
+		if test "x$quicktime" = "xyes"; then
+			AC_DEFINE(HAVE_APPLE_QUICKTIME,1, [Define if you have Apple QuickTime])
+			LDFLAGS="$LDFLAGS -framework QuickTime"
+		fi
+	else
+		coreaudio=no
+		AC_CHECK_HEADER([AudioToolbox/AudioToolbox.h], [AC_CHECK_HEADER([CoreAudio/CoreAudioTypes.h],[coreaudio=yes])])
+
+		if test "x$coreaudio" = "xyes"; then
+			AC_DEFINE(HAVE_APPLE_COREAUDIO,1, [Define if you have Apple CoreAudio])
+			LDFLAGS="$LDFLAGS -framework AudioUnit -framework CoreServices -framework AudioToolBox -framework CoreAudio"
+		fi
 	fi
 fi
 
