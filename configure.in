@@ -48,7 +48,8 @@ case "$host" in
     LDFLAGS="$LDFLAGS -lwinmm"
     ;;
   *-*-darwin*)
-   LDFLAGS="$LDFLAGS -dylib_file /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib -framework QuickTime `/opt/local/bin/pkg-config --libs glib-2.0`"
+    darwin=yes
+    LDFLAGS="$LDFLAGS -dylib_file /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib `/opt/local/bin/pkg-config --libs glib-2.0`"
     ;;
 esac
 AC_MSG_RESULT([$host])
@@ -131,6 +132,21 @@ if test "$with_sqlite" != "no" && test "x$have_sqlite" = "xyes"; then
 	AC_DEFINE(USE_SQLITE,1, [Define if you want to use sqlite])
 fi
 AM_CONDITIONAL(USE_SQLITE, test "$with_sqlite" != "no" && test "$have_sqlite" != "no" )
+
+if test "x$darwin" = "xyes"; then
+	coreaudio=no
+	quicktime=no
+	AC_CHECK_HEADER([AudioToolbox/AudioToolbox.h], [AC_CHECK_HEADER([CoreAudio/CoreAudioTypes.h],[coreaudio=yes])])
+	AC_CHECK_HEADER([QuickTime/QuickTime.h], [quicktime=yes])
+
+	if test "x$coreaudio" = "xyes"; then
+		AC_DEFINE(HAVE_APPLE_COREAUDIO,1, [Define if you have Apple CoreAudio])
+		LDFLAGS="$LDFLAGS -framework AudioUnit -framework CoreServices -framework AudioToolBox -framework CoreAudio"
+	elif test "x$quicktime" = "xyes"; then
+		AC_DEFINE(HAVE_APPLE_QUICKTIME,1, [Define if you have Apple QuickTime])
+		LDFLAGS="$LDFLAGS -framework QuickTime"
+	fi
+fi
 
 if test "x$have_canberra" = "xyes"; then
 	AC_DEFINE(HAVE_CANBERRA,1, [Define if you want to use gstreamer])

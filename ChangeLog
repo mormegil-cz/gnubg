@@ -1,3 +1,10 @@
+2011-03-14  Michael Petch  <mpetch@capp-sysware.com>
+
+	*  gnubg.c, sound.c, configure.in : Added support for Apple
+	CoreAudio sound on platforms that are supported. CoreAudio
+	takes precedence over QuickTime. This should allow for native
+	64bit builds without the need for an external sound player.
+
 2011-03-10  Michael Petch  <mpetch@capp-sysware.com>
 
 	*  gnubg.c: Fixed bug with random numbers being read from

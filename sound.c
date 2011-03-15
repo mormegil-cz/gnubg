@@ -40,7 +40,7 @@
 #include "windows.h"
 #include <mmsystem.h>
 
-#elif defined(__APPLE__) && !defined(__LP64__)
+#elif HAVE_APPLE_QUICKTIME
 #include <QuickTime/QuickTime.h>
 #include <pthread.h>
 #include "lib/list.h"
@@ -153,6 +153,157 @@ void PlaySound_QuickTime (const char *cSoundFilename)
         else fQTPlaying = FALSE;
     }
 }
+#elif HAVE_APPLE_COREAUDIO
+/* Apple CoreAudio Sound support 
+   Written by Michael Petch */
+
+#include <AudioToolbox/AudioToolbox.h>
+#include <CoreAudio/CoreAudioTypes.h>
+#include <ApplicationServices/ApplicationServices.h>
+
+static int result;
+#define CoreAudioChkError(func,context) \
+	if ((result = func)!=0) \
+	{ \
+		fprintf (stderr, "Apple CoreAudio Error (" context "): %d\n", result); \
+		return; \
+	} 
+
+double CoreAudio_PrepareFileAU (AudioUnit *au, AudioStreamBasicDescription *fileFormat, 
+	AudioFileID audioFile);
+void CoreAudio_MakeSimpleGraph (AUGraph *theGraph, AudioUnit *fileAU, 
+	AudioStreamBasicDescription *fileFormat, AudioFileID audioFile);
+
+void CoreAudio_PlayFile (char * const fileName)
+{
+	AudioFileID audioFile;
+
+	const char* inputFile = fileName;
+
+	/* Open the sound file */
+	CFURLRef outInputFileURL = CFURLCreateFromFileSystemRepresentation (kCFAllocatorDefault, 
+		(const UInt8 *)fileName, strlen(fileName), false);
+	if (AudioFileOpenURL (outInputFileURL, kAudioFileReadPermission, 0, &audioFile)) { 
+		fprintf (stderr,"Apple CoreAudio Error, can't find %s\n", fileName); 
+		return; 
+	}
+
+	/* Get properties of the file */
+	AudioStreamBasicDescription fileFormat;
+	UInt32 propsize = sizeof(AudioStreamBasicDescription);
+	CoreAudioChkError(AudioFileGetProperty(audioFile, kAudioFilePropertyDataFormat, 
+		&propsize, &fileFormat), "AudioFileGetProperty Dataformat");
+
+	/* Setup sound state */
+	AUGraph theGraph;
+	AudioUnit fileAU;
+	memset (&fileAU, 0, sizeof (AudioUnit));
+	memset (&theGraph, 0, sizeof (AUGraph));
+
+
+	/* Setup a simple output graph and AU */
+	CoreAudio_MakeSimpleGraph (&theGraph, &fileAU, &fileFormat, audioFile);
+	
+	/* Load the file contents */
+	Float64 fileDuration = CoreAudio_PrepareFileAU (&fileAU, &fileFormat, audioFile);
+
+	/* Start playing the sound file, and wait for it to complete */
+	AUGraphStart (theGraph);
+	usleep ((int)(1000.0 * 1000.0 * fileDuration));
+
+	/* Shutdown the audio stream */
+	AUGraphStop (theGraph);
+	AUGraphUninitialize (theGraph);
+	AudioFileClose (audioFile);
+	AUGraphClose (theGraph);
+}
+
+double CoreAudio_PrepareFileAU (AudioUnit *au, AudioStreamBasicDescription *fileFormat, 
+	AudioFileID audioFile)
+{
+	UInt64 nPackets;
+	UInt32 propsize = sizeof(nPackets);
+	CoreAudioChkError (AudioFileGetProperty(audioFile, kAudioFilePropertyAudioDataPacketCount, 
+		&propsize, &nPackets), "AudioFileGetProperty PacketCount");
+	
+	/* Get playing time in seconds */
+	Float64 fileDuration = (nPackets * fileFormat->mFramesPerPacket) / fileFormat->mSampleRate;
+
+	/* Initialize the region */
+	ScheduledAudioFileRegion rgn;
+	memset (&rgn, 0, sizeof (rgn));
+	rgn.mTimeStamp.mFlags = kAudioTimeStampSampleTimeValid;
+	rgn.mTimeStamp.mSampleTime = 0;
+	rgn.mCompletionProc = NULL;
+	rgn.mCompletionProcUserData = NULL;
+	rgn.mAudioFile = audioFile;
+	rgn.mLoopCount = 1;
+	rgn.mStartFrame = 0;
+	rgn.mFramesToPlay = (UInt32)(nPackets * fileFormat->mFramesPerPacket);
+
+	CoreAudioChkError (AudioUnitSetProperty(*au, kAudioUnitProperty_ScheduledFileRegion, 
+		kAudioUnitScope_Global, 0,&rgn, sizeof(rgn)), 
+		"kAudioUnitProperty_ScheduledFileRegion");
+
+	UInt32 defaultVal = 0;
+	CoreAudioChkError (AudioUnitSetProperty(*au, kAudioUnitProperty_ScheduledFilePrime, 
+		kAudioUnitScope_Global, 0, &defaultVal, sizeof(defaultVal)), 
+		"kAudioUnitProperty_ScheduledFilePrime");
+
+
+	/* Inform AU to start playing at next cycle */
+	AudioTimeStamp startTime;
+	memset (&startTime, 0, sizeof(startTime));
+	startTime.mFlags = kAudioTimeStampSampleTimeValid;
+	startTime.mSampleTime = -1;
+	CoreAudioChkError (AudioUnitSetProperty(*au, kAudioUnitProperty_ScheduleStartTimeStamp,
+		kAudioUnitScope_Global, 0, &startTime, sizeof(startTime)),
+		"AudioUnitSetproperty StartTime");
+
+	return fileDuration;
+}
+
+void CoreAudio_MakeSimpleGraph (AUGraph *theGraph, AudioUnit *fileAU, AudioStreamBasicDescription *fileFormat, 
+		AudioFileID audioFile)
+{
+	CoreAudioChkError(NewAUGraph (theGraph), "NewAUGraph");
+
+	AudioComponentDescription cd;
+	memset (&cd, 0, sizeof(cd));
+
+	/* Initialize and add Output Node */
+	cd.componentType = kAudioUnitType_Output;
+	cd.componentSubType = kAudioUnitSubType_DefaultOutput;
+	cd.componentManufacturer = kAudioUnitManufacturer_Apple;
+
+	AUNode outputNode;
+	CoreAudioChkError(AUGraphAddNode (*theGraph, &cd, &outputNode),"AUGraphAddNode Output");
+
+	/* Initialize and add the AU node */
+	AUNode fileNode;
+	cd.componentType = kAudioUnitType_Generator;
+	cd.componentSubType = kAudioUnitSubType_AudioFilePlayer;
+
+	CoreAudioChkError(AUGraphAddNode (*theGraph, &cd, &fileNode), "AUGraphAddNode AU");
+
+	/* Make connections */ 
+	CoreAudioChkError(AUGraphOpen (*theGraph), "AUGraphOpen");
+
+	/* Set Schedule properties and initialize the graph with the file*/
+	AudioUnit anAU;
+	memset (&anAU,0,sizeof(anAU));
+	CoreAudioChkError(AUGraphNodeInfo(*theGraph, fileNode, NULL, &anAU), "AUGraphNodeInfo");
+	
+	*fileAU = anAU;
+
+	CoreAudioChkError (AudioUnitSetProperty(*fileAU, kAudioUnitProperty_ScheduledFileIDs, 
+		kAudioUnitScope_Global, 0, &audioFile, sizeof(audioFile)), 
+		"SetScheduleFile");
+	CoreAudioChkError(AUGraphConnectNodeInput (*theGraph, fileNode, 0, outputNode, 0), 
+		"AUGraphConnectNodeInput");
+	CoreAudioChkError(AUGraphInitialize (*theGraph), "AUGraphInitialize");
+}
+
 #elif HAVE_CANBERRA
 #include <canberra.h>
 #include <canberra-gtk.h>
@@ -257,8 +408,10 @@ playSoundFile (char *file, /*lint -e{715}*/gboolean sync)
 	    }
 	  Sleep (1);		/* Wait (1ms) for current sound to finish */
       }
-#elif defined(__APPLE__) && !defined(__LP64__)
+#elif HAVE_APPLE_QUICKTIME
 	PlaySound_QuickTime (file);
+#elif HAVE_APPLE_COREAUDIO
+	CoreAudio_PlayFile (file);
 #elif HAVE_CANBERRA
 	if (!canberracontext)
 	{
