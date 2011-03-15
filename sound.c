@@ -161,14 +161,15 @@ void PlaySound_QuickTime (const char *cSoundFilename)
 #include <CoreAudio/CoreAudioTypes.h>
 #include <ApplicationServices/ApplicationServices.h>
 
-static int result;
 #define CoreAudioChkError(func,context) \
-	if ((result = func)!=0) \
 	{ \
-		fprintf (stderr, "Apple CoreAudio Error (" context "): %d\n", result); \
-		return; \
-	} 
-
+		int result; \
+		if ((result = func)!=0) \
+		{ \
+			fprintf (stderr, "Apple CoreAudio Error (" context "): %d\n", result); \
+			return; \
+		} \
+	}
 double CoreAudio_PrepareFileAU (AudioUnit *au, AudioStreamBasicDescription *fileFormat, 
 	AudioFileID audioFile);
 void CoreAudio_MakeSimpleGraph (AUGraph *theGraph, AudioUnit *fileAU, 
