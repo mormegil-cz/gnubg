@@ -30,11 +30,21 @@
 #include "eval.h"
 #include "matchequity.h"
 #include "positionid.h"
+#include "matchid.h"
 #include "util.h"
 
 #if USE_PYTHON
 
 #define UNUSED_PARAM __attribute__ ((unused))
+
+typedef struct {
+	int anDice[ 2 ];
+	int fTurn;
+	int fResigned;
+	int fDoubled;
+	gamestate gs;   
+} posinfo;
+
 
 static PyObject *
 BoardToPy( const TanBoard anBoard )
@@ -182,7 +192,7 @@ PyToCubeInfo( PyObject *p, cubeinfo *pci ) {
       /* unknown dict value */
       PyErr_SetString( PyExc_ValueError, 
                        _("invalid dict value in cubeinfo "
-                         "(see gnubg.setcubeinfo() for an example)") );
+                         "(see gnubg.cubeinfo() for an example)") );
       return -1;
     }
 
@@ -235,6 +245,126 @@ PyToCubeInfo( PyObject *p, cubeinfo *pci ) {
 
 }
 
+static int 
+SetPosInfo( posinfo *ppi, const int fTurn, const int fResigned,
+                  const int fDoubled, const gamestate gs, const int anDice[ 2 ] ) {
+    
+    if( fTurn < 0 || fTurn > 1 || fResigned < 0 || fResigned > 1 || 
+    	  fResigned < 0 || fResigned > 1 || anDice[ 0 ] > 6 || anDice[ 0 ] < 0 ||
+    	  anDice[ 1 ] > 6 || anDice[ 1 ] < 0 ||  gs > 7) {
+		memset(ppi, 0, sizeof(posinfo));
+		return -1;
+    }
+    
+    ppi->fTurn = fTurn;
+    ppi->fResigned = fResigned;
+    ppi->fDoubled = fDoubled;
+    ppi->gs = gs;
+    ppi->anDice[ 0 ] = anDice[ 0 ];
+    ppi->anDice[ 1 ] = anDice[ 1 ];
+                
+    return 0;
+}
+
+
+static PyObject *
+PosInfoToPy( const posinfo *ppi )
+{
+  return Py_BuildValue( "{s:(i,i),s:i,s:i,s:i,s:i}",
+                        "dice", ppi->anDice[0], ppi->anDice[1],
+                        "turn", ppi->fTurn,
+                        "resigned", ppi->fResigned,
+                        "doubled", ppi->fDoubled,
+                        "gamestate", ppi->gs );
+}
+
+
+static int
+PyToPosInfo( PyObject *p, posinfo *ppi ) {
+
+  PyObject *pyKey, *pyValue;
+  Py_ssize_t iPos = 0;
+  char *pchKey;
+  static const char *aszKeys[] = {
+    "turn", "resigned", "doubled", "gamestate", "dice", NULL };
+  int iKey;
+  void *ap[5];
+  int *pi;
+  float *pf;
+  int i = 0;
+  ap[i++] = &ppi->fTurn;
+  ap[i++] = &ppi->fResigned;
+  ap[i++] = &ppi->fDoubled;
+  ap[i++] = &ppi->gs;
+  ap[i++] = &ppi->anDice;
+
+  while( PyDict_Next( p, &iPos, &pyKey, &pyValue ) ) {
+
+    if ( ! ( pchKey = PyString_AsString( pyKey ) ) )
+      return -1;
+
+    iKey = -1;
+
+    for ( i = 0; aszKeys[ i ] && iKey < 0; ++i )
+      if ( ! strcmp( aszKeys[ i ], pchKey ) )
+        iKey = i;
+
+    if ( iKey < 0 ) {
+      /* unknown dict value */
+      PyErr_SetString( PyExc_ValueError, 
+                       _("invalid dict value in posinfo "
+                         "(see gnubg.cubeinfo() for an example)") );
+      return -1;
+    }
+
+    switch( iKey ) {
+    case 0:
+    case 1:
+    case 2:
+      /* simple unsigned integer (gamestate) */
+      if ( ! PyInt_Check( pyValue ) ) {
+        /* unknown dict value */
+        PyErr_SetString( PyExc_ValueError, 
+                         _("invalid value posinfo "
+                           "(see gnubg.posinfo() for an example)") );
+        return -1;
+      }
+      
+      *((gamestate *) ap[ iKey ]) = (gamestate) PyInt_AsLong( pyValue );
+
+      break;
+
+    case 3:
+      /* simple integer */
+      if ( ! PyInt_Check( pyValue ) ) {
+        /* unknown dict value */
+        PyErr_SetString( PyExc_ValueError, 
+                         _("invalid value posinfo "
+                           "(see gnubg.posinfo() for an example)") );
+        return -1;
+      }
+      
+      *((int *) ap[ iKey ]) = (int) PyInt_AsLong( pyValue );
+		break;
+		
+    case 4:
+      /* Dice */
+      pi = (int *) ap[ iKey ];
+      if ( ! PyArg_ParseTuple( pyValue, "ii", pi, pi + 1 ) )
+        return -1;
+      break;
+      
+    default:
+
+      g_assert( FALSE );
+
+    }
+
+  }
+
+  return 0;
+
+}
 
 static PyObject*
 EvalContextToPy( const evalcontext* pec)
@@ -329,8 +459,6 @@ PyToEvalContext( PyObject *p, evalcontext *pec ) {
 
 }
 
-
-
 static PyObject *
 PythonCubeInfo(PyObject* self UNUSED_PARAM, PyObject* args) {
 
@@ -363,6 +491,31 @@ PythonCubeInfo(PyObject* self UNUSED_PARAM, PyObject* args) {
 
 }
 
+static PyObject *
+PythonPosInfo(PyObject* self UNUSED_PARAM, PyObject* args) {
+
+  posinfo pi;
+  int fTurn = ms.fTurn;
+  int fResigned = ms.fResigned;
+  int fDoubled = ms.fDoubled;
+  int gs = ms.gs;
+  int anDice[ 2 ];
+  anDice [ 0 ] = ms.anDice [ 0 ];
+  anDice [ 1 ] = ms.anDice [ 1 ];
+
+  if ( ! PyArg_ParseTuple( args, "|iiii(ii):posinfo", 
+                           &fTurn, &fResigned, &fDoubled, &gs, 
+                           &anDice[ 0 ], &anDice[ 1 ] ) )
+    return NULL;
+
+  if ( SetPosInfo( &pi, fTurn, fResigned, fDoubled, gs, anDice ) ) {
+    printf( "error in SetPosInfo\n" );
+    return NULL;
+  }
+
+  return PosInfoToPy( &pi );
+
+}
 
 static PyObject *
 PythonNextTurn( PyObject *self UNUSED_PARAM, PyObject *args ) {
@@ -772,6 +925,103 @@ PythonPositionID( PyObject* self UNUSED_PARAM, PyObject *args ) {
     return NULL;
 
   return PyString_FromString( PositionID( (ConstTanBoard)anBoard ) );
+
+}
+
+static PyObject *
+PythonGnubgID( PyObject* self UNUSED_PARAM, PyObject *args ) {
+  char gnubgidBuf[48];
+  PyObject *pyCubeInfo = NULL;
+  PyObject *pyPosInfo = NULL;
+  PyObject *pyBoard = NULL;
+  cubeinfo ci;
+  posinfo pi;
+  TanBoard anBoard;
+  memcpy( anBoard, msBoard(), sizeof(TanBoard) );
+  pi.anDice[0] = ms.anDice[0];
+  pi.anDice[1] = ms.anDice[1];
+  pi.fTurn = ms.fTurn;
+  pi.fResigned = ms.fResigned;
+  pi.fDoubled = ms.fDoubled; 
+  pi.gs = ms.gs;
+  ci.fMove = ms.fMove;
+  ci.fCubeOwner = ms.fCubeOwner;
+  ci.fCrawford = ms.fCrawford;
+  ci.nMatchTo = ms.nMatchTo;
+  ci.anScore[0] = ms.anScore[0];
+  ci.anScore[1] = ms.anScore[1];
+  ci.nCube = ms.nCube;
+
+  if ( ! PyArg_ParseTuple( args, "|OOO:gnubgid", &pyBoard, &pyCubeInfo, &pyPosInfo ) )
+    return NULL;
+
+  if ( pyBoard && (!pyPosInfo || !pyCubeInfo)) {
+    PyErr_SetString( PyExc_TypeError, 
+                     _("requires 0 or exactly 3 arguments (Board, Cube-Info dict, Pos-Info dict). "
+                       "(see gnubg.board(), gnubg.cubeinfo(), gnubg.posinfo() for an examples)") );
+	 return NULL;
+  }
+
+  if ( pyBoard && !PyToBoard( pyBoard, anBoard ) )
+    return NULL;
+
+  if( !pyBoard && ms.gs == GAME_NONE ) {
+    PyErr_SetString( PyExc_ValueError,
+                     _("no current position available") );
+    return NULL;
+  }
+  
+  if ( pyCubeInfo && PyToCubeInfo( pyCubeInfo, &ci ) )
+    return NULL;
+
+  if ( pyPosInfo && PyToPosInfo( pyPosInfo, &pi ) )
+    return NULL;
+
+  sprintf (gnubgidBuf, "%s:%s", PositionID( (ConstTanBoard)anBoard ),
+           MatchID ( pi.anDice, pi.fTurn, pi.fResigned, pi.fDoubled, ci.fMove,
+           ci.fCubeOwner, ci.fCrawford, ci.nMatchTo,
+           ci.anScore, ci.nCube, pi.gs ) );
+  
+  return PyString_FromString( gnubgidBuf );
+
+}
+
+static PyObject *
+PythonMatchID( PyObject* self UNUSED_PARAM, PyObject *args ) {
+
+  PyObject *pyCubeInfo = NULL;
+  PyObject *pyPosInfo = NULL;
+  cubeinfo ci;
+  posinfo pi;
+
+  if ( ! PyArg_ParseTuple( args, "|OO:matchid", &pyCubeInfo , &pyPosInfo) )
+    return NULL;
+
+  if( !pyCubeInfo && ms.gs == GAME_NONE ) {
+    PyErr_SetString( PyExc_ValueError,
+                     _("no current position available") );
+    return NULL;
+  }
+
+  if ( pyCubeInfo && PyToCubeInfo( pyCubeInfo, &ci ) )
+    return NULL;
+
+  if ( pyPosInfo && PyToPosInfo( pyPosInfo, &pi ) )
+    return NULL;
+
+  if ( pyCubeInfo && !pyPosInfo) {
+    PyErr_SetString( PyExc_TypeError, 
+                     _("a cube-info argument requires a pos-info dictionary as an argument "
+                       "(see gnubg.matchid() for an example)") );
+	 return NULL;
+  }
+  
+  if (!pyCubeInfo)
+    return PyString_FromString( MatchIDFromMatchState ( &ms ) );
+  else
+    return PyString_FromString( MatchID ( pi.anDice, pi.fTurn, pi.fResigned, pi.fDoubled, ci.fMove,
+				ci.fCubeOwner, ci.fCrawford, ci.nMatchTo,
+				ci.anScore, ci.nCube, pi.gs ) );
 
 }
 
@@ -2162,7 +2412,7 @@ PyMethodDef gnubgMethods[] = {
     "           'reduced'=>0/1, 'deterministic'=> 0/1, 'noise'->float\n"
     "    returns: evaluation = tuple (floats optimal, nodouble, take, drop, int recommendation, String recommendationtext)" },
   { "evaluate", PythonEvaluate, METH_VARARGS,
-    "Cubeless evaluation]n"
+    "Cubeless evaluation\n"
     "    arguments: [board] [cube-info] [eval context]\n"
     "         see 'cfevaluate'\n"
     "    returns tuple(floats P(win), P(win gammon), P(win backgammnon)\n"
@@ -2193,10 +2443,17 @@ PyMethodDef gnubgMethods[] = {
     "    returns: MD5 digest as 32 char hex string" },
   { "cubeinfo", PythonCubeInfo, METH_VARARGS,
     "Make a cubeinfo\n"
-    "    arguments: [cube value, cube owner = 0/1, player on move = 0/1\n"
+    "    arguments: [cube value, cube owner = 0/1, player on move = 0/1, \n"
     "        match length (0 = money), score (tuple int, int), \n"
-    "        is crawford = 0/1, bg variant = 0/5\n"
-    "    returns cube-info dictionary ( see 'cfevaluate' )" },
+    "        is crawford = 0/1, bg variant = 0/5]\n"
+    "    returns pos-info dictionary ( see 'cfevaluate' )" },
+  { "posinfo", PythonPosInfo, METH_VARARGS,
+    "Make a posinfo dictionary\n"
+    "    arguments: [player on roll = 0/1, player resigned = 0/1, \n"
+    "        player doubled = 0/1, gamestate = 0-7, dice (tuple int, int)] \n"
+    "    returns pos-info dictionary\n"
+    "       pos-info = dictionary: 'dice'=>(int,int), 'turn'=>0/1\n"
+    "           'resigned'=>0/1, 'doubled'=>0/1, 'gamestat'=>(int)(0 to 7)\n" },
   { "met", PythonMET, METH_VARARGS,
     "return the current match equity table\n"
     "   arguments: [max score]\n"
@@ -2206,6 +2463,18 @@ PyMethodDef gnubgMethods[] = {
     "return position ID from board\n"
     "    arguments: [board] ( see 'cfevaluate' )\n"
     "    returns: position ID as string" },
+  { "matchid", PythonMatchID, METH_VARARGS,
+    "return MatchID from current position, or from cube-info, pos-info\n"
+    "    arguments: [cube-info dictionary], [pos-info dictionary] \n"
+    "        cube-info: see 'cfevaluate'\n"
+    "        pos-info: see 'posinfo'\n"
+    "    returns: Match ID as string" },
+  { "gnubgid", PythonGnubgID, METH_VARARGS,
+    "return GNUBGID from current position, or from board, cube-info, pos-info\n"
+    "    arguments: [board, cube-info dictionary, pos-info dictionary]\n"
+    "        board, cube-info: see 'cfevaluate'\n"
+    "        pos-info: see 'posinfo'\n"
+    "    returns: GNUBGID as string" },
   { "positionfromid", PythonPositionFromID, METH_VARARGS,
     "return board from position ID\n"
     "    arguments: [position ID as string]\n"

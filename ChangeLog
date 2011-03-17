@@ -1,3 +1,9 @@
+2011-03-16  Michael Petch  <mpetch@capp-sysware.com>
+
+	*  gnubgmodule.c : Added GNUBG python module functions: 
+	gnubgid, matchid, posinfo
+	ToDo: xgid
+
 2011-03-14  Michael Petch  <mpetch@capp-sysware.com>
 
 	*  gnubg.c, sound.c, configure.in : Added support for Apple
