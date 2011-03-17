@@ -313,7 +313,7 @@ PyToPosInfo( PyObject *p, posinfo *ppi ) {
       /* unknown dict value */
       PyErr_SetString( PyExc_ValueError, 
                        _("invalid dict value in posinfo "
-                         "(see gnubg.cubeinfo() for an example)") );
+                         "(see gnubg.posinfo() for an example)") );
       return -1;
     }
 
