@@ -249,6 +249,8 @@ enum {
 static int anEscapes[ 0x1000 ];
 static int anEscapes1[ 0x1000 ];
 
+static int anPoint[16] = {0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+
 neuralnet nnContact, nnRace, nnCrashed;
 
 neuralnet nnpContact, nnpRace, nnpCrashed;
@@ -430,8 +432,7 @@ static int Escapes( const unsigned int anBoard[ 25 ], int n ) {
     m = (n < 12) ? n : 12;
 
     for( i = 0; i < m; i++ )
-		if( anBoard[ 24 + i - n ] > 1 )
-		    af |= ( 1 << i );
+		af |= ( anPoint[anBoard[ 24 + i - n ]] << i );
     
     return anEscapes[ af ];
 }
@@ -471,8 +472,7 @@ static int Escapes1( const unsigned int anBoard[ 25 ], int n ) {
     m = (n < 12) ? n : 12;
 
     for( i = 0; i < m; i++ )
-	if( anBoard[ 24 + i - n ] > 1 )
-	    af |= ( 1 << i );
+	af |= ( anPoint[anBoard[ 24 + i - n ]] << i );
     
     return anEscapes1[ af ];
 }
