@@ -141,7 +141,7 @@ if test "x$darwin" = "xyes"; then
 
 	if test "x$needquicktime" = "xyes"; then
 		quicktime=no
-	 	AC_CHECK_HEADER([QuickTime/QuickTime.h2], [quicktime=yes])
+	 	AC_CHECK_HEADER([QuickTime/QuickTime.h], [quicktime=yes])
 
 		if test "x$quicktime" = "xyes"; then
 			AC_DEFINE(HAVE_APPLE_QUICKTIME,1, [Define if you have Apple QuickTime])
