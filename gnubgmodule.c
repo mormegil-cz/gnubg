@@ -962,7 +962,7 @@ PythonGnubgID( PyObject* self UNUSED_PARAM, PyObject *args ) {
   if ( pyBoard && (!pyPosInfo || !pyCubeInfo)) {
     PyErr_SetString( PyExc_TypeError, 
                      _("requires 0 or exactly 3 arguments (Board, Cube-Info dict, Pos-Info dict). "
-                       "(see gnubg.board(), gnubg.cubeinfo(), gnubg.posinfo() for an examples)") );
+                       "(see gnubg.board(), gnubg.cubeinfo(), gnubg.posinfo() for examples)") );
 	 return NULL;
   }
 
@@ -2462,7 +2462,7 @@ PyMethodDef gnubgMethods[] = {
     "        player doubled = 0/1, gamestate = 0-7, dice (tuple int, int)] \n"
     "    returns pos-info dictionary\n"
     "       pos-info = dictionary: 'dice'=>(int,int), 'turn'=>0/1\n"
-    "           'resigned'=>0/1, 'doubled'=>0/1, 'gamestat'=>(int)(0 to 7)\n" },
+    "           'resigned'=>0/1, 'doubled'=>0/1, 'gamestat'=>int (0 to 7)\n" },
   { "met", PythonMET, METH_VARARGS,
     "return the current match equity table\n"
     "   arguments: [max score]\n"
