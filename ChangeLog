@@ -1,3 +1,7 @@
+2011-03-17  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* positionid.h, eval.c: Speed improvements.
+
 2011-03-16  Michael Petch  <mpetch@capp-sysware.com>
 
 	*  gnubgmodule.c : Added GNUBG python module functions: 
