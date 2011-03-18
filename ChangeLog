@@ -1,3 +1,10 @@
+2011-03-17  Michael Petch  <mpetch@capp-sysware.com>
+
+	*  gtkgame.c : Fixed ClipBoard copy from the Match
+	statistics dialog that caused both players data to
+	be the same. Added player names to the match statistic
+	tables (treeviews). Reported by Boomslang
+
 2011-03-17  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* positionid.h, eval.c: Speed improvements.
