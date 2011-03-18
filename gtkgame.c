@@ -6009,7 +6009,7 @@ static void AddList(char *pStr, GtkWidget *view, const char *pTitle)
 			sprintf(strchr(pStr, 0), "%-37s ", sz ? sz : "");
 			gtk_tree_model_get(model, &iter, 1, &sz, -1);
 			sprintf(strchr(pStr, 0), "%-20s ", sz ? sz : "");
-			gtk_tree_model_get(model, &iter, 1, &sz, -1);
+			gtk_tree_model_get(model, &iter, 2, &sz, -1);
 			sprintf(strchr(pStr, 0), "%-20s\n", sz ? sz : "");
 		} while (gtk_tree_model_iter_next(model, &iter));
 	sprintf(strchr(pStr, 0), "\n");
