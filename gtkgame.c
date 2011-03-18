@@ -6274,7 +6274,7 @@ static GtkWidget *CreateList(void)
 		renderer = gtk_cell_renderer_text_new();
 		g_object_set(renderer, "xalign", 1.0, NULL);
 		column = gtk_tree_view_column_new_with_attributes("", renderer, "text", i, NULL);
-		gtk_tree_view_column_set_alignment  (column, 1.0);
+		gtk_tree_view_column_set_alignment  (column, 0.97);
 		gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	}
 	gtk_tree_view_column_set_title (gtk_tree_view_get_column (GTK_TREE_VIEW(view), 1), ap[0].szName); 
