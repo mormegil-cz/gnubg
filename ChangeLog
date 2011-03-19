@@ -1,3 +1,7 @@
+2011-03-19  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* set.c: Don't change the global Jacoby setting when pasting a XGID.
+
 2011-03-17  Michael Petch  <mpetch@capp-sysware.com>
 
 	*  gtkgame.c : Fixed ClipBoard copy from the Match

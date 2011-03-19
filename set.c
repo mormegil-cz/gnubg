@@ -4177,6 +4177,10 @@ static int SetXGID(char *sz)
 	int i;
 	char v[9][5];
 
+	/* Save fJacoby. Using a local variable here won't help since
+	   SetMatchID() below will clobber the global variable anyway. */
+	int fJacobySave = fJacoby;
+
 	for (i = 0; i < 9 && (c = strrchr(s, ':')); i++) {
 		strncpy(v[i], c + 1, 4);
 		v[i][4] = '\0';
@@ -4316,6 +4320,7 @@ static int SetXGID(char *sz)
 	msxg.fDoubled = fDoubled;
 	msxg.cGames = 0;
 	msxg.fMove = fMove;
+	msxg.fTurn = fTurn;
 	msxg.fCubeOwner = fCubeOwner;
 	msxg.fCrawford = fCrawford;
 	msxg.fPostCrawford = !fCrawford && (anScore[0] == nMatchTo - 1
@@ -4332,6 +4337,8 @@ static int SetXGID(char *sz)
 	matchid = g_strdup(MatchIDFromMatchState(&msxg));
 	CommandSetMatchID(matchid);
 	g_free(matchid);
+
+	fJacoby = fJacobySave;
 
 	if (!fMove)
 		SwapSides(anBoard);
