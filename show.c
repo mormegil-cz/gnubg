@@ -719,15 +719,15 @@ extern void CommandShowJacoby( char *UNUSED(sz) ) {
 
   if ( ! ms.nMatchTo )
     outputl( ms.fJacoby ? 
-             _("This money session is play with the Jacoby rule."
-               " Default is:") :
-             _("This money session is play without the Jacoby rule."
-               " Default is:") );
+             _("This money session is played with the Jacoby rule.")
+               :
+             _("This money session is played without the Jacoby rule.")
+               );
 
   if ( fJacoby ) 
-    outputl( _("Money sessions are played with the Jacoby rule.") );
+    outputl( _("New money sessions are played with the Jacoby rule.") );
   else
-    outputl( _("Money sessions are played without the Jacoby rule.") );
+    outputl( _("New money sessions are played without the Jacoby rule.") );
 
 }
 
