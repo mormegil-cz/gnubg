@@ -483,7 +483,7 @@ PythonCubeInfo(PyObject* self UNUSED_PARAM, PyObject* args) {
 
   if ( SetCubeInfo( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
                     fCrawford, fJacoby, fBeavers, bgv ) ) {
-    printf( N_("error in SetCubeInfo\n") );
+    printf( _("error in SetCubeInfo\n") );
     return NULL;
   }
 
@@ -509,7 +509,7 @@ PythonPosInfo(PyObject* self UNUSED_PARAM, PyObject* args) {
     return NULL;
 
   if ( SetPosInfo( &pi, fTurn, fResigned, fDoubled, gs, anDice ) ) {
-    printf( N_("error in SetPosInfo\n") );
+    printf( _("error in SetPosInfo\n") );
     return NULL;
   }
 
@@ -745,7 +745,7 @@ PythonFindBestMove( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   if (anDice[0] == 0)
   {
-	  printf(N_("What? No dice?\n"));
+	  printf(_("What? No dice?\n"));
 	  return NULL;
   }
 
@@ -985,7 +985,7 @@ PythonGnubgID( PyObject* self UNUSED_PARAM, PyObject *args ) {
   szMatchID = g_strdup (MatchID ( pi.anDice, pi.fTurn, pi.fResigned, pi.fDoubled, 
                         ci.fMove, ci.fCubeOwner, ci.fCrawford, ci.nMatchTo, 
                         ci.anScore, ci.nCube, pi.gs ) );
-  szGnubgID = g_strjoin (":", szPosID, szMatchID);
+  szGnubgID = g_strjoin (":", szPosID, szMatchID, NULL);
   pyRetVal = PyString_FromString( szGnubgID );
 
   g_free (szPosID);
