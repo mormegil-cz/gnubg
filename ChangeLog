@@ -1,3 +1,9 @@
+2011-03-20  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* gnubg.c: Fixed missing handling of MOVE_SETBOARD records in
+	swapGame(). Needed for single positions (bug #32272) and games
+	with illegal moves.
+
 2011-03-19  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* set.c: Don't change the global Jacoby setting when pasting a XGID.

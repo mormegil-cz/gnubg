@@ -4978,6 +4978,7 @@ swapGame ( listOLD *plGame ) {
   listOLD *pl;
   moverecord *pmr;
   int n;
+  TanBoard anBoard;
 
   for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
       
@@ -5014,6 +5015,12 @@ swapGame ( listOLD *plGame ) {
       break;
 
     case MOVE_SETBOARD:
+
+      PositionFromKey(anBoard, pmr->sb.auchKey);
+      SwapSides( anBoard );
+      PositionKey( (ConstTanBoard)anBoard, pmr->sb.auchKey );
+      break;
+
     case MOVE_SETCUBEVAL:
 
       /*no op */
@@ -5074,11 +5081,12 @@ extern void CommandSwapPlayers ( char *sz )
   ms.anScore[ 0 ] = n;
   SwapSides ( ms.anBoard );
 
-
 #if USE_GTK
   if ( fX ) {
     GTKSet ( ap );
+/* GTKSet(ap) already does this. This just adds flicker.
     GTKRegenerateGames();
+*/
     ChangeGame(NULL);
   }
 #endif
