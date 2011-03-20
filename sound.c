@@ -181,8 +181,6 @@ void CoreAudio_PlayFile (char * const fileName)
 
 	const char* inputFile = fileName;
 
-	CoreAudioChkError(-1, "testing"); 
-	
 	/* Open the sound file */
 	CFURLRef outInputFileURL = CFURLCreateFromFileSystemRepresentation (kCFAllocatorDefault, 
 		(const UInt8 *)fileName, strlen(fileName), false);
