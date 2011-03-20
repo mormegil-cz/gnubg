@@ -112,13 +112,13 @@ void PlaySound_QuickTime (const char *cSoundFilename)
 
 	err = NativePathNameToFSSpec(cSoundFilename, &fsSoundFile, 0);    
     if (err != 0) {
-        fprintf (stderr, "PlaySound_QuickTime: error #%d, can't find %s.\n", err, cSoundFilename);
+        ouputf( "PlaySound_QuickTime: error #%d, can't find %s.\n", err, cSoundFilename);
     }
     else {
         /* open movie (WAV or whatever) file */
         err = OpenMovieFile (&fsSoundFile, &resRefNum, fsRdPerm);
         if (err != 0) {
-            fprintf (stderr, "PlaySound_QuickTime: error #%d opening %s.\n", err, cSoundFilename);
+            outputf( _("PlaySound_QuickTime: error #%d opening %s.\n"), err, cSoundFilename);
         }
         else {
             /* create movie from movie file */
@@ -126,7 +126,7 @@ void PlaySound_QuickTime (const char *cSoundFilename)
             err = NewMovieFromFile (movie, resRefNum, NULL, NULL, 0, NULL);  
             CloseMovieFile (resRefNum);
             if (err != 0) {
-                fprintf (stderr, "PlaySound_QuickTime: error #%d reading %s.\n", err, cSoundFilename);
+                outputf ( _("PlaySound_QuickTime: error #%d reading %s.\n"), err, cSoundFilename);
             } 
             else {
                 /* reset movie timebase */
@@ -166,7 +166,7 @@ void PlaySound_QuickTime (const char *cSoundFilename)
 		int result; \
 		if ((result = func)!=0) \
 		{ \
-			fprintf (stderr, "Apple CoreAudio Error (" context "): %d\n", result); \
+			outputf(_("Apple CoreAudio Error (" context "): %d\n"), result); \
 			return; \
 		} \
 	}
@@ -181,11 +181,13 @@ void CoreAudio_PlayFile (char * const fileName)
 
 	const char* inputFile = fileName;
 
+	CoreAudioChkError(-1, "testing"); 
+	
 	/* Open the sound file */
 	CFURLRef outInputFileURL = CFURLCreateFromFileSystemRepresentation (kCFAllocatorDefault, 
 		(const UInt8 *)fileName, strlen(fileName), false);
 	if (AudioFileOpenURL (outInputFileURL, kAudioFileReadPermission, 0, &audioFile)) { 
-		fprintf (stderr,"Apple CoreAudio Error, can't find %s\n", fileName); 
+		outputf(_("Apple CoreAudio Error, can't find %s\n"), fileName); 
 		return; 
 	}
 
@@ -396,14 +398,14 @@ playSoundFile (char *file, /*lint -e{715}*/gboolean sync)
 	    }
 	  if (!soundDeviceAttached)
 	    {			/* No sound card found - disable sound */
-		g_print ("No soundcard found - sounds disabled\n");
+		g_print (_"No soundcard found - sounds disabled\n");
 		fSound = FALSE;
 		return;
 	    }
 	  /* Check for errors */
 	  if (GetLastError ())
 	    {
-		PrintSystemError("Playing sound");
+		PrintSystemError(_("Playing sound"));
 		SetLastError (0);
 		return;
 	    }

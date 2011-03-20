@@ -483,7 +483,7 @@ PythonCubeInfo(PyObject* self UNUSED_PARAM, PyObject* args) {
 
   if ( SetCubeInfo( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
                     fCrawford, fJacoby, fBeavers, bgv ) ) {
-    printf( "error in SetCubeInfo\n" );
+    printf( N_("error in SetCubeInfo\n") );
     return NULL;
   }
 
@@ -509,7 +509,7 @@ PythonPosInfo(PyObject* self UNUSED_PARAM, PyObject* args) {
     return NULL;
 
   if ( SetPosInfo( &pi, fTurn, fResigned, fDoubled, gs, anDice ) ) {
-    printf( "error in SetPosInfo\n" );
+    printf( N_("error in SetPosInfo\n") );
     return NULL;
   }
 
@@ -745,7 +745,7 @@ PythonFindBestMove( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   if (anDice[0] == 0)
   {
-	  printf("What? No dice?\n");
+	  printf(N_("What? No dice?\n"));
 	  return NULL;
   }
 
