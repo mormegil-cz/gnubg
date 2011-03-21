@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnubg 0.9.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-02-10 21:59+0100\n"
+"POT-Creation-Date: 2011-03-20 22:05-0600\n"
 "PO-Revision-Date: 2011-02-05 18:26+0200\n"
 "Last-Translator: Mihai <mihaiv@gmail.com>\n"
 "Language-Team:  <>\n"
@@ -472,55 +472,60 @@ msgstr "Manual"
 msgid "Tutorial"
 msgstr "Tutorial"
 
-#: non-src/credits.c:58 gtkgame.c:2628
+#: non-src/credits.c:58 gtkgame.c:2625
 msgid "Czech"
 msgstr "Cehă"
 
-#: non-src/credits.c:59 gtkgame.c:2629
+#: non-src/credits.c:59 gtkgame.c:2626
 msgid "Danish"
 msgstr "Daneză"
 
-#: non-src/credits.c:60 gtkgame.c:2632
+#: non-src/credits.c:60 gtkgame.c:2629
 msgid "French"
 msgstr "Franceză"
 
-#: non-src/credits.c:61 gtkgame.c:2633
+#: non-src/credits.c:61 gtkgame.c:2630
 msgid "German"
 msgstr "Germană"
 
-#: non-src/credits.c:62 gtkgame.c:2634
+#: non-src/credits.c:62 gtkgame.c:2631
 msgid "Icelandic"
 msgstr "Islandeză"
 
-#: non-src/credits.c:63 gtkgame.c:2635
+#: non-src/credits.c:63 gtkgame.c:2632
 msgid "Italian"
 msgstr "Italiană"
 
-#: non-src/credits.c:64 gtkgame.c:2636
+#: non-src/credits.c:64 gtkgame.c:2633
 msgid "Japanese"
 msgstr "Japoneză"
 
-#: non-src/credits.c:65 gtkgame.c:2640
-msgid "Turkish"
-msgstr "Turcă"
+#: non-src/credits.c:65 gtkgame.c:2634
+msgid "Romanian"
+msgstr ""
 
-#: non-src/credits.c:66 gtkgame.c:2638
+#: non-src/credits.c:66 gtkgame.c:2635
 msgid "Russian"
 msgstr "Rusă"
 
-#: non-src/credits.c:184 show.c:1488
-msgid "AUTHORS"
-msgstr ""
+#: non-src/credits.c:67 gtkgame.c:2637
+msgid "Turkish"
+msgstr "Turcă"
 
 #: non-src/credits.c:185
+#, fuzzy
+msgid "Authors"
+msgstr "Tutore"
+
+#: non-src/credits.c:186
 msgid "Code Contributors"
 msgstr "Contributori cod"
 
-#: non-src/credits.c:186
+#: non-src/credits.c:187
 msgid "Translations"
 msgstr "Traduceri"
 
-#: non-src/credits.c:187
+#: non-src/credits.c:188
 msgid "Support"
 msgstr "Suport"
 
@@ -720,8 +725,8 @@ msgstr ""
 msgid "Rewinding dice file (%s)"
 msgstr "Revenire la început fişier zaruri (%s)\n"
 
-#: drawboard.c:72 drawboard.c:304 gnubg.c:5098 gtkexport.c:775 gtkgame.c:2462
-#: gtkgame.c:3213 gtkgame.c:5749
+#: drawboard.c:72 drawboard.c:304 gnubg.c:5132 gtkexport.c:777 gtkgame.c:2464
+#: gtkgame.c:3207 gtkgame.c:5746
 msgid "GNU Backgammon"
 msgstr "Table GNU"
 
@@ -735,110 +740,110 @@ msgstr "ID poziţie:"
 msgid "Match ID"
 msgstr "ID partidă:"
 
-#: eval.c:276
+#: eval.c:278
 msgid "Standard backgammon"
 msgstr "Table standard"
 
-#: eval.c:277
+#: eval.c:279
 #, fuzzy
 msgid "Nackgammon"
 msgstr "marţ tehnic"
 
-#: eval.c:278
+#: eval.c:280
 msgid "1-chequer hypergammon"
 msgstr "Hypergammon 1-pul"
 
-#: eval.c:279
+#: eval.c:281
 msgid "2-chequer hypergammon"
 msgstr "Hypergammon 2-puluri"
 
-#: eval.c:280
+#: eval.c:282
 msgid "3-chequer hypergammon"
 msgstr "Hypergammon 3-pululuri"
 
-#: eval.c:296 set.c:2766
+#: eval.c:298 set.c:2807
 msgid "No evaluation"
 msgstr "Nici o evaluare"
 
-#: eval.c:297 set.c:2767
+#: eval.c:299 set.c:2808
 msgid "Neural net evaluation"
 msgstr "Evaluare reţea neurală"
 
-#: eval.c:298 eval.c:4347 format.c:871 gtkchequer.c:454 gtkcube.c:901
-#: gtkrace.c:244 html.c:2150 set.c:2768
+#: eval.c:300 eval.c:4347 format.c:871 gtkchequer.c:455 gtkcube.c:902
+#: gtkrace.c:244 html.c:2150 set.c:2809
 msgid "Rollout"
 msgstr "Simulare"
 
-#: eval.c:320
+#: eval.c:322
 #, fuzzy
 msgid "setting|beginner"
 msgstr "începător"
 
-#: eval.c:321
+#: eval.c:323
 #, fuzzy
 msgid "setting|casual play"
 msgstr "joc ocazional"
 
-#: eval.c:322
+#: eval.c:324
 #, fuzzy
 msgid "setting|intermediate"
 msgstr "mediu"
 
-#: eval.c:323
+#: eval.c:325
 #, fuzzy
 msgid "setting|advanced"
 msgstr "avansat"
 
-#: eval.c:324
+#: eval.c:326
 #, fuzzy
 msgid "setting|expert"
 msgstr "Setează setările pentru export"
 
-#: eval.c:325
+#: eval.c:327
 #, fuzzy
 msgid "setting|world class"
 msgstr "clasă mondială"
 
-#: eval.c:326
+#: eval.c:328
 #, fuzzy
 msgid "setting|supremo"
 msgstr "suprem"
 
-#: eval.c:327
+#: eval.c:329
 #, fuzzy
 msgid "setting|grandmaster"
 msgstr "mare maestru"
 
-#: eval.c:356
+#: eval.c:358
 msgid "Tiny"
 msgstr "Foarte mic"
 
-#: eval.c:357
+#: eval.c:359
 msgid "Narrow"
 msgstr "Îngust"
 
-#: eval.c:358
+#: eval.c:360
 msgid "Normal"
 msgstr "Normal"
 
-#: eval.c:359 gtkoptions.c:1262
+#: eval.c:361 gtkoptions.c:1262
 msgid "Large"
 msgstr "Mare"
 
-#: eval.c:360
+#: eval.c:362
 msgid "Huge"
 msgstr "Uriaş"
 
-#: eval.c:393
+#: eval.c:395
 msgid "doubletype|Double"
 msgstr ""
 
-#: eval.c:394
+#: eval.c:396
 #, fuzzy
 msgid "doubletype|Beaver"
 msgstr "Fără dublare, castor"
 
-#: eval.c:395
+#: eval.c:397
 msgid "doubletype|Raccoon"
 msgstr ""
 
@@ -974,7 +979,7 @@ msgstr "Redublare opţională, pas"
 msgid "Unknown cube decision"
 msgstr "Decizii cub în total"
 
-#: eval.c:4343 format.c:1200 gtkgame.c:4476 html.c:317 progress.c:691
+#: eval.c:4343 format.c:1200 gtkgame.c:4472 html.c:317 progress.c:691
 #: show.c:119
 msgid "Cubeful"
 msgstr "Cu cub"
@@ -1179,7 +1184,7 @@ msgstr " şi până la %d mutări în plus în valoarea %0.3g\n"
 msgid "Play"
 msgstr "Mutare"
 
-#: format.c:323 gnubg.c:1401 gnubg.c:1409 gnubg.c:2674 gnubg.c:2684
+#: format.c:323 gnubg.c:1405 gnubg.c:1413 gnubg.c:2689 gnubg.c:2699
 #: gtkoptions.c:416 gtkprefs.c:2928 gtkprefs.c:2945 gtktheory.c:723
 #: progress.c:275 progress.c:356
 msgid "Cube"
@@ -1414,8 +1419,8 @@ msgstr "L(bg)"
 msgid "Equity"
 msgstr "Valoare"
 
-#: format.c:1200 gnubg.c:1731 gtkchequer.c:456 gtkcube.c:139 gtkcube.c:153
-#: gtkcube.c:439 gtkcube.c:453 gtkcube.c:904 gtkmovelist.c:196 html.c:2507
+#: format.c:1200 gnubg.c:1735 gtkchequer.c:457 gtkcube.c:139 gtkcube.c:153
+#: gtkcube.c:439 gtkcube.c:453 gtkcube.c:905 gtkmovelist.c:196 html.c:2507
 msgid "MWC"
 msgstr "MWC"
 
@@ -1614,47 +1619,47 @@ msgid ""
 msgstr ""
 
 #. Usage strings
-#: gnubg.c:451
+#: gnubg.c:453
 msgid "<die> <die>"
 msgstr "<zar> <zar>"
 
-#: gnubg.c:452
+#: gnubg.c:454
 msgid "<command>"
 msgstr "<comandă>"
 
-#: gnubg.c:453
+#: gnubg.c:455
 msgid "<comment>"
 msgstr "<comentariu>"
 
-#: gnubg.c:454
+#: gnubg.c:456
 msgid "evaluation|rollout"
 msgstr "simulare|zaruri"
 
-#: gnubg.c:455
+#: gnubg.c:457
 msgid "<filename>"
 msgstr "<nume fişier>"
 
-#: gnubg.c:456
+#: gnubg.c:458
 msgid "[<key>=<value> ...]"
 msgstr "[<cheie>=<valoare> ...]"
 
-#: gnubg.c:457
+#: gnubg.c:459
 msgid "<length>"
 msgstr "<lungime>"
 
-#: gnubg.c:458
+#: gnubg.c:460
 msgid "<limit>"
 msgstr "<limită>"
 
-#: gnubg.c:459
+#: gnubg.c:461
 msgid "<milliseconds>"
 msgstr "<milisecunde>"
 
-#: gnubg.c:460
+#: gnubg.c:462
 msgid "<from> <to> ..."
 msgstr "<de la> <până la> ..."
 
-#: gnubg.c:461
+#: gnubg.c:463
 msgid ""
 "<ply> <num.xjoin to accept (0 = skip)> [<num. of extra moves to accept> "
 "<tolerance>]"
@@ -1662,264 +1667,269 @@ msgstr ""
 "<mutare> <nr. xjoin pentru a accepta (0 = omite)> [<nr. de mutări "
 "suplimentare de acceptat> <toleranţă>]"
 
-#: gnubg.c:463
+#: gnubg.c:465
 msgid "<name>"
 msgstr "<nume>"
 
-#: gnubg.c:464
+#: gnubg.c:466
 #, fuzzy
 msgid "[quiet]"
 msgstr "Valoare"
 
-#: gnubg.c:465
+#: gnubg.c:467
 msgid "system|<language code>"
 msgstr "sistem|<cod limbaj>"
 
-#: gnubg.c:466
+#: gnubg.c:468
 msgid "on|off"
 msgstr "pornit|oprit"
 
-#: gnubg.c:467
+#: gnubg.c:469
 msgid "[command]"
 msgstr "[comandă]"
 
-#: gnubg.c:468
+#: gnubg.c:470
 msgid "[yyyy-mm-dd]"
 msgstr ""
 
-#: gnubg.c:469
+#: gnubg.c:471
 msgid "[depth]"
 msgstr "[adâncime]"
 
-#: gnubg.c:470
+#: gnubg.c:472
 msgid "[filename]"
 msgstr "[fişier]"
 
-#: gnubg.c:471
+#: gnubg.c:473
 msgid "[length]"
 msgstr "[lungime]"
 
-#: gnubg.c:472
+#: gnubg.c:474
 msgid "[modulus <modulus>|factors <factor> <factor>] [seed]"
 msgstr "[modulus <modul>|factors <factor> <factor>] [sămânţă]"
 
-#: gnubg.c:474
+#: gnubg.c:476
 msgid "[name]"
 msgstr "[nume]"
 
-#: gnubg.c:475
+#: gnubg.c:477
 msgid "[position]"
 msgstr "[poziţie]"
 
-#: gnubg.c:476
+#: gnubg.c:478
 msgid "[seed]"
 msgstr "[sămânţă]"
 
-#: gnubg.c:477
+#: gnubg.c:479
 msgid "[value]"
 msgstr "[valoare]"
 
-#: gnubg.c:478
+#: gnubg.c:480
 msgid "<player>"
 msgstr "<jucător>"
 
-#: gnubg.c:479
+#: gnubg.c:481
 msgid "<player> [rating]"
 msgstr "<jucător> [punctaj]"
 
-#: gnubg.c:480
+#: gnubg.c:482
 msgid "<plies>"
 msgstr "<mutări>"
 
-#: gnubg.c:481
+#: gnubg.c:483
 msgid "<position>"
 msgstr "<poziţie>"
 
-#: gnubg.c:482
+#: gnubg.c:484
 msgid "<priority>"
 msgstr "<prioritate>"
 
-#: gnubg.c:483
+#: gnubg.c:485
 msgid "<prompt>"
 msgstr "<prompt>"
 
-#: gnubg.c:484
+#: gnubg.c:486
 msgid "<score>"
 msgstr "<scor>"
 
-#: gnubg.c:485
+#: gnubg.c:487
 msgid "<size>"
 msgstr "<dimensiune>"
 
-#: gnubg.c:486
+#: gnubg.c:488
 #, fuzzy
 msgid "[game|roll|rolled|marked] <count>"
 msgstr "[joc|zaruri|aruncate|marcate] [număr]"
 
-#: gnubg.c:487
+#: gnubg.c:489
 msgid "<trials>"
 msgstr "<încercări>"
 
-#: gnubg.c:488
+#: gnubg.c:490
 msgid "<value>"
 msgstr "<valoare>"
 
-#: gnubg.c:489
+#: gnubg.c:491
 msgid "<matchid>"
 msgstr "<id partidă>"
 
-#: gnubg.c:490
+#: gnubg.c:492
 #, fuzzy
 msgid "<gnubgid>"
 msgstr "gnubg:\n"
 
-#: gnubg.c:491
+#: gnubg.c:493
 msgid "<xgid>"
 msgstr ""
 
-#: gnubg.c:492
+#: gnubg.c:494
 msgid "<URL>"
 msgstr "<URL>"
 
-#: gnubg.c:493
+#: gnubg.c:495
 msgid "<fraction>"
 msgstr "<fracţie>"
 
-#: gnubg.c:494
+#: gnubg.c:496
 msgid "<minimum games to rollout>"
 msgstr "<număr minim de jocuri să simulez>"
 
-#: gnubg.c:495
+#: gnubg.c:497
 msgid "<folder>"
 msgstr "<dosar>"
 
-#: gnubg.c:497
+#: gnubg.c:499
 msgid "[<warning>]"
 msgstr "[<avertisment>]"
 
-#: gnubg.c:498
+#: gnubg.c:500
 msgid "<warning> on|off"
 msgstr "<avertisment> pornit|oprit"
 
-#: gnubg.c:500
+#: gnubg.c:502
 msgid "<joint standard deviations>"
 msgstr "<deviaţii standard legate>"
 
-#: gnubg.c:501
+#: gnubg.c:503
 msgid "<std dev>"
 msgstr "<dev std>"
 
-#: gnubg.c:517
+#: gnubg.c:519
 msgid "Python supported."
 msgstr "Python suportat."
 
-#: gnubg.c:520
+#: gnubg.c:522
 msgid "SQLite database supported."
 msgstr "Baza de date SQLite suportată."
 
-#: gnubg.c:523
+#: gnubg.c:525
 msgid "GTK graphical interface supported."
 msgstr ""
 
-#: gnubg.c:526
+#: gnubg.c:528
 msgid "External players supported."
 msgstr "Playere externe suportate."
 
-#: gnubg.c:529
+#: gnubg.c:531
 msgid "Long RNG seeds supported."
 msgstr "Seminţe lungi RNG suportate."
 
-#: gnubg.c:532
+#: gnubg.c:534
 msgid "3d Boards supported."
 msgstr "Table 3D suportate."
 
-#: gnubg.c:535
+#: gnubg.c:537
 msgid "External commands supported."
 msgstr "Comenzi externe suportate."
 
-#: gnubg.c:538
+#: gnubg.c:540
 msgid "Windows sound system supported."
 msgstr "Sistemul de sunet Windows suportat."
 
-#: gnubg.c:540
+#: gnubg.c:542
+#, fuzzy
+msgid "Apple CoreAudio sound system supported."
+msgstr "Sistemul de sunet ESD suportat."
+
+#: gnubg.c:544
 #, fuzzy
 msgid "Apple QuickTime sound system supported."
 msgstr "Sistemul de sunet ESD suportat."
 
-#: gnubg.c:542
+#: gnubg.c:546
 #, fuzzy
 msgid "libcanberra sound system supported."
 msgstr "Sistemul de sunet Windows suportat."
 
-#: gnubg.c:545
+#: gnubg.c:549
 msgid "Multiple threads supported."
 msgstr "Mai multe fire de execuţie suportate."
 
-#: gnubg.c:549
+#: gnubg.c:553
 #, fuzzy
 msgid "SSE/SSE2 supported."
 msgstr "Python suportat."
 
-#: gnubg.c:551
+#: gnubg.c:555
 #, fuzzy
 msgid "SSE supported."
 msgstr "Python suportat."
 
-#: gnubg.c:855
+#: gnubg.c:859
 msgid "Current position"
 msgstr "Poziţia curentă."
 
-#: gnubg.c:875
+#: gnubg.c:879
 #, c-format
 msgid "`simple' must be followed by 26 integers; found only %d\n"
 msgstr "'simple' trebuie urmat de 26 de întregi; găsiţi numai %d\n"
 
-#: gnubg.c:910
+#: gnubg.c:914
 msgid "Illegal position."
 msgstr "Poziţie ilegală."
 
-#: gnubg.c:999
+#: gnubg.c:1003
 #, fuzzy, c-format
 msgid "You must specify whether to set '%s' on or off.\n"
 msgstr ""
 "Trebuie să specifici dacă să setez %s pornit sau oprit (vezi `help set %"
 "s').\n"
 
-#: gnubg.c:1030
+#: gnubg.c:1034
 #, fuzzy, c-format
 msgid "Illegal keyword `%s'.\n"
 msgstr "Cuvânt cheie ilegal `%s' -- încercă `help set %s'.\n"
 
-#: gnubg.c:1084
+#: gnubg.c:1088
 #, fuzzy
 msgid "Interrupted"
 msgstr "(Întrerupt)"
 
-#: gnubg.c:1128
+#: gnubg.c:1132
 msgid ""
 "This installation of GNU Backgammon was compiled without Python support."
 msgstr ""
 "Această instalare de Table GNU a fost compilată fără suport pentru Python."
 
-#: gnubg.c:1138
+#: gnubg.c:1142
 #, fuzzy
 msgid "Incomplete command."
 msgstr "Comandă incompletă -- încearcă 'help'."
 
-#: gnubg.c:1163
+#: gnubg.c:1167
 #, fuzzy, c-format
 msgid "Unknown keyword `%s'.\n"
 msgstr "Cuvânt cheie necunoscut: %s\n"
 
-#: gnubg.c:1270 gnubg.c:1305 gnubg.c:1387 gnubg.c:2660 play.c:2455
+#: gnubg.c:1274 gnubg.c:1309 gnubg.c:1391 gnubg.c:2675 play.c:2455
 msgid "Rolled"
 msgstr "Aruncat"
 
-#: gnubg.c:1338 gnubg.c:5539 gtkgame.c:1233
+#: gnubg.c:1342 gnubg.c:5573 gtkgame.c:1233
 msgid "No game in progress."
 msgstr "Nici un joc în curs."
 
-#: gnubg.c:1366 gnubg.c:1370 gnubg.c:2637 gnubg.c:2641 text.c:60 text.c:65
+#: gnubg.c:1370 gnubg.c:1374 gnubg.c:2652 gnubg.c:2656 text.c:60 text.c:65
 #, c-format
 msgid "%d point"
 msgid_plural "%d points"
@@ -1927,152 +1937,152 @@ msgstr[0] "%d punct"
 msgstr[1] "%d puncte"
 msgstr[2] "%d puncte"
 
-#: gnubg.c:1378 gnubg.c:2650 text.c:74
+#: gnubg.c:1382 gnubg.c:2665 text.c:74
 #, c-format
 msgid "Cube offered at %d"
 msgstr "Cubul oferit la %d"
 
-#: gnubg.c:1387
+#: gnubg.c:1391
 #, fuzzy, c-format
 msgid "%s %d%d"
 msgstr "%d%d"
 
-#: gnubg.c:1389 gnubg.c:2662 text.c:85
+#: gnubg.c:1393 gnubg.c:2677 text.c:85
 msgid "On roll"
 msgstr "La aruncare"
 
-#: gnubg.c:1398 gnubg.c:2671 text.c:94
+#: gnubg.c:1402 gnubg.c:2686 text.c:94
 #, c-format
 msgid "%d point match (Cube: %d)"
 msgstr "Partidă de %d puncte (Cub: %d)"
 
-#: gnubg.c:1414 gnubg.c:2689 gtkgame.c:5220 text.c:112
+#: gnubg.c:1418 gnubg.c:2704 gtkgame.c:5217 text.c:112
 #, c-format
 msgid "%d point match"
 msgstr "partidă de %d puncte"
 
 #. FIXME it's not necessarily the player on roll that resigned
-#: gnubg.c:1420
+#: gnubg.c:1424
 #, fuzzy
 msgid "resigns"
 msgstr "Modele"
 
-#: gnubg.c:1451
+#: gnubg.c:1455
 #, fuzzy
 msgid "MatchID"
 msgstr "ID partidă:"
 
-#: gnubg.c:1476 gnubg.c:1488
+#: gnubg.c:1480 gnubg.c:1492
 msgid "No game"
 msgstr "Nici un joc"
 
-#: gnubg.c:1498
+#: gnubg.c:1502
 msgid "Game over"
 msgstr "Jocul s-a terminat"
 
-#: gnubg.c:1541 gnubg.c:2526 show.c:464 show.c:495 show.c:788 show.c:1110
+#: gnubg.c:1545 gnubg.c:2541 show.c:464 show.c:495 show.c:788 show.c:1110
 #: show.c:1162 show.c:1208 show.c:1252 show.c:1371
 msgid "No position specified and no game in progress."
 msgstr "Nici o poziţie specificată şi nici un joc în curs."
 
-#: gnubg.c:1565
+#: gnubg.c:1569
 msgid "Evaluating position..."
 msgstr "Evaluând poziţia..."
 
-#: gnubg.c:1655
+#: gnubg.c:1659
 #, fuzzy, c-format
 msgid "No help available for topic `%s'"
 msgstr ""
 "Nici un ajutor disponibil pentru topica '%s' -- încearcă 'help' pentru o "
 "listă de topici.\n"
 
-#: gnubg.c:1680
+#: gnubg.c:1684
 #, fuzzy
 msgid "Usage"
 msgstr "Utilizator"
 
-#: gnubg.c:1683
+#: gnubg.c:1687
 #, fuzzy
 msgid "subcommand"
 msgstr "<subcomandă>\n"
 
-#: gnubg.c:1689
+#: gnubg.c:1693
 msgid "Available commands:"
 msgstr "Comenzi disponibile:"
 
-#: gnubg.c:1690
+#: gnubg.c:1694
 msgid "Available subcommands:"
 msgstr "Subcomenzi disponibile:"
 
-#: gnubg.c:1731
+#: gnubg.c:1735
 msgid "Eq."
 msgstr "Eq."
 
 #. Opponent has rolled the dice and then resigned. We want to find out if the resignation is OK after
 #. the roll
-#: gnubg.c:1963 play.c:863 play.c:873
+#: gnubg.c:1967 play.c:863 play.c:873
 msgid "Considering resignation..."
 msgstr "Considerând renunţarea..."
 
-#: gnubg.c:1982 gnubg.c:1996 gtkgame.c:5050
+#: gnubg.c:1986 gnubg.c:2000 gtkgame.c:5047
 msgid "Equity before resignation"
 msgstr "Valoare înainte de renunţare"
 
-#: gnubg.c:1984 gnubg.c:1998 gtkgame.c:5067
+#: gnubg.c:1988 gnubg.c:2002 gtkgame.c:5064
 msgid "Equity after resignation"
 msgstr "Valoare după renunţare"
 
-#: gnubg.c:1986 gnubg.c:2001
+#: gnubg.c:1990 gnubg.c:2005
 #, fuzzy
 msgid "Correct resign decision"
 msgstr ""
 "Decizia curentă de renunţare  : %s\n"
 "\n"
 
-#: gnubg.c:1988 gnubg.c:2003 gtkgame.c:1007
+#: gnubg.c:1992 gnubg.c:2007 gtkgame.c:1007
 msgid "Accept"
 msgstr "Acceptă"
 
-#: gnubg.c:1988 gnubg.c:2003
+#: gnubg.c:1992 gnubg.c:2007
 msgid "Reject"
 msgstr "Refuză"
 
-#: gnubg.c:2017 gtkcube.c:750 play.c:1039 play.c:1243
+#: gnubg.c:2021 gtkcube.c:750 play.c:1039 play.c:1243
 msgid "Considering cube action..."
 msgstr "Considerând acţiunea de cub"
 
-#: gnubg.c:2196 gnubg.c:2241
+#: gnubg.c:2200 gnubg.c:2245
 #, c-format
 msgid "This decision is part of beaver/raccoon sequence and cannot be hinted"
 msgstr ""
 
-#: gnubg.c:2203
+#: gnubg.c:2207
 #, c-format
 msgid "You cannot double."
 msgstr "Nu poţi dubla."
 
-#: gnubg.c:2298 play.c:1349
+#: gnubg.c:2302 play.c:1349
 msgid "Considering move..."
 msgstr "Considerând mutarea..."
 
-#: gnubg.c:2331
+#: gnubg.c:2346
 msgid "There are no legal moves."
 msgstr "Nu există mutări legale."
 
-#: gnubg.c:2346
+#: gnubg.c:2361
 msgid "You must set up a board first."
 msgstr "Trebuie să setezi o tablă mai întâi."
 
-#: gnubg.c:2501
+#: gnubg.c:2516
 msgid "That command is not yet implemented."
 msgstr "Acea comandă nu este încă implementată."
 
-#: gnubg.c:2522
+#: gnubg.c:2537
 msgid ""
 "The rollout command takes no arguments and only rollouts the current position"
 msgstr ""
 
-#: gnubg.c:2533
+#: gnubg.c:2548
 #, fuzzy, c-format
 msgid "Current Position"
 msgstr "Poziţia curentă."
@@ -2080,30 +2090,30 @@ msgstr "Poziţia curentă."
 #. Python escape.
 #. Ideally we should be able to handle both > print 1+1 sys.exit() and > print 1+1
 #. currently we only handle the latter...
-#: gnubg.c:2573
+#: gnubg.c:2588
 msgid "Only Python commands supported, not multiline code"
 msgstr ""
 
-#: gnubg.c:2599
+#: gnubg.c:2614
 msgid "This build of GNU Backgammon does not support Python"
 msgstr "Această compilare de Table GNU nu suportă Python"
 
-#: gnubg.c:2602 gnubg.c:2612
+#: gnubg.c:2617 gnubg.c:2627
 #, fuzzy
 msgid "You must specify a file to load from."
 msgstr ""
 "Trebuie să specifici un fişier din care să încarci (vezi `help load game')."
 
-#: gnubg.c:3277
+#: gnubg.c:3294
 #, fuzzy, c-format
 msgid "Settings saved to %s."
 msgstr "Setările salvate la %s.\n"
 
-#: gnubg.c:3278
+#: gnubg.c:3295
 msgid "standard output stream"
 msgstr "flux ieşire standard"
 
-#: gnubg.c:3734 makebearoff.c:1389 makebearoff.c:1390 makebearoff.c:1391
+#: gnubg.c:3751 makebearoff.c:1389 makebearoff.c:1390 makebearoff.c:1391
 #: makebearoff.c:1392 makebearoff.c:1394 makebearoff.c:1457 makebearoff.c:1462
 #: show.c:395 show.c:1830 show.c:1833 show.c:1836 show.c:1840 show.c:1867
 #: show.c:1871 show.c:1875 show.c:1884 show.c:1892 show.c:1896 show.c:1900
@@ -2111,7 +2121,7 @@ msgstr "flux ieşire standard"
 msgid "yes"
 msgstr "da"
 
-#: gnubg.c:3734 makebearoff.c:1389 makebearoff.c:1390 makebearoff.c:1391
+#: gnubg.c:3751 makebearoff.c:1389 makebearoff.c:1390 makebearoff.c:1391
 #: makebearoff.c:1392 makebearoff.c:1394 makebearoff.c:1457 makebearoff.c:1462
 #: show.c:395 show.c:1830 show.c:1833 show.c:1836 show.c:1840 show.c:1867
 #: show.c:1871 show.c:1875 show.c:1884 show.c:1892 show.c:1896 show.c:1900
@@ -2119,264 +2129,305 @@ msgstr "da"
 msgid "no"
 msgstr "nu"
 
-#: gnubg.c:3765 gnubg.c:5156
+#: gnubg.c:3782 gnubg.c:5190
 msgid "Please answer `y' or `n'."
 msgstr "Te rog răspunde 'y' (da) sau 'n' (nu)."
 
-#: gnubg.c:3945
+#: gnubg.c:3962
 #, fuzzy
 msgid "output will be shown"
 msgstr "Numerele pip nu vor fi arătate."
 
-#: gnubg.c:3945
+#: gnubg.c:3962
 #, fuzzy
 msgid "output will not be shown"
 msgstr "Numerele pip nu vor fi arătate."
 
-#: gnubg.c:4415
+#: gnubg.c:4432
 msgid "Enter dice: "
 msgstr "Introduce zaruri:"
 
-#: gnubg.c:4434
+#: gnubg.c:4451
 msgid "You must enter two numbers between 1 and 6."
 msgstr "Trebuie să introduci două numere între 1 şi 6"
 
-#: gnubg.c:4493
+#: gnubg.c:4512
 #, fuzzy, c-format
 msgid "Fetching %d random numbers from <%s>\n"
 msgstr "Aducând %d numere aleatoare de la <www.random.org>\n"
 
 #. parse string
-#: gnubg.c:4547
+#: gnubg.c:4566
 msgid "Done."
 msgstr "Gata."
 
-#: gnubg.c:4574
+#: gnubg.c:4601
 #, fuzzy
 msgid "Failure setting up RNG"
 msgstr "Eroare la setarea RNG\n"
 
-#: gnubg.c:4579
+#: gnubg.c:4606
 #, fuzzy
 msgid "Failure setting up RNG for rollout."
 msgstr "Eroare la setarea RNG pentru simulare.\n"
 
-#: gnubg.c:4665
+#: gnubg.c:4693
 msgid "Do not use bearoff database"
 msgstr "Nu folosi bază de date de scoatere"
 
-#: gnubg.c:4667
+#: gnubg.c:4695
 msgid "Evaluate commands in FILE and exit"
 msgstr "Evaluează comenzi în FILE şi ieşi"
 
-#: gnubg.c:4669
+#: gnubg.c:4697
 msgid "Set language to LANG"
 msgstr "Setează limba la LANG"
 
-#: gnubg.c:4671
-msgid "Create new neural net (of size N)"
-msgstr "Creează o reţea neurală nouă (de dimensiune N)"
-
-#: gnubg.c:4673
+#: gnubg.c:4699
 msgid "Evaluate Python code in FILE and exit"
 msgstr "Evaluează cod Python în FILE şi ieşi"
 
-#: gnubg.c:4675
+#: gnubg.c:4701
 msgid "Disable sound effects"
 msgstr "Dezactivează efectele de sunet"
 
-#: gnubg.c:4677
+#: gnubg.c:4703
 msgid "Do not read .gnubgrc and .gnubgautorc commands"
 msgstr "Nu citi comenzile .gnubgrc şi .gnubgautorc"
 
-#: gnubg.c:4680
+#: gnubg.c:4706
 #, fuzzy
 msgid "Show gtk splash screen"
 msgstr "Nu arăta imaginea de întâmpinare gtk"
 
-#: gnubg.c:4682
+#: gnubg.c:4708
 #, fuzzy
 msgid "Start the command line instead of using the graphical interface"
 msgstr "Modifică felul cum arată interfaţa grafică"
 
-#: gnubg.c:4684
+#: gnubg.c:4710
 msgid "Show version information and exit"
 msgstr "Arată informaţii despre versiune şi ieşi"
 
-#: gnubg.c:4686
+#: gnubg.c:4712
 #, fuzzy
 msgid "Ignore tty input when using the graphical interface"
 msgstr "Ignoră intrarea tty la folosirea sistemului de ferestre"
 
-#: gnubg.c:4688
+#: gnubg.c:4714
 msgid "Turn on debug"
 msgstr "Porneşte depanarea"
 
-#: gnubg.c:4690
+#: gnubg.c:4716
 #, fuzzy
 msgid "Specify location of general data"
 msgstr "Specifică un generator extern"
 
-#: gnubg.c:4692
+#: gnubg.c:4718
 msgid "Specify location of program specific data"
 msgstr ""
 
-#: gnubg.c:4694
+#: gnubg.c:4720
 msgid "Specify location of program documentation"
 msgstr ""
 
-#: gnubg.c:4780 gnubg.c:4783 gnubg.c:4788 gnubg.c:4792 gnubg.c:4797
+#: gnubg.c:4806 gnubg.c:4809 gnubg.c:4814 gnubg.c:4818 gnubg.c:4823
 msgid "Initialising"
 msgstr "Iniţializare"
 
-#: gnubg.c:4780 gtkoptions.c:1010
+#: gnubg.c:4806 gtkoptions.c:1010
 msgid "Random number generator"
 msgstr "Generator de numere aleatoare"
 
-#: gnubg.c:4783
+#: gnubg.c:4809
 msgid "match equity table"
 msgstr "tabela de valori a partidei"
 
-#: gnubg.c:4788
+#: gnubg.c:4814
 msgid "neural nets"
 msgstr "reţele neurale"
 
-#: gnubg.c:4792
+#: gnubg.c:4818
 msgid "Windows sockets"
 msgstr "Socket-uri Windows"
 
-#: gnubg.c:4797
+#: gnubg.c:4823
 msgid "Python"
 msgstr "Python"
 
-#: gnubg.c:4805
+#: gnubg.c:4831
 msgid "Loading"
 msgstr "Încărcare"
 
-#: gnubg.c:4805
+#: gnubg.c:4831
 msgid "User Settings"
 msgstr "Setări utilizator"
 
-#: gnubg.c:4851
+#: gnubg.c:4877
 #, fuzzy, c-format
 msgid "GNU Backgammon build without Python."
 msgstr "Table GNU compilat fără Python\n"
 
-#: gnubg.c:4882 gnubg.c:4926
+#: gnubg.c:4908 gnubg.c:4952
 msgid "Command only valid in match play"
 msgstr "Comanda este validă doar în timpul partidei"
 
-#: gnubg.c:4893 gnubg.c:4895 gnubg.c:4898
+#: gnubg.c:4919 gnubg.c:4921 gnubg.c:4924
 #, fuzzy
 msgid "MWC for equity"
 msgstr "MWC înainte de renunţare"
 
-#: gnubg.c:4897 gnubg.c:4942
+#: gnubg.c:4923 gnubg.c:4968
 #, fuzzy
 msgid "By linear interpolation"
 msgstr "După interpolare liniară:\n"
 
-#: gnubg.c:4938 gnubg.c:4940 gnubg.c:4943
+#: gnubg.c:4964 gnubg.c:4966 gnubg.c:4969
 #, fuzzy
 msgid "Equity for MWC"
 msgstr "Valoare partidă ca MWC"
 
-#: gnubg.c:5076
+#: gnubg.c:5110
 #, c-format
 msgid "File \"%s\" exists. Overwrite? "
 msgstr "Fişierul \"%s\" există. Suprascrie? "
 
-#: gnubg.c:5173
+#: gnubg.c:5207
 #, fuzzy
 msgid "You may be about to make a very bad play"
 msgstr "Eşti pe cale să joci foarte slab. Eşti sigur? "
 
-#: gnubg.c:5177
+#: gnubg.c:5211
 #, fuzzy
 msgid "You may be about to make a bad play"
 msgstr "Eşti pe cale să joci slab. Eşti sigur? "
 
-#: gnubg.c:5181
+#: gnubg.c:5215
 #, fuzzy
 msgid "You may be about to make a doubtful play"
 msgstr "Eşti pe cale să joci îndoielnic. Eşti sigur? "
 
-#: gnubg.c:5193
+#: gnubg.c:5227
 msgid "Are you sure?"
 msgstr ""
 
-#: gnubg.c:5251
+#: gnubg.c:5285
 msgid "Analysis used for `hint' has been cleared"
 msgstr "Analiza utilizată pentru 'hint' a fost ştearsă"
 
-#: gnubg.c:5416
+#: gnubg.c:5450
 #, c-format
 msgid ""
 "Locale in your environment not supported by C library. Falling back to C "
 "locale.\n"
 msgstr ""
 
-#: gnubg.c:5601
+#: gnubg.c:5635
 #, fuzzy
 msgid ""
 "Are you sure you want to discard the current match and your existing "
 "autosave? "
 msgstr "Eşti sigur că vrei să ştergi toate partidele din această bază de date?"
 
-#: gnubg.c:5609
+#: gnubg.c:5643
 #, fuzzy
 msgid "Are you sure you want to discard the current match? "
 msgstr "Eşti sigur că vrei să ştergi toate partidele din această bază de date?"
 
-#: gnubgmodule.c:184
-msgid "invalid dict value in cubeinfo (see gnubg.setcubeinfo() for an example)"
+#: gnubgmodule.c:185
+#, fuzzy
+msgid "invalid dict value in cubeinfo (see gnubg.cubeinfo() for an example)"
 msgstr ""
 "valoare dict invalidă în cubeinfo (pentru un exemplu vezi gnubg.setcubeinfo"
 "())"
 
-#: gnubgmodule.c:202
+#: gnubgmodule.c:203
 msgid "invalid value cubeinfo (see gnubg.setcubeinfo() for an example)"
 msgstr "valoare invalidă cubeinfo (pentru un exemplu vezi gnubg.setcubeinfo())"
 
-#: gnubgmodule.c:275
+#: gnubgmodule.c:306
+#, fuzzy
+msgid "invalid dict value in posinfo (see gnubg.posinfo() for an example)"
+msgstr ""
+"valoare dict invalidă în cubeinfo (pentru un exemplu vezi gnubg.setcubeinfo"
+"())"
+
+#: gnubgmodule.c:319 gnubgmodule.c:333
+#, fuzzy
+msgid "invalid value posinfo (see gnubg.posinfo() for an example)"
+msgstr "valoare invalidă cubeinfo (pentru un exemplu vezi gnubg.setcubeinfo())"
+
+#: gnubgmodule.c:396
 msgid ""
 "invalid dict value in evalcontext (see gnubg.evalcontext() for an example)"
 msgstr ""
 "valoare dict invalidă în evalcontex (pentru un exemplu vezi gnubg.evalcontext"
 "())"
 
-#: gnubgmodule.c:289
+#: gnubgmodule.c:410
 msgid "invalid value evalcontext (see gnubg.evalcontext() for an example)"
 msgstr ""
 "valoare evalcontext invalidă (pentru un exemplu vezi gnubg.evalcontext())"
 
-#: gnubgmodule.c:311
+#: gnubgmodule.c:432
 msgid "invalid value in evalcontext (see gnubg.evalcontext() for an example)"
 msgstr ""
 "valoare invalidă în evalcontext (pentru un exemplu vezi gnubg.evalcontext())"
 
-#: gnubgmodule.c:504
+#: gnubgmodule.c:477
+#, c-format
+msgid "error in SetCubeInfo\n"
+msgstr ""
+
+#: gnubgmodule.c:503
+#, c-format
+msgid "error in SetPosInfo\n"
+msgstr ""
+
+#: gnubgmodule.c:648
 #, fuzzy
 msgid "interupted/errno in GeneralEvaluateE"
 msgstr "interupted/errro în GeneralEvaluateE"
 
-#: gnubgmodule.c:550
+#: gnubgmodule.c:694
 msgid "interupted/errno in GeneralCubeDecisionE"
 msgstr "interupted/errno în GeneralCubeDecisionE"
 
-#: gnubgmodule.c:686
+#: gnubgmodule.c:739
+#, c-format
+msgid "What? No dice?\n"
+msgstr ""
+
+#: gnubgmodule.c:830
 msgid "invalid matchlength"
 msgstr "lungime partidă invalidă"
 
-#: gnubgmodule.c:791
+#: gnubgmodule.c:955
+msgid ""
+"requires 0 or exactly 3 arguments (Board, Cube-Info dict, Pos-Info dict). "
+"(see gnubg.board(), gnubg.cubeinfo(), gnubg.posinfo() for examples)"
+msgstr ""
+
+#: gnubgmodule.c:965 gnubgmodule.c:1002
+#, fuzzy
+msgid "no current position available"
+msgstr "Scrie poziţia curentă într-un fişier"
+
+#: gnubgmodule.c:1014
+msgid ""
+"a cube-info argument requires a pos-info dictionary as an argument (see "
+"gnubg.matchid() for an example)"
+msgstr ""
+
+#: gnubgmodule.c:1041
 msgid "invalid positionid"
 msgstr "id poziţie invalid"
 
-#: gnubgmodule.c:898
+#: gnubgmodule.c:1148
 msgid "invalid number of chequers or points"
 msgstr "număr de puluri sau puncte invalide"
 
-#: gnubgmodule.c:906
+#: gnubgmodule.c:1156
 msgid "invalid position number"
 msgstr "număr poziţie invalid"
 
@@ -2493,7 +2544,7 @@ msgstr "Întoarce lovituri: %s\n"
 #. * the click is in the small time frame between end
 #. * of player turn and next computer turn
 #: gtkboard.c:1820 play.c:1873 play.c:2207 play.c:2263 play.c:2366 play.c:2544
-#: play.c:3611 play.c:3667 play.c:3739 play.c:3850
+#: play.c:3613 play.c:3669 play.c:3741 play.c:3852
 msgid ""
 "It is the computer's turn -- type `play' to force it to move immediately."
 msgstr ""
@@ -2544,93 +2595,93 @@ msgstr "%s este la aruncare.\n"
 msgid "%s to roll"
 msgstr "%s la aruncare:"
 
-#: gtkchequer.c:264
+#: gtkchequer.c:265
 msgid "Evaluating positions..."
 msgstr "Evaluând poziţiile..."
 
-#: gtkchequer.c:353 gtkcube.c:830
+#: gtkchequer.c:354 gtkcube.c:830
 #, c-format
 msgid "You need to save a preset as \"%s\""
 msgstr "Trebuie să salvezi o presetare ca \"%s\""
 
-#: gtkchequer.c:445
+#: gtkchequer.c:446
 #, fuzzy
 msgid "Move details"
 msgstr "Întârziere mutare:"
 
-#: gtkchequer.c:452 gtkcube.c:898
+#: gtkchequer.c:453 gtkcube.c:899
 msgid "Eval"
 msgstr "Evaluare"
 
-#: gtkchequer.c:453 gtkchequer.c:455 gtkcube.c:900 gtkcube.c:903
+#: gtkchequer.c:454 gtkchequer.c:456 gtkcube.c:901 gtkcube.c:904
 msgid "..."
 msgstr "..."
 
-#: gtkchequer.c:457 gtkmovelist.c:65 gtkrolls.c:219 html.c:2502 sound.c:168
+#: gtkchequer.c:458 gtkmovelist.c:65 gtkrolls.c:219 html.c:2502 sound.c:320
 msgid "Move"
 msgstr "Mută"
 
-#: gtkchequer.c:458
+#: gtkchequer.c:459
 msgid "Show"
 msgstr "Arată"
 
-#: gtkchequer.c:459 gtkcube.c:905 gtkcube.c:1039
+#: gtkchequer.c:460 gtkcube.c:906 gtkcube.c:1040
 msgid "Copy"
 msgstr "Copiază"
 
-#: gtkchequer.c:460
+#: gtkchequer.c:461
 #, fuzzy
 msgid "TM"
 msgstr "HTML"
 
-#: gtkchequer.c:461 gtkcube.c:907
+#: gtkchequer.c:462 gtkcube.c:908
 #, fuzzy
 msgid "Cmark"
 msgstr "întuneric"
 
-#: gtkchequer.c:467
+#: gtkchequer.c:468
 msgid "Details"
 msgstr "Detalii"
 
-#: gtkchequer.c:507 gtkcube.c:941
+#: gtkchequer.c:508 gtkcube.c:942
 #, c-format
 msgid "Evaluate play on cubeful %d-ply"
 msgstr "Evaluează jocul la mutarea %d cu cub"
 
-#: gtkchequer.c:551 gtkcube.c:984
+#: gtkchequer.c:552 gtkcube.c:985
 #, c-format
 msgid "Rollout preset %c"
 msgstr "Presetare simulare %c"
 
-#: gtkchequer.c:614
+#: gtkchequer.c:615
 msgid "Rollout chequer play with current settings"
 msgstr "Simulează jocul de puluri cu setările curente"
 
-#: gtkchequer.c:617
+#: gtkchequer.c:618
 msgid "Evaluate chequer play with current settings"
 msgstr "Evaluează jocul de puluri cu setările curente"
 
-#: gtkchequer.c:620 gtkcube.c:1030
+#: gtkchequer.c:621 gtkcube.c:1031
 msgid "Modify rollout settings"
 msgstr "Modifică parametri simulare"
 
-#: gtkchequer.c:623 gtkcube.c:1033
+#: gtkchequer.c:624 gtkcube.c:1034
 msgid "Modify evaluation settings"
 msgstr "Modifică parametri evaluare"
 
-#: gtkchequer.c:626 gtkcube.c:1036
+#: gtkchequer.c:627 gtkcube.c:1037
 msgid "Toggle output as MWC or equity"
 msgstr "Comută ieşirea ca MWC sau valoare"
 
-#: gtkchequer.c:629
+#: gtkchequer.c:630
 msgid "Copy selected moves to clipboard"
 msgstr "Copiază mutările selectate în clipboard"
 
-#: gtkchequer.c:632
+#: gtkchequer.c:633
 msgid "Move the selected move"
 msgstr "Mută conform mutării selectate"
 
-#: gtkchequer.c:635 gtkcube.c:1042
+#: gtkchequer.c:636 gtkcube.c:1043
 msgid "Show Sho Sengoku Temperature Map of position after selected move"
 msgstr ""
 "Arată harta de temperatură Sho Sengoku a poziţiei după mutarea selectată"
@@ -2640,7 +2691,7 @@ msgid "Lose"
 msgstr "Pierdut"
 
 #: gtkcube.c:107 gtkcube.c:335 gtkgame.c:958 gtkrelational.c:58 latex.c:444
-#: play.c:4378 sound.c:172
+#: play.c:4379 sound.c:324
 msgid "Take"
 msgstr "Ia"
 
@@ -2700,20 +2751,20 @@ msgstr "Ia-l!"
 msgid "Proper cube action: "
 msgstr "Acţiune cu cub corectă:"
 
-#: gtkcube.c:875
+#: gtkcube.c:876
 #, fuzzy
 msgid "Cube details"
 msgstr "Decizia de cub"
 
-#: gtkcube.c:906
+#: gtkcube.c:907
 msgid "Temp. Map"
 msgstr "Hartă temporară"
 
-#: gtkcube.c:1024
+#: gtkcube.c:1025
 msgid "Rollout cube decision with current settings"
 msgstr "Simulează decizia de cub cu setările curente"
 
-#: gtkcube.c:1027
+#: gtkcube.c:1028
 msgid "Evaluate cube decision with current settings"
 msgstr "Evaluează decizia de cub cu setările curente"
 
@@ -2721,7 +2772,7 @@ msgstr "Evaluează decizia de cub cu setările curente"
 msgid "Annotations"
 msgstr "Adnotări"
 
-#: gtkexport.c:40 gtkgame.c:2285
+#: gtkexport.c:40 gtkgame.c:2287
 msgid "Analysis"
 msgstr "Analiză"
 
@@ -2777,16 +2828,16 @@ msgstr "Arată pentru dublările ratate"
 msgid "Show for close cube decisions"
 msgstr "Arată pentru deciziile de cub de închidere"
 
-#: gtkexport.c:433
+#: gtkexport.c:434
 #, c-format
 msgid "%dx%d pixels"
 msgstr "%dx%d pixeli"
 
-#: gtkexport.c:448
+#: gtkexport.c:449
 msgid "Select top folder for html export"
 msgstr "Selectează dosarul rădăcină pentru exportare html"
 
-#: gtkexport.c:474
+#: gtkexport.c:475
 #, c-format
 msgid ""
 "Folder html-images exists\n"
@@ -2797,7 +2848,7 @@ msgstr ""
 "în %s\n"
 "Pot suprascrie imaginile?"
 
-#: gtkexport.c:487
+#: gtkexport.c:488
 #, c-format
 msgid ""
 "Folder html-images can't be created\n"
@@ -2807,110 +2858,110 @@ msgstr ""
 "în %s"
 
 #. create dialog
-#: gtkexport.c:538
+#: gtkexport.c:540
 msgid "GNU Backgammon - Export Settings"
 msgstr "Table GNU - Exportă setări"
 
 #. include stuff
-#: gtkexport.c:547
+#: gtkexport.c:549
 msgid "Include"
 msgstr "Include"
 
 #. show stuff
-#: gtkexport.c:570 gtkexport.c:585 gtkgame.c:3460 gtkprefs.c:2920
+#: gtkexport.c:572 gtkexport.c:587 gtkgame.c:3454 gtkprefs.c:2920
 #: gtkprefs.c:2937
 msgid "Board"
 msgstr "Tablă"
 
-#: gtkexport.c:603
+#: gtkexport.c:605
 msgid "move(s) between board shown"
 msgstr "mutări la mijloc de tablă arătate"
 
-#: gtkexport.c:615 gtkrelational.c:803
+#: gtkexport.c:617 gtkrelational.c:803
 msgid "Players"
 msgstr "Jucători"
 
 #. moves
-#: gtkexport.c:640
+#: gtkexport.c:642
 msgid "Output move analysis"
 msgstr "Analiza mutărilor de ieşire"
 
-#: gtkexport.c:656
+#: gtkexport.c:658
 msgid "Show at most"
 msgstr "Arată cel mult"
 
-#: gtkexport.c:668
+#: gtkexport.c:670
 msgid "move(s)"
 msgstr "mutări"
 
-#: gtkexport.c:674 gtkexport.c:714
+#: gtkexport.c:676 gtkexport.c:716
 msgid "Show detailed probabilities"
 msgstr "Arată probabilităţi detaliate"
 
-#: gtkexport.c:680 gtkexport.c:720
+#: gtkexport.c:682 gtkexport.c:722
 msgid "Show evaluation parameters"
 msgstr "Arată parametrii evaluării"
 
-#: gtkexport.c:685 gtkexport.c:726
+#: gtkexport.c:687 gtkexport.c:728
 msgid "Show rollout parameters"
 msgstr "Arată parametrii simulării"
 
 #. cube
-#: gtkexport.c:699
+#: gtkexport.c:701
 msgid "Output cube decision analysis"
 msgstr "Scrie analiza deciziilor de cub"
 
 #. html
-#: gtkexport.c:744
+#: gtkexport.c:746
 msgid "HTML export options"
 msgstr "Opţiuni export HTML"
 
-#: gtkexport.c:759
+#: gtkexport.c:761
 msgid "URL to pictures"
 msgstr "URL în imagini"
 
-#: gtkexport.c:770
+#: gtkexport.c:772
 msgid "HTML board type:"
 msgstr "Tip tablă HTML:"
 
-#: gtkexport.c:776
+#: gtkexport.c:778
 msgid "BBS"
 msgstr "BBS"
 
-#: gtkexport.c:777
+#: gtkexport.c:779
 msgid "fibs2html"
 msgstr "fibs2html"
 
-#: gtkexport.c:787
+#: gtkexport.c:789
 msgid "CSS Style sheet:"
 msgstr "Foaie de stil CSS"
 
-#: gtkexport.c:792
+#: gtkexport.c:794
 msgid "In <head>"
 msgstr "În <head>"
 
-#: gtkexport.c:793
+#: gtkexport.c:795
 msgid "Inline (in tags)"
 msgstr "Inclus (în marcaje)"
 
-#: gtkexport.c:794
+#: gtkexport.c:796
 msgid "External file"
 msgstr "Fişier extern"
 
 #. Sizes
-#: gtkexport.c:802
+#: gtkexport.c:804
 msgid "Export sizes"
 msgstr "Exportă dimensiuni"
 
-#: gtkexport.c:821
+#: gtkexport.c:823
 msgid "Size of PNG images:"
 msgstr "Dimensiunea imaginilor PNG:"
 
-#: gtkexport.c:843
+#: gtkexport.c:845
 msgid "Size of Html images:"
 msgstr "Dimensiunea imaginilor Html:"
 
-#: gtkexport.c:855
+#: gtkexport.c:857
 msgid "Generate Html images..."
 msgstr "Generează imaginile Html..."
 
@@ -2919,7 +2970,7 @@ msgstr "Generează imaginile Html..."
 msgid "Supported files (%s)"
 msgstr "Fişiere suportate (%s)"
 
-#: gtkfile.c:130 gtkfile.c:300
+#: gtkfile.c:130 gtkfile.c:301
 msgid "All Files"
 msgstr "Toate fişierele"
 
@@ -2939,95 +2990,95 @@ msgstr "poziţie"
 msgid "Update extension"
 msgstr "Actualizează extensie"
 
-#: gtkfile.c:290
+#: gtkfile.c:291
 msgid "Supported files"
 msgstr "Fişiere suportate"
 
 #. Default option 'automatic'
-#: gtkfile.c:322
+#: gtkfile.c:323
 msgid "Automatic"
 msgstr "Automat"
 
 #. Extra option 'command file'
-#: gtkfile.c:329
+#: gtkfile.c:330
 msgid "Gnubg Command file"
 msgstr "Fişier linie de comandă gnubg"
 
-#: gtkfile.c:341
+#: gtkfile.c:342
 #, c-format
 msgid "Unable to import. Unrecognized file type"
 msgstr "Nu pot importa. Tip de fişier nerecunoscut"
 
-#: gtkfile.c:366
+#: gtkfile.c:367
 msgid "Open backgammon file"
 msgstr "Deschide fişier table"
 
-#: gtkfile.c:374
+#: gtkfile.c:375
 msgid "Open as:"
 msgstr "Deschide ca:"
 
-#: gtkfile.c:379
+#: gtkfile.c:380
 msgid "Selected file type: "
 msgstr "Tip de fişier selectat:"
 
-#: gtkfile.c:425
+#: gtkfile.c:427
 #, fuzzy
 msgid "Open Commands file"
 msgstr "Fişier linie de comandă gnubg"
 
-#: gtkfile.c:439
+#: gtkfile.c:441
 msgid "Save or export to file"
 msgstr "Salvează sau exportă în fişier"
 
-#: gtkfile.c:466
+#: gtkfile.c:468
 msgid "Failed to make directory"
 msgstr "Eşuat în crea dosar"
 
-#: gtkfile.c:489
+#: gtkfile.c:491
 msgid "Previous"
 msgstr "Precedent"
 
-#: gtkfile.c:502
+#: gtkfile.c:504
 msgid "Failed import"
 msgstr "Eşuat în a importa"
 
-#: gtkfile.c:512
+#: gtkfile.c:514
 msgid "Cancelled"
 msgstr "Anulat"
 
-#: gtkfile.c:528
+#: gtkfile.c:530
 msgid "Done"
 msgstr "Gata"
 
-#: gtkfile.c:628
+#: gtkfile.c:630
 msgid "Result"
 msgstr "Rezultat"
 
-#: gtkfile.c:633 gtkmovelist.c:56
+#: gtkfile.c:635 gtkmovelist.c:56
 msgid "Type"
 msgstr "Tip"
 
-#: gtkfile.c:702
+#: gtkfile.c:704
 msgid "Batch analyse files"
 msgstr "Fişiere analiză batch"
 
-#: gtkfile.c:725
+#: gtkfile.c:727
 msgid "Skip"
 msgstr "Sări"
 
-#: gtkfile.c:726 progress.c:759
+#: gtkfile.c:728 progress.c:759
 msgid "Stop"
 msgstr "Stop"
 
-#: gtkfile.c:727
+#: gtkfile.c:729
 msgid "Open"
 msgstr "Deschide"
 
-#: gtkfile.c:763
+#: gtkfile.c:765
 msgid "Select files to analyse"
 msgstr "Selectează fişierele de analizat"
 
-#: gtkfile.c:768
+#: gtkfile.c:770
 #, fuzzy
 msgid "Add to relational database"
 msgstr "Adaugă la baza de date relatională externă"
@@ -3061,7 +3112,7 @@ msgstr "Diferenţă:"
 msgid "Didn't double"
 msgstr "Nu a dublat"
 
-#: gtkgame.c:838 play.c:4399 text.c:83 text.c:490
+#: gtkgame.c:838 play.c:4400 text.c:83 text.c:490
 #, c-format
 msgid "Rolled %d%d"
 msgstr "Aruncat %d%d"
@@ -3071,7 +3122,7 @@ msgstr "Aruncat %d%d"
 msgid "Moved "
 msgstr "Mutat"
 
-#: gtkgame.c:886 gtkgame.c:2035 gtkgame.c:2292 gtkgame.c:6332 gtkoptions.c:521
+#: gtkgame.c:886 gtkgame.c:2036 gtkgame.c:2294 gtkgame.c:6329 gtkoptions.c:521
 msgid "Chequer play"
 msgstr "Joc de puluri"
 
@@ -3083,11 +3134,11 @@ msgstr "Decizia de cub"
 msgid "GNU Backgammon cannot analyse neither beavers nor raccoons yet"
 msgstr "Table GNU nu poate analiza nici castori nici ratoni încă"
 
-#: gtkgame.c:959 latex.c:460 play.c:4386 sound.c:166
+#: gtkgame.c:959 latex.c:460 play.c:4387 sound.c:318
 msgid "Drop"
 msgstr "Renunţă"
 
-#: gtkgame.c:994 gtkgame.c:6778 sound.c:170
+#: gtkgame.c:994 gtkgame.c:6776 sound.c:322
 msgid "Resign"
 msgstr "Renunţă"
 
@@ -3116,15 +3167,15 @@ msgstr "Schimbă vederea în 3D"
 msgid "Switch to 2D view"
 msgstr "Schimbă vederea în 2D"
 
-#: gtkgame.c:1722
+#: gtkgame.c:1723
 msgid "Predefined settings"
 msgstr "Setări predefinite"
 
-#: gtkgame.c:1732
+#: gtkgame.c:1733
 msgid "Select a predefined setting:"
 msgstr "Selectează o setare predefinită:"
 
-#: gtkgame.c:1735
+#: gtkgame.c:1736
 msgid ""
 "Select a predefined setting, ranging from beginner's play to the grandmaster "
 "setting that will test your patience"
@@ -3132,7 +3183,7 @@ msgstr ""
 "Selectează o setare predefinită, pornind de la joc de începător până la "
 "setarea mare maestru care îţi va testa răbdarea"
 
-#: gtkgame.c:1743 gtkgame.c:2103 gtkmovefilter.c:332 gtkmovefilter.c:500
+#: gtkgame.c:1744 gtkgame.c:2104 gtkmovefilter.c:332 gtkmovefilter.c:500
 #: gtkprefs.c:265
 msgid "user defined"
 msgstr "definit de utilizator"
@@ -3140,11 +3191,11 @@ msgstr "definit de utilizator"
 #.
 #. * Frame with user settings
 #.
-#: gtkgame.c:1753
+#: gtkgame.c:1754
 msgid "User defined settings"
 msgstr "Setări definite de utilizator"
 
-#: gtkgame.c:1767
+#: gtkgame.c:1768
 msgid ""
 "Specify how many rolls GNU Backgammon should lookahead. Each ply costs "
 "approximately a factor of 21 in computational time. Also note that 2-ply is "
@@ -3154,34 +3205,34 @@ msgstr ""
 "mutare costă aproximativ un factor de 21 în timp de calcul. De notat că 2-"
 "mutări este echivalent cu setarea 3-mutări Snowie."
 
-#: gtkgame.c:1772
+#: gtkgame.c:1773
 msgid "Lookahead"
 msgstr "Calculează înainte"
 
-#: gtkgame.c:1781
+#: gtkgame.c:1782
 msgid "Plies:"
 msgstr "Mutări:"
 
 #. Use pruning neural nets
-#: gtkgame.c:1787
+#: gtkgame.c:1788
 msgid "Pruning neural nets"
 msgstr "Reţelele neurale de reducere"
 
-#: gtkgame.c:1792
+#: gtkgame.c:1793
 msgid "Use neural net pruning"
 msgstr "Foloseşte reţele neurale de reducere"
 
 #. FIXME This needs a tool tip
 #. cubeful
-#: gtkgame.c:1799
+#: gtkgame.c:1800
 msgid "Cubeful evaluations"
 msgstr "Evaluări cu cub"
 
-#: gtkgame.c:1804
+#: gtkgame.c:1805
 msgid "Cubeful chequer evaluation"
 msgstr "Evaluare puluri cu cub"
 
-#: gtkgame.c:1811
+#: gtkgame.c:1812
 msgid ""
 "Instruct GNU Backgammon to use cubeful evaluations, i.e., include the value "
 "of cube ownership in the evaluations. It is recommended to enable this "
@@ -3190,7 +3241,7 @@ msgstr ""
 "Instruieşte Table GNU să folosească evaluări cu cub, i.e., include valoarea "
 "posesiei cubului în evaluări. Este recomandat să activezi această opţiune."
 
-#: gtkgame.c:1818
+#: gtkgame.c:1819
 msgid ""
 "GNU Backgammon will always perform cubeful evaluations for cube decisions. "
 "Disabling this option will make GNU Backgammon use cubeless evaluations in "
@@ -3202,7 +3253,7 @@ msgstr ""
 "fără cub în nodurile interval al evaluărilor de mutări mai înalte. Este "
 "recomandat să activezi această opţiune"
 
-#: gtkgame.c:1832
+#: gtkgame.c:1833
 msgid ""
 "You can use this option to introduce noise or errors in the evaluations. "
 "This is useful for introducing levels below 0-ply. The lower rated bots (e."
@@ -3216,19 +3267,19 @@ msgstr ""
 "Zgomotul introdus poate fi determinist, i.e., întotdeauna acelaşi zgomot "
 "pentru aceiaşi poziţie, sau poate fi aleator"
 
-#: gtkgame.c:1841
+#: gtkgame.c:1842
 msgid "Noise"
 msgstr "Zgomot"
 
-#: gtkgame.c:1853
+#: gtkgame.c:1854
 msgid "Noise:"
 msgstr "Zgomot:"
 
-#: gtkgame.c:1859
+#: gtkgame.c:1860
 msgid "Deterministic noise"
 msgstr "Zgomot determinist"
 
-#: gtkgame.c:1884
+#: gtkgame.c:1885
 msgid ""
 "GNU Backgammon will evaluate all moves at 0-ply. The move filter controls "
 "how many moves to be evaluted at higher plies. A \"smaller\" filter will be "
@@ -3240,748 +3291,740 @@ msgstr ""
 "mic va fi mai rapid, dar Table GNU poate să nu găsească mutarea optimă. "
 "Utilizatorii avansaţi pot setă propriile filtre apăsând pe butonul [Modifică]"
 
-#: gtkgame.c:2043 gtkgame.c:2295 gtkgame.c:6335
+#: gtkgame.c:2044 gtkgame.c:2297 gtkgame.c:6332
 msgid "Cube decisions"
 msgstr "Decizii de cub"
 
-#: gtkgame.c:2107
+#: gtkgame.c:2108
 #, fuzzy
 msgid "Advanced Settings..."
 msgstr "Modifică setări jucător..."
 
-#: gtkgame.c:2253
+#: gtkgame.c:2255
 msgid "Doubtful:"
 msgstr "Îndoielnic:"
 
-#: gtkgame.c:2253
+#: gtkgame.c:2255
 msgid "Bad:"
 msgstr "Slab:"
 
-#: gtkgame.c:2253
+#: gtkgame.c:2255
 msgid "Very bad:"
 msgstr "Foarte slab:"
 
-#: gtkgame.c:2254
+#: gtkgame.c:2256
 msgid "Very lucky:"
 msgstr "Foarte norocos:"
 
-#: gtkgame.c:2254
+#: gtkgame.c:2256
 msgid "Lucky:"
 msgstr "Norocos:"
 
-#: gtkgame.c:2255
+#: gtkgame.c:2257
 msgid "Unlucky:"
 msgstr "Nenorocos:"
 
-#: gtkgame.c:2255
+#: gtkgame.c:2257
 msgid "Very unlucky:"
 msgstr "Foarte nenorocos:"
 
-#: gtkgame.c:2270
+#: gtkgame.c:2272
 msgid "GNU Backgammon - Analysis Settings"
 msgstr "Table GNU - Setări analiză"
 
-#: gtkgame.c:2298 gtkgame.c:6338 gtkrelational.c:63
+#: gtkgame.c:2300 gtkgame.c:6335 gtkrelational.c:63
 msgid "Luck"
 msgstr "Noroc"
 
-#: gtkgame.c:2303
+#: gtkgame.c:2305
 #, c-format
 msgid "Analyse player %s"
 msgstr "Analizează jucător %s"
 
-#: gtkgame.c:2311
+#: gtkgame.c:2313
 msgid "Skill thresholds"
 msgstr "Praguri îndemânare"
 
-#: gtkgame.c:2339
+#: gtkgame.c:2341
 msgid "Luck thresholds"
 msgstr "Praguri noroc"
 
-#: gtkgame.c:2368
+#: gtkgame.c:2370
 #, fuzzy
 msgid "Analysis Level"
 msgstr "Analiză"
 
-#: gtkgame.c:2375
+#: gtkgame.c:2377
 #, fuzzy
 msgid "Analysis settings"
 msgstr "Utilizează setările de analiză pentru Tutore"
 
-#: gtkgame.c:2380
+#: gtkgame.c:2382
 msgid "Eval Hint/Tutor Level"
 msgstr ""
 
-#: gtkgame.c:2389
+#: gtkgame.c:2391
 #, fuzzy
 msgid "Same as analysis"
 msgstr "La fel ca analiza"
 
-#: gtkgame.c:2396
+#: gtkgame.c:2398
 #, fuzzy
 msgid "Hint/Tutor settings"
 msgstr "Setări partidă"
 
-#: gtkgame.c:2448
-msgid "Name:"
-msgstr "Nume:"
+#: gtkgame.c:2450
+#, fuzzy
+msgid "Default Name:"
+msgstr "Imagini implicite"
 
-#: gtkgame.c:2456
+#: gtkgame.c:2458
 msgid "Human"
 msgstr "Om"
 
-#: gtkgame.c:2467
+#: gtkgame.c:2469
 #, fuzzy
 msgid "GNU Backgammon settings"
 msgstr "Table GNU - Setări analiză"
 
-#: gtkgame.c:2474
+#: gtkgame.c:2476
 msgid "External"
 msgstr "Extern"
 
-#: gtkgame.c:2480
+#: gtkgame.c:2482
 msgid "Socket:"
 msgstr "Socket:"
 
-#: gtkgame.c:2535
+#: gtkgame.c:2537
 msgid "GNU Backgammon - Players"
 msgstr "Table GNU - Jucători"
 
-#: gtkgame.c:2541
+#: gtkgame.c:2543
 msgid "Player 0"
 msgstr "Jucător 0"
 
-#: gtkgame.c:2542
+#: gtkgame.c:2544
 msgid "Player 1"
 msgstr "Jucător 1"
 
-#: gtkgame.c:2627 gtkgame.c:2812
+#: gtkgame.c:2624 gtkgame.c:2809
 msgid "System default"
 msgstr "Implicit sistem"
 
-#: gtkgame.c:2630
+#: gtkgame.c:2627
 msgid "English (GB)"
 msgstr "Engleză (MB)"
 
-#: gtkgame.c:2631
+#: gtkgame.c:2628
 msgid "English (US)"
 msgstr "Engleză (SUA)"
 
-#: gtkgame.c:2637
-msgid "Romanian"
-msgstr ""
-
-#: gtkgame.c:2639
+#: gtkgame.c:2636
 #, fuzzy
 msgid "Spanish"
 msgstr "Daneză"
 
-#: gtkgame.c:2665 gtkgame.c:2814
+#: gtkgame.c:2662 gtkgame.c:2811
 msgid "Select language"
 msgstr "Selectează limba"
 
-#: gtkgame.c:2709
+#: gtkgame.c:2706
 #, c-format
 msgid "Locale '%s' not supported by C library."
 msgstr ""
 
-#: gtkgame.c:2858 gtkrolls.c:388 gtkwindows.c:220
+#: gtkgame.c:2855 gtkrolls.c:388 gtkwindows.c:220
 msgid "Cancel"
 msgstr "Anulează"
 
-#: gtkgame.c:2859 gtkwindows.c:212 gtkwindows.c:250
+#: gtkgame.c:2856 gtkwindows.c:212 gtkwindows.c:250
 msgid "OK"
 msgstr "OK"
 
-#: gtkgame.c:2882
+#: gtkgame.c:2879
 msgid "/_File"
 msgstr "/_Fişier"
 
-#: gtkgame.c:2883
+#: gtkgame.c:2880
 msgid "/_File/_New..."
 msgstr "/_Fişier/_Nou..."
 
-#: gtkgame.c:2886
+#: gtkgame.c:2883
 msgid "/_File/_Open..."
 msgstr "/_Fişier/_Deschide..."
 
-#: gtkgame.c:2889
+#: gtkgame.c:2886
 msgid "/_File/_Save..."
 msgstr "/_Fişier/_Salvează..."
 
-#: gtkgame.c:2892 gtkgame.c:2896 gtkgame.c:2899
+#: gtkgame.c:2889 gtkgame.c:2893 gtkgame.c:2896
 msgid "/_File/-"
 msgstr "/_Fişier/-"
 
-#: gtkgame.c:2893
+#: gtkgame.c:2890
 #, fuzzy
 msgid "/_File/Open _Commands..."
 msgstr "/_Fişier/_Deschide..."
 
-#: gtkgame.c:2897
+#: gtkgame.c:2894
 msgid "/_File/Match information..."
 msgstr "/_Fişier/Informaţii partidă..."
 
-#: gtkgame.c:2902
+#: gtkgame.c:2899
 msgid "/_File/E_xit"
 msgstr "/_Fişier/_Ieşire"
 
-#: gtkgame.c:2904
+#: gtkgame.c:2901
 msgid "/_File/_Quit"
 msgstr "/_Fişier/_Părăseşte"
 
-#: gtkgame.c:2908
+#: gtkgame.c:2905
 msgid "/_Edit"
 msgstr "/_Editare"
 
-#: gtkgame.c:2909
+#: gtkgame.c:2906
 msgid "/_Edit/_Undo"
 msgstr "/_Editare/_Anulează"
 
-#: gtkgame.c:2912 gtkgame.c:2929
+#: gtkgame.c:2909 gtkgame.c:2926
 msgid "/_Edit/-"
 msgstr "/_Editare/-"
 
-#: gtkgame.c:2914
+#: gtkgame.c:2911
 #, fuzzy
 msgid "/_Edit/_Copy Position ID"
 msgstr "/_Editare/Copiază ca/Poziţie ASCII"
 
-#: gtkgame.c:2918
+#: gtkgame.c:2915
 msgid "/_Edit/Copy as"
 msgstr "/_Editare/Copiază ca"
 
-#: gtkgame.c:2919
+#: gtkgame.c:2916
 msgid "/_Edit/Copy as/Position as ASCII"
 msgstr "/_Editare/Copiază ca/Poziţie ASCII"
 
-#: gtkgame.c:2921
+#: gtkgame.c:2918
 msgid "/_Edit/Copy as/GammOnLine (HTML)"
 msgstr "/_Editare/Copiază ca/GammOnLine (HTML)"
 
-#: gtkgame.c:2923
+#: gtkgame.c:2920
 #, fuzzy
 msgid "/_Edit/Copy as/BackgammonBase.com (URL)"
 msgstr "/_Editare/Copiază ca/GammOnLine (HTML)"
 
-#: gtkgame.c:2926
+#: gtkgame.c:2923
 #, fuzzy
 msgid "/_Edit/_Paste Position ID"
 msgstr "/_Editare/_Editare poziţie"
 
-#: gtkgame.c:2930
+#: gtkgame.c:2927
 msgid "/_Edit/_Edit Position"
 msgstr "/_Editare/_Editare poziţie"
 
-#: gtkgame.c:2933
+#: gtkgame.c:2930
 msgid "/_View"
 msgstr "/_Vizualizare"
 
-#: gtkgame.c:2934
+#: gtkgame.c:2931
 msgid "/_View/_Panels"
 msgstr "/_Vizualizare/_Panouri"
 
-#: gtkgame.c:2935
+#: gtkgame.c:2932
 msgid "/_View/_Panels/_Game record"
 msgstr "/_Vizualizare/_Panouri/_Istoricul jocului"
 
-#: gtkgame.c:2937
+#: gtkgame.c:2934
 msgid "/_View/_Panels/_Analysis"
 msgstr "/_Vizualizare/_Panouri/_Analiză"
 
-#: gtkgame.c:2939
+#: gtkgame.c:2936
 msgid "/_View/_Panels/_Commentary"
 msgstr "/_Vizualizare/_Panouri/_Comentariu"
 
-#: gtkgame.c:2941
+#: gtkgame.c:2938
 msgid "/_View/_Panels/_Message"
 msgstr "/_Vizualizare/_Panouri/_Mesaj"
 
-#: gtkgame.c:2943
+#: gtkgame.c:2940
 msgid "/_View/_Panels/_Theory"
 msgstr "/_Vizualizare/_Panouri/_Teorie"
 
-#: gtkgame.c:2945
+#: gtkgame.c:2942
 msgid "/_View/_Panels/_Command"
 msgstr "/_Vizualizare/_Panouri/_Comandă"
 
-#: gtkgame.c:2947
+#: gtkgame.c:2944
 msgid "/_View/_Dock panels"
 msgstr "/_Vizualizare/_Andochează panouri"
 
-#: gtkgame.c:2948
+#: gtkgame.c:2945
 msgid "/_View/Restore panels"
 msgstr "/_Vizualizare/Restabileşte panouri"
 
-#: gtkgame.c:2949
+#: gtkgame.c:2946
 msgid "/_View/Hide panels"
 msgstr "/_Vizualizare/Ascunde panouri"
 
-#: gtkgame.c:2950 gtkgame.c:2963 gtkgame.c:2966
+#: gtkgame.c:2947 gtkgame.c:2960 gtkgame.c:2963
 msgid "/_View/-"
 msgstr "/_Vizualizare/-"
 
-#: gtkgame.c:2951
+#: gtkgame.c:2948
 #, fuzzy
 msgid "/_View/Show _ID in status bar"
 msgstr "/_Vizualizare/Arată ID-urile deasupra tablei"
 
-#: gtkgame.c:2952
+#: gtkgame.c:2949
 msgid "/_View/_Toolbar"
 msgstr "/_Vizualizare/Bara de _unelte"
 
-#: gtkgame.c:2953
+#: gtkgame.c:2950
 msgid "/_View/_Toolbar/_Hide Toolbar"
 msgstr "/_Vizualizare/Bara de _unelte/_Ascunde bara de unelte"
 
-#: gtkgame.c:2954
+#: gtkgame.c:2951
 msgid "/_View/_Toolbar/_Show Toolbar"
 msgstr "/_Vizualizare/Bara de _unelte/A_rată bara de unelte"
 
-#: gtkgame.c:2955
+#: gtkgame.c:2952
 msgid "/_View/_Toolbar/-"
 msgstr "/_Vizualizare/Bara de _unelte/-"
 
-#: gtkgame.c:2956
+#: gtkgame.c:2953
 msgid "/_View/_Toolbar/_Text only"
 msgstr "/_Vizualizare/Bara de _unelte/Numai _text"
 
-#: gtkgame.c:2958
+#: gtkgame.c:2955
 msgid "/_View/_Toolbar/_Icons only"
 msgstr "/_Vizualizare/Bara de _unelte/Numai _pictograme"
 
-#: gtkgame.c:2960
+#: gtkgame.c:2957
 msgid "/_View/_Toolbar/_Both"
 msgstr "/_Vizualizare/Bara de _unelte/Am_bele"
 
-#: gtkgame.c:2962
+#: gtkgame.c:2959
 msgid "/_View/Full screen"
 msgstr "/_Vizualizare/Pe tot ecranul"
 
-#: gtkgame.c:2964
+#: gtkgame.c:2961
 msgid "/_View/Play _Clockwise"
 msgstr "/_Vizualizare/Joacă în sensul a_celor de ceasornic"
 
-#: gtkgame.c:2967
+#: gtkgame.c:2964
 msgid "/_View/Switch to xD view"
 msgstr "/_Vizualizare/Treci la vederea xD"
 
-#: gtkgame.c:2969
+#: gtkgame.c:2966
 msgid "/_Game"
 msgstr "/_Joc"
 
-#: gtkgame.c:2970
+#: gtkgame.c:2967
 msgid "/_Game/_Roll"
 msgstr "/_Joc/A_runcare"
 
-#: gtkgame.c:2971
+#: gtkgame.c:2968
 msgid "/_Game/_Finish move"
 msgstr "/_Joc/_Termină mutarea"
 
-#: gtkgame.c:2972 gtkgame.c:2975 gtkgame.c:2978 gtkgame.c:2982 gtkgame.c:2985
+#: gtkgame.c:2969 gtkgame.c:2972 gtkgame.c:2975 gtkgame.c:2979 gtkgame.c:2982
 msgid "/_Game/-"
 msgstr "/_Joc/-"
 
-#: gtkgame.c:2973
+#: gtkgame.c:2970
 msgid "/_Game/_Double"
 msgstr "/_Joc/_Dublează"
 
-#: gtkgame.c:2974
+#: gtkgame.c:2971
 msgid "/_Game/Re_sign"
 msgstr "/_Joc/Re_nunţă"
 
-#: gtkgame.c:2976
+#: gtkgame.c:2973
 #, fuzzy
 msgid "/_Game/_Accept"
 msgstr "/_Joc/_Ia"
 
-#: gtkgame.c:2977
+#: gtkgame.c:2974
 #, fuzzy
 msgid "/_Game/Re_ject"
 msgstr "/_Joc/Re_nunţă"
 
-#: gtkgame.c:2979
+#: gtkgame.c:2976
 msgid "/_Game/Play computer turn"
 msgstr "/_Joc/Joacă în locul calculatorului"
 
-#: gtkgame.c:2981
+#: gtkgame.c:2978
 #, fuzzy
 msgid "/_Game/_End Game"
 msgstr "/_Joc/_Ia"
 
-#: gtkgame.c:2983
+#: gtkgame.c:2980
 msgid "/_Game/Swap players"
 msgstr "/_Joc/Inversează jucătorii"
 
-#: gtkgame.c:2986
+#: gtkgame.c:2983
 msgid "/_Game/Set cube..."
 msgstr "/_Joc/Setează cub..."
 
-#: gtkgame.c:2987
+#: gtkgame.c:2984
 msgid "/_Game/Set _dice..."
 msgstr "/_Joc/Setează _zaruri..."
 
-#: gtkgame.c:2988
+#: gtkgame.c:2985
 msgid "/_Game/Set _turn"
 msgstr "/Joc/Setează rând"
 
-#: gtkgame.c:2989
+#: gtkgame.c:2986
 msgid "/_Game/Set turn/0"
 msgstr "/_Joc/Setează rând/0"
 
-#: gtkgame.c:2991
+#: gtkgame.c:2988
 msgid "/_Game/Set turn/1"
 msgstr "/_Joc/Setează rând/1"
 
-#: gtkgame.c:2993
+#: gtkgame.c:2990
 #, fuzzy
 msgid "/_Game/Clear turn"
 msgstr "/Joc/Setează rând"
 
-#: gtkgame.c:2994
+#: gtkgame.c:2991
 msgid "/_Analyse"
 msgstr "/_Analiză"
 
-#: gtkgame.c:2995
+#: gtkgame.c:2992
 msgid "/_Analyse/_Evaluate"
 msgstr "/_Analiză/_Evaluează"
 
-#: gtkgame.c:2996
+#: gtkgame.c:2993
 msgid "/_Analyse/_Hint"
 msgstr "/_Analiză/_Indiciu"
 
-#: gtkgame.c:2998
+#: gtkgame.c:2995
 msgid "/_Analyse/_Rollout"
 msgstr "/_Analiză/_Simulare"
 
-#: gtkgame.c:2999 gtkgame.c:3006 gtkgame.c:3020 gtkgame.c:3034 gtkgame.c:3040
-#: gtkgame.c:3043 gtkgame.c:3046 gtkgame.c:3052 gtkgame.c:3059 gtkgame.c:3062
-#: gtkgame.c:3067
+#: gtkgame.c:2996 gtkgame.c:3003 gtkgame.c:3017 gtkgame.c:3031 gtkgame.c:3037
+#: gtkgame.c:3040 gtkgame.c:3043 gtkgame.c:3049 gtkgame.c:3056 gtkgame.c:3059
+#: gtkgame.c:3064
 msgid "/_Analyse/-"
 msgstr "/_Analiză/-"
 
-#: gtkgame.c:3000
+#: gtkgame.c:2997
 msgid "/_Analyse/Analyse move"
 msgstr "/_Analiză/Analizează mutare"
 
-#: gtkgame.c:3002
+#: gtkgame.c:2999
 msgid "/_Analyse/Analyse game"
 msgstr "/_Analiză/Analizează joc"
 
-#: gtkgame.c:3004
+#: gtkgame.c:3001
 #, fuzzy
 msgid "/_Analyse/Analyse match or session"
 msgstr "/_Analiză/Analizează partidă\\\\sesiune"
 
-#: gtkgame.c:3007
+#: gtkgame.c:3004
 msgid "/_Analyse/Clear analysis"
 msgstr "/_Analiză/Şterge analiza"
 
-#: gtkgame.c:3008
+#: gtkgame.c:3005
 msgid "/_Analyse/Clear analysis/Move"
 msgstr "/_Analiză/Şterge analiza/Mutare"
 
-#: gtkgame.c:3012
+#: gtkgame.c:3009
 msgid "/_Analyse/Clear analysis/_Game"
 msgstr "/_Analiză/Şterge analiza/_Joc"
 
-#: gtkgame.c:3016
+#: gtkgame.c:3013
 #, fuzzy
 msgid "/_Analyse/Clear analysis/_Match or session"
 msgstr "/_Analiză/Şterge analiza/_Sesiune"
 
-#: gtkgame.c:3021
+#: gtkgame.c:3018
 #, fuzzy
 msgid "/_Analyse/CMark"
 msgstr "/_Analiză/-"
 
-#: gtkgame.c:3022
+#: gtkgame.c:3019
 #, fuzzy
 msgid "/_Analyse/CMark/Cube"
 msgstr "/_Analiză/Fereastra pieţei"
 
-#: gtkgame.c:3023
+#: gtkgame.c:3020
 #, fuzzy
 msgid "/_Analyse/CMark/Cube/Clear"
 msgstr "/_Analiză/Şterge analiza"
 
-#: gtkgame.c:3024
+#: gtkgame.c:3021
 #, fuzzy
 msgid "/_Analyse/CMark/Cube/Show"
 msgstr "/_Analiză/Fereastra pieţei"
 
-#: gtkgame.c:3025
+#: gtkgame.c:3022
 #, fuzzy
 msgid "/_Analyse/CMark/Move"
 msgstr "/_Analiză/Şterge analiza/Mutare"
 
-#: gtkgame.c:3026
+#: gtkgame.c:3023
 #, fuzzy
 msgid "/_Analyse/CMark/Move/Clear"
 msgstr "/_Analiză/Şterge analiza/Mutare"
 
-#: gtkgame.c:3027
+#: gtkgame.c:3024
 #, fuzzy
 msgid "/_Analyse/CMark/Move/Show"
 msgstr "/_Analiză/Fereastra pieţei"
 
-#: gtkgame.c:3028
+#: gtkgame.c:3025
 #, fuzzy
 msgid "/_Analyse/CMark/Game"
 msgstr "/_Analiză/Şterge analiza/_Joc"
 
-#: gtkgame.c:3029
+#: gtkgame.c:3026
 #, fuzzy
 msgid "/_Analyse/CMark/Game/Clear"
 msgstr "/_Analiză/Şterge analiza/_Joc"
 
-#: gtkgame.c:3030
+#: gtkgame.c:3027
 #, fuzzy
 msgid "/_Analyse/CMark/Game/Show"
 msgstr "/_Analiză/Fereastra pieţei"
 
-#: gtkgame.c:3031
+#: gtkgame.c:3028
 #, fuzzy
 msgid "/_Analyse/CMark/Match"
 msgstr "/_Analiză/Şterge analiza/_Partidă"
 
-#: gtkgame.c:3032
+#: gtkgame.c:3029
 #, fuzzy
 msgid "/_Analyse/CMark/Match/Clear"
 msgstr "/_Analiză/Şterge analiza/_Partidă"
 
-#: gtkgame.c:3033
+#: gtkgame.c:3030
 #, fuzzy
 msgid "/_Analyse/CMark/Match/Show"
 msgstr "/_Analiză/Fereastra pieţei"
 
-#: gtkgame.c:3035
+#: gtkgame.c:3032
 #, fuzzy
 msgid "/_Analyse/Rollout"
 msgstr "/_Analiză/_Simulare"
 
-#: gtkgame.c:3036
+#: gtkgame.c:3033
 #, fuzzy
 msgid "/_Analyse/Rollout/Cube"
 msgstr "/_Analiză/_Simulare"
 
-#: gtkgame.c:3037
+#: gtkgame.c:3034
 #, fuzzy
 msgid "/_Analyse/Rollout/Move"
 msgstr "/_Analiză/_Simulare"
 
-#: gtkgame.c:3038
+#: gtkgame.c:3035
 #, fuzzy
 msgid "/_Analyse/Rollout/Game"
 msgstr "/_Analiză/_Simulare"
 
-#: gtkgame.c:3039
+#: gtkgame.c:3036
 #, fuzzy
 msgid "/_Analyse/Rollout/Match"
 msgstr "/_Analiză/_Simulare"
 
-#: gtkgame.c:3041
+#: gtkgame.c:3038
 msgid "/_Analyse/Batch analyse..."
 msgstr "/_Analiză/Analizează în batch..."
 
-#: gtkgame.c:3044
+#: gtkgame.c:3041
 #, fuzzy
 msgid "/_Analyse/Match or session statistics"
 msgstr "/_Analiză/Partidă\\\\statistici sesiune"
 
-#: gtkgame.c:3047
+#: gtkgame.c:3044
 #, fuzzy
 msgid "/_Analyse/Add match or session to database"
 msgstr "/_Analiză/Partidă\\\\statistici sesiune"
 
-#: gtkgame.c:3050
+#: gtkgame.c:3047
 #, fuzzy
 msgid "/_Analyse/Show Records"
 msgstr "/_Analiză/Istoric jucător"
 
-#: gtkgame.c:3053
+#: gtkgame.c:3050
 msgid "/_Analyse/Distribution of rolls"
 msgstr "/_Analiză/Distribuţia aruncărilor de zaruri"
 
-#: gtkgame.c:3055
+#: gtkgame.c:3052
 msgid "/_Analyse/Temperature Map"
 msgstr "/_Analiză/Harta de temperatură"
 
-#: gtkgame.c:3057
+#: gtkgame.c:3054
 msgid "/_Analyse/Temperature Map (cube decision)"
 msgstr "/_Analiză/Harta de temperatură (decizia de cub)"
 
-#: gtkgame.c:3060
+#: gtkgame.c:3057
 msgid "/_Analyse/_Race Theory"
 msgstr "/_Analiză/Teoria întrecerii"
 
-#: gtkgame.c:3063
+#: gtkgame.c:3060
 msgid "/_Analyse/_Market window"
 msgstr "/_Analiză/Fereastra pieţei"
 
-#: gtkgame.c:3065
+#: gtkgame.c:3062
 msgid "/_Analyse/M_atch equity table"
 msgstr "/_Analiză/Tabela de valoare a partidei"
 
-#: gtkgame.c:3068
+#: gtkgame.c:3065
 msgid "/_Analyse/Evaluation speed"
 msgstr "/_Analiză/Viteza de evaluare"
 
-#: gtkgame.c:3070
+#: gtkgame.c:3067
 msgid "/_Settings"
 msgstr "/_Setări"
 
-#: gtkgame.c:3071
+#: gtkgame.c:3068
 #, fuzzy
 msgid "/_Settings/_Analysis..."
 msgstr "/_Setări/Analiză..."
 
-#: gtkgame.c:3072
+#: gtkgame.c:3069
 #, fuzzy
 msgid "/_Settings/_Board Appearance..."
 msgstr "/_Setări/Aspect..."
 
-#: gtkgame.c:3074
+#: gtkgame.c:3071
 msgid "/_Settings/E_xport..."
 msgstr "/_Setări/E_xport..."
 
-#: gtkgame.c:3076
+#: gtkgame.c:3073
 msgid "/_Settings/_Players..."
 msgstr "/_Setări/_Jucători"
 
-#: gtkgame.c:3077
+#: gtkgame.c:3074
 msgid "/_Settings/_Rollouts..."
 msgstr "/_Setări/_Simulări..."
 
-#: gtkgame.c:3078 gtkgame.c:3081
+#: gtkgame.c:3075
 msgid "/_Settings/-"
 msgstr "/_Setări/-"
 
-#: gtkgame.c:3079
+#: gtkgame.c:3076
 #, fuzzy
 msgid "/_Settings/_Options..."
 msgstr "/_Setări/Opţiuni..."
 
-#: gtkgame.c:3080
+#: gtkgame.c:3077
 msgid "/_Settings/_Language..."
 msgstr "/_Setări/_Limba..."
 
-#: gtkgame.c:3082
-#, fuzzy
-msgid "/_Settings/_Save settings"
-msgstr "/_Setări/Salvează setări"
-
-#: gtkgame.c:3084
+#: gtkgame.c:3078
 msgid "/G_o"
 msgstr "/_Mergi"
 
-#: gtkgame.c:3085
+#: gtkgame.c:3079
 #, fuzzy
 msgid "/G_o/Previous marked move"
 msgstr "/_Mergi/Mutarea marcată precedentă"
 
-#: gtkgame.c:3086
+#: gtkgame.c:3080
 #, fuzzy
 msgid "/G_o/Previous cmarked move"
 msgstr "/_Mergi/Mutarea marcată precedentă"
 
-#: gtkgame.c:3087
+#: gtkgame.c:3081
 msgid "/G_o/Previous rol_l"
 msgstr "/_Mergi/A_runcare precedentă"
 
-#: gtkgame.c:3088
+#: gtkgame.c:3082
 msgid "/G_o/Pre_vious game"
 msgstr "/_Mergi/Jo_c precedent"
 
-#: gtkgame.c:3089
+#: gtkgame.c:3083
 msgid "/G_o/-"
 msgstr "/_Mergi/-"
 
-#: gtkgame.c:3090
+#: gtkgame.c:3084
 msgid "/G_o/Next _game"
 msgstr "/_Mergi/_Joc următor"
 
-#: gtkgame.c:3091
+#: gtkgame.c:3085
 msgid "/G_o/Next _roll"
 msgstr "/_Mergi/_Aruncare următoare"
 
-#: gtkgame.c:3092
+#: gtkgame.c:3086
 #, fuzzy
 msgid "/G_o/Next cmarked move"
 msgstr "/_Mergi/Mutarea marcată următoare"
 
-#: gtkgame.c:3093
+#: gtkgame.c:3087
 #, fuzzy
 msgid "/G_o/Next marked move"
 msgstr "/_Mergi/Mutarea marcată următoare"
 
-#: gtkgame.c:3094
+#: gtkgame.c:3088
 msgid "/_Help"
 msgstr "/_Ajutor"
 
-#: gtkgame.c:3095
+#: gtkgame.c:3089
 msgid "/_Help/_Commands"
 msgstr "/_Ajutor/_Comenzi"
 
-#: gtkgame.c:3096 gtkgame.c:3101
+#: gtkgame.c:3090 gtkgame.c:3095
 msgid "/_Help/-"
 msgstr "/_Ajutor/-"
 
-#: gtkgame.c:3097
+#: gtkgame.c:3091
 #, fuzzy
 msgid "/_Help/_Manual (all about)"
 msgstr "/_Ajutor/Ma_nual gnubg (totul despre)"
 
-#: gtkgame.c:3099
+#: gtkgame.c:3093
 #, fuzzy
 msgid "/_Help/Manual (_web)"
 msgstr "/_Ajutor/_Manual gnubg (web)"
 
-#: gtkgame.c:3102
+#: gtkgame.c:3096
 msgid "/_Help/_About gnubg"
 msgstr "/_Ajutor/Despre gnubg"
 
-#: gtkgame.c:3127
+#: gtkgame.c:3121
 #, fuzzy
 msgid "Process interrupted"
 msgstr "(Întrerupt)"
 
-#: gtkgame.c:3156
+#: gtkgame.c:3150
 #, fuzzy
 msgid "Press the stop button to interrupt the current process"
 msgstr "Întrerupe procesul curent?"
 
-#: gtkgame.c:3166
+#: gtkgame.c:3160
 #, c-format
 msgid "Only local files supported in dnd"
 msgstr ""
 
-#: gtkgame.c:3173
+#: gtkgame.c:3167
 #, fuzzy, c-format
 msgid "Failed to parse uri"
 msgstr "Eşuat în a crea %s"
 
-#: gtkgame.c:3285
+#: gtkgame.c:3279
 #, fuzzy
 msgid "Copy Position ID"
 msgstr "ID poziţie:"
 
-#: gtkgame.c:3290
+#: gtkgame.c:3284
 #, fuzzy
 msgid "Paste Position ID"
 msgstr "ID poziţie:"
 
-#: gtkgame.c:3309
+#: gtkgame.c:3303
 msgid ""
 "This is a unique id for this position. Ctrl+C copies the current ID and Ctrl"
 "+V pastes an ID from the clipboard"
 msgstr ""
 
-#: gtkgame.c:3460
+#: gtkgame.c:3454
 msgid "Rendering"
 msgstr "Randare"
 
-#: gtkgame.c:3560
+#: gtkgame.c:3554
 #, fuzzy, c-format
 msgid ""
 "The MS windows GTK interface doesn't support the '-p' option. Use the cl "
@@ -3990,342 +4033,342 @@ msgstr ""
 "Interfaţa cu ferestre gtk nu suportă opţiunea '-p'. Utilizează interfaţă cl "
 "în loc"
 
-#: gtkgame.c:3654
+#: gtkgame.c:3648
 msgid "GNU Backgammon - Tutor"
 msgstr "Table GNU - Tutore"
 
-#: gtkgame.c:3658
+#: gtkgame.c:3652
 msgid "Play Anyway"
 msgstr "Joacă oricum"
 
-#: gtkgame.c:3660
+#: gtkgame.c:3654
 msgid "Rethink"
 msgstr "Regândeşte"
 
-#: gtkgame.c:3661
+#: gtkgame.c:3655
 msgid "End Tutor Mode"
 msgstr "Termină modul tutore"
 
-#: gtkgame.c:3662
+#: gtkgame.c:3656
 msgid "Hint"
 msgstr "Indiciu"
 
-#: gtkgame.c:3887
+#: gtkgame.c:3882
 msgid "Shortcut buttons"
 msgstr "Butoane scurtătură"
 
-#: gtkgame.c:3898
+#: gtkgame.c:3893
 msgid "Edit position"
 msgstr "Editare poziţie"
 
-#: gtkgame.c:3905
+#: gtkgame.c:3900
 msgid "Start a new money game session"
 msgstr "Porneşte o nouă sesiune de joc pe bani"
 
-#: gtkgame.c:3916
+#: gtkgame.c:3911
 #, c-format
 msgid "Start a new %d point match"
 msgstr "Porneşte o nouă partidă de %d puncte"
 
-#: gtkgame.c:3932
+#: gtkgame.c:3927
 msgid "Match settings"
 msgstr "Setări partidă"
 
-#: gtkgame.c:3935
+#: gtkgame.c:3930
 msgid "Length:"
 msgstr "Lungime:"
 
 #. Here the simplified player settings starts
-#: gtkgame.c:3947
+#: gtkgame.c:3942
 msgid "Player settings"
 msgstr "Setări jucător"
 
-#: gtkgame.c:3954
+#: gtkgame.c:3949
 msgid "Current player settings"
 msgstr "Setări jucător curent"
 
-#: gtkgame.c:3957
+#: gtkgame.c:3952
 msgid "GNU Backgammon vs. Human"
 msgstr "Table GNU vs. Om"
 
-#: gtkgame.c:3958
+#: gtkgame.c:3953
 msgid "Human vs. Human"
 msgstr "Om vs. Om"
 
-#: gtkgame.c:3962
+#: gtkgame.c:3957
 msgid "Modify player settings..."
 msgstr "Modifică setări jucător..."
 
-#: gtkgame.c:3974
+#: gtkgame.c:3969
 msgid "Manual dice"
 msgstr "Zaruri manuale"
 
-#: gtkgame.c:3975 gtkoptions.c:508
+#: gtkgame.c:3970 gtkoptions.c:508
 msgid "Tutor mode"
 msgstr "Mod tutore"
 
-#: gtkgame.c:4014
+#: gtkgame.c:4009
 msgid "GNU Backgammon - New"
 msgstr "Table GNU - Nou"
 
-#: gtkgame.c:4034
+#: gtkgame.c:4029
 msgid "Set match equity table"
 msgstr "Setează tabela de valoare a partidei"
 
-#: gtkgame.c:4306
+#: gtkgame.c:4302
 msgid "First Play Both"
 msgstr "Primul joc ambii"
 
-#: gtkgame.c:4306 gtkgame.c:4673
+#: gtkgame.c:4302 gtkgame.c:4669
 msgid "First Play (0) "
 msgstr "Primul joc (0)"
 
-#: gtkgame.c:4308
+#: gtkgame.c:4304
 msgid "Later Play Both"
 msgstr "Joc mai târziu ambii"
 
-#: gtkgame.c:4308 gtkgame.c:4677
+#: gtkgame.c:4304 gtkgame.c:4673
 msgid "Later Play (0) "
 msgstr "Joc mai târziu (0)"
 
-#: gtkgame.c:4329 gtkrace.c:271
+#: gtkgame.c:4325 gtkrace.c:271
 msgid "Trials:"
 msgstr "Încercări:"
 
-#: gtkgame.c:4333
+#: gtkgame.c:4329
 msgid "Truncation"
 msgstr "Trunchiere"
 
-#: gtkgame.c:4341
+#: gtkgame.c:4337
 msgid "Truncate Rollouts"
 msgstr "Trunchiază simulări"
 
-#: gtkgame.c:4351
+#: gtkgame.c:4347
 msgid "Truncate at ply:"
 msgstr "Trunchiază la mutarea:"
 
-#: gtkgame.c:4359
+#: gtkgame.c:4355
 msgid "Evaluation for later plies"
 msgstr "Evaluare pentru mutări mai târzii"
 
-#: gtkgame.c:4367
+#: gtkgame.c:4363
 msgid "Enable separate evaluations "
 msgstr "Activează evaluări separate"
 
-#: gtkgame.c:4378
+#: gtkgame.c:4374
 msgid "Change eval after ply:"
 msgstr "Schimbă evaluarea după mutarea:"
 
-#: gtkgame.c:4385
+#: gtkgame.c:4381
 msgid "Stop when result is accurate"
 msgstr "Opreşte-te când rezultatul este precis"
 
-#: gtkgame.c:4394
+#: gtkgame.c:4390
 #, fuzzy
 msgid "Stop when STD is small enough "
 msgstr "Opreşte-te când STD este suficient de mic"
 
-#: gtkgame.c:4410 gtkgame.c:4455
+#: gtkgame.c:4406 gtkgame.c:4451
 msgid "Minimum Trials:"
 msgstr "Încercări minime:"
 
-#: gtkgame.c:4422
+#: gtkgame.c:4418
 #, fuzzy
 msgid "Equity Standard Deviation:"
 msgstr "<deviaţii standard legate>"
 
-#: gtkgame.c:4432
+#: gtkgame.c:4428
 #, fuzzy
 msgid "Stop Rollouts of multiple moves based on JSD"
 msgstr "Opreşte simularea mutărilor multiple bazat pe j.s.d."
 
-#: gtkgame.c:4444
+#: gtkgame.c:4440
 msgid "Enable Stop on JSD"
 msgstr ""
 
-#: gtkgame.c:4466
+#: gtkgame.c:4462
 msgid "JSDs from best choice"
 msgstr ""
 
-#: gtkgame.c:4484
+#: gtkgame.c:4480
 msgid "Bearoff Truncation"
 msgstr "Trunchiere scoatere"
 
-#: gtkgame.c:4491
+#: gtkgame.c:4487
 msgid "Truncate cubeless (and cubeful money) at exact bearoff database"
 msgstr "Trunchiază fără cub (şi bani cu cub) exact la baza de date de scoatere"
 
-#: gtkgame.c:4498
+#: gtkgame.c:4494
 msgid "Truncate cubeless at one-sided bearoff database"
 msgstr "Trunchiază fără cub la bază de date de scoatere a unei părţi"
 
-#: gtkgame.c:4506
+#: gtkgame.c:4502
 msgid "Variance reduction"
 msgstr "Reducere variaţie"
 
-#: gtkgame.c:4512
+#: gtkgame.c:4508
 msgid "Use quasi-random dice"
 msgstr "Foloseşte zaruri pseudo-aleatoare"
 
-#: gtkgame.c:4518
+#: gtkgame.c:4514
 msgid "Rollout as initial position"
 msgstr "Simulează ca poziţie iniţială"
 
-#: gtkgame.c:4526
+#: gtkgame.c:4522
 msgid "Seed:"
 msgstr "Sămânţa:"
 
-#: gtkgame.c:4544
+#: gtkgame.c:4540
 #, c-format
 msgid "Failed to create %s"
 msgstr "Eşuat în a crea %s"
 
-#: gtkgame.c:4549
+#: gtkgame.c:4545
 msgid "Save Rollout Settings As (*.rol)"
 msgstr "Salvează setările de simulare ca (*.rol)"
 
-#: gtkgame.c:4582
+#: gtkgame.c:4578
 msgid "Open rollout settings (*.rol)"
 msgstr "Deschide setările de simulare (*.rol)"
 
-#: gtkgame.c:4648
+#: gtkgame.c:4644
 msgid "GNU Backgammon - Rollouts"
 msgstr "Table GNU - Simulări"
 
-#: gtkgame.c:4652
+#: gtkgame.c:4648
 msgid "Save As"
 msgstr "Salvează Ca"
 
-#: gtkgame.c:4656
+#: gtkgame.c:4652
 msgid "Load"
 msgstr "Încarcă"
 
-#: gtkgame.c:4666
+#: gtkgame.c:4662
 msgid "General Settings"
 msgstr "Setări generale"
 
-#: gtkgame.c:4669
+#: gtkgame.c:4665
 #, fuzzy
 msgid "Play settings"
 msgstr "Setări jucător"
 
-#: gtkgame.c:4675
+#: gtkgame.c:4671
 msgid "First Play (1) "
 msgstr "Primul Joc (1)"
 
-#: gtkgame.c:4679
+#: gtkgame.c:4675
 msgid "Later Play (1) "
 msgstr "Joc mai târziu (1)"
 
-#: gtkgame.c:4682
+#: gtkgame.c:4678
 msgid "Truncation Pt."
 msgstr "Pct. trunchiere"
 
-#: gtkgame.c:4685
+#: gtkgame.c:4681
 msgid "Use same settings for both players"
 msgstr "Utilizează aceleaşi setări pentru ambii jucători"
 
-#: gtkgame.c:4691
+#: gtkgame.c:4687
 msgid "Cube decisions use same settings as Chequer play"
 msgstr "Deciziile de cub utilizează aceleaşi setări ca şi jocul de puluri"
 
-#: gtkgame.c:4699
+#: gtkgame.c:4695
 msgid "Use player0 setting for truncation point"
 msgstr "Utilizează setările player0 pentru punctul de trunchiere"
 
-#: gtkgame.c:4973
+#: gtkgame.c:4970
 msgid "GNU Backgammon - Evaluation"
 msgstr "Table GNU - Evaluare"
 
 #. create dialog
-#: gtkgame.c:5004 gtkgame.c:5040 gtkgame.c:5116
+#: gtkgame.c:5001 gtkgame.c:5037 gtkgame.c:5113
 msgid "GNU Backgammon - Hint"
 msgstr "Table GNU - Indiciu"
 
-#: gtkgame.c:5050
+#: gtkgame.c:5047
 msgid "MWC before resignation"
 msgstr "MWC înainte de renunţare"
 
-#: gtkgame.c:5067
+#: gtkgame.c:5064
 msgid "MWC after resignation"
 msgstr "MWC după renunţare"
 
-#: gtkgame.c:5083
+#: gtkgame.c:5080
 msgid "You should accept the resignation!"
 msgstr "Ar trebui să accepţi renunţarea!"
 
-#: gtkgame.c:5085
+#: gtkgame.c:5082
 msgid "You should reject the resignation!"
 msgstr "Ar trebui să respingi renunţarea!"
 
-#: gtkgame.c:5105
+#: gtkgame.c:5102
 #, fuzzy, c-format
 msgid "There are no legal moves. Figure it out yourself."
 msgstr "Nu există mutări legale."
 
-#: gtkgame.c:5218 show.c:981
+#: gtkgame.c:5215 show.c:981
 #, c-format
 msgid "Score Sheet - "
 msgstr "Foaie scor - "
 
-#: gtkgame.c:5222 show.c:988
+#: gtkgame.c:5219 show.c:988
 msgid "Money Session"
 msgstr "Sesiune pe bani"
 
-#: gtkgame.c:5300 show.c:631
+#: gtkgame.c:5297 show.c:631
 msgid "Copying"
 msgstr "Copiere"
 
-#: gtkgame.c:5305 gtkgame.c:5355 show.c:1070
+#: gtkgame.c:5302 gtkgame.c:5352 show.c:1070
 msgid "Warranty"
 msgstr "Garanţie"
 
-#: gtkgame.c:5314
+#: gtkgame.c:5311
 msgid "Evaluation engine"
 msgstr "Motor de evaluare"
 
-#: gtkgame.c:5323
+#: gtkgame.c:5320
 msgid "About GNU Backgammon"
 msgstr "Despre Table GNU"
 
-#: gtkgame.c:5337
+#: gtkgame.c:5334
 msgid "Credits"
 msgstr "Autori"
 
-#: gtkgame.c:5343
+#: gtkgame.c:5340
 msgid "Build Info"
 msgstr "Informaţii versiune"
 
-#: gtkgame.c:5349
+#: gtkgame.c:5346
 msgid "Copying conditions"
 msgstr "Condiţii copiere"
 
-#: gtkgame.c:5361
+#: gtkgame.c:5358
 msgid "Report Bug"
 msgstr "Raportează defecte"
 
-#: gtkgame.c:5367
+#: gtkgame.c:5364
 msgid "Evaluation Engine"
 msgstr "Motor de evaluare"
 
-#: gtkgame.c:5386
+#: gtkgame.c:5383
 msgid "GNU Backgammon - Build Info"
 msgstr "Table GNU - Informaţii versiune"
 
-#: gtkgame.c:5475
+#: gtkgame.c:5472
 msgid "GNU Backgammon - Credits"
 msgstr "Table GNU - Autori"
 
-#: gtkgame.c:5511
+#: gtkgame.c:5508
 msgid "Special thanks"
 msgstr "Mulţumiri"
 
-#: gtkgame.c:5528
+#: gtkgame.c:5525
 #, fuzzy
 msgid "Contributers"
 msgstr "Contributori cod"
 
-#: gtkgame.c:5596
+#: gtkgame.c:5593
 #, c-format
 msgid ""
 "%s- %s\n"
@@ -4336,66 +4379,66 @@ msgstr ""
 "\n"
 "Utilizare: %s%s\n"
 
-#: gtkgame.c:5633 gtkgame.c:5635
+#: gtkgame.c:5630 gtkgame.c:5632
 msgid "Help - command reference"
 msgstr "Ajutor - referinţă comenzi"
 
-#: gtkgame.c:5991
+#: gtkgame.c:5988
 msgid "Chequer Play Statistics:"
 msgstr "Statistici joc de puluri:"
 
-#: gtkgame.c:5992
+#: gtkgame.c:5989
 msgid "Cube Statistics:"
 msgstr "Statistici cub:"
 
-#: gtkgame.c:5993
+#: gtkgame.c:5990
 msgid "Luck Statistics:"
 msgstr "Statistici noroc:"
 
-#: gtkgame.c:5994
+#: gtkgame.c:5991
 msgid "Overall Statistics:"
 msgstr "Statistici generale:"
 
-#: gtkgame.c:6137
+#: gtkgame.c:6135
 msgid "Statistics for all games"
 msgstr "Statistici pentru toate jocurile"
 
-#: gtkgame.c:6140
+#: gtkgame.c:6138
 msgid "Statistics for game "
 msgstr "Statistici pentru joc "
 
-#: gtkgame.c:6171
+#: gtkgame.c:6169
 #, c-format
 msgid "All games: %s %d, %s %d"
 msgstr "Toate jocurile: %s %d, %s %d"
 
-#: gtkgame.c:6174
+#: gtkgame.c:6172
 #, c-format
 msgid "All games: %s, %s"
 msgstr "Toate jocurile: %s, %s"
 
-#: gtkgame.c:6180
+#: gtkgame.c:6178
 msgid "Move back to the previous game"
 msgstr "Mergi la jocul precedent"
 
-#: gtkgame.c:6186
+#: gtkgame.c:6184
 msgid "Move ahead to the next game"
 msgstr "Mergi la jocul următor"
 
-#: gtkgame.c:6195
+#: gtkgame.c:6193
 #, c-format
 msgid "Game %d: %s %d, %s %d"
 msgstr "Joc %d: %s %d, %s %d"
 
-#: gtkgame.c:6329
+#: gtkgame.c:6326
 msgid "Overall"
 msgstr "General"
 
-#: gtkgame.c:6369
+#: gtkgame.c:6366
 msgid "Graph"
 msgstr "Grafic"
 
-#: gtkgame.c:6370
+#: gtkgame.c:6367
 msgid ""
 "This graph shows the total error rates per game for each player. The games "
 "are along the bottom and the error rates up the side. Chequer error in "
@@ -4405,81 +4448,81 @@ msgstr ""
 "Jocurile sunt de-a lungul părţii de jos şi ratele de eroare de-a lungul "
 "părţii laterale. Eroare puluri în verde, eroare cub în albastru."
 
-#: gtkgame.c:6375
+#: gtkgame.c:6372
 msgid "Split statistics into panels"
 msgstr "Împarte statisticile în panouri"
 
-#: gtkgame.c:6529
+#: gtkgame.c:6526
 msgid "GNU Backgammon - Match information"
 msgstr "Table GNU - Informaţii partidă"
 
-#: gtkgame.c:6536 gtkgame.c:6539
+#: gtkgame.c:6533 gtkgame.c:6536
 #, c-format
 msgid "%s's rating:"
 msgstr "punctajul lui %s:"
 
-#: gtkgame.c:6542
+#: gtkgame.c:6539
 msgid "Date:"
 msgstr "Dată:"
 
-#: gtkgame.c:6543
+#: gtkgame.c:6540
 msgid "Event:"
 msgstr "Eveniment:"
 
-#: gtkgame.c:6544
+#: gtkgame.c:6541
 msgid "Round:"
 msgstr "Rundă:"
 
-#: gtkgame.c:6545
+#: gtkgame.c:6542
 msgid "Place:"
 msgstr "Loc:"
 
-#: gtkgame.c:6546
+#: gtkgame.c:6543
 msgid "Annotator:"
 msgstr "Adnotator:"
 
-#: gtkgame.c:6549
+#: gtkgame.c:6546
 msgid "Comments:"
 msgstr "Comentarii:"
 
 #. FIXME should be modal but presently causes crash and/or killing of the main window
-#: gtkgame.c:6656
+#: gtkgame.c:6654
 msgid "GNU Backgammon - Speed estimate"
 msgstr "Table GNU - Estimare viteză"
 
-#: gtkgame.c:6665
+#: gtkgame.c:6663
 msgid "Speed recorded:"
 msgstr "Viteză înregistrată:"
 
-#: gtkgame.c:6673 gtkgame.c:6710
+#: gtkgame.c:6671 gtkgame.c:6708
 msgid "static evaluations/second"
 msgstr "evaluări statice / secundă"
 
-#: gtkgame.c:6677
+#: gtkgame.c:6675
 msgid "Calibrate"
 msgstr "Calibrează"
 
-#: gtkgame.c:6700
+#: gtkgame.c:6698
 msgid "GNU Backgammon - Calibration"
 msgstr "Table GNU - Calibrare"
 
-#: gtkgame.c:6706
+#: gtkgame.c:6704
 msgid "Calibrating:"
 msgstr "Calibrare:"
 
-#: gtkgame.c:6708
+#: gtkgame.c:6706
 msgid "       (n/a)       "
 msgstr "       (n/a)       "
 
-#: gtkgame.c:6763
+#: gtkgame.c:6761
 msgid "Resign normal"
 msgstr "Renunţă normal"
 
-#: gtkgame.c:6764
+#: gtkgame.c:6762
 msgid "Resign gammon"
 msgstr "Renunţă marţ"
 
-#: gtkgame.c:6765
+#: gtkgame.c:6763
 msgid "Resign backgammon"
 msgstr "Renunţă marţ tehnic"
 
@@ -4492,23 +4535,23 @@ msgstr "#"
 msgid "%d-away"
 msgstr "%d-de câştigat"
 
-#: gtkmet.c:212
+#: gtkmet.c:213
 msgid "GNU Backgammon - Match equity table"
 msgstr "Table GNU - Tabela de valoare a partidei"
 
-#: gtkmet.c:215
+#: gtkmet.c:216
 msgid "Load table..."
 msgstr "Încarcă tabelă..."
 
-#: gtkmet.c:218 gtkoptions.c:840
+#: gtkmet.c:219 gtkoptions.c:840
 msgid "Invert table"
 msgstr "Inversează tabelă"
 
-#: gtkmet.c:240
+#: gtkmet.c:241
 msgid "Pre-Crawford"
 msgstr "Pre-Crawford"
 
-#: gtkmet.c:244
+#: gtkmet.c:245
 #, c-format
 msgid "Post-Crawford for player %s"
 msgstr "Post-Crawford pentru jucător %s"
@@ -5151,87 +5194,87 @@ msgstr ""
 msgid "Dice manipulation"
 msgstr "Manipularea zarului"
 
-#: gtkoptions.c:1081 set.c:3804
+#: gtkoptions.c:1081 set.c:3845
 msgid "best"
 msgstr "primul"
 
-#: gtkoptions.c:1081 set.c:3804
+#: gtkoptions.c:1081 set.c:3845
 msgid "second best"
 msgstr "al doilea"
 
-#: gtkoptions.c:1081 set.c:3804
+#: gtkoptions.c:1081 set.c:3845
 msgid "third best"
 msgstr "al treilea"
 
-#: gtkoptions.c:1082 set.c:3805
+#: gtkoptions.c:1082 set.c:3846
 msgid "4th best"
 msgstr "al 4-lea"
 
-#: gtkoptions.c:1082 set.c:3805
+#: gtkoptions.c:1082 set.c:3846
 msgid "5th best"
 msgstr "al 5-lea"
 
-#: gtkoptions.c:1082 set.c:3805
+#: gtkoptions.c:1082 set.c:3846
 msgid "6th best"
 msgstr "al 6-lea"
 
-#: gtkoptions.c:1083 set.c:3806
+#: gtkoptions.c:1083 set.c:3847
 msgid "7th best"
 msgstr "al 7-lea"
 
-#: gtkoptions.c:1083 set.c:3806
+#: gtkoptions.c:1083 set.c:3847
 msgid "8th best"
 msgstr "al 8-lea"
 
-#: gtkoptions.c:1083 set.c:3806
+#: gtkoptions.c:1083 set.c:3847
 msgid "9th best"
 msgstr "al 9-lea"
 
-#: gtkoptions.c:1084 set.c:3807
+#: gtkoptions.c:1084 set.c:3848
 msgid "10th best"
 msgstr "al 10-lea"
 
-#: gtkoptions.c:1085 set.c:3808
+#: gtkoptions.c:1085 set.c:3849
 msgid "median"
 msgstr "median"
 
-#: gtkoptions.c:1086 set.c:3809
+#: gtkoptions.c:1086 set.c:3850
 msgid "10th worst"
 msgstr "al 10-lea rău"
 
-#: gtkoptions.c:1087 set.c:3810
+#: gtkoptions.c:1087 set.c:3851
 msgid "9th worst"
 msgstr "al 9-lea rău"
 
-#: gtkoptions.c:1087 set.c:3810
+#: gtkoptions.c:1087 set.c:3851
 msgid "8th worst"
 msgstr "al 8-lea rău"
 
-#: gtkoptions.c:1087 set.c:3810
+#: gtkoptions.c:1087 set.c:3851
 msgid "7th worst"
 msgstr "al 7-lea rău"
 
-#: gtkoptions.c:1088 set.c:3811
+#: gtkoptions.c:1088 set.c:3852
 msgid "6th worst"
 msgstr "al 6-lea rău"
 
-#: gtkoptions.c:1088 set.c:3811
+#: gtkoptions.c:1088 set.c:3852
 msgid "5th worst"
 msgstr "al 5-lea rău"
 
-#: gtkoptions.c:1088 set.c:3811
+#: gtkoptions.c:1088 set.c:3852
 msgid "4th worst"
 msgstr "al 4-lea rău"
 
-#: gtkoptions.c:1089 set.c:3812
+#: gtkoptions.c:1089 set.c:3853
 msgid "third worst"
 msgstr "al treilea rău"
 
-#: gtkoptions.c:1089 set.c:3812
+#: gtkoptions.c:1089 set.c:3853
 msgid "second worst"
 msgstr "al doilea rău"
 
-#: gtkoptions.c:1089 set.c:3812
+#: gtkoptions.c:1089 set.c:3853
 msgid "worst"
 msgstr "cel mai rău"
 
@@ -5432,7 +5475,7 @@ msgstr "Bază de date"
 msgid "Select file with dice"
 msgstr "Selectează un fişier cu zaruri"
 
-#: gtkoptions.c:1759
+#: gtkoptions.c:1760
 msgid "GNU Backgammon - General options"
 msgstr "Table GNU - Opţiuni generale"
 
@@ -6618,7 +6661,7 @@ msgstr "Valoare medie"
 msgid "Calculating equities"
 msgstr "Calculând valorile"
 
-#: gtkrolls.c:218 sound.c:171
+#: gtkrolls.c:218 sound.c:323
 msgid "Roll"
 msgstr "Aruncare"
 
@@ -6813,109 +6856,109 @@ msgid "Gammon values"
 msgstr "Valori marţ"
 
 #. New button
-#: gtktoolbar.c:324
+#: gtktoolbar.c:325
 msgid "Start new game, match, session or position"
 msgstr "Începe un joc, partidă, sesiune sau poziţie noi"
 
 #. Open button
-#: gtktoolbar.c:327
+#: gtktoolbar.c:328
 msgid "Open game, match, session or position"
 msgstr "Deschide joc, partidă, sesiune sau poziţie"
 
 #. Save button
-#: gtktoolbar.c:330
+#: gtktoolbar.c:331
 msgid "Save match, session, game or position"
 msgstr "Salvează partidă, sesiune, joc sau poziţie"
 
 #. Take/accept button
-#: gtktoolbar.c:335
+#: gtktoolbar.c:336
 msgid "Take the offered cube or accept the offered resignation"
 msgstr "Ia cubul oferit sau acceptă renunţarea oferită"
 
 #. drop button
-#: gtktoolbar.c:338
+#: gtktoolbar.c:339
 msgid "Drop the offered cube or decline the offered resignation"
 msgstr "Refuză cubul sau renunţarea oferită"
 
 #. Double button
-#: gtktoolbar.c:341
+#: gtktoolbar.c:342
 #, fuzzy
 msgid "Double or redouble(beaver)"
 msgstr "Fără redublare, castor"
 
 #. Resign button
-#: gtktoolbar.c:344
+#: gtktoolbar.c:345
 msgid "Resign the current game"
 msgstr "Renunţă la jocul curent"
 
 #. End game button
-#: gtktoolbar.c:347
+#: gtktoolbar.c:348
 #, fuzzy
 msgid "Let the computer end the game"
 msgstr "Forţează calculatorul să mute"
 
 #. reset button
-#: gtktoolbar.c:353
+#: gtktoolbar.c:354
 msgid "Undo moves"
 msgstr "Anulează mutări"
 
 #. Hint button
-#: gtktoolbar.c:356
+#: gtktoolbar.c:357
 msgid "Show the best moves or cube action"
 msgstr "Arată cele mai bune mutări sau acţiuni cu cub"
 
-#: gtktoolbar.c:362
+#: gtktoolbar.c:363
 msgid "Edit"
 msgstr "Editare"
 
-#: gtktoolbar.c:365
+#: gtktoolbar.c:366
 msgid "Toggle Edit Mode"
 msgstr ""
 
-#: gtktoolbar.c:372
+#: gtktoolbar.c:373
 msgid "Direction"
 msgstr "Direcţie"
 
-#: gtktoolbar.c:376
+#: gtktoolbar.c:377
 msgid "Reverse direction of play"
 msgstr "Inversează direcţia jocului"
 
-#: gtktoolbar.c:383
+#: gtktoolbar.c:384
 #, fuzzy
 msgid "Go to Previous Marked"
 msgstr "/_Mergi/Mutarea marcată precedentă"
 
-#: gtktoolbar.c:385
+#: gtktoolbar.c:386
 #, fuzzy
 msgid "Go to Previous CMarked"
 msgstr "/_Mergi/Mutarea marcată precedentă"
 
-#: gtktoolbar.c:387
+#: gtktoolbar.c:388
 #, fuzzy
 msgid "Go to Previous Roll"
 msgstr "/_Mergi/A_runcare precedentă"
 
-#: gtktoolbar.c:389
+#: gtktoolbar.c:390
 #, fuzzy
 msgid "Go to Previous Game"
 msgstr "[Joc precedent]"
 
-#: gtktoolbar.c:391
+#: gtktoolbar.c:392
 #, fuzzy
 msgid "Go to Next Game"
 msgstr "[Următorul joc]"
 
-#: gtktoolbar.c:393
+#: gtktoolbar.c:394
 #, fuzzy
 msgid "Go to Next Roll"
 msgstr "/_Mergi/_Aruncare următoare"
 
-#: gtktoolbar.c:395
+#: gtktoolbar.c:396
 #, fuzzy
 msgid "Go to Next CMarked"
 msgstr "/_Mergi/Mutarea marcată următoare"
 
-#: gtktoolbar.c:397
+#: gtktoolbar.c:398
 #, fuzzy
 msgid "Go to Next Marked"
 msgstr "Mergi la culcare"
@@ -6978,7 +7021,7 @@ msgid "GNU Backgammon - Question"
 msgstr "Table GNU - Întrebare"
 
 #. are you sure
-#: gtkwindows.c:290 gtkwindows.c:291 gtkwindows.c:393
+#: gtkwindows.c:290 gtkwindows.c:291 gtkwindows.c:394
 msgid "GNU Backgammon - Warning"
 msgstr "Table GNU - Avertisment"
 
@@ -6986,15 +7029,15 @@ msgstr "Table GNU - Avertisment"
 msgid "GNU Backgammon - Error"
 msgstr "Table GNU - Eroare"
 
-#: gtkwindows.c:403
+#: gtkwindows.c:404
 msgid "Don't show this again"
 msgstr "Nu arăta din nou"
 
-#: gtkwindows.c:409
+#: gtkwindows.c:410
 msgid "If set, this message won't appear again"
 msgstr "Dacă setat, acest mesaj nu va mai apărea"
 
-#: gtkwindows.c:445
+#: gtkwindows.c:446
 #, c-format
 msgid "Warning %s (%s) is %s"
 msgstr "Avertisment %s (%s) este %s"
@@ -7254,8 +7297,8 @@ msgstr "gnubg.css nu este scris pentru că există deja în \"%s\"\n"
 
 #: html.c:3328 html.c:3480 html.c:3630 html.c:3665 html.c:3769 html.c:3798
 #: latex.c:503 play.c:1867 play.c:2201 play.c:2257 play.c:2474 play.c:2538
-#: play.c:3198 play.c:3265 play.c:3353 play.c:3475 play.c:3733 sgf.c:2353
-#: sgf.c:2391 sgf.c:2439 show.c:969 show.c:1285 show.c:1504 show.c:2039
+#: play.c:3200 play.c:3267 play.c:3355 play.c:3477 play.c:3735 sgf.c:2351
+#: sgf.c:2389 sgf.c:2437 show.c:969 show.c:1285 show.c:1504 show.c:2039
 #: show.c:2063 text.c:866 text.c:960
 msgid "No game in progress (type `new game' to start one)."
 msgstr "Nici un joc în curs (scrie 'new game' pentru a începe unul)."
@@ -7792,15 +7835,15 @@ msgstr "Navigatorul nu a putut deschide fişier (%s): %s\n"
 msgid "single game"
 msgstr "linie"
 
-#: play.c:58 set.c:3498 show.c:1993
+#: play.c:58 set.c:3539 show.c:1993
 msgid "very bad"
 msgstr "foarte slab"
 
-#: play.c:59 set.c:3493 show.c:1989
+#: play.c:59 set.c:3534 show.c:1989
 msgid "bad"
 msgstr "slab"
 
-#: play.c:60 set.c:3488 show.c:1985
+#: play.c:60 set.c:3529 show.c:1985
 msgid "doubtful"
 msgstr "îndoielnic"
 
@@ -7864,7 +7907,7 @@ msgstr "%s nu poate muta.\n"
 msgid "%s moves %s.\n"
 msgstr "%s mută %s.\n"
 
-#: play.c:1321 play.c:3788
+#: play.c:1321 play.c:3790
 #, c-format
 msgid "%s rolls %1i and %1i.\n"
 msgstr "%s aruncă %1i şi %1i.\n"
@@ -7982,7 +8025,7 @@ msgstr ""
 msgid "You do not own the cube."
 msgstr "Nu deţii cubul."
 
-#: play.c:2310 play.c:3617
+#: play.c:2310 play.c:3619
 #, c-format
 msgid "The cube is already at %d; you can't double any more.\n"
 msgstr "Cubul este deja la %d; nu mai poţi dubla.\n"
@@ -8043,7 +8086,7 @@ msgstr "Trebuie să arunci zarurile înainte de a putea muta."
 msgid "Please wait for %s to consider the resignation before moving.\n"
 msgstr "Aşteaptă %s pentru a considera renunţarea înainte de a muta.\n"
 
-#: play.c:2563 play.c:3745
+#: play.c:2563 play.c:3747
 #, c-format
 msgid "Please wait for %s to consider the cube before moving.\n"
 msgstr "Aşteaptă %s pentru a considera cubul înainte de a muta.\n"
@@ -8082,16 +8125,16 @@ msgstr ""
 "Table GNU este compilat cu suport pentru partide de lungime %i\n"
 "sau mai puţin\n"
 
-#: play.c:2804
+#: play.c:2806
 #, c-format
 msgid "A new %d point match has been started.\n"
 msgstr "O nouă partidă de %d puncte a început.\n"
 
-#: play.c:2835
+#: play.c:2837
 msgid "A new session has been started."
 msgstr "O nouă sesiune a început."
 
-#: play.c:2948
+#: play.c:2950
 msgid ""
 "If you specify a parameter to the `next game' command, it must be a positive "
 "number (the count of games to step ahead)."
@@ -8099,7 +8142,7 @@ msgstr ""
 "Dacă specifici un parametru la comanda 'next game', trebuie să fie un număr "
 "pozitiv (numărul de jocuri de sărit înainte)"
 
-#: play.c:3237
+#: play.c:3239
 msgid ""
 "If you specify a parameter to the `next' command, it must be a positive "
 "number (the count of moves to step ahead)."
@@ -8107,11 +8150,11 @@ msgstr ""
 "Dacă specifici un parametru la comanda 'next', trebuie să fie un număr "
 "pozitiv (numărul de mutări de sărit înainte)."
 
-#: play.c:3359
+#: play.c:3361
 msgid "It's not the computer's turn to play."
 msgstr "Nu este rândul calculatorului."
 
-#: play.c:3386
+#: play.c:3388
 msgid ""
 "If you specify a parameter to the `previous game' command, it must be a "
 "positive number (the count of games to step back)."
@@ -8119,7 +8162,7 @@ msgstr ""
 "Dacă specifici un parametru la comanda 'previous game', trebuie să fie un "
 "număr pozitiv (numărul de jocuri de sărit înapoi)."
 
-#: play.c:3515
+#: play.c:3517
 msgid ""
 "If you specify a parameter to the `previous' command, it must be a positive "
 "number (the count of moves to step back)."
@@ -8127,169 +8170,169 @@ msgstr ""
 "Dacă specifici un parametru la comanda 'previous', trebuie să fie un număr "
 "pozitiv (numărul de mutări de sărit înapoi)."
 
-#: play.c:3581
+#: play.c:3583
 #, fuzzy
 msgid "Beavers and Raccoons are not permitted during match play."
 msgstr "Redublările nu sunt permise în timpul partidei."
 
-#: play.c:3587
+#: play.c:3589
 msgid "Beavers are disabled (see `help set beavers')."
 msgstr "Castorii sunt dezactivaţi (vezi 'help set beavers')"
 
-#: play.c:3594
+#: play.c:3596
 msgid "Only one beaver is permitted (see `help set beavers')."
 msgstr "Doar un castor este permis (vezi 'help set beavers')."
 
-#: play.c:3597
+#: play.c:3599
 #, c-format
 msgid "Only %d beavers are permitted (see `help set beavers').\n"
 msgstr "Doar %d castori sunt permişi (vezi 'help set beavers').\n"
 
-#: play.c:3604
+#: play.c:3606
 msgid "The cube must have been offered before you can redouble it."
 msgstr "Cubul trebuie să fi fost oferit înainte de a putea redubla."
 
-#: play.c:3630
+#: play.c:3632
 #, c-format
 msgid "%s accepts and immediately redoubles to %d.\n"
 msgstr "%s acceptă şi imediat redublează la %d.\n"
 
-#: play.c:3651
+#: play.c:3653
 msgid "You can only reject if the cube or a resignation has been offered."
 msgstr "Poţi refuza doar dacă cubul sau o renunţare au fost oferite."
 
-#: play.c:3661
+#: play.c:3663
 msgid "You must be playing a game if you want to resign it."
 msgstr "Trebuie să joci un joc dacă vrei să renunţi."
 
-#: play.c:3693
+#: play.c:3695
 #, fuzzy, c-format
 msgid "Unknown keyword `%s' (see `help resign').\n"
 msgstr "Cuvânt cheie necunoscut '%s' -- încearcă 'help resign'.\n"
 
-#: play.c:3701
+#: play.c:3703
 #, c-format
 msgid "%s has already declined your offer of a %s.\n"
 msgstr "%s deja a refuzat oferta ta de %s.\n"
 
-#: play.c:3711
+#: play.c:3713
 #, c-format
 msgid "%s offers to resign a %s.\n"
 msgstr "%s oferă să renunţe %s.\n"
 
-#: play.c:3713
+#: play.c:3715
 #, fuzzy, c-format
 msgid "%s offers to resign.\n"
 msgstr "%s oferă să renunţe %s.\n"
 
-#: play.c:3752 play.c:4568 set.c:2438
+#: play.c:3754 play.c:4569 set.c:2479
 msgid "Please resolve the resignation first."
 msgstr "Decide asupra renunţării întâi."
 
-#: play.c:3758
+#: play.c:3760
 msgid "You have already rolled the dice."
 msgstr "Ai aruncat deja zarurile."
 
-#: play.c:3844
+#: play.c:3846
 msgid "The cube must have been offered before you can take it."
 msgstr "Cubul trebuie să fi fost oferit înainte de a-l putea lua."
 
-#: play.c:3876
+#: play.c:3878
 #, c-format
 msgid "%s accepts the cube at %d.\n"
 msgstr "%s acceptă cubul la %d.\n"
 
-#: play.c:3909
+#: play.c:3911
 #, c-format
 msgid "Illegal match ID '%s'\n"
 msgstr "ID partidă invalid '%s'\n"
 
-#: play.c:3910
+#: play.c:3912
 #, fuzzy, c-format
 msgid "Dice %d %d, "
 msgstr "Joc %d: %d, %d"
 
-#: play.c:3911
+#: play.c:3913
 #, c-format
 msgid "player on roll %d (turn %d), "
 msgstr ""
 
-#: play.c:3912
+#: play.c:3914
 #, fuzzy, c-format
 msgid "resigned %d,\n"
 msgstr ", renunţă %s"
 
-#: play.c:3913
+#: play.c:3915
 #, fuzzy, c-format
 msgid "doubled %d, "
 msgstr "Redublează la %d"
 
-#: play.c:3914
+#: play.c:3916
 #, fuzzy, c-format
 msgid "cube owner %d, "
 msgstr "Cubul oferit la %d"
 
-#: play.c:3915
+#: play.c:3917
 #, fuzzy, c-format
 msgid "crawford game %d,\n"
 msgstr "Joc Crawford"
 
-#: play.c:3916
+#: play.c:3918
 #, fuzzy, c-format
 msgid "match length %d, "
 msgstr "Lungime implicită partidă:"
 
-#: play.c:3917
+#: play.c:3919
 #, c-format
 msgid "score %d-%d, "
 msgstr ""
 
-#: play.c:3918
+#: play.c:3920
 #, fuzzy, c-format
 msgid "cube %d, "
 msgstr "(Cub: %d)"
 
-#: play.c:3919
+#: play.c:3921
 #, fuzzy, c-format
 msgid "game state %d\n"
 msgstr ""
 "Statistica joc pentru jocul %d\n"
 "\n"
 
-#: play.c:3926
+#: play.c:3928
 msgid "SetMatchID cannot handle positions where a double has been offered."
 msgstr ""
 
-#: play.c:3927
+#: play.c:3929
 #, c-format
 msgid "Stepping back to the offering of the cube. "
 msgstr ""
 
-#: play.c:4360
+#: play.c:4361
 #, c-format
 msgid "Double to %d"
 msgstr "Dublează la %d"
 
-#: play.c:4360
+#: play.c:4361
 #, c-format
 msgid "Redouble to %d"
 msgstr "Redublează la %d"
 
-#: play.c:4366
+#: play.c:4367
 #, c-format
 msgid "Beaver to %d"
 msgstr "Castor la %d"
 
-#: play.c:4366
+#: play.c:4367
 #, c-format
 msgid "Raccoon to %d"
 msgstr "Raton la %d"
 
-#: play.c:4394
+#: play.c:4395
 msgid " Resigns"
 msgstr " Renunţă"
 
-#: play.c:4563 set.c:2432
+#: play.c:4564 set.c:2473
 msgid "There must be a game in progress to set a player on roll."
 msgstr "Trebuie să fie un joc în curs pentru a seta un jucător la aruncare."
 
@@ -8617,7 +8660,7 @@ msgid ""
 msgstr ""
 "Nu poţi seta o sămânţă dacă foloseşti generare manuală de zar sau random.org"
 
-#: set.c:116 set.c:126 set.c:1988
+#: set.c:116 set.c:126 set.c:2029
 #, fuzzy
 msgid "You must specify a valid seed (see `help set seed')."
 msgstr "Trebuie să specifici o sămânţă validă -- încearcă 'help set seed'."
@@ -8632,11 +8675,11 @@ msgstr "Sămânţă setată la %s.\n"
 msgid "Seed set to %d.\n"
 msgstr "Sămânţă setată la %d.\n"
 
-#: set.c:136 set.c:1997
+#: set.c:136 set.c:2038
 msgid "Seed initialised from system random data."
 msgstr "Sămânţă iniţializată din informaţii aleatoare din sistem."
 
-#: set.c:137 set.c:1998
+#: set.c:137 set.c:2039
 msgid "Seed initialised by system clock."
 msgstr "Sămânţă iniţializată cu ceasul sistem."
 
@@ -9309,12 +9352,12 @@ msgstr "Mutările pentru %s trebuie introduse manual.\n"
 msgid "You must specify a name to use."
 msgstr "Trebuie să specifici un nume să foloseşti."
 
-#: set.c:1391
+#: set.c:1391 set.c:1491
 #, c-format
 msgid "`%c' is not a valid name.\n"
 msgstr "`%c' nu este un nume valid.\n"
 
-#: set.c:1397
+#: set.c:1397 set.c:1496
 msgid "`both' is a reserved word; you can't call a player that.\n"
 msgstr "`both' este un cuvânt rezervat; nu poţi numi un jucător aşa.\n"
 
@@ -9332,7 +9375,7 @@ msgstr "Jucătorul %d este cunoscut ca `%s'.\n"
 msgid "You must specify a player (see `help set player')."
 msgstr "Trebuie să specifici un jucător -- încearcă `help set player'."
 
-#: set.c:1445 set.c:2157 set.c:2206 set.c:2851 set.c:3773
+#: set.c:1445 set.c:2198 set.c:2247 set.c:2892 set.c:3814
 msgid "Insufficient memory."
 msgstr "Memorie insuficientă."
 
@@ -9341,20 +9384,37 @@ msgstr "Memorie insuficientă."
 msgid "Unknown player `%s' (see `help set player').\n"
 msgstr "Jucător necunoscut `%s' -- încearcă `help set player'.\n"
 
-#: set.c:1481
+#: set.c:1483
+#, fuzzy
+msgid "You must specify two player names use."
+msgstr "Trebuie să specifici un nume să foloseşti."
+
+#: set.c:1502
+#, fuzzy
+msgid "Player names identical"
+msgstr "Statistici jucător"
+
+#: set.c:1511
+#, c-format
+msgid ""
+"Players will be known as `%s' and `%s'.\n"
+" This setting will take effect when a new match is started.\n"
+msgstr ""
+
+#: set.c:1522
 #, c-format
 msgid "The prompt has been set to `%s'.\n"
 msgstr "Prompt-ul a fost setat la `%s'.\n"
 
-#: set.c:1487
+#: set.c:1528
 msgid "All games in a session will be recorded."
 msgstr "Toate jocurile dintr-o sesiune vor fi înregistrate."
 
-#: set.c:1488
+#: set.c:1529
 msgid "Only the active game in a session will be recorded."
 msgstr "Doar jocul activ dintr-o sesiune va fi înregistrat."
 
-#: set.c:1513
+#: set.c:1554
 msgid ""
 "This installation of GNU Backgammon was compiled without the Blum, Blum and "
 "Shub generator."
@@ -9362,12 +9422,12 @@ msgstr ""
 "Această instalare de Table GNU a fost compilată fără generatorul Blum, Blum "
 "şi Shub."
 
-#: set.c:1522
+#: set.c:1563
 msgid ""
 "This installation of GNU Backgammon was compiled without the BSD generator."
 msgstr "Această instalare de table GNU a fost compilată fără generatorul BSD."
 
-#: set.c:1552
+#: set.c:1593
 msgid ""
 "This installation of GNU Backgammon was compiled without support for sockets "
 "needed for fetching\n"
@@ -9377,24 +9437,24 @@ msgstr ""
 "uri necesar pentru a\n"
 "aduce numere aleatoare de la <www.random.org>"
 
-#: set.c:1569
+#: set.c:1610
 msgid "Create an .sgf file for each game rolled out"
 msgstr "Creează un fişier .sgf pentru fiecare joc simulat"
 
-#: set.c:1570
+#: set.c:1611
 msgid "Do not create an .sgf file for each game rolled out"
 msgstr "Nu crea un fişier .sgf pentru fiecare joc simulat"
 
-#: set.c:1589
+#: set.c:1630
 msgid "Use different evaluation for later moves of rollout."
 msgstr ""
 "Utilizează o evaluare diferită pentru mutările mai târzii ale simulării."
 
-#: set.c:1590
+#: set.c:1631
 msgid "Do not change evaluations during rollout."
 msgstr "Nu schimba evaluările în timpul simulării."
 
-#: set.c:1600
+#: set.c:1641
 #, fuzzy
 msgid ""
 "You must specify a valid ply at which to change evaluations (see `help set "
@@ -9403,24 +9463,24 @@ msgstr ""
 "Trebuie să specifici o mutare validă la care să se schimbe evaluările -- "
 "încearcă `help set rollout late plies'."
 
-#: set.c:1609
+#: set.c:1650
 msgid "No evaluations changes will be made during rollouts."
 msgstr "Nici o schimbare de evaluare nu va fi făcută în timpul simulărilor."
 
-#: set.c:1611
+#: set.c:1652
 #, c-format
 msgid "Evaluations will change after %d plies in rollouts.\n"
 msgstr "Evaluările se vor schimba după %d mutări în simulări.\n"
 
-#: set.c:1632
+#: set.c:1673
 msgid "Stop rollout when STD's are small enough"
 msgstr "Opreşte simularea când STD este suficient de mic"
 
-#: set.c:1633
+#: set.c:1674
 msgid "Do not stop rollout based on STDs"
 msgstr "Nu opri simularea pe baza STD"
 
-#: set.c:1643
+#: set.c:1684
 #, fuzzy
 msgid ""
 "You must specify a valid minimum number of games to rollout (see `help set "
@@ -9429,14 +9489,14 @@ msgstr ""
 "Trebuie să specifici un număr minim de jocuri de simulat valid -- încearcă "
 "'help set rollout limit minimumgames'."
 
-#: set.c:1650
+#: set.c:1691
 #, c-format
 msgid "After %d games, rollouts will stop if the STDs are small enough.\n"
 msgstr ""
 "După %d jocuri, simulările se vor opri dacă STD-urile sunt suficient de "
 "mici.\n"
 
-#: set.c:1659
+#: set.c:1700
 #, fuzzy
 msgid ""
 "You must set a valid fraction for the ratio STD/value where rollouts can "
@@ -9445,7 +9505,7 @@ msgstr ""
 "Trebuie să setezi o fracţie validă pentru raţia STD/valoare unde simulările "
 "se pot opri -- încearcă 'help set rollout limit maxerror'."
 
-#: set.c:1667
+#: set.c:1708
 #, c-format
 msgid ""
 "Rollouts can stop when the ratio |STD/value| is less than %5.4f for every "
@@ -9454,17 +9514,17 @@ msgstr ""
 "Simulările se pot opri când raţia |STD/valoare| este mai mică decât %5.4f "
 "pentru fiecare valoare (linie/marţ/marţ tehnic/...valoare)\n"
 
-#: set.c:1684
+#: set.c:1725
 #, fuzzy
 msgid "Stop rollout of choices based on JSDs"
 msgstr "Opreşte simularea mutărilor pe baza J.S.D."
 
-#: set.c:1685
+#: set.c:1726
 #, fuzzy
 msgid "Do not stop rollout of moves choices on JSDs"
 msgstr "Nu opri simularea mutărilor pe baza J.S.D."
 
-#: set.c:1695
+#: set.c:1736
 #, fuzzy
 msgid ""
 "You must specify a valid minimum number of games to rollout (see `help set "
@@ -9473,13 +9533,13 @@ msgstr ""
 "Trebuie să specifici un număr minim de jocuri de simulat valid -- încearcă "
 "'help set rollout jsd minimumgames'."
 
-#: set.c:1701
+#: set.c:1742
 #, fuzzy, c-format
 msgid "After %d games, rollouts will stop if the JSDs are large enough.\n"
 msgstr ""
 "După %d jocuri, simulările se vor opri dacă J.S.D. este suficient de mare.\n"
 
-#: set.c:1712
+#: set.c:1753
 #, fuzzy
 msgid ""
 "You must set a number of joint standard deviations for the equity difference "
@@ -9489,7 +9549,7 @@ msgstr ""
 "diferenţa de valoare cu cea mai bună mutare simulată -- încearcă 'help set "
 "rollout jsd limit'."
 
-#: set.c:1721
+#: set.c:1762
 #, c-format
 msgid ""
 "Rollouts (or rollouts of moves) may stop when the equity is more than %5.3f "
@@ -9499,79 +9559,79 @@ msgstr ""
 "mult decât %5.3f deviaţii standard reunite depărtare de cea mai bună mutare "
 "simulată\n"
 
-#: set.c:1765
+#: set.c:1806
 msgid "Chequer play in rollouts"
 msgstr "Jocul de puluri în simulări"
 
-#: set.c:1814
+#: set.c:1855
 msgid "Chequer play for later moves in rollouts"
 msgstr "Jocul de puluri pentru mutările mai depărtate în simulări"
 
-#: set.c:1841
+#: set.c:1882
 msgid "Chequer play in rollouts (for player 1)"
 msgstr "Jocul de puluri în simulări (pentru jucătorul 1)"
 
-#: set.c:1842
+#: set.c:1883
 msgid "Chequer play in rollouts (for player 0)"
 msgstr "Jocul de puluri în simulări (pentru jucătorul 0)"
 
-#: set.c:1857
+#: set.c:1898
 msgid "Chequer play for later moves in rollouts (for player 1)"
 msgstr ""
 "Jocul de puluri pentru mutări mai depărtate în simulări (pentru jucătorul 1)"
 
-#: set.c:1858
+#: set.c:1899
 msgid "Chequer play for later moves in rollouts (for player 0)"
 msgstr ""
 "Jocul de puluri pentru mutări mai depărtate în simulări (pentru jucătorul 0)"
 
-#: set.c:1873
+#: set.c:1914
 msgid "Cube decisions in rollouts"
 msgstr "Decizii de cub în simulări"
 
-#: set.c:1888
+#: set.c:1929
 msgid "Cube decisions for later plies in rollouts"
 msgstr "Decizii de cub pentru mutări mai depărtate în simulări"
 
-#: set.c:1903
+#: set.c:1944
 msgid "Cube decisions in rollouts (for player 1)"
 msgstr "Decizii de cub în simulări (pentru jucătorul 1)"
 
-#: set.c:1904
+#: set.c:1945
 msgid "Cube decisions in rollouts (for player 0)"
 msgstr "Decizii de cub în simulări (pentru jucătorul 0)"
 
-#: set.c:1919
+#: set.c:1960
 msgid "Cube decisions for later plies of rollouts (for player 1)"
 msgstr ""
 "Decizii de cub pentru mutări mai depărtate în simulări (pentru jucătorul 1)"
 
-#: set.c:1920
+#: set.c:1961
 msgid "Cube decisions in later plies of rollouts (for player 0)"
 msgstr ""
 "Decizii de cub pentru mutări mai depărtate în simulări (pentru jucătorul 0)"
 
-#: set.c:1936
+#: set.c:1977
 msgid "Will truncate *cubeless* rollouts when reaching exact bearoff database"
 msgstr ""
 "Va trunchia simulările *fără cub* când se va ajunge la bază de date de "
 "scoatere exactă"
 
-#: set.c:1938
+#: set.c:1979
 msgid ""
 "Will not truncate *cubeless* rollouts when reaching exact bearoff database"
 msgstr ""
 "Nu va trunchia simulările *fără cub* când se va ajunge la bază de date de "
 "scoatere exactă"
 
-#: set.c:1952
+#: set.c:1993
 msgid ""
 "Will truncate *cubeless* rollouts when reaching one-sided bearoff database"
 msgstr ""
 "Va trunchia simulările *fără cub* când se va ajunge la bază de date de "
 "scoatere o singură parte"
 
-#: set.c:1954
+#: set.c:1995
 msgid ""
 "Will not truncate *cubeless* rollouts when reaching one-sided bearoff "
 "database"
@@ -9579,24 +9639,24 @@ msgstr ""
 "Nu va trunchia simulările *fără cub* când se va ajunge la bază de date de "
 "scoatere o singură parte"
 
-#: set.c:1968
+#: set.c:2009
 msgid "Rollouts will be made as the initial position of a game."
 msgstr "Simulările se vor face ca în poziţia iniţială a jocului."
 
-#: set.c:1969
+#: set.c:2010
 msgid "Rollouts will be made for normal (non-opening) positions."
 msgstr "Simulările se vor face pentru poziţii normale (non-deschidere)."
 
-#: set.c:1979
+#: set.c:2020
 msgid "You can't set a seed if you're using manual dice generation."
 msgstr "Nu poţi seta o sămânţă dacă foloseşti generarea de zaruri manuală."
 
-#: set.c:1994
+#: set.c:2035
 #, c-format
 msgid "Rollout seed set to %d.\n"
 msgstr "Sămânţă simulării setată la %d.\n"
 
-#: set.c:2008
+#: set.c:2049
 #, fuzzy
 msgid ""
 "You must specify a valid number of trials to make (see `help set rollout "
@@ -9605,7 +9665,7 @@ msgstr ""
 "Trebuie să specifici un număr valid de încercări de făcut -- încearcă `help "
 "set rollout trials'."
 
-#: set.c:2015 show.c:221
+#: set.c:2056 show.c:221
 #, fuzzy, c-format
 msgid "%d game will be played per rollout.\n"
 msgid_plural "%d games will be played per rollout.\n"
@@ -9613,43 +9673,43 @@ msgstr[0] "%d joc va fi jucat per simulare.\n"
 msgstr[1] "%d joc va fi jucat per simulare.\n"
 msgstr[2] "%d joc va fi jucat per simulare.\n"
 
-#: set.c:2023
+#: set.c:2064
 msgid "Games in rollouts will be stopped after a fixed number of moves."
 msgstr "Jocurile din simulări vor fi oprite după un număr stabilit de mutări."
 
-#: set.c:2025
+#: set.c:2066
 msgid "Games in rollouts will be played out until the end."
 msgstr "Jocurile din simulări vor fi jucate până la sfârşit."
 
-#: set.c:2034
+#: set.c:2075
 msgid "Rollouts use same settings for cube and chequer play."
 msgstr ""
 "Simulările folosesc aceleaşi setări pentru jocul cu cubul sau cu pulurile."
 
-#: set.c:2035
+#: set.c:2076
 msgid "Rollouts use separate settings for cube and chequer play."
 msgstr ""
 "Simulările folosesc setări diferite pentru jocul cu cubul sau cu pulurile."
 
-#: set.c:2041
+#: set.c:2082
 msgid "Rollouts use same settings for both players."
 msgstr "Simulările folosesc aceleaşi setări pentru ambii jucători."
 
-#: set.c:2042
+#: set.c:2083
 msgid "Rollouts use separate settings for both players."
 msgstr "Simulările folosesc setări diferite pentru cei doi jucători."
 
-#: set.c:2048
+#: set.c:2089
 msgid "Evaluation of rollouts at truncation point will be same as player 0."
 msgstr ""
 "Evaluarea simulărilor la punctul de trunchiere va fi la fel ca jucătorul 0."
 
-#: set.c:2049
+#: set.c:2090
 msgid "Evaluation of rollouts at truncation point are separately specified."
 msgstr ""
 "Evaluarea simulărilor la punctul de trunchiere este specificată separat."
 
-#: set.c:2057
+#: set.c:2098
 #, fuzzy
 msgid ""
 "You must specify a valid ply at which to truncate rollouts (see `help set "
@@ -9658,11 +9718,11 @@ msgstr ""
 "Trebuie să specifici o mutare validă la care să trunchiez simulările -- "
 "încearcă `help set rollout'."
 
-#: set.c:2066
+#: set.c:2107
 msgid "Rollouts will not be truncated."
 msgstr "Simulările nu vor fi trunchiate."
 
-#: set.c:2068
+#: set.c:2109
 #, fuzzy, c-format
 msgid "Rollouts will be truncated after %d ply.\n"
 msgid_plural "Rollouts will be truncated after %d plies.\n"
@@ -9670,45 +9730,45 @@ msgstr[0] "Simulările vor fi trunchiate după %d mutare.\n"
 msgstr[1] "Simulările vor fi trunchiate după %d mutare.\n"
 msgstr[2] "Simulările vor fi trunchiate după %d mutare.\n"
 
-#: set.c:2074
+#: set.c:2115
 msgid "Chequer play evaluations at rollout truncation point"
 msgstr "Evaluări joc de puluri la punctul de trunchiere al simulării"
 
-#: set.c:2084
+#: set.c:2125
 msgid "Cube decisions at rollout truncation point"
 msgstr "Decizii de cub la punctul de trunchiere al simulării"
 
-#: set.c:2098
+#: set.c:2139
 msgid "Will lookahead during rollouts to reduce variance."
 msgstr "Va căuta înainte în timpul simulărilor pentru a reduce variaţia."
 
-#: set.c:2099
+#: set.c:2140
 msgid "Will not use lookahead variance reduction during rollouts."
 msgstr ""
 "Nu va folosi reducerea de variaţie prin căutat înainte în timpul simulărilor."
 
-#: set.c:2112
+#: set.c:2153
 msgid "Use quasi-random dice in rollouts"
 msgstr "Utilizează zaruri pseudo-aleatoare în simulări"
 
-#: set.c:2113
+#: set.c:2154
 msgid "Do not use quasi-random dice in rollouts"
 msgstr "Nu utiliza zaruri pseudo-aleatoare în simulări"
 
-#: set.c:2127
+#: set.c:2168
 msgid "Cubeful rollouts will be performed."
 msgstr "Vor fi realizate simulări cu cub."
 
-#: set.c:2128
+#: set.c:2169
 msgid "Cubeless rollouts will be performed."
 msgstr "Vor fi realizate simulări fără cub."
 
-#: set.c:2141 set.c:2190
+#: set.c:2182 set.c:2231
 #, fuzzy, c-format
 msgid "You must specify a player (see `help set %s player').\n"
 msgstr "Trebuie să specifici un jucător -- încearcă `help set %s player'.\n"
 
-#: set.c:2179 set.c:2228 set.c:3795
+#: set.c:2220 set.c:2269 set.c:3836
 #, fuzzy, c-format
 msgid ""
 "Unknown player `%s'\n"
@@ -9717,72 +9777,72 @@ msgstr ""
 "Jucător necunoscut `%s' -- încearcă\n"
 "`help set %s player'.\n"
 
-#: set.c:2263 set.c:2274 set.c:2281
+#: set.c:2304 set.c:2315 set.c:2322
 msgid ""
 "The Crawford rule applies only in match play when a player's score is 1-away."
 msgstr ""
 "Regula Crawford se aplică doar în joc în partidă când scorul unui jucător "
 "este la 1 punct distanţă de partidă."
 
-#: set.c:2287
+#: set.c:2328
 msgid "You cannot set the Crawford rule when both players' scores are 1-away."
 msgstr ""
 "Nu poţi seta regula Crawford când scorurile ambilor jucători sunt la un "
 "punct distanţă de partidă."
 
-#: set.c:2294
+#: set.c:2335
 msgid "You cannot set both Crawford and post-Crawford simultaneously."
 msgstr "Nu poţi seta Crawford şi post-Crawford simultan."
 
-#: set.c:2315
+#: set.c:2356
 msgid "You cannot set post-Crawford play if the trailer has yet to score."
 msgstr ""
 "Nu poţi seta post-Crawford dacă cel din urmă trebuie încă să câştige un "
 "punct."
 
-#: set.c:2321
+#: set.c:2362
 msgid "You must specify two valid scores."
 msgstr "Trebuie să specifici două scoruri valide."
 
-#: set.c:2326
+#: set.c:2367
 msgid "Only one player may win the match."
 msgstr "Doar un singur jucător poate câştiga partida."
 
-#: set.c:2332
+#: set.c:2373
 msgid "You cannot play the Crawford game once the match is already over."
 msgstr "Nu poţi juca jocul Crawford din moment ce partida s-a terminat deja."
 
-#: set.c:2416
+#: set.c:2457
 msgid "You must specify either 0, 1 or 2"
 msgstr "Trebuie să specifici 0, 1, sau 2"
 
-#: set.c:2444
+#: set.c:2485
 msgid "Which player do you want to set on roll?"
 msgstr "Ce jucător vrei să fie la aruncare?"
 
-#: set.c:2450
+#: set.c:2491
 #, fuzzy, c-format
 msgid "Unknown player `%s' (see `help set turn').\n"
 msgstr "Jucător necunoscut `%s' -- încearcă `help set turn'.\n"
 
-#: set.c:2456
+#: set.c:2497
 msgid "You can't set both players on roll."
 msgstr "Nu poţi seta ambii jucător la aruncare."
 
-#: set.c:2484
+#: set.c:2525
 #, c-format
 msgid "`%s' is now on roll.\n"
 msgstr "`%s' este acum la aruncare.\n"
 
-#: set.c:2490
+#: set.c:2531
 msgid "Will use the Jacoby rule for money sessions."
 msgstr "Va folosi regula Jacobi pentru sesiuni pe bani."
 
-#: set.c:2491
+#: set.c:2532
 msgid "Will not use the Jacoby rule for money sessions."
 msgstr "Nu va folosi regula Jacobi pentru sesiuni pe bani."
 
-#: set.c:2495
+#: set.c:2536
 #, fuzzy
 msgid ""
 "Note that you'll have to enable the cube if you want gammons and "
@@ -9792,15 +9852,15 @@ msgstr ""
 "(De notat că va trebui să activezi cubul dacă vrei ca marţurile si marţurile "
 "tehnice să fie marcate -- vezi `help set cube use'.)"
 
-#: set.c:2514 set.c:2532
+#: set.c:2555 set.c:2573
 msgid "This game is the Crawford game (no doubling allowed)."
 msgstr "Acest joc este jocul Crawford (nu este permisă nici o dublare)."
 
-#: set.c:2515 set.c:2533
+#: set.c:2556 set.c:2574
 msgid "This game is not the Crawford game."
 msgstr "Acest joc nu este jocul Crawford."
 
-#: set.c:2536
+#: set.c:2577
 msgid ""
 "Cannot set whether this is the Crawford game\n"
 "as none of the players are 1-away from winning."
@@ -9808,23 +9868,23 @@ msgstr ""
 "Nu pot seta dacă acesta este jocul Crawford pentru \n"
 "că nici unul din jucători nu este la 1 punct de victorie."
 
-#: set.c:2541
+#: set.c:2582
 msgid "Cannot set Crawford play for money sessions."
 msgstr "Nu pot seta jocul Crawford pentru sesiuni pe bani."
 
-#: set.c:2543 set.c:2577
+#: set.c:2584 set.c:2618
 msgid "No match in progress (type `new match n' to start one)."
 msgstr "Nici o partidă în curs (scrie `new match n' pentru a începe una)."
 
-#: set.c:2556
+#: set.c:2597
 msgid "This is post-Crawford play (doubling allowed)."
 msgstr "Acesta este un joc post-Crawford (dublarea permisă)"
 
-#: set.c:2557 show.c:843
+#: set.c:2598 show.c:843
 msgid "This is not post-Crawford play."
 msgstr "Acesta nu este un joc post-Crawford."
 
-#: set.c:2570
+#: set.c:2611
 msgid ""
 "Cannot set whether this is post-Crawford play\n"
 "as none of the players are 1-away from winning."
@@ -9832,99 +9892,99 @@ msgstr ""
 "Nu pot seta dacă acesta este un joc post-Crawford pentru că\n"
 "nici unul din jucători nu este la 1 punct de victorie."
 
-#: set.c:2575
+#: set.c:2616
 msgid "Cannot set post-Crawford play for money sessions."
 msgstr "Nu pot setă joc post-Crawford pentru sesiuni pe bani."
 
-#: set.c:2590
+#: set.c:2631
 msgid "Incorrect syntax for set warning command."
 msgstr "Sintaxa incorectă pentru comanda setează avertisment."
 
-#: set.c:2598 set.c:2642
+#: set.c:2639 set.c:2683
 #, c-format
 msgid "Unknown warning %s."
 msgstr "Avertisment necunoscut %s."
 
-#: set.c:2616
+#: set.c:2657
 #, c-format
 msgid "Unknown value %s."
 msgstr "Valoare necunoscută %s."
 
-#: set.c:2620
+#: set.c:2661
 #, fuzzy, c-format
 msgid "Warning %s set to %s."
 msgstr "Avertisment %s setează %s."
 
-#: set.c:2656
+#: set.c:2697
 msgid "You must specify the number of beavers to allow."
 msgstr "Trebuie să specifici numărul de castori permis."
 
-#: set.c:2664 show.c:1272
+#: set.c:2705 show.c:1272
 #, c-format
 msgid "%d beavers/raccoons allowed in money sessions.\n"
 msgstr "%d castori/ratoni permişi în sesiunile pe bani.\n"
 
-#: set.c:2666 show.c:1274
+#: set.c:2707 show.c:1274
 msgid "1 beaver allowed in money sessions."
 msgstr "1 castor permis în sesiunile pe bani."
 
-#: set.c:2668 show.c:1276
+#: set.c:2709 show.c:1276
 msgid "No beavers allowed in money sessions."
 msgstr "Nici un castor permis în sesiunile pe bani."
 
-#: set.c:2677
+#: set.c:2718
 msgid "You must specify a number between 1 and 6.\n"
 msgstr "Trebuie să specifici un număr între 1 şi 6.\n"
 
-#: set.c:2683
+#: set.c:2724
 #, c-format
 msgid ""
 "Probabilities and equities will be shown with %d digits after the decimal "
 "separator\n"
 msgstr "Probabilităţile şi valorile vor fi arătate cu %d zecimale\n"
 
-#: set.c:2695
+#: set.c:2736
 msgid "Match winning chances will be shown as percentages."
 msgstr "Şansele de a câştiga partida vor fi arătate ca procentaje."
 
-#: set.c:2696
+#: set.c:2737
 msgid "Match winning chances will be shown as probabilities."
 msgstr "Şansele de câştiga partida vor fi arătate ca probabilităţi."
 
-#: set.c:2702
+#: set.c:2743
 msgid "Match evaluations will be shown as match winning chances."
 msgstr "Evaluările partidei vor fi arătate ca şanse de câştig ale partidei."
 
-#: set.c:2703
+#: set.c:2744
 msgid "Match evaluations will be shown as equivalent money equity."
 msgstr "Evaluările partidei vor fi arătate valoare în bani echivalentă."
 
-#: set.c:2709
+#: set.c:2750
 msgid "TTY boards will be given in raw format."
 msgstr "Tablele TTY vor fi date în format neprelucrat."
 
-#: set.c:2710
+#: set.c:2751
 msgid "TTY boards will be given in ASCII."
 msgstr "Tablele TTY vor fi date în format ASCII."
 
-#: set.c:2716
+#: set.c:2757
 msgid "Game winning chances will be shown as percentages."
 msgstr "Şansele de câştiga jocul vor fi arătate ca procentaje."
 
-#: set.c:2717
+#: set.c:2758
 msgid "Game winning chances will be shown as probabilities."
 msgstr "Şansele de câştiga jocul vor fi arătate ca probabilităţi."
 
-#: set.c:2733
+#: set.c:2774
 msgid "You must specify a filename. See \"help set met\". "
 msgstr "Trebuie să specifici un nume de fişier. Vezi \"help set met\"."
 
-#: set.c:2745
+#: set.c:2786
 #, c-format
 msgid "GNU Backgammon will now use the %s match equity table.\n"
 msgstr "Table GNU va folosi acum tabela de valoare a partidei %s.\n"
 
-#: set.c:2750
+#: set.c:2791
 #, c-format
 msgid ""
 "\n"
@@ -9938,7 +9998,7 @@ msgstr ""
 "Pentru scoruri mai mari de %i-de câştig se foloseşte o schemă de "
 "extrapolare.\n"
 
-#: set.c:2782
+#: set.c:2823
 #, fuzzy, c-format
 msgid ""
 "Unknown evaluation type: %s (see\n"
@@ -9947,12 +10007,12 @@ msgstr ""
 "Tip evaluare necunoscut: %s -- vezi\n"
 "`help set %s type'\n"
 
-#: set.c:2789
+#: set.c:2830
 #, c-format
 msgid "%s will now use %s.\n"
 msgstr "%s va folosi acum %s.\n"
 
-#: set.c:2802
+#: set.c:2843
 #, c-format
 msgid ""
 "(Note that this setting will have no effect until you\n"
@@ -9961,7 +10021,7 @@ msgstr ""
 "(De notat că această setare nu va avea nici un efect până când\n"
 "`set %s type evaluation'.)\n"
 
-#: set.c:2816
+#: set.c:2857
 #, c-format
 msgid ""
 "(Note that this setting will have no effect until you\n"
@@ -9970,24 +10030,24 @@ msgstr ""
 "(De notat că această setare nu va avea nici un efect până când\n"
 "`set %s type rollout.)'\n"
 
-#: set.c:2825
+#: set.c:2866
 #, fuzzy
 msgid "Evaluation settings will be same as analysis settings."
 msgstr ""
 "Evaluarea simulărilor la punctul de trunchiere va fi la fel ca jucătorul 0."
 
-#: set.c:2826
+#: set.c:2867
 #, fuzzy
 msgid "Evaluation settings separate from analysis settings."
 msgstr "Utilizează setările evaluării pentru a genera sfaturi."
 
-#: set.c:2836
+#: set.c:2877
 #, fuzzy
 msgid "You must specify a player (see `help set analysis player')."
 msgstr ""
 "Trebuie să specifici un jucător -- încearcă `help set analysis player'."
 
-#: set.c:2873
+#: set.c:2914
 #, fuzzy, c-format
 msgid ""
 "Unknown player `%s'\n"
@@ -9996,69 +10056,69 @@ msgstr ""
 "Jucător necunoscut `%s' -- încearcă\n"
 "`help set analysis player'.\n"
 
-#: set.c:2885
+#: set.c:2926
 #, c-format
 msgid "Analyse %s's chequerplay and cube decisions."
 msgstr "Analizează jocul de puluri şi deciziile de cub ale lui %s."
 
-#: set.c:2888
+#: set.c:2929
 #, c-format
 msgid "Do not analyse %s's chequerplay and cube decisions."
 msgstr "Nu analiza jocul de puluri şi deciziile de cub ale lui %s."
 
-#: set.c:2902
+#: set.c:2943
 msgid "Analysis chequerplay"
 msgstr "Analiză joc de puluri"
 
-#: set.c:2915
+#: set.c:2956
 msgid "Analysis cubedecision"
 msgstr "Analiză decizie de cub"
 
-#: set.c:2928
+#: set.c:2969
 msgid "`eval' and `hint' chequerplay"
 msgstr "'eval' şi 'hint' joc de puluri"
 
-#: set.c:2941
+#: set.c:2982
 msgid "`eval' and `hint' cube decisions"
 msgstr "'eval' şi 'hint' decizii de cub"
 
-#: set.c:2974
+#: set.c:3015
 #, c-format
 msgid "%s set to: %s\n"
 msgstr "%s setat la: %s\n"
 
-#: set.c:2978
+#: set.c:3019
 #, c-format
 msgid "%s cleared.\n"
 msgstr "%s şters.\n"
 
-#: set.c:2984
+#: set.c:3025
 msgid "Match annotator"
 msgstr "Adnotator partidă"
 
-#: set.c:2989
+#: set.c:3030
 msgid "Match comment"
 msgstr "Comentariu partidă"
 
-#: set.c:3012
+#: set.c:3053
 msgid "Match date cleared."
 msgstr "Dată partidă ştearsă"
 
-#: set.c:3019
+#: set.c:3060
 #, c-format
 msgid "%s is not a valid date (see `help set matchinfo date').\n"
 msgstr "%s nu este o dată validă (vezi `help set matchinfo date').\n"
 
-#: set.c:3028
+#: set.c:3069
 #, c-format
 msgid "Match date set to %04d-%02d-%02d.\n"
 msgstr "Dată partidă setată la %04d-%02d-%02d.\n"
 
-#: set.c:3033
+#: set.c:3074
 msgid "Match event"
 msgstr "Eveniment partidă"
 
-#: set.c:3042 show.c:779
+#: set.c:3083 show.c:779
 #, fuzzy, c-format
 msgid "New matches default to %d point.\n"
 msgid_plural "New matches default to %d points.\n"
@@ -10066,11 +10126,11 @@ msgstr[0] "Partidele noi au %d punct implicit.\n"
 msgstr[1] "Partidele noi au %d punct implicit.\n"
 msgstr[2] "Partidele noi au %d punct implicit.\n"
 
-#: set.c:3048
+#: set.c:3089
 msgid "Match place"
 msgstr "Loc partidă"
 
-#: set.c:3057
+#: set.c:3098
 msgid ""
 "You must specify which player's rating to set (see `help set matchinfo "
 "rating')."
@@ -10078,202 +10138,202 @@ msgstr ""
 "Trebuie să specifici punctajul cărui jucător să setez (vezi `help set "
 "matchinfo rating')."
 
-#: set.c:3062
+#: set.c:3103
 #, c-format
 msgid "Rating for %s"
 msgstr "Punctaj pentru %s"
 
-#: set.c:3069
+#: set.c:3110
 msgid "Match round"
 msgstr "Tur partidă"
 
-#: set.c:3083
+#: set.c:3124
 msgid "Include annotations in exports"
 msgstr "Include adnotări în exporturi"
 
-#: set.c:3084
+#: set.c:3125
 msgid "Do not include annotations in exports"
 msgstr "Nu include adnotări în exporturi"
 
-#: set.c:3092
+#: set.c:3133
 msgid "Include analysis in exports"
 msgstr "Include analiza în exporturi"
 
-#: set.c:3093
+#: set.c:3134
 msgid "Do not include analysis in exports"
 msgstr "Nu include analiza în exporturi"
 
-#: set.c:3101
+#: set.c:3142
 msgid "Include statistics in exports"
 msgstr "Include statisticile în exporturi"
 
-#: set.c:3102
+#: set.c:3143
 msgid "Do not include statistics in exports"
 msgstr "Nu include statisticile în exporturi"
 
-#: set.c:3110
+#: set.c:3151
 msgid "Include match information in exports"
 msgstr "Include informaţii partidă în exporturi"
 
-#: set.c:3111
+#: set.c:3152
 msgid "Do not include match information in exports"
 msgstr "Nu include informaţii partidă în exporturi"
 
-#: set.c:3121 set.c:3165
+#: set.c:3162 set.c:3206
 msgid "You must specify a semi-positive number."
 msgstr "Trebuie să specifici un număr semi-pozitiv."
 
-#: set.c:3129
+#: set.c:3170
 msgid "The board will never been shown in exports."
 msgstr "Tabla nu va fi arătată niciodată în exporturi."
 
-#: set.c:3131
+#: set.c:3172
 #, c-format
 msgid "The board will be shown every %d. move in exports."
 msgstr "Tabla va fi arătată la fiecare %d mutări în exporturi."
 
-#: set.c:3142
+#: set.c:3183
 #, fuzzy, c-format
 msgid "Unknown player `%s' (see `help set export show player').\n"
 msgstr "Jucător necunoscut `%s' -- încearcă `help set export show player'.\n"
 
-#: set.c:3150
+#: set.c:3191
 msgid "Analysis, boards etc will be shown for both players in exports."
 msgstr ""
 "Analiza, tablele, etc vor fi arătate pentru ambii jucători în exporturi."
 
-#: set.c:3153
+#: set.c:3194
 #, c-format
 msgid "Analysis, boards etc will only be shown for player %s in exports.\n"
 msgstr ""
 "Analiza tablele etc vor fi arătate numai pentru jucătorul %s în exporturi.\n"
 
-#: set.c:3172
+#: set.c:3213
 #, c-format
 msgid "Show at most %d moves in exports.\n"
 msgstr "Arată cel mult %d mutări în exporturi.\n"
 
-#: set.c:3180
+#: set.c:3221
 msgid "Show detailed probabilities for moves"
 msgstr "Arată probabilităţi detaliate pentru mutări"
 
-#: set.c:3181
+#: set.c:3222
 msgid "Do not show detailed probabilities for moves"
 msgstr "Nu arăta probabilităţi detaliate pentru mutări"
 
-#: set.c:3199
+#: set.c:3240
 msgid "Show detailed probabilities for cube decisions"
 msgstr "Arată probabilităţi detaliate pentru deciziile de cub"
 
-#: set.c:3200
+#: set.c:3241
 msgid "Do not show detailed probabilities for cube decisions"
 msgstr "Nu arăta probabilităţi detaliate pentru deciziile de cub"
 
-#: set.c:3218
+#: set.c:3259
 msgid "Show detailed parameters for evaluations"
 msgstr "Arată parametri detaliaţi pentru evaluări"
 
-#: set.c:3219
+#: set.c:3260
 msgid "Do not show detailed parameters for evaluations"
 msgstr "Nu arăta parametri detaliaţi pentru evaluări"
 
-#: set.c:3227
+#: set.c:3268
 msgid "Show detailed parameters for rollouts"
 msgstr "Arată parametri detaliaţi pentru simulări"
 
-#: set.c:3228
+#: set.c:3269
 msgid "Do not show detailed parameters for rollouts"
 msgstr "Nu arăta parametri detaliaţi pentru simulări"
 
-#: set.c:3238
+#: set.c:3279
 msgid "Export moves marked 'very bad'."
 msgstr "Exportă mutările marcate 'foarte slab'."
 
-#: set.c:3239
+#: set.c:3280
 msgid "Do not export moves marked 'very bad'."
 msgstr "Nu exporta mutările marcate 'foarte slab'."
 
-#: set.c:3248
+#: set.c:3289
 msgid "Export moves marked 'bad'."
 msgstr "Exportă mutările marcate 'slab'."
 
-#: set.c:3249
+#: set.c:3290
 msgid "Do not export moves marked 'bad'."
 msgstr "Nu exporta mutările marcate 'slab'."
 
-#: set.c:3258
+#: set.c:3299
 msgid "Export moves marked 'doubtful'."
 msgstr "Exportă mutările marcate 'îndoielnic'."
 
-#: set.c:3259
+#: set.c:3300
 msgid "Do not export moves marked 'doubtful'."
 msgstr "Nu exporta mutările marcate 'îndoielnic'."
 
-#: set.c:3268
+#: set.c:3309
 msgid "Export unmarked moves."
 msgstr "Exportă mutările nemarcate."
 
-#: set.c:3269
+#: set.c:3310
 msgid "Do not export unmarked moves."
 msgstr "Nu exporta mutările nemarcate."
 
-#: set.c:3278
+#: set.c:3319
 msgid "Export cube decisions marked 'very bad'."
 msgstr "Exportă deciziile de cub marcate 'foarte slab'."
 
-#: set.c:3279
+#: set.c:3320
 msgid "Do not export cube decisions marked 'very bad'."
 msgstr "Nu exporta deciziile de cub marcate 'foarte slab'."
 
-#: set.c:3288
+#: set.c:3329
 msgid "Export cube decisions marked 'bad'."
 msgstr "Exportă deciziile de cub marcate 'slab'."
 
-#: set.c:3289
+#: set.c:3330
 msgid "Do not export cube decisions marked 'bad'."
 msgstr "Nu exporta deciziile de cub marcate 'slab'."
 
-#: set.c:3298
+#: set.c:3339
 msgid "Export cube decisions marked 'doubtful'."
 msgstr "Exportă deciziile de cub marcate 'îndoielnic'."
 
-#: set.c:3299
+#: set.c:3340
 msgid "Do not export cube decisions marked 'doubtful'."
 msgstr "Nu exporta deciziile de cub marcate 'îndoielnic'."
 
-#: set.c:3308
+#: set.c:3349
 msgid "Export unmarked cube decisions."
 msgstr "Exportă deciziile de cub nemarcate."
 
-#: set.c:3309
+#: set.c:3350
 msgid "Do not export unmarked cube decisions."
 msgstr "Nu exporta deciziile de cub nemarcate."
 
-#: set.c:3318
+#: set.c:3359
 msgid "Export actual cube decisions."
 msgstr "Exportă deciziile de cub reale."
 
-#: set.c:3319
+#: set.c:3360
 msgid "Do not export actual cube decisions."
 msgstr "Nu exporta deciziile de cub reale."
 
-#: set.c:3328
+#: set.c:3369
 msgid "Export close cube decisions."
 msgstr "Exportă deciziile de cub de închidere."
 
-#: set.c:3329
+#: set.c:3370
 msgid "Do not export close cube decisions."
 msgstr "Nu exporta deciziile de cub de închidere."
 
-#: set.c:3338
+#: set.c:3379
 msgid "Export missed cube decisions."
 msgstr "Exportă deciziile de cub ratate."
 
-#: set.c:3339
+#: set.c:3380
 msgid "Do not export missed cube decisions."
 msgstr "Nu exporta deciziile de cub ratate."
 
-#: set.c:3353
+#: set.c:3394
 #, c-format
 msgid ""
 "HTML export type is now: \n"
@@ -10282,16 +10342,16 @@ msgstr ""
 "Tipul de export HTML este acum:\n"
 "%s\n"
 
-#: set.c:3392
+#: set.c:3433
 #, c-format
 msgid "CSS stylesheet for HTML export: %s\n"
 msgstr "Foaia de stil CSS pentru exportul HTML: %s\n"
 
-#: set.c:3424
+#: set.c:3465
 msgid "You must specify a URL. See `help set export html pictureurl'."
 msgstr "Trebuie să specifici un URL. Vezi `help set export html pictureurl'."
 
-#: set.c:3435
+#: set.c:3476
 #, c-format
 msgid ""
 "URL for picture in HTML export is now: \n"
@@ -10300,271 +10360,271 @@ msgstr ""
 "URL-ul imaginii în exportul HTML este acum:\n"
 "%s\n"
 
-#: set.c:3449
+#: set.c:3490
 msgid "Match equity table will be used inverted."
 msgstr "Tabela de valoare a partidei va fi folosită inversată."
 
-#: set.c:3450
+#: set.c:3491
 msgid "Match equity table will not be use inverted."
 msgstr "Tabela de valoare a partidei nu va fi folosită inversată."
 
-#: set.c:3461
+#: set.c:3502
 msgid "Warn about possibly bad play."
 msgstr "Avertizează la posibil joc slab."
 
-#: set.c:3462
+#: set.c:3503
 msgid "No warnings for possibly bad play."
 msgstr "Nici un avertisment la posibil joc slab."
 
-#: set.c:3468
+#: set.c:3509
 msgid "Include advice on cube decisions in tutor mode."
 msgstr "Include sfaturi la deciziile de cub în modul tutore."
 
-#: set.c:3469
+#: set.c:3510
 msgid "Exclude advice on cube decisions from tutor mode."
 msgstr "Exclude sfaturi la deciziile de cub în modul tutore."
 
-#: set.c:3475
+#: set.c:3516
 msgid "Include advice on chequer play in tutor mode."
 msgstr "Include sfaturi asupra jocului de puluri în modul tutore."
 
-#: set.c:3476
+#: set.c:3517
 msgid "Exclude advice on chequer play from tutor mode."
 msgstr "Exclude sfaturi asupra jocului de puluri în modul tutore."
 
-#: set.c:3483
+#: set.c:3524
 #, fuzzy, c-format
 msgid "Tutor warnings will be given for play marked `%s'.\n"
 msgstr "Avertismentele tutore vor fi date pentru joc marcat `%s'.\n"
 
-#: set.c:3511
+#: set.c:3552
 msgid "Enable sounds."
 msgstr "Activează sunete."
 
-#: set.c:3512
+#: set.c:3553
 msgid "Disable sounds."
 msgstr "Dezactivează sunete."
 
-#: set.c:3655
+#: set.c:3696
 #, c-format
 msgid "Scheduling priority set to %d.\n"
 msgstr "Prioritatea planificării setată la %d.\n"
 
-#: set.c:3666
+#: set.c:3707
 msgid "time critical"
 msgstr "timp critic"
 
-#: set.c:3669
+#: set.c:3710
 msgid "highest"
 msgstr "cel mai sus"
 
-#: set.c:3672
+#: set.c:3713
 msgid "above normal"
 msgstr "peste normal"
 
-#: set.c:3674
+#: set.c:3715
 msgid "normal"
 msgstr "normal"
 
-#: set.c:3677
+#: set.c:3718
 msgid "below normal"
 msgstr "sub normal"
 
-#: set.c:3683
+#: set.c:3724
 msgid "idle"
 msgstr "inactiv"
 
-#: set.c:3688
+#: set.c:3729
 #, c-format
 msgid "Priority of program set to: %s\n"
 msgstr "Prioritatea programului setată la: %s\n"
 
-#: set.c:3691
+#: set.c:3732
 #, c-format
 msgid "Changing priority failed (trying to set priority %s)\n"
 msgstr "Schimbarea priorităţii a eşuat (încercând să setez prioritatea %s)\n"
 
-#: set.c:3694
+#: set.c:3735
 #, c-format
 msgid "Priority changes are not supported on this platform.\n"
 msgstr "Schimbările de prioritate nu sunt suportate pe această platformă.\n"
 
-#: set.c:3723
+#: set.c:3764
 msgid "You must specify a priority between -20 and 20."
 msgstr "Trebuie să specifici o prioritate între -20 şi 20."
 
-#: set.c:3745
+#: set.c:3786
 msgid "Allow GNU Backgammon to manipulate the dice."
 msgstr "Permite Table GNU să manipuleze zarurile."
 
-#: set.c:3746
+#: set.c:3787
 msgid "Disallow GNU Backgammon to manipulate the dice."
 msgstr "Interzice Table GNU să manipuleze zarurile."
 
-#: set.c:3758
+#: set.c:3799
 #, fuzzy
 msgid "You must specify a player (see `help set cheat player')."
 msgstr "Trebuie să specifici un jucător -- încearcă `help set cheat player'."
 
-#: set.c:3815
+#: set.c:3856
 #, c-format
 msgid "%s will get the %s roll on each turn.\n"
 msgstr "%s va avea aruncarea %s la fiecare rând.\n"
 
-#: set.c:3825
+#: set.c:3866
 msgid "You must specify a size between 1 and 21."
 msgstr "Trebuie să specifici o dimensiune între 1 şi 21."
 
-#: set.c:3841 set.c:3859
+#: set.c:3882 set.c:3900
 msgid "You must specify a size between 1 and 20."
 msgstr "Trebuie să specifici o dimensiune între 1 şi 20."
 
-#: set.c:3847
+#: set.c:3888
 #, c-format
 msgid "Size of generated Html images are %dx%d pixels\n"
 msgstr "Dimensiunile imaginilor Htlm generate sunt %dx%d pixeli\n"
 
-#: set.c:3865
+#: set.c:3906
 #, c-format
 msgid "Size of generated PNG images are %dx%d pixels\n"
 msgstr "Dimensiunile imaginilor PNG generate sunt %dx%d pixeli\n"
 
-#: set.c:3878
+#: set.c:3919
 #, c-format
 msgid "The current match or session is being played as `%s'.\n"
 msgstr "Partida sau sesiunea curentă e jucată ca `%s'.\n"
 
-#: set.c:3881
+#: set.c:3922
 #, c-format
 msgid "Please start a new match or session to play `%s'\n"
 msgstr "Începe o nouă partidă sau sesiune pentru a juca `%s'\n"
 
-#: set.c:3931
+#: set.c:3972
 msgid "Goto first game when loading matches or sessions."
 msgstr "Mergi la primul joc la încărcarea partidelor sau sesiunilor."
 
-#: set.c:3932
+#: set.c:3973
 msgid "Goto last game when loading matches or sessions."
 msgstr "Mergi la ultimul joc la încărcarea partidelor sau sesiunilor."
 
-#: set.c:3947
+#: set.c:3988
 msgid "Cube efficiency must be between 0 and 1"
 msgstr "Eficienţa cubului trebuie să fie între 0 şi 1"
 
-#: set.c:3954 show.c:2143
+#: set.c:3995 show.c:2143
 msgid "Cube efficiency for one sided bearoff positions"
 msgstr "Eficienţa cubului pentru poziţii de scoatere o singură parte"
 
-#: set.c:3962 show.c:2141
+#: set.c:4003 show.c:2141
 msgid "Cube efficiency for crashed positions"
 msgstr "Eficienţa cubului pentru poziţii prăbuşite"
 
-#: set.c:3969 show.c:2142
+#: set.c:4010 show.c:2142
 msgid "Cube efficiency for contact positions"
 msgstr "Eficienţa cubului pentru poziţii de contact"
 
-#: set.c:3980
+#: set.c:4021
 #, c-format
 msgid "Cube efficiency race factor set to %7.5f\n"
 msgstr "Factorul cursă al eficienţei cubului setat la %7.5f\n"
 
-#: set.c:3983
+#: set.c:4024
 msgid "Cube efficiency race factor must be larger than 0."
 msgstr "Factorul cursă al eficienţei cubului trebuie să fie mai mare ca 0."
 
-#: set.c:3990
+#: set.c:4031
 msgid "Cube efficiency race max"
 msgstr "Factorul cursă al eficienţei cubului maxim"
 
-#: set.c:3997
+#: set.c:4038
 msgid "Cube efficiency race min"
 msgstr "Factorul cursă al eficienţei cubului minim"
 
-#: set.c:4008
+#: set.c:4049
 #, c-format
 msgid "Cube efficiency race coefficient set to %7.5f\n"
 msgstr "Coeficientul cursă al eficienţei cubului setat la %7.5f\n"
 
-#: set.c:4012
+#: set.c:4053
 msgid "Cube efficiency race coefficient must be larger than 0."
 msgstr "Coeficientul cursă al eficienţei cubului trebuie să fie mai mare ca 0."
 
-#: set.c:4023
+#: set.c:4064
 msgid "Please provide a positive rating offset\n"
 msgstr "Te rog dă un decalaj al punctajului pozitiv\n"
 
-#: set.c:4029
+#: set.c:4070
 #, c-format
 msgid "The rating offset for estimating absolute ratings is: %.1f\n"
 msgstr ""
 "Decalajul punctajului pentru estimarea punctajelor absolute este: %.1f\n"
 
-#: set.c:4048
+#: set.c:4089
 #, c-format
 msgid "Locale is now '%s'"
 msgstr ""
 
-#: set.c:4051
+#: set.c:4092
 #, c-format
 msgid "Locale '%s' not supported by C library.\n"
 msgstr ""
 
-#: set.c:4060
+#: set.c:4101
 msgid "You must specify a number greater than 50"
 msgstr "Trebuie să specifici un număr mai mare decât 50"
 
-#: set.c:4075
+#: set.c:4116
 msgid "Please provide a positive number\n"
 msgstr "Te rog dă un număr pozitiv\n"
 
-#: set.c:4081
+#: set.c:4122
 #, c-format
 msgid "The factor used for multiplying error rates is: %.1f\n"
 msgstr "Factorul utilizat pentru multiplicarea ratelor de eroare este: %.1f\n"
 
-#: set.c:4334
+#: set.c:4382
 #, c-format
 msgid "Not a valid XGID '%s'"
 msgstr ""
 
-#: set.c:4364
+#: set.c:4412
 #, fuzzy, c-format
 msgid "No valid id's found"
 msgstr "Nici o înregistrare jucător găsită."
 
-#: set.c:4371
+#: set.c:4419
 #, c-format
 msgid "Setting GNUBG id %s:%s\n"
 msgstr ""
 
-#: set.c:4380
+#: set.c:4428
 #, fuzzy
 msgid "Auto save during rollouts"
 msgstr "Jocul de puluri în simulări"
 
-#: set.c:4380
+#: set.c:4428
 #, fuzzy
 msgid "Don't auto save during rollouts"
 msgstr "Nu schimba evaluările în timpul simulării."
 
-#: set.c:4386
+#: set.c:4434
 msgid "Auto save after each analysed game"
 msgstr ""
 
-#: set.c:4387
+#: set.c:4435
 msgid "Don't auto save after each analysed game"
 msgstr ""
 
-#: set.c:4393
+#: set.c:4441
 msgid "Prompt before deleting autosaves"
 msgstr ""
 
-#: set.c:4393
+#: set.c:4441
 #, fuzzy
 msgid "Delete autosaves automatically"
 msgstr "Joacă mutările forţate automat"
 
-#: set.c:4402
+#: set.c:4450
 #, fuzzy
 msgid "You must specify a positive autosave time in minutes"
 msgstr "Trebuie să specifici un număr semi-pozitiv."
@@ -10573,33 +10633,33 @@ msgstr "Trebuie să specifici un număr semi-pozitiv."
 msgid "warning: no backgammon games in SGF file"
 msgstr "avertisment: nici un joc de table în fişierul SGF"
 
-#: sgf.c:1436
+#: sgf.c:1432
 msgid "You must specify a file to load from (see `help load game')."
 msgstr ""
 "Trebuie să specifici un fişier din care să încarci (vezi `help load game')."
 
-#: sgf.c:1487
+#: sgf.c:1484
 msgid "You must specify a file to load from (see `help load position')."
 msgstr ""
 "Trebuie să specifici un fişier din care să încarci (vezi `help load "
 "position')."
 
-#: sgf.c:1535
+#: sgf.c:1532
 msgid "You must specify a file to load from (see `help load match')."
 msgstr ""
 "Trebuie să specifici un fişier din care să încarci (vezi `help load match')."
 
-#: sgf.c:2358
+#: sgf.c:2356
 msgid "You must specify a file to save to (see `help save game')."
 msgstr ""
 "Trebuie să specifici un fişier în care să salvezi (vezi `help save game')."
 
-#: sgf.c:2398
+#: sgf.c:2396
 msgid "You must specify a file to save to (see `help save match')."
 msgstr ""
 "Trebuie să specifici un fişier în care să salvezi (vezi `help save match')."
 
-#: sgf.c:2444
+#: sgf.c:2442
 msgid "You must specify a file to save to (see `help save position')."
 msgstr ""
 "Trebuie să specifici un fişier în care să salvezi (vezi `help save "
@@ -11018,19 +11078,23 @@ msgid "    Move filters:"
 msgstr "    Filtre mutări:"
 
 #: show.c:722
-msgid "This money session is play with the Jacoby rule. Default is:"
+#, fuzzy
+msgid "This money session is played with the Jacoby rule."
 msgstr "Această sesiune pe bani este jucată cu regula Jacoby. Implicit este:"
 
 #: show.c:724
-msgid "This money session is play without the Jacoby rule. Default is:"
+#, fuzzy
+msgid "This money session is played without the Jacoby rule."
 msgstr "Această sesiune pe bani este jucată fără regula Jacoby. Implicit este:"
 
 #: show.c:728
-msgid "Money sessions are played with the Jacoby rule."
+#, fuzzy
+msgid "New money sessions are played with the Jacoby rule."
 msgstr "Sesiunile pe bani sunt jucate cu regula Jacoby."
 
 #: show.c:730
-msgid "Money sessions are played without the Jacoby rule."
+#, fuzzy
+msgid "New money sessions are played without the Jacoby rule."
 msgstr "Sesiunile pe bani sunt jucate fără regula Jacoby."
 
 #: show.c:737
@@ -11445,6 +11509,10 @@ msgstr "Tablele vor fi arătate în format neprelucrat.\n"
 #, c-format
 msgid "Boards will be shown in ASCII.\n"
 msgstr "Tablele vor fi arătate în format ASCII.\n"
+
+#: show.c:1488
+msgid "AUTHORS"
+msgstr ""
 
 #: show.c:1549
 #, c-format
@@ -11883,74 +11951,99 @@ msgstr ""
 msgid "Match will not be autosaved during and after analysis\n"
 msgstr ""
 
-#: sound.c:162
+#: sound.c:121
+#, c-format
+msgid "PlaySound_QuickTime: error #%d opening %s.\n"
+msgstr ""
+
+#: sound.c:129
+#, c-format
+msgid "PlaySound_QuickTime: error #%d reading %s.\n"
+msgstr ""
+
+#: sound.c:169
+#, c-format
+msgid "Apple CoreAudio Error ("
+msgstr ""
+
+#: sound.c:188
+#, c-format
+msgid "Apple CoreAudio Error, can't find %s\n"
+msgstr ""
+
+#: sound.c:314
 msgid "Starting GNU Backgammon"
 msgstr "Pornind Table GNU"
 
-#: sound.c:163
+#: sound.c:315
 msgid "Exiting GNU Backgammon"
 msgstr "Ieşind Table GNU"
 
-#: sound.c:164
+#: sound.c:316
 msgid "Agree"
 msgstr "De acord"
 
-#: sound.c:165
+#: sound.c:317
 msgid "Doubling"
 msgstr "Dublare"
 
-#: sound.c:167
+#: sound.c:319
 msgid "Chequer movement"
 msgstr "Mutare pul"
 
-#: sound.c:169
+#: sound.c:321
 msgid "Redouble"
 msgstr "Redublează"
 
-#: sound.c:173
+#: sound.c:325
 msgid "Human fans"
 msgstr "Fani umani"
 
-#: sound.c:174
+#: sound.c:326
 msgid "Human wins game"
 msgstr "Omul a câştigat jocul"
 
-#: sound.c:175
+#: sound.c:327
 msgid "Human wins match"
 msgstr "Omul a câştigat partida"
 
-#: sound.c:176
+#: sound.c:328
 msgid "Bot fans"
 msgstr "Fani bot"
 
-#: sound.c:177
+#: sound.c:329
 msgid "Bot wins game"
 msgstr "Bot-ul a câştigat jocul"
 
-#: sound.c:178
+#: sound.c:330
 msgid "Bot wins match"
 msgstr "Bot-ul a câştigat partida"
 
-#: sound.c:179
+#: sound.c:331
 msgid "Analysis is finished"
 msgstr "Analiza s-a terminat"
 
-#: sound.c:213
+#: sound.c:368
 #, c-format
 msgid "The sound file (%s) doesn't exist.\n"
 msgstr "Fişierul de sunet (%s) nu există.\n"
 
-#: sound.c:224
+#: sound.c:379
 #, c-format
 msgid "sound command (%s) could not be launched: %s\n"
 msgstr "comanda de sunet (%s) nu a putut fi lansată: %s\n"
 
-#: sound.c:363
+#: sound.c:406
+#, fuzzy
+msgid "Playing sound"
+msgstr "Setări jucător"
+
+#: sound.c:529
 #, c-format
 msgid "No sound played for: %s\n"
 msgstr "Nici un sunet redat pentru: %s\n"
 
-#: sound.c:366
+#: sound.c:532
 #, c-format
 msgid "Sound for: %s: %s\n"
 msgstr "Sunet pentru: %s: %s\n"
@@ -12150,6 +12243,16 @@ msgid "You must specify a file to export to (see `help export position text')."
 msgstr ""
 "Trebuie să specifici un fişier în care să exporţi (vezi `help export "
 "position text')."
+
+#~ msgid "Create new neural net (of size N)"
+#~ msgstr "Creează o reţea neurală nouă (de dimensiune N)"
+
+#~ msgid "Name:"
+#~ msgstr "Nume:"
+
+#, fuzzy
+#~ msgid "/_Settings/_Save settings"
+#~ msgstr "/_Setări/Salvează setări"
 
 #~ msgid "N/A"
 #~ msgstr "N/A"
@@ -12719,9 +12822,6 @@ msgstr ""
 
 #~ msgid "Record a log of the match so far to a file"
 #~ msgstr "Înregistrează un istoric al partidei într-un fişier"
-
-#~ msgid "Write the current position to a file"
-#~ msgstr "Scrie poziţia curentă într-un fişier"
 
 #~ msgid "Record a log of the session so far to a file"
 #~ msgstr "Înregistrează un istoric al sesiunii într-un fişier"
@@ -13325,9 +13425,6 @@ msgstr ""
 
 #~ msgid "Use fibs2html-type pictures"
 #~ msgstr "Utilizează imagini tip fibs2html"
-
-#~ msgid "Default images"
-#~ msgstr "Imagini implicite"
 
 #~ msgid "Write CSS stylesheet in <head>"
 #~ msgstr "Scrie foaie de stil CSS în <head>"

@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnubg-0.14\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-02-10 21:59+0100\n"
+"POT-Creation-Date: 2011-03-20 22:05-0600\n"
 "PO-Revision-Date: 2009-09-19 23:37+0200\n"
 "Last-Translator: Petr Kadlec <mormegil@centrum.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -439,55 +439,60 @@ msgstr "Příručka"
 msgid "Tutorial"
 msgstr "Tutoriál"
 
-#: non-src/credits.c:58 gtkgame.c:2628
+#: non-src/credits.c:58 gtkgame.c:2625
 msgid "Czech"
 msgstr "Čeština"
 
-#: non-src/credits.c:59 gtkgame.c:2629
+#: non-src/credits.c:59 gtkgame.c:2626
 msgid "Danish"
 msgstr "Dánština"
 
-#: non-src/credits.c:60 gtkgame.c:2632
+#: non-src/credits.c:60 gtkgame.c:2629
 msgid "French"
 msgstr "Francouzština"
 
-#: non-src/credits.c:61 gtkgame.c:2633
+#: non-src/credits.c:61 gtkgame.c:2630
 msgid "German"
 msgstr "Němčina"
 
-#: non-src/credits.c:62 gtkgame.c:2634
+#: non-src/credits.c:62 gtkgame.c:2631
 msgid "Icelandic"
 msgstr "Islandština"
 
-#: non-src/credits.c:63 gtkgame.c:2635
+#: non-src/credits.c:63 gtkgame.c:2632
 msgid "Italian"
 msgstr "Italština"
 
-#: non-src/credits.c:64 gtkgame.c:2636
+#: non-src/credits.c:64 gtkgame.c:2633
 msgid "Japanese"
 msgstr "Japonština"
 
-#: non-src/credits.c:65 gtkgame.c:2640
-msgid "Turkish"
-msgstr "Turečtina"
+#: non-src/credits.c:65 gtkgame.c:2634
+msgid "Romanian"
+msgstr ""
 
-#: non-src/credits.c:66 gtkgame.c:2638
+#: non-src/credits.c:66 gtkgame.c:2635
 msgid "Russian"
 msgstr "Ruština"
 
-#: non-src/credits.c:184 show.c:1488
-msgid "AUTHORS"
-msgstr "AUTOŘI"
+#: non-src/credits.c:67 gtkgame.c:2637
+msgid "Turkish"
+msgstr "Turečtina"
 
 #: non-src/credits.c:185
+#, fuzzy
+msgid "Authors"
+msgstr "Učitel"
+
+#: non-src/credits.c:186
 msgid "Code Contributors"
 msgstr "Přispěvatelé kódu"
 
-#: non-src/credits.c:186
+#: non-src/credits.c:187
 msgid "Translations"
 msgstr "Překlady"
 
-#: non-src/credits.c:187
+#: non-src/credits.c:188
 msgid "Support"
 msgstr "Podpora"
 
@@ -675,8 +680,8 @@ msgstr "Váš generátor hodů nefunguje. Použije se RNG_MERSENNE"
 msgid "Rewinding dice file (%s)"
 msgstr "Vracím se na začátek souboru s hody (%s)"
 
-#: drawboard.c:72 drawboard.c:304 gnubg.c:5098 gtkexport.c:775 gtkgame.c:2462
-#: gtkgame.c:3213 gtkgame.c:5749
+#: drawboard.c:72 drawboard.c:304 gnubg.c:5132 gtkexport.c:777 gtkgame.c:2464
+#: gtkgame.c:3207 gtkgame.c:5746
 msgid "GNU Backgammon"
 msgstr "GNU Backgammon"
 
@@ -688,101 +693,101 @@ msgstr "ID pozice"
 msgid "Match ID"
 msgstr "ID zápasu"
 
-#: eval.c:276
+#: eval.c:278
 msgid "Standard backgammon"
 msgstr "Standardní backgammon"
 
-#: eval.c:277
+#: eval.c:279
 #, fuzzy
 msgid "Nackgammon"
 msgstr "backgammon"
 
-#: eval.c:278
+#: eval.c:280
 msgid "1-chequer hypergammon"
 msgstr "1-kamenový hypergammon"
 
-#: eval.c:279
+#: eval.c:281
 msgid "2-chequer hypergammon"
 msgstr "2-kamenový hypergammon"
 
-#: eval.c:280
+#: eval.c:282
 msgid "3-chequer hypergammon"
 msgstr "3-kamenový hypergammon"
 
-#: eval.c:296 set.c:2766
+#: eval.c:298 set.c:2807
 msgid "No evaluation"
 msgstr "Bez ohodnocování"
 
-#: eval.c:297 set.c:2767
+#: eval.c:299 set.c:2808
 msgid "Neural net evaluation"
 msgstr "Vyhodnocování neuronovou sítí"
 
-#: eval.c:298 eval.c:4347 format.c:871 gtkchequer.c:454 gtkcube.c:901
-#: gtkrace.c:244 html.c:2150 set.c:2768
+#: eval.c:300 eval.c:4347 format.c:871 gtkchequer.c:455 gtkcube.c:902
+#: gtkrace.c:244 html.c:2150 set.c:2809
 msgid "Rollout"
 msgstr "Rozhoz"
 
-#: eval.c:320
+#: eval.c:322
 msgid "setting|beginner"
 msgstr "začátečník"
 
-#: eval.c:321
+#: eval.c:323
 msgid "setting|casual play"
 msgstr "občasný hráč"
 
-#: eval.c:322
+#: eval.c:324
 msgid "setting|intermediate"
 msgstr "amatér"
 
-#: eval.c:323
+#: eval.c:325
 msgid "setting|advanced"
 msgstr "pokročilý"
 
-#: eval.c:324
+#: eval.c:326
 msgid "setting|expert"
 msgstr "expert"
 
-#: eval.c:325
+#: eval.c:327
 msgid "setting|world class"
 msgstr "světová třída"
 
-#: eval.c:326
+#: eval.c:328
 msgid "setting|supremo"
 msgstr "superznalec"
 
-#: eval.c:327
+#: eval.c:329
 msgid "setting|grandmaster"
 msgstr "velmistr"
 
-#: eval.c:356
+#: eval.c:358
 msgid "Tiny"
 msgstr "Mrňavý"
 
-#: eval.c:357
+#: eval.c:359
 msgid "Narrow"
 msgstr "Úzký"
 
-#: eval.c:358
+#: eval.c:360
 msgid "Normal"
 msgstr "Normální"
 
-#: eval.c:359 gtkoptions.c:1262
+#: eval.c:361 gtkoptions.c:1262
 msgid "Large"
 msgstr "Velký"
 
-#: eval.c:360
+#: eval.c:362
 msgid "Huge"
 msgstr "Obrovský"
 
-#: eval.c:393
+#: eval.c:395
 msgid "doubletype|Double"
 msgstr "Zdvojnásobení"
 
-#: eval.c:394
+#: eval.c:396
 msgid "doubletype|Beaver"
 msgstr "Bobr"
 
-#: eval.c:395
+#: eval.c:397
 msgid "doubletype|Raccoon"
 msgstr "Mýval"
 
@@ -914,7 +919,7 @@ msgstr "Možno zdvojnásobit, odmítnout"
 msgid "Unknown cube decision"
 msgstr "Neznámé rozhodnutí o kostce"
 
-#: eval.c:4343 format.c:1200 gtkgame.c:4476 html.c:317 progress.c:691
+#: eval.c:4343 format.c:1200 gtkgame.c:4472 html.c:317 progress.c:691
 #: show.c:119
 msgid "Cubeful"
 msgstr "S kostkou"
@@ -1110,7 +1115,7 @@ msgstr " a nejvýše %d dalších tahů s ekvitou v rozmezí %0.3g"
 msgid "Play"
 msgstr "Hra"
 
-#: format.c:323 gnubg.c:1401 gnubg.c:1409 gnubg.c:2674 gnubg.c:2684
+#: format.c:323 gnubg.c:1405 gnubg.c:1413 gnubg.c:2689 gnubg.c:2699
 #: gtkoptions.c:416 gtkprefs.c:2928 gtkprefs.c:2945 gtktheory.c:723
 #: progress.c:275 progress.c:356
 msgid "Cube"
@@ -1326,8 +1331,8 @@ msgstr "P(bg)"
 msgid "Equity"
 msgstr "Ekvita"
 
-#: format.c:1200 gnubg.c:1731 gtkchequer.c:456 gtkcube.c:139 gtkcube.c:153
-#: gtkcube.c:439 gtkcube.c:453 gtkcube.c:904 gtkmovelist.c:196 html.c:2507
+#: format.c:1200 gnubg.c:1735 gtkchequer.c:457 gtkcube.c:139 gtkcube.c:153
+#: gtkcube.c:439 gtkcube.c:453 gtkcube.c:905 gtkmovelist.c:196 html.c:2507
 msgid "MWC"
 msgstr "MWC"
 
@@ -1530,47 +1535,47 @@ msgstr ""
 "podrobnosti získáte zadáním „show copying“.\n"
 
 #. Usage strings
-#: gnubg.c:451
+#: gnubg.c:453
 msgid "<die> <die>"
 msgstr "<hod> <hod>"
 
-#: gnubg.c:452
+#: gnubg.c:454
 msgid "<command>"
 msgstr "<příkaz>"
 
-#: gnubg.c:453
+#: gnubg.c:455
 msgid "<comment>"
 msgstr "<komentář>"
 
-#: gnubg.c:454
+#: gnubg.c:456
 msgid "evaluation|rollout"
 msgstr "evaluation|rollout"
 
-#: gnubg.c:455
+#: gnubg.c:457
 msgid "<filename>"
 msgstr "<soubor>"
 
-#: gnubg.c:456
+#: gnubg.c:458
 msgid "[<key>=<value> ...]"
 msgstr "[<klíč>=<hodnota> ...]"
 
-#: gnubg.c:457
+#: gnubg.c:459
 msgid "<length>"
 msgstr "<délka>"
 
-#: gnubg.c:458
+#: gnubg.c:460
 msgid "<limit>"
 msgstr "<limit>"
 
-#: gnubg.c:459
+#: gnubg.c:461
 msgid "<milliseconds>"
 msgstr "<milisekund>"
 
-#: gnubg.c:460
+#: gnubg.c:462
 msgid "<from> <to> ..."
 msgstr "<z> <na> ..."
 
-#: gnubg.c:461
+#: gnubg.c:463
 msgid ""
 "<ply> <num.xjoin to accept (0 = skip)> [<num. of extra moves to accept> "
 "<tolerance>]"
@@ -1578,254 +1583,259 @@ msgstr ""
 "<půltahů> <počet přijatých (0 = přeskočit)> [<počet dalších přijatých> "
 "<tolerance>]"
 
-#: gnubg.c:463
+#: gnubg.c:465
 msgid "<name>"
 msgstr "<jméno>"
 
-#: gnubg.c:464
+#: gnubg.c:466
 msgid "[quiet]"
 msgstr ""
 
-#: gnubg.c:465
+#: gnubg.c:467
 msgid "system|<language code>"
 msgstr "system|<kód jazyka>"
 
-#: gnubg.c:466
+#: gnubg.c:468
 msgid "on|off"
 msgstr "on|off"
 
-#: gnubg.c:467
+#: gnubg.c:469
 msgid "[command]"
 msgstr "[příkaz]"
 
-#: gnubg.c:468
+#: gnubg.c:470
 msgid "[yyyy-mm-dd]"
 msgstr ""
 
-#: gnubg.c:469
+#: gnubg.c:471
 msgid "[depth]"
 msgstr "[hloubka]"
 
-#: gnubg.c:470
+#: gnubg.c:472
 msgid "[filename]"
 msgstr "[soubor]"
 
-#: gnubg.c:471
+#: gnubg.c:473
 msgid "[length]"
 msgstr "[délka]"
 
-#: gnubg.c:472
+#: gnubg.c:474
 msgid "[modulus <modulus>|factors <factor> <factor>] [seed]"
 msgstr "[modulus <modul>|factors <faktor> <faktor>] [semínko]"
 
-#: gnubg.c:474
+#: gnubg.c:476
 msgid "[name]"
 msgstr "[jméno]"
 
-#: gnubg.c:475
+#: gnubg.c:477
 msgid "[position]"
 msgstr "[pozice]"
 
-#: gnubg.c:476
+#: gnubg.c:478
 msgid "[seed]"
 msgstr "[semínko]"
 
-#: gnubg.c:477
+#: gnubg.c:479
 msgid "[value]"
 msgstr "[hodnota]"
 
-#: gnubg.c:478
+#: gnubg.c:480
 msgid "<player>"
 msgstr "<hráč>"
 
-#: gnubg.c:479
+#: gnubg.c:481
 msgid "<player> [rating]"
 msgstr "<hráč> [rating]"
 
-#: gnubg.c:480
+#: gnubg.c:482
 msgid "<plies>"
 msgstr "<půltahů>"
 
-#: gnubg.c:481
+#: gnubg.c:483
 msgid "<position>"
 msgstr "<pozice>"
 
-#: gnubg.c:482
+#: gnubg.c:484
 msgid "<priority>"
 msgstr "<priorita>"
 
-#: gnubg.c:483
+#: gnubg.c:485
 msgid "<prompt>"
 msgstr "<výzva>"
 
-#: gnubg.c:484
+#: gnubg.c:486
 msgid "<score>"
 msgstr "<skóre>"
 
-#: gnubg.c:485
+#: gnubg.c:487
 msgid "<size>"
 msgstr "<velikost>"
 
-#: gnubg.c:486
+#: gnubg.c:488
 msgid "[game|roll|rolled|marked] <count>"
 msgstr "[game|roll|rolled|marked] <počet>"
 
-#: gnubg.c:487
+#: gnubg.c:489
 msgid "<trials>"
 msgstr "<pokusů>"
 
-#: gnubg.c:488
+#: gnubg.c:490
 msgid "<value>"
 msgstr "<hodnota>"
 
-#: gnubg.c:489
+#: gnubg.c:491
 msgid "<matchid>"
 msgstr "<id zápasu>"
 
-#: gnubg.c:490
+#: gnubg.c:492
 msgid "<gnubgid>"
 msgstr "<gnubgid>"
 
-#: gnubg.c:491
+#: gnubg.c:493
 #, fuzzy
 msgid "<xgid>"
 msgstr "<gnubgid>"
 
-#: gnubg.c:492
+#: gnubg.c:494
 msgid "<URL>"
 msgstr "<URL>"
 
-#: gnubg.c:493
+#: gnubg.c:495
 msgid "<fraction>"
 msgstr "<podíl>"
 
-#: gnubg.c:494
+#: gnubg.c:496
 msgid "<minimum games to rollout>"
 msgstr "<nejméně her pro rozhoz>"
 
-#: gnubg.c:495
+#: gnubg.c:497
 msgid "<folder>"
 msgstr "<adresář>"
 
-#: gnubg.c:497
+#: gnubg.c:499
 msgid "[<warning>]"
 msgstr "[<varování>]"
 
-#: gnubg.c:498
+#: gnubg.c:500
 msgid "<warning> on|off"
 msgstr "<varování> on|off"
 
-#: gnubg.c:500
+#: gnubg.c:502
 msgid "<joint standard deviations>"
 msgstr "<společných směrodatných odchylek>"
 
-#: gnubg.c:501
+#: gnubg.c:503
 msgid "<std dev>"
 msgstr "<odchylka>"
 
-#: gnubg.c:517
+#: gnubg.c:519
 msgid "Python supported."
 msgstr "Podporován Python."
 
-#: gnubg.c:520
+#: gnubg.c:522
 msgid "SQLite database supported."
 msgstr "Podporována databáze SQLite."
 
-#: gnubg.c:523
+#: gnubg.c:525
 msgid "GTK graphical interface supported."
 msgstr "Podporováno grafické rozhraní GTK."
 
-#: gnubg.c:526
+#: gnubg.c:528
 msgid "External players supported."
 msgstr "Podporováno vzdálené ovládání."
 
-#: gnubg.c:529
+#: gnubg.c:531
 msgid "Long RNG seeds supported."
 msgstr "Podporovány velká semínka RNG."
 
-#: gnubg.c:532
+#: gnubg.c:534
 msgid "3d Boards supported."
 msgstr "Podporovány 3D desky."
 
-#: gnubg.c:535
+#: gnubg.c:537
 msgid "External commands supported."
 msgstr "Podporovány vzdálené příkazy."
 
-#: gnubg.c:538
+#: gnubg.c:540
 msgid "Windows sound system supported."
 msgstr "Podporován zvukový systém Windows."
 
-#: gnubg.c:540
+#: gnubg.c:542
+#, fuzzy
+msgid "Apple CoreAudio sound system supported."
+msgstr "Podporován zvukový systém Apple QuickTime."
+
+#: gnubg.c:544
 msgid "Apple QuickTime sound system supported."
 msgstr "Podporován zvukový systém Apple QuickTime."
 
-#: gnubg.c:542
+#: gnubg.c:546
 msgid "libcanberra sound system supported."
 msgstr "Podporován zvukový systém libcanberra."
 
-#: gnubg.c:545
+#: gnubg.c:549
 msgid "Multiple threads supported."
 msgstr "Podporováno více vláken."
 
-#: gnubg.c:549
+#: gnubg.c:553
 msgid "SSE/SSE2 supported."
 msgstr "SSE/SSE2 podporováno."
 
-#: gnubg.c:551
+#: gnubg.c:555
 msgid "SSE supported."
 msgstr "SSE podporováno."
 
-#: gnubg.c:855
+#: gnubg.c:859
 msgid "Current position"
 msgstr "Aktuální pozice"
 
-#: gnubg.c:875
+#: gnubg.c:879
 #, c-format
 msgid "`simple' must be followed by 26 integers; found only %d\n"
 msgstr "„simple“ musí být následováno 26 celými čísly; nalezeno pouze %d\n"
 
-#: gnubg.c:910
+#: gnubg.c:914
 msgid "Illegal position."
 msgstr "Neplatná pozice."
 
-#: gnubg.c:999
+#: gnubg.c:1003
 #, c-format
 msgid "You must specify whether to set '%s' on or off.\n"
 msgstr "Musíte zadat, jestli se má „%s“ zapnout (on) nebo vypnout (off).\n"
 
-#: gnubg.c:1030
+#: gnubg.c:1034
 #, c-format
 msgid "Illegal keyword `%s'.\n"
 msgstr "Neplatné klíčové slovo „%s“.\n"
 
-#: gnubg.c:1084
+#: gnubg.c:1088
 msgid "Interrupted"
 msgstr "Přerušeno"
 
-#: gnubg.c:1128
+#: gnubg.c:1132
 msgid ""
 "This installation of GNU Backgammon was compiled without Python support."
 msgstr ""
 "Tato instalace GNU Backgammonu byla kompilována bez podpory pro Python."
 
-#: gnubg.c:1138
+#: gnubg.c:1142
 msgid "Incomplete command."
 msgstr "Neúplný příkaz."
 
-#: gnubg.c:1163
+#: gnubg.c:1167
 #, c-format
 msgid "Unknown keyword `%s'.\n"
 msgstr "Neznámé klíčové slovo „%s“.\n"
 
-#: gnubg.c:1270 gnubg.c:1305 gnubg.c:1387 gnubg.c:2660 play.c:2455
+#: gnubg.c:1274 gnubg.c:1309 gnubg.c:1391 gnubg.c:2675 play.c:2455
 msgid "Rolled"
 msgstr "Hozeno"
 
-#: gnubg.c:1338 gnubg.c:5539 gtkgame.c:1233
+#: gnubg.c:1342 gnubg.c:5573 gtkgame.c:1233
 msgid "No game in progress."
 msgstr "Není rozehrána hra."
 
-#: gnubg.c:1366 gnubg.c:1370 gnubg.c:2637 gnubg.c:2641 text.c:60 text.c:65
+#: gnubg.c:1370 gnubg.c:1374 gnubg.c:2652 gnubg.c:2656 text.c:60 text.c:65
 #, c-format
 msgid "%d point"
 msgid_plural "%d points"
@@ -1833,146 +1843,146 @@ msgstr[0] "%d bod"
 msgstr[1] "%d body"
 msgstr[2] "%d bodů"
 
-#: gnubg.c:1378 gnubg.c:2650 text.c:74
+#: gnubg.c:1382 gnubg.c:2665 text.c:74
 #, c-format
 msgid "Cube offered at %d"
 msgstr "Nabídnuta kostka s hodnotou %d"
 
-#: gnubg.c:1387
+#: gnubg.c:1391
 #, c-format
 msgid "%s %d%d"
 msgstr "%s %d%d"
 
-#: gnubg.c:1389 gnubg.c:2662 text.c:85
+#: gnubg.c:1393 gnubg.c:2677 text.c:85
 msgid "On roll"
 msgstr "Na tahu"
 
-#: gnubg.c:1398 gnubg.c:2671 text.c:94
+#: gnubg.c:1402 gnubg.c:2686 text.c:94
 #, c-format
 msgid "%d point match (Cube: %d)"
 msgstr "%dbodový zápas (Kostka: %d)"
 
-#: gnubg.c:1414 gnubg.c:2689 gtkgame.c:5220 text.c:112
+#: gnubg.c:1418 gnubg.c:2704 gtkgame.c:5217 text.c:112
 #, c-format
 msgid "%d point match"
 msgstr "%dbodový zápas"
 
 #. FIXME it's not necessarily the player on roll that resigned
-#: gnubg.c:1420
+#: gnubg.c:1424
 msgid "resigns"
 msgstr "vzdal"
 
-#: gnubg.c:1451
+#: gnubg.c:1455
 msgid "MatchID"
 msgstr "ID zápasu"
 
-#: gnubg.c:1476 gnubg.c:1488
+#: gnubg.c:1480 gnubg.c:1492
 msgid "No game"
 msgstr "Neprobíhá hra"
 
-#: gnubg.c:1498
+#: gnubg.c:1502
 msgid "Game over"
 msgstr "Hra skončena"
 
-#: gnubg.c:1541 gnubg.c:2526 show.c:464 show.c:495 show.c:788 show.c:1110
+#: gnubg.c:1545 gnubg.c:2541 show.c:464 show.c:495 show.c:788 show.c:1110
 #: show.c:1162 show.c:1208 show.c:1252 show.c:1371
 msgid "No position specified and no game in progress."
 msgstr "Není zadána pozice a hra neprobíhá."
 
-#: gnubg.c:1565
+#: gnubg.c:1569
 msgid "Evaluating position..."
 msgstr "Ohodnocuji pozici..."
 
-#: gnubg.c:1655
+#: gnubg.c:1659
 #, c-format
 msgid "No help available for topic `%s'"
 msgstr "K tématu „%s“ neexistuje nápověda"
 
-#: gnubg.c:1680
+#: gnubg.c:1684
 msgid "Usage"
 msgstr "Použití"
 
-#: gnubg.c:1683
+#: gnubg.c:1687
 msgid "subcommand"
 msgstr "<podpříkaz>"
 
-#: gnubg.c:1689
+#: gnubg.c:1693
 msgid "Available commands:"
 msgstr "Dostupné příkazy:"
 
-#: gnubg.c:1690
+#: gnubg.c:1694
 msgid "Available subcommands:"
 msgstr "Dostupné podpříkazy:"
 
-#: gnubg.c:1731
+#: gnubg.c:1735
 msgid "Eq."
 msgstr "H."
 
 #. Opponent has rolled the dice and then resigned. We want to find out if the resignation is OK after
 #. the roll
-#: gnubg.c:1963 play.c:863 play.c:873
+#: gnubg.c:1967 play.c:863 play.c:873
 msgid "Considering resignation..."
 msgstr "Zvažuji rezignaci..."
 
-#: gnubg.c:1982 gnubg.c:1996 gtkgame.c:5050
+#: gnubg.c:1986 gnubg.c:2000 gtkgame.c:5047
 msgid "Equity before resignation"
 msgstr "Ekvita před rezignací"
 
-#: gnubg.c:1984 gnubg.c:1998 gtkgame.c:5067
+#: gnubg.c:1988 gnubg.c:2002 gtkgame.c:5064
 msgid "Equity after resignation"
 msgstr "Ekvita po rezignaci"
 
-#: gnubg.c:1986 gnubg.c:2001
+#: gnubg.c:1990 gnubg.c:2005
 msgid "Correct resign decision"
 msgstr "Správné rozhodnutí o rezignaci"
 
-#: gnubg.c:1988 gnubg.c:2003 gtkgame.c:1007
+#: gnubg.c:1992 gnubg.c:2007 gtkgame.c:1007
 msgid "Accept"
 msgstr "Přijmout"
 
-#: gnubg.c:1988 gnubg.c:2003
+#: gnubg.c:1992 gnubg.c:2007
 msgid "Reject"
 msgstr "Odmítnout"
 
-#: gnubg.c:2017 gtkcube.c:750 play.c:1039 play.c:1243
+#: gnubg.c:2021 gtkcube.c:750 play.c:1039 play.c:1243
 msgid "Considering cube action..."
 msgstr "Zvažuji, co s kostkou..."
 
-#: gnubg.c:2196 gnubg.c:2241
+#: gnubg.c:2200 gnubg.c:2245
 #, c-format
 msgid "This decision is part of beaver/raccoon sequence and cannot be hinted"
 msgstr ""
 "Toto rozhodnutí je součástí postupu při bobrovi/mývalovi a nelze k němu "
 "napovídat"
 
-#: gnubg.c:2203
+#: gnubg.c:2207
 #, c-format
 msgid "You cannot double."
 msgstr "Nemůžete zdvojnásobovat."
 
-#: gnubg.c:2298 play.c:1349
+#: gnubg.c:2302 play.c:1349
 msgid "Considering move..."
 msgstr "Zvažuji tah..."
 
-#: gnubg.c:2331
+#: gnubg.c:2346
 msgid "There are no legal moves."
 msgstr "Není možný žádný platný tah."
 
-#: gnubg.c:2346
+#: gnubg.c:2361
 msgid "You must set up a board first."
 msgstr "Nejdříve musíte nastavit desku."
 
-#: gnubg.c:2501
+#: gnubg.c:2516
 msgid "That command is not yet implemented."
 msgstr "Tento příkaz dosud nebyl implementován."
 
-#: gnubg.c:2522
+#: gnubg.c:2537
 msgid ""
 "The rollout command takes no arguments and only rollouts the current position"
 msgstr ""
 "Příkaz rollout nepodporuje žádné parametry a rozhodí pouze aktuální pozici"
 
-#: gnubg.c:2533
+#: gnubg.c:2548
 #, c-format
 msgid "Current Position"
 msgstr "Aktuální pozice"
@@ -1980,29 +1990,29 @@ msgstr "Aktuální pozice"
 #. Python escape.
 #. Ideally we should be able to handle both > print 1+1 sys.exit() and > print 1+1
 #. currently we only handle the latter...
-#: gnubg.c:2573
+#: gnubg.c:2588
 msgid "Only Python commands supported, not multiline code"
 msgstr "Podporovány pouze příkazy v Pythonu, ne víceřádkový kód"
 
-#: gnubg.c:2599
+#: gnubg.c:2614
 msgid "This build of GNU Backgammon does not support Python"
 msgstr ""
 "Tato instalace GNU Backgammonu byla zkompilována bez podpory pro Python."
 
-#: gnubg.c:2602 gnubg.c:2612
+#: gnubg.c:2617 gnubg.c:2627
 msgid "You must specify a file to load from."
 msgstr "Musíte zadat soubor, ze kterého se má načítat."
 
-#: gnubg.c:3277
+#: gnubg.c:3294
 #, c-format
 msgid "Settings saved to %s."
 msgstr "Nastavení uloženo do %s."
 
-#: gnubg.c:3278
+#: gnubg.c:3295
 msgid "standard output stream"
 msgstr "standardního výstupního proudu"
 
-#: gnubg.c:3734 makebearoff.c:1389 makebearoff.c:1390 makebearoff.c:1391
+#: gnubg.c:3751 makebearoff.c:1389 makebearoff.c:1390 makebearoff.c:1391
 #: makebearoff.c:1392 makebearoff.c:1394 makebearoff.c:1457 makebearoff.c:1462
 #: show.c:395 show.c:1830 show.c:1833 show.c:1836 show.c:1840 show.c:1867
 #: show.c:1871 show.c:1875 show.c:1884 show.c:1892 show.c:1896 show.c:1900
@@ -2010,7 +2020,7 @@ msgstr "standardního výstupního proudu"
 msgid "yes"
 msgstr "ano"
 
-#: gnubg.c:3734 makebearoff.c:1389 makebearoff.c:1390 makebearoff.c:1391
+#: gnubg.c:3751 makebearoff.c:1389 makebearoff.c:1390 makebearoff.c:1391
 #: makebearoff.c:1392 makebearoff.c:1394 makebearoff.c:1457 makebearoff.c:1462
 #: show.c:395 show.c:1830 show.c:1833 show.c:1836 show.c:1840 show.c:1867
 #: show.c:1871 show.c:1875 show.c:1884 show.c:1892 show.c:1896 show.c:1900
@@ -2018,183 +2028,179 @@ msgstr "ano"
 msgid "no"
 msgstr "ne"
 
-#: gnubg.c:3765 gnubg.c:5156
+#: gnubg.c:3782 gnubg.c:5190
 msgid "Please answer `y' or `n'."
 msgstr "Prosím, odpovězte „y“, nebo „n“"
 
-#: gnubg.c:3945
+#: gnubg.c:3962
 msgid "output will be shown"
 msgstr "výstup bude zobrazován"
 
-#: gnubg.c:3945
+#: gnubg.c:3962
 msgid "output will not be shown"
 msgstr "výstup nebude zobrazovány"
 
-#: gnubg.c:4415
+#: gnubg.c:4432
 msgid "Enter dice: "
 msgstr "Zadejte hod: "
 
-#: gnubg.c:4434
+#: gnubg.c:4451
 msgid "You must enter two numbers between 1 and 6."
 msgstr "Musíte zadat dvě čísla mezi 1 a 6."
 
-#: gnubg.c:4493
+#: gnubg.c:4512
 #, fuzzy, c-format
 msgid "Fetching %d random numbers from <%s>\n"
 msgstr "Čtu %d náhodných čísel z <www.random.org>\n"
 
 #. parse string
-#: gnubg.c:4547
+#: gnubg.c:4566
 msgid "Done."
 msgstr "Hotovo."
 
-#: gnubg.c:4574
+#: gnubg.c:4601
 msgid "Failure setting up RNG"
 msgstr "Nepodařilo se nastavit generátor"
 
-#: gnubg.c:4579
+#: gnubg.c:4606
 msgid "Failure setting up RNG for rollout."
 msgstr "Nepodařilo se nastavit generátor pro rozhoz."
 
-#: gnubg.c:4665
+#: gnubg.c:4693
 msgid "Do not use bearoff database"
 msgstr "Nepoužívat databázi koncovek"
 
-#: gnubg.c:4667
+#: gnubg.c:4695
 msgid "Evaluate commands in FILE and exit"
 msgstr "Provést příkazy v souboru FILE a skončit"
 
-#: gnubg.c:4669
+#: gnubg.c:4697
 msgid "Set language to LANG"
 msgstr "Nastavit jazyk na LANG"
 
-#: gnubg.c:4671
-msgid "Create new neural net (of size N)"
-msgstr "Vytvořit novou neuronovou síť (velikosti N)"
-
-#: gnubg.c:4673
+#: gnubg.c:4699
 msgid "Evaluate Python code in FILE and exit"
 msgstr "Provést program v Pythonu v souboru FILE a skončit"
 
-#: gnubg.c:4675
+#: gnubg.c:4701
 msgid "Disable sound effects"
 msgstr "Vypnout zvukové efekty"
 
-#: gnubg.c:4677
+#: gnubg.c:4703
 msgid "Do not read .gnubgrc and .gnubgautorc commands"
 msgstr "Nenačítat příkazy v .gnubgrc a .gnubgautorc"
 
-#: gnubg.c:4680
+#: gnubg.c:4706
 msgid "Show gtk splash screen"
 msgstr "Zobrazovat úvodní obrazovku GTK"
 
-#: gnubg.c:4682
+#: gnubg.c:4708
 msgid "Start the command line instead of using the graphical interface"
 msgstr "Spustit v režimu příkazového řádku namísto grafického rozhraní"
 
-#: gnubg.c:4684
+#: gnubg.c:4710
 msgid "Show version information and exit"
 msgstr "Zobrazit informace o verzi a skončit"
 
-#: gnubg.c:4686
+#: gnubg.c:4712
 msgid "Ignore tty input when using the graphical interface"
 msgstr "Při použití grafického rozhraní ignorovat vstup z terminálu"
 
-#: gnubg.c:4688
+#: gnubg.c:4714
 msgid "Turn on debug"
 msgstr "Zapnout ladění"
 
-#: gnubg.c:4690
+#: gnubg.c:4716
 msgid "Specify location of general data"
 msgstr "Uveďte umístění obecných dat"
 
-#: gnubg.c:4692
+#: gnubg.c:4718
 msgid "Specify location of program specific data"
 msgstr "Uveďte umístění dat specifických pro program"
 
-#: gnubg.c:4694
+#: gnubg.c:4720
 msgid "Specify location of program documentation"
 msgstr "Uveďte umístění dokumentace k programu"
 
-#: gnubg.c:4780 gnubg.c:4783 gnubg.c:4788 gnubg.c:4792 gnubg.c:4797
+#: gnubg.c:4806 gnubg.c:4809 gnubg.c:4814 gnubg.c:4818 gnubg.c:4823
 msgid "Initialising"
 msgstr "Inicializuji se"
 
-#: gnubg.c:4780 gtkoptions.c:1010
+#: gnubg.c:4806 gtkoptions.c:1010
 msgid "Random number generator"
 msgstr "Generátor náhodných čísel"
 
-#: gnubg.c:4783
+#: gnubg.c:4809
 msgid "match equity table"
 msgstr "tabulka zápasové ekvity"
 
-#: gnubg.c:4788
+#: gnubg.c:4814
 msgid "neural nets"
 msgstr "neuronové sítě"
 
-#: gnubg.c:4792
+#: gnubg.c:4818
 msgid "Windows sockets"
 msgstr "Windows sockets"
 
-#: gnubg.c:4797
+#: gnubg.c:4823
 msgid "Python"
 msgstr "Python"
 
-#: gnubg.c:4805
+#: gnubg.c:4831
 msgid "Loading"
 msgstr "Nahrávám"
 
-#: gnubg.c:4805
+#: gnubg.c:4831
 msgid "User Settings"
 msgstr "Uživatelská nastavení"
 
-#: gnubg.c:4851
+#: gnubg.c:4877
 #, c-format
 msgid "GNU Backgammon build without Python."
 msgstr "GNU Backgammon byl sestaven bez Pythonu."
 
-#: gnubg.c:4882 gnubg.c:4926
+#: gnubg.c:4908 gnubg.c:4952
 msgid "Command only valid in match play"
 msgstr "Příkaz platný pouze pro zápasovou hru"
 
-#: gnubg.c:4893 gnubg.c:4895 gnubg.c:4898
+#: gnubg.c:4919 gnubg.c:4921 gnubg.c:4924
 msgid "MWC for equity"
 msgstr "MWC pro ekvitu"
 
-#: gnubg.c:4897 gnubg.c:4942
+#: gnubg.c:4923 gnubg.c:4968
 msgid "By linear interpolation"
 msgstr "Lineární interpolací"
 
-#: gnubg.c:4938 gnubg.c:4940 gnubg.c:4943
+#: gnubg.c:4964 gnubg.c:4966 gnubg.c:4969
 msgid "Equity for MWC"
 msgstr "Ekvita pro MWC"
 
-#: gnubg.c:5076
+#: gnubg.c:5110
 #, c-format
 msgid "File \"%s\" exists. Overwrite? "
 msgstr "Soubor „%s“ existuje. Přepsat? "
 
-#: gnubg.c:5173
+#: gnubg.c:5207
 msgid "You may be about to make a very bad play"
 msgstr "Právě se chystáte udělat velmi špatný tah"
 
-#: gnubg.c:5177
+#: gnubg.c:5211
 msgid "You may be about to make a bad play"
 msgstr "Právě se chystáte udělat špatný tah"
 
-#: gnubg.c:5181
+#: gnubg.c:5215
 msgid "You may be about to make a doubtful play"
 msgstr "Právě se chystáte udělat pochybný tah"
 
-#: gnubg.c:5193
+#: gnubg.c:5227
 msgid "Are you sure?"
 msgstr "Jste si jisti?"
 
-#: gnubg.c:5251
+#: gnubg.c:5285
 msgid "Analysis used for `hint' has been cleared"
 msgstr "Analýza použitá pro „hint“ byla smazána"
 
-#: gnubg.c:5416
+#: gnubg.c:5450
 #, c-format
 msgid ""
 "Locale in your environment not supported by C library. Falling back to C "
@@ -2203,60 +2209,100 @@ msgstr ""
 "Místní nastavení vašeho prostředí není podporováno knihovnou jazyka C. "
 "Použije se nastavení C.\n"
 
-#: gnubg.c:5601
+#: gnubg.c:5635
 #, fuzzy
 msgid ""
 "Are you sure you want to discard the current match and your existing "
 "autosave? "
 msgstr "Jste si jisti, že chcete smazat všechny zápasy v této databázi?"
 
-#: gnubg.c:5609
+#: gnubg.c:5643
 #, fuzzy
 msgid "Are you sure you want to discard the current match? "
 msgstr "Jste si jisti, že chcete začít novou hru a zahodit rozehraný zápas? "
 
-#: gnubgmodule.c:184
-msgid "invalid dict value in cubeinfo (see gnubg.setcubeinfo() for an example)"
+#: gnubgmodule.c:185
+msgid "invalid dict value in cubeinfo (see gnubg.cubeinfo() for an example)"
 msgstr ""
 
-#: gnubgmodule.c:202
+#: gnubgmodule.c:203
 msgid "invalid value cubeinfo (see gnubg.setcubeinfo() for an example)"
 msgstr ""
 
-#: gnubgmodule.c:275
+#: gnubgmodule.c:306
+msgid "invalid dict value in posinfo (see gnubg.posinfo() for an example)"
+msgstr ""
+
+#: gnubgmodule.c:319 gnubgmodule.c:333
+msgid "invalid value posinfo (see gnubg.posinfo() for an example)"
+msgstr ""
+
+#: gnubgmodule.c:396
 msgid ""
 "invalid dict value in evalcontext (see gnubg.evalcontext() for an example)"
 msgstr ""
 
-#: gnubgmodule.c:289
+#: gnubgmodule.c:410
 msgid "invalid value evalcontext (see gnubg.evalcontext() for an example)"
 msgstr ""
 
-#: gnubgmodule.c:311
+#: gnubgmodule.c:432
 msgid "invalid value in evalcontext (see gnubg.evalcontext() for an example)"
 msgstr ""
 
-#: gnubgmodule.c:504
+#: gnubgmodule.c:477
+#, c-format
+msgid "error in SetCubeInfo\n"
+msgstr ""
+
+#: gnubgmodule.c:503
+#, c-format
+msgid "error in SetPosInfo\n"
+msgstr ""
+
+#: gnubgmodule.c:648
 msgid "interupted/errno in GeneralEvaluateE"
 msgstr ""
 
-#: gnubgmodule.c:550
+#: gnubgmodule.c:694
 msgid "interupted/errno in GeneralCubeDecisionE"
 msgstr ""
 
-#: gnubgmodule.c:686
+#: gnubgmodule.c:739
+#, c-format
+msgid "What? No dice?\n"
+msgstr ""
+
+#: gnubgmodule.c:830
 msgid "invalid matchlength"
 msgstr ""
 
-#: gnubgmodule.c:791
+#: gnubgmodule.c:955
+msgid ""
+"requires 0 or exactly 3 arguments (Board, Cube-Info dict, Pos-Info dict). "
+"(see gnubg.board(), gnubg.cubeinfo(), gnubg.posinfo() for examples)"
+msgstr ""
+
+#: gnubgmodule.c:965 gnubgmodule.c:1002
+#, fuzzy
+msgid "no current position available"
+msgstr "Aktuální pozice"
+
+#: gnubgmodule.c:1014
+msgid ""
+"a cube-info argument requires a pos-info dictionary as an argument (see "
+"gnubg.matchid() for an example)"
+msgstr ""
+
+#: gnubgmodule.c:1041
 msgid "invalid positionid"
 msgstr ""
 
-#: gnubgmodule.c:898
+#: gnubgmodule.c:1148
 msgid "invalid number of chequers or points"
 msgstr ""
 
-#: gnubgmodule.c:906
+#: gnubgmodule.c:1156
 msgid "invalid position number"
 msgstr ""
 
@@ -2367,7 +2413,7 @@ msgstr "Odvetné zásahy: %s\n"
 #. * the click is in the small time frame between end
 #. * of player turn and next computer turn
 #: gtkboard.c:1820 play.c:1873 play.c:2207 play.c:2263 play.c:2366 play.c:2544
-#: play.c:3611 play.c:3667 play.c:3739 play.c:3850
+#: play.c:3613 play.c:3669 play.c:3741 play.c:3852
 msgid ""
 "It is the computer's turn -- type `play' to force it to move immediately."
 msgstr "Na tahu je počítač – zadejte „play“ pro vynucení okamžitého táhnutí."
@@ -2417,90 +2463,90 @@ msgstr "%s má házet.\n"
 msgid "%s to roll"
 msgstr "%s na tahu:"
 
-#: gtkchequer.c:264
+#: gtkchequer.c:265
 msgid "Evaluating positions..."
 msgstr "Vyhodnocuji pozice..."
 
-#: gtkchequer.c:353 gtkcube.c:830
+#: gtkchequer.c:354 gtkcube.c:830
 #, c-format
 msgid "You need to save a preset as \"%s\""
 msgstr "Musíte uložit předvolbu jako „%s“"
 
-#: gtkchequer.c:445
+#: gtkchequer.c:446
 msgid "Move details"
 msgstr "Podrobnosti k tahu"
 
-#: gtkchequer.c:452 gtkcube.c:898
+#: gtkchequer.c:453 gtkcube.c:899
 msgid "Eval"
 msgstr "Vyhodnotit"
 
-#: gtkchequer.c:453 gtkchequer.c:455 gtkcube.c:900 gtkcube.c:903
+#: gtkchequer.c:454 gtkchequer.c:456 gtkcube.c:901 gtkcube.c:904
 msgid "..."
 msgstr "..."
 
-#: gtkchequer.c:457 gtkmovelist.c:65 gtkrolls.c:219 html.c:2502 sound.c:168
+#: gtkchequer.c:458 gtkmovelist.c:65 gtkrolls.c:219 html.c:2502 sound.c:320
 msgid "Move"
 msgstr "Tah"
 
-#: gtkchequer.c:458
+#: gtkchequer.c:459
 msgid "Show"
 msgstr "Ukaž"
 
-#: gtkchequer.c:459 gtkcube.c:905 gtkcube.c:1039
+#: gtkchequer.c:460 gtkcube.c:906 gtkcube.c:1040
 msgid "Copy"
 msgstr "Kopíruj"
 
-#: gtkchequer.c:460
+#: gtkchequer.c:461
 msgid "TM"
 msgstr "TM"
 
-#: gtkchequer.c:461 gtkcube.c:907
+#: gtkchequer.c:462 gtkcube.c:908
 msgid "Cmark"
 msgstr "Značka"
 
-#: gtkchequer.c:467
+#: gtkchequer.c:468
 msgid "Details"
 msgstr "Detaily"
 
-#: gtkchequer.c:507 gtkcube.c:941
+#: gtkchequer.c:508 gtkcube.c:942
 #, c-format
 msgid "Evaluate play on cubeful %d-ply"
 msgstr "Vyhodnotit tah v %d půltazích s kostkou"
 
-#: gtkchequer.c:551 gtkcube.c:984
+#: gtkchequer.c:552 gtkcube.c:985
 #, c-format
 msgid "Rollout preset %c"
 msgstr "Přednastavení rozhozů %c"
 
-#: gtkchequer.c:614
+#: gtkchequer.c:615
 msgid "Rollout chequer play with current settings"
 msgstr "Rozhodit tah kameny podle současného nastavení"
 
-#: gtkchequer.c:617
+#: gtkchequer.c:618
 msgid "Evaluate chequer play with current settings"
 msgstr "Vyhodnotit tah kameny podle současného nastavení"
 
-#: gtkchequer.c:620 gtkcube.c:1030
+#: gtkchequer.c:621 gtkcube.c:1031
 msgid "Modify rollout settings"
 msgstr "Upravit nastavení rozhozu"
 
-#: gtkchequer.c:623 gtkcube.c:1033
+#: gtkchequer.c:624 gtkcube.c:1034
 msgid "Modify evaluation settings"
 msgstr "Upravit nastavení vyhodnocování"
 
-#: gtkchequer.c:626 gtkcube.c:1036
+#: gtkchequer.c:627 gtkcube.c:1037
 msgid "Toggle output as MWC or equity"
 msgstr "Přepnout výstup na MWC nebo ekvitu"
 
-#: gtkchequer.c:629
+#: gtkchequer.c:630
 msgid "Copy selected moves to clipboard"
 msgstr "Kopírovat vybrané tahy do schránky"
 
-#: gtkchequer.c:632
+#: gtkchequer.c:633
 msgid "Move the selected move"
 msgstr "Provést vybraný tah"
 
-#: gtkchequer.c:635 gtkcube.c:1042
+#: gtkchequer.c:636 gtkcube.c:1043
 msgid "Show Sho Sengoku Temperature Map of position after selected move"
 msgstr "Zobrazit Šo Sengokovu teplotní mapu pozice po zvoleném tahu"
 
@@ -2509,7 +2555,7 @@ msgid "Lose"
 msgstr "Prohra"
 
 #: gtkcube.c:107 gtkcube.c:335 gtkgame.c:958 gtkrelational.c:58 latex.c:444
-#: play.c:4378 sound.c:172
+#: play.c:4379 sound.c:324
 msgid "Take"
 msgstr "Přijmout"
 
@@ -2569,19 +2615,19 @@ msgstr "Sněz ji!"
 msgid "Proper cube action: "
 msgstr "Správná hra kostkou: "
 
-#: gtkcube.c:875
+#: gtkcube.c:876
 msgid "Cube details"
 msgstr "Podrobnosti o kostce"
 
-#: gtkcube.c:906
+#: gtkcube.c:907
 msgid "Temp. Map"
 msgstr "Teplotní mapa"
 
-#: gtkcube.c:1024
+#: gtkcube.c:1025
 msgid "Rollout cube decision with current settings"
 msgstr "Rozhodit rozhodnutí o kostce podle aktuálního nastavení"
 
-#: gtkcube.c:1027
+#: gtkcube.c:1028
 msgid "Evaluate cube decision with current settings"
 msgstr "Vyhodnotit rozhodnutí o kostce podle aktuálního nastavení"
 
@@ -2589,7 +2635,7 @@ msgstr "Vyhodnotit rozhodnutí o kostce podle aktuálního nastavení"
 msgid "Annotations"
 msgstr "Komentáře"
 
-#: gtkexport.c:40 gtkgame.c:2285
+#: gtkexport.c:40 gtkgame.c:2287
 msgid "Analysis"
 msgstr "Analýza"
 
@@ -2645,16 +2691,16 @@ msgstr "Zobrazovat u zmeškaných zdvojnásobení"
 msgid "Show for close cube decisions"
 msgstr "Zobrazovat u těsných rozhodnutí"
 
-#: gtkexport.c:433
+#: gtkexport.c:434
 #, c-format
 msgid "%dx%d pixels"
 msgstr "%dx%d pixelů"
 
-#: gtkexport.c:448
+#: gtkexport.c:449
 msgid "Select top folder for html export"
 msgstr "Nastav kořenový adresář pro export do HTML"
 
-#: gtkexport.c:474
+#: gtkexport.c:475
 #, c-format
 msgid ""
 "Folder html-images exists\n"
@@ -2665,7 +2711,7 @@ msgstr ""
 "už adresář html-images je.\n"
 "Je možno obrázky přepsat?"
 
-#: gtkexport.c:487
+#: gtkexport.c:488
 #, c-format
 msgid ""
 "Folder html-images can't be created\n"
@@ -2675,110 +2721,110 @@ msgstr ""
 "nelze vytvořit adresář html-images"
 
 #. create dialog
-#: gtkexport.c:538
+#: gtkexport.c:540
 msgid "GNU Backgammon - Export Settings"
 msgstr "GNU Backgammon – Nastavení pro export"
 
 #. include stuff
-#: gtkexport.c:547
+#: gtkexport.c:549
 msgid "Include"
 msgstr "Zahrnovat"
 
 #. show stuff
-#: gtkexport.c:570 gtkexport.c:585 gtkgame.c:3460 gtkprefs.c:2920
+#: gtkexport.c:572 gtkexport.c:587 gtkgame.c:3454 gtkprefs.c:2920
 #: gtkprefs.c:2937
 msgid "Board"
 msgstr "Deska"
 
-#: gtkexport.c:603
+#: gtkexport.c:605
 msgid "move(s) between board shown"
 msgstr "tah(ů) mezi zobrazenými deskami"
 
-#: gtkexport.c:615 gtkrelational.c:803
+#: gtkexport.c:617 gtkrelational.c:803
 msgid "Players"
 msgstr "Hráči"
 
 #. moves
-#: gtkexport.c:640
+#: gtkexport.c:642
 msgid "Output move analysis"
 msgstr "Výpis analýzy tahů"
 
-#: gtkexport.c:656
+#: gtkexport.c:658
 msgid "Show at most"
 msgstr "Zobrazit nejvýše"
 
-#: gtkexport.c:668
+#: gtkexport.c:670
 msgid "move(s)"
 msgstr "tah(ů)"
 
-#: gtkexport.c:674 gtkexport.c:714
+#: gtkexport.c:676 gtkexport.c:716
 msgid "Show detailed probabilities"
 msgstr "Zobrazovat detailní pravděpodobnosti"
 
-#: gtkexport.c:680 gtkexport.c:720
+#: gtkexport.c:682 gtkexport.c:722
 msgid "Show evaluation parameters"
 msgstr "Zobrazovat parametry vyhodnocování"
 
-#: gtkexport.c:685 gtkexport.c:726
+#: gtkexport.c:687 gtkexport.c:728
 msgid "Show rollout parameters"
 msgstr "Zobrazovat parametry rozhozu"
 
 #. cube
-#: gtkexport.c:699
+#: gtkexport.c:701
 msgid "Output cube decision analysis"
 msgstr "Výpis analýzy rozhodnutí o kostce"
 
 #. html
-#: gtkexport.c:744
+#: gtkexport.c:746
 msgid "HTML export options"
 msgstr "Volby pro export HTML"
 
-#: gtkexport.c:759
+#: gtkexport.c:761
 msgid "URL to pictures"
 msgstr "URL k obrázkům"
 
-#: gtkexport.c:770
+#: gtkexport.c:772
 msgid "HTML board type:"
 msgstr "Typ HTML desky:"
 
-#: gtkexport.c:776
+#: gtkexport.c:778
 msgid "BBS"
 msgstr "BBS"
 
-#: gtkexport.c:777
+#: gtkexport.c:779
 msgid "fibs2html"
 msgstr "fibs2html"
 
-#: gtkexport.c:787
+#: gtkexport.c:789
 msgid "CSS Style sheet:"
 msgstr "CSS šablona:"
 
-#: gtkexport.c:792
+#: gtkexport.c:794
 msgid "In <head>"
 msgstr "V <head>"
 
-#: gtkexport.c:793
+#: gtkexport.c:795
 msgid "Inline (in tags)"
 msgstr "V těle tagů"
 
-#: gtkexport.c:794
+#: gtkexport.c:796
 msgid "External file"
 msgstr "Externí soubor"
 
 #. Sizes
-#: gtkexport.c:802
+#: gtkexport.c:804
 msgid "Export sizes"
 msgstr "Velikosti při exportu"
 
-#: gtkexport.c:821
+#: gtkexport.c:823
 msgid "Size of PNG images:"
 msgstr "Velikost PNG obrázků:"
 
-#: gtkexport.c:843
+#: gtkexport.c:845
 msgid "Size of Html images:"
 msgstr "Velikost HTML obrázků:"
 
-#: gtkexport.c:855
+#: gtkexport.c:857
 msgid "Generate Html images..."
 msgstr "Vygenerovat obrázky pro HTML..."
 
@@ -2787,7 +2833,7 @@ msgstr "Vygenerovat obrázky pro HTML..."
 msgid "Supported files (%s)"
 msgstr "Podporované soubory (%s)"
 
-#: gtkfile.c:130 gtkfile.c:300
+#: gtkfile.c:130 gtkfile.c:301
 msgid "All Files"
 msgstr "Všechny soubory"
 
@@ -2807,94 +2853,94 @@ msgstr "pozice"
 msgid "Update extension"
 msgstr "Aktualizovat příponu"
 
-#: gtkfile.c:290
+#: gtkfile.c:291
 msgid "Supported files"
 msgstr "Podporované soubory"
 
 #. Default option 'automatic'
-#: gtkfile.c:322
+#: gtkfile.c:323
 msgid "Automatic"
 msgstr "Automatická"
 
 #. Extra option 'command file'
-#: gtkfile.c:329
+#: gtkfile.c:330
 msgid "Gnubg Command file"
 msgstr "Soubor s příkazu Gnubg"
 
-#: gtkfile.c:341
+#: gtkfile.c:342
 #, c-format
 msgid "Unable to import. Unrecognized file type"
 msgstr "Nelze importovat. Nerozpoznaný typ souboru"
 
-#: gtkfile.c:366
+#: gtkfile.c:367
 msgid "Open backgammon file"
 msgstr "Otevřít soubor"
 
-#: gtkfile.c:374
+#: gtkfile.c:375
 msgid "Open as:"
 msgstr "Načíst jako:"
 
-#: gtkfile.c:379
+#: gtkfile.c:380
 msgid "Selected file type: "
 msgstr "Zvolený typ souboru: "
 
-#: gtkfile.c:425
+#: gtkfile.c:427
 msgid "Open Commands file"
 msgstr "Otevřít soubor s příkazy"
 
-#: gtkfile.c:439
+#: gtkfile.c:441
 msgid "Save or export to file"
 msgstr "Uložit nebo exportovat do souboru"
 
-#: gtkfile.c:466
+#: gtkfile.c:468
 msgid "Failed to make directory"
 msgstr "Nepodařilo se vytvořit adresář"
 
-#: gtkfile.c:489
+#: gtkfile.c:491
 msgid "Previous"
 msgstr "Předchozí"
 
-#: gtkfile.c:502
+#: gtkfile.c:504
 msgid "Failed import"
 msgstr "Import se nezdařil"
 
-#: gtkfile.c:512
+#: gtkfile.c:514
 msgid "Cancelled"
 msgstr "Stornováno"
 
-#: gtkfile.c:528
+#: gtkfile.c:530
 msgid "Done"
 msgstr "Hotovo"
 
-#: gtkfile.c:628
+#: gtkfile.c:630
 msgid "Result"
 msgstr "Výsledek"
 
-#: gtkfile.c:633 gtkmovelist.c:56
+#: gtkfile.c:635 gtkmovelist.c:56
 msgid "Type"
 msgstr "Typ"
 
-#: gtkfile.c:702
+#: gtkfile.c:704
 msgid "Batch analyse files"
 msgstr "Dávkově analyzovat soubory"
 
-#: gtkfile.c:725
+#: gtkfile.c:727
 msgid "Skip"
 msgstr "Přeskočit"
 
-#: gtkfile.c:726 progress.c:759
+#: gtkfile.c:728 progress.c:759
 msgid "Stop"
 msgstr "Zastavit"
 
-#: gtkfile.c:727
+#: gtkfile.c:729
 msgid "Open"
 msgstr "Načíst"
 
-#: gtkfile.c:763
+#: gtkfile.c:765
 msgid "Select files to analyse"
 msgstr "Zvolte soubory, které se mají analyzovat"
 
-#: gtkfile.c:768
+#: gtkfile.c:770
 msgid "Add to relational database"
 msgstr "Přidat do relační databáze"
 
@@ -2928,7 +2974,7 @@ msgstr "Rozdíl: "
 msgid "Didn't double"
 msgstr "Nezdvojnásoboval"
 
-#: gtkgame.c:838 play.c:4399 text.c:83 text.c:490
+#: gtkgame.c:838 play.c:4400 text.c:83 text.c:490
 #, c-format
 msgid "Rolled %d%d"
 msgstr "Hozeno %d%d"
@@ -2938,7 +2984,7 @@ msgstr "Hozeno %d%d"
 msgid "Moved "
 msgstr "Táhnul "
 
-#: gtkgame.c:886 gtkgame.c:2035 gtkgame.c:2292 gtkgame.c:6332 gtkoptions.c:521
+#: gtkgame.c:886 gtkgame.c:2036 gtkgame.c:2294 gtkgame.c:6329 gtkoptions.c:521
 msgid "Chequer play"
 msgstr "Hra kameny"
 
@@ -2950,11 +2996,11 @@ msgstr "Rozhodnutí o kostce"
 msgid "GNU Backgammon cannot analyse neither beavers nor raccoons yet"
 msgstr "GNU Backgammon dosud nedokáže analyzovat bobry ani mývaly"
 
-#: gtkgame.c:959 latex.c:460 play.c:4386 sound.c:166
+#: gtkgame.c:959 latex.c:460 play.c:4387 sound.c:318
 msgid "Drop"
 msgstr "Odmítnuto"
 
-#: gtkgame.c:994 gtkgame.c:6778 sound.c:170
+#: gtkgame.c:994 gtkgame.c:6776 sound.c:322
 msgid "Resign"
 msgstr "Vzdát"
 
@@ -2983,15 +3029,15 @@ msgstr "Přepnout do 3D zobrazení"
 msgid "Switch to 2D view"
 msgstr "Přepnout do 2D zobrazení"
 
-#: gtkgame.c:1722
+#: gtkgame.c:1723
 msgid "Predefined settings"
 msgstr "Předvolby"
 
-#: gtkgame.c:1732
+#: gtkgame.c:1733
 msgid "Select a predefined setting:"
 msgstr "Zvolte předvolbu:"
 
-#: gtkgame.c:1735
+#: gtkgame.c:1736
 msgid ""
 "Select a predefined setting, ranging from beginner's play to the grandmaster "
 "setting that will test your patience"
@@ -2999,7 +3045,7 @@ msgstr ""
 "Zvolte předvolené nastavení, od hry začátečníka, po nastavení velmistr, "
 "které vyzkouší vaši trpělivost"
 
-#: gtkgame.c:1743 gtkgame.c:2103 gtkmovefilter.c:332 gtkmovefilter.c:500
+#: gtkgame.c:1744 gtkgame.c:2104 gtkmovefilter.c:332 gtkmovefilter.c:500
 #: gtkprefs.c:265
 msgid "user defined"
 msgstr "uživatelská"
@@ -3007,11 +3053,11 @@ msgstr "uživatelská"
 #.
 #. * Frame with user settings
 #.
-#: gtkgame.c:1753
+#: gtkgame.c:1754
 msgid "User defined settings"
 msgstr "Uživatelská nastavení"
 
-#: gtkgame.c:1767
+#: gtkgame.c:1768
 msgid ""
 "Specify how many rolls GNU Backgammon should lookahead. Each ply costs "
 "approximately a factor of 21 in computational time. Also note that 2-ply is "
@@ -3021,34 +3067,34 @@ msgstr ""
 "znamená zhruba 21-násobek výpočetního času. Navíc poznamenejme, že 2 půltahy "
 "jsou ekvivalentní nastavení „3-ply“ programu Snowie."
 
-#: gtkgame.c:1772
+#: gtkgame.c:1773
 msgid "Lookahead"
 msgstr "Výhled"
 
-#: gtkgame.c:1781
+#: gtkgame.c:1782
 msgid "Plies:"
 msgstr "Půltahů"
 
 #. Use pruning neural nets
-#: gtkgame.c:1787
+#: gtkgame.c:1788
 msgid "Pruning neural nets"
 msgstr "Ořezávací neuronové sítě"
 
-#: gtkgame.c:1792
+#: gtkgame.c:1793
 msgid "Use neural net pruning"
 msgstr "Používat ořezávací neuronové sítě"
 
 #. FIXME This needs a tool tip
 #. cubeful
-#: gtkgame.c:1799
+#: gtkgame.c:1800
 msgid "Cubeful evaluations"
 msgstr "Vyhodnocování s kostkou"
 
-#: gtkgame.c:1804
+#: gtkgame.c:1805
 msgid "Cubeful chequer evaluation"
 msgstr "Vyhodnocování kamenů s kostkou"
 
-#: gtkgame.c:1811
+#: gtkgame.c:1812
 msgid ""
 "Instruct GNU Backgammon to use cubeful evaluations, i.e., include the value "
 "of cube ownership in the evaluations. It is recommended to enable this "
@@ -3058,7 +3104,7 @@ msgstr ""
 "zahrnout hodnotu vlastnictví kostky v ohodnocení. Je doporučeno zapnout tuto "
 "volbu."
 
-#: gtkgame.c:1818
+#: gtkgame.c:1819
 msgid ""
 "GNU Backgammon will always perform cubeful evaluations for cube decisions. "
 "Disabling this option will make GNU Backgammon use cubeless evaluations in "
@@ -3070,7 +3116,7 @@ msgstr ""
 "bezkostkové vyhodnocování v intervalových uzlech v hlubších půltazích. Je "
 "doporučeno zapnout tuto volbu."
 
-#: gtkgame.c:1832
+#: gtkgame.c:1833
 msgid ""
 "You can use this option to introduce noise or errors in the evaluations. "
 "This is useful for introducing levels below 0-ply. The lower rated bots (e."
@@ -3084,19 +3130,19 @@ msgstr ""
 "Zavedený šum může být deterministický, tzn. vždy stejný šum pro danou "
 "pozici, nebo může být náhodný."
 
-#: gtkgame.c:1841
+#: gtkgame.c:1842
 msgid "Noise"
 msgstr "Šum"
 
-#: gtkgame.c:1853
+#: gtkgame.c:1854
 msgid "Noise:"
 msgstr "Šum:"
 
-#: gtkgame.c:1859
+#: gtkgame.c:1860
 msgid "Deterministic noise"
 msgstr "Deterministický šum"
 
-#: gtkgame.c:1884
+#: gtkgame.c:1885
 msgid ""
 "GNU Backgammon will evaluate all moves at 0-ply. The move filter controls "
 "how many moves to be evaluted at higher plies. A \"smaller\" filter will be "
@@ -3108,715 +3154,707 @@ msgstr ""
 "rychlejší, ale GNU Backgammon nemusí najít nejlepší tah. Pokročilejší "
 "uživatelé mohou nastavit vlastní filtry kliknutím na tlačítko [Upravit]."
 
-#: gtkgame.c:2043 gtkgame.c:2295 gtkgame.c:6335
+#: gtkgame.c:2044 gtkgame.c:2297 gtkgame.c:6332
 msgid "Cube decisions"
 msgstr "Rozhodnutí o kostce"
 
-#: gtkgame.c:2107
+#: gtkgame.c:2108
 #, fuzzy
 msgid "Advanced Settings..."
 msgstr "Změnit nastavení hráčů..."
 
-#: gtkgame.c:2253
+#: gtkgame.c:2255
 msgid "Doubtful:"
 msgstr "Pochybný:"
 
-#: gtkgame.c:2253
+#: gtkgame.c:2255
 msgid "Bad:"
 msgstr "Špatný:"
 
-#: gtkgame.c:2253
+#: gtkgame.c:2255
 msgid "Very bad:"
 msgstr "Velmi špatný:"
 
-#: gtkgame.c:2254
+#: gtkgame.c:2256
 msgid "Very lucky:"
 msgstr "Velmi šťastný:"
 
-#: gtkgame.c:2254
+#: gtkgame.c:2256
 msgid "Lucky:"
 msgstr "Šťastný:"
 
-#: gtkgame.c:2255
+#: gtkgame.c:2257
 msgid "Unlucky:"
 msgstr "Smolný:"
 
-#: gtkgame.c:2255
+#: gtkgame.c:2257
 msgid "Very unlucky:"
 msgstr "Velmi smolný:"
 
-#: gtkgame.c:2270
+#: gtkgame.c:2272
 msgid "GNU Backgammon - Analysis Settings"
 msgstr "GNU Backgammon – Nastavení analýzy"
 
-#: gtkgame.c:2298 gtkgame.c:6338 gtkrelational.c:63
+#: gtkgame.c:2300 gtkgame.c:6335 gtkrelational.c:63
 msgid "Luck"
 msgstr "Štěstí"
 
-#: gtkgame.c:2303
+#: gtkgame.c:2305
 #, c-format
 msgid "Analyse player %s"
 msgstr "Analyzovat hráče %s"
 
-#: gtkgame.c:2311
+#: gtkgame.c:2313
 msgid "Skill thresholds"
 msgstr "Prahy úrovní"
 
-#: gtkgame.c:2339
+#: gtkgame.c:2341
 msgid "Luck thresholds"
 msgstr "Prahy štěstí"
 
-#: gtkgame.c:2368
+#: gtkgame.c:2370
 #, fuzzy
 msgid "Analysis Level"
 msgstr "Analýza"
 
-#: gtkgame.c:2375
+#: gtkgame.c:2377
 #, fuzzy
 msgid "Analysis settings"
 msgstr "Analýza dokončena"
 
-#: gtkgame.c:2380
+#: gtkgame.c:2382
 msgid "Eval Hint/Tutor Level"
 msgstr ""
 
-#: gtkgame.c:2389
+#: gtkgame.c:2391
 #, fuzzy
 msgid "Same as analysis"
 msgstr "Analýza přijetí"
 
-#: gtkgame.c:2396
+#: gtkgame.c:2398
 #, fuzzy
 msgid "Hint/Tutor settings"
 msgstr "Nastavení zápasu"
 
-#: gtkgame.c:2448
-msgid "Name:"
-msgstr "Jméno:"
+#: gtkgame.c:2450
+#, fuzzy
+msgid "Default Name:"
+msgstr "Jméno databáze"
 
-#: gtkgame.c:2456
+#: gtkgame.c:2458
 msgid "Human"
 msgstr "Člověk"
 
-#: gtkgame.c:2467
+#: gtkgame.c:2469
 #, fuzzy
 msgid "GNU Backgammon settings"
 msgstr "GNU Backgammon – Nastavení analýzy"
 
-#: gtkgame.c:2474
+#: gtkgame.c:2476
 msgid "External"
 msgstr "Externí"
 
-#: gtkgame.c:2480
+#: gtkgame.c:2482
 msgid "Socket:"
 msgstr "Socket:"
 
-#: gtkgame.c:2535
+#: gtkgame.c:2537
 msgid "GNU Backgammon - Players"
 msgstr "GNU Backgammon – Hráči"
 
-#: gtkgame.c:2541
+#: gtkgame.c:2543
 msgid "Player 0"
 msgstr "Hráč 0"
 
-#: gtkgame.c:2542
+#: gtkgame.c:2544
 msgid "Player 1"
 msgstr "Hráč 1"
 
-#: gtkgame.c:2627 gtkgame.c:2812
+#: gtkgame.c:2624 gtkgame.c:2809
 msgid "System default"
 msgstr "Systémový"
 
-#: gtkgame.c:2630
+#: gtkgame.c:2627
 msgid "English (GB)"
 msgstr "Angličtina (UK)"
 
-#: gtkgame.c:2631
+#: gtkgame.c:2628
 msgid "English (US)"
 msgstr "Angličtina (US)"
 
-#: gtkgame.c:2637
-msgid "Romanian"
-msgstr ""
-
-#: gtkgame.c:2639
+#: gtkgame.c:2636
 msgid "Spanish"
 msgstr "Španělština"
 
-#: gtkgame.c:2665 gtkgame.c:2814
+#: gtkgame.c:2662 gtkgame.c:2811
 msgid "Select language"
 msgstr "Zvolte jazyk"
 
-#: gtkgame.c:2709
+#: gtkgame.c:2706
 #, c-format
 msgid "Locale '%s' not supported by C library."
 msgstr "Prostředí „%s“ není podporováno knihovnou jazyka C"
 
-#: gtkgame.c:2858 gtkrolls.c:388 gtkwindows.c:220
+#: gtkgame.c:2855 gtkrolls.c:388 gtkwindows.c:220
 msgid "Cancel"
 msgstr "Storno"
 
-#: gtkgame.c:2859 gtkwindows.c:212 gtkwindows.c:250
+#: gtkgame.c:2856 gtkwindows.c:212 gtkwindows.c:250
 msgid "OK"
 msgstr "OK"
 
-#: gtkgame.c:2882
+#: gtkgame.c:2879
 msgid "/_File"
 msgstr "/_Soubor"
 
-#: gtkgame.c:2883
+#: gtkgame.c:2880
 msgid "/_File/_New..."
 msgstr "/_Soubor/_Nový..."
 
-#: gtkgame.c:2886
+#: gtkgame.c:2883
 msgid "/_File/_Open..."
 msgstr "/_Soubor/_Otevřít..."
 
-#: gtkgame.c:2889
+#: gtkgame.c:2886
 msgid "/_File/_Save..."
 msgstr "/_Soubor/_Uložit..."
 
-#: gtkgame.c:2892 gtkgame.c:2896 gtkgame.c:2899
+#: gtkgame.c:2889 gtkgame.c:2893 gtkgame.c:2896
 msgid "/_File/-"
 msgstr "/_Soubor/-"
 
-#: gtkgame.c:2893
+#: gtkgame.c:2890
 msgid "/_File/Open _Commands..."
 msgstr "/_Soubor/Načíst _příkazy..."
 
-#: gtkgame.c:2897
+#: gtkgame.c:2894
 msgid "/_File/Match information..."
 msgstr "/_Hra/Informace o zápasu..."
 
-#: gtkgame.c:2902
+#: gtkgame.c:2899
 msgid "/_File/E_xit"
 msgstr "/_Soubor/_Konec"
 
-#: gtkgame.c:2904
+#: gtkgame.c:2901
 msgid "/_File/_Quit"
 msgstr "/_Soubor/_Konec"
 
-#: gtkgame.c:2908
+#: gtkgame.c:2905
 msgid "/_Edit"
 msgstr "/Ú_pravy"
 
-#: gtkgame.c:2909
+#: gtkgame.c:2906
 msgid "/_Edit/_Undo"
 msgstr "/Ú_pravy/_Zpět"
 
-#: gtkgame.c:2912 gtkgame.c:2929
+#: gtkgame.c:2909 gtkgame.c:2926
 msgid "/_Edit/-"
 msgstr "/Ú_pravy/-"
 
-#: gtkgame.c:2914
+#: gtkgame.c:2911
 #, fuzzy
 msgid "/_Edit/_Copy Position ID"
 msgstr "/Ú_pravy/Kopírovat jako/Pozice v ASCII"
 
-#: gtkgame.c:2918
+#: gtkgame.c:2915
 msgid "/_Edit/Copy as"
 msgstr "/Ú_pravy/Kopírovat jako"
 
-#: gtkgame.c:2919
+#: gtkgame.c:2916
 msgid "/_Edit/Copy as/Position as ASCII"
 msgstr "/Ú_pravy/Kopírovat jako/Pozice v ASCII"
 
-#: gtkgame.c:2921
+#: gtkgame.c:2918
 msgid "/_Edit/Copy as/GammOnLine (HTML)"
 msgstr "/Ú_pravy/Kopírovat jako/GammOnLine (HTML)"
 
-#: gtkgame.c:2923
+#: gtkgame.c:2920
 #, fuzzy
 msgid "/_Edit/Copy as/BackgammonBase.com (URL)"
 msgstr "/Ú_pravy/Kopírovat jako/GammOnLine (HTML)"
 
-#: gtkgame.c:2926
+#: gtkgame.c:2923
 #, fuzzy
 msgid "/_Edit/_Paste Position ID"
 msgstr "/Ú_pravy/_Upravit pozici"
 
-#: gtkgame.c:2930
+#: gtkgame.c:2927
 msgid "/_Edit/_Edit Position"
 msgstr "/Ú_pravy/_Upravit pozici"
 
-#: gtkgame.c:2933
+#: gtkgame.c:2930
 msgid "/_View"
 msgstr "/_Zobrazit"
 
-#: gtkgame.c:2934
+#: gtkgame.c:2931
 msgid "/_View/_Panels"
 msgstr "/_Zobrazit/_Panely"
 
-#: gtkgame.c:2935
+#: gtkgame.c:2932
 msgid "/_View/_Panels/_Game record"
 msgstr "/_Zobrazit/_Panely/Záznam _hry"
 
-#: gtkgame.c:2937
+#: gtkgame.c:2934
 msgid "/_View/_Panels/_Analysis"
 msgstr "/_Zobrazit/_Panely/_Analýza"
 
-#: gtkgame.c:2939
+#: gtkgame.c:2936
 msgid "/_View/_Panels/_Commentary"
 msgstr "/_Zobrazit/_Panely/_Komentář"
 
-#: gtkgame.c:2941
+#: gtkgame.c:2938
 msgid "/_View/_Panels/_Message"
 msgstr "/_Zobrazit/_Panely/_Zprávy"
 
-#: gtkgame.c:2943
+#: gtkgame.c:2940
 msgid "/_View/_Panels/_Theory"
 msgstr "/_Zobrazit/_Panely/_Teorie"
 
-#: gtkgame.c:2945
+#: gtkgame.c:2942
 msgid "/_View/_Panels/_Command"
 msgstr "/_Zobrazit/_Panely/_Příkazy"
 
-#: gtkgame.c:2947
+#: gtkgame.c:2944
 msgid "/_View/_Dock panels"
 msgstr "/_Zobrazit/_Ukotvit panely"
 
-#: gtkgame.c:2948
+#: gtkgame.c:2945
 msgid "/_View/Restore panels"
 msgstr "/_Zobrazit/Obnovit panely"
 
-#: gtkgame.c:2949
+#: gtkgame.c:2946
 msgid "/_View/Hide panels"
 msgstr "/_Zobrazit/Skrýt panely"
 
-#: gtkgame.c:2950 gtkgame.c:2963 gtkgame.c:2966
+#: gtkgame.c:2947 gtkgame.c:2960 gtkgame.c:2963
 msgid "/_View/-"
 msgstr "/_Zobrazit/-"
 
-#: gtkgame.c:2951
+#: gtkgame.c:2948
 #, fuzzy
 msgid "/_View/Show _ID in status bar"
 msgstr "/_Zobrazit/Zobrazovat _ID nad deskou"
 
-#: gtkgame.c:2952
+#: gtkgame.c:2949
 msgid "/_View/_Toolbar"
 msgstr "/_Zobrazit/Pa_nel nástrojů"
 
-#: gtkgame.c:2953
+#: gtkgame.c:2950
 msgid "/_View/_Toolbar/_Hide Toolbar"
 msgstr "/_Zobrazit/Pa_nel nástrojů/_Skrýt panel"
 
-#: gtkgame.c:2954
+#: gtkgame.c:2951
 msgid "/_View/_Toolbar/_Show Toolbar"
 msgstr "/_Zobrazit/Pa_nel nástrojů/_Zobrazit panel"
 
-#: gtkgame.c:2955
+#: gtkgame.c:2952
 msgid "/_View/_Toolbar/-"
 msgstr "/_Zobrazit/Pa_nel nástrojů/-"
 
-#: gtkgame.c:2956
+#: gtkgame.c:2953
 msgid "/_View/_Toolbar/_Text only"
 msgstr "/_Zobrazit/Pa_nel nástrojů/Pouze _text"
 
-#: gtkgame.c:2958
+#: gtkgame.c:2955
 msgid "/_View/_Toolbar/_Icons only"
 msgstr "/_Zobrazit/Pa_nel nástrojů/Pouze _ikony"
 
-#: gtkgame.c:2960
+#: gtkgame.c:2957
 msgid "/_View/_Toolbar/_Both"
 msgstr "/_Zobrazit/Pa_nel nástrojů/_Obojí"
 
-#: gtkgame.c:2962
+#: gtkgame.c:2959
 msgid "/_View/Full screen"
 msgstr "/_Zobrazit/Celá obrazovka"
 
-#: gtkgame.c:2964
+#: gtkgame.c:2961
 msgid "/_View/Play _Clockwise"
 msgstr "/_Zobrazit/Hrát po _směru hodin"
 
-#: gtkgame.c:2967
+#: gtkgame.c:2964
 msgid "/_View/Switch to xD view"
 msgstr "/_Zobrazit/Přepnout do xD pohledu"
 
-#: gtkgame.c:2969
+#: gtkgame.c:2966
 msgid "/_Game"
 msgstr "/_Hra"
 
-#: gtkgame.c:2970
+#: gtkgame.c:2967
 msgid "/_Game/_Roll"
 msgstr "/_Hra/_Házet"
 
-#: gtkgame.c:2971
+#: gtkgame.c:2968
 msgid "/_Game/_Finish move"
 msgstr "/_Hra/_Dokončit tah"
 
-#: gtkgame.c:2972 gtkgame.c:2975 gtkgame.c:2978 gtkgame.c:2982 gtkgame.c:2985
+#: gtkgame.c:2969 gtkgame.c:2972 gtkgame.c:2975 gtkgame.c:2979 gtkgame.c:2982
 msgid "/_Game/-"
 msgstr "/_Hra/-"
 
-#: gtkgame.c:2973
+#: gtkgame.c:2970
 msgid "/_Game/_Double"
 msgstr "/_Hra/_Zdvojnásobit"
 
-#: gtkgame.c:2974
+#: gtkgame.c:2971
 msgid "/_Game/Re_sign"
 msgstr "/_Hra/_Vzdát"
 
-#: gtkgame.c:2976
+#: gtkgame.c:2973
 msgid "/_Game/_Accept"
 msgstr "/_Hra/_Přijmout"
 
-#: gtkgame.c:2977
+#: gtkgame.c:2974
 msgid "/_Game/Re_ject"
 msgstr "/_Hra/_Odmítnout"
 
-#: gtkgame.c:2979
+#: gtkgame.c:2976
 msgid "/_Game/Play computer turn"
 msgstr "/_Hra/Odehrát tah počítače"
 
-#: gtkgame.c:2981
+#: gtkgame.c:2978
 msgid "/_Game/_End Game"
 msgstr "/_Hra/_Dokončit hru"
 
-#: gtkgame.c:2983
+#: gtkgame.c:2980
 msgid "/_Game/Swap players"
 msgstr "/_Hra/Zaměň hráče"
 
-#: gtkgame.c:2986
+#: gtkgame.c:2983
 msgid "/_Game/Set cube..."
 msgstr "/_Hra/Nastav kostku..."
 
-#: gtkgame.c:2987
+#: gtkgame.c:2984
 msgid "/_Game/Set _dice..."
 msgstr "/_Hra/N_astav hod..."
 
-#: gtkgame.c:2988
+#: gtkgame.c:2985
 msgid "/_Game/Set _turn"
 msgstr "/_Hra/Nastav hráče _na řadě"
 
-#: gtkgame.c:2989
+#: gtkgame.c:2986
 msgid "/_Game/Set turn/0"
 msgstr "/_Hra/Nastav hráče _na řadě/0"
 
-#: gtkgame.c:2991
+#: gtkgame.c:2988
 msgid "/_Game/Set turn/1"
 msgstr "/_Hra/Nastav hráče _na řadě/1"
 
-#: gtkgame.c:2993
+#: gtkgame.c:2990
 msgid "/_Game/Clear turn"
 msgstr "/_Hra/Smaž tah"
 
-#: gtkgame.c:2994
+#: gtkgame.c:2991
 msgid "/_Analyse"
 msgstr "/_Analýza"
 
-#: gtkgame.c:2995
+#: gtkgame.c:2992
 msgid "/_Analyse/_Evaluate"
 msgstr "/_Analýza/_Vyhodnotit"
 
-#: gtkgame.c:2996
+#: gtkgame.c:2993
 msgid "/_Analyse/_Hint"
 msgstr "/_Analýza/_Napovědět"
 
-#: gtkgame.c:2998
+#: gtkgame.c:2995
 msgid "/_Analyse/_Rollout"
 msgstr "/_Analýza/_Rozhodit"
 
-#: gtkgame.c:2999 gtkgame.c:3006 gtkgame.c:3020 gtkgame.c:3034 gtkgame.c:3040
-#: gtkgame.c:3043 gtkgame.c:3046 gtkgame.c:3052 gtkgame.c:3059 gtkgame.c:3062
-#: gtkgame.c:3067
+#: gtkgame.c:2996 gtkgame.c:3003 gtkgame.c:3017 gtkgame.c:3031 gtkgame.c:3037
+#: gtkgame.c:3040 gtkgame.c:3043 gtkgame.c:3049 gtkgame.c:3056 gtkgame.c:3059
+#: gtkgame.c:3064
 msgid "/_Analyse/-"
 msgstr "/_Analýza/-"
 
-#: gtkgame.c:3000
+#: gtkgame.c:2997
 msgid "/_Analyse/Analyse move"
 msgstr "/_Analýza/Analyzovat tah"
 
-#: gtkgame.c:3002
+#: gtkgame.c:2999
 msgid "/_Analyse/Analyse game"
 msgstr "/_Analýza/Analyzovat hru"
 
-#: gtkgame.c:3004
+#: gtkgame.c:3001
 msgid "/_Analyse/Analyse match or session"
 msgstr "/_Analýza/Analyzovat zápas nebo sezení"
 
-#: gtkgame.c:3007
+#: gtkgame.c:3004
 msgid "/_Analyse/Clear analysis"
 msgstr "/_Analýza/Vymazat analýzu"
 
-#: gtkgame.c:3008
+#: gtkgame.c:3005
 msgid "/_Analyse/Clear analysis/Move"
 msgstr "/_Analýza/Vymazat analýzu/Tahu"
 
-#: gtkgame.c:3012
+#: gtkgame.c:3009
 msgid "/_Analyse/Clear analysis/_Game"
 msgstr "/_Analýza/Vymazat analýzu/_Hry"
 
-#: gtkgame.c:3016
+#: gtkgame.c:3013
 msgid "/_Analyse/Clear analysis/_Match or session"
 msgstr "/_Analýza/Vymazat analýzu/_Zápasu nebo sezení"
 
-#: gtkgame.c:3021
+#: gtkgame.c:3018
 msgid "/_Analyse/CMark"
 msgstr "/_Analýza/Značkování"
 
-#: gtkgame.c:3022
+#: gtkgame.c:3019
 msgid "/_Analyse/CMark/Cube"
 msgstr "/_Analýza/Značkování/Kostka"
 
-#: gtkgame.c:3023
+#: gtkgame.c:3020
 msgid "/_Analyse/CMark/Cube/Clear"
 msgstr "/_Analýza/Značkování/Kostka/Smazat"
 
-#: gtkgame.c:3024
+#: gtkgame.c:3021
 msgid "/_Analyse/CMark/Cube/Show"
 msgstr "/_Analýza/Značkování/Kostka/Zobrazit"
 
-#: gtkgame.c:3025
+#: gtkgame.c:3022
 msgid "/_Analyse/CMark/Move"
 msgstr "/_Analýza/Značkování/Tah"
 
-#: gtkgame.c:3026
+#: gtkgame.c:3023
 msgid "/_Analyse/CMark/Move/Clear"
 msgstr "/_Analýza/Značkování/Tah/Smazat"
 
-#: gtkgame.c:3027
+#: gtkgame.c:3024
 msgid "/_Analyse/CMark/Move/Show"
 msgstr "/_Analýza/Značkování/Tah/Zobrazit"
 
-#: gtkgame.c:3028
+#: gtkgame.c:3025
 msgid "/_Analyse/CMark/Game"
 msgstr "/_Analýza/Značkování/Hra"
 
-#: gtkgame.c:3029
+#: gtkgame.c:3026
 msgid "/_Analyse/CMark/Game/Clear"
 msgstr "/_Analýza/Značkování/Hra/Smazat"
 
-#: gtkgame.c:3030
+#: gtkgame.c:3027
 msgid "/_Analyse/CMark/Game/Show"
 msgstr "/_Analýza/Značkování/Hra/Zobrazit"
 
-#: gtkgame.c:3031
+#: gtkgame.c:3028
 msgid "/_Analyse/CMark/Match"
 msgstr "/_Analýza/Značkování/Zápas"
 
-#: gtkgame.c:3032
+#: gtkgame.c:3029
 msgid "/_Analyse/CMark/Match/Clear"
 msgstr "/_Analýza/Značkování/Zápas/Smazat"
 
-#: gtkgame.c:3033
+#: gtkgame.c:3030
 msgid "/_Analyse/CMark/Match/Show"
 msgstr "/_Analýza/Značkování/Zápas/Zobrazit"
 
-#: gtkgame.c:3035
+#: gtkgame.c:3032
 msgid "/_Analyse/Rollout"
 msgstr "/_Analýza/Rozhoz"
 
-#: gtkgame.c:3036
+#: gtkgame.c:3033
 msgid "/_Analyse/Rollout/Cube"
 msgstr "/_Analýza/Rozhoz/Kostka"
 
-#: gtkgame.c:3037
+#: gtkgame.c:3034
 msgid "/_Analyse/Rollout/Move"
 msgstr "/_Analýza/Rozhoz/Tah"
 
-#: gtkgame.c:3038
+#: gtkgame.c:3035
 msgid "/_Analyse/Rollout/Game"
 msgstr "/_Analýza/Rozhoz/Hra"
 
-#: gtkgame.c:3039
+#: gtkgame.c:3036
 msgid "/_Analyse/Rollout/Match"
 msgstr "/_Analýza/Rozhoz/Zápas"
 
-#: gtkgame.c:3041
+#: gtkgame.c:3038
 msgid "/_Analyse/Batch analyse..."
 msgstr "/_Analýza/Hromadná analýza..."
 
-#: gtkgame.c:3044
+#: gtkgame.c:3041
 msgid "/_Analyse/Match or session statistics"
 msgstr "/_Analýza/Statistika zápasu nebo sezení"
 
-#: gtkgame.c:3047
+#: gtkgame.c:3044
 msgid "/_Analyse/Add match or session to database"
 msgstr "/_Analýza/Přidat zápas nebo sezení do databáze"
 
-#: gtkgame.c:3050
+#: gtkgame.c:3047
 msgid "/_Analyse/Show Records"
 msgstr "/_Analýza/Zobrazit záznamy"
 
-#: gtkgame.c:3053
+#: gtkgame.c:3050
 msgid "/_Analyse/Distribution of rolls"
 msgstr "/_Analýza/Rozdělení hodů"
 
-#: gtkgame.c:3055
+#: gtkgame.c:3052
 msgid "/_Analyse/Temperature Map"
 msgstr "/_Analýza/Teplotní mapa"
 
-#: gtkgame.c:3057
+#: gtkgame.c:3054
 msgid "/_Analyse/Temperature Map (cube decision)"
 msgstr "/_Analýza/Teplotní mapa (rozhodnutí o kostce)"
 
-#: gtkgame.c:3060
+#: gtkgame.c:3057
 msgid "/_Analyse/_Race Theory"
 msgstr "/_Analýza/Teorie _závodu"
 
-#: gtkgame.c:3063
+#: gtkgame.c:3060
 msgid "/_Analyse/_Market window"
 msgstr "/_Analýza/_Okno příležitosti"
 
-#: gtkgame.c:3065
+#: gtkgame.c:3062
 msgid "/_Analyse/M_atch equity table"
 msgstr "/_Analýza/Tabulka zápasové _ekvity"
 
-#: gtkgame.c:3068
+#: gtkgame.c:3065
 msgid "/_Analyse/Evaluation speed"
 msgstr "/_Analýza/Rychlost vyhodnocování"
 
-#: gtkgame.c:3070
+#: gtkgame.c:3067
 msgid "/_Settings"
 msgstr "/Nas_tavení"
 
-#: gtkgame.c:3071
+#: gtkgame.c:3068
 #, fuzzy
 msgid "/_Settings/_Analysis..."
 msgstr "/Nas_tavení/Analýza..."
 
-#: gtkgame.c:3072
+#: gtkgame.c:3069
 #, fuzzy
 msgid "/_Settings/_Board Appearance..."
 msgstr "/Nas_tavení/Vzhled..."
 
-#: gtkgame.c:3074
+#: gtkgame.c:3071
 msgid "/_Settings/E_xport..."
 msgstr "/Nas_tavení/E_xport..."
 
-#: gtkgame.c:3076
+#: gtkgame.c:3073
 msgid "/_Settings/_Players..."
 msgstr "/Nas_tavení/_Hráči..."
 
-#: gtkgame.c:3077
+#: gtkgame.c:3074
 msgid "/_Settings/_Rollouts..."
 msgstr "/Nas_tavení/_Rozhozy..."
 
-#: gtkgame.c:3078 gtkgame.c:3081
+#: gtkgame.c:3075
 msgid "/_Settings/-"
 msgstr "/Nas_tavení/-"
 
-#: gtkgame.c:3079
+#: gtkgame.c:3076
 #, fuzzy
 msgid "/_Settings/_Options..."
 msgstr "/Nas_tavení/Volby..."
 
-#: gtkgame.c:3080
+#: gtkgame.c:3077
 msgid "/_Settings/_Language..."
 msgstr "/Nas_tavení/_Jazyk..."
 
-#: gtkgame.c:3082
-#, fuzzy
-msgid "/_Settings/_Save settings"
-msgstr "/Nas_tavení/Uložit nastavení"
-
-#: gtkgame.c:3084
+#: gtkgame.c:3078
 msgid "/G_o"
 msgstr "/Pře_jít"
 
-#: gtkgame.c:3085
+#: gtkgame.c:3079
 #, fuzzy
 msgid "/G_o/Previous marked move"
 msgstr "/Pře_jít/Předchozí o_značený tah"
 
-#: gtkgame.c:3086
+#: gtkgame.c:3080
 #, fuzzy
 msgid "/G_o/Previous cmarked move"
 msgstr "/Pře_jít/Předchozí o_značený tah"
 
-#: gtkgame.c:3087
+#: gtkgame.c:3081
 msgid "/G_o/Previous rol_l"
 msgstr "/Pře_jít/Předchozí ho_d"
 
-#: gtkgame.c:3088
+#: gtkgame.c:3082
 msgid "/G_o/Pre_vious game"
 msgstr "/Pře_jít/Př_edchozí hra"
 
-#: gtkgame.c:3089
+#: gtkgame.c:3083
 msgid "/G_o/-"
 msgstr "/Pře_jít/-"
 
-#: gtkgame.c:3090
+#: gtkgame.c:3084
 msgid "/G_o/Next _game"
 msgstr "/Pře_jít/Ná_sledující hra"
 
-#: gtkgame.c:3091
+#: gtkgame.c:3085
 msgid "/G_o/Next _roll"
 msgstr "/Pře_jít/Následující _hod"
 
-#: gtkgame.c:3092
+#: gtkgame.c:3086
 #, fuzzy
 msgid "/G_o/Next cmarked move"
 msgstr "/Pře_jít/Následující _označený tah"
 
-#: gtkgame.c:3093
+#: gtkgame.c:3087
 #, fuzzy
 msgid "/G_o/Next marked move"
 msgstr "/Pře_jít/Následující _označený tah"
 
-#: gtkgame.c:3094
+#: gtkgame.c:3088
 msgid "/_Help"
 msgstr "/Nápo_věda"
 
-#: gtkgame.c:3095
+#: gtkgame.c:3089
 msgid "/_Help/_Commands"
 msgstr "/Nápo_věda/Příkaz_y"
 
-#: gtkgame.c:3096 gtkgame.c:3101
+#: gtkgame.c:3090 gtkgame.c:3095
 msgid "/_Help/-"
 msgstr "/Nápo_věda/-"
 
-#: gtkgame.c:3097
+#: gtkgame.c:3091
 msgid "/_Help/_Manual (all about)"
 msgstr "/Nápo_věda/Pří_ručka (vše o programu)"
 
-#: gtkgame.c:3099
+#: gtkgame.c:3093
 msgid "/_Help/Manual (_web)"
 msgstr "/Nápo_věda/Příručka (na _webu)"
 
-#: gtkgame.c:3102
+#: gtkgame.c:3096
 msgid "/_Help/_About gnubg"
 msgstr "/Nápo_věda/_O programu gnubg"
 
-#: gtkgame.c:3127
+#: gtkgame.c:3121
 msgid "Process interrupted"
 msgstr "Činnost přerušena"
 
-#: gtkgame.c:3156
+#: gtkgame.c:3150
 msgid "Press the stop button to interrupt the current process"
 msgstr "Aktuální činnost můžete zastavit kliknutím na tlačítko stop"
 
-#: gtkgame.c:3166
+#: gtkgame.c:3160
 #, c-format
 msgid "Only local files supported in dnd"
 msgstr ""
 
-#: gtkgame.c:3173
+#: gtkgame.c:3167
 #, fuzzy, c-format
 msgid "Failed to parse uri"
 msgstr "Nepodařilo se vytvořit %s"
 
-#: gtkgame.c:3285
+#: gtkgame.c:3279
 #, fuzzy
 msgid "Copy Position ID"
 msgstr "ID pozice"
 
-#: gtkgame.c:3290
+#: gtkgame.c:3284
 #, fuzzy
 msgid "Paste Position ID"
 msgstr "ID pozice"
 
-#: gtkgame.c:3309
+#: gtkgame.c:3303
 msgid ""
 "This is a unique id for this position. Ctrl+C copies the current ID and Ctrl"
 "+V pastes an ID from the clipboard"
 msgstr ""
 
-#: gtkgame.c:3460
+#: gtkgame.c:3454
 msgid "Rendering"
 msgstr "Vykresluje se"
 
-#: gtkgame.c:3560
+#: gtkgame.c:3554
 #, c-format
 msgid ""
 "The MS windows GTK interface doesn't support the '-p' option. Use the cl "
@@ -3825,341 +3863,341 @@ msgstr ""
 "Rozhraní GTK pro MS Windows nepodporuje volbu „-p“. Použijte řádkové "
 "rozhraní."
 
-#: gtkgame.c:3654
+#: gtkgame.c:3648
 msgid "GNU Backgammon - Tutor"
 msgstr "GNU Backgammon – Učitel"
 
-#: gtkgame.c:3658
+#: gtkgame.c:3652
 msgid "Play Anyway"
 msgstr "Přesto zahrát"
 
-#: gtkgame.c:3660
+#: gtkgame.c:3654
 msgid "Rethink"
 msgstr "Zvážím to"
 
-#: gtkgame.c:3661
+#: gtkgame.c:3655
 msgid "End Tutor Mode"
 msgstr "Ukončit Učitele"
 
-#: gtkgame.c:3662
+#: gtkgame.c:3656
 msgid "Hint"
 msgstr "Napovědět"
 
-#: gtkgame.c:3887
+#: gtkgame.c:3882
 msgid "Shortcut buttons"
 msgstr "Předvolby"
 
-#: gtkgame.c:3898
+#: gtkgame.c:3893
 msgid "Edit position"
 msgstr "Uprav pozici"
 
-#: gtkgame.c:3905
+#: gtkgame.c:3900
 msgid "Start a new money game session"
 msgstr "Začít nové sezení (o peníze)"
 
-#: gtkgame.c:3916
+#: gtkgame.c:3911
 #, c-format
 msgid "Start a new %d point match"
 msgstr "Začít nový %dbodový zápas"
 
-#: gtkgame.c:3932
+#: gtkgame.c:3927
 msgid "Match settings"
 msgstr "Nastavení zápasu"
 
-#: gtkgame.c:3935
+#: gtkgame.c:3930
 msgid "Length:"
 msgstr "Délka:"
 
 #. Here the simplified player settings starts
-#: gtkgame.c:3947
+#: gtkgame.c:3942
 msgid "Player settings"
 msgstr "Nastavení hráčů"
 
-#: gtkgame.c:3954
+#: gtkgame.c:3949
 msgid "Current player settings"
 msgstr "Aktuální nastavení hráčů"
 
-#: gtkgame.c:3957
+#: gtkgame.c:3952
 msgid "GNU Backgammon vs. Human"
 msgstr "GNU Backgammon proti člověku"
 
-#: gtkgame.c:3958
+#: gtkgame.c:3953
 msgid "Human vs. Human"
 msgstr "Člověk proti člověku"
 
-#: gtkgame.c:3962
+#: gtkgame.c:3957
 msgid "Modify player settings..."
 msgstr "Změnit nastavení hráčů..."
 
-#: gtkgame.c:3974
+#: gtkgame.c:3969
 msgid "Manual dice"
 msgstr "Ruční kostka"
 
-#: gtkgame.c:3975 gtkoptions.c:508
+#: gtkgame.c:3970 gtkoptions.c:508
 msgid "Tutor mode"
 msgstr "Režim učitele"
 
-#: gtkgame.c:4014
+#: gtkgame.c:4009
 msgid "GNU Backgammon - New"
 msgstr "GNU Backgammon – Nový"
 
-#: gtkgame.c:4034
+#: gtkgame.c:4029
 msgid "Set match equity table"
 msgstr "Nastavit tabulku zápasové ekvity"
 
-#: gtkgame.c:4306
+#: gtkgame.c:4302
 msgid "First Play Both"
 msgstr "Počáteční hra (oba)"
 
-#: gtkgame.c:4306 gtkgame.c:4673
+#: gtkgame.c:4302 gtkgame.c:4669
 msgid "First Play (0) "
 msgstr "Počáteční hra (0)"
 
-#: gtkgame.c:4308
+#: gtkgame.c:4304
 msgid "Later Play Both"
 msgstr "Pozdější hra (oba)"
 
-#: gtkgame.c:4308 gtkgame.c:4677
+#: gtkgame.c:4304 gtkgame.c:4673
 msgid "Later Play (0) "
 msgstr "Pozdější hra (0)"
 
-#: gtkgame.c:4329 gtkrace.c:271
+#: gtkgame.c:4325 gtkrace.c:271
 msgid "Trials:"
 msgstr "Pokusů:"
 
-#: gtkgame.c:4333
+#: gtkgame.c:4329
 msgid "Truncation"
 msgstr "Ořezávání"
 
-#: gtkgame.c:4341
+#: gtkgame.c:4337
 msgid "Truncate Rollouts"
 msgstr "Ořezávat rozhozy"
 
-#: gtkgame.c:4351
+#: gtkgame.c:4347
 msgid "Truncate at ply:"
 msgstr "Ořezávat v půltahu:"
 
-#: gtkgame.c:4359
+#: gtkgame.c:4355
 msgid "Evaluation for later plies"
 msgstr "Vyhodnocování v pozdějších půltazích"
 
-#: gtkgame.c:4367
+#: gtkgame.c:4363
 msgid "Enable separate evaluations "
 msgstr "Zapnout odlišné vyhodnocování "
 
-#: gtkgame.c:4378
+#: gtkgame.c:4374
 msgid "Change eval after ply:"
 msgstr "Změnit vyhodnocování po půltahu:"
 
-#: gtkgame.c:4385
+#: gtkgame.c:4381
 msgid "Stop when result is accurate"
 msgstr "Zastavit při přesném výsledku"
 
-#: gtkgame.c:4394
+#: gtkgame.c:4390
 #, fuzzy
 msgid "Stop when STD is small enough "
 msgstr "Zastavit při dostatečně malých odchylkách"
 
-#: gtkgame.c:4410 gtkgame.c:4455
+#: gtkgame.c:4406 gtkgame.c:4451
 msgid "Minimum Trials:"
 msgstr "Nejméně pokusů:"
 
-#: gtkgame.c:4422
+#: gtkgame.c:4418
 #, fuzzy
 msgid "Equity Standard Deviation:"
 msgstr "Směrodatná odchylka šumu"
 
-#: gtkgame.c:4432
+#: gtkgame.c:4428
 msgid "Stop Rollouts of multiple moves based on JSD"
 msgstr "Zastavit rozhozy více tahů podle s.s.o."
 
-#: gtkgame.c:4444
+#: gtkgame.c:4440
 #, fuzzy
 msgid "Enable Stop on JSD"
 msgstr "Zastavit podle SSO"
 
-#: gtkgame.c:4466
+#: gtkgame.c:4462
 msgid "JSDs from best choice"
 msgstr "SSO od nejlepšího tahu"
 
-#: gtkgame.c:4484
+#: gtkgame.c:4480
 msgid "Bearoff Truncation"
 msgstr "Ořezávání koncovky"
 
-#: gtkgame.c:4491
+#: gtkgame.c:4487
 msgid "Truncate cubeless (and cubeful money) at exact bearoff database"
 msgstr "Oříznout bezkostkové (a peněžní s kostkou) na přesné databázi koncovek"
 
-#: gtkgame.c:4498
+#: gtkgame.c:4494
 msgid "Truncate cubeless at one-sided bearoff database"
 msgstr "Oříznout bezkostkové na jednostranné databázi koncovek"
 
-#: gtkgame.c:4506
+#: gtkgame.c:4502
 msgid "Variance reduction"
 msgstr "Redukce rozptylu"
 
-#: gtkgame.c:4512
+#: gtkgame.c:4508
 msgid "Use quasi-random dice"
 msgstr "Používat kvazi-náhodné kostky"
 
-#: gtkgame.c:4518
+#: gtkgame.c:4514
 msgid "Rollout as initial position"
 msgstr "Rozhazovat, jako by to byla počáteční pozice"
 
-#: gtkgame.c:4526
+#: gtkgame.c:4522
 msgid "Seed:"
 msgstr "Semínko:"
 
-#: gtkgame.c:4544
+#: gtkgame.c:4540
 #, c-format
 msgid "Failed to create %s"
 msgstr "Nepodařilo se vytvořit %s"
 
-#: gtkgame.c:4549
+#: gtkgame.c:4545
 msgid "Save Rollout Settings As (*.rol)"
 msgstr "Vyložit nastavení rozhozu jako (*.rol)"
 
-#: gtkgame.c:4582
+#: gtkgame.c:4578
 msgid "Open rollout settings (*.rol)"
 msgstr "Otevřít nastavení rozhozu (*.rol)"
 
-#: gtkgame.c:4648
+#: gtkgame.c:4644
 msgid "GNU Backgammon - Rollouts"
 msgstr "GNU Backgammon – Rozhozy"
 
-#: gtkgame.c:4652
+#: gtkgame.c:4648
 msgid "Save As"
 msgstr "Uložit jako"
 
-#: gtkgame.c:4656
+#: gtkgame.c:4652
 msgid "Load"
 msgstr "Načíst"
 
-#: gtkgame.c:4666
+#: gtkgame.c:4662
 msgid "General Settings"
 msgstr "Obecná nastavení"
 
-#: gtkgame.c:4669
+#: gtkgame.c:4665
 #, fuzzy
 msgid "Play settings"
 msgstr "Nastavení hráčů"
 
-#: gtkgame.c:4675
+#: gtkgame.c:4671
 msgid "First Play (1) "
 msgstr "Počáteční hra (1)"
 
-#: gtkgame.c:4679
+#: gtkgame.c:4675
 msgid "Later Play (1) "
 msgstr "Pozdější hra (1)"
 
-#: gtkgame.c:4682
+#: gtkgame.c:4678
 msgid "Truncation Pt."
 msgstr "Bod oříznutí"
 
-#: gtkgame.c:4685
+#: gtkgame.c:4681
 msgid "Use same settings for both players"
 msgstr "Použít stejné nastavení pro oba hráče"
 
-#: gtkgame.c:4691
+#: gtkgame.c:4687
 msgid "Cube decisions use same settings as Chequer play"
 msgstr "Rozhodnutí o kostce používají stejná nastavení jako hra kameny"
 
-#: gtkgame.c:4699
+#: gtkgame.c:4695
 msgid "Use player0 setting for truncation point"
 msgstr "Použít nastavení hráče 0 pro bod oříznutí"
 
-#: gtkgame.c:4973
+#: gtkgame.c:4970
 msgid "GNU Backgammon - Evaluation"
 msgstr "GNU Backgammon – Vyhodnocování"
 
 #. create dialog
-#: gtkgame.c:5004 gtkgame.c:5040 gtkgame.c:5116
+#: gtkgame.c:5001 gtkgame.c:5037 gtkgame.c:5113
 msgid "GNU Backgammon - Hint"
 msgstr "GNU Backgammon – Nápověda"
 
-#: gtkgame.c:5050
+#: gtkgame.c:5047
 msgid "MWC before resignation"
 msgstr "MWC před rezignací"
 
-#: gtkgame.c:5067
+#: gtkgame.c:5064
 msgid "MWC after resignation"
 msgstr "MWC po rezignaci"
 
-#: gtkgame.c:5083
+#: gtkgame.c:5080
 msgid "You should accept the resignation!"
 msgstr "Doporučuji rezignaci přijmout!"
 
-#: gtkgame.c:5085
+#: gtkgame.c:5082
 msgid "You should reject the resignation!"
 msgstr "Doporučuji rezignaci odmítnout!"
 
-#: gtkgame.c:5105
+#: gtkgame.c:5102
 #, fuzzy, c-format
 msgid "There are no legal moves. Figure it out yourself."
 msgstr "Není možný žádný platný tah."
 
-#: gtkgame.c:5218 show.c:981
+#: gtkgame.c:5215 show.c:981
 #, c-format
 msgid "Score Sheet - "
 msgstr "Tabulka skóre – "
 
-#: gtkgame.c:5222 show.c:988
+#: gtkgame.c:5219 show.c:988
 msgid "Money Session"
 msgstr "Sezení o peníze"
 
-#: gtkgame.c:5300 show.c:631
+#: gtkgame.c:5297 show.c:631
 msgid "Copying"
 msgstr "Podmínky kopírování"
 
-#: gtkgame.c:5305 gtkgame.c:5355 show.c:1070
+#: gtkgame.c:5302 gtkgame.c:5352 show.c:1070
 msgid "Warranty"
 msgstr "Záruka"
 
-#: gtkgame.c:5314
+#: gtkgame.c:5311
 msgid "Evaluation engine"
 msgstr "Vyhodnocovací stroj"
 
-#: gtkgame.c:5323
+#: gtkgame.c:5320
 msgid "About GNU Backgammon"
 msgstr "O programu GNU Backgammon"
 
-#: gtkgame.c:5337
+#: gtkgame.c:5334
 msgid "Credits"
 msgstr "Zásluhy"
 
-#: gtkgame.c:5343
+#: gtkgame.c:5340
 msgid "Build Info"
 msgstr "Přesná verze"
 
-#: gtkgame.c:5349
+#: gtkgame.c:5346
 msgid "Copying conditions"
 msgstr "Podmínky kopírování"
 
-#: gtkgame.c:5361
+#: gtkgame.c:5358
 msgid "Report Bug"
 msgstr "Nahlásit chybu"
 
-#: gtkgame.c:5367
+#: gtkgame.c:5364
 msgid "Evaluation Engine"
 msgstr "Vyhodnocovací stroj"
 
-#: gtkgame.c:5386
+#: gtkgame.c:5383
 msgid "GNU Backgammon - Build Info"
 msgstr "GNU Backgammon – Informace o verzi"
 
-#: gtkgame.c:5475
+#: gtkgame.c:5472
 msgid "GNU Backgammon - Credits"
 msgstr "GNU Backgammon – Zásluhy"
 
-#: gtkgame.c:5511
+#: gtkgame.c:5508
 msgid "Special thanks"
 msgstr "Zvláštní poděkování"
 
-#: gtkgame.c:5528
+#: gtkgame.c:5525
 msgid "Contributers"
 msgstr "Přispěvatelé kódu"
 
-#: gtkgame.c:5596
+#: gtkgame.c:5593
 #, c-format
 msgid ""
 "%s- %s\n"
@@ -4170,66 +4208,66 @@ msgstr ""
 "\n"
 "Použití: %s%s\n"
 
-#: gtkgame.c:5633 gtkgame.c:5635
+#: gtkgame.c:5630 gtkgame.c:5632
 msgid "Help - command reference"
 msgstr "Nápověda – přehled příkazů"
 
-#: gtkgame.c:5991
+#: gtkgame.c:5988
 msgid "Chequer Play Statistics:"
 msgstr "Statistika hry kameny:"
 
-#: gtkgame.c:5992
+#: gtkgame.c:5989
 msgid "Cube Statistics:"
 msgstr "Statistika hry kostkou:"
 
-#: gtkgame.c:5993
+#: gtkgame.c:5990
 msgid "Luck Statistics:"
 msgstr "Statistika štěstí:"
 
-#: gtkgame.c:5994
+#: gtkgame.c:5991
 msgid "Overall Statistics:"
 msgstr "Celková statistika:"
 
-#: gtkgame.c:6137
+#: gtkgame.c:6135
 msgid "Statistics for all games"
 msgstr "Statistika všech her"
 
-#: gtkgame.c:6140
+#: gtkgame.c:6138
 msgid "Statistics for game "
 msgstr "Statistika pro hru "
 
-#: gtkgame.c:6171
+#: gtkgame.c:6169
 #, c-format
 msgid "All games: %s %d, %s %d"
 msgstr "Všechny hry: %s %d, %s %d"
 
-#: gtkgame.c:6174
+#: gtkgame.c:6172
 #, c-format
 msgid "All games: %s, %s"
 msgstr "Všechny hry: %s, %s"
 
-#: gtkgame.c:6180
+#: gtkgame.c:6178
 msgid "Move back to the previous game"
 msgstr "Vrátit se k předchozí hře"
 
-#: gtkgame.c:6186
+#: gtkgame.c:6184
 msgid "Move ahead to the next game"
 msgstr "Postoupit k další hře"
 
-#: gtkgame.c:6195
+#: gtkgame.c:6193
 #, c-format
 msgid "Game %d: %s %d, %s %d"
 msgstr "Hra %d: %s %d, %s %d"
 
-#: gtkgame.c:6329
+#: gtkgame.c:6326
 msgid "Overall"
 msgstr "Celkem"
 
-#: gtkgame.c:6369
+#: gtkgame.c:6366
 msgid "Graph"
 msgstr "Graf"
 
-#: gtkgame.c:6370
+#: gtkgame.c:6367
 msgid ""
 "This graph shows the total error rates per game for each player. The games "
 "are along the bottom and the error rates up the side. Chequer error in "
@@ -4239,81 +4277,81 @@ msgstr ""
 "na spodní ose, míra chyb svisle. Chyby při hře kameny jsou zelené, chyby hry "
 "kostkou modré."
 
-#: gtkgame.c:6375
+#: gtkgame.c:6372
 msgid "Split statistics into panels"
 msgstr "Rozdělit statistiku do panelů"
 
-#: gtkgame.c:6529
+#: gtkgame.c:6526
 msgid "GNU Backgammon - Match information"
 msgstr "GNU Backgammon – Informace o zápasu"
 
-#: gtkgame.c:6536 gtkgame.c:6539
+#: gtkgame.c:6533 gtkgame.c:6536
 #, c-format
 msgid "%s's rating:"
 msgstr "Rating %s:"
 
-#: gtkgame.c:6542
+#: gtkgame.c:6539
 msgid "Date:"
 msgstr "Datum:"
 
-#: gtkgame.c:6543
+#: gtkgame.c:6540
 msgid "Event:"
 msgstr "Událost:"
 
-#: gtkgame.c:6544
+#: gtkgame.c:6541
 msgid "Round:"
 msgstr "Kolo:"
 
-#: gtkgame.c:6545
+#: gtkgame.c:6542
 msgid "Place:"
 msgstr "Místo:"
 
-#: gtkgame.c:6546
+#: gtkgame.c:6543
 msgid "Annotator:"
 msgstr "Komentátor:"
 
-#: gtkgame.c:6549
+#: gtkgame.c:6546
 msgid "Comments:"
 msgstr "Poznámky:"
 
 #. FIXME should be modal but presently causes crash and/or killing of the main window
-#: gtkgame.c:6656
+#: gtkgame.c:6654
 msgid "GNU Backgammon - Speed estimate"
 msgstr "GNU Backgammon – Odhad rychlosti"
 
-#: gtkgame.c:6665
+#: gtkgame.c:6663
 msgid "Speed recorded:"
 msgstr "Zaznamenaná rychlost:"
 
-#: gtkgame.c:6673 gtkgame.c:6710
+#: gtkgame.c:6671 gtkgame.c:6708
 msgid "static evaluations/second"
 msgstr "statických ohodnocení za sekundu"
 
-#: gtkgame.c:6677
+#: gtkgame.c:6675
 msgid "Calibrate"
 msgstr "Kalibrovat"
 
-#: gtkgame.c:6700
+#: gtkgame.c:6698
 msgid "GNU Backgammon - Calibration"
 msgstr "GNU Backgammon – Kalibrace"
 
-#: gtkgame.c:6706
+#: gtkgame.c:6704
 msgid "Calibrating:"
 msgstr "Kalibruji:"
 
-#: gtkgame.c:6708
+#: gtkgame.c:6706
 msgid "       (n/a)       "
 msgstr "      (není)       "
 
-#: gtkgame.c:6763
+#: gtkgame.c:6761
 msgid "Resign normal"
 msgstr "Vzdát prostou hru"
 
-#: gtkgame.c:6764
+#: gtkgame.c:6762
 msgid "Resign gammon"
 msgstr "Vzdát gammon"
 
-#: gtkgame.c:6765
+#: gtkgame.c:6763
 msgid "Resign backgammon"
 msgstr "Vzdát backgammon"
 
@@ -4326,23 +4364,23 @@ msgstr "#"
 msgid "%d-away"
 msgstr "zbývá %d"
 
-#: gtkmet.c:212
+#: gtkmet.c:213
 msgid "GNU Backgammon - Match equity table"
 msgstr "GNU Backgammon – Tabulka zápasové ekvity"
 
-#: gtkmet.c:215
+#: gtkmet.c:216
 msgid "Load table..."
 msgstr "Nahrát tabulku..."
 
-#: gtkmet.c:218 gtkoptions.c:840
+#: gtkmet.c:219 gtkoptions.c:840
 msgid "Invert table"
 msgstr "Invertovat tabulku"
 
-#: gtkmet.c:240
+#: gtkmet.c:241
 msgid "Pre-Crawford"
 msgstr "Před-Crawfordovská"
 
-#: gtkmet.c:244
+#: gtkmet.c:245
 #, c-format
 msgid "Post-Crawford for player %s"
 msgstr "Po-Crawfordovská pro hráče %s"
@@ -4975,87 +5013,87 @@ msgstr ""
 msgid "Dice manipulation"
 msgstr "Manipulace s kostkami"
 
-#: gtkoptions.c:1081 set.c:3804
+#: gtkoptions.c:1081 set.c:3845
 msgid "best"
 msgstr "nejlepší"
 
-#: gtkoptions.c:1081 set.c:3804
+#: gtkoptions.c:1081 set.c:3845
 msgid "second best"
 msgstr "druhý nejlepší"
 
-#: gtkoptions.c:1081 set.c:3804
+#: gtkoptions.c:1081 set.c:3845
 msgid "third best"
 msgstr "třetí nejlepší"
 
-#: gtkoptions.c:1082 set.c:3805
+#: gtkoptions.c:1082 set.c:3846
 msgid "4th best"
 msgstr "4. nejlepší"
 
-#: gtkoptions.c:1082 set.c:3805
+#: gtkoptions.c:1082 set.c:3846
 msgid "5th best"
 msgstr "5. nejlepší"
 
-#: gtkoptions.c:1082 set.c:3805
+#: gtkoptions.c:1082 set.c:3846
 msgid "6th best"
 msgstr "6. nejlepší"
 
-#: gtkoptions.c:1083 set.c:3806
+#: gtkoptions.c:1083 set.c:3847
 msgid "7th best"
 msgstr "7. nejlepší"
 
-#: gtkoptions.c:1083 set.c:3806
+#: gtkoptions.c:1083 set.c:3847
 msgid "8th best"
 msgstr "8. nejlepší"
 
-#: gtkoptions.c:1083 set.c:3806
+#: gtkoptions.c:1083 set.c:3847
 msgid "9th best"
 msgstr "9. nejlepší"
 
-#: gtkoptions.c:1084 set.c:3807
+#: gtkoptions.c:1084 set.c:3848
 msgid "10th best"
 msgstr "10. nejlepší"
 
-#: gtkoptions.c:1085 set.c:3808
+#: gtkoptions.c:1085 set.c:3849
 msgid "median"
 msgstr "prostřední"
 
-#: gtkoptions.c:1086 set.c:3809
+#: gtkoptions.c:1086 set.c:3850
 msgid "10th worst"
 msgstr "10. nejhorší"
 
-#: gtkoptions.c:1087 set.c:3810
+#: gtkoptions.c:1087 set.c:3851
 msgid "9th worst"
 msgstr "9. nejhorší"
 
-#: gtkoptions.c:1087 set.c:3810
+#: gtkoptions.c:1087 set.c:3851
 msgid "8th worst"
 msgstr "8. nejhorší"
 
-#: gtkoptions.c:1087 set.c:3810
+#: gtkoptions.c:1087 set.c:3851
 msgid "7th worst"
 msgstr "7. nejhorší"
 
-#: gtkoptions.c:1088 set.c:3811
+#: gtkoptions.c:1088 set.c:3852
 msgid "6th worst"
 msgstr "6. nejhorší"
 
-#: gtkoptions.c:1088 set.c:3811
+#: gtkoptions.c:1088 set.c:3852
 msgid "5th worst"
 msgstr "5. nejhorší"
 
-#: gtkoptions.c:1088 set.c:3811
+#: gtkoptions.c:1088 set.c:3852
 msgid "4th worst"
 msgstr "4. nejhorší"
 
-#: gtkoptions.c:1089 set.c:3812
+#: gtkoptions.c:1089 set.c:3853
 msgid "third worst"
 msgstr "třetí nejhorší"
 
-#: gtkoptions.c:1089 set.c:3812
+#: gtkoptions.c:1089 set.c:3853
 msgid "second worst"
 msgstr "druhý nejhorší"
 
-#: gtkoptions.c:1089 set.c:3812
+#: gtkoptions.c:1089 set.c:3853
 msgid "worst"
 msgstr "nejhorší"
 
@@ -5248,7 +5286,7 @@ msgstr "Databáze"
 msgid "Select file with dice"
 msgstr "Zvolte soubor s hody kostkami"
 
-#: gtkoptions.c:1759
+#: gtkoptions.c:1760
 msgid "GNU Backgammon - General options"
 msgstr "GNU Backgammon – Obecné volby"
 
@@ -6423,7 +6461,7 @@ msgstr "Průměrná ekvita"
 msgid "Calculating equities"
 msgstr "Počítám ekvity"
 
-#: gtkrolls.c:218 sound.c:171
+#: gtkrolls.c:218 sound.c:323
 msgid "Roll"
 msgstr "Hod"
 
@@ -6618,107 +6656,107 @@ msgid "Gammon values"
 msgstr "Hodnoty gammonů"
 
 #. New button
-#: gtktoolbar.c:324
+#: gtktoolbar.c:325
 msgid "Start new game, match, session or position"
 msgstr "Začít novou hru, zápas, sezení, nebo pozici"
 
 #. Open button
-#: gtktoolbar.c:327
+#: gtktoolbar.c:328
 msgid "Open game, match, session or position"
 msgstr "Načíst hru, zápas, sezení, nebo pozici"
 
 #. Save button
-#: gtktoolbar.c:330
+#: gtktoolbar.c:331
 msgid "Save match, session, game or position"
 msgstr "Uložit zápas, sezení, hru, nebo pozici"
 
 #. Take/accept button
-#: gtktoolbar.c:335
+#: gtktoolbar.c:336
 msgid "Take the offered cube or accept the offered resignation"
 msgstr "Přijmout nabízené zdvojnásobení nebo rezignaci"
 
 #. drop button
-#: gtktoolbar.c:338
+#: gtktoolbar.c:339
 msgid "Drop the offered cube or decline the offered resignation"
 msgstr "Odmítnout nabídnuté zdvojnásobení nebo rezignaci"
 
 #. Double button
-#: gtktoolbar.c:341
+#: gtktoolbar.c:342
 msgid "Double or redouble(beaver)"
 msgstr "Zdvojnásobení či bobr"
 
 #. Resign button
-#: gtktoolbar.c:344
+#: gtktoolbar.c:345
 msgid "Resign the current game"
 msgstr "Vzdát aktuální hru"
 
 #. End game button
-#: gtktoolbar.c:347
+#: gtktoolbar.c:348
 msgid "Let the computer end the game"
 msgstr "Nechat počítač dohrát hru"
 
 #. reset button
-#: gtktoolbar.c:353
+#: gtktoolbar.c:354
 msgid "Undo moves"
 msgstr "Vrátí tahy"
 
 #. Hint button
-#: gtktoolbar.c:356
+#: gtktoolbar.c:357
 msgid "Show the best moves or cube action"
 msgstr "Ukáže nejlepší tahy nebo hru kostkou"
 
-#: gtktoolbar.c:362
+#: gtktoolbar.c:363
 msgid "Edit"
 msgstr "Upravit"
 
-#: gtktoolbar.c:365
+#: gtktoolbar.c:366
 msgid "Toggle Edit Mode"
 msgstr "Přepnout režim editace pozice"
 
-#: gtktoolbar.c:372
+#: gtktoolbar.c:373
 msgid "Direction"
 msgstr "Směr"
 
-#: gtktoolbar.c:376
+#: gtktoolbar.c:377
 msgid "Reverse direction of play"
 msgstr "Otoč směr hry"
 
-#: gtktoolbar.c:383
+#: gtktoolbar.c:384
 #, fuzzy
 msgid "Go to Previous Marked"
 msgstr "/Pře_jít/Předchozí o_značený tah"
 
-#: gtktoolbar.c:385
+#: gtktoolbar.c:386
 #, fuzzy
 msgid "Go to Previous CMarked"
 msgstr "/Pře_jít/Předchozí o_značený tah"
 
-#: gtktoolbar.c:387
+#: gtktoolbar.c:388
 #, fuzzy
 msgid "Go to Previous Roll"
 msgstr "/Pře_jít/Předchozí ho_d"
 
-#: gtktoolbar.c:389
+#: gtktoolbar.c:390
 #, fuzzy
 msgid "Go to Previous Game"
 msgstr "[Předchozí hra]"
 
-#: gtktoolbar.c:391
+#: gtktoolbar.c:392
 #, fuzzy
 msgid "Go to Next Game"
 msgstr "[Následující hra]"
 
-#: gtktoolbar.c:393
+#: gtktoolbar.c:394
 #, fuzzy
 msgid "Go to Next Roll"
 msgstr "/Pře_jít/Následující _hod"
 
-#: gtktoolbar.c:395
+#: gtktoolbar.c:396
 #, fuzzy
 msgid "Go to Next CMarked"
 msgstr "/Pře_jít/Následující _označený tah"
 
-#: gtktoolbar.c:397
+#: gtktoolbar.c:398
 #, fuzzy
 msgid "Go to Next Marked"
 msgstr "/Pře_jít/Následující _označený tah"
@@ -6782,7 +6820,7 @@ msgid "GNU Backgammon - Question"
 msgstr "GNU Backgammon – Otázka"
 
 #. are you sure
-#: gtkwindows.c:290 gtkwindows.c:291 gtkwindows.c:393
+#: gtkwindows.c:290 gtkwindows.c:291 gtkwindows.c:394
 msgid "GNU Backgammon - Warning"
 msgstr "GNU Backgammon – Varování"
 
@@ -6790,15 +6828,15 @@ msgstr "GNU Backgammon – Varování"
 msgid "GNU Backgammon - Error"
 msgstr "GNU Backgammon – Chyba"
 
-#: gtkwindows.c:403
+#: gtkwindows.c:404
 msgid "Don't show this again"
 msgstr "Tento dialog už nezobrazovat"
 
-#: gtkwindows.c:409
+#: gtkwindows.c:410
 msgid "If set, this message won't appear again"
 msgstr "Pokud je zaškrtnuto, tato zpráva se již nebude zobrazovat"
 
-#: gtkwindows.c:445
+#: gtkwindows.c:446
 #, c-format
 msgid "Warning %s (%s) is %s"
 msgstr "Varování %s (%s) je %s"
@@ -7059,8 +7097,8 @@ msgstr "gnubg.css nebyl uložen, protože v „%s“ již existuje\n"
 
 #: html.c:3328 html.c:3480 html.c:3630 html.c:3665 html.c:3769 html.c:3798
 #: latex.c:503 play.c:1867 play.c:2201 play.c:2257 play.c:2474 play.c:2538
-#: play.c:3198 play.c:3265 play.c:3353 play.c:3475 play.c:3733 sgf.c:2353
-#: sgf.c:2391 sgf.c:2439 show.c:969 show.c:1285 show.c:1504 show.c:2039
+#: play.c:3200 play.c:3267 play.c:3355 play.c:3477 play.c:3735 sgf.c:2351
+#: sgf.c:2389 sgf.c:2437 show.c:969 show.c:1285 show.c:1504 show.c:2039
 #: show.c:2063 text.c:866 text.c:960
 msgid "No game in progress (type `new game' to start one)."
 msgstr "Není rozehrána hra (zadejte „new game“ pro zahájení hry)."
@@ -7566,15 +7604,15 @@ msgstr "Prohlížeč nemohl otevřít soubor (%s): %s\n"
 msgid "single game"
 msgstr "prostou hru"
 
-#: play.c:58 set.c:3498 show.c:1993
+#: play.c:58 set.c:3539 show.c:1993
 msgid "very bad"
 msgstr "velmi špatný"
 
-#: play.c:59 set.c:3493 show.c:1989
+#: play.c:59 set.c:3534 show.c:1989
 msgid "bad"
 msgstr "špatný"
 
-#: play.c:60 set.c:3488 show.c:1985
+#: play.c:60 set.c:3529 show.c:1985
 msgid "doubtful"
 msgstr "pochybný"
 
@@ -7640,7 +7678,7 @@ msgstr "%s nemůže táhnout.\n"
 msgid "%s moves %s.\n"
 msgstr "%s táhne %s.\n"
 
-#: play.c:1321 play.c:3788
+#: play.c:1321 play.c:3790
 #, c-format
 msgid "%s rolls %1i and %1i.\n"
 msgstr "%s hází %1i a %1i.\n"
@@ -7757,7 +7795,7 @@ msgstr ""
 msgid "You do not own the cube."
 msgstr "Nejste majitelem kostky."
 
-#: play.c:2310 play.c:3617
+#: play.c:2310 play.c:3619
 #, c-format
 msgid "The cube is already at %d; you can't double any more.\n"
 msgstr "Kostka již je na hodnotě %d; už nemůžete dále zdvojnásobovat.\n"
@@ -7815,7 +7853,7 @@ msgstr "Nejdříve musíte hodit kostkou."
 msgid "Please wait for %s to consider the resignation before moving.\n"
 msgstr "Prosím počkejte, až %s zváží rezignaci před tím, než budete táhnout.\n"
 
-#: play.c:2563 play.c:3745
+#: play.c:2563 play.c:3747
 #, c-format
 msgid "Please wait for %s to consider the cube before moving.\n"
 msgstr ""
@@ -7852,16 +7890,16 @@ msgid ""
 msgstr ""
 "GNU Backgammon byl zkompilován s podporou pro zápasy délky nejvýše %i\n"
 
-#: play.c:2804
+#: play.c:2806
 #, c-format
 msgid "A new %d point match has been started.\n"
 msgstr "Nový zápas do %d bodů byl zahájen.\n"
 
-#: play.c:2835
+#: play.c:2837
 msgid "A new session has been started."
 msgstr "Bylo zahájeno nové sezení."
 
-#: play.c:2948
+#: play.c:2950
 msgid ""
 "If you specify a parameter to the `next game' command, it must be a positive "
 "number (the count of games to step ahead)."
@@ -7869,7 +7907,7 @@ msgstr ""
 "Pokud zadáte u příkazu „next game“ parametr, musí jím být kladné číslo "
 "(počet her, o které se má postoupit)."
 
-#: play.c:3237
+#: play.c:3239
 msgid ""
 "If you specify a parameter to the `next' command, it must be a positive "
 "number (the count of moves to step ahead)."
@@ -7877,11 +7915,11 @@ msgstr ""
 "Pokud zadáte u příkazu „next“ parametr, musí jím být kladné číslo (počet "
 "tahů, o které se má postoupit)."
 
-#: play.c:3359
+#: play.c:3361
 msgid "It's not the computer's turn to play."
 msgstr "Počítač není na tahu, aby mohl hrát."
 
-#: play.c:3386
+#: play.c:3388
 msgid ""
 "If you specify a parameter to the `previous game' command, it must be a "
 "positive number (the count of games to step back)."
@@ -7889,7 +7927,7 @@ msgstr ""
 "Pokud zadáte u příkazu „previous game“ parametr, musí jím být kladné číslo "
 "(počet her, o které se má vrátit)."
 
-#: play.c:3515
+#: play.c:3517
 msgid ""
 "If you specify a parameter to the `previous' command, it must be a positive "
 "number (the count of moves to step back)."
@@ -7897,172 +7935,172 @@ msgstr ""
 "Pokud zadáte u příkazu „previous“ parametr, musí jím být kladné číslo (počet "
 "tahů, o které se má vrátit)."
 
-#: play.c:3581
+#: play.c:3583
 msgid "Beavers and Raccoons are not permitted during match play."
 msgstr "V zápasech nejsou povoleni bobři a mývali."
 
-#: play.c:3587
+#: play.c:3589
 msgid "Beavers are disabled (see `help set beavers')."
 msgstr "Bobři jsou vypnuti (vizte „help set beavers“)."
 
-#: play.c:3594
+#: play.c:3596
 msgid "Only one beaver is permitted (see `help set beavers')."
 msgstr "Je povolen maximálně jeden bobr (vizte „help set beavers“)."
 
-#: play.c:3597
+#: play.c:3599
 #, c-format
 msgid "Only %d beavers are permitted (see `help set beavers').\n"
 msgstr "Je povoleno maximálně %d bobrů (vizte „help set beavers“).\n"
 
-#: play.c:3604
+#: play.c:3606
 msgid "The cube must have been offered before you can redouble it."
 msgstr ""
 "Nejdřív by vám muselo být nabídnuto zdvojnásobení, abyste mohl okamžitě "
 "znovu zdvojnásobit."
 
-#: play.c:3630
+#: play.c:3632
 #, c-format
 msgid "%s accepts and immediately redoubles to %d.\n"
 msgstr "%s přijímá a ihned znovu zdvojnásobuje na %d.\n"
 
-#: play.c:3651
+#: play.c:3653
 msgid "You can only reject if the cube or a resignation has been offered."
 msgstr "Odmítnout můžete jedině nabídnuté zdvojnásobení nebo rezignaci."
 
-#: play.c:3661
+#: play.c:3663
 msgid "You must be playing a game if you want to resign it."
 msgstr "Nejdřív musíte mít rozehranou hru, když ji chcete vzdát."
 
-#: play.c:3693
+#: play.c:3695
 #, c-format
 msgid "Unknown keyword `%s' (see `help resign').\n"
 msgstr "Neznámé klíčové slovo „%s“ (vizte „help resign“).\n"
 
-#: play.c:3701
+#: play.c:3703
 #, c-format
 msgid "%s has already declined your offer of a %s.\n"
 msgstr "%s již vaši nabídku %s odmítl.\n"
 
-#: play.c:3711
+#: play.c:3713
 #, c-format
 msgid "%s offers to resign a %s.\n"
 msgstr "%s nabízí, že vzdá %s.\n"
 
-#: play.c:3713
+#: play.c:3715
 #, c-format
 msgid "%s offers to resign.\n"
 msgstr "%s nabízí, že se vzdá.\n"
 
-#: play.c:3752 play.c:4568 set.c:2438
+#: play.c:3754 play.c:4569 set.c:2479
 msgid "Please resolve the resignation first."
 msgstr "Nejprve prosím vyřešte tu rezignaci."
 
-#: play.c:3758
+#: play.c:3760
 msgid "You have already rolled the dice."
 msgstr "Kostkou jste již hodil."
 
-#: play.c:3844
+#: play.c:3846
 msgid "The cube must have been offered before you can take it."
 msgstr ""
 "Nejdřív by vám muselo být nabídnuto zdvojnásobení, abyste ho mohl přijmout."
 
-#: play.c:3876
+#: play.c:3878
 #, c-format
 msgid "%s accepts the cube at %d.\n"
 msgstr "%s přijímá kostku na %d.\n"
 
-#: play.c:3909
+#: play.c:3911
 #, c-format
 msgid "Illegal match ID '%s'\n"
 msgstr "Neplatné ID zápasu „%s“\n"
 
-#: play.c:3910
+#: play.c:3912
 #, c-format
 msgid "Dice %d %d, "
 msgstr "Hod %d %d, "
 
-#: play.c:3911
+#: play.c:3913
 #, c-format
 msgid "player on roll %d (turn %d), "
 msgstr "hráč na tahu %d (kolo %d), "
 
-#: play.c:3912
+#: play.c:3914
 #, c-format
 msgid "resigned %d,\n"
 msgstr "vzdává %d,\n"
 
-#: play.c:3913
+#: play.c:3915
 #, c-format
 msgid "doubled %d, "
 msgstr "zdvojnásobeno %d, "
 
-#: play.c:3914
+#: play.c:3916
 #, c-format
 msgid "cube owner %d, "
 msgstr "majitel kostky %d, "
 
-#: play.c:3915
+#: play.c:3917
 #, c-format
 msgid "crawford game %d,\n"
 msgstr "crawfordovská hra %d,\n"
 
-#: play.c:3916
+#: play.c:3918
 #, c-format
 msgid "match length %d, "
 msgstr "délka zápasu %d, "
 
-#: play.c:3917
+#: play.c:3919
 #, c-format
 msgid "score %d-%d, "
 msgstr "skóre %d:%d, "
 
-#: play.c:3918
+#: play.c:3920
 #, c-format
 msgid "cube %d, "
 msgstr "kostka %d, "
 
-#: play.c:3919
+#: play.c:3921
 #, c-format
 msgid "game state %d\n"
 msgstr "stav hry %d\n"
 
-#: play.c:3926
+#: play.c:3928
 #, fuzzy
 msgid "SetMatchID cannot handle positions where a double has been offered."
 msgstr ""
 "Omlouvám se, ale SetMatchID nedokáže zpracovat pozice, ve kterých bylo "
 "nabídnuto zdvojnásobení"
 
-#: play.c:3927
+#: play.c:3929
 #, c-format
 msgid "Stepping back to the offering of the cube. "
 msgstr ""
 
-#: play.c:4360
+#: play.c:4361
 #, c-format
 msgid "Double to %d"
 msgstr "Zdvojnásobení na %d"
 
-#: play.c:4360
+#: play.c:4361
 #, c-format
 msgid "Redouble to %d"
 msgstr "Zdvojnásobení na %d"
 
-#: play.c:4366
+#: play.c:4367
 #, c-format
 msgid "Beaver to %d"
 msgstr "Bobr na %d"
 
-#: play.c:4366
+#: play.c:4367
 #, c-format
 msgid "Raccoon to %d"
 msgstr "Mýval na %d"
 
-#: play.c:4394
+#: play.c:4395
 msgid " Resigns"
 msgstr " Vzdává"
 
-#: play.c:4563 set.c:2432
+#: play.c:4564 set.c:2473
 msgid "There must be a game in progress to set a player on roll."
 msgstr "Pro nastavení hráče na tahu musí být rozehrána hra."
 
@@ -8379,7 +8417,7 @@ msgid ""
 "You can't set a seed if you're using manual dice generation or random.org"
 msgstr "U ručního zadávání hodů a u random.org nelze nastavit semínko"
 
-#: set.c:116 set.c:126 set.c:1988
+#: set.c:116 set.c:126 set.c:2029
 msgid "You must specify a valid seed (see `help set seed')."
 msgstr "Musíte zadat platné semínko (vizte „help set seed“)."
 
@@ -8393,11 +8431,11 @@ msgstr "Semínko nastaveno na %s.\n"
 msgid "Seed set to %d.\n"
 msgstr "Semínko nastaveno na %d.\n"
 
-#: set.c:136 set.c:1997
+#: set.c:136 set.c:2038
 msgid "Seed initialised from system random data."
 msgstr "Semínko inicializováno z náhodných dat dodaných systémem."
 
-#: set.c:137 set.c:1998
+#: set.c:137 set.c:2039
 msgid "Seed initialised by system clock."
 msgstr "Semínko inicializováno pomocí systémových hodin."
 
@@ -9047,12 +9085,12 @@ msgstr "Tahy hráče %s musí být zadávány ručně.\n"
 msgid "You must specify a name to use."
 msgstr "Musíte zadat jméno."
 
-#: set.c:1391
+#: set.c:1391 set.c:1491
 #, c-format
 msgid "`%c' is not a valid name.\n"
 msgstr "„%c“ není platné jméno.\n"
 
-#: set.c:1397
+#: set.c:1397 set.c:1496
 msgid "`both' is a reserved word; you can't call a player that.\n"
 msgstr "„both“ je rezervované slovo, tak nemůžete hráče pojmenovat.\n"
 
@@ -9069,7 +9107,7 @@ msgstr "Hráč %d se odteď nazývá „%s“.\n"
 msgid "You must specify a player (see `help set player')."
 msgstr "Musíte určit hráče (vizte „help set player“)."
 
-#: set.c:1445 set.c:2157 set.c:2206 set.c:2851 set.c:3773
+#: set.c:1445 set.c:2198 set.c:2247 set.c:2892 set.c:3814
 msgid "Insufficient memory."
 msgstr "Nedostatek paměti."
 
@@ -9078,20 +9116,37 @@ msgstr "Nedostatek paměti."
 msgid "Unknown player `%s' (see `help set player').\n"
 msgstr "Neznámý hráč „%s“ (vizte „help set player“).\n"
 
-#: set.c:1481
+#: set.c:1483
+#, fuzzy
+msgid "You must specify two player names use."
+msgstr "Musíte zadat jméno."
+
+#: set.c:1502
+#, fuzzy
+msgid "Player names identical"
+msgstr "Hráčské statistiky"
+
+#: set.c:1511
+#, c-format
+msgid ""
+"Players will be known as `%s' and `%s'.\n"
+" This setting will take effect when a new match is started.\n"
+msgstr ""
+
+#: set.c:1522
 #, c-format
 msgid "The prompt has been set to `%s'.\n"
 msgstr "Výzva byla nastavena na „%s“.\n"
 
-#: set.c:1487
+#: set.c:1528
 msgid "All games in a session will be recorded."
 msgstr "Budou se zaznamenávat všechny hry sezení."
 
-#: set.c:1488
+#: set.c:1529
 msgid "Only the active game in a session will be recorded."
 msgstr "Zaznamenávat se bude jenom aktuální hra sezení."
 
-#: set.c:1513
+#: set.c:1554
 msgid ""
 "This installation of GNU Backgammon was compiled without the Blum, Blum and "
 "Shub generator."
@@ -9099,12 +9154,12 @@ msgstr ""
 "Tato instalace GNU Backgammonu byla zkompilována bez generátoru Blum, Blum a "
 "Shub."
 
-#: set.c:1522
+#: set.c:1563
 msgid ""
 "This installation of GNU Backgammon was compiled without the BSD generator."
 msgstr "Tato instalace GNU Backgammonu byla zkompilována bez generátoru BSD."
 
-#: set.c:1552
+#: set.c:1593
 msgid ""
 "This installation of GNU Backgammon was compiled without support for sockets "
 "needed for fetching\n"
@@ -9114,23 +9169,23 @@ msgstr ""
 "je\n"
 "zapotřebí pro čtení náhodných čísel z <www.random.org>"
 
-#: set.c:1569
+#: set.c:1610
 msgid "Create an .sgf file for each game rolled out"
 msgstr "Pro každou rozhazovanou hru se bude vytvářet soubor .sgf"
 
-#: set.c:1570
+#: set.c:1611
 msgid "Do not create an .sgf file for each game rolled out"
 msgstr "Soubory .sgf se nebudou vytvářet pro každou rozhazovanou hru"
 
-#: set.c:1589
+#: set.c:1630
 msgid "Use different evaluation for later moves of rollout."
 msgstr "U pozdějších tahů rozhozu se bude používat jiné vyhodnocování."
 
-#: set.c:1590
+#: set.c:1631
 msgid "Do not change evaluations during rollout."
 msgstr "V průběhu rozhozu se nebude měnit vyhodnocování."
 
-#: set.c:1600
+#: set.c:1641
 msgid ""
 "You must specify a valid ply at which to change evaluations (see `help set "
 "rollout late plies')."
@@ -9138,24 +9193,24 @@ msgstr ""
 "Musíte zadat platný půltah, ve kterém se má změnit vyhodnocování (vizte "
 "„help set rollout late plies“)."
 
-#: set.c:1609
+#: set.c:1650
 msgid "No evaluations changes will be made during rollouts."
 msgstr "V průběhu rozhozů se nebude měnit vyhodnocování."
 
-#: set.c:1611
+#: set.c:1652
 #, c-format
 msgid "Evaluations will change after %d plies in rollouts.\n"
 msgstr "Vyhodnocování se bude měnit po %d půltazích rozhozu.\n"
 
-#: set.c:1632
+#: set.c:1673
 msgid "Stop rollout when STD's are small enough"
 msgstr "Rozhozy budou zastaveny, jakmile budou odchylky dostatečně malé"
 
-#: set.c:1633
+#: set.c:1674
 msgid "Do not stop rollout based on STDs"
 msgstr "Rozhozy se nebudou zastavovat podle odchylek"
 
-#: set.c:1643
+#: set.c:1684
 msgid ""
 "You must specify a valid minimum number of games to rollout (see `help set "
 "rollout limit minimumgames')."
@@ -9163,13 +9218,13 @@ msgstr ""
 "Musíte zadat platný minimální počet her k rozhození (vizte „help set rollout "
 "limit minimumgames“)."
 
-#: set.c:1650
+#: set.c:1691
 #, c-format
 msgid "After %d games, rollouts will stop if the STDs are small enough.\n"
 msgstr ""
 "Rozhozy se po %d hrách zastaví, jakmile budou odchylky dostatečně malé.\n"
 
-#: set.c:1659
+#: set.c:1700
 msgid ""
 "You must set a valid fraction for the ratio STD/value where rollouts can "
 "stop (see `help set rollout limit maxerror')."
@@ -9177,7 +9232,7 @@ msgstr ""
 "Musíte zadat platný zlomek pro podíl odchylka/hodnota, při kterém se mohou "
 "rozhozy zastavit (vizte „help set rollout limit maxerror“)."
 
-#: set.c:1667
+#: set.c:1708
 #, c-format
 msgid ""
 "Rollouts can stop when the ratio |STD/value| is less than %5.4f for every "
@@ -9186,15 +9241,15 @@ msgstr ""
 "Rozhozy se zastaví, jakmile je podíl |odchylka/hodnota| nižší než %5.4f pro "
 "všechny hodnoty (výhra/gammon/backgammon/...ekvita)\n"
 
-#: set.c:1684
+#: set.c:1725
 msgid "Stop rollout of choices based on JSDs"
 msgstr "Zastavit rozhoz podle SSO"
 
-#: set.c:1685
+#: set.c:1726
 msgid "Do not stop rollout of moves choices on JSDs"
 msgstr "Nezastavovat rozhoz tahů podle SSO"
 
-#: set.c:1695
+#: set.c:1736
 msgid ""
 "You must specify a valid minimum number of games to rollout (see `help set "
 "rollout jsd minimumgames')."
@@ -9202,12 +9257,12 @@ msgstr ""
 "Musíte zadat platné minimum pro počet rozhozených her (vizte „help set "
 "rollout jsd minimumgames“)."
 
-#: set.c:1701
+#: set.c:1742
 #, c-format
 msgid "After %d games, rollouts will stop if the JSDs are large enough.\n"
 msgstr "Rozhozy se po %d hrách zastaví, jakmile budou SSO dostatečně velké.\n"
 
-#: set.c:1712
+#: set.c:1753
 msgid ""
 "You must set a number of joint standard deviations for the equity difference "
 "with the best move being rolled out (see `help set rollout jsd limit')."
@@ -9215,7 +9270,7 @@ msgstr ""
 "Musíte nastavit počet společných směrodatných odchylek pro rozdíl ekvit vůči "
 "nejlepšímu rozhazovanému tahu (vizte „help set rollout jsd limit“)."
 
-#: set.c:1721
+#: set.c:1762
 #, c-format
 msgid ""
 "Rollouts (or rollouts of moves) may stop when the equity is more than %5.3f "
@@ -9224,72 +9279,72 @@ msgstr ""
 "Rozhozy (nebo rozhozy tahů) se zastaví, jakmile je ekvita více než %5.3f "
 "společných směrodatných odchylek od nejlepšího rozhazovaného tahu\n"
 
-#: set.c:1765
+#: set.c:1806
 msgid "Chequer play in rollouts"
 msgstr "Hra kameny při rozhozech"
 
-#: set.c:1814
+#: set.c:1855
 msgid "Chequer play for later moves in rollouts"
 msgstr "Hra kameny v pozdějších tazích rozhozů"
 
-#: set.c:1841
+#: set.c:1882
 msgid "Chequer play in rollouts (for player 1)"
 msgstr "Hra kameny při rozhozech (pro hráče 1)"
 
-#: set.c:1842
+#: set.c:1883
 msgid "Chequer play in rollouts (for player 0)"
 msgstr "Hra kameny při rozhozech (pro hráče 1)"
 
-#: set.c:1857
+#: set.c:1898
 msgid "Chequer play for later moves in rollouts (for player 1)"
 msgstr "Hra kameny v pozdějších tazích rozhozů (pro hráče 1)"
 
-#: set.c:1858
+#: set.c:1899
 msgid "Chequer play for later moves in rollouts (for player 0)"
 msgstr "Hra kameny v pozdějších tazích rozhozů (pro hráče 0)"
 
-#: set.c:1873
+#: set.c:1914
 msgid "Cube decisions in rollouts"
 msgstr "Rozhodnutí o kostce při rozhozech"
 
-#: set.c:1888
+#: set.c:1929
 msgid "Cube decisions for later plies in rollouts"
 msgstr "Rozhodnutí o kostce v pozdějších tazích rozhozů"
 
-#: set.c:1903
+#: set.c:1944
 msgid "Cube decisions in rollouts (for player 1)"
 msgstr "Rozhodnutí o kostce při rozhozech (pro hráče 1)"
 
-#: set.c:1904
+#: set.c:1945
 msgid "Cube decisions in rollouts (for player 0)"
 msgstr "Rozhodnutí o kostce při rozhozech (pro hráče 0)"
 
-#: set.c:1919
+#: set.c:1960
 msgid "Cube decisions for later plies of rollouts (for player 1)"
 msgstr "Rozhodnutí o kostce v pozdějších tazích rozhozů (pro hráče 1)"
 
-#: set.c:1920
+#: set.c:1961
 msgid "Cube decisions in later plies of rollouts (for player 0)"
 msgstr "Rozhodnutí o kostce v pozdějších tazích rozhozů (pro hráče 0)"
 
-#: set.c:1936
+#: set.c:1977
 msgid "Will truncate *cubeless* rollouts when reaching exact bearoff database"
 msgstr "Při dosažení přesné databáze koncovek se *bezkostkové* rozhozy oříznou"
 
-#: set.c:1938
+#: set.c:1979
 msgid ""
 "Will not truncate *cubeless* rollouts when reaching exact bearoff database"
 msgstr ""
 "*Bezkostkové* rozhozy se nebudou ořezávat při dosažení přesné databáze "
 "koncovek"
 
-#: set.c:1952
+#: set.c:1993
 msgid ""
 "Will truncate *cubeless* rollouts when reaching one-sided bearoff database"
 msgstr ""
 "Při dosažení jednostranné databáze koncovek se *bezkostkové* rozhozy oříznou"
 
-#: set.c:1954
+#: set.c:1995
 msgid ""
 "Will not truncate *cubeless* rollouts when reaching one-sided bearoff "
 "database"
@@ -9297,24 +9352,24 @@ msgstr ""
 "*Bezkostkové* rozhozy se nebudou ořezávat při dosažení jednostranné databáze "
 "koncovek"
 
-#: set.c:1968
+#: set.c:2009
 msgid "Rollouts will be made as the initial position of a game."
 msgstr "Rozhozy se budou provádět jako z počáteční pozice hry."
 
-#: set.c:1969
+#: set.c:2010
 msgid "Rollouts will be made for normal (non-opening) positions."
 msgstr "Rozhozy se budou provádět jako z běžné (ne počáteční) pozice."
 
-#: set.c:1979
+#: set.c:2020
 msgid "You can't set a seed if you're using manual dice generation."
 msgstr "Nemůžete nastavovat semínko, když používáte ruční zadávání hodů."
 
-#: set.c:1994
+#: set.c:2035
 #, c-format
 msgid "Rollout seed set to %d.\n"
 msgstr "Semínko rozhozů nastaveno na %d.\n"
 
-#: set.c:2008
+#: set.c:2049
 msgid ""
 "You must specify a valid number of trials to make (see `help set rollout "
 "trials')."
@@ -9322,7 +9377,7 @@ msgstr ""
 "Musíte zadat platné číslo určující počet pokusů (vizte „help set rollout "
 "trials“)."
 
-#: set.c:2015 show.c:221
+#: set.c:2056 show.c:221
 #, c-format
 msgid "%d game will be played per rollout.\n"
 msgid_plural "%d games will be played per rollout.\n"
@@ -9330,39 +9385,39 @@ msgstr[0] "V každém rozhozu se sehraje %d hra.\n"
 msgstr[1] "V každém rozhozu se sehrají %d hry.\n"
 msgstr[2] "V každém rozhozu se sehraje %d her.\n"
 
-#: set.c:2023
+#: set.c:2064
 msgid "Games in rollouts will be stopped after a fixed number of moves."
 msgstr "Hry v rozhozech se ukončí po zadaném počtu tahů."
 
-#: set.c:2025
+#: set.c:2066
 msgid "Games in rollouts will be played out until the end."
 msgstr "Hry v rozhozech se budou hrát až do konce."
 
-#: set.c:2034
+#: set.c:2075
 msgid "Rollouts use same settings for cube and chequer play."
 msgstr "Rozhozy používají stejné nastavení pro hru kostkou i kameny."
 
-#: set.c:2035
+#: set.c:2076
 msgid "Rollouts use separate settings for cube and chequer play."
 msgstr "Rozhozy používají odlišná nastavení pro hru kostkou a kameny."
 
-#: set.c:2041
+#: set.c:2082
 msgid "Rollouts use same settings for both players."
 msgstr "Rozhozy používají stejné nastavení pro oba hráče."
 
-#: set.c:2042
+#: set.c:2083
 msgid "Rollouts use separate settings for both players."
 msgstr "Rozhozy používají odlišná nastavení pro každého hráče."
 
-#: set.c:2048
+#: set.c:2089
 msgid "Evaluation of rollouts at truncation point will be same as player 0."
 msgstr "Vyhodnocování rozhozů v bodě oříznutí bude stejné jako pro hráče 0."
 
-#: set.c:2049
+#: set.c:2090
 msgid "Evaluation of rollouts at truncation point are separately specified."
 msgstr "Vyhodnocování rozhozů v bodě oříznutí je zadáno pro každého zvlášť."
 
-#: set.c:2057
+#: set.c:2098
 msgid ""
 "You must specify a valid ply at which to truncate rollouts (see `help set "
 "rollout')."
@@ -9370,11 +9425,11 @@ msgstr ""
 "Musíte zadat platný půltah, ve kterém se mají rozhozy ořezávat (vizte „help "
 "set rollout“)."
 
-#: set.c:2066
+#: set.c:2107
 msgid "Rollouts will not be truncated."
 msgstr "Rozhozy nebudou ořezávány."
 
-#: set.c:2068
+#: set.c:2109
 #, c-format
 msgid "Rollouts will be truncated after %d ply.\n"
 msgid_plural "Rollouts will be truncated after %d plies.\n"
@@ -9382,44 +9437,44 @@ msgstr[0] "Rozhozy budou oříznuty po %d půltahu.\n"
 msgstr[1] "Rozhozy budou oříznuty po %d půltazích.\n"
 msgstr[2] "Rozhozy budou oříznuty po %d půltazích.\n"
 
-#: set.c:2074
+#: set.c:2115
 msgid "Chequer play evaluations at rollout truncation point"
 msgstr "Vyhodnocování hry kameny v bodě oříznutí rozhozu"
 
-#: set.c:2084
+#: set.c:2125
 msgid "Cube decisions at rollout truncation point"
 msgstr "Rozhodnutí o kostce v bodě oříznutí rozhozu"
 
-#: set.c:2098
+#: set.c:2139
 msgid "Will lookahead during rollouts to reduce variance."
 msgstr "Při rozhozech se bude používat výhled pro redukci rozptylu."
 
-#: set.c:2099
+#: set.c:2140
 msgid "Will not use lookahead variance reduction during rollouts."
 msgstr "Při rozhozech se nebude používat výhled pro redukci rozptylu."
 
-#: set.c:2112
+#: set.c:2153
 msgid "Use quasi-random dice in rollouts"
 msgstr "V rozhozech se budou používat kvazi-náhodné kostky."
 
-#: set.c:2113
+#: set.c:2154
 msgid "Do not use quasi-random dice in rollouts"
 msgstr "V rozhozech se nebudou používat kvazi-náhodné kostky."
 
-#: set.c:2127
+#: set.c:2168
 msgid "Cubeful rollouts will be performed."
 msgstr "Budou se provádět rozhozy s ohledem na kostku."
 
-#: set.c:2128
+#: set.c:2169
 msgid "Cubeless rollouts will be performed."
 msgstr "Budou se provádět bezkostkové rozhozy."
 
-#: set.c:2141 set.c:2190
+#: set.c:2182 set.c:2231
 #, c-format
 msgid "You must specify a player (see `help set %s player').\n"
 msgstr "Musíte určit hráče (vizte „help set %s player“).\n"
 
-#: set.c:2179 set.c:2228 set.c:3795
+#: set.c:2220 set.c:2269 set.c:3836
 #, c-format
 msgid ""
 "Unknown player `%s'\n"
@@ -9428,69 +9483,69 @@ msgstr ""
 "Neznámý hráč „%s“\n"
 "(vizte „help set %s player“).\n"
 
-#: set.c:2263 set.c:2274 set.c:2281
+#: set.c:2304 set.c:2315 set.c:2322
 msgid ""
 "The Crawford rule applies only in match play when a player's score is 1-away."
 msgstr ""
 "Crawfordovo pravidlo se používá jenom v zápasech, ve kterých zbývá hráči 1 "
 "bod."
 
-#: set.c:2287
+#: set.c:2328
 msgid "You cannot set the Crawford rule when both players' scores are 1-away."
 msgstr "Nemůžete použít Crawfordovo pravidlo, když oběma hráčům zbývá 1 bod."
 
-#: set.c:2294
+#: set.c:2335
 msgid "You cannot set both Crawford and post-Crawford simultaneously."
 msgstr "Nemůžete nastavit současně Crawfordovskou a po-Crawfordovskou hru."
 
-#: set.c:2315
+#: set.c:2356
 msgid "You cannot set post-Crawford play if the trailer has yet to score."
 msgstr ""
 "Nemůžete nastavit po-Crawfordovskou hru, když prohrávající dosud nebodoval."
 
-#: set.c:2321
+#: set.c:2362
 msgid "You must specify two valid scores."
 msgstr "Musíte zadat dvě platná skóre."
 
-#: set.c:2326
+#: set.c:2367
 msgid "Only one player may win the match."
 msgstr "Jenom jeden hráč může vyhrát zápas."
 
-#: set.c:2332
+#: set.c:2373
 msgid "You cannot play the Crawford game once the match is already over."
 msgstr "Nemůžete hrát Crawfordovskou hru, když zápas už skončil."
 
-#: set.c:2416
+#: set.c:2457
 msgid "You must specify either 0, 1 or 2"
 msgstr "Musíte zadat 0, 1, nebo 2."
 
-#: set.c:2444
+#: set.c:2485
 msgid "Which player do you want to set on roll?"
 msgstr "Který hráč má být na tahu?"
 
-#: set.c:2450
+#: set.c:2491
 #, c-format
 msgid "Unknown player `%s' (see `help set turn').\n"
 msgstr "Neznámý hráč „%s“ (vizte „help set turn“).\n"
 
-#: set.c:2456
+#: set.c:2497
 msgid "You can't set both players on roll."
 msgstr "Nemůžete nastavit, že mají být na tahu oba hráči."
 
-#: set.c:2484
+#: set.c:2525
 #, c-format
 msgid "`%s' is now on roll.\n"
 msgstr "Na tahu je nyní „%s“.\n"
 
-#: set.c:2490
+#: set.c:2531
 msgid "Will use the Jacoby rule for money sessions."
 msgstr "V sezeních o peníze se bude používat Jacobyho pravidlo."
 
-#: set.c:2491
+#: set.c:2532
 msgid "Will not use the Jacoby rule for money sessions."
 msgstr "V sezeních o peníze se nebude používat Jacobyho pravidlo."
 
-#: set.c:2495
+#: set.c:2536
 msgid ""
 "Note that you'll have to enable the cube if you want gammons and "
 "backgammons\n"
@@ -9499,15 +9554,15 @@ msgstr ""
 "Uvědomte si, že musíte povolit kostku, pokud chcete počítat\n"
 "gammony a backgammony (vizte „help set cube use“)."
 
-#: set.c:2514 set.c:2532
+#: set.c:2555 set.c:2573
 msgid "This game is the Crawford game (no doubling allowed)."
 msgstr "Toto je Crawfordovská hra (zdvojnásobování není povoleno)."
 
-#: set.c:2515 set.c:2533
+#: set.c:2556 set.c:2574
 msgid "This game is not the Crawford game."
 msgstr "Toto není Crawfordovská hra."
 
-#: set.c:2536
+#: set.c:2577
 msgid ""
 "Cannot set whether this is the Crawford game\n"
 "as none of the players are 1-away from winning."
@@ -9515,23 +9570,23 @@ msgstr ""
 "Tuto hru nemůžete nastavit jako Crawfordovskou,\n"
 "protože ani jednomu z hráčů nezbývá 1 bod do vítězství."
 
-#: set.c:2541
+#: set.c:2582
 msgid "Cannot set Crawford play for money sessions."
 msgstr "Crawfordovskou hru nelze nastavit při hře o peníze."
 
-#: set.c:2543 set.c:2577
+#: set.c:2584 set.c:2618
 msgid "No match in progress (type `new match n' to start one)."
 msgstr "Není rozehrán zápas (použijte „new match n“ pro zahájení zápasu)."
 
-#: set.c:2556
+#: set.c:2597
 msgid "This is post-Crawford play (doubling allowed)."
 msgstr "Toto je po-Crawfordovská hra (zdvojnásobování povoleno)."
 
-#: set.c:2557 show.c:843
+#: set.c:2598 show.c:843
 msgid "This is not post-Crawford play."
 msgstr "Toto není po-Crawfordovská hra."
 
-#: set.c:2570
+#: set.c:2611
 msgid ""
 "Cannot set whether this is post-Crawford play\n"
 "as none of the players are 1-away from winning."
@@ -9539,51 +9594,51 @@ msgstr ""
 "Tuto hru nemůžete nastavit jako po-Crawfordovskou,\n"
 "protože ani jednomu z hráčů nezbývá 1 bod do vítězství."
 
-#: set.c:2575
+#: set.c:2616
 msgid "Cannot set post-Crawford play for money sessions."
 msgstr "Po-Crawfordovskou hru nelze nastavit při hře o peníze."
 
-#: set.c:2590
+#: set.c:2631
 msgid "Incorrect syntax for set warning command."
 msgstr "Chybná syntaxe pro příkaz set warning."
 
-#: set.c:2598 set.c:2642
+#: set.c:2639 set.c:2683
 #, c-format
 msgid "Unknown warning %s."
 msgstr "Neznámé varování %s."
 
-#: set.c:2616
+#: set.c:2657
 #, c-format
 msgid "Unknown value %s."
 msgstr "Neznámá hodnota %s."
 
-#: set.c:2620
+#: set.c:2661
 #, c-format
 msgid "Warning %s set to %s."
 msgstr "Varování %s nastaveno na %s."
 
-#: set.c:2656
+#: set.c:2697
 msgid "You must specify the number of beavers to allow."
 msgstr "Musíte zadat počet povolených bobrů."
 
-#: set.c:2664 show.c:1272
+#: set.c:2705 show.c:1272
 #, c-format
 msgid "%d beavers/raccoons allowed in money sessions.\n"
 msgstr "Ve hře o peníze je dovoleno %d bobrů/mývalů.\n"
 
-#: set.c:2666 show.c:1274
+#: set.c:2707 show.c:1274
 msgid "1 beaver allowed in money sessions."
 msgstr "Ve hře o peníze je dovolen 1 bobr."
 
-#: set.c:2668 show.c:1276
+#: set.c:2709 show.c:1276
 msgid "No beavers allowed in money sessions."
 msgstr "Ve hře o peníze nejsou bobři dovoleni."
 
-#: set.c:2677
+#: set.c:2718
 msgid "You must specify a number between 1 and 6.\n"
 msgstr "Musíte zadat číslo mezi 1 a 6.\n"
 
-#: set.c:2683
+#: set.c:2724
 #, c-format
 msgid ""
 "Probabilities and equities will be shown with %d digits after the decimal "
@@ -9591,48 +9646,48 @@ msgid ""
 msgstr ""
 "Pravděpodobnosti a ekvity budou zobrazeny s %d číslicemi po desetinné čárce\n"
 
-#: set.c:2695
+#: set.c:2736
 msgid "Match winning chances will be shown as percentages."
 msgstr "Šance na vítězství v zápasu se budou zobrazovat v procentech."
 
-#: set.c:2696
+#: set.c:2737
 msgid "Match winning chances will be shown as probabilities."
 msgstr "Šance na vítězství v zápasu se budou zobrazovat jako pravděpodobnosti."
 
-#: set.c:2702
+#: set.c:2743
 msgid "Match evaluations will be shown as match winning chances."
 msgstr "Ohodnocení zápasu se bude zobrazovat jako šance na vítězství v zápasu."
 
-#: set.c:2703
+#: set.c:2744
 msgid "Match evaluations will be shown as equivalent money equity."
 msgstr "Ohodnocení zápasu se bude zobrazovat jako ekvivalentní peněžní ekvita."
 
-#: set.c:2709
+#: set.c:2750
 msgid "TTY boards will be given in raw format."
 msgstr "Terminálové desky se budou zobrazovat v syrovém formátu."
 
-#: set.c:2710
+#: set.c:2751
 msgid "TTY boards will be given in ASCII."
 msgstr "Terminálové desky se budou zobrazovat v ASCII."
 
-#: set.c:2716
+#: set.c:2757
 msgid "Game winning chances will be shown as percentages."
 msgstr "Šance na vítězství ve hře se budou zobrazovat v procentech."
 
-#: set.c:2717
+#: set.c:2758
 msgid "Game winning chances will be shown as probabilities."
 msgstr "Šance na vítězství ve hře se budou zobrazovat jako pravděpodobnosti."
 
-#: set.c:2733
+#: set.c:2774
 msgid "You must specify a filename. See \"help set met\". "
 msgstr "Musíte zadat jméno souboru. Vizte „help set met“. "
 
-#: set.c:2745
+#: set.c:2786
 #, c-format
 msgid "GNU Backgammon will now use the %s match equity table.\n"
 msgstr "GNU Backgammon bude používat tabulku zápasové ekvity %s.\n"
 
-#: set.c:2750
+#: set.c:2791
 #, c-format
 msgid ""
 "\n"
@@ -9645,7 +9700,7 @@ msgstr ""
 "nejvýše %i.\n"
 "Pro více než %i zbývajících bodů se bude používat extrapolace.\n"
 
-#: set.c:2782
+#: set.c:2823
 #, c-format
 msgid ""
 "Unknown evaluation type: %s (see\n"
@@ -9654,12 +9709,12 @@ msgstr ""
 "Neznámý typ vyhodnocování: %s (vizte\n"
 "„help set %s type“).\n"
 
-#: set.c:2789
+#: set.c:2830
 #, c-format
 msgid "%s will now use %s.\n"
 msgstr "%s nyní bude používat %s.\n"
 
-#: set.c:2802
+#: set.c:2843
 #, c-format
 msgid ""
 "(Note that this setting will have no effect until you\n"
@@ -9668,7 +9723,7 @@ msgstr ""
 "(Uvědomte si, že toto nastavení se neuplatní, dokud nepoužijete\n"
 "„set %s type evaluation“.)\n"
 
-#: set.c:2816
+#: set.c:2857
 #, c-format
 msgid ""
 "(Note that this setting will have no effect until you\n"
@@ -9677,20 +9732,20 @@ msgstr ""
 "(Uvědomte si, že toto nastavení se neuplatní, dokud nepoužijete\n"
 "„set %s type rollout“.)\n"
 
-#: set.c:2825
+#: set.c:2866
 #, fuzzy
 msgid "Evaluation settings will be same as analysis settings."
 msgstr "Vyhodnocování rozhozů v bodě oříznutí bude stejné jako pro hráče 0."
 
-#: set.c:2826
+#: set.c:2867
 msgid "Evaluation settings separate from analysis settings."
 msgstr ""
 
-#: set.c:2836
+#: set.c:2877
 msgid "You must specify a player (see `help set analysis player')."
 msgstr "Musíte určit hráče (vizte „help set analysis player“)."
 
-#: set.c:2873
+#: set.c:2914
 #, c-format
 msgid ""
 "Unknown player `%s'\n"
@@ -9699,69 +9754,69 @@ msgstr ""
 "Neznámý hráč „%s“\n"
 "(vizte „help set analysis player“).\n"
 
-#: set.c:2885
+#: set.c:2926
 #, c-format
 msgid "Analyse %s's chequerplay and cube decisions."
 msgstr "Hra hráče %s kameny a kostkou bude analyzována."
 
-#: set.c:2888
+#: set.c:2929
 #, c-format
 msgid "Do not analyse %s's chequerplay and cube decisions."
 msgstr "Hra hráče %s kameny a kostkou nebude analyzována."
 
-#: set.c:2902
+#: set.c:2943
 msgid "Analysis chequerplay"
 msgstr "Analýza hry kameny"
 
-#: set.c:2915
+#: set.c:2956
 msgid "Analysis cubedecision"
 msgstr "Analýza rozhodnutí o kostce"
 
-#: set.c:2928
+#: set.c:2969
 msgid "`eval' and `hint' chequerplay"
 msgstr "Hra kameny při „eval“ a „hint“"
 
-#: set.c:2941
+#: set.c:2982
 msgid "`eval' and `hint' cube decisions"
 msgstr "Rozhodnutí o kostce při „eval“ a „hint“"
 
-#: set.c:2974
+#: set.c:3015
 #, c-format
 msgid "%s set to: %s\n"
 msgstr "%s nastaveno na %s\n"
 
-#: set.c:2978
+#: set.c:3019
 #, c-format
 msgid "%s cleared.\n"
 msgstr "Informace %s smazána.\n"
 
-#: set.c:2984
+#: set.c:3025
 msgid "Match annotator"
 msgstr "Komentátor zápasu"
 
-#: set.c:2989
+#: set.c:3030
 msgid "Match comment"
 msgstr "Poznámky o zápasu"
 
-#: set.c:3012
+#: set.c:3053
 msgid "Match date cleared."
 msgstr "Datum zápasu smazáno."
 
-#: set.c:3019
+#: set.c:3060
 #, c-format
 msgid "%s is not a valid date (see `help set matchinfo date').\n"
 msgstr "%s není platné datum (vizte „help set matchinfo date“).\n"
 
-#: set.c:3028
+#: set.c:3069
 #, c-format
 msgid "Match date set to %04d-%02d-%02d.\n"
 msgstr "Datum zápasu nastaveno na %3$02d.%2$02d.%1$04d.\n"
 
-#: set.c:3033
+#: set.c:3074
 msgid "Match event"
 msgstr "Událost"
 
-#: set.c:3042 show.c:779
+#: set.c:3083 show.c:779
 #, c-format
 msgid "New matches default to %d point.\n"
 msgid_plural "New matches default to %d points.\n"
@@ -9769,11 +9824,11 @@ msgstr[0] "Nové zápasy budou implicitně na %d bod.\n"
 msgstr[1] "Nové zápasy budou implicitně na %d body.\n"
 msgstr[2] "Nové zápasy budou implicitně na %d bodů.\n"
 
-#: set.c:3048
+#: set.c:3089
 msgid "Match place"
 msgstr "Místo zápasu"
 
-#: set.c:3057
+#: set.c:3098
 msgid ""
 "You must specify which player's rating to set (see `help set matchinfo "
 "rating')."
@@ -9781,200 +9836,200 @@ msgstr ""
 "Musíte určit hráče, kterému chcete nastavit rating (vizte „help set "
 "matchinfo rating“)."
 
-#: set.c:3062
+#: set.c:3103
 #, c-format
 msgid "Rating for %s"
 msgstr "Rating pro %s"
 
-#: set.c:3069
+#: set.c:3110
 msgid "Match round"
 msgstr "Kolo"
 
-#: set.c:3083
+#: set.c:3124
 msgid "Include annotations in exports"
 msgstr "Zahrnovat komentáře při exportu"
 
-#: set.c:3084
+#: set.c:3125
 msgid "Do not include annotations in exports"
 msgstr "Nezahrnovat komentáře při exportu"
 
-#: set.c:3092
+#: set.c:3133
 msgid "Include analysis in exports"
 msgstr "Zahrnovat analýzu při exportu"
 
-#: set.c:3093
+#: set.c:3134
 msgid "Do not include analysis in exports"
 msgstr "Nezahrnovat analýzu při exportu"
 
-#: set.c:3101
+#: set.c:3142
 msgid "Include statistics in exports"
 msgstr "Zahrnovat statistiku při exportu"
 
-#: set.c:3102
+#: set.c:3143
 msgid "Do not include statistics in exports"
 msgstr "Nezahrnovat statistiku při exportu"
 
-#: set.c:3110
+#: set.c:3151
 msgid "Include match information in exports"
 msgstr "Zahrnovat informace o zápasu při exportu"
 
-#: set.c:3111
+#: set.c:3152
 msgid "Do not include match information in exports"
 msgstr "Nezahrnovat informace o zápasu při exportu"
 
-#: set.c:3121 set.c:3165
+#: set.c:3162 set.c:3206
 msgid "You must specify a semi-positive number."
 msgstr "Musíte zadat nezáporné číslo."
 
-#: set.c:3129
+#: set.c:3170
 msgid "The board will never been shown in exports."
 msgstr "Deska nebude při exportu nikdy zobrazena."
 
-#: set.c:3131
+#: set.c:3172
 #, c-format
 msgid "The board will be shown every %d. move in exports."
 msgstr "Při exportu bude deska zobrazena každý %d. tah."
 
-#: set.c:3142
+#: set.c:3183
 #, c-format
 msgid "Unknown player `%s' (see `help set export show player').\n"
 msgstr "Neznámý hráč „%s“ (vizte „help set export show player“).\n"
 
-#: set.c:3150
+#: set.c:3191
 msgid "Analysis, boards etc will be shown for both players in exports."
 msgstr "Analýza, desky, atd. budou při exportu zobrazeny u obou hráčů."
 
-#: set.c:3153
+#: set.c:3194
 #, c-format
 msgid "Analysis, boards etc will only be shown for player %s in exports.\n"
 msgstr "Analýza, desky, atd. budou při exportu zobrazeny pouze u hráče %s.\n"
 
-#: set.c:3172
+#: set.c:3213
 #, c-format
 msgid "Show at most %d moves in exports.\n"
 msgstr "Při exportu zobrazovat nejvýše %d tahů.\n"
 
-#: set.c:3180
+#: set.c:3221
 msgid "Show detailed probabilities for moves"
 msgstr "Zobrazovat detailní pravděpodobnosti k tahům"
 
-#: set.c:3181
+#: set.c:3222
 msgid "Do not show detailed probabilities for moves"
 msgstr "Nezobrazovat detailní pravděpodobnosti k tahům"
 
-#: set.c:3199
+#: set.c:3240
 msgid "Show detailed probabilities for cube decisions"
 msgstr "Zobrazovat detailní pravděpodobnosti k rozhodnutím o kostce"
 
-#: set.c:3200
+#: set.c:3241
 msgid "Do not show detailed probabilities for cube decisions"
 msgstr "Nezobrazovat detailní pravděpodobnosti k rozhodnutím o kostce"
 
-#: set.c:3218
+#: set.c:3259
 msgid "Show detailed parameters for evaluations"
 msgstr "Zobrazovat detailní parametry vyhodnocování"
 
-#: set.c:3219
+#: set.c:3260
 msgid "Do not show detailed parameters for evaluations"
 msgstr "Nezobrazovat detailní parametry vyhodnocování"
 
-#: set.c:3227
+#: set.c:3268
 msgid "Show detailed parameters for rollouts"
 msgstr "Zobrazovat detailní parametry rozhozů"
 
-#: set.c:3228
+#: set.c:3269
 msgid "Do not show detailed parameters for rollouts"
 msgstr "Nezobrazovat detailní parametry rozhozů"
 
-#: set.c:3238
+#: set.c:3279
 msgid "Export moves marked 'very bad'."
 msgstr "Exportovat tahy označené jako „velmi špatné“."
 
-#: set.c:3239
+#: set.c:3280
 msgid "Do not export moves marked 'very bad'."
 msgstr "Neexportovat tahy označené jako „velmi špatné“."
 
-#: set.c:3248
+#: set.c:3289
 msgid "Export moves marked 'bad'."
 msgstr "Exportovat tahy označené jako „špatné“."
 
-#: set.c:3249
+#: set.c:3290
 msgid "Do not export moves marked 'bad'."
 msgstr "Neexportovat tahy označené jako „velmi špatné“."
 
-#: set.c:3258
+#: set.c:3299
 msgid "Export moves marked 'doubtful'."
 msgstr "Exportovat tahy označené jako „pochybné“."
 
-#: set.c:3259
+#: set.c:3300
 msgid "Do not export moves marked 'doubtful'."
 msgstr "Neexportovat tahy označené jako „pochybné“."
 
-#: set.c:3268
+#: set.c:3309
 msgid "Export unmarked moves."
 msgstr "Exportovat neoznačené tahy."
 
-#: set.c:3269
+#: set.c:3310
 msgid "Do not export unmarked moves."
 msgstr "Neexportovat neoznačené tahy."
 
-#: set.c:3278
+#: set.c:3319
 msgid "Export cube decisions marked 'very bad'."
 msgstr "Exportovat rozhodnutí o kostce označené jako „velmi špatné“."
 
-#: set.c:3279
+#: set.c:3320
 msgid "Do not export cube decisions marked 'very bad'."
 msgstr "Neexportovat rozhodnutí o kostce označené jako „velmi špatné“."
 
-#: set.c:3288
+#: set.c:3329
 msgid "Export cube decisions marked 'bad'."
 msgstr "Exportovat rozhodnutí o kostce označené jako „špatné“."
 
-#: set.c:3289
+#: set.c:3330
 msgid "Do not export cube decisions marked 'bad'."
 msgstr "Neexportovat rozhodnutí o kostce označené jako „špatné“."
 
-#: set.c:3298
+#: set.c:3339
 msgid "Export cube decisions marked 'doubtful'."
 msgstr "Exportovat rozhodnutí o kostce označené jako „pochybné“."
 
-#: set.c:3299
+#: set.c:3340
 msgid "Do not export cube decisions marked 'doubtful'."
 msgstr "Neexportovat rozhodnutí o kostce označené jako „pochybné“."
 
-#: set.c:3308
+#: set.c:3349
 msgid "Export unmarked cube decisions."
 msgstr "Exportovat neoznačená rozhodnutí o kostce."
 
-#: set.c:3309
+#: set.c:3350
 msgid "Do not export unmarked cube decisions."
 msgstr "Neexportovat neoznačená rozhodnutí o kostce."
 
-#: set.c:3318
+#: set.c:3359
 msgid "Export actual cube decisions."
 msgstr "Exportovat skutečná rozhodnutí o kostce."
 
-#: set.c:3319
+#: set.c:3360
 msgid "Do not export actual cube decisions."
 msgstr "Neexportovat skutečná rozhodnutí o kostce."
 
-#: set.c:3328
+#: set.c:3369
 msgid "Export close cube decisions."
 msgstr "Exportovat těsná rozhodnutí o kostce."
 
-#: set.c:3329
+#: set.c:3370
 msgid "Do not export close cube decisions."
 msgstr "Neexportovat těsná rozhodnutí o kostce."
 
-#: set.c:3338
+#: set.c:3379
 msgid "Export missed cube decisions."
 msgstr "Exportovat zmeškaná rozhodnutí o kostce."
 
-#: set.c:3339
+#: set.c:3380
 msgid "Do not export missed cube decisions."
 msgstr "Neexportovat zmeškaná rozhodnutí o kostce."
 
-#: set.c:3353
+#: set.c:3394
 #, c-format
 msgid ""
 "HTML export type is now: \n"
@@ -9983,16 +10038,16 @@ msgstr ""
 "Typ exportu HTML je nyní: \n"
 "%s\n"
 
-#: set.c:3392
+#: set.c:3433
 #, c-format
 msgid "CSS stylesheet for HTML export: %s\n"
 msgstr "Šablona CSS pro export HTML: %s\n"
 
-#: set.c:3424
+#: set.c:3465
 msgid "You must specify a URL. See `help set export html pictureurl'."
 msgstr "Musíte zadat URL. Vizte „help set export html pictureurl“."
 
-#: set.c:3435
+#: set.c:3476
 #, c-format
 msgid ""
 "URL for picture in HTML export is now: \n"
@@ -10001,269 +10056,269 @@ msgstr ""
 "URL pro obrázky pro export HTML je nyní: \n"
 "%s\n"
 
-#: set.c:3449
+#: set.c:3490
 msgid "Match equity table will be used inverted."
 msgstr "Tabulky zápasové ekvity budou používány invertované."
 
-#: set.c:3450
+#: set.c:3491
 msgid "Match equity table will not be use inverted."
 msgstr "Tabulky zápasové ekvity budou používány neinvertované."
 
-#: set.c:3461
+#: set.c:3502
 msgid "Warn about possibly bad play."
 msgstr "Varovat před možnou špatnou hrou."
 
-#: set.c:3462
+#: set.c:3503
 msgid "No warnings for possibly bad play."
 msgstr "Nevarovat před možnou špatnou hrou."
 
-#: set.c:3468
+#: set.c:3509
 msgid "Include advice on cube decisions in tutor mode."
 msgstr "Radit k rozhodnutím o kostce v režimu učitel."
 
-#: set.c:3469
+#: set.c:3510
 msgid "Exclude advice on cube decisions from tutor mode."
 msgstr "V režimu učitel neradit k rozhodnutím o kostce."
 
-#: set.c:3475
+#: set.c:3516
 msgid "Include advice on chequer play in tutor mode."
 msgstr "Radit ke hře kameny v režimu učitel."
 
-#: set.c:3476
+#: set.c:3517
 msgid "Exclude advice on chequer play from tutor mode."
 msgstr "V režimu učitel neradit ke hře kameny."
 
-#: set.c:3483
+#: set.c:3524
 #, c-format
 msgid "Tutor warnings will be given for play marked `%s'.\n"
 msgstr "Učitel bude varovat před hrou označenou jako „%s“.\n"
 
-#: set.c:3511
+#: set.c:3552
 msgid "Enable sounds."
 msgstr "Zvuky zapnuty."
 
-#: set.c:3512
+#: set.c:3553
 msgid "Disable sounds."
 msgstr "Zvuky vypnuty."
 
-#: set.c:3655
+#: set.c:3696
 #, c-format
 msgid "Scheduling priority set to %d.\n"
 msgstr "Priorita procesu gnubg nastavena na %d.\n"
 
-#: set.c:3666
+#: set.c:3707
 msgid "time critical"
 msgstr "absolutní"
 
-#: set.c:3669
+#: set.c:3710
 msgid "highest"
 msgstr "nejvyšší"
 
-#: set.c:3672
+#: set.c:3713
 msgid "above normal"
 msgstr "vyšší"
 
-#: set.c:3674
+#: set.c:3715
 msgid "normal"
 msgstr "normální"
 
-#: set.c:3677
+#: set.c:3718
 msgid "below normal"
 msgstr "nižší"
 
-#: set.c:3683
+#: set.c:3724
 msgid "idle"
 msgstr "nejnižší"
 
-#: set.c:3688
+#: set.c:3729
 #, c-format
 msgid "Priority of program set to: %s\n"
 msgstr "Priorita programu nastavena na: %s\n"
 
-#: set.c:3691
+#: set.c:3732
 #, c-format
 msgid "Changing priority failed (trying to set priority %s)\n"
 msgstr "Pokus o změnu priority selhal (nelze nastavit %s prioritu)\n"
 
-#: set.c:3694
+#: set.c:3735
 #, c-format
 msgid "Priority changes are not supported on this platform.\n"
 msgstr "Na této platformě nejsou podporovány změny priority.\n"
 
-#: set.c:3723
+#: set.c:3764
 msgid "You must specify a priority between -20 and 20."
 msgstr "Musíte zadat prioritu mezi -20 a 20."
 
-#: set.c:3745
+#: set.c:3786
 msgid "Allow GNU Backgammon to manipulate the dice."
 msgstr "Dovolit GNU Backgammonu manipulovat kostkami."
 
-#: set.c:3746
+#: set.c:3787
 msgid "Disallow GNU Backgammon to manipulate the dice."
 msgstr "Zakázat GNU Backgammonu manipulovat kostkami."
 
-#: set.c:3758
+#: set.c:3799
 msgid "You must specify a player (see `help set cheat player')."
 msgstr "Musíte zadat hráče (vizte „help set cheat player“)."
 
-#: set.c:3815
+#: set.c:3856
 #, c-format
 msgid "%s will get the %s roll on each turn.\n"
 msgstr "%s dostane každé kolo %s hod.\n"
 
-#: set.c:3825
+#: set.c:3866
 msgid "You must specify a size between 1 and 21."
 msgstr "Musíte zadat velikost mezi 1 a 21."
 
-#: set.c:3841 set.c:3859
+#: set.c:3882 set.c:3900
 msgid "You must specify a size between 1 and 20."
 msgstr "Musíte zadat velikost mezi 1 a 20."
 
-#: set.c:3847
+#: set.c:3888
 #, c-format
 msgid "Size of generated Html images are %dx%d pixels\n"
 msgstr "Generované HTML obrázky budou mít velikost %d×%d pixelů\n"
 
-#: set.c:3865
+#: set.c:3906
 #, c-format
 msgid "Size of generated PNG images are %dx%d pixels\n"
 msgstr "Generované PNG obrázky budou mít velikost %d×%d pixelů\n"
 
-#: set.c:3878
+#: set.c:3919
 #, c-format
 msgid "The current match or session is being played as `%s'.\n"
 msgstr "Aktuální zápas či sezení se hraje podle „%s“.\n"
 
-#: set.c:3881
+#: set.c:3922
 #, c-format
 msgid "Please start a new match or session to play `%s'\n"
 msgstr "Pro hru „%s“ prosím začněte nový zápas nebo sezení\n"
 
-#: set.c:3931
+#: set.c:3972
 msgid "Goto first game when loading matches or sessions."
 msgstr "Při nahrávání zápasů a sezení jít na první hru."
 
-#: set.c:3932
+#: set.c:3973
 msgid "Goto last game when loading matches or sessions."
 msgstr "Při nahrávání zápasů a sezení jít na poslední hru."
 
-#: set.c:3947
+#: set.c:3988
 msgid "Cube efficiency must be between 0 and 1"
 msgstr "Účinnost kostky musí být mezi 0 a 1"
 
-#: set.c:3954 show.c:2143
+#: set.c:3995 show.c:2143
 msgid "Cube efficiency for one sided bearoff positions"
 msgstr "Účinnost kostky pro jednostranné koncovky"
 
-#: set.c:3962 show.c:2141
+#: set.c:4003 show.c:2141
 msgid "Cube efficiency for crashed positions"
 msgstr "Účinnost kostky pro srážkové pozice"
 
-#: set.c:3969 show.c:2142
+#: set.c:4010 show.c:2142
 msgid "Cube efficiency for contact positions"
 msgstr "Účinnost kostky pro kontaktní pozice"
 
-#: set.c:3980
+#: set.c:4021
 #, c-format
 msgid "Cube efficiency race factor set to %7.5f\n"
 msgstr "Faktor účinnosti kostky při závodu nastaven na %7.5f\n"
 
-#: set.c:3983
+#: set.c:4024
 msgid "Cube efficiency race factor must be larger than 0."
 msgstr "Faktor účinnosti kostky při závodu musí být vyšší než 0."
 
-#: set.c:3990
+#: set.c:4031
 msgid "Cube efficiency race max"
 msgstr "Maximum závodní účinnosti kostky"
 
-#: set.c:3997
+#: set.c:4038
 msgid "Cube efficiency race min"
 msgstr "Minimum závodní účinnosti kostky"
 
-#: set.c:4008
+#: set.c:4049
 #, c-format
 msgid "Cube efficiency race coefficient set to %7.5f\n"
 msgstr "Koeficient účinnosti kostky při závodu nastaven na %7.5f\n"
 
-#: set.c:4012
+#: set.c:4053
 msgid "Cube efficiency race coefficient must be larger than 0."
 msgstr "Koeficient účinnosti kostky při závodu musí být vyšší než 0."
 
-#: set.c:4023
+#: set.c:4064
 msgid "Please provide a positive rating offset\n"
 msgstr "Prosím zadejte kladný odstup ratingů\n"
 
-#: set.c:4029
+#: set.c:4070
 #, c-format
 msgid "The rating offset for estimating absolute ratings is: %.1f\n"
 msgstr "Odstup ratingů pro odhad absolutního ratingu je: %.1f\n"
 
-#: set.c:4048
+#: set.c:4089
 #, c-format
 msgid "Locale is now '%s'"
 msgstr "Místní nastavení je nyní „%s“"
 
-#: set.c:4051
+#: set.c:4092
 #, c-format
 msgid "Locale '%s' not supported by C library.\n"
 msgstr "Místní nastavení „%s“ není podporováno knihovnou jazyka C.\n"
 
-#: set.c:4060
+#: set.c:4101
 msgid "You must specify a number greater than 50"
 msgstr "Musíte zadat číslo vyšší než 50"
 
-#: set.c:4075
+#: set.c:4116
 msgid "Please provide a positive number\n"
 msgstr "Zadejte prosím kladné číslo\n"
 
-#: set.c:4081
+#: set.c:4122
 #, c-format
 msgid "The factor used for multiplying error rates is: %.1f\n"
 msgstr "Činitel používaný pro násobení míry chyb je: %.1f\n"
 
-#: set.c:4334
+#: set.c:4382
 #, c-format
 msgid "Not a valid XGID '%s'"
 msgstr ""
 
-#: set.c:4364
+#: set.c:4412
 #, fuzzy, c-format
 msgid "No valid id's found"
 msgstr "Nenalezeno žádné platné GNUBG ID"
 
-#: set.c:4371
+#: set.c:4419
 #, c-format
 msgid "Setting GNUBG id %s:%s\n"
 msgstr "Nastavuje se GNUBG ID %s:%s\n"
 
-#: set.c:4380
+#: set.c:4428
 #, fuzzy
 msgid "Auto save during rollouts"
 msgstr "Hra kameny při rozhozech"
 
-#: set.c:4380
+#: set.c:4428
 #, fuzzy
 msgid "Don't auto save during rollouts"
 msgstr "V průběhu rozhozu se nebude měnit vyhodnocování."
 
-#: set.c:4386
+#: set.c:4434
 msgid "Auto save after each analysed game"
 msgstr ""
 
-#: set.c:4387
+#: set.c:4435
 msgid "Don't auto save after each analysed game"
 msgstr ""
 
-#: set.c:4393
+#: set.c:4441
 msgid "Prompt before deleting autosaves"
 msgstr ""
 
-#: set.c:4393
+#: set.c:4441
 #, fuzzy
 msgid "Delete autosaves automatically"
 msgstr "Hrát vynucené tahy automaticky"
 
-#: set.c:4402
+#: set.c:4450
 #, fuzzy
 msgid "You must specify a positive autosave time in minutes"
 msgstr "Musíte zadat nezáporné číslo."
@@ -10272,33 +10327,33 @@ msgstr "Musíte zadat nezáporné číslo."
 msgid "warning: no backgammon games in SGF file"
 msgstr "varování: v SGF souboru nejsou žádné hry backgammonu"
 
-#: sgf.c:1436
+#: sgf.c:1432
 msgid "You must specify a file to load from (see `help load game')."
 msgstr ""
 "Musíte zadat soubor, ze kterého se má hra načíst (vizte „help load game“)."
 
-#: sgf.c:1487
+#: sgf.c:1484
 msgid "You must specify a file to load from (see `help load position')."
 msgstr ""
 "Musíte zadat soubor, ze kterého se má pozice načíst (vizte „help load "
 "position“)."
 
-#: sgf.c:1535
+#: sgf.c:1532
 msgid "You must specify a file to load from (see `help load match')."
 msgstr ""
 "Musíte zadat soubor, ze kterého se má zápas načíst (vizte „help load match“)."
 
-#: sgf.c:2358
+#: sgf.c:2356
 msgid "You must specify a file to save to (see `help save game')."
 msgstr ""
 "Musíte zadat soubor, do kterého se má hra uložit (vizte „help save game“)."
 
-#: sgf.c:2398
+#: sgf.c:2396
 msgid "You must specify a file to save to (see `help save match')."
 msgstr ""
 "Musíte zadat soubor, do kterého se má zápas uložit (vizte „help save match“)."
 
-#: sgf.c:2444
+#: sgf.c:2442
 msgid "You must specify a file to save to (see `help save position')."
 msgstr ""
 "Musíte zadat soubor, do kterého se má pozice uložit (vizte „help save "
@@ -10711,19 +10766,23 @@ msgid "    Move filters:"
 msgstr "    Filtry tahů:"
 
 #: show.c:722
-msgid "This money session is play with the Jacoby rule. Default is:"
+#, fuzzy
+msgid "This money session is played with the Jacoby rule."
 msgstr "Toto sezení o peníze se hraje s Jacobyho pravidlem. Implicitní je:"
 
 #: show.c:724
-msgid "This money session is play without the Jacoby rule. Default is:"
+#, fuzzy
+msgid "This money session is played without the Jacoby rule."
 msgstr "Toto sezení o peníze se hraje bez Jacobyho pravidla. Implicitní je:"
 
 #: show.c:728
-msgid "Money sessions are played with the Jacoby rule."
+#, fuzzy
+msgid "New money sessions are played with the Jacoby rule."
 msgstr "V sezeních o peníze se používá Jacobyho pravidlo."
 
 #: show.c:730
-msgid "Money sessions are played without the Jacoby rule."
+#, fuzzy
+msgid "New money sessions are played without the Jacoby rule."
 msgstr "V sezeních o peníze se nepoužívá Jacobyho pravidlo."
 
 #: show.c:737
@@ -11137,6 +11196,10 @@ msgstr "Desky se budou zobrazovat v syrovém formátu.\n"
 #, c-format
 msgid "Boards will be shown in ASCII.\n"
 msgstr "Desky se budou zobrazovat v ASCII.\n"
+
+#: show.c:1488
+msgid "AUTHORS"
+msgstr "AUTOŘI"
 
 #: show.c:1549
 #, c-format
@@ -11567,74 +11630,99 @@ msgstr ""
 msgid "Match will not be autosaved during and after analysis\n"
 msgstr ""
 
-#: sound.c:162
+#: sound.c:121
+#, c-format
+msgid "PlaySound_QuickTime: error #%d opening %s.\n"
+msgstr ""
+
+#: sound.c:129
+#, c-format
+msgid "PlaySound_QuickTime: error #%d reading %s.\n"
+msgstr ""
+
+#: sound.c:169
+#, c-format
+msgid "Apple CoreAudio Error ("
+msgstr ""
+
+#: sound.c:188
+#, c-format
+msgid "Apple CoreAudio Error, can't find %s\n"
+msgstr ""
+
+#: sound.c:314
 msgid "Starting GNU Backgammon"
 msgstr "Spuštění GNU Backgammonu"
 
-#: sound.c:163
+#: sound.c:315
 msgid "Exiting GNU Backgammon"
 msgstr "Odchod z GNU Backgammonu"
 
-#: sound.c:164
+#: sound.c:316
 msgid "Agree"
 msgstr "Souhlas"
 
-#: sound.c:165
+#: sound.c:317
 msgid "Doubling"
 msgstr "Zdvojnásobení"
 
-#: sound.c:167
+#: sound.c:319
 msgid "Chequer movement"
 msgstr "Tah kamenem"
 
-#: sound.c:169
+#: sound.c:321
 msgid "Redouble"
 msgstr "Zdvojnásobení"
 
-#: sound.c:173
+#: sound.c:325
 msgid "Human fans"
 msgstr "Člověk zuří"
 
-#: sound.c:174
+#: sound.c:326
 msgid "Human wins game"
 msgstr "Člověk vyhrává hru"
 
-#: sound.c:175
+#: sound.c:327
 msgid "Human wins match"
 msgstr "Člověk vyhrává zápas"
 
-#: sound.c:176
+#: sound.c:328
 msgid "Bot fans"
 msgstr "Bot zuří"
 
-#: sound.c:177
+#: sound.c:329
 msgid "Bot wins game"
 msgstr "Bot vyhrává hru"
 
-#: sound.c:178
+#: sound.c:330
 msgid "Bot wins match"
 msgstr "Bot vyhrává zápas"
 
-#: sound.c:179
+#: sound.c:331
 msgid "Analysis is finished"
 msgstr "Analýza dokončena"
 
-#: sound.c:213
+#: sound.c:368
 #, c-format
 msgid "The sound file (%s) doesn't exist.\n"
 msgstr "Zvukový soubor (%s) neexistuje.\n"
 
-#: sound.c:224
+#: sound.c:379
 #, c-format
 msgid "sound command (%s) could not be launched: %s\n"
 msgstr "zvukový příkaz (%s) nelze spustit: %s\n"
 
-#: sound.c:363
+#: sound.c:406
+#, fuzzy
+msgid "Playing sound"
+msgstr "Nastavení hráčů"
+
+#: sound.c:529
 #, c-format
 msgid "No sound played for: %s\n"
 msgstr "Pro %s se nebude přehrávat zvuk\n"
 
-#: sound.c:366
+#: sound.c:532
 #, c-format
 msgid "Sound for: %s: %s\n"
 msgstr "Pro %s je nastaven zvuk %s\n"
@@ -11837,6 +11925,16 @@ msgid "You must specify a file to export to (see `help export position text')."
 msgstr ""
 "Musíte zadat soubor, do kterého se má exportovat (vizte „help export "
 "position text“)."
+
+#~ msgid "Create new neural net (of size N)"
+#~ msgstr "Vytvořit novou neuronovou síť (velikosti N)"
+
+#~ msgid "Name:"
+#~ msgstr "Jméno:"
+
+#, fuzzy
+#~ msgid "/_Settings/_Save settings"
+#~ msgstr "/Nas_tavení/Uložit nastavení"
 
 #~ msgid "Standard backgammon with Nackgammon starting position"
 #~ msgstr "Standardní backgammon s počáteční pozicí Nackgammon"
