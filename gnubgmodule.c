@@ -37,15 +37,6 @@
 
 #define UNUSED_PARAM __attribute__ ((unused))
 
-typedef struct {
-	int anDice[ 2 ];
-	int fTurn;
-	int fResigned;
-	int fDoubled;
-	gamestate gs;   
-} posinfo;
-
-
 static PyObject *
 BoardToPy( const TanBoard anBoard )
 {

@@ -23,6 +23,15 @@
 #define _MATCHID_H_
 
 #define L_MATCHID 12
+
+typedef struct {
+        int anDice[ 2 ];
+        int fTurn;
+        int fResigned;
+        int fDoubled;
+        gamestate gs;
+} posinfo;
+
 extern int
 LogCube ( const int n );
 
