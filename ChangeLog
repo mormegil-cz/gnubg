@@ -1,3 +1,12 @@
+2011-03-22  Michael Petch  <mpetch@capp-sysware.com>
+
+	*  gtkgame.c, simpleboard.c, gnubgmodule.c, matchid.c
+	matchid.h, configure.in, play.c : Began adding support
+	for an extended matchID that includes Jacoby. While in
+	testing phase ./configure supports  --enable-extmatchid
+	and a USE_EXTENDEDMATCHID define in config.h. By default
+	builds do not have this feature turned on.
+
 2011-03-20  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* gnubg.c: Fixed missing handling of MOVE_SETBOARD records in
