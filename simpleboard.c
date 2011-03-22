@@ -527,6 +527,9 @@ extern SimpleBoard *simple_board_new_from_ids(gchar * position_id,
 	     &board->ms.fResigned, &board->ms.fDoubled, &board->ms.fMove,
 	     &board->ms.fCubeOwner, &board->ms.fCrawford,
 	     &board->ms.nMatchTo, board->ms.anScore, &board->ms.nCube,
+#if USE_EXTENDEDMATCHID 
+	     &board->ms.fJacoby,
+#endif	     
 	     &board->ms.gs, match_id))
 		return (NULL);
 

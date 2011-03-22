@@ -46,10 +46,14 @@ MatchID ( const unsigned int anDice[ 2 ],
           const int nMatchTo,
           const int anScore[ 2 ],
           const int nCube,
+#if USE_EXTENDEDMATCHID 
+			 const int fJacoby,
+#endif          
+
           const gamestate gs );
 
 extern char*
-MatchIDFromKey( unsigned char auchKey[ 8 ] );
+MatchIDFromKey( unsigned char auchKey[ 9 ] );
 
 extern int
 MatchFromID ( unsigned int anDice[ 2 ],
@@ -62,6 +66,9 @@ MatchFromID ( unsigned int anDice[ 2 ],
               int *pnMatchTo,
               int anScore[ 2 ],
               int *pnCube,
+#if USE_EXTENDEDMATCHID 
+              int *pfJacoby,
+#endif  
               gamestate *pgs,
               const char *szMatchID );
 
@@ -76,6 +83,9 @@ MatchFromKey ( int anDice[ 2 ],
                int *pnMatchTo,
                int anScore[ 2 ],
                int *pnCube,
+#if USE_EXTENDEDMATCHID 
+               int *pfJacoby,
+#endif               
                gamestate *pgs,
                const unsigned char *auchKey );
 

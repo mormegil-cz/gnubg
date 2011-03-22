@@ -517,7 +517,12 @@ extern void update_gnubg_id(BoardData * bd, const TanBoard points)
 			      MatchID(bd->diceRoll, ms.fTurn, ms.fResigned,
 				      ms.fDoubled, ms.fMove, fCubeOwner,
 				      bd->crawford_game, bd->match_to,
+#if USE_EXTENDEDMATCHID
+				      anScore, bd->cube, ms.fJacoby, ms.gs));
+#else
 				      anScore, bd->cube, ms.gs));
+#endif
+				      
 	gtk_label_set_text(GTK_LABEL(pwGnubgID), str);
 	g_free(str);
 }
@@ -3443,6 +3448,9 @@ extern void board_edit( BoardData *bd )
                                          nMatchToNew,
                                          anScoreNew,
                                          bd->cube,
+#if USE_EXTENDEDMATCHID
+                                         ms.fJacoby,
+#endif                                         
                                          ms.gs ) );
           UserCommand( sz );
           g_free( sz );
