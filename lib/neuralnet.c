@@ -33,23 +33,6 @@
 #include "sse.h"
 #include "sigmoid.h"
 
-static int frc;
-static randctx rc; /* for irand */
-
-static void CheckRC( void )
-{
-    if( !frc ) {
-        int i;
-
-        rc.randrsl[ 0 ] = (ub4)time( NULL );
-        for( i = 0; i < RANDSIZ; i++ )
-           rc.randrsl[ i ] = rc.randrsl[ 0 ];
-        irandinit( &rc, TRUE );
-
-        frc = TRUE;
-    }
-}
-
 /* separate context for race, crashed, contact
    -1: regular eval
     0: save base
@@ -123,20 +106,6 @@ extern int NeuralNetCreate( neuralnet *pnn, unsigned int cInput, unsigned int cH
 		sse_free( pnn->arHiddenWeight );
 		return -1;
     }
-
-    CheckRC();
-
-    for( i = cHidden * cInput, pf = pnn->arHiddenWeight; i; i-- )
-		*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0f;
-    
-    for( i = cOutput * cHidden, pf = pnn->arOutputWeight; i; i-- )
-		*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0f;
-    
-    for( i = cHidden, pf = pnn->arHiddenThreshold; i; i-- )
-		*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0f;
-    
-    for( i = cOutput, pf = pnn->arOutputThreshold; i; i-- )
-		*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0f;
 
     return 0;
 }
@@ -284,85 +253,6 @@ extern int NeuralNetEvaluate( const neuralnet *pnn, float arInput[],
         break;
       }
     }
-    return 0;
-}
-
-extern int NeuralNetResize( neuralnet *pnn, unsigned int cInput, unsigned int cHidden,
-			    unsigned int cOutput )
-{
-    unsigned int i, j;
-    float *pr, *prNew;
-
-    CheckRC();
-    
-    if( cHidden != pnn->cHidden ) {
-		if( ( pnn->arHiddenThreshold = (float*)realloc( pnn->arHiddenThreshold,
-				cHidden * sizeof( float ) ) ) == NULL )
-			return -1;
-
-	for( i = pnn->cHidden; i < cHidden; i++ )
-	    pnn->arHiddenThreshold[ i ] = ( ( irand( &rc ) & 0xFFFF ) -
-					    0x8000 ) / 131072.0f;
-    }
-    
-    if( cHidden != pnn->cHidden || cInput != pnn->cInput ) {
-		if( ( pr = sse_malloc( cHidden * cInput * sizeof( float ) ) ) == NULL )
-			return -1;
-
-		prNew = pr;
-		
-		for( i = 0; i < cInput; i++ )
-			for( j = 0; j < cHidden; j++ )
-			if( j >= pnn->cHidden )
-				*prNew++ = ( ( irand( &rc ) & 0xFFFF ) - 0x8000 ) /
-				131072.0f;
-			else if( i >= pnn->cInput )
-				*prNew++ = ( ( irand( &rc ) & 0x0FFF ) - 0x0800 ) /
-				131072.0f;
-			else
-				*prNew++ = pnn->arHiddenWeight[ i * pnn->cHidden + j ];
-			    
-		sse_free( pnn->arHiddenWeight );
-
-		pnn->arHiddenWeight = pr;
-    }
-	
-    if( cOutput != pnn->cOutput ) {
-		if( ( pnn->arOutputThreshold = (float*)realloc( pnn->arOutputThreshold,
-			cOutput * sizeof( float ) ) ) == NULL )
-			return -1;
-
-		for( i = pnn->cOutput; i < cOutput; i++ )
-			pnn->arOutputThreshold[ i ] = ( ( irand( &rc ) & 0xFFFF ) -
-							0x8000 ) / 131072.0f;
-    }
-    
-    if( cOutput != pnn->cOutput || cHidden != pnn->cHidden ) {
-		if( ( pr = sse_malloc( cOutput * cHidden * sizeof( float ) ) ) == NULL )
-			return -1;
-
-		prNew = pr;
-		
-		for( i = 0; i < cHidden; i++ )
-			for( j = 0; j < cOutput; j++ )
-			if( j >= pnn->cOutput )
-				*prNew++ = ( ( irand( &rc ) & 0xFFFF ) - 0x8000 ) /
-				131072.0f;
-			else if( i >= pnn->cHidden )
-				*prNew++ = ( ( irand( &rc ) & 0x0FFF ) - 0x0800 ) /
-				131072.0f;
-			else
-				*prNew++ = pnn->arOutputWeight[ i * pnn->cOutput + j ];
-
-		sse_free( pnn->arOutputWeight );
-
-		pnn->arOutputWeight = pr;
-    }
-
-    pnn->cInput = cInput;
-    pnn->cHidden = cHidden;
-    pnn->cOutput = cOutput;
-    
     return 0;
 }
 

@@ -1,3 +1,9 @@
+2011-03-22  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* neuralnet.c, neuralnet.h : Remove unused NeuralNetResize(),
+	simplify NeuralNetCreate(). Use of untrained nets has been removed
+	for some time.
+
 2011-02-08  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* neuralnetsse.c, neuralnet.h : Øystein Johansen's patch to handle

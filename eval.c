@@ -241,6 +241,7 @@ enum {
 
 #define NUM_INPUTS ((25 * MINPPERPOINT + MORE_INPUTS) * 2)
 #define NUM_RACE_INPUTS ( HALF_RACE_INPUTS * 2 )
+#define NUM_PRUNING_INPUTS (25 * MINPPERPOINT * 2)
 
 #define DATABASE1_SIZE ( 54264 * 32 * 2 )
 #define DATABASE2_SIZE ( 924 * 924 * 2 )
@@ -732,30 +733,19 @@ extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 
 	g_assert(fReadWeights);
 
-	if( nnContact.cInput != NUM_INPUTS || nnContact.cOutput != NUM_OUTPUTS )
-	{
-		if (NeuralNetResize( &nnContact, NUM_INPUTS, nnContact.cHidden, NUM_OUTPUTS ) == -1)
-		{
-			PrintError( "NeuralNetResize" );
-			return;
-		}
-	}
-	if( nnCrashed.cInput != NUM_INPUTS || nnCrashed.cOutput != NUM_OUTPUTS )
-	{
-		if (NeuralNetResize( &nnCrashed, NUM_INPUTS, nnCrashed.cHidden, NUM_OUTPUTS ) == -1)
-		{
-			PrintError( "NeuralNetResize" );
-			return;
-		}
-	}		
-	if( nnRace.cInput != NUM_RACE_INPUTS || nnRace.cOutput != NUM_OUTPUTS )
-	{
-		if (NeuralNetResize( &nnRace, NUM_RACE_INPUTS, nnRace.cHidden, NUM_OUTPUTS ) == -1)
-		{
-			PrintError( "NeuralNetResize" );
-			return;
-		}
-	}
+	g_assert(nnContact.cInput == NUM_INPUTS
+			&& nnContact.cOutput == NUM_OUTPUTS);
+        g_assert(nnCrashed.cInput == NUM_INPUTS
+                        && nnCrashed.cOutput == NUM_OUTPUTS);
+        g_assert(nnRace.cInput == NUM_RACE_INPUTS
+                        && nnRace.cOutput == NUM_OUTPUTS);
+
+        g_assert(nnpContact.cInput == NUM_PRUNING_INPUTS
+                        && nnpContact.cOutput == NUM_OUTPUTS);
+        g_assert(nnpCrashed.cInput == NUM_PRUNING_INPUTS
+                        && nnpCrashed.cOutput == NUM_OUTPUTS);
+        g_assert(nnpRace.cInput == NUM_PRUNING_INPUTS
+                        && nnpRace.cOutput == NUM_OUTPUTS);
 
 {
 	int j;

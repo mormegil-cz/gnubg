@@ -60,7 +60,6 @@ extern int NeuralNetCreate(neuralnet *pnn, unsigned int cInput, unsigned int cHi
 extern void NeuralNetDestroy(neuralnet *pnn);
 extern int NeuralNetEvaluate(const neuralnet *pnn, float arInput[], float arOutput[], NNState *pnState);
 extern int NeuralNetEvaluateSSE(const neuralnet *pnn, float arInput[], float arOutput[], NNState *pnState);
-extern int NeuralNetResize(neuralnet *pnn, unsigned int cInput, unsigned int cHidden, unsigned int cOutput);
 extern int NeuralNetLoad(neuralnet *pnn, FILE *pf);
 extern int NeuralNetLoadBinary(neuralnet *pnn, FILE *pf);
 extern int NeuralNetSaveBinary(const neuralnet *pnn, FILE *pf);
