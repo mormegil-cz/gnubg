@@ -2510,11 +2510,11 @@ static gint board_set( Board *board, const gchar *board_text, const gint
         score_changed( NULL, bd );
 
 	if (bd->crawford){
-	    SetCrawfordToggle(bd);
+//	    SetCrawfordToggle(bd);
 	    gtk_widget_set_sensitive( bd->crawford, FALSE);
 	} 
 	if (bd->jacoby) {
-	    SetJacobyToggle(bd);
+//	    SetJacobyToggle(bd);
 	    gtk_widget_set_sensitive( bd->jacoby, FALSE );
 	}
 
@@ -3490,19 +3490,21 @@ extern void board_edit( BoardData *bd )
 	    UserCommand( sz );
 	}
 
-	if (crawford != bd->crawford_game)
-	{
+	if (nMatchToNew && crawford != bd->crawford_game) {
 		sprintf( sz, "set crawford %s", crawford ? "on" : "off" );
 		UserCommand( sz );
-		SetCrawfordToggle(bd);
-	}
-	if (jacoby != bd->jacoby_flag)
-	{
+		bd->jacoby_flag = jacoby = FALSE;
+//		SetCrawfordToggle(bd);
+	} else if (!nMatchToNew && jacoby != bd->jacoby_flag) {
 		bd->jacoby_flag = jacoby;
-		SetJacobyToggle(bd);
+		bd->crawford_game = crawford = FALSE;
+		sprintf( sz, "set crawford %s", crawford ? "on" : "off" );
+//		SetJacobyToggle(bd);
 	}
 
-        if ( nMatchToNew != ms.nMatchTo || crawford != ms.fCrawford || jacoby != ms.fJacoby) {
+
+
+        if ( nMatchToNew != ms.nMatchTo ) {// || crawford != ms.fCrawford || jacoby != ms.fJacoby) {
           /* new match length; issue "set matchid ..." command */
           gchar *sz;
           int i;
