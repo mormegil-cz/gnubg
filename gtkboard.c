@@ -3413,7 +3413,7 @@ extern void board_edit( BoardData *bd )
     update_move( bd );
     update_buttons( bd );
 
-    if (bd->crawford) // && !bd->crawford_game)
+    if (bd->crawford) 
 	gtk_widget_set_sensitive(bd->crawford, f);
 
     if (bd->jacoby) 
