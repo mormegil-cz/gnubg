@@ -62,7 +62,7 @@ typedef enum _DiceShown {
 struct _BoardData {
 	GtkWidget *drawing_area, *dice_area, *table, *wmove,
 	    *reset, *edit, *name0, *name1, *score0, *score1,
-	    *crawford, *widget, *key0, *key1, *stop, *stopparent,
+	    *crawford, *jacoby, *widget, *key0, *key1, *stop, *stopparent,
 	    *doub, *lname0, *lname1, *lscore0, *lscore1, *mname0, *mname1, *mscore0, *mscore1, *play;
 	GtkWidget *mmatch, *lmatch, *match;
 	GtkAdjustment *amatch, *ascore0, *ascore1;
@@ -70,6 +70,7 @@ struct _BoardData {
 	GtkWidget *take, *drop, *redouble;
 	GtkWidget *pipcount0, *pipcount1;
 	GtkWidget *pipcountlabel0, *pipcountlabel1;
+	GtkWidget *pwvboxcnt;
 
 	GdkGC *gc_and, *gc_or, *gc_copy, *gc_cube;
 	GdkPixmap *appmKey[2];
@@ -105,6 +106,7 @@ struct _BoardData {
 	gint on_bar, on_bar_opponent;	/* number of men on bar */
 	gint to_move;		/* 0 to 4 -- number of pieces to move */
 	gint forced, crawford_game;	/* unused, Crawford game flag */
+	gint jacoby_flag;		/* jacoby enabled flag */
 	gint redoubles;		/* number of instant redoubles allowed */
 	int DragTargetHelp;	/* Currently showing draw targets? */
 	int iTargetHelpPoints[4];	/* Drag target position */

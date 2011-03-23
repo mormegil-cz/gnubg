@@ -3415,6 +3415,7 @@ extern void InitGTK(int *argc, char ***argv)
 	clipboard = gtk_clipboard_get(cb);
 }
 
+
 #ifndef WIN32
 static gint python_run_file (gpointer file)
 { 
@@ -3450,6 +3451,7 @@ extern void RunGTK( GtkWidget *pwSplash, char *commands, char *python_script, ch
 		GTKSet( ap );
 		GTKSet( &ms.fTurn );
 		GTKSet( &ms.gs );
+		GTKSet( &ms.fJacoby );
 	    
 		PushSplash ( pwSplash, _("Rendering"), _("Board") );
 
@@ -3847,6 +3849,7 @@ extern int edit_new(unsigned int length)
 	ms.fDoubled = 0;
 	ms.fCubeOwner = -1;
 	ms.fCrawford = FALSE;
+	ms.fJacoby = fJacoby;
 	ms.anScore[0] = ms.anScore[1] = 0; 
 	ms.nCube = 0;
 	ms.gs = GAME_PLAYING;
@@ -5811,6 +5814,13 @@ extern void GTKSet( void *p ) {
     GL_SetNames();
 
 	GTKRegenerateGames();
+
+    } else if( p == &ms.fJacoby ) {
+        bd->jacoby_flag = ms.fJacoby;
+        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->jacoby ),
+                                      bd->jacoby_flag );
+  	ShowBoard();
+
     } else if( p == &ms.fTurn ) {
 	/* Handle the player on roll. */
 	fAutoCommand = TRUE;

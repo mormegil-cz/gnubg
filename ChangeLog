@@ -1,5 +1,19 @@
 2011-03-22  Michael Petch  <mpetch@capp-sysware.com>
 
+	*  gnubg.c, gtkgame.c, gtkboard.c, matchid.c, play.c
+	set.c, gtkboard.h: Improve support for Jacoby. 
+	- When using extended Match ID's - Jacoby comes from 
+	  the ID, 
+	- When using regular ID's Jacoby is decided by the
+	  global "Jacoby" setting in options. 
+	- Fixed bug with Jacoby being read from an extended ID. 
+	- Added Jacoby flag to the table. When MatchLen is
+	  0 (money session) Crawford flag replaced by Jacoby
+	  and vice versa.
+	- Fixed some editing issues with Crawford
+
+2011-03-22  Michael Petch  <mpetch@capp-sysware.com>
+
 	*  gtkgame.c, simpleboard.c, gnubgmodule.c, matchid.c
 	matchid.h, configure.in, play.c : Began adding support
 	for an extended matchID that includes Jacoby. While in

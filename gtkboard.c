@@ -78,6 +78,7 @@ int animate_player, *animate_move_list, animation_finished = TRUE;
 static GtkVBoxClass *parent_class = NULL;
 static randctx rc;
 
+
 typedef struct _SetDiceData
 {
 	unsigned char *TTachDice[2], *TTachPip[2], *TTachGrayDice, *TTachGrayPip;
@@ -104,6 +105,7 @@ extern GtkWidget *board_new(renderdata* prd)
 	bd->rd = prd;
 	bd->rd->nSize = (unsigned int)-1;
 
+	bd->jacoby_flag = ms.fJacoby;
 	bd->crawford_game = 0;
 	bd->cube = 1;
 	bd->cube_use = 0;
@@ -140,6 +142,7 @@ extern void InitBoardPreview(BoardData *bd)
 	InitialPos(bd);
 	bd->cube_use = 1;
 	bd->crawford_game = 0;
+	bd->jacoby_flag = ms.fJacoby;
 	bd->doubled = bd->cube_owner = bd->cube = 0;
 	bd->resigned = 0;
 	bd->diceShown = DICE_ON_BOARD;
@@ -2314,10 +2317,12 @@ extern void RollDice2d(BoardData* bd)
 
 static void board_set_crawford( GtkWidget *pw, BoardData *bd ); /* recursion
 								 */
+static void board_set_jacoby( GtkWidget *pw, BoardData *bd );
+static void match_change_val ( GtkWidget *pw, BoardData *bd );
 
 static void SetCrawfordToggle(BoardData* bd)
 {
-	if (bd->crawford_game != gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(bd->crawford)))
+	if (bd->crawford && (bd->crawford_game != gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(bd->crawford))))
 	{
 		/* Block handler to stop warning message in click handler */
 		g_signal_handlers_block_by_func(G_OBJECT(bd->crawford), G_CALLBACK( board_set_crawford ), bd);
@@ -2326,6 +2331,19 @@ static void SetCrawfordToggle(BoardData* bd)
 		g_signal_handlers_unblock_by_func(G_OBJECT(bd->crawford), G_CALLBACK( board_set_crawford ), bd);
 	}
 }
+
+static void SetJacobyToggle(BoardData* bd)
+{
+	if (bd->jacoby && (bd->jacoby_flag != gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(bd->jacoby))))
+	{
+		/* Block handler to stop warning message in click handler */
+		g_signal_handlers_block_by_func(G_OBJECT(bd->jacoby), G_CALLBACK( board_set_jacoby ), bd);
+		gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->jacoby ),
+				      bd->jacoby_flag );
+		g_signal_handlers_unblock_by_func(G_OBJECT(bd->jacoby), G_CALLBACK( board_set_jacoby ), bd);
+	}
+}
+
 
 static int board_text_to_setting (const gchar **board_text, gint *failed)
 {
@@ -2353,6 +2371,7 @@ static gint board_set( Board *board, const gchar *board_text, const gint
     int old_xResign, old_yResign;
     int old_turn;
     int old_diceShown;
+    int old_jacoby;
     int redrawNeeded = 0;
     gint failed = 0;
     
@@ -2367,7 +2386,8 @@ static gint board_set( Board *board, const gchar *board_text, const gint
     old_dice[ 1 ] = bd->diceRoll[ 1 ];
     old_diceShown = bd->diceShown;
     old_turn = bd->turn;
-    
+    old_jacoby = bd->jacoby_flag;    
+
     editing = bd->playing && ToolbarIsEditing( pwToolbar );
 
     if( strncmp( board_text, "board:", 6 ) )
@@ -2414,6 +2434,7 @@ static gint board_set( Board *board, const gchar *board_text, const gint
     old_cube = bd->cube;
     old_doubled = bd->doubled;
     old_crawford = bd->crawford_game;
+    old_jacoby = bd->jacoby_flag;
     old_resigned = bd->resigned;
 
     CubePosition( bd->crawford_game, bd->cube_use, bd->doubled, bd->cube_owner, fClockwise, &old_xCube, &old_yCube, NULL);
@@ -2442,6 +2463,7 @@ static gint board_set( Board *board, const gchar *board_text, const gint
     bd->forced = board_text_to_setting (&board_text, &failed);
     bd->crawford_game = board_text_to_setting (&board_text, &failed);
     bd->redoubles = board_text_to_setting (&board_text, &failed);
+    bd->jacoby_flag = ms.fJacoby;
     if (failed)
 	    return -1;
 
@@ -2474,9 +2496,10 @@ static gint board_set( Board *board, const gchar *board_text, const gint
 	if( bd->match_to ) {
 	    sprintf( buf, "%d", bd->match_to );
 	    gtk_label_set_text( GTK_LABEL( bd->lmatch ), buf );
-	} else
+	} else {
 	    gtk_label_set_text( GTK_LABEL( bd->lmatch ), _("unlimited") );
-
+	}
+        gtk_adjustment_value_changed ( GTK_ADJUSTMENT ( bd->amatch ) );
         gtk_spin_button_set_value( GTK_SPIN_BUTTON( bd->score0 ),
                                    bd->score_opponent );
         gtk_spin_button_set_value( GTK_SPIN_BUTTON( bd->score1 ),
@@ -2486,8 +2509,14 @@ static gint board_set( Board *board, const gchar *board_text, const gint
 
         score_changed( NULL, bd );
 
-	SetCrawfordToggle(bd);
-	gtk_widget_set_sensitive( bd->crawford, bd->crawford_game);
+	if (bd->crawford){
+	    SetCrawfordToggle(bd);
+	    gtk_widget_set_sensitive( bd->crawford, FALSE);
+	} 
+	if (bd->jacoby) {
+	    SetJacobyToggle(bd);
+	    gtk_widget_set_sensitive( bd->jacoby, FALSE );
+	}
 
 	read_board( bd, bd->old_board );
 	update_pipcount ( bd, (ConstTanBoard)bd->old_board );
@@ -2617,7 +2646,8 @@ static gint board_set( Board *board, const gchar *board_text, const gint
         bd->cube != old_cube ||
 	bd->cube_owner != bd->opponent_can_double - bd->can_double ||
 	cube_use != bd->cube_use || 
-        bd->crawford_game != old_crawford ) {
+        bd->crawford_game != old_crawford  ||
+        bd->jacoby_flag != old_jacoby ) {
 	int xCube, yCube;
 #if USE_BOARD3D
 	int old_cube_owner = bd->cube_owner;
@@ -3337,6 +3367,27 @@ static void board_show_all( GtkWidget *pw )
     gtk_widget_show( pw );
 }
 
+static void match_change_val ( GtkWidget *pw, BoardData *bd )
+{
+    int nMatchLen = (int)gtk_adjustment_get_value ( GTK_ADJUSTMENT( bd->amatch ) );
+    if (nMatchLen && gtk_widget_get_parent_window ( GTK_WIDGET ( bd->jacoby ) ) ) {
+	bd->jacoby_flag = 0;
+	SetJacobyToggle (bd);
+        gtk_container_remove( GTK_CONTAINER( bd->pwvboxcnt ), bd->jacoby );
+        gtk_container_add   ( GTK_CONTAINER( bd->pwvboxcnt ), bd->crawford );
+	gtk_widget_show  (bd->crawford);
+    } else if (nMatchLen == 0 && gtk_widget_get_parent_window ( GTK_WIDGET ( bd->crawford ) ) ) {
+	bd->crawford_game = 0;
+	SetCrawfordToggle (bd);
+        gtk_container_remove( GTK_CONTAINER( bd->pwvboxcnt ), bd->crawford );
+        gtk_container_add   ( GTK_CONTAINER( bd->pwvboxcnt ), bd->jacoby );
+	gtk_widget_show  (bd->jacoby);
+	bd->jacoby_flag = fJacoby;
+	SetJacobyToggle (bd);
+    }
+
+}
+
 static void board_set_crawford( GtkWidget *pw, BoardData *bd )
 {
 	/* Don't allow changes unless editing */
@@ -3348,6 +3399,17 @@ static void board_set_crawford( GtkWidget *pw, BoardData *bd )
 	}
 }
 
+static void board_set_jacoby( GtkWidget *pw, BoardData *bd )
+{
+	/* Don't allow changes unless editing */
+	if (!ToolbarIsEditing( pwToolbar ))
+	{
+		SetJacobyToggle(bd);
+		outputl(_("You can only enable Jacoby while editing a position"));
+		outputx();
+	}
+}
+
 extern void board_edit( BoardData *bd )
 {
     int f = ToolbarIsEditing( pwToolbar );
@@ -3355,8 +3417,11 @@ extern void board_edit( BoardData *bd )
     update_move( bd );
     update_buttons( bd );
 
-    if (!bd->crawford_game)
+    if (bd->crawford) // && !bd->crawford_game)
 	gtk_widget_set_sensitive(bd->crawford, f);
+
+    if (bd->jacoby) 
+	gtk_widget_set_sensitive(bd->jacoby, f);
 
     if (fGUIGrayEdit)
 	    bd->grayBoard = f;
@@ -3390,14 +3455,18 @@ extern void board_edit( BoardData *bd )
     } else {
 	/* Editing complete; set board. */
         TanBoard points;
-		int anScoreNew[ 2 ], nMatchToNew, crawford;
+		int anScoreNew[ 2 ], nMatchToNew, crawford, jacoby;
 	const char *pch0, *pch1;
 	char sz[ 64 ]; /* "set board XXXXXXXXXXXXXX" */
 
 	/* We need to query all the widgets before issuing any commands,
 	   since those commands have side effects which disturb other
 	   widgets. */
-	crawford = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->crawford ) );
+	if (bd->crawford)
+  		crawford = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->crawford ) );
+	if (bd->jacoby)
+		jacoby = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->jacoby ) );
+	
 	pch0 = gtk_entry_get_text( GTK_ENTRY( bd->name0 ) );
 	pch1 = gtk_entry_get_text( GTK_ENTRY( bd->name1 ) );
 	anScoreNew[ 0 ] = (int)GTK_SPIN_BUTTON( bd->score0 )->adjustment->value;
@@ -3424,7 +3493,19 @@ extern void board_edit( BoardData *bd )
 	    UserCommand( sz );
 	}
 
-        if ( nMatchToNew != ms.nMatchTo ) {
+	if (crawford != bd->crawford_game)
+	{
+		sprintf( sz, "set crawford %s", crawford ? "on" : "off" );
+		UserCommand( sz );
+		SetCrawfordToggle(bd);
+	}
+	if (jacoby != bd->jacoby_flag)
+	{
+		bd->jacoby_flag = jacoby;
+		SetJacobyToggle(bd);
+	}
+
+        if ( nMatchToNew != ms.nMatchTo || crawford != ms.fCrawford || jacoby != ms.fJacoby) {
           /* new match length; issue "set matchid ..." command */
           gchar *sz;
           int i;
@@ -3449,7 +3530,7 @@ extern void board_edit( BoardData *bd )
                                          anScoreNew,
                                          bd->cube,
 #if USE_EXTENDEDMATCHID
-                                         ms.fJacoby,
+                                         bd->jacoby_flag,
 #endif                                         
                                          ms.gs ) );
           UserCommand( sz );
@@ -3462,13 +3543,6 @@ extern void board_edit( BoardData *bd )
           sprintf( sz, "set score %d %d", anScoreNew[ 0 ],
                    anScoreNew[ 1 ] );
           UserCommand( sz );
-	}
-
-	if (crawford != bd->crawford_game)
-	{
-		sprintf( sz, "set crawford %s", crawford ? "on" : "off" );
-		UserCommand( sz );
-		SetCrawfordToggle(bd);
 	}
 
 	outputresume();
@@ -3625,6 +3699,7 @@ static void board_init( Board *board )
     bd->drag_point = -1;
 
     bd->crawford_game = FALSE;
+    bd->jacoby_flag = ms.fJacoby;
     bd->playing = FALSE;
     bd->cube_use = TRUE;    
     bd->all_moves = NULL;
@@ -3853,16 +3928,30 @@ static void board_init( Board *board )
     bd->amatch = 
       GTK_ADJUSTMENT( gtk_adjustment_new( 0, 0, MAXSCORE, 1, 1, 0 ) );
     bd->match = gtk_spin_button_new( GTK_ADJUSTMENT( bd->amatch ), 1, 0 );
+
+    g_signal_connect( G_OBJECT( bd->match ), "value-changed",
+			G_CALLBACK( match_change_val ), bd );
+
     gtk_container_add( GTK_CONTAINER( bd->mmatch ), bd->match );
 
-    /* crawford flag */
+    /* crawford and jacoby flag */
 
-    gtk_box_pack_start ( GTK_BOX ( pwvbox ),
-                        bd->crawford =
-                        gtk_check_button_new_with_label( _("Crawford game") ),
-                        FALSE, FALSE, 0 );
+    bd->crawford = gtk_check_button_new_with_label( _("Crawford game"));
     g_signal_connect( G_OBJECT( bd->crawford ), "toggled",
-			G_CALLBACK( board_set_crawford ), bd );
+	              G_CALLBACK( board_set_crawford ), bd );
+    bd->jacoby = gtk_check_button_new_with_label( _("Jacoby"));
+    g_signal_connect( G_OBJECT( bd->jacoby ), "toggled",
+	              G_CALLBACK( board_set_jacoby ), bd );
+
+    bd->pwvboxcnt = gtk_event_box_new();
+    gtk_container_add( GTK_CONTAINER( bd->pwvboxcnt ), bd->crawford );
+    gtk_box_pack_start ( GTK_BOX ( pwvbox ),
+                         bd->pwvboxcnt,
+                       	 FALSE, FALSE, 0 );
+    
+    gtk_widget_ref(bd->jacoby);
+    gtk_widget_ref(bd->crawford);
+    gtk_adjustment_value_changed ( GTK_ADJUSTMENT ( bd->amatch ) );
 
 
     /* dice drawing area */

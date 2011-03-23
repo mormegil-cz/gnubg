@@ -2728,6 +2728,8 @@ extern void ClearMatch( void )
     ms.fCrawford = FALSE;
     ms.fPostCrawford = FALSE;
     ms.gs = GAME_NONE;
+    ms.fJacoby = fJacoby;
+
     IniStatcontext( &scMatch );
 
     for( pppch = appch; *pppch; pppch++ )
@@ -2832,6 +2834,7 @@ extern void CommandNewSession( char *sz ) {
     UpdateSetting( &ms.fTurn );
     UpdateSetting( &ms.fCrawford );
     UpdateSetting( &ms.gs );
+    UpdateSetting( &ms.fJacoby );
     
 
     outputl( _("A new session has been started.") );
@@ -3893,9 +3896,8 @@ extern void SetMatchID(const char *szMatchID)
 	unsigned int anDice[2];
 	int nMatchTo, fCubeOwner, fMove, fCrawford, nCube;
 	int fTurn, fDoubled, fResigned, oneAway;
-#if USE_EXTENDEDMATCHID 
-	int fJacoby;
-#endif		
+	int lfJacoby; /* for local copy of global jacoby variable */
+
 	gamestate gs;
 	char szID[15];
 	moverecord *pmr;
@@ -3908,10 +3910,11 @@ extern void SetMatchID(const char *szMatchID)
 	else
 		strcpy(szID, "");
 
+	lfJacoby = fJacoby;
 	if (MatchFromID(anDice, &fTurn, &fResigned, &fDoubled, &fMove,
 			&fCubeOwner, &fCrawford,
 #if USE_EXTENDEDMATCHID 
-			&nMatchTo, anScore, &nCube, &fJacoby, &gs, szMatchID) < 0) {
+			&nMatchTo, anScore, &nCube, &lfJacoby, &gs, szMatchID) < 0) {
 #else
 			&nMatchTo, anScore, &nCube, &gs, szMatchID) < 0) {
 #endif
@@ -3923,6 +3926,7 @@ extern void SetMatchID(const char *szMatchID)
 		outputf(_("doubled %d, "), fDoubled);
 		outputf(_("cube owner %d, "), fCubeOwner);
 		outputf(_("crawford game %d,\n"), fCrawford);
+		outputf(_("jacoby %d,\n"), lfJacoby);
 		outputf(_("match length %d, "), nMatchTo);
 		outputf(_("score %d-%d, "), anScore[0], anScore[1]);
 		outputf(_("cube %d, "), nCube);
@@ -3955,7 +3959,7 @@ extern void SetMatchID(const char *szMatchID)
 	ms.fPostCrawford = !fCrawford && oneAway;
 	ms.bgv = bgvDefault;	/* FIXME: include bgv in match ID */
 	ms.fCubeUse = fCubeUse;	/* FIXME: include cube use in match ID */
-	ms.fJacoby = fJacoby;	/* FIXME: include Jacoby in match ID */
+	ms.fJacoby = lfJacoby;	/* FIXME: include Jacoby in match ID */
 
 	/* start new game */
 
@@ -3993,6 +3997,7 @@ extern void SetMatchID(const char *szMatchID)
 	ms.fTurn = fTurn;
 	ms.fResigned = fResigned;
 	ms.fDoubled = fDoubled;
+	ms.fJacoby = lfJacoby;
 
 	if (anDice[0]) {
 		char sz[10];
@@ -4022,6 +4027,7 @@ extern void SetMatchID(const char *szMatchID)
 	UpdateSetting(&ms.fCubeOwner);
 	UpdateSetting(&ms.fTurn);
 	UpdateSetting(&ms.fCrawford);
+	UpdateSetting(&ms.fJacoby);
 
 	/* make sure that the hint record has the player on turn */
 	get_current_moverecord(NULL);

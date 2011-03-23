@@ -216,7 +216,7 @@ MatchFromKey ( int anDice[ 2 ],
   GetBits ( auchKey, 36, 15, &anScore[ 0 ] );
   GetBits ( auchKey, 51, 15, &anScore[ 1 ] );
 #if USE_EXTENDEDMATCHID 
-  GetBits ( auchKey, 51, 15, pfJacoby );
+  GetBits ( auchKey, 66, 1, pfJacoby );
   *pfJacoby = !(*pfJacoby);
 #endif          
 

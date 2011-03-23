@@ -971,6 +971,7 @@ extern void UpdateSettings( void )
     UpdateSetting( &ms.fTurn );
     UpdateSetting( &ms.nMatchTo );
     UpdateSetting( &ms.fCrawford );
+    UpdateSetting( &ms.fJacoby );
     UpdateSetting( &ms.gs );
     
     ShowBoard();
@@ -2726,6 +2727,8 @@ static void LoadRCFiles(void)
 	szz = g_strdup_printf("'%s'", sz);
 	if (g_file_test(sz, G_FILE_TEST_EXISTS))
 		CommandLoadCommands(szz);
+	
+	UpdateSettings();
 	g_free(sz);
 	g_free(szz);
 
