@@ -396,7 +396,7 @@ playSoundFile (char *file, /*lint -e{715}*/gboolean sync)
 	    }
 	  if (!soundDeviceAttached)
 	    {			/* No sound card found - disable sound */
-		g_print (_"No soundcard found - sounds disabled\n");
+		g_print (_("No soundcard found - sounds disabled\n"));
 		fSound = FALSE;
 		return;
 	    }

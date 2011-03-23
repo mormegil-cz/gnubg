@@ -47,9 +47,8 @@ MatchID ( const unsigned int anDice[ 2 ],
           const int anScore[ 2 ],
           const int nCube,
 #if USE_EXTENDEDMATCHID 
-			 const int fJacoby,
+	  const int fJacoby,
 #endif          
-
           const gamestate gs );
 
 extern char*

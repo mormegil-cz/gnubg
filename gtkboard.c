@@ -3462,6 +3462,7 @@ extern void board_edit( BoardData *bd )
 	/* We need to query all the widgets before issuing any commands,
 	   since those commands have side effects which disturb other
 	   widgets. */
+	crawford = jacoby = FALSE;
 	if (bd->crawford)
   		crawford = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->crawford ) );
 	if (bd->jacoby)
