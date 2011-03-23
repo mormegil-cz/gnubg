@@ -3371,21 +3371,17 @@ static void match_change_val ( GtkWidget *pw, BoardData *bd )
 {
     int nMatchLen = (int)gtk_adjustment_get_value ( GTK_ADJUSTMENT( bd->amatch ) );
     if (nMatchLen && gtk_widget_get_parent_window ( GTK_WIDGET ( bd->jacoby ) ) ) {
-	bd->jacoby_flag = 0;
-	SetJacobyToggle (bd);
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->jacoby ), FALSE );
         gtk_container_remove( GTK_CONTAINER( bd->pwvboxcnt ), bd->jacoby );
         gtk_container_add   ( GTK_CONTAINER( bd->pwvboxcnt ), bd->crawford );
 	gtk_widget_show  (bd->crawford);
     } else if (nMatchLen == 0 && gtk_widget_get_parent_window ( GTK_WIDGET ( bd->crawford ) ) ) {
-	bd->crawford_game = 0;
-	SetCrawfordToggle (bd);
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->crawford ), FALSE );
         gtk_container_remove( GTK_CONTAINER( bd->pwvboxcnt ), bd->crawford );
         gtk_container_add   ( GTK_CONTAINER( bd->pwvboxcnt ), bd->jacoby );
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->jacoby ), fJacoby );
 	gtk_widget_show  (bd->jacoby);
-	bd->jacoby_flag = fJacoby;
-	SetJacobyToggle (bd);
     }
-
 }
 
 static void board_set_crawford( GtkWidget *pw, BoardData *bd )
