@@ -1,5 +1,13 @@
 2011-03-22  Michael Petch  <mpetch@capp-sysware.com>
 
+	* gtkboard.c: Did cleanup of new Jacoby code.
+	Modified the edit GUI to enforce proper Crawford
+        settings when editing. If scores and match length
+	make Crawford impossible, disable Crawford toggle
+	and turn off Crawford until settings make it possible
+
+2011-03-22  Michael Petch  <mpetch@capp-sysware.com>
+
 	*  gnubg.c, gtkgame.c, gtkboard.c, matchid.c, play.c
 	set.c, gtkboard.h: Improve support for Jacoby. 
 	- When using extended Match ID's - Jacoby comes from 
