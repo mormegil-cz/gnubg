@@ -3966,8 +3966,8 @@ static void board_init( Board *board )
     g_signal_connect( G_OBJECT( bd->crawford ), "toggled",
 	              G_CALLBACK( board_set_crawford ), bd );
     bd->jacoby = gtk_check_button_new_with_label( _("Jacoby"));
-    g_signal_connect( G_OBJECT( bd->jacoby ), "toggled",
-	              G_CALLBACK( board_set_jacoby ), bd );
+    /* g_signal_connect( G_OBJECT( bd->jacoby ), "toggled",
+	              G_CALLBACK( board_set_jacoby ), bd ); */
 
     bd->pwvboxcnt = gtk_event_box_new();
     if (ms.nMatchTo)
