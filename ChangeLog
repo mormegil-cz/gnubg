@@ -1,4 +1,10 @@
-2011-03-22  Michael Petch  <mpetch@capp-sysware.com>
+2011-03-23  Michael Petch  <mpetch@capp-sysware.com>
+
+	* gtkboard.c: Update global match state with changes in
+	score made through edit mode. Fixes hint/edit bug reported 
+	by Pierre Zakia
+
+2011-03-23  Michael Petch  <mpetch@capp-sysware.com>
 
 	* gtkboard.c: Did cleanup of new Jacoby code.
 	Modified the edit GUI to enforce proper Crawford
