@@ -3394,6 +3394,7 @@ static void match_change_val ( GtkWidget *pw, BoardData *bd )
 	gtk_widget_show  (bd->crawford);
     } else if (nMatchLen == 0 && gtk_widget_get_parent_window ( GTK_WIDGET ( bd->crawford ) ) ) {
 	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->crawford ), FALSE );
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->jacoby ), fJacoby );
         gtk_container_remove( GTK_CONTAINER( bd->pwvboxcnt ), bd->crawford );
         gtk_container_add   ( GTK_CONTAINER( bd->pwvboxcnt ), bd->jacoby );
 	gtk_widget_show  (bd->jacoby);
@@ -3427,6 +3428,9 @@ extern void board_edit( BoardData *bd )
 {
     int f = ToolbarIsEditing( pwToolbar );
     int changed = FALSE;
+#ifndef USE_EXTENDEDMATCHID
+    int savefJacoby = fJacoby;
+#endif
 									
     update_move( bd );
     update_buttons( bd );
@@ -3510,12 +3514,15 @@ extern void board_edit( BoardData *bd )
 	}
 
 	if (jacoby != bd->jacoby_flag) {
-            ms.fJacoby = bd->jacoby_flag = jacoby;
-	    bd->crawford_game = crawford = FALSE;
-	    sprintf( sz, "set crawford off " );
-            ChangeGame(NULL);
-	    changed = TRUE;
+	    if ( !nMatchToNew )
+	        bd->crawford_game = crawford = FALSE;
+            else
+                ms.fJacoby = bd->jacoby_flag = jacoby;
+            changed = TRUE;
 	}
+#ifndef USE_EXTENDEDMATCHID
+        fJacoby = jacoby; 
+#endif
 
         if ( nMatchToNew != ms.nMatchTo || changed) {
           /* new match length; issue "set matchid ..." command */
@@ -3537,12 +3544,12 @@ extern void board_edit( BoardData *bd )
                                          ms.fDoubled,
                                          ms.fMove,
                                          ms.fCubeOwner,
-                                         bd->crawford_game,
+                                         crawford,
                                          nMatchToNew,
                                          anScoreNew,
                                          bd->cube,
 #if USE_EXTENDEDMATCHID
-                                         bd->jacoby_flag,
+                                         jacoby,
 #endif                                         
                                          ms.gs ) );
           UserCommand( sz );
@@ -3576,6 +3583,9 @@ extern void board_edit( BoardData *bd )
 	gtk_multiview_set_current( GTK_MULTIVIEW( bd->mmatch ), 
                                    bd->lmatch );
     }
+#ifndef USE_EXTENDEDMATCHID
+    fJacoby = savefJacoby; 
+#endif
 }
 
 static void DrawAlphaImage( GdkDrawable *pd, int x, int y,
@@ -3963,12 +3973,12 @@ static void board_init( Board *board )
     /* crawford and jacoby flag */
 
     bd->crawford = gtk_check_button_new_with_label( _("Crawford game"));
-    g_signal_connect( G_OBJECT( bd->crawford ), "toggled",
-	              G_CALLBACK( board_set_crawford ), bd );
     bd->jacoby = gtk_check_button_new_with_label( _("Jacoby"));
-    /* g_signal_connect( G_OBJECT( bd->jacoby ), "toggled",
-	              G_CALLBACK( board_set_jacoby ), bd ); */
-
+/*    g_signal_connect( G_OBJECT( bd->crawford ), "toggled",
+	              G_CALLBACK( board_set_crawford ), bd );
+    g_signal_connect( G_OBJECT( bd->jacoby ), "toggled",
+	              G_CALLBACK( board_set_jacoby ), bd ); 
+*/
     bd->pwvboxcnt = gtk_event_box_new();
     if (ms.nMatchTo)
         gtk_container_add( GTK_CONTAINER( bd->pwvboxcnt ), bd->crawford );
