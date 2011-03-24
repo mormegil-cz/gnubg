@@ -2220,6 +2220,12 @@ extern gboolean board_motion_notify(GtkWidget *board, GdkEventMotion *event,
 	return TRUE;
 }
 
+static void UpdateCrawfordToggle ( GtkWidget *pw, BoardData *bd ) ;
+static void board_set_crawford( GtkWidget *pw, BoardData *bd ); /* recursion
+								 */
+static void board_set_jacoby( GtkWidget *pw, BoardData *bd );
+static void match_change_val ( GtkWidget *pw, BoardData *bd );
+
 static void score_changed( GtkAdjustment *adj, BoardData *bd )
 {
 
@@ -2229,7 +2235,7 @@ static void score_changed( GtkAdjustment *adj, BoardData *bd )
   if ((bd->match_to != nMatchLen) && (adj == bd->amatch)) {
     /* reset limits for scores if match length is changed */
     bd->ascore0->upper = bd->ascore1->upper =
-      (gfloat) (nMatchLen == 0) ? 65535 : nMatchLen;
+      (gfloat) (nMatchLen == 0) ? 32767 : nMatchLen - 1;
   }
     
   gtk_adjustment_changed( bd->ascore0 );
@@ -2262,6 +2268,7 @@ static void score_changed( GtkAdjustment *adj, BoardData *bd )
     gtk_label_set_text( GTK_LABEL( bd->lscore1 ), buf );
 
   }
+  UpdateCrawfordToggle ( NULL, bd );
 
 }
 
@@ -2315,10 +2322,6 @@ extern void RollDice2d(BoardData* bd)
 	}
 }
 
-static void board_set_crawford( GtkWidget *pw, BoardData *bd ); /* recursion
-								 */
-static void board_set_jacoby( GtkWidget *pw, BoardData *bd );
-static void match_change_val ( GtkWidget *pw, BoardData *bd );
 
 static void SetCrawfordToggle(BoardData* bd)
 {
@@ -3399,7 +3402,6 @@ static void match_change_val ( GtkWidget *pw, BoardData *bd )
         gtk_container_add   ( GTK_CONTAINER( bd->pwvboxcnt ), bd->jacoby );
 	gtk_widget_show  (bd->jacoby);
     }
-    UpdateCrawfordToggle ( NULL, bd );
 }
 
 static void board_set_crawford( GtkWidget *pw, BoardData *bd )
@@ -3513,7 +3515,11 @@ extern void board_edit( BoardData *bd )
 	    UserCommand( sz );
 	}
 
-	if (jacoby != bd->jacoby_flag) {
+        if( anScoreNew[ 0 ] != ms.anScore[ 0 ] ||
+            anScoreNew[ 1 ] != ms.anScore[ 1 ] ) 
+            changed = TRUE;
+
+	if (jacoby != bd->jacoby_flag || nMatchToNew != ms.nMatchTo) {
 	    if ( !nMatchToNew )
 	        bd->crawford_game = crawford = FALSE;
             else
@@ -3536,7 +3542,6 @@ extern void board_edit( BoardData *bd )
 	  if ( (bd->diceRoll[0] > 6) || (bd->diceRoll[1] > 6)) {
 	    bd->diceRoll[0] = bd->diceRoll[1] = 0;
 	  }
-
           sz = g_strdup_printf( "set matchid %s", 
                                 MatchID(bd->diceRoll,
                                          ms.fTurn,
@@ -3555,23 +3560,12 @@ extern void board_edit( BoardData *bd )
           UserCommand( sz );
           g_free( sz );
         }
-        else if( anScoreNew[ 0 ] != ms.anScore[ 0 ] ||
-	    anScoreNew[ 1 ] != ms.anScore[ 1 ] ) {
-          /* only score changed; no need for "set matchid ..." command */
-          sprintf( sz, "set score %d %d", anScoreNew[ 0 ],
-                   anScoreNew[ 1 ] );
-          UserCommand( sz );
-          ms.anScore[0] = anScoreNew[0];
-          ms.anScore[1] = anScoreNew[1];
-          ChangeGame(NULL);
-	}  
 
 	/* Update if crawford was changed. */
 	if ( crawford != bd->crawford_game ) {
-            sprintf( sz, "set crawford %s", crawford ? "on" : "off" );
-	    UserCommand( sz );     
-	    bd->crawford_game = crawford = FALSE;
-            ChangeGame(NULL);
+          sprintf( sz, "set crawford %s", crawford ? "on" : "off" );
+	  UserCommand( sz );     
+	  bd->crawford_game = ms.fCrawford = crawford;
 	}	
 
 	outputresume();
@@ -3828,14 +3822,12 @@ static void board_init( Board *board )
     bd->mscore0 = gtk_multiview_new();
     gtk_box_pack_start ( GTK_BOX ( pw ), bd->mscore0, FALSE, FALSE, 8 );
 
-    bd->ascore0 = GTK_ADJUSTMENT( gtk_adjustment_new( 0, 0, 65535, 1, 1, 0 ) );
+    bd->ascore0 = GTK_ADJUSTMENT( gtk_adjustment_new( 0, 0, 32767, 1, 1, 0 ) );
     bd->score0 = gtk_spin_button_new( GTK_ADJUSTMENT( bd->ascore0 ), 1, 0 );
     gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( bd->score0 ), TRUE );
     bd->lscore0 = gtk_label_new( NULL );
     gtk_container_add( GTK_CONTAINER( bd->mscore0 ), bd->lscore0 );
     gtk_container_add( GTK_CONTAINER( bd->mscore0 ), bd->score0 );
-    g_signal_connect( G_OBJECT( bd->score0 ), "value-changed",
-			G_CALLBACK( UpdateCrawfordToggle ), bd );
 
     /* third row: pip count and epc */
 
@@ -3903,14 +3895,12 @@ static void board_init( Board *board )
     bd->mscore1 = gtk_multiview_new();
     gtk_box_pack_start ( GTK_BOX ( pw ), bd->mscore1, FALSE, FALSE, 8 );
 
-    bd->ascore1 = GTK_ADJUSTMENT( gtk_adjustment_new( 0, 0, 65535, 1, 1, 0 ) );
+    bd->ascore1 = GTK_ADJUSTMENT( gtk_adjustment_new( 0, 0, 32767, 1, 1, 0 ) );
     bd->score1 = gtk_spin_button_new( GTK_ADJUSTMENT( bd->ascore1 ), 1, 0 );
     gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( bd->score1 ), TRUE );
     bd->lscore1 = gtk_label_new( NULL );
     gtk_container_add( GTK_CONTAINER( bd->mscore1 ), bd->lscore1 );
     gtk_container_add( GTK_CONTAINER( bd->mscore1 ), bd->score1 );
-    g_signal_connect( G_OBJECT( bd->score1 ), "value-changed",
-			G_CALLBACK( UpdateCrawfordToggle ), bd );
 
     /* third row: pip count and epc */
 
