@@ -3510,7 +3510,7 @@ extern void board_edit( BoardData *bd )
 	}
 
 	if (jacoby != bd->jacoby_flag) {
-            bd->jacoby_flag = jacoby;
+            ms.fJacoby = bd->jacoby_flag = jacoby;
 	    bd->crawford_game = crawford = FALSE;
 	    sprintf( sz, "set crawford off " );
 	    changed = TRUE;
@@ -3546,7 +3546,6 @@ extern void board_edit( BoardData *bd )
                                          ms.gs ) );
           UserCommand( sz );
           g_free( sz );
-
         }
         else if( anScoreNew[ 0 ] != ms.anScore[ 0 ] ||
 	    anScoreNew[ 1 ] != ms.anScore[ 1 ] ) {
@@ -3554,6 +3553,9 @@ extern void board_edit( BoardData *bd )
           sprintf( sz, "set score %d %d", anScoreNew[ 0 ],
                    anScoreNew[ 1 ] );
           UserCommand( sz );
+          ms.anScore[0] = anScoreNew[0];
+          ms.anScore[1] = anScoreNew[1];
+
 	}  
 
 	/* Update if crawford was changed. */
