@@ -2953,17 +2953,18 @@ static void SaveMoves( movelist *pml, unsigned int cMoves, unsigned int cPip, in
 
 static int LegalMove( const TanBoard anBoard, int iSrc, int nPips ) {
 
-    int i, nBack = 0, iDest = iSrc - nPips;
+    int nBack;
+    const int iDest = iSrc - nPips;
 	
-	if (iDest >= 0)
+    if (iDest >= 0)
 	{ /* Here we can do the Chris rule check */
 		return ( anBoard[ 0 ][ 23 - iDest ] < 2 );
     }
     /* otherwise, attempting to bear off */
 
-    for( i = 1; i < 25; i++ )
-	if( anBoard[ 1 ][ i ] > 0 )
-	    nBack = i;
+    for( nBack = 24; nBack > 0; nBack-- )
+	if( anBoard[ 1 ][ nBack ] > 0 )
+	    break;
 
     return ( nBack <= 5 && ( iSrc == nBack || iDest == -1 ) );
 }
