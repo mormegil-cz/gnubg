@@ -1,3 +1,13 @@
+
+2011-03-23  Michael Petch  <mpetch@capp-sysware.com>
+
+	* gtkboard.c, play.c, gtkgame.c: Fix bug that caused
+	crawford flag to be unset in the GUI if you changed to
+	a crawford game in the game list. Reported by Phillipe
+	Michel. Fixed bug that caused a new money session to
+	not correctly use the global Jacoby setting in some
+	cases.
+
 2011-03-23  Michael Petch  <mpetch@capp-sysware.com>
 
 	* gtkboard.c: Update global match state with changes in

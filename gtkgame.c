@@ -5933,9 +5933,12 @@ extern void GTKSet( void *p ) {
           TRUE );
 
 	fAutoCommand = FALSE;
-    } else if( p == &ms.fCrawford )
+    } else if( p == &ms.fCrawford ) {
+        bd->crawford_game = ms.fCrawford;
+        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->crawford ), 
+                                      ms.fCrawford );
 	ShowBoard(); /* this is overkill, but it works */
-    else if (IsPanelShowVar(WINDOW_ANNOTATION, p)) {
+    } else if (IsPanelShowVar(WINDOW_ANNOTATION, p)) {
 	if (PanelShowing(WINDOW_ANNOTATION))
 		ShowHidePanel(WINDOW_ANNOTATION);
     } else if (IsPanelShowVar(WINDOW_GAME, p)) {

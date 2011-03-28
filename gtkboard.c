@@ -105,7 +105,7 @@ extern GtkWidget *board_new(renderdata* prd)
 	bd->rd = prd;
 	bd->rd->nSize = (unsigned int)-1;
 
-	bd->jacoby_flag = ms.fJacoby;
+	bd->jacoby_flag = ms.fJacoby = fJacoby; 
 	bd->crawford_game = 0;
 	bd->cube = 1;
 	bd->cube_use = 0;
@@ -2502,7 +2502,6 @@ static gint board_set( Board *board, const gchar *board_text, const gint
 	} else {
 	    gtk_label_set_text( GTK_LABEL( bd->lmatch ), _("unlimited") );
 	}
-        gtk_adjustment_value_changed ( GTK_ADJUSTMENT ( bd->amatch ) );
         gtk_spin_button_set_value( GTK_SPIN_BUTTON( bd->score0 ),
                                    bd->score_opponent );
         gtk_spin_button_set_value( GTK_SPIN_BUTTON( bd->score1 ),
@@ -2511,6 +2510,7 @@ static gint board_set( Board *board, const gchar *board_text, const gint
                                    bd->match_to );
 
         score_changed( NULL, bd );
+/*        gtk_adjustment_value_changed ( GTK_ADJUSTMENT ( bd->amatch ) ); */
 
 	if (bd->crawford){
 	    gtk_widget_set_sensitive( bd->crawford, FALSE);
@@ -3373,7 +3373,7 @@ static void UpdateCrawfordToggle ( GtkWidget *pw, BoardData *bd )
     int anScoreNew[2];
     int allowCrawford;
 
-    /* Ajust the crawford toggle box by disabling it when the score & matchlen
+    /* Adjust the crawford toggle box by disabling it when the score & matchlen
        make crawford impossible */
     int nMatchLen = (int)gtk_adjustment_get_value ( GTK_ADJUSTMENT( bd->amatch ) );
 	 anScoreNew[ 0 ] = (int)GTK_SPIN_BUTTON( bd->score0 )->adjustment->value;
@@ -3472,7 +3472,6 @@ extern void board_edit( BoardData *bd )
 	gtk_multiview_set_current( GTK_MULTIVIEW( bd->mscore0 ), bd->score0 );
 	gtk_multiview_set_current( GTK_MULTIVIEW( bd->mscore1 ), bd->score1 );
 	gtk_multiview_set_current( GTK_MULTIVIEW( bd->mmatch ), bd->match );
-   UpdateCrawfordToggle ( NULL, bd );
     } else {
 	/* Editing complete; set board. */
         TanBoard points;
@@ -3725,7 +3724,7 @@ static void board_init( Board *board )
     bd->drag_point = -1;
 
     bd->crawford_game = FALSE;
-    bd->jacoby_flag = ms.fJacoby;
+    bd->jacoby_flag = FALSE; 
     bd->playing = FALSE;
     bd->cube_use = TRUE;    
     bd->all_moves = NULL;

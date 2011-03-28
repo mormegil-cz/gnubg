@@ -2803,6 +2803,7 @@ extern void CommandNewMatch( char *sz )
     UpdateSetting( &ms.nMatchTo );
     UpdateSetting( &ms.fTurn );
     UpdateSetting( &ms.fCrawford );
+    UpdateSetting( &ms.fJacoby );
     UpdateSetting( &ms.gs );
     
     outputf( _("A new %d point match has been started.\n"), n );
@@ -2833,8 +2834,8 @@ extern void CommandNewSession( char *sz ) {
     UpdateSetting( &ms.nMatchTo );
     UpdateSetting( &ms.fTurn );
     UpdateSetting( &ms.fCrawford );
-    UpdateSetting( &ms.gs );
     UpdateSetting( &ms.fJacoby );
+    UpdateSetting( &ms.gs );
     
 
     outputl( _("A new session has been started.") );
@@ -2849,6 +2850,7 @@ extern void CommandNewSession( char *sz ) {
 
 extern void UpdateGame( int fShowBoard ) {
     
+    UpdateSetting( &ms.fCrawford );
     UpdateSetting( &ms.nCube );
     UpdateSetting( &ms.fCubeOwner );
     UpdateSetting( &ms.fTurn );
