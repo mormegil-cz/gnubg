@@ -112,7 +112,7 @@ void PlaySound_QuickTime (const char *cSoundFilename)
 
 	err = NativePathNameToFSSpec(cSoundFilename, &fsSoundFile, 0);    
     if (err != 0) {
-        ouputf( "PlaySound_QuickTime: error #%d, can't find %s.\n", err, cSoundFilename);
+        outputf( _("PlaySound_QuickTime: error #%d, can't find %s.\n"), err, cSoundFilename);
     }
     else {
         /* open movie (WAV or whatever) file */

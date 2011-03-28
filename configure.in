@@ -137,7 +137,7 @@ dnl If OSX version < 10.5 then try to build with Quicktime
 dnl otherwise use CoreAudio if it is available
 if test "x$darwin" = "xyes"; then
 	needquicktime=no
-	AS_VERSION_COMPARE("$(uname -r)", "10.5", needquicktime=yes, [], [])
+	AS_VERSION_COMPARE("$(uname -r)", "10.0", needquicktime=yes, [], [])
 
 	if test "x$needquicktime" = "xyes"; then
 		quicktime=no
