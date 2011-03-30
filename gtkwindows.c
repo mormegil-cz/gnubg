@@ -72,7 +72,7 @@ Warning warnings[WARN_NUM_WARNINGS] =
 		"resign", TRUE, TRUE
 	},
 	{
-		N_("This action will roll out the current position before the dice are rolled. It is not possible to extend nor save this rollout?"),
+		N_("This action will roll out the current position before the dice are rolled.\nIt will not be possible to extend nor save this rollout."),
 		"rollout", TRUE, FALSE
 	}
 };
