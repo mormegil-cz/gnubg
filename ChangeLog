@@ -1,3 +1,7 @@
+2011-04-05  Michael Petch  <mpetch@capp-sysware.com>
+
+	* gnubg.c: Fix WIN32 specific bug that caused command files
+	with spaces to not be processed. Reported by Nardy.     
 
 2011-03-23  Michael Petch  <mpetch@capp-sysware.com>
 

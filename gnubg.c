@@ -2622,7 +2622,19 @@ extern void CommandLoadCommands( char *sz )
 {
     FILE *pf;
 
+#if defined(WIN32)	
+    /* Make sure unquoted filenames are quoted before processing 
+       to allow proper support for filenames with spaces */
+    char *szz = NULL;
+    if (sz[0] != '"' && sz[0] != '\'') {
+      szz = g_strdup_printf("'%s'", sz);
+      sz = NextToken( &szz );
+    }
+    else
+      sz = NextToken( &sz );
+#else
     sz = NextToken( &sz );
+#endif    
     
     if( !sz || !*sz ) {
 	outputl( _("You must specify a file to load from.") );
@@ -2634,6 +2646,11 @@ extern void CommandLoadCommands( char *sz )
 	fclose( pf );
     } else
 	outputerr( sz );
+
+#if defined(WIN32)
+    if (szz)	
+      g_free(szz);
+#endif
 }
 
 
