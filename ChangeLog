@@ -1,5 +1,13 @@
 2011-04-05  Michael Petch  <mpetch@capp-sysware.com>
 
+	* configure.in, board3d/font3d.c, board3d/inc3d.h: Added
+	better 3dboard autoconf support for Apple build environments.
+	Use Apple OpenGL, and add appropriate check for GTK
+	X windows headers. GTK does not necessarily rely on X as a
+	backend.
+
+2011-04-05  Michael Petch  <mpetch@capp-sysware.com>
+
 	* gnubg.c: Fix WIN32 specific bug that caused command files
 	with spaces to not be processed. Reported by Nardy.     
 

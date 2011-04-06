@@ -479,7 +479,9 @@ static void PopulateContour(GArray *contour, const FT_Vector* points, const char
 #define TESS_CALLBACK
 #endif
 
-#ifdef __GNUC__
+#if defined(USE_APPLE_OPENGL)
+#define GLUFUN(X) X
+#elif defined(__GNUC__)
 #define GLUFUN(X) (_GLUfuncptr)X
 #else
 #define GLUFUN(X) X

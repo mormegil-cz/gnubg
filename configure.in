@@ -50,6 +50,7 @@ case "$host" in
   *-*-darwin*)
     darwin=yes
     LDFLAGS="$LDFLAGS -dylib_file /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib `/opt/local/bin/pkg-config --libs glib-2.0`"
+    AC_DEFINE(USE_APPLE_OPENGL, 1, [Define if using Apple OpenGL])
     ;;
 esac
 AC_MSG_RESULT([$host])
@@ -246,6 +247,8 @@ fi
 if test "$with_gtk" = "yes" && test "$no_gtk" = "yes"; then
 	AC_MSG_ERROR([gtk requested but not found])
 fi
+
+AC_CHECK_HEADERS(GL/glx.h)
 
 if test  "$with_board3d" != "no" && test "$with_gtk" != "no" && test "x$have_gtk" = "xyes" && test "x$have_gtkglext" = "xyes"; then
 	AC_DEFINE(USE_BOARD3D,1, [Define if you want to use the 3d boards])
