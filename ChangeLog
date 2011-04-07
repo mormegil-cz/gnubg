@@ -1,4 +1,4 @@
-2011-04-05  Michael Petch  <mpetch@capp-sysware.com>
+2011-04-06  Michael Petch  <mpetch@capp-sysware.com>
 
 	* configure.in, board3d/font3d.c, board3d/inc3d.h: Added
 	better 3dboard autoconf support for Apple build environments.
@@ -6,10 +6,10 @@
 	X windows headers. GTK does not necessarily rely on X as a
 	backend.
 
-2011-04-05  Michael Petch  <mpetch@capp-sysware.com>
+2011-04-06  Michael Petch  <mpetch@capp-sysware.com>
 
-	* gnubg.c: Fix WIN32 specific bug that caused command files
-	with spaces to not be processed. Reported by Nardy.     
+	* gnubg.c: Fix WIN32 specific bug that caused command 
+	filenames with spaces to not be processed. Reported by Nardy.     
 
 2011-03-23  Michael Petch  <mpetch@capp-sysware.com>
 
