@@ -1,3 +1,9 @@
+2011-04-08  Michael Petch  <mpetch@capp-sysware.com>
+
+	* gtkgame.c, play.c: Fixed bug that didn't update the cube
+	properly when navigating from a non crawford game to crawford
+	game. Reported by Ongun Alsac.
+
 2011-04-06  Michael Petch  <mpetch@capp-sysware.com>
 
 	* configure.in, board3d/font3d.c, board3d/inc3d.h: Added
