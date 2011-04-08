@@ -2850,11 +2850,11 @@ extern void CommandNewSession( char *sz ) {
 
 extern void UpdateGame( int fShowBoard ) {
     
-    UpdateSetting( &ms.fCrawford );
     UpdateSetting( &ms.nCube );
     UpdateSetting( &ms.fCubeOwner );
     UpdateSetting( &ms.fTurn );
     UpdateSetting( &ms.gs );
+    UpdateSetting( &ms.fCrawford );
 
 #if USE_GTK
     if( fX || ( fShowBoard && fDisplay ) )

@@ -5938,6 +5938,8 @@ extern void GTKSet( void *p ) {
         gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->crawford ), 
                                       ms.fCrawford );
 	ShowBoard(); /* this is overkill, but it works */
+    } else if( p == &ms.nCube ) {
+	ShowBoard(); /* this is overkill, but it works */ 
     } else if (IsPanelShowVar(WINDOW_ANNOTATION, p)) {
 	if (PanelShowing(WINDOW_ANNOTATION))
 		ShowHidePanel(WINDOW_ANNOTATION);
