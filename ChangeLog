@@ -1,5 +1,11 @@
 2011-04-08  Michael Petch  <mpetch@capp-sysware.com>
 
+	* gtkprefs.c: Fixed bug that disallowed import/export board
+	designs from using file names with paths that had spaces on
+	Windows (WIN32) platform.
+
+2011-04-08  Michael Petch  <mpetch@capp-sysware.com>
+
 	* gtkgame.c, play.c: Fixed bug that didn't update the cube
 	properly when navigating from a non crawford game to crawford
 	game. Reported by Ongun Alsac.
