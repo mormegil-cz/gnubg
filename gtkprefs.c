@@ -2531,7 +2531,7 @@ static void RemoveDesign ( GtkWidget *pw, gpointer data )
 {
   GList *plBoardDesigns = (GList *) data;
   char prompt[200];
-  sprintf(prompt, _("Permently remove design %s?"), pbdeSelected->szTitle);
+  sprintf(prompt, _("Permanently remove design %s?"), pbdeSelected->szTitle);
   if (!GetInputYN(prompt))
 		return;
 
