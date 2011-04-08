@@ -2418,7 +2418,9 @@ static void ExportDesign ( GtkWidget *pw, gpointer data )
                                 GTKFileSelect(_("Export Design"), NULL, NULL, NULL,
                                         GTK_FILE_CHOOSER_ACTION_SAVE)) == 0) return;
 
+#if !defined(WIN32)
 	szFile = NextToken( &szFile );
+#endif
 
 	/* 
 	* Copy current design 
@@ -2487,8 +2489,9 @@ static void ImportDesign ( GtkWidget *pw, gpointer data )
         if ( (pch = szFile =
                                 GTKFileSelect(_("Import Design"), NULL, NULL, NULL,
                                         GTK_FILE_CHOOSER_ACTION_OPEN)) == 0) return;
-
+#if !defined(WIN32)
 	szFile = NextToken( &szFile );
+#endif
 
 	if ( ( new_designs = ParseBoardDesigns( szFile, TRUE ) ) == 0 ) {
 		/* no designs found */
