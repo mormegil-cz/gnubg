@@ -1,3 +1,10 @@
+2011-04-09  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* gtkexport.c, gtkgame.c, gtktempmap.c: Alter some pop-up panel
+	that were too tall too be usable on smaller screens (the OK button
+	was below the bottom of the display). Affected are
+	Settings|Export, Settings|Rollouts and Analyze|Temperature Map.
+
 2011-04-08  Michael Petch  <mpetch@capp-sysware.com>
 
 	* gtkprefs.c: Fixed bug that disallowed import/export board

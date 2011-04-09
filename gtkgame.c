@@ -4314,16 +4314,25 @@ static GtkWidget *
 RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   GtkWidget *pwPage, *pw, *pwv;
   GtkWidget *pwHBox, *pwVBox;
-  GtkWidget *pwFrame;
+  GtkWidget *pwTable, *pwFrame;
 
   pwPage = gtk_vbox_new( FALSE, 0 );
   gtk_container_set_border_width( GTK_CONTAINER( pwPage ), 8 );
 
+  prpw->padjSeed = GTK_ADJUSTMENT( gtk_adjustment_new(
+                                                      abs( prw->rcRollout.nSeed ), 0, INT_MAX, 1, 1, 0 ) );
+ 
   prpw->padjTrials = GTK_ADJUSTMENT(gtk_adjustment_new(
                                                        prw->rcRollout.nTrials, 1,
                                                        1296 * 1296, 36, 36, 0 ) );
   pw = gtk_hbox_new( FALSE, 0 );
   gtk_container_add( GTK_CONTAINER( pwPage), pw );
+
+  gtk_container_add( GTK_CONTAINER( pw ),
+                     gtk_label_new( _("Seed:") ) );
+  gtk_container_add( GTK_CONTAINER( pw ),
+		     gtk_spin_button_new( prpw->padjSeed, 1, 0 ) );
+
   gtk_container_add( GTK_CONTAINER( pw ),
                      gtk_label_new( _("Trials:") ) );
   gtk_container_add( GTK_CONTAINER( pw ),
@@ -4344,14 +4353,14 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   g_signal_connect( G_OBJECT( prpw->pwDoTrunc ), "toggled",
                       G_CALLBACK (TruncEnableToggled), prw);
 
-  prpw->pwAdjTruncPlies = pwVBox = gtk_vbox_new( FALSE, 0 );
-  gtk_container_add( GTK_CONTAINER( pw ), pwVBox);
-  gtk_container_add( GTK_CONTAINER( pwVBox ), 
+  prpw->pwAdjTruncPlies = pwHBox = gtk_hbox_new( FALSE, 0 );
+  gtk_container_add( GTK_CONTAINER( pw ), pwHBox);
+  gtk_container_add( GTK_CONTAINER( pwHBox ), 
                      gtk_label_new( _("Truncate at ply:" ) ) );
 
   prpw->padjTruncPlies = GTK_ADJUSTMENT( gtk_adjustment_new( 
                                                             prw->rcRollout.nTruncate, 0, 1000, 1, 1, 0 ) );
-  gtk_container_add( GTK_CONTAINER( pwVBox ), gtk_spin_button_new( 
+  gtk_container_add( GTK_CONTAINER( pwHBox ), gtk_spin_button_new( 
                                                                   prpw->padjTruncPlies, 1, 0 ) );
 
 
@@ -4371,14 +4380,14 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   g_signal_connect( G_OBJECT( prw->prwGeneral->pwDoLate ), 
                       "toggled", G_CALLBACK (LateEvalToggled), prw);
 
-  prpw->pwAdjLatePlies = pwVBox = gtk_vbox_new( FALSE, 0 );
-  gtk_container_add( GTK_CONTAINER( pw ), pwVBox);
-  gtk_container_add( GTK_CONTAINER( pwVBox ), 
+  prpw->pwAdjLatePlies = pwHBox = gtk_hbox_new( FALSE, 0 );
+  gtk_container_add( GTK_CONTAINER( pw ), pwHBox);
+  gtk_container_add( GTK_CONTAINER( pwHBox ), 
                      gtk_label_new( _("Change eval after ply:" ) ) );
 
   prpw->padjLatePlies = GTK_ADJUSTMENT( gtk_adjustment_new( 
                                        prw->rcRollout.nLate, 0, 1000, 1, 1, 0 ) );
-  gtk_container_add( GTK_CONTAINER( pwVBox ), gtk_spin_button_new( 
+  gtk_container_add( GTK_CONTAINER( pwHBox ), gtk_spin_button_new( 
                                                 prpw->padjLatePlies, 1, 0 ) );
 
   pwFrame = gtk_frame_new ( _("Stop when result is accurate") );
@@ -4471,15 +4480,6 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
 
   gtk_container_add( GTK_CONTAINER( pwHBox ), prpw->pwJsdAdjLimit);
 
-
-  prpw->pwCubeful = gtk_check_button_new_with_label ( _("Cubeful") );
-  gtk_container_add ( GTK_CONTAINER (pwPage ), prpw->pwCubeful );
-  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( prpw->pwCubeful ),
-                                prw->rcRollout.fCubeful );
-
-  g_signal_connect( G_OBJECT( prpw->pwCubeful ), "toggled",
-                      G_CALLBACK( CubefulToggled ), prw );
-
   pwFrame = gtk_frame_new ( _("Bearoff Truncation") );
   gtk_container_add ( GTK_CONTAINER (pwPage ), pwFrame );
   prpw->pwTruncBearoffOpts = pw = gtk_vbox_new( FALSE, 8 );
@@ -4501,33 +4501,54 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
                                  (prpw->pwTruncBearoffOS ),
                                  prw->rcRollout.fTruncBearoffOS );
 
+
+  pwTable = gtk_table_new ( 2, 2, TRUE );
+  gtk_container_add ( GTK_CONTAINER (pwPage ), pwTable );
+
+  prpw->pwCubeful = gtk_check_button_new_with_label ( _("Cubeful") );
+  gtk_table_attach ( GTK_TABLE ( pwTable ), prpw->pwCubeful,
+                     0, 1, 0, 1,
+                     GTK_FILL,
+                     GTK_FILL,
+                     2, 2 );
+
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( prpw->pwCubeful ),
+                                prw->rcRollout.fCubeful );
+
+  g_signal_connect( G_OBJECT( prpw->pwCubeful ), "toggled",
+                      G_CALLBACK( CubefulToggled ), prw );
+
+
   prpw->pwVarRedn = gtk_check_button_new_with_label ( 
                                                      _("Variance reduction") );
-  gtk_container_add ( GTK_CONTAINER (pwPage ), prpw->pwVarRedn );
+  gtk_table_attach ( GTK_TABLE ( pwTable ), prpw->pwVarRedn,
+                     1, 2, 0, 1,
+                     GTK_FILL,
+                     GTK_FILL,
+                     2, 2 );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( prpw->pwVarRedn ),
                                 prw->rcRollout.fVarRedn );
 
   prpw->pwRotate = gtk_check_button_new_with_label ( 
                                                     _("Use quasi-random dice") );
-  gtk_container_add ( GTK_CONTAINER (pwPage ), prpw->pwRotate );
+  gtk_table_attach ( GTK_TABLE ( pwTable ), prpw->pwRotate,
+                     0, 1, 1, 2,
+                     GTK_FILL,
+                     GTK_FILL,
+                     2, 2 );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( prpw->pwRotate ),
                                 prw->rcRollout.fRotate );
 
   prpw->pwInitial = gtk_check_button_new_with_label ( 
                                                      _("Rollout as initial position") );
-  gtk_container_add ( GTK_CONTAINER (pwPage ), prpw->pwInitial );
+  gtk_table_attach ( GTK_TABLE ( pwTable ), prpw->pwInitial,
+                     1, 2, 1, 2,
+                     GTK_FILL,
+                     GTK_FILL,
+                     2, 2 );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( prpw->pwInitial ),
                                 prw->rcRollout.fInitial );
 
-  pwHBox = gtk_hbox_new( FALSE, 0 );
-  gtk_container_add( GTK_CONTAINER( pwPage ), pwHBox);
-  gtk_container_add( GTK_CONTAINER( pwHBox ),
-                     gtk_label_new( _("Seed:") ) );
-  prpw->padjSeed = GTK_ADJUSTMENT( gtk_adjustment_new(
-                                                      abs( prw->rcRollout.nSeed ), 0, INT_MAX, 1, 1, 0 ) );
-  gtk_container_add( GTK_CONTAINER( pwHBox ), gtk_spin_button_new(
-                                                                  prpw->padjSeed, 1, 0 ) );
- 
   return pwPage;
 }
 
