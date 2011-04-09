@@ -41,21 +41,6 @@
 #include <string.h>
 #include "positionid.h"
 
-static inline void addBits(unsigned char auchKey[10], unsigned int bitPos, unsigned int nBits)
-{
-  unsigned int k = bitPos / 8;
-  unsigned int r = (bitPos & 0x7);
-  unsigned int b = (((unsigned int)0x1 << nBits) - 1) << r;
-
-  auchKey[k] |= (unsigned char)b;
-
-  if( k < 8 ) {
-    auchKey[k+1] |= (unsigned char)(b >> 8);
-    auchKey[k+2] |= (unsigned char)(b >> 16);
-  } else if( k == 8 ) {
-    auchKey[k+1] |= (unsigned char)(b >> 8);
-  }
-}
 
 #if defined (__i386) || defined (__x86_64)
 
@@ -150,6 +135,22 @@ extern void PositionFromKey(TanBoard anBoard, const unsigned char* pauch)
 #else
 
 /* Portable code */
+
+static inline void addBits(unsigned char auchKey[10], unsigned int bitPos, unsigned int nBits)
+{
+  unsigned int k = bitPos / 8;
+  unsigned int r = (bitPos & 0x7);
+  unsigned int b = (((unsigned int)0x1 << nBits) - 1) << r;
+
+  auchKey[k] |= (unsigned char)b;
+
+  if( k < 8 ) {
+    auchKey[k+1] |= (unsigned char)(b >> 8);
+    auchKey[k+2] |= (unsigned char)(b >> 16);
+  } else if( k == 8 ) {
+    auchKey[k+1] |= (unsigned char)(b >> 8);
+  }
+}
 
 extern void PositionKey(const TanBoard anBoard, unsigned char auchKey[10])
 {
