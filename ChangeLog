@@ -1,3 +1,10 @@
+2011-04-10  Michael Petch  <mpetch@capp-sysware.com>
+
+        * board3d/drawboard3d.c board3d/fun3d.h board3d/shadow.c:
+	Converted int to GLint where appropriate to avoid compiler
+	warnings about incompatible types in certain build 
+	environments.
+
 2011-04-09  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* gtkexport.c, gtkgame.c, gtktempmap.c: Alter some pop-up panel
