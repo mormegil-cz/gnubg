@@ -34,7 +34,7 @@ extern int ShadowsInitilised(const BoardData3d *bd3d)
 void shadowInit(BoardData3d *bd3d, renderdata *prd)
 {
 	int i;
-	int stencilBits;
+	GLint stencilBits;
 
 	if (bd3d->shadowsInitialised)
 		return;

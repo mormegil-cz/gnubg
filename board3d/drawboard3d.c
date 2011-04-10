@@ -2544,7 +2544,7 @@ void getProjectedPieceDragPos(int x, int y, float pos[3])
 	getProjectedPos(x, y, BASE_DEPTH + EDGE_DEPTH + DOUBLECUBE_SIZE + LIFT_OFF * 3, pos);
 }
 
-void calculateBackgroundSize(BoardData3d *bd3d, const int viewport[4])
+void calculateBackgroundSize(BoardData3d *bd3d, const GLint viewport[4])
 {
 	float pos1[3], pos2[3], pos3[3];
 
@@ -3266,7 +3266,7 @@ static void WorkOutViewArea(const BoardData* bd, viewArea *pva, float *pHalfRadi
 	workOutWidth(pva, *pHalfRadianFOV, boardRadAngle, aspectRatio, p);
 }
 
-void SetupPerspVolume(const BoardData* bd, BoardData3d* bd3d, const renderdata* prd, int viewport[4])
+void SetupPerspVolume(const BoardData* bd, BoardData3d* bd3d, const renderdata* prd, GLint viewport[4])
 {
 	float aspectRatio = (float)viewport[2]/(float)(viewport[3]);
 	if (!prd->planView)

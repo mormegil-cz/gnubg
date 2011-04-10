@@ -18,16 +18,20 @@
 #include "gtkboard.h"
 #include "analysis.h"
 
+#if defined(HAVE_GL_GLX_H)
+#include <GL/glx.h>     /* x-windows file */
+#endif
+
 /* Setup functions */
 void InitGL(const BoardData *bd);
 
 /* Drawing functions */
 void drawBoard(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd);
 extern void Draw3d(const BoardData* bd);
-void SetupPerspVolume(const BoardData* bd, BoardData3d* bd3d, const renderdata* prd, int viewport[4]);
+void SetupPerspVolume(const BoardData* bd, BoardData3d* bd3d, const renderdata* prd, GLint viewport[4]);
 float getBoardWidth(void);
 float getBoardHeight(void);
-void calculateBackgroundSize(BoardData3d *bd3d, const int viewport[4]);
+void calculateBackgroundSize(BoardData3d *bd3d, const GLint viewport[4]);
 
 void RestrictiveRender(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd);
 void RestrictiveDrawFrame(const float pos[3], float width, float height, float depth);
