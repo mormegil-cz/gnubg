@@ -1167,22 +1167,22 @@
       </about>
 
       <design>
-         board=#FFFCC4;0.20
-         border=#009E00
-         wood=alder
-         hinges=y
+         board=#F5F9EC;0.20f
+         border=#CEA567
+         wood=paint
+         hinges=n
          light=150;50
          shape=0.5
-         chequers0=#FFFFFF;1.00;1.60;0.90;30.50
-         chequers1=#D11616;1.00;1.50;1.00;30.00
-         dice0=#FFFEFE;0.80;3.00;n
-         dice1=#FF2626;1.00;30.00;n
+         chequers0=#FFFFFF;1.00;1.40;0.30;31.90
+         chequers1=#B10B0B;1.00;1.40;0.30;31.90
+         dice0=#FFFEFE;0.30;31.90;n
+         dice1=#FF2626;0.30;87.10;n
          dot0=#0D0D0D
-         dot1=#F8FB0A
-         cube=#F7FFAE
+         dot1=#F4F4EC
+         cube=#FFFEFE
          points0=#D11717;0.20
-         points1=#4CA57F;0.20
-         hinges3d=y
+         points1=#007800;0.20
+         hinges3d=n
          piecetype=0
          piecetexturetype=1
          roundededges=y
@@ -1192,20 +1192,20 @@
          lightposx=0.000000 lightposy=1.000000 lightposz=3.000000
          lightambient=45 lightdiffuse=75 lightspecular=95
          chequers3d0=#FFFFFF;#FFFFFF;#FF0000;60;100
-         chequers3d1=#D11616;#D11616;#3F3F3F;70;100
+         chequers3d1=#910000;#D11616;#AA412A;128;100
          dice3d0=#FFFEFE;#FFFEFE;#FF0000;100;100;n
          dice3d1=#FF2626;#FF2626;#3F3F3F;70;100;n
          dot3d0=#0D0D0D;#0D0D0D;#4C4F4C;128;100
-         dot3d1=#F8FB0A;#F8FB0A;#1B1B1B;128;100
-         cube3d=#F7FFAE;#F7FFAE;#CBCCCB;80;100
+         dot3d1=#F3F3EA;#F5F5EE;#1B1B1B;128;100
+         cube3d=#FFFEFE;#FFFEFE;#FF0000;80;0
          cubetext3d=#000066;#00007F;#00008C;98;100
-         base3d=#FFFCC4;#FFFCC4;#000000;128;100;felt.png
+         base3d=#FAFCE9;#F1F7F0;#000000;128;0;redwood.png
          points3d0=#D11717;#D11717;#49181D;128;100;felt.png
-         points3d1=#4CA57F;#4CA57F;#47514A;128;100;felt.png
-         border3d=#009E00;#009E00;#37465C;128;100;alder.png
+         points3d1=#007F00;#007200;#47514A;128;100;felt.png
+         border3d=#E9AE66;#B39D69;#606060;101;100;maple.png
          hinge3d=#D8F233;#99BF0C;#E9C944;63;0;hinge.png
-         numbers3d=#AB78CC;#E7E675;#010101;116;100
-         background3d=#D45588;#933E98;#CA41C7;116;0;felt.png
+         numbers3d=#0E0713;#030303;#010101;103;100
+         background3d=#FFE5BC;#FFDBC9;#CA41C7;116;0;Tiles.png
 
       </design>
 
