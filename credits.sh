@@ -47,7 +47,7 @@ Nis Joergensen
 Petr Kadlec
 Kaoru Takahashi
 Stein Kulseth
-Phillipe Michel
+Philippe Michel
 Mike Petch
 Rod Roark
 Ingo Macherius
