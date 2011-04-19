@@ -136,7 +136,9 @@ static void Evaluate( const neuralnet *pnn, const float arInput[], float ar[],
     for( i = 0; i < pnn->cInput; i++ ) {
 	float const ari = arInput[ i ];
 
-	if( ari ) {
+	if( !ari )
+            prWeight += cHidden;
+	else {
 	    float *pr = ar;
 
 	    if( ari == 1.0f )
@@ -145,8 +147,7 @@ static void Evaluate( const neuralnet *pnn, const float arInput[], float ar[],
 	    else
 		for( j = cHidden; j; j-- )
 		    *pr++ += *prWeight++ * ari;
-	} else
-	    prWeight += cHidden;
+	} 
     }
 
     if( saveAr)
@@ -183,7 +184,9 @@ static void EvaluateFromBase( const neuralnet *pnn, const float arInputDif[], fl
     for( i = 0; i < pnn->cInput; ++i ) {
 	float const ari = arInputDif[ i ];
 
-	if( ari ) {
+	if( !ari )
+	    prWeight += pnn->cHidden;
+	else {
 	    float *pr = ar;
 
 	    if( ari == 1.0f )
@@ -195,8 +198,7 @@ static void EvaluateFromBase( const neuralnet *pnn, const float arInputDif[], fl
             else
 	      for( j = pnn->cHidden; j; j-- )
 		*pr++ += *prWeight++ * ari;
-	} else
-	    prWeight += pnn->cHidden;
+	}
     }
     
     for( i = 0; i < pnn->cHidden; i++ )

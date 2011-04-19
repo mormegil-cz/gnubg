@@ -127,7 +127,9 @@ EvaluateSSE( const neuralnet *pnn, const float arInput[], float ar[],
 	{
 		float const ari = arInput[i];
 
-		if (ari)
+		if (!ari)
+			prWeight += cHidden;
+		else
 		{
 			float *pr = ar;
 			if (ari == 1.0f)
@@ -153,8 +155,6 @@ EvaluateSSE( const neuralnet *pnn, const float arInput[], float ar[],
 				}
 			}
 		}
-		else
-			prWeight += cHidden;
     }
 
     if( saveAr)
