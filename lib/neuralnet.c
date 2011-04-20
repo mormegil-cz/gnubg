@@ -73,9 +73,6 @@ extern int NeuralNetCreate( neuralnet *pnn, unsigned int cInput, unsigned int cH
 			    unsigned int cOutput, float rBetaHidden,
 			    float rBetaOutput )
 {
-    unsigned int i;
-    float *pf;
-    
     pnn->cInput = cInput;
     pnn->cHidden = cHidden;
     pnn->cOutput = cOutput;
