@@ -3123,8 +3123,9 @@ static void Stop( GtkWidget *pw, gpointer unused )
 
 static gboolean StopAnyAnimations(void)
 {
-	BoardData *bd = BOARD( pwBoard )->board_data;
 #if USE_BOARD3D
+	BoardData *bd = BOARD( pwBoard )->board_data;
+
 	if (display_is_3d(bd->rd))
 	{
 		if (Animating3d(bd->bd3d))
@@ -4313,7 +4314,7 @@ static void PlayersSameToggled( GtkWidget *pw, rolloutwidget *prw)
 static GtkWidget *
 RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   GtkWidget *pwPage, *pw, *pwv;
-  GtkWidget *pwHBox, *pwVBox;
+  GtkWidget *pwHBox;
   GtkWidget *pwTable, *pwFrame;
 
   pwPage = gtk_vbox_new( FALSE, 0 );
