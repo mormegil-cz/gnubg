@@ -117,7 +117,7 @@ extern void CommandCalibrate( char *sz )
 		}
 	}
 
-	if (clock() < 0)
+	if (clock() == (clock_t) -1)
 	{
 	    outputl( _("Calibration not available.") );
 		return;
