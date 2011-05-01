@@ -610,6 +610,16 @@ extern void AddMoveRecord( void *pv ) {
 
     /* FIXME perform other elision (e.g. consecutive "set" records) */
 
+    /* Partial fix. For edited positions it would be nice to look
+       further back, but this is still an improvement */
+
+    if( pmr->mt >= MOVE_SETBOARD &&
+        ( pmrOld = plLastMove->p )->mt == pmr->mt &&
+        pmrOld->fPlayer == pmr->fPlayer )
+        {
+            PopMoveRecord( plLastMove );
+        }
+
 #if USE_GTK
     if( fX )
 	GTKAddMoveRecord( pmr );
