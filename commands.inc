@@ -407,13 +407,8 @@ command cER = {
       szSTDDEV, NULL },
     { "plies", CommandSetEvalPlies, N_("Choose how many plies to look ahead"),
       szPLIES, NULL },
-#if defined(REDUCTION_CODE)
-    { "reduced", CommandSetEvalReduced,
-      N_("Control how thoroughly deep plies are searched"), szNUMBER, NULL },
-#else
     { "prune", CommandSetEvalPrune,
       N_("use fast pruning networks"), szONOFF, NULL },
-#endif
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetPlayer[] = {
     { "chequerplay", CommandSetPlayerChequerplay, N_("Control chequerplay "
