@@ -3692,19 +3692,14 @@ extern void CommandExportPositionGOL2Clipboard( char *sz )
 
     szClipboard = (char *) malloc ( l + 1 );
 
-    if (fread( szClipboard, 1, l, pf ) != (unsigned long) l)
-    {
-	    outputerr("temporary file");
-	    free(szClipboard);
-	    fclose(pf);
+    if (fread( szClipboard, 1, l, pf ) != (unsigned long) l) {
+      outputerr("temporary file");
+    } else {
+      szClipboard[ l ] = 0;
+      TextToClipboard( szClipboard );
     }
 
-    szClipboard[ l ] = 0;
-
-    TextToClipboard( szClipboard );
-
     free( szClipboard );
-
     fclose( pf );
     g_unlink(tmpFile);
     g_free(tmpFile);
