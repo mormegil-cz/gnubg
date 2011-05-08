@@ -519,8 +519,10 @@ extern SimpleBoard *simple_board_new_from_ids(gchar * position_id,
 	g_assert(position_id != NULL && match_id != NULL);
 
 	board = simple_board_new(NULL, cr);
-	if (!PositionFromID(board->ms.anBoard, position_id))
+	if (!PositionFromID(board->ms.anBoard, position_id)) {
+		g_free(board);
 		return (NULL);
+	}
 
 	if (MatchFromID
 	    (board->ms.anDice, &board->ms.fTurn,
@@ -530,8 +532,10 @@ extern SimpleBoard *simple_board_new_from_ids(gchar * position_id,
 #if USE_EXTENDEDMATCHID 
 	     &board->ms.fJacoby,
 #endif	     
-	     &board->ms.gs, match_id))
+	     &board->ms.gs, match_id)) {
+		g_free(board);
 		return (NULL);
+	}
 
 	return (board);
 }
