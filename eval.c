@@ -77,10 +77,6 @@ f_GeneralEvaluationE GeneralEvaluationE = GeneralEvaluationENoLocking;
 #define CacheAdd CacheAddNoLocking
 #define CacheLookup CacheLookupNoLocking
 
-#ifdef NO_ERF
-#include "erf.inc"	/* No erf on msdev so include code here... */
-#endif
-
 static int EvaluatePositionCache( NNState *nnStates, const TanBoard anBoard, float arOutput[],
                        const cubeinfo* pci, const evalcontext* pecx,
 		       int nPlies, positionclass pc );

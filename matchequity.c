@@ -37,10 +37,6 @@
 #include "mec.h"
 #include "util.h"
 
-#ifdef NO_ERF
-#include "erf.inc"	/* No erf on msdev so include code here... */
-#endif
-
 #define DELTA         0.08
 #define DELTABAR      0.06
 #define G1            0.25
