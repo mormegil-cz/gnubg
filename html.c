@@ -2300,8 +2300,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf,
 
     }
 
-    free ( sz );
-
+    g_free ( sz );
 
   }
 

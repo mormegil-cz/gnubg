@@ -565,7 +565,7 @@ static PyObject *PythonCommand(PyObject * self UNUSED_PARAM, PyObject * args)
 	 * which always run NextTurn(TRUE), and that isn't right */
 
 	outputx();
-	free(sz);
+	g_free(sz);
 	PortableSignalRestore(SIGINT, &sh);
 	if (fInterrupt) {
 		raise(SIGINT);

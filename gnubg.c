@@ -4330,7 +4330,7 @@ static char *get_stdin_line(void)
 	}
 
 	fInterrupt = FALSE;
-    return g_strdup(sz);
+    return strdup(sz);
 }
 
 
@@ -4349,7 +4349,7 @@ static void run_cl(void)
 		{
 			line = get_stdin_line();
 			HandleCommand(line, acTop);
-			g_free(line);
+			free(line);
 		}
 		while (fNextTurn)
 			NextTurn(TRUE);
