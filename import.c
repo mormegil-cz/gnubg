@@ -443,7 +443,7 @@ static int ImportJF( FILE * fp, char *szFileName) {
   pmr->mt = MOVE_SETBOARD;
   if( fTurn )
     SwapSides( anBoard );
-  PositionKey( (ConstTanBoard)anBoard, pmr->sb.auchKey );
+  PositionKey( (ConstTanBoard)anBoard, &pmr->sb.key );
   AddMoveRecord( pmr );
 
   /* cube value */
@@ -644,7 +644,7 @@ static void ParseMatMove( char *sz, int iPlayer, int *warned ) {
           pmr->mt = MOVE_SETBOARD;
           if( fTurn )
             SwapSides( anBoard );
-          PositionKey( (ConstTanBoard)anBoard, pmr->sb.auchKey );
+          PositionKey( (ConstTanBoard)anBoard, &pmr->sb.key );
           AddMoveRecord( pmr );
 
           return;
@@ -3216,7 +3216,7 @@ ImportSnowieTxt( FILE *pf ) {
   pmr->mt = MOVE_SETBOARD;
   if( ! fTurn )
       SwapSides( anBoard );
-  PositionKey( (ConstTanBoard)anBoard, pmr->sb.auchKey );
+  PositionKey( (ConstTanBoard)anBoard, &pmr->sb.key );
   AddMoveRecord( pmr );
 
   /* cube value */

@@ -1156,7 +1156,7 @@ static void ExportGameJF( FILE *pf, listOLD *plGame, int iGame, int withScore, i
 	if ( pmr->mt == MOVE_SETBOARD
 	     || pmr->mt == MOVE_SETCUBEVAL
 	     || pmr->mt == MOVE_SETCUBEPOS) {
-          PositionFromKey(anBoard, pmr->sb.auchKey);
+          PositionFromKey(anBoard, &pmr->sb.key);
 	  if (i & 1)
             SwapSides(anBoard);
 
@@ -1168,7 +1168,7 @@ static void ExportGameJF( FILE *pf, listOLD *plGame, int iGame, int withScore, i
 	    msExport.nCube = nFileCube;
 	    msExport.fMove = (i & 1);
 	    msExport.fTurn = (i & 1);
-	    PositionFromKey(msExport.anBoard, pmr->sb.auchKey);
+	    PositionFromKey(msExport.anBoard, &pmr->sb.key);
 	    msExport.anDice[0] = pnextmr->anDice[0];
 	    msExport.anDice[1] = pnextmr->anDice[1];
 	    if (i & 1)

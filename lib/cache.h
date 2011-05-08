@@ -23,16 +23,14 @@
 
 #include <stdlib.h>
 
+#include "gnubg-types.h"
+
 /* Set to calculate simple cache stats */
 #define CACHE_STATS 0
 
 typedef struct _cacheNodeDetail
 {
-	union
-	{
-		unsigned char auch[10];
-		int data[3];
-	} key;
+	positionkey key;
 	int nEvalContext;
 	float ar[6];
 } cacheNodeDetail;

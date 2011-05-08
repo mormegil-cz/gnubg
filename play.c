@@ -324,7 +324,7 @@ ApplyMoveRecord(matchstate* pms, const listOLD* plGame, const moverecord* pmr)
 	ApplyGameOver( pms, plGame );
 	break;
     case MOVE_SETBOARD:
-	PositionFromKey( pms->anBoard, pmr->sb.auchKey );
+	PositionFromKey( pms->anBoard, &pmr->sb.key );
 
 	if( pms->fMove < 0 )
 	    pms->fTurn = pms->fMove = 0;
@@ -1351,7 +1351,7 @@ static int ComputerTurn( void ) {
 
 	  fd.pml = &pmr->ml;
 	  fd.pboard = (ConstTanBoard)anBoardMove;
-	  fd.auchMove = NULL;
+	  fd.keyMove = NULL;
 	  fd.rThr = 0.0f;
 	  fd.pci = &ci;
 	  fd.pec = &ap[ ms.fTurn ].esChequer.ec;
@@ -4431,7 +4431,7 @@ extern const char* GetMoveString(moverecord *pmr, int* pPlayer, gboolean addSkil
 	case MOVE_SETBOARD:
 		*pPlayer = -1;
 		sprintf( sz, " (set board %s)",
-			PositionIDFromKey( pmr->sb.auchKey ) );
+			PositionIDFromKey( &pmr->sb.key ) );
 		pch = sz;
 	break;
 

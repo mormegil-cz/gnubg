@@ -2882,7 +2882,7 @@ static void SaveMoves( movelist *pml, unsigned int cMoves, unsigned int cPip, in
 		       const TanBoard anBoard, int fPartial ) {
     unsigned int i, j;
     move *pm;
-    unsigned char auch[ 10 ];
+    positionkey key;
 
 	if( fPartial ) {
 	/* Save all moves, even incomplete ones */
@@ -2907,11 +2907,11 @@ static void SaveMoves( movelist *pml, unsigned int cMoves, unsigned int cPip, in
     
     pm = pml->amMoves + pml->cMoves;
     
-    PositionKey( anBoard, auch );
+    PositionKey( anBoard, &key );
     
     for( i = 0; i < pml->cMoves; i++ )
 	{
-		if( EqualKeys( auch, pml->amMoves[ i ].auch ) )
+		if( EqualKeys( key, pml->amMoves[ i ].key ) )
 		{
 			if( cMoves > pml->amMoves[ i ].cMoves ||
 				cPip > pml->amMoves[ i ].cPips )
@@ -2936,8 +2936,7 @@ static void SaveMoves( movelist *pml, unsigned int cMoves, unsigned int cPip, in
     if( cMoves < 4 )
 		pm->anMove[ cMoves * 2 ] = -1;
     
-    for( i = 0; i < 10; i++ )
-		pm->auch[ i ] = auch[ i ];
+    CopyKey(key, pm->key);
 
     pm->cMoves = cMoves;
     pm->cPips = cPip;
@@ -3050,8 +3049,8 @@ static int CompareMovesGeneral(const move *pm0, const move *pm1)
 		return CompareMoves(pm0, pm1);
 
 	/* find the "back" chequer */
-	PositionFromKey(board[0], pm0->auch);
-	PositionFromKey(board[1], pm1->auch);
+	PositionFromKey(board[0], &pm0->key);
+	PositionFromKey(board[1], &pm1->key);
 	for (a = 0; a < 2; a++) {
 		for (b = 24; b > -1; b--) {
 			if (board[a][1][b] > 0) {
@@ -5431,16 +5430,15 @@ locateMove ( const TanBoard anBoard,
              const int anMove[ 8 ], const movelist *pml ) {
 
   unsigned int i;
-  unsigned char auch[ 10 ];
-  unsigned char key[ 10 ];
+  positionkey key1, key2;
 
-  MoveKey ( anBoard, anMove, key );
+  MoveKey ( anBoard, anMove, &key1 );
 
   for ( i = 0; i < pml->cMoves; ++i ) {
 
-    MoveKey ( anBoard, pml->amMoves[ i ].anMove, auch );
+    MoveKey ( anBoard, pml->amMoves[ i ].anMove, &key2 );
 
-    if ( EqualKeys ( auch, key ) )
+    if ( EqualKeys ( key2, key1 ) )
       return i;
 
 
@@ -5453,13 +5451,13 @@ locateMove ( const TanBoard anBoard,
 
 extern int
 MoveKey ( const TanBoard anBoard, const int anMove[ 8 ], 
-          unsigned char auch[ 10 ] ) {
+          positionkey* pkey ) {
 
   TanBoard anBoardMove;
 
   memcpy ( anBoardMove, anBoard, sizeof ( anBoardMove ) );
   ApplyMove ( anBoardMove, anMove, FALSE );
-  PositionKey ( (ConstTanBoard)anBoardMove, auch );
+  PositionKey ( (ConstTanBoard)anBoardMove, pkey );
 
   return 0;
 
@@ -5614,13 +5612,13 @@ static void FindBestMoveInEval(NNState * nnStates, int const nDice0, int const n
 	if (ml.cMoves == 1) {
 		/* forced move */
 		ml.iMoveBest = 0;
-		PositionFromKey(anBoardOut, ml.amMoves[ml.iMoveBest].auch);
+		PositionFromKey(anBoardOut, &ml.amMoves[ml.iMoveBest].key);
 		return;
 	}
 
 	if (ml.cMoves <= PRUNE_MOVES) {
 		ScoreMoves(&ml, pci, pec, 0);
-		PositionFromKey(anBoardOut, ml.amMoves[ml.iMoveBest].auch);
+		PositionFromKey(anBoardOut, &ml.amMoves[ml.iMoveBest].key);
 		return;
 	}
 
@@ -5636,7 +5634,7 @@ static void FindBestMoveInEval(NNState * nnStates, int const nDice0, int const n
 		 * on some gcc systems. Remove with great care. */
 		move* const volatile pm = &ml.amMoves[i];
 
-		PositionFromKey(anBoardOut, pm->auch);
+		PositionFromKey(anBoardOut, &pm->key);
 		SwapSides(anBoardOut);
 
 		pc = ClassifyPosition((ConstTanBoard) anBoardOut, VARIATION_STANDARD);
@@ -5647,7 +5645,7 @@ static void FindBestMoveInEval(NNState * nnStates, int const nDice0, int const n
 		} else if (pc != evalClass)
 			break;
 
-		memcpy(ec.key.auch, pm->auch, sizeof(ec.key.auch));
+		CopyKey(pm->key, ec.key);
 		ec.nEvalContext = 0;
 		if ((l = CacheLookup(&cpEval, &ec, arOutput, NULL)) != CACHEHIT) {
 			baseInputs((ConstTanBoard) anBoardOut, arInput);
@@ -5697,7 +5695,7 @@ static void FindBestMoveInEval(NNState * nnStates, int const nDice0, int const n
 	}
 
 	ScoreMoves(&ml, pci, pec, 0);
-	PositionFromKey(anBoardOut, ml.amMoves[ml.iMoveBest].auch);
+	PositionFromKey(anBoardOut, &ml.amMoves[ml.iMoveBest].key);
 }
 
 static int EvaluatePositionFull( NNState *nnStates, const TanBoard anBoard, float arOutput[],
@@ -5811,7 +5809,7 @@ EvaluatePositionCache( NNState *nnStates, const TanBoard anBoard, float arOutput
 		return EvaluatePositionFull( nnStates, anBoard, arOutput, pci, pecx, nPlies, pc );
 	}
     
-    PositionKey( anBoard, ec.key.auch );
+    PositionKey( anBoard, &ec.key );
 
     ec.nEvalContext = EvalKey ( pecx, nPlies, pci, FALSE );
 	if ( ( l = CacheLookup( &cEval, &ec, arOutput, NULL ) ) == CACHEHIT ) {
@@ -5846,7 +5844,7 @@ extern int ScoreMove(NNState *nnStates, move *pm, const cubeinfo *pci,
     float arEval[ NUM_ROLLOUT_OUTPUTS ];
     cubeinfo ci;
 
-    PositionFromKey( anBoardTemp, pm->auch );
+    PositionFromKey( anBoardTemp, &pm->key );
       
     SwapSides( anBoardTemp );
 
@@ -5953,7 +5951,7 @@ FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
   }
 	
   if ( ml.cMoves )
-    PositionFromKey( anBoard, ml.amMoves[ ml.iMoveBest ].auch );
+    PositionFromKey( anBoard, &ml.amMoves[ ml.iMoveBest ].key );
 
   if ( ml.amMoves )
     free( ml.amMoves );
@@ -5974,13 +5972,13 @@ int FindBestMove( int anMove[ 8 ], int nDice0, int nDice1,
 }
 
 extern int FindnSaveBestMoves( movelist *pml, int nDice0, int nDice1,
-		const TanBoard anBoard, unsigned char *auchMove, const
+		const TanBoard anBoard, positionkey *keyMove, const
 		float rThr, const cubeinfo* pci, const evalcontext* pec,
 		movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] )
 {
 
   /* Find best moves. 
-     Ensure that auchMove is evaluated at the deepest ply. */
+     Ensure that keyMove is evaluated at the deepest ply. */
 
   unsigned int i;
   unsigned int nMoves, iPly;
@@ -6074,14 +6072,14 @@ extern int FindnSaveBestMoves( movelist *pml, int nDice0, int nDice1,
   cOldMoves = pml->cMoves;
   pml->cMoves = nMoves;
 
-  /* Make sure that auchMove and top move are both  
+  /* Make sure that keyMove and top move are both  
      evaluated at the deepest ply. */
-  if( auchMove ) {
+  if( keyMove ) {
 
     int fResort = FALSE;
 
     for( i = 0; i < pml->cMoves; i++ )
-      if( EqualKeys( auchMove, pml->amMoves[ i ].auch ) ) {
+      if( EqualKeys( (*keyMove), pml->amMoves[ i ].key ) ) {
 
         /* ensure top move is evaluted at deepest ply */
 
@@ -6576,7 +6574,7 @@ EvaluatePositionCubeful3( NNState *nnStates, const TanBoard anBoard,
 				       nPlies, fTop );
   }
 
-  PositionKey ( anBoard, ec.key.auch );
+  PositionKey ( anBoard, &ec.key );
 
   /* check cache for existence for earlier calculation */
 

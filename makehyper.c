@@ -382,7 +382,7 @@ HyperEquity ( const int nUs, const int nThem,
         
           for ( k = 0; k < ml.cMoves; ++k ) {
           
-            PositionFromKey ( anBoardTemp, ml.amMoves[ k ].auch );
+            PositionFromKey ( anBoardTemp, &ml.amMoves[ k ].key );
           
             nUsNew = PositionBearoff( anBoardTemp[ 1 ], 25, nC );
             nThemNew = PositionBearoff( anBoardTemp[ 0 ], 25, nC );

@@ -304,7 +304,7 @@ updateStatcontext(statcontext*       psc,
                   const listOLD *plGame )
 {
   cubeinfo ci;
-  static unsigned char auch[ 10 ];
+  static positionkey key;
   float rSkill, rChequerSkill, rCost;
   unsigned int i;
   float arDouble[ 4 ];
@@ -440,12 +440,12 @@ updateStatcontext(statcontext*       psc,
 	  TanBoard anBoardMove;
       memcpy( anBoardMove, pms->anBoard, sizeof( anBoardMove ) );
       ApplyMove( anBoardMove, pmr->n.anMove, FALSE );
-      PositionKey ( (ConstTanBoard)anBoardMove, auch );
+      PositionKey ( (ConstTanBoard)anBoardMove, &key );
       rChequerSkill = 0.0f;
 	  
       for( i = 0; i < pmr->ml.cMoves; i++ ) 
 
-        if( EqualKeys(auch, pmr->ml.amMoves[ i ].auch) ) {
+        if( EqualKeys(key, pmr->ml.amMoves[ i ].key) ) {
 
           rChequerSkill =
             pmr->ml.amMoves[ i ].rScore - pmr->ml.amMoves[ 0 ].rScore;
@@ -715,13 +715,13 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const listOLD *plParentGame,
 	      
 		if( fAnalyseMove )
 		{
-			unsigned char auch[ 10 ];
+			positionkey key;
 
 			/* evaluate move */
 
 			memcpy( anBoardMove, pms->anBoard, sizeof( anBoardMove ) );
 			ApplyMove( anBoardMove, pmr->n.anMove, FALSE );
-			PositionKey ( (ConstTanBoard)anBoardMove, auch );
+			PositionKey ( (ConstTanBoard)anBoardMove, &key );
 		  
 			if (cmp_evalsetup(pesChequer, &pmr->esChequer) > 0) {
 
@@ -735,7 +735,7 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const listOLD *plParentGame,
 					MT_Release();
 					if (FindnSaveBestMoves(&ml, pmr->anDice[0],
 								pmr->anDice[1],
-								(ConstTanBoard) pms->anBoard, auch,
+								(ConstTanBoard) pms->anBoard, &key,
 								arSkillLevel[SKILL_DOUBTFUL],
 								&ci, &pesChequer->ec, aamf) < 0)
 						return -1;
@@ -749,8 +749,7 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const listOLD *plParentGame,
 		  
 			for( pmr->n.iMove = 0; pmr->n.iMove < pmr->ml.cMoves;
 			pmr->n.iMove++ )
-			if( EqualKeys( auch,
-					pmr->ml.amMoves[ pmr->n.iMove ].auch ) ) {
+			if( EqualKeys( key, pmr->ml.amMoves[ pmr->n.iMove ].key) ) {
 				rChequerSkill = pmr->ml.amMoves[ pmr->n.iMove ].
 				rScore - pmr->ml.amMoves[ 0 ].rScore;
 			  
@@ -1900,7 +1899,7 @@ static int MoveAnalysed(moverecord * pmr, matchstate * pms, listOLD * plGame,
 			UNUSED(aamf[MAX_FILTER_PLIES][MAX_FILTER_PLIES]))
 {
 	static TanBoard anBoardMove;
-	static unsigned char auch[10];
+	static positionkey key;
 	static cubeinfo ci;
 	static float rSkill, rChequerSkill;
 	static evalsetup esDouble;	/* shared between the
@@ -1953,7 +1952,7 @@ static int MoveAnalysed(moverecord * pmr, matchstate * pms, listOLD * plGame,
 
 		memcpy(anBoardMove, pms->anBoard, sizeof(anBoardMove));
 		ApplyMove(anBoardMove, pmr->n.anMove, FALSE);
-		PositionKey((ConstTanBoard)anBoardMove, auch);
+		PositionKey((ConstTanBoard)anBoardMove, &key);
 
 		if (pmr->esChequer.et == EVAL_NONE && pmr->n.iMove != UINT_MAX)
 			return FALSE;
@@ -2327,7 +2326,7 @@ static int cmark_move_rollout(moverecord *pmr, gboolean destroy)
 	move **ppm;
 	void *p;
 	GSList *list = NULL;
-	guchar auch[10];
+	positionkey key;
 
 	g_return_val_if_fail(pmr, -1);
 
@@ -2344,7 +2343,7 @@ static int cmark_move_rollout(moverecord *pmr, gboolean destroy)
 	ppci = g_new(cubeinfo *, c);
 	asz = (char (*)[40])g_malloc(40 * c);
 	if (pmr->n.iMove != UINT_MAX)
-		memcpy(auch, pmr->ml.amMoves[pmr->n.iMove].auch, 10);
+		CopyKey(pmr->ml.amMoves[pmr->n.iMove].key, key);
 	GetMatchStateCubeInfo(&ci, &ms);
 
 	for (pl = list, j = 0; pl; pl = g_slist_next(pl), j++) {
@@ -2366,7 +2365,7 @@ static int cmark_move_rollout(moverecord *pmr, gboolean destroy)
 
 	if (pmr->n.iMove != UINT_MAX)
 		for (pmr->n.iMove = 0; pmr->n.iMove < pmr->ml.cMoves; pmr->n.iMove++)
-			if (EqualKeys(auch, pmr->ml.amMoves[pmr->n.iMove].auch)) {
+			if (EqualKeys(key, pmr->ml.amMoves[pmr->n.iMove].key)) {
 				pmr->n.stMove =
 					Skill(pmr->ml.amMoves[pmr->n.iMove].rScore - pmr->ml.amMoves[0].rScore);
 

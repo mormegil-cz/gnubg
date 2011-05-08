@@ -1,3 +1,12 @@
+2011-05-08  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* lib/gnubg-types.h, lib/cache.h, lib/cache.c, positionid.h,
+	positionid.c, analysis.c, eval.c, export.c, gnubg.c,
+	gnubgmodule.c, gtkboard.c, gtkpanels.c, import.c, play.c,
+	rollout.c, set.c, sgf.c, makebearoff.c, makehyper.c:
+	Use a defined type for the position key.
+	Small speed up with faster EqualKeys and CopyKey macros.
+
 2011-04-10  Michael Petch  <mpetch@capp-sysware.com>
 
         * board3d/drawboard3d.c board3d/fun3d.h board3d/shadow.c:

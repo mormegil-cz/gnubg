@@ -315,7 +315,7 @@ void UpdateTheoryData(BoardData* bd, int UpdateType, const TanBoard points)
 		pc = NULL;
 		if ( bd->valid_move )
 		{
-			PositionFromKey( anBoard, bd->valid_move->auch );
+			PositionFromKey( anBoard, &bd->valid_move->key );
 			pc = ReturnHits( anBoard );
 		}
 		if (pc)

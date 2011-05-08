@@ -694,7 +694,7 @@ int update_move(BoardData *bd)
     char *move = _("Illegal move"), move_buf[ 40 ];
     unsigned int i;
 	TanBoard points;
-    guchar key[ 10 ];
+    positionkey key;
     int fIncomplete = TRUE, fIllegal = TRUE;
     
     read_board( bd, points );
@@ -711,10 +711,10 @@ int update_move(BoardData *bd)
 	move = NULL;
 	fIncomplete = fIllegal = FALSE;
     } else {
-        PositionKey( (ConstTanBoard)points, key );
+        PositionKey( (ConstTanBoard)points, &key );
 
         for( i = 0; i < bd->move_list.cMoves; i++ )
-            if( EqualKeys( bd->move_list.amMoves[ i ].auch, key ) ) {
+            if( EqualKeys( bd->move_list.amMoves[ i ].key, key ) ) {
                 bd->valid_move = bd->move_list.amMoves + i;
 		fIncomplete = bd->valid_move->cMoves < bd->move_list.cMaxMoves
 		    || bd->valid_move->cPips < bd->move_list.cMaxPips;
@@ -730,7 +730,7 @@ int update_move(BoardData *bd)
         if ( bd->valid_move ) {
           TanBoard anBoard;
           char *pch;
-          PositionFromKey( anBoard, bd->valid_move->auch );
+          PositionFromKey( anBoard, &bd->valid_move->key );
           if ( ( pch = ReturnHits( anBoard ) ) ) {
             outputf( _("Return hits: %s\n"), pch );
             outputx();
@@ -1889,7 +1889,7 @@ extern gboolean board_button_press(GtkWidget *board, GdkEventButton *event,
 			int n[2], bar, i;
 			int old_points[ 28 ];
 			TanBoard points;
-			unsigned char key[ 10 ];
+			positionkey key;
 			
 			memcpy( old_points, bd->points, sizeof old_points );
 			
@@ -1945,7 +1945,7 @@ extern gboolean board_button_press(GtkWidget *board, GdkEventButton *event,
 				bd->points[ bd->drag_point ] = bd->drag_colour << 1;
 			
 				read_board( bd, points );
-				PositionKey( (ConstTanBoard)points, key );
+				PositionKey( (ConstTanBoard)points, &key );
 
 				if (!update_move(bd))
 				{	/* Show Move */

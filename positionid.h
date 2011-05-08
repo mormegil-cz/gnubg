@@ -26,16 +26,16 @@
 
 #define L_POSITIONID 14
 
-extern void PositionKey( const TanBoard anBoard, unsigned char auchKey[ 10 ] );
+extern void PositionKey( const TanBoard anBoard, positionkey* pkey );
 extern char *PositionID( const TanBoard anBoard );
-extern char *PositionIDFromKey( const unsigned char auchKey[ 10 ] );
+extern char *PositionIDFromKey( const positionkey* pkey );
 
 extern 
 unsigned int PositionBearoff( const unsigned int anBoard[],
                               unsigned int nPoints,
                               unsigned int nChequers );
 
-extern void PositionFromKey(TanBoard anBoard, const unsigned char* puch);
+extern void PositionFromKey(TanBoard anBoard, const positionkey* pkey);
 
 /* Return 1 for success, 0 for invalid id */
 extern int PositionFromID( TanBoard anBoard, const char* szID );
@@ -45,12 +45,9 @@ extern void PositionFromBearoff(unsigned int anBoard[], unsigned int usID,
 
 extern unsigned short PositionIndex(unsigned int g, const unsigned int anBoard[6]);
 
-/* Efficient order of tests determined by profiling.
-   It makes a significant difference!  */
-#define EqualKeys(k1, k2) (   k1[5]==k2[5] && k1[6]==k2[6] && k1[7]==k2[7] \
-			   && k1[8]==k2[8] && k1[4]==k2[4] && k1[9]==k2[9] \
-			   && k1[3]==k2[3] && k1[0]==k2[0] && k1[1]==k2[1] \
-			   && k1[2]==k2[2])
+#define EqualKeys(k1, k2) (k1.data[1]==k2.data[1]&&k1.data[2]==k2.data[2]&&k1.data[0]==k2.data[0])
+
+#define CopyKey(ks, kd) kd.data[0]=ks.data[0],kd.data[1]=ks.data[1],kd.data[2]=ks.data[2]
 
 extern int EqualBoards( const TanBoard anBoard0, const TanBoard anBoard1 );
 

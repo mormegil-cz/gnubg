@@ -1888,7 +1888,7 @@ ScoreMoveRollout ( move **ppm, const cubeinfo** ppci, int cMoves,
     memcpy (aci + i, ppci[ i ], sizeof (cubeinfo));
     apCubeDecTop[ i ] = &fCubeDecTop;
 
-    PositionFromKey( anBoard[ i ], ppm[ i ]->auch );
+    PositionFromKey( anBoard[ i ], &ppm[ i ]->key );
       
     SwapSides( anBoard[ i ] );
 

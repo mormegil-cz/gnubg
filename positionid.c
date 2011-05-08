@@ -46,14 +46,14 @@
 
 /* See https://savannah.gnu.org/bugs/index.php?28421 regarding the code below */
 
-extern void PositionKey(const TanBoard anBoard, unsigned char auchKey[10])
+extern void PositionKey(const TanBoard anBoard, positionkey* pkey)
 {
 	unsigned int i;
 	int iBit = 32;
-	unsigned int *iKey = (unsigned int *)auchKey;
+	unsigned int *iKey = pkey->data;
 	const unsigned int* j;
 
-	memset(auchKey, 0, 10 * sizeof(*auchKey));
+	memset(pkey, 0, sizeof(positionkey));
 
 	for(i = 0; i < 2; ++i)
 	{
@@ -88,10 +88,10 @@ extern void PositionKey(const TanBoard anBoard, unsigned char auchKey[10])
 	}
 }
 
-extern void PositionFromKey(TanBoard anBoard, const unsigned char* pauch)
+extern void PositionFromKey(TanBoard anBoard, const positionkey* pkey)
 {
 	int i = 0, j = 0, xtest;
-	int *ptest = (int*)pauch;
+	const unsigned int *ptest = pkey->data;
 
 	memset(anBoard, 0, sizeof(TanBoard));
 
@@ -152,12 +152,12 @@ static inline void addBits(unsigned char auchKey[10], unsigned int bitPos, unsig
   }
 }
 
-extern void PositionKey(const TanBoard anBoard, unsigned char auchKey[10])
+extern void PositionKey(const TanBoard anBoard, positionkey* pkey)
 {
   unsigned int i, iBit = 0;
   const unsigned int* j;
 
-  memset(auchKey, 0, 10 * sizeof(*auchKey));
+  memset(pkey, 0, sizeof(positionkey));
 
   for(i = 0; i < 2; ++i) {
     const unsigned int* const b = anBoard[i];
@@ -166,7 +166,7 @@ extern void PositionKey(const TanBoard anBoard, unsigned char auchKey[10])
       const unsigned int nc = *j;
 
       if( nc ) {
-        addBits(auchKey, iBit, nc);
+        addBits(pkey->auch, iBit, nc);
         iBit += nc + 1;
       } else {
         ++iBit;
@@ -175,7 +175,7 @@ extern void PositionKey(const TanBoard anBoard, unsigned char auchKey[10])
   }
 }
 
-extern void PositionFromKey(TanBoard anBoard, const unsigned char* pauch)
+extern void PositionFromKey(TanBoard anBoard, const positionkey* pkey)
 {
   int i = 0, j  = 0, k;
   const unsigned char* a;
@@ -183,7 +183,7 @@ extern void PositionFromKey(TanBoard anBoard, const unsigned char* pauch)
   memset(anBoard[0], 0, sizeof(anBoard[0]));
   memset(anBoard[1], 0, sizeof(anBoard[1]));
   
-  for(a = pauch; a < pauch + 10; ++a) {
+  for(a = pkey->auch; a < pkey->auch + 10; ++a) {
     unsigned char cur = *a;
     
     for(k = 0; k < 8; ++k)
@@ -211,9 +211,9 @@ extern void PositionFromKey(TanBoard anBoard, const unsigned char* pauch)
 
 #endif
 
-extern char *PositionIDFromKey( const unsigned char auchKey[ 10 ] ) {
+extern char *PositionIDFromKey( const positionkey *pkey ) {
 
-    const unsigned char *puch = auchKey;
+    unsigned char const *puch = pkey->auch;
     static char szID[ L_POSITIONID + 1 ];
     char *pch = szID;
     static char aszBase64[ 65 ] =
@@ -241,11 +241,11 @@ extern char *PositionIDFromKey( const unsigned char auchKey[ 10 ] ) {
 
 extern char *PositionID( const TanBoard anBoard ) {
 
-    unsigned char auch[ 10 ];
+    positionkey key;
     
-    PositionKey( anBoard, auch );
+    PositionKey( anBoard, &key );
 
-    return PositionIDFromKey( auch );
+    return PositionIDFromKey( &key );
 }
 
 extern int
@@ -339,7 +339,8 @@ extern unsigned char Base64( const unsigned char ch )
 extern int
 PositionFromID(TanBoard anBoard, const char* pchEnc)
 {
-  unsigned char auchKey[ 10 ], ach[ L_POSITIONID +1 ], *pch = ach, *puch = auchKey;
+  positionkey key;
+  unsigned char ach[ L_POSITIONID +1 ], *pch = ach, *puch = key.auch;
   int i;
 
   memset ( ach, 0, L_POSITIONID +1 );
@@ -357,7 +358,7 @@ PositionFromID(TanBoard anBoard, const char* pchEnc)
 
   *puch = (unsigned char)( pch[ 0 ] << 2 ) | ( pch[ 1 ] >> 4 );
 
-  PositionFromKey( anBoard, auchKey );
+  PositionFromKey( anBoard, &key );
 
   return CheckPosition( (ConstTanBoard)anBoard );
 }

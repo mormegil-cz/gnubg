@@ -440,7 +440,7 @@ static void BearOff( int nId, unsigned int nPoints,
             usGammonBest = 0xFFFFFFFF; iGammonBest = -1;
 	    
 	    for( i = 0; i < ml.cMoves; i++ ) {
-		PositionFromKey( anBoardTemp, ml.amMoves[ i ].auch );
+		PositionFromKey( anBoardTemp, &ml.amMoves[ i ].key );
 
 		j = PositionBearoff( anBoardTemp[ 1 ], nPoints, 15 );
 
@@ -785,7 +785,7 @@ NDBearoff ( const int iPos, const unsigned int nPoints, float ar[ 4 ], xhash *ph
 
       for ( i = 0; i < ml.cMoves; ++i ) {
 
-        PositionFromKey ( anBoardTemp, ml.amMoves[ i ].auch );
+        PositionFromKey ( anBoardTemp, &ml.amMoves[ i ].key );
 
         j = PositionBearoff ( anBoardTemp[ 1 ], nPoints, 15 );
 
@@ -1079,7 +1079,7 @@ static void BearOff2( int nUs, int nThem,
             aiBest [ 0 ] = aiBest[ 1 ] = aiBest[ 2 ] = aiBest [ 3 ] = -1;
 	    
 	    for( i = 0; i < ml.cMoves; i++ ) {
-		PositionFromKey( anBoardTemp, ml.amMoves[ i ].auch );
+		PositionFromKey( anBoardTemp, &ml.amMoves[ i ].key );
 
 		j = PositionBearoff( anBoardTemp[ 1 ], nTSP, nTSC );
 

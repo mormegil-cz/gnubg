@@ -548,7 +548,7 @@ extern void CommandSetBoard( char *sz ) {
     
     if( ms.fMove )
 	SwapSides( an );
-    PositionKey( (ConstTanBoard)an, pmr->sb.auchKey );
+    PositionKey( (ConstTanBoard)an, &pmr->sb.key );
     
     AddMoveRecord( pmr );
 

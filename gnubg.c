@@ -2293,7 +2293,7 @@ extern void hint_move(char *sz, gboolean show)
 	if (pmr->esChequer.et == EVAL_NONE) {
 		fd.pml = &ml;
 		fd.pboard = msBoard();
-		fd.auchMove = NULL;
+		fd.keyMove = NULL;
 		fd.rThr = arSkillLevel[SKILL_DOUBTFUL];
 		fd.pci = &ci;
 		fd.pec = &GetEvalChequer()->ec;
@@ -2321,7 +2321,7 @@ extern void hint_move(char *sz, gboolean show)
 		   move is evaluated at the best ply. */
 		fd.pml = &ml;
 		fd.pboard = msBoard();
-		fd.auchMove = pmr->ml.amMoves[pmr->n.iMove].auch;
+		fd.keyMove = &(pmr->ml.amMoves[pmr->n.iMove].key);
 		fd.rThr = arSkillLevel[SKILL_DOUBTFUL];
 		fd.pci = &ci;
 		fd.pec = &GetEvalChequer()->ec;
@@ -5036,9 +5036,9 @@ swapGame ( listOLD *plGame ) {
 
     case MOVE_SETBOARD:
 
-      PositionFromKey(anBoard, pmr->sb.auchKey);
+      PositionFromKey(anBoard, &pmr->sb.key);
       SwapSides( anBoard );
-      PositionKey( (ConstTanBoard)anBoard, pmr->sb.auchKey );
+      PositionKey( (ConstTanBoard)anBoard, &pmr->sb.key );
       break;
 
     case MOVE_SETCUBEVAL:
@@ -5487,7 +5487,7 @@ char *SetupLanguage(const char *newLangCode)
 void asyncFindMove(findData *pfd)
 {
 	if( FindnSaveBestMoves( pfd->pml, ms.anDice[ 0 ], ms.anDice[ 1 ], pfd->pboard,
-				pfd->auchMove, pfd->rThr, pfd->pci, pfd->pec, pfd->aamf) < 0)
+				pfd->keyMove, pfd->rThr, pfd->pci, pfd->pec, pfd->aamf) < 0)
 		MT_SetResultFailed();
 }
 

@@ -1064,7 +1064,7 @@ PythonPositionKey( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   PyObject *pyBoard = NULL;
   TanBoard anBoard;
-  unsigned char auch[ 10 ];
+  positionkey key;
 
   memcpy( anBoard, msBoard(), sizeof(TanBoard) );
 
@@ -1074,13 +1074,13 @@ PythonPositionKey( PyObject* self UNUSED_PARAM, PyObject *args ) {
   if ( pyBoard && !PyToBoard( pyBoard, anBoard ) )
     return NULL;
 
-  PositionKey( (ConstTanBoard)anBoard, auch );
+  PositionKey( (ConstTanBoard)anBoard, &key );
 
   {
     PyObject* a = PyTuple_New(10);
     int i;
     for(i = 0; i < 10; ++i) {
-      PyTuple_SET_ITEM(a, i, PyInt_FromLong(auch[i]));
+      PyTuple_SET_ITEM(a, i, PyInt_FromLong(key.auch[i]));
     }
     return a;
   }
@@ -1093,7 +1093,7 @@ PythonPositionFromKey( PyObject* self UNUSED_PARAM, PyObject *args ) {
   int i;
   PyObject *pyKey = NULL;
   PyObject *py;
-  unsigned char auch[ 10 ];
+  positionkey key;
 
   if( ! PyArg_ParseTuple( args, "|O!:positionfromkey", &PyList_Type, &pyKey ) )
     return NULL;
@@ -1104,18 +1104,18 @@ PythonPositionFromKey( PyObject* self UNUSED_PARAM, PyObject *args ) {
       if ( ! ( py = PyList_GetItem( pyKey, i ) ) )
         return NULL;
       
-      auch[ i ] = (unsigned char) PyInt_AsLong( py );
+      key.auch[ i ] = (unsigned char) PyInt_AsLong( py );
     }
 
   }
   else {
 
     for ( i = 0; i < 10; ++i )
-      auch[ i ] = 0;
+      key.auch[ i ] = 0;
 
   }
 
-  PositionFromKey( anBoard, auch );
+  PositionFromKey( anBoard, &key );
 
   return BoardToPy( (ConstTanBoard)anBoard );
 }
@@ -2030,7 +2030,7 @@ PythonGame(const listOLD*    plGame,
 	case MOVE_SETBOARD:
 	{
 	  PyObject* id = 
-            PyString_FromString(PositionIDFromKey(pmr->sb.auchKey));
+            PyString_FromString(PositionIDFromKey(&pmr->sb.key));
 
 	  action = "set";
 
@@ -2039,7 +2039,7 @@ PythonGame(const listOLD*    plGame,
 	  if( includeBoards ) {
 	    /* (FIXME) what about side? */
             /* JTH: the board is always stored as if player 0 was on roll */
-	    PositionFromKey(anBoard, pmr->sb.auchKey);
+	    PositionFromKey(anBoard, &pmr->sb.key);
 	  }
 	  
 	  break;

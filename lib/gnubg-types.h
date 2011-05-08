@@ -61,4 +61,10 @@ typedef struct _matchstate {
 	gamestate gs;
 } matchstate;
 
+typedef union _positionkey
+{
+	unsigned char auch[10];
+	unsigned int data[3];
+} positionkey;
+
 #endif
