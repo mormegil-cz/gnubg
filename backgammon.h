@@ -129,7 +129,7 @@ typedef struct _moveresign {
 } xmoveresign;
 
 typedef struct _movesetboard {
-	unsigned char auchKey[10];	/* always stored as if player 0 was on roll */
+	positionkey key;	/* always stored as if player 0 was on roll */
 } xmovesetboard;
 
 typedef struct _movesetcubeval {
@@ -220,7 +220,7 @@ typedef struct _findData
 {
 	movelist *pml;
 	ConstTanBoard pboard;
-	unsigned char *auchMove;
+	positionkey *keyMove;
 	float rThr;
 	const cubeinfo* pci;
 	const evalcontext* pec;
