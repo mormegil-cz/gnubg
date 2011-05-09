@@ -3347,18 +3347,27 @@ static GList *ParseBoardDesigns ( const char *szFile, const int fDeletable )
 
   /* create parser context */
 
-  if (!g_file_get_contents(szFile, &contents, &size, NULL))
+  if (!g_file_get_contents(szFile, &contents, &size, NULL)) {
+          g_free( parser->filename );
+          g_free( parser );
           return NULL;
+  }
 
   context = g_markup_parse_context_new( &markup_parser, 0, parser, NULL );
-  if ( ! context )
+  if ( ! context ) {
+          g_free( parser->filename );
+          g_free( parser );
           return NULL;
+  }
 
   /* parse document */
   if(!g_markup_parse_context_parse( context, contents, size, &error )){
 	g_warning("Error parsing XML: %s\n", error->message );
 	g_error_free( error );
         free_board_designs ( parser->designs );
+        g_markup_parse_context_free (context);
+	g_free( parser->filename );
+	g_free( parser );
 	return NULL;
   }
   g_markup_parse_context_free (context); 
