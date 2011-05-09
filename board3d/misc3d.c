@@ -458,7 +458,7 @@ void FindTexture(TextureInfo** textureInfo, const char* file)
 void LoadTextureInfo(void)
 {
 	FILE* fp;
-	char *szFile;
+	gchar *szFile;
 	char buf[BUF_SIZE];
 
 	textures = NULL;
@@ -466,6 +466,7 @@ void LoadTextureInfo(void)
 	szFile = BuildFilename(TEXTURE_FILE );
 	fp = g_fopen(szFile, "r");
 	g_free(szFile);
+
 	if (!fp)
 	{
 		g_print("Error: Texture file (%s) not found\n", TEXTURE_FILE);
@@ -475,6 +476,7 @@ void LoadTextureInfo(void)
 	if (!fgets(buf, BUF_SIZE, fp) || atoi(buf) != TEXTURE_FILE_VERSION)
 	{
 		g_print("Error: Texture file (%s) out of date\n", TEXTURE_FILE);
+		fclose(fp);
 		return;
 	}
 
@@ -509,6 +511,7 @@ void LoadTextureInfo(void)
 		if (!fgets(buf, BUF_SIZE, fp))
 		{
 			g_print("Error in texture file info.\n");
+			fclose(fp);
 			return;
 		}
 		len = strlen(buf);
@@ -529,6 +532,7 @@ void LoadTextureInfo(void)
 		if (!fgets(buf, BUF_SIZE, fp))
 		{
 			g_print("Error in texture file info.\n");
+			fclose(fp);
 			return;
 		}
 		len = strlen(buf);
@@ -564,6 +568,7 @@ void LoadTextureInfo(void)
 			textures = g_list_append(textures, pNewText);
 		}
 	} while (!feof(fp));
+	fclose(fp);
 }
 
 static void DeleteTexture(Texture* texture)
@@ -588,7 +593,7 @@ int LoadTexture(Texture* texture, const char* filename)
 		fpixbuf = gdk_pixbuf_new_from_file(filename, &pix_error);
 	else
 	{
-		char *tmp = BuildFilename(filename);
+		gchar *tmp = BuildFilename(filename);
 		fpixbuf = gdk_pixbuf_new_from_file(tmp, &pix_error);
 		g_free(tmp);
 	}
