@@ -2328,8 +2328,10 @@ extern void CommandDouble( char *sz ) {
 
     pmr->mt = MOVE_DOUBLE;
     pmr->fPlayer = ms.fTurn;
-    if ( fTutor && fTutorCube && !GiveAdvice( tutor_double(TRUE) ))
+    if ( fTutor && fTutorCube && !GiveAdvice( tutor_double(TRUE) )) {
+      free( pmr );
       return;
+    }
 
     if( fDisplay )
 	outputf( _("%s doubles.\n"), ap[ ms.fTurn ].szName );
