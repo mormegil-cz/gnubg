@@ -3362,9 +3362,10 @@ extern void CommandExportGameHtml( char *sz ) {
     /* external stylesheet */
 
     if ( exsExport.hecss == HTML_EXPORT_CSS_EXTERNAL ) 
-      if ( ( pf = OpenCSS( sz ) ) )
+      if ( ( pf = OpenCSS( sz ) ) ) {
         WriteStyleSheet ( pf, exsExport.hecss );
-
+	fclose( pf );
+       }
 }
 
 
@@ -3460,9 +3461,10 @@ extern void CommandExportMatchHtml( char *sz ) {
     /* external stylesheet */
 
     if ( exsExport.hecss == HTML_EXPORT_CSS_EXTERNAL ) 
-      if ( ( pf = OpenCSS( sz ) ) )
+      if ( ( pf = OpenCSS( sz ) ) ) {
         WriteStyleSheet ( pf, exsExport.hecss );
-    
+        fclose( pf );
+      }
 }
 
 
@@ -3540,9 +3542,10 @@ extern void CommandExportPositionHtml( char *sz ) {
     /* external stylesheet */
 
     if ( exsExport.hecss == HTML_EXPORT_CSS_EXTERNAL ) 
-      if ( ( pf = OpenCSS( sz ) ) )
+      if ( ( pf = OpenCSS( sz ) ) ) {
         WriteStyleSheet ( pf, exsExport.hecss );
-
+        fclose( pf );
+      }
 }
 
 
