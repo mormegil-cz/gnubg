@@ -349,11 +349,15 @@ int CreateDatabase(DBProvider *pdb)
 {
 	char buffer[10240];
 	char *pBuf = buffer;
-	char *szFile = BuildFilename("gnubg.sql");
-	FILE *fp = g_fopen(szFile, "r");
 	char line[1024];
-	if (!fp)
+
+	gchar *szFile = BuildFilename("gnubg.sql");
+	FILE *fp = g_fopen(szFile, "r");
+
+	if (!fp) {
+		g_free(szFile);
 		return FALSE;
+		}
 
 	buffer[0] = '\0';
 	while (fgets(line, sizeof(line), fp) != NULL)
@@ -378,8 +382,11 @@ int CreateDatabase(DBProvider *pdb)
 				pBuf += len;
 				if (pLine[len - 1] == ';')
 				{
-					if (!pdb->UpdateCommand(buffer))
+					if (!pdb->UpdateCommand(buffer)) {
+						fclose(fp);
+						g_free(szFile);
 						return FALSE;
+						}
 					pBuf = buffer;
 					buffer[0] = '\0';
 				}
@@ -389,6 +396,8 @@ int CreateDatabase(DBProvider *pdb)
 	if (ferror(fp))
 	{
 		outputerr(szFile);
+		g_free(szFile);
+		fclose(fp);
 		return FALSE;
 	}
 	g_free(szFile);
