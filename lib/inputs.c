@@ -19,7 +19,7 @@
  */
 
 #include "config.h"
-#include "backgammon.h"
+#include "gnubg-types.h"
 #include "sse.h"
 
 #if USE_SSE_VECTORIZE
