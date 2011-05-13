@@ -1,3 +1,9 @@
+2011-05-13  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* eval.c, lib/inputs.c (new file), lib/Makefile.am: Computation of
+	baseInputs() with SSE. The code was already there in eval.c, but
+	commented out.
+
 2011-05-08  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* lib/gnubg-types.h, lib/cache.h, lib/cache.c, backgammon.h,
