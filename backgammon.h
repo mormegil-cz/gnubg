@@ -1023,6 +1023,8 @@ extern void delete_autosave(void);
 extern int get_input_discard(void);
 extern void SaveGame(FILE * pf, listOLD * plGame);
 
+extern int fMatchCancelled;
+
 extern void ProcessEvents(void);
 #if !USE_MULTITHREAD
 extern void CallbackProgress( void );

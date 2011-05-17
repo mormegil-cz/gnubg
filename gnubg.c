@@ -152,8 +152,6 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #define NO_BACKSLASH_ESCAPES 1
 #endif
 
-extern int fMatchCancelled;
-
 #if USE_GTK
 int fX = FALSE; /* use X display */
 unsigned int nDelay = 300;

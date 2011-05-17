@@ -479,10 +479,12 @@ static gboolean batch_create_save(gchar *filename, gchar **save, char **result)
 	return TRUE;
 }
 
-static gboolean batch_analyse(gchar *filename, char **result, gboolean add_to_db)
+static gboolean batch_analyse(gchar *filename, char **result, gboolean add_to_db, 
+			      gboolean add_incdata_to_db)
 {
 	gchar *cmd;
 	gchar *save = NULL;
+	gboolean fMatchAnalysed;
 
 	if (!batch_create_save(filename, &save, result))
 		return FALSE;
@@ -516,6 +518,7 @@ static gboolean batch_analyse(gchar *filename, char **result, gboolean add_to_db
 	{
 		*result = _("Cancelled");
 		g_free(save);
+		fInterrupt = FALSE;
 		fMatchCancelled = FALSE;
 		return FALSE;
 	}
@@ -525,7 +528,8 @@ static gboolean batch_analyse(gchar *filename, char **result, gboolean add_to_db
 	g_free(cmd);
 	g_free(save);
 
-	if (add_to_db && MatchAnalysed())
+	fMatchAnalysed = MatchAnalysed();
+	if (add_to_db && ((!fMatchAnalysed && add_incdata_to_db) || fMatchAnalysed))
 	{
 		cmd = g_strdup("relational add match quiet");
 		UserCommand(cmd);
@@ -535,7 +539,7 @@ static gboolean batch_analyse(gchar *filename, char **result, gboolean add_to_db
 	return TRUE;
 }
 
-static void batch_do_all(gpointer batch_model, gboolean add_to_db)
+static void batch_do_all(gpointer batch_model, gboolean add_to_db, gboolean add_incdata_to_db)
 {
 	gchar *result;
 	GtkTreeIter iter;
@@ -553,7 +557,7 @@ static void batch_do_all(gpointer batch_model, gboolean add_to_db)
 		gtk_tree_model_get(batch_model, &iter, COL_PATH, &filename,
 				   -1);
 
-		batch_analyse(filename, &result, add_to_db);
+		batch_analyse(filename, &result, add_to_db, add_incdata_to_db);
 		gtk_list_store_set(batch_model, &iter, COL_RESULT, result,
 				-1);
 
@@ -704,6 +708,13 @@ static void batch_create_dialog_and_run(GSList * filenames, gboolean add_to_db)
 	GtkWidget *open_button;
 	GtkTreeModel *model;
 	GtkWidget *sw;
+	gboolean add_incdata_to_db = FALSE;
+
+	if (add_to_db && (!fAnalyseMove ||!fAnalyseCube || !fAnalyseDice ||
+	    !afAnalysePlayers[ 0 ] || !afAnalysePlayers[ 1 ])) {
+	        add_incdata_to_db = GetInputYN(_("Your current analysis settings will produce incomplete statistics.\n"
+                             "Do you still want to add these matches to the database?"));
+	}
 
 	view = batch_create_view(filenames);
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
@@ -747,8 +758,8 @@ static void batch_create_dialog_and_run(GSList * filenames, gboolean add_to_db)
 			 G_CALLBACK(batch_stop), model);
 	gtk_widget_show_all(dialog);
 
-	batch_do_all(model, add_to_db);
-	
+	batch_do_all(model, add_to_db, add_incdata_to_db );
+
 	g_signal_connect(open_button, "clicked", G_CALLBACK(batch_row_open), view);
 	g_signal_connect(view, "row-activated", G_CALLBACK(batch_row_activate), view);
 
@@ -768,6 +779,7 @@ extern void GTKBatchAnalyse(gpointer p, guint n, GtkWidget * pw)
 	static gchar *last_folder = NULL;
 	GtkWidget *add_to_db;
 	int fConfirmNew_s;
+	fInterrupt = FALSE;
 
 	folder = last_folder ? last_folder : default_import_folder;
 
@@ -776,7 +788,7 @@ extern void GTKBatchAnalyse(gpointer p, guint n, GtkWidget * pw)
 	gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(fc), TRUE);
 	add_import_filters(GTK_FILE_CHOOSER(fc));
 
-	add_to_db = gtk_check_button_new_with_label (_("Add to relational database"));
+	add_to_db = gtk_check_button_new_with_label (_("Add to database"));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (add_to_db), TRUE);
 
 	gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(fc), add_to_db);
@@ -796,10 +808,12 @@ extern void GTKBatchAnalyse(gpointer p, guint n, GtkWidget * pw)
 
 		if( !get_input_discard())
 			return;
+
 		fConfirmNew_s = fConfirmNew;
 		fConfirmNew = 0;
 		batch_create_dialog_and_run(filenames, add_to_db_set);
 		fConfirmNew = fConfirmNew_s;
 	} else
 		gtk_widget_destroy(fc);
+
 }
