@@ -746,8 +746,6 @@ static void batch_create_dialog_and_run(GSList * filenames, gboolean add_to_db)
 	g_signal_connect(G_OBJECT(stop_button), "clicked",
 			 G_CALLBACK(batch_stop), model);
 	gtk_widget_show_all(dialog);
-        GetInputYN(_("Do you wish to proceed?"));
-//                              "Continuing will destroy the remainder of the match. Continue?"));
 
 	batch_do_all(model, add_to_db);
 	
