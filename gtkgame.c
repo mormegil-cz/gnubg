@@ -1244,6 +1244,44 @@ static void CopyIDs(gpointer p, guint n, GtkWidget * pw)
 	gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idOutput, _("Position and Match IDs copied to the clipboard") );
 }
 
+static void CopyMatchID(gpointer p, guint n, GtkWidget * pw)
+{				/* Copy the position and match ids to the clipboard */
+	char buffer[1024];
+
+	if( ms.gs == GAME_NONE )
+	{
+		output( _("No game in progress.") );
+		outputx();
+		return;
+	}
+
+	sprintf(buffer, "%s %s\n",_("Match ID:"),
+		MatchIDFromMatchState(&ms));
+
+	GTKTextToClipboard(buffer);
+
+	gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idOutput, _("Match ID copied to the clipboard") );
+}
+
+static void CopyPositionID(gpointer p, guint n, GtkWidget * pw)
+{				/* Copy the position and match ids to the clipboard */
+	char buffer[1024];
+
+	if( ms.gs == GAME_NONE )
+	{
+		output( _("No game in progress.") );
+		outputx();
+		return;
+	}
+
+	sprintf(buffer, "%s %s\n", _("Position ID:"),
+		PositionID(msBoard()));
+
+	GTKTextToClipboard(buffer);
+
+	gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idOutput, _("Position ID copied to the clipboard") );
+}
+
 static void TogglePanel(gpointer p, guint n, GtkWidget * pw)
 {
 	int f;
@@ -2908,9 +2946,10 @@ GtkItemFactoryEntry aife[] = {
 	},
 	{ N_("/_Edit/-"), NULL, NULL, 0, "<Separator>", NULL },
 
-	{ N_("/_Edit/_Copy Position ID"), "<control>C", CopyIDs, 0,
-		"<StockItem>", GTK_STOCK_COPY
-	},
+	{ N_("/_Edit/_Copy ID to Clipboard"), NULL, NULL, 0, "<Branch>", NULL },
+	{ N_("/_Edit/_Copy ID to Clipboard/GNUBG ID"), "<control>C", CopyIDs, 0, NULL, NULL }, 
+	{ N_("/_Edit/_Copy ID to Clipboard/Match ID"), "<control>M", CopyMatchID, 0, NULL, NULL },
+	{ N_("/_Edit/_Copy ID to Clipboard/Position ID"), "<control>P", CopyPositionID, 0, NULL, NULL },
 
 	{ N_("/_Edit/Copy as"), NULL, NULL, 0, "<Branch>", NULL },
 	{ N_("/_Edit/Copy as/Position as ASCII"), NULL,
@@ -2920,7 +2959,7 @@ GtkItemFactoryEntry aife[] = {
 	{ N_("/_Edit/Copy as/BackgammonBase.com (URL)"), NULL,
 	  CopyAsBGbase, 0, NULL, NULL },
 
-	{ N_("/_Edit/_Paste Position ID"), "<control>V", PasteIDs, 0,
+	{ N_("/_Edit/_Paste ID"), "<control>V", PasteIDs, 0,
 		"<StockItem>", GTK_STOCK_PASTE},
 
 	{ N_("/_Edit/-"), NULL, NULL, 0, "<Separator>", NULL },
