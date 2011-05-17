@@ -152,6 +152,8 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #define NO_BACKSLASH_ESCAPES 1
 #endif
 
+extern int fMatchCancelled;
+
 #if USE_GTK
 int fX = FALSE; /* use X display */
 unsigned int nDelay = 300;
@@ -1092,6 +1094,9 @@ extern void ResetInterrupt( void )
 	
 	fInterrupt = FALSE;
 	
+	/* if  a batch was running signal a cancellation of current match */
+	fMatchCancelled = TRUE;
+
 #if USE_GTK
 	if( nNextTurn ) {
 	    g_source_remove( nNextTurn );
