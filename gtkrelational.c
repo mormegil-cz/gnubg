@@ -784,7 +784,7 @@ extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw)
 	}
 	pdb->Disconnect();
 
-	pwDialog = GTKCreateDialog(_("GNU Backgammon - Relational Database"),
+	pwDialog = GTKCreateDialog(_("GNU Backgammon - Database"),
 			    DT_INFO, NULL, DIALOG_FLAG_MODAL | DIALOG_FLAG_MINMAXBUTTONS, NULL, NULL);
 
 #define REL_DIALOG_HEIGHT 600
