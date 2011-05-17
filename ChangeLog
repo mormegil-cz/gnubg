@@ -1,3 +1,25 @@
+2011-05-17  Michael Petch  <mpetch@capp-sysware.com>
+        * configure.in: Modify the Menu to support copying of GNUBGID's,
+	as well as the MatchId or positionID's individually.
+
+2011-05-17  Michael Petch  <mpetch@capp-sysware.com>
+        * configure.in: Modify the ./configure process to now enable
+	Extended match ID's by default. They can be disabled with
+	--disable-extmatchid
+
+2011-05-17  Michael Petch  <mpetch@capp-sysware.com>
+
+        * gnubg.c, backgammon.h, gtkfile.c, gtkrelational.c: The word 
+	"Relational" has been removed from the GUI when referring to the 
+	database. This makes more sense to the casual users. Fixed the 
+	situation where a Batch sometimes had to be preceded by a clear 
+	match/session. Fixed bug reported by Leo that prevented matches 
+	being analysed with incomplete analysis settings. Fixed bug
+	reported by Leo Bueno that prevented matches that may not have been
+	played to completion from being analysed. Added Warning if you 
+	use incomplete analysis settings and have requested to save the 
+	matches to the database
+
 2011-05-13  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* eval.c, lib/inputs.c (new file), lib/Makefile.am: Computation of
