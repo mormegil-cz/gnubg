@@ -291,7 +291,7 @@ AC_ARG_ENABLE( extmatchid, [  --disable-extmatchid  disable extended MatchIDs ])
 AS_IF([test "x$enable_extmatchid" != "xno"], [
         AC_DEFINE(USE_EXTENDEDMATCHID,1,Define if you want extended MatchID support)
 ])
-AC_MSG_RESULT($extmatchid)
+AS_IF( [test "x$enable_extmatchid" != "xno"], [AC_MSG_RESULT(yes)], [AC_MSG_RESULT(no)] )
 
 dnl
 dnl SSE
@@ -311,7 +311,7 @@ if test "x$ssecpu" = "xundef"; then
                 	ssecpu="yes"
 		fi
 		;;
-		ia64-* | x86_64-* )
+		ia64-* | x86_64-* | amd64-* )
 		ssecpu="sse2"
 		;;
 		*)
@@ -346,16 +346,17 @@ dnl
 dnl Threads
 dnl
 
-AC_ARG_ENABLE( threads, [  --enable-threads  enable multithread support (Default disabled)], threadson=$enableval, threadson=no)
-AM_CONDITIONAL(USE_MULTITHREAD, test "$threadson" != "no" )
-if test "$threadson" != "no"; then
+AC_MSG_CHECKING([for threading])
+AC_ARG_ENABLE( threads, [  --disable-threads  enable multithread support (Default enabled)])
+AM_CONDITIONAL(USE_MULTITHREAD, test "x$enable_threads" != "xno" )
+if test "x$enable_threads" != "xno"; then
         if test "$have_gthread" != "yes"; then
                 AC_MSG_ERROR([Threads enabled but glib doesn't seem to have gthread support])
         fi
         AC_DEFINE(USE_MULTITHREAD, 1, Define if you want to have multithread support)
         AC_DEFINE(GLIB_THREADS, 1, Define if you wish to use glib threads)
 fi
-
+AS_IF( [test "x$enable_threads" != "xno"], [AC_MSG_RESULT(yes)], [AC_MSG_RESULT(no)] )
 
 dnl *************
 dnl Misc. setings
