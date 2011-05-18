@@ -1,3 +1,7 @@
+2011-05-18  Michael Petch  <mpetch@capp-sysware.com>
+        * configure.in:  --enable-threads and --enable-extmatchid are 
+	now the default. amd64 cpu types will automatically enable sse2
+
 2011-05-17  Michael Petch  <mpetch@capp-sysware.com>
         * gtkgame.c: Modify the Menu to support copying of GNUBGID's,
 	as well as the MatchId or positionID's individually.
