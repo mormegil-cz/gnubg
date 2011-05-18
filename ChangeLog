@@ -1,5 +1,5 @@
 2011-05-17  Michael Petch  <mpetch@capp-sysware.com>
-        * configure.in: Modify the Menu to support copying of GNUBGID's,
+        * gtkgame.c: Modify the Menu to support copying of GNUBGID's,
 	as well as the MatchId or positionID's individually.
 
 2011-05-17  Michael Petch  <mpetch@capp-sysware.com>
