@@ -7,7 +7,7 @@ BINDIR=../../bin
 TARGET = $(BINDIR)/libevent.a
 OBJDIR=$(BINDIR)/obj/lib
 
-SOURCE= cache list neuralnet neuralnetsse mt19937ar isaac md5
+SOURCE= cache list neuralnet neuralnetsse mt19937ar isaac md5 inputs
 
 OBJECTS=$(patsubst %,$(OBJDIR)/%.o,$(SOURCE))
 
@@ -24,7 +24,7 @@ $(TARGET): $(OBJDIR) $(OBJECTS)
 $(OBJDIR):
 	@mkdir "$@"
 
-$(OBJDIR)/neuralnetsse.o: neuralnetsse.c
+$(OBJDIR)/neuralnetsse.o: neuralnetsse.c inputs.c
 	@echo Compiling neuralnetsse
 	@${CC} $(FLAGS) -msse2 $(INCLUDE) -o $@ -c $<
 
