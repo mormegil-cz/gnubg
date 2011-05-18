@@ -262,6 +262,7 @@ evalCache cEval;
 evalCache cpEval;
 unsigned int cCache;
 int fInterrupt = FALSE;
+int fMatchCancelled = FALSE;
 
 /* variation of backgammon used by gnubg */
 

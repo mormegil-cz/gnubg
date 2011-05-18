@@ -40,9 +40,6 @@
 #include "file.h"
 #include "util.h"
 
-/* Global Variables */
-
-int fMatchCancelled = FALSE;
 
 static void FilterAdd (const char *fn, const char *pt, GtkFileChooser * fc)
 {
