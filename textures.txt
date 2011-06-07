@@ -59,6 +59,6 @@ general
 wavesand01.png
 Sand
 general
-Tiles.png
-Tiles
+checkered.png
+Checkered
 general
