@@ -3225,7 +3225,6 @@ static void board_size_allocate( GtkWidget *board, GtkAllocation *allocation )
     guint old_size = bd->rd->nSize, new_size;
     GtkAllocation child_allocation;
     GtkRequisition requisition;
-    int cx;
     
     memcpy( &board->allocation, allocation, sizeof( GtkAllocation ) );
 
@@ -3279,7 +3278,7 @@ static void board_size_allocate( GtkWidget *board, GtkAllocation *allocation )
 #endif
 
     child_allocation.width = BOARD_WIDTH * bd->rd->nSize;
-    cx = child_allocation.x = allocation->x + ( ( allocation->width -
+    child_allocation.x = allocation->x + ( ( allocation->width -
 					     child_allocation.width ) >> 1 );
     child_allocation.height = BOARD_HEIGHT * bd->rd->nSize;
     child_allocation.y = allocation->y + ( ( allocation->height -
