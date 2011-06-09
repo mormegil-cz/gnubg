@@ -820,15 +820,15 @@ PythonDiceRolls( PyObject* self UNUSED_PARAM, PyObject *args ) {
   PyObject *pyDiceRoll;
   PyObject *pyDie1;
   PyObject *pyDie2;
-  unsigned long  n;
-  unsigned int   anDice[2];
-  int            dieidx, rollsidx;
+  long n;
+  unsigned int anDice[2];
+  int dieidx, rollsidx;
 
-  if ( ! PyArg_ParseTuple( args, "k:dicerolls", &n ) )
+  if ( ! PyArg_ParseTuple( args, "l:dicerolls", &n ) )
     return NULL;
 
   if ( n <= 0 ) {
-    PyErr_SetString( PyExc_ValueError, _("numner of rolls must be greater than 0" ) );
+    PyErr_SetString( PyExc_ValueError, _("number of rolls must be greater than 0" ) );
     return NULL;
   }
 
