@@ -815,6 +815,49 @@ METPre( float aar[ MAXSCORE ][ MAXSCORE ], const int n ) {
 
 
 static PyObject *
+PythonDiceRolls( PyObject* self UNUSED_PARAM, PyObject *args ) {
+  PyObject *pyDiceRolls;
+  PyObject *pyDiceRoll;
+  PyObject *pyDie1;
+  PyObject *pyDie2;
+  unsigned long  n;
+  unsigned int   anDice[2];
+  int            dieidx, rollsidx;
+
+  if ( ! PyArg_ParseTuple( args, "k:dicerolls", &n ) )
+    return NULL;
+
+  if ( n <= 0 ) {
+    PyErr_SetString( PyExc_ValueError, _("numner of rolls must be greater than 0" ) );
+    return NULL;
+  }
+
+  if ( ! ( pyDiceRolls = PyTuple_New( n ) ) )
+    return NULL;
+
+  rollsidx = 0;
+  while (n-- > 0) {
+    RollDice( anDice, &rngCurrent, rngctxCurrent );
+
+    pyDie1 = PyInt_FromLong(anDice[0]);
+    pyDie2 = PyInt_FromLong(anDice[1]);
+
+    if ( ! ( pyDiceRoll = PyTuple_New( 2 ) ) )
+      return NULL;
+
+    dieidx = 0;
+    if ( PyTuple_SetItem( pyDiceRoll, dieidx, pyDie1 ) < 0 )
+      return NULL;
+    if ( PyTuple_SetItem( pyDiceRoll, dieidx+1, pyDie2 ) < 0 )
+      return NULL;
+
+    if ( PyTuple_SetItem( pyDiceRolls, rollsidx++, pyDiceRoll ) < 0 )
+      return NULL;
+  }
+  return pyDiceRolls;
+}
+
+static PyObject *
 PythonMET( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   int n = ms.nMatchTo ? ms.nMatchTo : MAXSCORE;
@@ -2421,6 +2464,10 @@ PyMethodDef gnubgMethods[] = {
     "       eval-context = dictionary: 'cubeful'=>0/1, 'plies'=>int,\n"
     "           'reduced'=>0/1, 'deterministic'=> 0/1, 'noise'->float\n"
     "    returns: evaluation = tuple (floats optimal, nodouble, take, drop, int recommendation, String recommendationtext)" },
+  { "dicerolls", PythonDiceRolls, METH_VARARGS,
+    "return a list of dice rolls from current RNG\n"
+    "   arguments: number of rolls\n"
+    "    returns: list of tuples (2 elements each, one for each die)\n"},
   { "evaluate", PythonEvaluate, METH_VARARGS,
     "Cubeless evaluation\n"
     "    arguments: [board] [cube-info] [eval context]\n"

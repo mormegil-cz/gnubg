@@ -1,19 +1,23 @@
+2011-06-08  Michael Petch  <mpetch@capp-sysware.com>
+	* gnubgmodule.c: Add new python function "DiceRolls" to 
+	return the next "n" rolls from the current RNG. 
+
 2011-05-18  Michael Petch  <mpetch@capp-sysware.com>
-        * configure.in:  --enable-threads and --enable-extmatchid are 
+	* configure.in:  --enable-threads and --enable-extmatchid are 
 	now the default. amd64 cpu types will automatically enable sse2
 
 2011-05-17  Michael Petch  <mpetch@capp-sysware.com>
-        * gtkgame.c: Modify the Menu to support copying of GNUBGID's,
+	* gtkgame.c: Modify the Menu to support copying of GNUBGID's,
 	as well as the MatchId or positionID's individually.
 
 2011-05-17  Michael Petch  <mpetch@capp-sysware.com>
-        * configure.in: Modify the ./configure process to now enable
+	* configure.in: Modify the ./configure process to now enable
 	Extended match ID's by default. They can be disabled with
 	--disable-extmatchid
 
 2011-05-17  Michael Petch  <mpetch@capp-sysware.com>
 
-        * gnubg.c, backgammon.h, gtkfile.c, gtkrelational.c: The word 
+	* gnubg.c, backgammon.h, gtkfile.c, gtkrelational.c: The word 
 	"Relational" has been removed from the GUI when referring to the 
 	database. This makes more sense to the casual users. Fixed the 
 	situation where a Batch sometimes had to be preceded by a clear 
@@ -41,7 +45,7 @@
 
 2011-04-10  Michael Petch  <mpetch@capp-sysware.com>
 
-        * board3d/drawboard3d.c board3d/fun3d.h board3d/shadow.c:
+	* board3d/drawboard3d.c board3d/fun3d.h board3d/shadow.c:
 	Converted int to GLint where appropriate to avoid compiler
 	warnings about incompatible types in certain build 
 	environments.
@@ -97,7 +101,7 @@
 
 	* gtkboard.c: Did cleanup of new Jacoby code.
 	Modified the edit GUI to enforce proper Crawford
-        settings when editing. If scores and match length
+	settings when editing. If scores and match length
 	make Crawford impossible, disable Crawford toggle
 	and turn off Crawford until settings make it possible
 
