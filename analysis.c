@@ -1767,16 +1767,7 @@ updateStatisticsMatch ( listOLD *plMatch ) {
 
 extern lucktype getLuckRating ( float rLuck )
 {
-  if ( rLuck < -0.06 )
-    return LUCK_VERYBAD;
-  else if ( rLuck < -0.02 )
-    return LUCK_BAD;
-  else if ( rLuck < +0.02 )
-    return LUCK_NONE;
-  else if ( rLuck < +0.06 )
-    return LUCK_GOOD;
-  else
-    return LUCK_VERYGOOD;
+	return Luck (rLuck);
 }
 
 static void

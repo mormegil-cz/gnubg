@@ -1,4 +1,9 @@
 2011-06-08  Michael Petch  <mpetch@capp-sysware.com>
+	* analysis.c: getLuckRating was returning values based
+	on old hard coded luck thresholds. Use the user supplied 
+	ones instead 
+
+2011-06-08  Michael Petch  <mpetch@capp-sysware.com>
 	* gnubgmodule.c: Add new python function "DiceRolls" to 
 	return the next "n" rolls from the current RNG. 
 
