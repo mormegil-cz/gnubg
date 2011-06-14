@@ -1,4 +1,4 @@
-2011-06-08  Michael Petch  <mpetch@capp-sysware.com>
+2011-06-13  Michael Petch  <mpetch@capp-sysware.com>
 	* analysis.c: getLuckRating was returning values based
 	on old hard coded luck thresholds. Use the user supplied 
 	ones instead 
