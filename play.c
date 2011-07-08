@@ -2822,7 +2822,7 @@ extern void CommandNewMatch( char *sz )
 
 #if USE_GTK
     if( fX )
-	ShowBoard();
+	GTKSet(ap);
 #endif
 
     CommandNewGame( NULL );
