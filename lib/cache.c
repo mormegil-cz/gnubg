@@ -120,12 +120,12 @@ unsigned int CacheLookupWithLocking(evalCache* pc, const cacheNodeDetail* e, flo
 #if USE_MULTITHREAD
 	cache_lock(pc, l);
 #endif
-	if (pc->entries[l].nd_primary.nEvalContext != e->nEvalContext ||
-		!EqualKeys(pc->entries[l].nd_primary.key, e->key))
-	{	/* Not in primary slot */
-		if (pc->entries[l].nd_secondary.nEvalContext != e->nEvalContext ||
-			!EqualKeys(pc->entries[l].nd_secondary.key, e->key))
-		{	/* Cache miss */
+	if (!EqualKeys(pc->entries[l].nd_primary.key, e->key) ||
+	    pc->entries[l].nd_primary.nEvalContext != e->nEvalContext)
+	  {	/* Not in primary slot */
+	    if (!EqualKeys(pc->entries[l].nd_secondary.key, e->key) ||
+		pc->entries[l].nd_secondary.nEvalContext != e->nEvalContext)
+	      {	/* Cache miss */
 #if USE_MULTITHREAD
 			cache_unlock(pc, l);
 #endif
@@ -138,7 +138,7 @@ unsigned int CacheLookupWithLocking(evalCache* pc, const cacheNodeDetail* e, flo
 			pc->entries[l].nd_primary = pc->entries[l].nd_secondary;
 			pc->entries[l].nd_secondary = tmp;
 		}
-	}
+	  }
 	/* Cache hit */
 #if CACHE_STATS
     ++pc->cHit;
@@ -162,11 +162,11 @@ unsigned int CacheLookupNoLocking(evalCache* pc, const cacheNodeDetail* e, float
 #if CACHE_STATS
 	++pc->cLookup;
 #endif
-	if (pc->entries[l].nd_primary.nEvalContext != e->nEvalContext ||
-		!EqualKeys(pc->entries[l].nd_primary.key, e->key))
-	{	/* Not in primary slot */
-		if (pc->entries[l].nd_secondary.nEvalContext != e->nEvalContext ||
-			!EqualKeys(pc->entries[l].nd_secondary.key, e->key))
+	if (!EqualKeys(pc->entries[l].nd_primary.key, e->key) ||
+	    pc->entries[l].nd_primary.nEvalContext != e->nEvalContext)
+	  {	/* Not in primary slot */
+	    if (!EqualKeys(pc->entries[l].nd_secondary.key, e->key) || 
+		pc->entries[l].nd_secondary.nEvalContext != e->nEvalContext)
 		{	/* Cache miss */
 			return l;
 		}
@@ -177,7 +177,7 @@ unsigned int CacheLookupNoLocking(evalCache* pc, const cacheNodeDetail* e, float
 			pc->entries[l].nd_primary = pc->entries[l].nd_secondary;
 			pc->entries[l].nd_secondary = tmp;
 		}
-	}
+	  }
 	/* Cache hit */
 #if CACHE_STATS
     ++pc->cHit;
