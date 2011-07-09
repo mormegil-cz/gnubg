@@ -1881,10 +1881,13 @@ invertMET ( void ) {
  * if nCubePrime0 < 0, then we're only interested in the first
  * values in each array, using nCube. 
  *
- * Otherwise, if nCubePrime0 < 0, we do another set of METs with 
+ * Otherwise, if nCubePrime0 >= 0, we do another set of METs with 
  * both sides using nCubePrime0 
  *
  * if nCubePrime1 >= 0, we do a third set using nCubePrime1
+ *
+ * FIXME ? It looks like if nCubePrime0 >= 0, nCubePrime1 is as well
+ *         That could simplify the code below a little
  *
  * This reduces the *huge* number of calls to get equity table entries 
  * when analyzing matches by something like 40 times 
@@ -1926,23 +1929,27 @@ getMEMultiple ( const int nScore0, const int nScore1, const int nMatchTo,
 	*score0++ = away0;
 	*score1++ = away1 - mult[i] * nCube;
   }
-  /* same using the second cube value */
-  for (i = 0; (max_res > DPP0) && (i < NDL); ++i) {
-	*score0++ = away0 - mult[i] * nCubePrime0;
-	*score1++ = away1;
-  }
-  for (i = 0; (max_res > DPP0) && (i < NDL); ++i) {
-	*score0++ = away0;
-	*score1++ = away1 - mult[i] * nCubePrime0;
-  }
-  /* same using the third cube value */
-  for (i = 0; (max_res > DPP1) && (i < NDL); ++i) {
+  if (max_res > DPP0) {
+    /* same using the second cube value */
+    for (i = 0; i < NDL; ++i) {
+      *score0++ = away0 - mult[i] * nCubePrime0;
+      *score1++ = away1;
+    }
+    for (i = 0; i < NDL; ++i) {
+      *score0++ = away0;
+      *score1++ = away1 - mult[i] * nCubePrime0;
+    }
+    if (max_res > DPP1) {     
+      /* same using the third cube value */
+      for (i = 0; i < NDL; ++i) {
 	*score0++ = away0 - mult[i] * nCubePrime1;
 	*score1++ = away1;
-  }
-  for (i = 0; (max_res > DPP1) && (i < NDL); ++i) {
+      }
+      for (i = 0; i < NDL; ++i) {
 	*score0++ = away0;
 	*score1++ = away1 - mult[i] * nCubePrime1;
+      }
+    }
   }
 
   score0 = scores[0]; score1 = scores[1];
