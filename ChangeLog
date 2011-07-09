@@ -1,3 +1,9 @@
+2011-07-09  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* gnubg.c, gtkgame.c: Set players names from default_names at
+	program launch and when pasting a position id, in addition to when
+	starting a match.
+
 2011-07-08  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* play.c: Update players names in game record panel when starting

@@ -1188,6 +1188,14 @@ static void PasteIDs(void)
 	UserCommand(sz);
 	g_free(sz);
 
+	strcpy(ap[0].szName,default_names[0]);
+	strcpy(ap[1].szName,default_names[1]);
+
+#if USE_GTK
+	if( fX )
+		GTKSet(ap);
+#endif /* USE_GTK */
+
 	if (editing)
 		click_edit();
 }

@@ -4855,6 +4855,9 @@ int main(int argc, char *argv[])
 		LoadRCFiles();
 	}
 
+	strcpy(ap[0].szName,default_names[0]);
+	strcpy(ap[1].szName,default_names[1]);
+
 	fflush(stdout);
 	fflush(stderr);
 
