@@ -24,6 +24,7 @@
 
 #include <glib.h>
 #include <glib/gstdio.h>
+#include <locale.h>
 #include <string.h>
 #include <errno.h>
 #include <cache.h>
@@ -711,6 +712,7 @@ extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 		pfWeights = g_fopen(szWeights, "r");
 	    if (!weights_failed(szWeights, pfWeights))
 	    {
+		setlocale (LC_ALL, "C");
 		    if( !( fReadWeights =
 					    !NeuralNetLoad( &nnContact, pfWeights ) &&
 					    !NeuralNetLoad( &nnRace, pfWeights ) &&
@@ -721,7 +723,7 @@ extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 					    !NeuralNetLoad( &nnpRace, pfWeights ) 
 			 ) )
 			    perror( szWeights );
-
+		setlocale (LC_ALL, "");
 	    }
 	    if (pfWeights)
 		    fclose( pfWeights );
