@@ -33,20 +33,36 @@
 #if USE_MULTITHREAD
 #include "multithread.h"
 
+#if defined(__GNUC__) && ( __GNUC__ * 100 + __GNUC_MINOR__ >= 401 ) \
+  && (defined (__i386) || defined (__x86_64))
+
+#define cache_lock(pc, k) \
+    while (__sync_lock_test_and_set(&(pc->entries[k].lock), 1)) \
+	while (pc->entries[k].lock) \
+	    __asm volatile ("pause" ::: "memory");
+
+#define cache_unlock(pc, k) \
+    __sync_lock_release(&(pc->entries[k].lock));
+
+#else
+
 #define cache_lock(pc, k) \
 if (MT_SafeIncCheck(&(pc->entries[k].lock))) \
 	WaitForLock(&(pc->entries[k].lock))
 
 #define cache_unlock(pc, k) MT_SafeDec(&(pc->entries[k].lock))
 
-static void WaitForLock(int *lock)
+static void WaitForLock(volatile int *lock)
 {
 	do
 	{
 		MT_SafeDec(lock);
 	} while (MT_SafeIncCheck(lock));
 }
+
 #endif
+
+#endif /* USE_MULTITHREAD */
 
 /* Adapted from
    http://burtleburtle.net/bob/c/lookup2.c

@@ -40,7 +40,7 @@ typedef struct _cacheNode
 	cacheNodeDetail nd_primary;
 	cacheNodeDetail nd_secondary;
 #if USE_MULTITHREAD
-	int lock;
+	volatile int lock;
 #endif
 } cacheNode;
 
