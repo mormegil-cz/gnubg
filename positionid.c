@@ -3,12 +3,14 @@
  *
  * by Gary Wong <gary@cs.arizona.edu>, 1998-1999.
  *
- * An implementation of the position key/IDs at:
+ * An implementation of the position "external" key/IDs at:
  *
  *   http://www.gnu.org/manual/gnubg/html_node/A-technical-description-of-the-Position-ID.html
  *
  * Please see that page for more information.
  *
+ * For internal use, we use another "key", much faster to encode or decode
+ * that is essentially the raw board squeezed down to 4 bits/point.
  *
  * This library also calculates bearoff IDs, which are enumerations of the
  *
@@ -41,100 +43,51 @@
 #include <string.h>
 #include "positionid.h"
 
-
-#if defined (__i386) || defined (__x86_64)
-
-/* See https://savannah.gnu.org/bugs/index.php?28421 regarding the code below */
-
 extern void PositionKey(const TanBoard anBoard, positionkey* pkey)
 {
-	unsigned int i;
-	int iBit = 32;
-	unsigned int *iKey = pkey->data;
-	const unsigned int* j;
+	unsigned int i, j;
+	unsigned int *anpBoard = pkey->data;
 
-	memset(pkey, 0, sizeof(positionkey));
-
-	for(i = 0; i < 2; ++i)
-	{
-		const unsigned int* const b = anBoard[i];
-		for(j = b; j < b + 25; ++j)
-		{
-			const unsigned int nc = *j;
-			if( !nc )
-				iBit--;
-			else
-			{
-				if (iBit <= 0)
-				{
-					iBit += 32;
-					iKey++;
-				}
-				if (nc <= (unsigned int)iBit)
-				{
-					*iKey |= ((1 << (nc)) - 1) << (32 - iBit);
-					iBit -= nc;
-				}
-				else
-				{
-					*iKey |= ((1 << iBit) - 1) << (32 - iBit);
-					iKey++;
-					*iKey |= ((1 << ((nc - iBit))) - 1);
-					iBit = 32 - (nc - iBit);
-				}
-				iBit--;
-			}
+	for (i = 0, j = 0; i < 3; i++, j+=8) {
+		anpBoard[i] =      anBoard[1][j]        + (anBoard[1][j+1]<<4)
+				+ (anBoard[1][j+2]<<8)  + (anBoard[1][j+3]<<12)
+                                + (anBoard[1][j+4]<<16) + (anBoard[1][j+5]<<20)
+                                + (anBoard[1][j+6]<<24) + (anBoard[1][j+7]<<28);
+                anpBoard[i+3] =    anBoard[0][j]        + (anBoard[0][j+1]<<4)
+                                + (anBoard[0][j+2]<<8)  + (anBoard[0][j+3]<<12)
+                                + (anBoard[0][j+4]<<16) + (anBoard[0][j+5]<<20)
+                                + (anBoard[0][j+6]<<24) + (anBoard[0][j+7]<<28);
 		}
-	}
+		anpBoard[6] = anBoard[0][24] + (anBoard[1][24]<<4);
 }
 
 extern void PositionFromKey(TanBoard anBoard, const positionkey* pkey)
 {
-	int i = 0, j = 0, xtest;
-	const unsigned int *ptest = pkey->data;
+	unsigned int i, j;
+	unsigned int const *anpBoard = pkey->data;
 
-	memset(anBoard, 0, sizeof(TanBoard));
+	for (i = 0, j = 0; i < 3; i++, j+=8) {
+		anBoard[1][j]   =  anpBoard[i]      & 0x0f;
+		anBoard[1][j+1] = (anpBoard[i]>>4)  & 0x0f;
+                anBoard[1][j+2] = (anpBoard[i]>>8)  & 0x0f;
+                anBoard[1][j+3] = (anpBoard[i]>>12) & 0x0f;
+                anBoard[1][j+4] = (anpBoard[i]>>16) & 0x0f;
+                anBoard[1][j+5] = (anpBoard[i]>>20) & 0x0f;
+                anBoard[1][j+6] = (anpBoard[i]>>24) & 0x0f;
+                anBoard[1][j+7] = (anpBoard[i]>>28) & 0x0f;
 
-	xtest = 1;
-	do
-	{
-		if ((*ptest) & xtest)
-			++anBoard[i][j];
-		else if( ++j == 25 )
-		{
-			++i;
-			j = 0;
-		}
-	} while (xtest <<= 1);
-	xtest = 1;
-	ptest++;
-	do
-	{
-		if ((*ptest) & xtest)
-			++anBoard[i][j];
-		else if( ++j == 25 )
-		{
-			++i;
-			j = 0;
-		}
-	} while (xtest <<= 1);
-	xtest = 1;
-	ptest++;
-	do
-	{
-		if ((*ptest) & xtest)
-			++anBoard[i][j];
-		else if( ++j == 25 )
-		{
-			++i;
-			j = 0;
-		}
-	} while ((short)(xtest <<= 1));
+                anBoard[0][j]   =  anpBoard[i+3]      & 0x0f;
+                anBoard[0][j+1] = (anpBoard[i+3]>>4)  & 0x0f;
+                anBoard[0][j+2] = (anpBoard[i+3]>>8)  & 0x0f;
+                anBoard[0][j+3] = (anpBoard[i+3]>>12) & 0x0f;
+                anBoard[0][j+4] = (anpBoard[i+3]>>16) & 0x0f;
+                anBoard[0][j+5] = (anpBoard[i+3]>>20) & 0x0f;
+                anBoard[0][j+6] = (anpBoard[i+3]>>24) & 0x0f;
+                anBoard[0][j+7] = (anpBoard[i+3]>>28) & 0x0f;
+	}
+	anBoard[0][24] =  anpBoard[6]     & 0x0f;
+	anBoard[1][24] = (anpBoard[6]>>4) & 0x0f;
 }
-
-#else
-
-/* Portable code */
 
 static inline void addBits(unsigned char auchKey[10], unsigned int bitPos, unsigned int nBits)
 {
@@ -152,12 +105,12 @@ static inline void addBits(unsigned char auchKey[10], unsigned int bitPos, unsig
   }
 }
 
-extern void PositionKey(const TanBoard anBoard, positionkey* pkey)
+extern void oldPositionKey(const TanBoard anBoard, oldpositionkey* pkey)
 {
   unsigned int i, iBit = 0;
   const unsigned int* j;
 
-  memset(pkey, 0, sizeof(positionkey));
+  memset(pkey, 0, sizeof(oldpositionkey));
 
   for(i = 0; i < 2; ++i) {
     const unsigned int* const b = anBoard[i];
@@ -175,7 +128,7 @@ extern void PositionKey(const TanBoard anBoard, positionkey* pkey)
   }
 }
 
-extern void PositionFromKey(TanBoard anBoard, const positionkey* pkey)
+extern void oldPositionFromKey(TanBoard anBoard, const oldpositionkey* pkey)
 {
   int i = 0, j  = 0, k;
   const unsigned char* a;
@@ -209,9 +162,8 @@ extern void PositionFromKey(TanBoard anBoard, const positionkey* pkey)
   }
 }
 
-#endif
 
-extern char *PositionIDFromKey( const positionkey *pkey ) {
+static char *oldPositionIDFromKey( const oldpositionkey *pkey ) {
 
     unsigned char const *puch = pkey->auch;
     static char szID[ L_POSITIONID + 1 ];
@@ -239,13 +191,24 @@ extern char *PositionIDFromKey( const positionkey *pkey ) {
     return szID;
 }
 
+extern char *PositionIDFromKey( const positionkey *pkey ) {
+
+	TanBoard anBoard;
+	oldpositionkey okey;
+
+	PositionFromKey(anBoard, pkey);
+	oldPositionKey(anBoard, &okey);
+
+	return oldPositionIDFromKey(&okey);
+}
+
 extern char *PositionID( const TanBoard anBoard ) {
 
-    positionkey key;
+    oldpositionkey key;
     
-    PositionKey( anBoard, &key );
+    oldPositionKey( anBoard, &key );
 
-    return PositionIDFromKey( &key );
+    return oldPositionIDFromKey( &key );
 }
 
 extern int
@@ -339,7 +302,7 @@ extern unsigned char Base64( const unsigned char ch )
 extern int
 PositionFromID(TanBoard anBoard, const char* pchEnc)
 {
-  positionkey key;
+  oldpositionkey key;
   unsigned char ach[ L_POSITIONID +1 ], *pch = ach, *puch = key.auch;
   int i;
 
@@ -358,7 +321,7 @@ PositionFromID(TanBoard anBoard, const char* pchEnc)
 
   *puch = (unsigned char)( pch[ 0 ] << 2 ) | ( pch[ 1 ] >> 4 );
 
-  PositionFromKey( anBoard, &key );
+  oldPositionFromKey( anBoard, &key );
 
   return CheckPosition( (ConstTanBoard)anBoard );
 }

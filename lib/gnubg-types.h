@@ -63,8 +63,12 @@ typedef struct _matchstate {
 
 typedef union _positionkey
 {
-	unsigned char auch[10];
-	unsigned int data[3];
+	unsigned int data[7];
 } positionkey;
+
+typedef union _oldpositionkey
+{
+        unsigned char auch[10];
+} oldpositionkey;
 
 #endif

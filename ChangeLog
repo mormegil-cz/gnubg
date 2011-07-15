@@ -1,3 +1,11 @@
+2011-07-15  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* positionid.c, positionid.h, lib/cache.c, lib/gnubg-types.h: Use
+	a simpler position key for internal use. PositionKey() and
+	PositionFromKey() are much faster. The global speed improvement is
+	about 10%.
+	A side effect is that the evalution cache becomes 38% larger.
+
 2011-07-09  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* gnubg.c, gtkgame.c: Set players names from default_names at
