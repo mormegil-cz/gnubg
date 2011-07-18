@@ -1107,7 +1107,7 @@ PythonPositionKey( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   PyObject *pyBoard = NULL;
   TanBoard anBoard;
-  positionkey key;
+  oldpositionkey key;
 
   memcpy( anBoard, msBoard(), sizeof(TanBoard) );
 
@@ -1117,7 +1117,7 @@ PythonPositionKey( PyObject* self UNUSED_PARAM, PyObject *args ) {
   if ( pyBoard && !PyToBoard( pyBoard, anBoard ) )
     return NULL;
 
-  PositionKey( (ConstTanBoard)anBoard, &key );
+  oldPositionKey( (ConstTanBoard)anBoard, &key );
 
   {
     PyObject* a = PyTuple_New(10);
@@ -1136,7 +1136,7 @@ PythonPositionFromKey( PyObject* self UNUSED_PARAM, PyObject *args ) {
   int i;
   PyObject *pyKey = NULL;
   PyObject *py;
-  positionkey key;
+  oldpositionkey key;
 
   if( ! PyArg_ParseTuple( args, "|O!:positionfromkey", &PyList_Type, &pyKey ) )
     return NULL;
@@ -1158,7 +1158,7 @@ PythonPositionFromKey( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   }
 
-  PositionFromKey( anBoard, &key );
+  oldPositionFromKey( anBoard, &key );
 
   return BoardToPy( (ConstTanBoard)anBoard );
 }
