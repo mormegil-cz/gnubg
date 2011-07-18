@@ -197,7 +197,7 @@ extern char *PositionIDFromKey( const positionkey *pkey ) {
 	oldpositionkey okey;
 
 	PositionFromKey(anBoard, pkey);
-	oldPositionKey(anBoard, &okey);
+	oldPositionKey((ConstTanBoard)anBoard, &okey);
 
 	return oldPositionIDFromKey(&okey);
 }
