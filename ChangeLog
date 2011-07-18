@@ -1,5 +1,5 @@
 2011-07-17  Michael Petch  <mpetch@capp-sysware.com>
-	* gnubgmodule.c: Fix Python position key functions to intternally call 
+	* gnubgmodule.c: Fix Python position key functions to internally call 
 	the old style position keys functions. Fixes compiler errors due to 
 	new position key changes made on 2011/07/15.
 
