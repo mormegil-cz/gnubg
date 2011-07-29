@@ -1,3 +1,10 @@
+2011-07-29  Michael Petch  <mpetch@capp-sysware.com>
+	* analysis.c: Previous getLuckRating change had unintended side
+	effects when we stopped using hard coded valuse. Hard coded values
+	were off by an approximate factor of 10. Although this has been fixed
+	it may wish to be revisited as to why the values were hardcoded in
+	this fashion originally. Reported by Chris (pck).
+
 2011-07-17  Michael Petch  <mpetch@capp-sysware.com>
 	* gnubgmodule.c: Fix Python position key functions to internally call 
 	the old style position keys functions. Fixes compiler errors due to 

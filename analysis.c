@@ -1767,7 +1767,7 @@ updateStatisticsMatch ( listOLD *plMatch ) {
 
 extern lucktype getLuckRating ( float rLuck )
 {
-	return Luck (rLuck);
+	return Luck (rLuck * 10);
 }
 
 static void
