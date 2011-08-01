@@ -545,6 +545,7 @@ extern void CommandSetBoard( char *sz ) {
     pmr = NewMoveRecord();
 
     pmr->mt = MOVE_SETBOARD;
+    pmr->fPlayer = ms.fMove;
     
     if( ms.fMove )
 	SwapSides( an );

@@ -5045,6 +5045,7 @@ swapGame ( listOLD *plGame ) {
       PositionFromKey(anBoard, &pmr->sb.key);
       SwapSides( anBoard );
       PositionKey( (ConstTanBoard)anBoard, &pmr->sb.key );
+      pmr->fPlayer = ! pmr->fPlayer;
       break;
 
     case MOVE_SETCUBEVAL:
@@ -5113,12 +5114,12 @@ extern void CommandSwapPlayers ( char *sz )
 /* GTKSet(ap) already does this. This just adds flicker.
     GTKRegenerateGames();
 */
-    ChangeGame(NULL);
   }
 #endif
 
-  ShowBoard();
+  ChangeGame(NULL);
 
+  ShowBoard();
 }
 
 

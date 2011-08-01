@@ -1,3 +1,10 @@
+2011-08-01  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* play.c, gnubg.c, set.c: Fix display of SETBOARD records in the
+	game record panel (bug #32778). Fix Game|Swap players for games
+	ending with a SETBOARD record (in practice, games created from a
+	pasted id).
+
 2011-07-29  Michael Petch  <mpetch@capp-sysware.com>
 	* analysis.c: Previous getLuckRating change had unintended side
 	effects when we stopped using hard coded valuse. Hard coded values

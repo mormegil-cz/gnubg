@@ -2898,6 +2898,8 @@ extern void ChangeGame(listOLD *plGameNew)
 {
 	moverecord *pmr_cur;
 	gboolean dice_rolled = FALSE;
+	movetype reallastmt;
+	int reallastplayer;
 
 #if USE_GTK
 	listOLD *pl;
@@ -2935,8 +2937,18 @@ extern void ChangeGame(listOLD *plGameNew)
 #endif
 	CalculateBoard();
 	SetMoveRecord(plLastMove->p);
+
+	/* The real last move, before get_current_moverecord()
+	   possibly adds a hint record */
+	pmr_cur = plLastMove->p;
+	reallastmt = pmr_cur->mt;
+	reallastplayer =  pmr_cur->fPlayer;
+
 	pmr_cur = get_current_moverecord(NULL);
+
 	if (pmr_cur) {
+		if (reallastmt == MOVE_SETBOARD)
+			pmr_cur->fPlayer = reallastplayer;
 		if (pmr_cur->fPlayer != ms.fTurn) {
 			char *sz =
 			    g_strdup_printf("%s", pmr_cur->fPlayer ? "1" : "0");
@@ -4356,6 +4368,7 @@ extern const char* GetMoveString(moverecord *pmr, int* pPlayer, gboolean addSkil
     static char sz[40];
 	const char* pch = NULL;
 	*pPlayer = 0;
+	TanBoard anBoard;
 
 	switch( pmr->mt )
 	{
@@ -4432,8 +4445,19 @@ extern const char* GetMoveString(moverecord *pmr, int* pPlayer, gboolean addSkil
 
 	case MOVE_SETBOARD:
 		*pPlayer = -1;
+		/* PositionID assumes player 0 on roll. If this is not
+		   the case, swap board first and restore it when done */
+		if ( pmr->fPlayer) {
+			PositionFromKey(anBoard, &pmr->sb.key);
+			SwapSides( anBoard );
+			PositionKey( (ConstTanBoard)anBoard, &pmr->sb.key );
+		}
 		sprintf( sz, " (set board %s)",
 			PositionIDFromKey( &pmr->sb.key ) );
+		if ( pmr->fPlayer) {
+			SwapSides( anBoard );
+			PositionKey( (ConstTanBoard)anBoard, &pmr->sb.key );
+		}
 		pch = sz;
 	break;
 
