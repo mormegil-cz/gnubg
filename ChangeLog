@@ -7,7 +7,7 @@
 
 2011-07-29  Michael Petch  <mpetch@capp-sysware.com>
 	* analysis.c: Previous getLuckRating change had unintended side
-	effects when we stopped using hard coded valuse. Hard coded values
+	effects when we stopped using hard coded values. Hard coded values
 	were off by an approximate factor of 10. Although this has been fixed
 	it may wish to be revisited as to why the values were hardcoded in
 	this fashion originally. Reported by Chris (pck).
