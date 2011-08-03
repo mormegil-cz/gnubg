@@ -4348,6 +4348,9 @@ static int SetXGID(char *sz)
 	CommandSetBoard(posid);
 	g_free(posid);
 
+	if (anDice[0] && !fMove)
+		CommandSwapPlayers(NULL);
+
 	return 0;
 }
 
