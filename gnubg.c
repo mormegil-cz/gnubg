@@ -231,6 +231,7 @@ int fTutorChequer = TRUE;
 int fTutorCube = TRUE;
 int fTutor = FALSE;
 int fEvalSameAsAnalysis = TRUE;
+int fJustSwappedPlayers = FALSE;
 int nConfirmDefault = -1;
 int nThreadPriority = 0;
 int nToolbarStyle = 2;
@@ -5036,6 +5037,7 @@ swapGame ( listOLD *plGame ) {
     case MOVE_NORMAL:
     case MOVE_RESIGN:
     case MOVE_SETDICE:
+    case MOVE_SETCUBEVAL:
 
       pmr->fPlayer = ! pmr->fPlayer;
       break;
@@ -5048,15 +5050,11 @@ swapGame ( listOLD *plGame ) {
       pmr->fPlayer = ! pmr->fPlayer;
       break;
 
-    case MOVE_SETCUBEVAL:
-
-      /*no op */
-      break;
-
     case MOVE_SETCUBEPOS:
 
       if ( pmr->scp.fCubeOwner > -1 )
         pmr->scp.fCubeOwner = ! pmr->scp.fCubeOwner;
+      pmr->fPlayer = ! pmr->fPlayer;
       break;
 
     }
@@ -5110,6 +5108,7 @@ extern void CommandSwapPlayers ( char *sz )
 
 #if USE_GTK
   if ( fX ) {
+    fJustSwappedPlayers = TRUE;
     GTKSet ( ap );
 /* GTKSet(ap) already does this. This just adds flicker.
     GTKRegenerateGames();

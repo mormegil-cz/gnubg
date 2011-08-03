@@ -3065,9 +3065,14 @@ if (display_is_3d(bd->rd))
 else
 #endif
 {
-    /* FIXME it's overkill to do this every time, but if we don't do it,
-       then "set turn <player>" won't redraw the dice in the other colour. */
-    gtk_widget_queue_draw( bd->dice_area );
+    extern int fJustSwappedPlayers;
+
+    if (fJustSwappedPlayers) {
+	if (ms.anDice[ 0 ] > 0)
+            RollDice2d(bd);
+        gtk_widget_queue_draw( bd->drawing_area );
+        fJustSwappedPlayers = FALSE;
+    }
 }
 
     return 0;

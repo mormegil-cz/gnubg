@@ -747,6 +747,7 @@ extern void CommandSetCubeCentre( char *sz ) {
 
     pmr->mt = MOVE_SETCUBEPOS;
     pmr->scp.fCubeOwner = -1;
+    pmr->fPlayer = ms.fMove;
     
     AddMoveRecord( pmr );
     
@@ -787,6 +788,7 @@ extern void CommandSetCubeOwner( char *sz ) {
 
     pmr->mt = MOVE_SETCUBEPOS;
     pmr->scp.fCubeOwner = i;
+    pmr->fPlayer = ms.fMove;
     
     AddMoveRecord( pmr );
     
@@ -845,6 +847,7 @@ extern void CommandSetCubeValue( char *sz ) {
 	if( n == i ) {
             pmr = NewMoveRecord();
 	    pmr->mt = MOVE_SETCUBEVAL;
+            pmr->fPlayer = ms.fMove;
 
 	    pmr->scv.nCube = n;
 
@@ -2509,8 +2512,11 @@ extern void CommandSetTurn( char *sz ) {
     fNextTurn = FALSE;
 #if USE_GTK
     if (fX) {
+	    extern int fJustSwappedPlayers;
+
 	    BoardData *bd = BOARD(pwBoard)->board_data;
 	    bd->diceRoll[0] = bd->diceRoll[1] = -1;
+            fJustSwappedPlayers = TRUE;
     }
 #endif
     ms.anDice[ 0 ] = ms.anDice[ 1 ] = 0;

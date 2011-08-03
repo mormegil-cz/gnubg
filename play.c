@@ -2947,7 +2947,7 @@ extern void ChangeGame(listOLD *plGameNew)
 	pmr_cur = get_current_moverecord(NULL);
 
 	if (pmr_cur) {
-		if (reallastmt == MOVE_SETBOARD)
+		if (reallastmt >= MOVE_SETBOARD)
 			pmr_cur->fPlayer = reallastplayer;
 		if (pmr_cur->fPlayer != ms.fTurn) {
 			char *sz =
