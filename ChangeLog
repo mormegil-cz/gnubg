@@ -3,8 +3,10 @@
 
 2011-08-03  Michael Petch  <mpetch@capp-sysware.com>
 	* set.c: Fix the display of the board when importing XGID's
-	so that they appear similar to those HTML positions pasted to
-	websites. Reported by Leo Bueno (on BGO)
+	so that they appear *similar* to those HTML positions pasted to
+	websites. Reported by Leo Bueno (on BGO). Assume that most
+	people are using XG2 and exporting with default setting "Player
+	on roll always at the bottom".
 
 2011-08-03  Philippe Michel  <philippe.michel7@sfr.fr>
 
