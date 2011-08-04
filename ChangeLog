@@ -1,4 +1,7 @@
 2011-08-03  Michael Petch  <mpetch@capp-sysware.com>
+	* gnubgmodule.c: Add PythonParseMove function
+
+2011-08-03  Michael Petch  <mpetch@capp-sysware.com>
 	* set.c: Fix the display of the board when importing XGID's
 	so that they appear similar to those HTML positions pasted to
 	websites. Reported by Leo Bueno (on BGO)
