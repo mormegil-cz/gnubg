@@ -68,7 +68,7 @@ extern double get_time(void)
 	struct timeval tv;
 	gettimeofday(&tv, 0);
 
-	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
+	return 1000.0 * tv.tv_sec + 0.001 * tv.tv_usec;
 }
 
 #endif
