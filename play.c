@@ -1788,35 +1788,38 @@ extern int NextTurn( int fPlayNext ) {
 
     g_assert( ms.gs == GAME_PLAYING );
     
-    if( fDisplay || ap[ ms.fTurn ].pt == PLAYER_HUMAN )
-	ShowBoard();
+    if( fDisplay || ap[ ms.fTurn ].pt == PLAYER_HUMAN ) {
+		fInterrupt = FALSE;
+		ShowBoard();
+	}
+
     /* We have reached a safe point to check for interrupts.  Until now,
        the board could have been in an inconsistent state. */
     if( fInterrupt || !fPlayNext ) {
-	fComputing = FALSE;
-	return -1;
+		fComputing = FALSE;
+		return -1;
     }
     
     if( ap[ ms.fTurn ].pt == PLAYER_HUMAN ) {
-	/* Roll for them, if:
+		/* Roll for them, if:
 
-	   * "auto roll" is on;
-	   * they haven't already rolled;
-	   * they haven't just been doubled;
-	   * somebody hasn't just resigned;
-	   * at least one of the following:
-	     - cube use is disabled;
-	     - it's the Crawford game;
-	     - the cube is dead. */
-	if( fAutoRoll && !ms.anDice[ 0 ] && !ms.fDoubled && !ms.fResigned &&
-	    ( !ms.fCubeUse || ms.fCrawford ||
-	      ( ms.fCubeOwner >= 0 && ms.fCubeOwner != ms.fTurn ) ||
-	      ( ms.nMatchTo > 0 && ms.anScore[ ms.fTurn ] +
-		ms.nCube >= ms.nMatchTo ) ) )
-	    CommandRoll( NULL );
+		   * "auto roll" is on;
+		   * they haven't already rolled;
+		   * they haven't just been doubled;
+		   * somebody hasn't just resigned;
+		   * at least one of the following:
+		     - cube use is disabled;
+		     - it's the Crawford game;
+		     - the cube is dead. */
+		if( fAutoRoll && !ms.anDice[ 0 ] && !ms.fDoubled && !ms.fResigned &&
+		    ( !ms.fCubeUse || ms.fCrawford ||
+		      ( ms.fCubeOwner >= 0 && ms.fCubeOwner != ms.fTurn ) ||
+		      ( ms.nMatchTo > 0 && ms.anScore[ ms.fTurn ] +
+			ms.nCube >= ms.nMatchTo ) ) )
+		    CommandRoll( NULL );
 
-	fComputing = FALSE;
-	return -1;
+		fComputing = FALSE;
+		return -1;
     }
     
 #if USE_GTK

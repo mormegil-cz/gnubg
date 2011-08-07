@@ -1,3 +1,8 @@
+2011-08-07  Michael Petch  <mpetch@capp-sysware.com>
+	* play.c: Fix bug #33143 reported by Kevin McDonough where 
+	interrupting a forced move in 2D got into wrong state causing
+	bot not to continue automatic play.
+
 2011-08-03  Michael Petch  <mpetch@capp-sysware.com>
 	* gnubgmodule.c: Add PythonParseMove function
 
