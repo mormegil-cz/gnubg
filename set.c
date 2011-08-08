@@ -4184,6 +4184,7 @@ static int SetXGID(char *sz)
 	char *c;
 	int i;
 	char v[9][5];
+	int fSidesSwapped = FALSE;
 
 	for (i = 0; i < 9 && (c = strrchr(s, ':')); i++) {
 		strncpy(v[i], c + 1, 4);
@@ -4342,15 +4343,18 @@ static int SetXGID(char *sz)
 	CommandSetMatchID(matchid);
 	g_free(matchid);
 
-	if (!fMove)
+	if (!fMove){
 		SwapSides(anBoard);
+		fSidesSwapped = TRUE;
+	}
 	posid = g_strdup(PositionID((ConstTanBoard)anBoard));
 	CommandSetBoard(posid);
 	g_free(posid);
 
-	if (anDice[0] && !fMove)
+	if (( anDice[0] == 0 && fSidesSwapped && fCubeOwner != -1 ) ||
+		( anDice[0] && !fMove ) ) {
 		CommandSwapPlayers(NULL);
-
+	}
 	return 0;
 }
 
