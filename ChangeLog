@@ -1,3 +1,10 @@
+2011-08-09  Michael Petch  <mpetch@capp-sysware.com>
+	* play.c, gtkoptions.c: A new bug was introduced that broke
+	canceling of a match where bot played bot (or potentially other
+	scenario of automatic play). Fix an old bug where canceling 
+	automated bearoff of the human didn't work properly. Cache size 
+	is now reported as MB (Megabyte) not "Mb" (Megabit) 	
+
 2011-08-07  Michael Petch  <mpetch@capp-sysware.com>
 	* set.c: Some imported XGID cube positions were not properly
 	swapped when the board was displayed. Reported by Philippe (plm)

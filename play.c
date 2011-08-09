@@ -1682,6 +1682,9 @@ extern int NextTurn( int fPlayNext ) {
 		if( fLastMove )
 		{
 			board_animate( BOARD( pwBoard ), anLastMove, fLastPlayer );
+			if (fInterrupt && ! automaticTask) 
+				fInterrupt = FALSE;
+
 			playSound ( SOUND_MOVE );
 			fLastMove = FALSE;
 		}
@@ -1789,7 +1792,6 @@ extern int NextTurn( int fPlayNext ) {
     g_assert( ms.gs == GAME_PLAYING );
     
     if( fDisplay || ap[ ms.fTurn ].pt == PLAYER_HUMAN ) {
-		fInterrupt = FALSE;
 		ShowBoard();
 	}
 

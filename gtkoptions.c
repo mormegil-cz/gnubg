@@ -302,7 +302,7 @@ static void SoundPlayClicked(GtkWidget *UNUSED(widget), gpointer UNUSED(userdata
 
 static gchar* CacheSizeString(GtkScale *UNUSED(scale), gdouble value)
 {
-  return g_strdup_printf ("%iMb", GetCacheMB(value));
+  return g_strdup_printf ("%iMB", GetCacheMB(value));
 }
 
 static void append_game_options(optionswidget *pow)
