@@ -1730,9 +1730,13 @@ extern int NextTurn( int fPlayNext ) {
 			{
 		#if USE_BOARD3D
 				BoardData *bd = BOARD( pwBoard )->board_data;
-				if (ms.fResigned && display_is_3d(bd->rd))
+				if (ms.fResigned && display_is_3d(bd->rd)) 
 					StopIdle3d(bd, bd->bd3d);	/* Stop flag waving */
+
 		#endif
+				/* Clear the resignation flag */
+				ms.fResigned = 0;
+
 				ShowBoard();
 			}
 			else
