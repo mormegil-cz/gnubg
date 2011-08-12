@@ -1,3 +1,11 @@
+2011-08-11  Michael Petch  <mpetch@capp-sysware.com>
+	* set.c: When importing XGIDs prompt user in positions where
+	person on roll is on top before swapping. In non interactive
+	mode swapping will not occur. This option exists because XG2
+	swaps players when exporting (default), so person on roll
+	appears on bottom. Unfrotunately, XG2 does not change the XGID
+	to account for the change.
+
 2011-08-09  Michael Petch  <mpetch@capp-sysware.com>
 	* play.c, gtkoptions.c: A new bug was introduced that broke
 	canceling of a match where bot played bot (or potentially other
