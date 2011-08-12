@@ -1773,8 +1773,12 @@ extern gboolean board_button_press(GtkWidget *board, GdkEventButton *event,
 #endif
 	    bd->drag_point = -1;
 		if (event->button == 1)
-		{	/* Clicked on dice; end move. */
-			Confirm(bd);
+		{
+			if ( ms.gs == GAME_RESIGNED ) 
+				UserCommand ("new game");
+			else
+				/* Clicked on dice; end move. */
+				Confirm(bd);
 		}
 	    else 
 		{	/* Other buttons on dice swaps positions. */

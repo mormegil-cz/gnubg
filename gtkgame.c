@@ -6831,6 +6831,7 @@ static void CallbackResign(GtkWidget *pw, gpointer data)
     const char *asz[3]= { "normal", "gammon", "backgammon" };
     char sz[20];
 
+	ms.anDice[0] = ms.anDice[1] = 0;
     sprintf(sz, "resign %s", asz[i]);
     gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
     UserCommand(sz);
