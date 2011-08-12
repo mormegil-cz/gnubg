@@ -1789,6 +1789,7 @@ extern int NextTurn( int fPlayNext ) {
 		else
 		{
 			fComputing = FALSE;
+			StopAutomaticPlay();
 			return -1;
 		}
 	}
@@ -3755,7 +3756,6 @@ extern void CommandResign( char *sz ) {
 
 
     ms.fTurn = !ms.fTurn;
-
     playSound ( SOUND_RESIGN );
     
     TurnDone();
