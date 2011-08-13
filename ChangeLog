@@ -1,9 +1,9 @@
 2011-08-12  Michael Petch  <mpetch@capp-sysware.com>
-	* play.c, gtkgame.c, gtkboard.: Fix bug #33866 reported by 
+	* play.c, gtkgame.c, gtkboard.c: Fix bug #33866 reported by 
 	Gerhard. In 3D mode with option "Start new Games immediately" 
-	turned off, match would not continue properly. Also fixes 
-	the bug where the resignation flag is not cleared after 
-	accepting/rejecting a resignation.
+	turned off, match would not continue properly if the computer
+	offered a resignation. Also fixes the bug where the resignation 
+	flag is not cleared after accepting/rejecting a resignation.
 	Fix Bug #33701, #33313 - When "Start Game Immediately" option
 	is off, resigning gets the user stuck trying to start a new 
 	game. Now allow user to click dice area on board to start new 
