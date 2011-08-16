@@ -161,12 +161,19 @@ void PlaySound_QuickTime (const char *cSoundFilename)
 #include <CoreAudio/CoreAudioTypes.h>
 #include <ApplicationServices/ApplicationServices.h>
 
+static pthread_mutex_t 	mutexCAAccess;
+static AudioFileID audioFile;
+static AUGraph theGraph;
+static int fCAInitialised = FALSE;
+static Float64 fileDuration = 0.0;
+
 #define CoreAudioChkError(func,context) \
 	{ \
 		int result; \
 		if ((result = func)!=0) \
 		{ \
 			outputf(_("Apple CoreAudio Error (" context "): %d\n"), result); \
+		        pthread_mutex_unlock (&mutexCAAccess); \
 			return; \
 		} \
 	}
@@ -175,11 +182,39 @@ double CoreAudio_PrepareFileAU (AudioUnit *au, AudioStreamBasicDescription *file
 void CoreAudio_MakeSimpleGraph (AUGraph *theGraph, AudioUnit *fileAU, 
 	AudioStreamBasicDescription *fileFormat, AudioFileID audioFile);
 
+void CoreAudio_ShutDown ()
+{
+	AUGraphStop (theGraph);
+	AUGraphUninitialize (theGraph);
+	AudioFileClose (audioFile);
+	AUGraphClose (theGraph);
+}
+
+void CoreAudio_PlayFile_Thread (void *auGraph)
+{
+	/* Start playing the sound file, and wait for it to complete */
+	AUGraphStart (theGraph);
+	usleep ((int)(1000.0 * 1000.0 * fileDuration));
+
+	CoreAudio_ShutDown ();
+
+	/* Shutdown the audio stream */
+        pthread_mutex_unlock (&mutexCAAccess);
+}
+
 void CoreAudio_PlayFile (char * const fileName)
 {
-	AudioFileID audioFile;
-
 	const char* inputFile = fileName;
+        pthread_t CAThread;
+
+	/* first time through ininitialise the mutex */
+	if (!fCAInitialised) {
+	        pthread_mutex_init (&mutexCAAccess, NULL);
+		fCAInitialised = TRUE;
+	}
+
+	/*  Apparently CoreAudio is not fully reentrant */
+	pthread_mutex_lock (&mutexCAAccess);
 
 	/* Open the sound file */
 	CFURLRef outInputFileURL = CFURLCreateFromFileSystemRepresentation (kCFAllocatorDefault, 
@@ -196,27 +231,22 @@ void CoreAudio_PlayFile (char * const fileName)
 		&propsize, &fileFormat), "AudioFileGetProperty Dataformat");
 
 	/* Setup sound state */
-	AUGraph theGraph;
 	AudioUnit fileAU;
 	memset (&fileAU, 0, sizeof (AudioUnit));
 	memset (&theGraph, 0, sizeof (AUGraph));
 
-
 	/* Setup a simple output graph and AU */
 	CoreAudio_MakeSimpleGraph (&theGraph, &fileAU, &fileFormat, audioFile);
-	
+
 	/* Load the file contents */
-	Float64 fileDuration = CoreAudio_PrepareFileAU (&fileAU, &fileFormat, audioFile);
+	fileDuration = CoreAudio_PrepareFileAU (&fileAU, &fileFormat, audioFile);
 
-	/* Start playing the sound file, and wait for it to complete */
-	AUGraphStart (theGraph);
-	usleep ((int)(1000.0 * 1000.0 * fileDuration));
-
-	/* Shutdown the audio stream */
-	AUGraphStop (theGraph);
-	AUGraphUninitialize (theGraph);
-	AudioFileClose (audioFile);
-	AUGraphClose (theGraph);
+        if ( pthread_create (&CAThread, 0L, CoreAudio_PlayFile_Thread, NULL) == 0)
+		pthread_detach (CAThread);
+	else {
+		CoreAudio_ShutDown();	
+	        pthread_mutex_unlock (&mutexCAAccess);
+	}
 }
 
 double CoreAudio_PrepareFileAU (AudioUnit *au, AudioStreamBasicDescription *fileFormat, 

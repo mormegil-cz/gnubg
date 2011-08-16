@@ -135,8 +135,8 @@ if test "$with_sqlite" != "no" && test "x$have_sqlite" = "xyes"; then
 fi
 AM_CONDITIONAL(USE_SQLITE, test "$with_sqlite" != "no" && test "$have_sqlite" != "no" )
 
-dnl If OSX version < 10.5 then try to build with Quicktime
-dnl otherwise use CoreAudio if it is available
+dnl If OSX version < 10.6 (Prior to Snow Leopard) then try to build
+dnl with Quicktime, otherwise use CoreAudio if it is available
 if test "x$darwin" = "xyes"; then
 	needquicktime=no
 	AS_VERSION_COMPARE("$(uname -r)", "10.0", needquicktime=yes, [], [])
