@@ -207,7 +207,7 @@ void CoreAudio_PlayFile (char * const fileName)
 	const char* inputFile = fileName;
         pthread_t CAThread;
 
-	/* first time through ininitialise the mutex */
+	/* first time through initialise the mutex */
 	if (!fCAInitialised) {
 	        pthread_mutex_init (&mutexCAAccess, NULL);
 		fCAInitialised = TRUE;
