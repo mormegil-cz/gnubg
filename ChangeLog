@@ -1,3 +1,12 @@
+2011-08-16  Michael Petch  <mpetch@capp-sysware.com>
+	* sound.c, configure.in: Play CoreAudio sounds in the
+	background on OS/X builds. Deficiency found by Louis Zulli. 
+
+2011-08-15  Michael Petch  <mpetch@capp-sysware.com>
+	* Makefile.am, configure.in, util.c, board3d/Makefile.am, 
+	doc/Makefile.am: better support for Mingw/Msys windows
+	builds.
+
 2011-08-16  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* eval.c, eval.h: Add 4ply with large movefilter to predefined
@@ -19,7 +28,7 @@
 	person on roll is on top before swapping. In non interactive
 	mode swapping will not occur. This option exists because XG2
 	swaps players when exporting (default), so person on roll
-	appears on bottom. Unfrotunately, XG2 does not change the XGID
+	appears on bottom. Unfortunately, XG2 does not change the XGID
 	to account for the change.
 
 2011-08-09  Michael Petch  <mpetch@capp-sysware.com>
