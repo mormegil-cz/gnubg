@@ -325,7 +325,8 @@ const char *aszSettings[ NUM_SETTINGS ] = {
   N_ ("setting|expert"), 
   N_ ("setting|world class"),
   N_ ("setting|supremo"),
-  N_ ("setting|grandmaster") };
+  N_ ("setting|grandmaster"),
+  N_ ("setting|4ply") };
 
 /* which evaluation context does the predefined settings use */
 evalcontext aecSettings[ NUM_SETTINGS ] = {
@@ -337,6 +338,7 @@ evalcontext aecSettings[ NUM_SETTINGS ] = {
   { TRUE, 2, TRUE, TRUE, 0.0f }, /* world class */
   { TRUE, 2, TRUE, TRUE, 0.0f }, /* supremo */
   { TRUE, 3, TRUE, TRUE, 0.0f }, /* grand master */
+  { TRUE, 4, TRUE, TRUE, 0.0f }, /* 4ply */
 };
 
 /* which move filter does the predefined settings use */
@@ -348,7 +350,8 @@ int aiSettingsMoveFilter[ NUM_SETTINGS ] = {
   -1, /* expoert: n/a */
   2,  /* wc: normal */
   3,  /* supremo: large */
-  2,  /* grandmaster: normal */
+  3,  /* grandmaster: large */
+  3,  /* 4ply: large */
 };
 
 /* the predefined move filters */
