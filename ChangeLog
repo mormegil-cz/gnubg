@@ -2,15 +2,15 @@
 	* sound.c, configure.in: Play CoreAudio sounds in the
 	background on OS/X builds. Deficiency found by Louis Zulli. 
 
-2011-08-15  Michael Petch  <mpetch@capp-sysware.com>
-	* Makefile.am, configure.in, util.c, board3d/Makefile.am, 
-	doc/Makefile.am: better support for Mingw/Msys windows
-	builds.
-
 2011-08-16  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* eval.c, eval.h: Add 4ply with large movefilter to predefined
 	play levels. Bump grandmaster movefilter up to large.
+
+2011-08-15  Michael Petch  <mpetch@capp-sysware.com>
+	* Makefile.am, configure.in, util.c, board3d/Makefile.am, 
+	doc/Makefile.am: better support for Mingw/Msys windows
+	builds.
 
 2011-08-12  Michael Petch  <mpetch@capp-sysware.com>
 	* play.c, gtkgame.c, gtkboard.c: Fix bug #33866 reported by 
