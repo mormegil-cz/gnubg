@@ -2,7 +2,7 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
-AM_CPPFLAGS = -DDOCDIR='"$(datadir)/doc/gnubg/"' -DDATADIR='"$(datadir)"' -DPKGDATADIR='"$(datadir)/gnubg"'
+AM_CPPFLAGS = -DAC_DOCDIR='"$(datadir)/doc/gnubg/"' -DAC_DATADIR='"$(datadir)"' -DAC_PKGDATADIR='"$(datadir)/gnubg"'
 
 SUBDIRS = lib doc met po m4 sounds board3d textures scripts flags fonts non-src pixmaps .
 
@@ -195,8 +195,17 @@ AUTHORS: credits.sh
 #
 ##copying.c target
 #
+if WIN32
+copying.c: copying.awk
+	$(AWK) -f $(srcdir)/copying.awk < $(srcdir)/COPYING > $@
+
+copying.$(OBJEXT): copying.c
+	$(CC) -c $(CFLAGS) $< -o $@
+else
 copying.c: COPYING copying.awk
 	$(AWK) -f $(srcdir)/copying.awk < $(srcdir)/COPYING > $@
+endif
+
 
 #
 ##databases

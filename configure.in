@@ -53,6 +53,7 @@ case "$host" in
     AC_DEFINE(USE_APPLE_OPENGL, 1, [Define if using Apple OpenGL])
     ;;
 esac
+AM_CONDITIONAL(WIN32, test "x$win32" = "xyes")
 AC_MSG_RESULT([$host])
 
 dnl
@@ -173,7 +174,11 @@ AC_CHECK_LIB(m,sqrt)
 AC_CHECK_LIB(gmp, __gmpz_import)
 AC_SEARCH_LIBS(gethostbyname,nsl)
 AC_SEARCH_LIBS(inet_aton,resolv)
+if test "x$win32" = "xyes"; then
+AC_DEFINE(HAVE_SOCKETS,1,Define if the system supports AF_LOCAL sockets.)
+else
 AC_SEARCH_LIBS(connect,socket,AC_DEFINE(HAVE_SOCKETS,1,Define if the system supports AF_LOCAL sockets.))
+fi
 
 dnl
 dnl Check for readline

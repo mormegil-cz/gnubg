@@ -3,7 +3,7 @@
 ## a standalone library, it would be better for them to be installed.
 ##
 
-AM_CPPFLAGS = -DDATADIR='"$(datadir)"' -DPKGDATADIR='"$(datadir)/gnubg"'
+AM_CPPFLAGS = -DGNU_DATADIR='"$(datadir)"' -DPKGDATADIR='"$(datadir)/gnubg"'
 
 INCLUDES = -I$(srcdir)/.. $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) \
 	-I$(srcdir)/../lib \
@@ -19,5 +19,9 @@ EXTRA_DIST = wglBuffer.c wglBuffer.h
 libboard3d_la_SOURCES = drawboard3d.c font3d.c fun3d.h graph.c gtkcolour3d.c \
 			inc3d.h matrix.c matrix.h misc3d.c model.c model.h \
 			shadow.c types3d.h widget3d.c tr.c tr.h
+
+if WIN32
+libboard3d_la_SOURCES += $(EXTRA_DIST)
+endif
 
 noinst_HEADERS = fun3d.h inc3d.h matrix.h model.h types3d.h 

@@ -1,4 +1,4 @@
-AM_CPPFLAGS = -DDOCDIR='"$(datadir)/doc/gnubg/"' -DDATADIR='"$(datadir)"' -DPKGDATADIR='"$(datadir)/gnubg"'
+AM_CPPFLAGS = -DAC_DOCDIR='"$(datadir)/doc/gnubg/"' -DAC_DATADIR='"$(datadir)"' -DAC_PKGDATADIR='"$(datadir)/gnubg"'
 gnubg_helpdir = $(datadir)/doc/gnubg/
 gnubg_imagedir = $(datadir)/doc/gnubg/images
 gnubg_help_DATA =  gnubg.html allabout.html
