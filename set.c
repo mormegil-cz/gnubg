@@ -2018,8 +2018,6 @@ extern void CommandSetRolloutInitial( char *sz ) {
 
 extern void CommandSetRolloutSeed( char *sz ) {
 
-    int n;
-    
     if( prcSet->rngRollout == RNG_MANUAL ) {
 	outputl( _("You can't set a seed if you're using manual dice "
 		 "generation.") );
@@ -2027,7 +2025,7 @@ extern void CommandSetRolloutSeed( char *sz ) {
     }
 
     if( *sz ) {
-	n = ParseNumber( &sz );
+	const int n = ParseNumber( &sz );
 
 	if( n < 0 ) {
 	    outputl( _("You must specify a valid seed (see `help set seed').") );
@@ -4161,8 +4159,6 @@ CommandSetSGFFolder (char *sz)
 
 static int SetXGID(char *sz)
 {
-
-	int nMaxCube = -1;
 	int nMatchTo = -1;
 	int nRules = -1;
 	int fCrawford = 0;
@@ -4235,7 +4231,7 @@ static int SetXGID(char *sz)
 
 	g_free(s);
 
-	nMaxCube = atoi(v[0]);
+	/* atoi(v[0]) is a maximum (money) cube value, unused in gnubg */
 
 	nMatchTo = atoi(v[1]);
 
