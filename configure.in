@@ -45,7 +45,7 @@ case "$host" in
   *-*-mingw*)
     win32=yes
     CFLAGS="$CFLAGS -mms-bitfields"
-    LDFLAGS="$LDFLAGS -lwinmm"
+	LDFLAGS="$LDFLAGS -lws2_32 -lwinmm"
     ;;
   *-*-darwin*)
     darwin=yes
