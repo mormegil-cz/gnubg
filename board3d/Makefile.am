@@ -3,7 +3,7 @@
 ## a standalone library, it would be better for them to be installed.
 ##
 
-AM_CPPFLAGS = -DAC_DATADIR='"$(datadir)"' -DAC_DATADIR='"$(datadir)/gnubg"'
+AM_CPPFLAGS = -DAC_DATADIR='"$(datadir)"' -DAC_PKGDATADIR=='"$(datadir)/gnubg"'
 
 INCLUDES = -I$(srcdir)/.. $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) \
 	-I$(srcdir)/../lib \
