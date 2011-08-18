@@ -2754,6 +2754,7 @@ extern int LoadPythonFile(const char *sz)
 {
 	char *path = NULL;
 	char *cmd = NULL;
+	char *escpath = NULL;
 	int ret = FALSE;
 
 	if (g_file_test(sz, G_FILE_TEST_EXISTS))
@@ -2770,8 +2771,10 @@ extern int LoadPythonFile(const char *sz)
 		outputerrf("Python file (%s) not found\n", sz);
 		return FALSE;
 	}
-	cmd = g_strdup_printf("execfile('%s')", path);
+	escpath = g_strescape (path, NULL);
+	cmd = g_strdup_printf("execfile('%s')", escpath);
 	PyRun_SimpleString(cmd);
+	g_free(escpath);
 	g_free(path);
 	g_free(cmd);
 
