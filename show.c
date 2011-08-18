@@ -304,9 +304,14 @@ ShowRollout ( const rolloutcontext *prc ) {
   }
 
   if (prc->fStopOnSTD) {
-    outputf ( _("Rollouts may stop after %d games if the ratios |value/STD|\n"
-		"are all less than< %5.4f\n"), prc->nMinimumGames, 
-		prc->rStdLimit);
+    if (prc->fCubeful)
+      outputf ( _("Rollouts may stop after %d games if both ratios |equity/STD|\n"
+		"\t(cubeful and cubeless) are less than %5.4f\n"),
+		prc->nMinimumGames, prc->rStdLimit);
+    else
+      outputf ( _("Rollouts may stop after %d games if the ratio |equity/STD|"
+		" is less than %5.4f\n"),
+		prc->nMinimumGames, prc->rStdLimit);
   }
 }
 
