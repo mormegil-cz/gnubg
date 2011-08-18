@@ -223,7 +223,7 @@ gnubg.wd:
 else
 gnubg.wd: gnubg.weights makeweights$(EXEEXT)
 	[ -s $@ ] || \
-	./makeweights < $< > $@
+	./makeweights -f $@ $< 
 gnubg_os0.bd: makebearoff$(EXEEXT)
 	[ -s $@ ] || \
 	./makebearoff -o 6 -s 7999999 -f $@
