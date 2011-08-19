@@ -1,3 +1,21 @@
+2011-08-19  Michael Petch  <mpetch@capp-sysware.com>
+	* set.c: Fixed bug reported by Chris Yep. If you use "hint"
+	on a Crawford position, edit the position and remove Crawford
+	flag, and click "Hint" it used the previous position info and
+	produced identical results. Also occurred if using
+	"set crawford" command directly.
+
+2011-08-18  Michael Petch  <mpetch@capp-sysware.com>
+	* configure.in, Makefile.am, gnubgmodule.c: Fixed build issues
+	with Mingw/Msys environment. MingW doesn't output Binary data 
+	by default to stdout. Use makeweights "-f" argument to output
+	proper binary weights files. On Windows path names need to be
+	properly escaped when passed to the Python interpreter.
+
+2011-08-16  Michael Petch  <mpetch@capp-sysware.com>
+	* sound.c, configure.in: Play CoreAudio sounds in the
+	background on OS/X builds. Deficiency found by Louis Zulli. 
+
 2011-08-16  Michael Petch  <mpetch@capp-sysware.com>
 	* sound.c, configure.in: Play CoreAudio sounds in the
 	background on OS/X builds. Deficiency found by Louis Zulli. 
@@ -13,12 +31,12 @@
 	builds.
 
 2011-08-12  Michael Petch  <mpetch@capp-sysware.com>
-	* play.c, gtkgame.c, gtkboard.c: Fix bug #33866 reported by 
+	* play.c, gtkgame.c, gtkboard.c: Fixed bug #33866 reported by 
 	Gerhard. In 3D mode with option "Start new Games immediately" 
 	turned off, match would not continue properly if the computer
 	offered a resignation. Also fixes the bug where the resignation 
 	flag is not cleared after accepting/rejecting a resignation.
-	Fix Bug #33701, #33313 - When "Start Game Immediately" option
+	Fixed Bug #33701, #33313 - When "Start Game Immediately" option
 	is off, resigning gets the user stuck trying to start a new 
 	game. Now allow user to click dice area on board to start new 
 	game after a resign. 	
@@ -34,7 +52,7 @@
 2011-08-09  Michael Petch  <mpetch@capp-sysware.com>
 	* play.c, gtkoptions.c: A new bug was introduced that broke
 	canceling of a match where bot played bot (or potentially other
-	scenario of automatic play). Fix an old bug where canceling 
+	scenario of automatic play). Fixed an old bug where canceling 
 	automated bearoff of the human didn't work properly. Cache size 
 	is now reported as MB (Megabyte) not "Mb" (Megabit) 	
 
@@ -43,7 +61,7 @@
 	swapped when the board was displayed. Reported by Philippe (plm)
 
 2011-08-07  Michael Petch  <mpetch@capp-sysware.com>
-	* play.c: Fix bug #33143 reported by Kevin McDonough where 
+	* play.c: Fixed bug #33143 reported by Kevin McDonough where 
 	interrupting a forced move in 2D got into wrong state causing
 	bot not to continue automatic play.
 
@@ -51,7 +69,7 @@
 	* gnubgmodule.c: Add PythonParseMove function
 
 2011-08-03  Michael Petch  <mpetch@capp-sysware.com>
-	* set.c: Fix the display of the board when importing XGID's
+	* set.c: Fixed the display of the board when importing XGID's
 	so that they appear *similar* to those HTML positions pasted to
 	websites. Reported by Leo Bueno (on BGO). Assume that most
 	people are using XG2 and exporting with default setting "Player
@@ -64,8 +82,8 @@
 
 2011-08-01  Philippe Michel  <philippe.michel7@sfr.fr>
 
-	* play.c, gnubg.c, set.c: Fix display of SETBOARD records in the
-	game record panel (bug #32778). Fix Game|Swap players for games
+	* play.c, gnubg.c, set.c: Fixed display of SETBOARD records in the
+	game record panel (bug #32778). Fixed Game|Swap players for games
 	ending with a SETBOARD record (in practice, games created from a
 	pasted id).
 
@@ -77,7 +95,7 @@
 	this fashion originally. Reported by Chris (pck).
 
 2011-07-17  Michael Petch  <mpetch@capp-sysware.com>
-	* gnubgmodule.c: Fix Python position key functions to internally call 
+	* gnubgmodule.c: Fixed Python position key functions to internally call 
 	the old style position keys functions. Fixes compiler errors due to 
 	new position key changes made on 2011/07/15.
 
@@ -186,12 +204,12 @@
 
 2011-04-06  Michael Petch  <mpetch@capp-sysware.com>
 
-	* gnubg.c: Fix WIN32 specific bug that caused command 
+	* gnubg.c: Fixed WIN32 specific bug that caused command 
 	filenames with spaces to not be processed. Reported by Nardy.     
 
 2011-03-23  Michael Petch  <mpetch@capp-sysware.com>
 
-	* gtkboard.c, play.c, gtkgame.c: Fix bug that caused
+	* gtkboard.c, play.c, gtkgame.c: Fixed bug that caused
 	crawford flag to be unset in the GUI if you changed to
 	a crawford game in the game list. Reported by Phillipe
 	Michel. Fixed bug that caused a new money session to
@@ -297,7 +315,7 @@
 2011-02-14  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* sgf.c, eval.h (comment only), gtkgame.c, gnubg.c, analysis.c:
-	Fix crash when loading a take or drop saved as a position (bug
+	Fixed crash when loading a take or drop saved as a position (bug
 	#32270).
 
 Mon Feb 14 21:11:28 CET 2011 Christian Anthon <anthon@kiku.dk>

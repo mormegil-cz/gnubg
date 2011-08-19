@@ -2565,11 +2565,11 @@ extern void CommandSetCrawford( char *sz ) {
       ms.fPostCrawford = !ms.fCrawford;
 
       if( ms.fCrawford )
-	  CancelCubeAction();
+	      CancelCubeAction();
       
       if( plGame && ( pmr = plGame->plNext->p ) && ( pmgi = &pmr->g ) ) {
-	  g_assert( pmr->mt == MOVE_GAMEINFO );
-	  pmgi->fCrawfordGame = ms.fCrawford;
+	      g_assert( pmr->mt == MOVE_GAMEINFO );
+	      pmgi->fCrawfordGame = ms.fCrawford;
       }
     } else {
 		if (ms.fCrawford)
@@ -2582,6 +2582,8 @@ extern void CommandSetCrawford( char *sz ) {
 		outputl( _("Cannot set whether this is the Crawford game\n"
 			"as none of the players are 1-away from winning.") );
     }
+	/* Clear previous data in the hint cache after toggling Crawford*/
+    pmr_hint_destroy();
   }
   else if ( !ms.nMatchTo ) 
       outputl( _("Cannot set Crawford play for money sessions.") );
