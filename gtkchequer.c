@@ -77,11 +77,11 @@ static void MoveListRolloutClicked(GtkWidget *pw, hintdata *phd)
 	MoveListFreeSelectionList(plSelList);
 
 	GTKSetCurrentParent(pw);
-  RolloutProgressStart( &ci, c, NULL, &rcRollout, asz, FALSE, &p );
+	RolloutProgressStart( &ci, c, NULL, &rcRollout, asz, FALSE, &p );
 
-  res = ScoreMoveRollout ( ppm, (const cubeinfo**)ppci, c, RolloutProgress, p );
+	res = ScoreMoveRollout ( ppm, (const cubeinfo**)ppci, c, RolloutProgress, p );
 
-  RolloutProgressEnd( &p, FALSE );
+	RolloutProgressEnd( &p, TRUE );
 
 	free(asz);
 	free(ppm);
