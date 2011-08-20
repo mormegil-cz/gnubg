@@ -401,6 +401,7 @@ const char *aszDoubleTypes[ NUM_DOUBLE_TYPES ] = {
 
 /* parameters for EvalEfficiency */
 
+float rTSCubeX = 0.6f;	/* for match play only */
 float rOSCubeX = 0.6f;
 float rRaceFactorX = 0.00125f;
 float rRaceCoefficientX = 0.55f;
@@ -4175,7 +4176,7 @@ EvalEfficiency( const TanBoard anBoard, positionclass pc )
   case CLASS_BEAROFF2:
   case CLASS_BEAROFF_TS:
 
-    return 0.0f; /* not used */
+    return rTSCubeX;	/* for match play only */
     break;
 
   default:
@@ -6381,6 +6382,12 @@ EvaluatePositionCubeful4( NNState *nnStates, const TanBoard anBoard,
               rCubeX = ( rCfMoney - rCl ) / ( rCf - rCl );
             else
               rCubeX = X;
+
+            /* fabs(...) > 0.0001 above is not enough. We still get some
+               nutty values for rCubeX and need more sanity checking */
+
+            if (rCubeX < 0.0f) rCubeX = 0.0f;
+            if (rCubeX > X) rCubeX = X;
 
             arCf[ ici ] = Cl2CfMatch( arOutput, &aci[ ici ], rCubeX );
 

@@ -1,3 +1,10 @@
+2011-08-20  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* eval.c: Improve evaluation of late bearoff positions in match
+	play. Problem reported by Neil Robins (in 2009). 0-ply can still
+	be way off if there is an impending automatic redouble but
+	evaluations with lookahead should be adequate.
+
 2011-08-20  Michael Petch  <mpetch@capp-sysware.com>
 	* gnubg.c: Fixed bug #33781. When doing a chequer play rollout
 	from the hint window, detroy the rollout window when the user
