@@ -4653,6 +4653,9 @@ static char *matchfile_from_argv(char *sz)
 {
 	char *pchMatch;
 #ifdef WIN32
+	gsize br, bw;
+	gchar *utf8fn;
+
 	if (g_path_is_absolute(sz))
 		pchMatch = g_strdup_printf("'%s'", sz);
 	else {
@@ -4661,6 +4664,9 @@ static char *matchfile_from_argv(char *sz)
 		pchMatch = g_strdup_printf("'%s'", tmp);
 		g_free(tmp);
 	}
+	utf8fn = g_locale_to_utf8 (pchMatch, -1, &br, &bw, NULL);
+	g_free (pchMatch);
+	pchMatch = utf8fn;
 #else
 	pchMatch = g_strdup_printf("'%s'", sz);
 #endif

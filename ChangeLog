@@ -1,3 +1,7 @@
+2011-08-20  Michael Petch  <mpetch@capp-sysware.com>
+	* gnubg.c: Fixed bug #33141. Under Windows convert file name
+	from locale to utf8 to handle special characters in file names.
+
 2011-08-19  Michael Petch  <mpetch@capp-sysware.com>
 	* set.c: Fixed bug reported by Chris Yep. If you use "hint"
 	on a Crawford position, edit the position and remove Crawford
