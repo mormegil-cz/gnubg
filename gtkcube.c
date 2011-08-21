@@ -728,10 +728,12 @@ CubeAnalysisRollout ( GtkWidget *pw, cubehintdata *pchd ) {
 
   pes->et = EVAL_ROLLOUT;
 
+  if ( ! gtk_widget_is_drawable(pw) )
+    return;
+
   UpdateCubeAnalysis ( pchd );
   if (pchd->hist)
 	  ChangeGame(NULL);
-
 }
 
 static void EvalCube ( cubehintdata *pchd, evalcontext *pec )

@@ -90,9 +90,14 @@ static void MoveListRolloutClicked(GtkWidget *pw, hintdata *phd)
 	if (res < 0)
 		return;
 
-  /* Calling RefreshMoveList here requires some extra work, as
-     it may reorder moves */
-  MoveListUpdate ( phd );
+    /* If the source widget has been destroyed do not attempt
+       to update the hint window*/
+    if ( ! gtk_widget_is_drawable(pw) )
+      return;
+
+    /* Calling RefreshMoveList here requires some extra work, as
+       it may reorder moves */
+    MoveListUpdate ( phd );
   }
 
   MoveListClearSelection(0, 0, phd);

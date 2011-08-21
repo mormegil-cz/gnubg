@@ -1,3 +1,13 @@
+2011-08-21  Michael Petch  <mpetch@capp-sysware.com>
+	* gtkchequer.c,gtkcube.c: Fixed bug #33781. When doing a
+	chequer play rollout from the hint window, destroy the rollout
+	window when the user hits "Stop" or the rollout finishes.
+	This is the same behavior as doing "Rollout" from the move
+	list in the game record pane. Fix similar issue with cube rollout.
+	Please see https://savannah.gnu.org/bugs/index.php?33781
+	for additional comments and other coding options to resolve
+	these issues
+
 2011-08-20  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* eval.c: Improve evaluation of late bearoff positions in match
