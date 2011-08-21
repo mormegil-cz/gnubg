@@ -728,7 +728,9 @@ CubeAnalysisRollout ( GtkWidget *pw, cubehintdata *pchd ) {
 
   pes->et = EVAL_ROLLOUT;
 
-  if ( ! gtk_widget_is_drawable(pw) )
+  /* If the source widget parent has been destroyed do not attempt
+     to update the hint window */
+  if ( ! GDK_IS_WINDOW (gtk_widget_get_parent_window( pw ) ) )
     return;
 
   UpdateCubeAnalysis ( pchd );
