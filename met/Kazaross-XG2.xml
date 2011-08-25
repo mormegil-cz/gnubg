@@ -731,7 +731,7 @@
 
   </pre-crawford-table>   
 
-  <post-crawford-table>
+  <post-crawford-table type="explicit" player="both">
     <row>
       <me>0.500000</me>
       <me>0.48803</me>
