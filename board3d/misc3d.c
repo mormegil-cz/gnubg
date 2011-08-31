@@ -36,6 +36,7 @@
 #include "util.h"
 #include <glib/gstdio.h>
 #include <assert.h>
+#include "gtklocdefs.h"
 
 #define MAX_FRAMES 10
 #define DOT_SIZE 32

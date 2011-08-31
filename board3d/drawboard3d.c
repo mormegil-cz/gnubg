@@ -27,6 +27,7 @@
 #ifdef WIN32
 #include "wglbuffer.h"
 #endif
+#include "gtklocdefs.h"
 
 /* Used to calculate correct viewarea for board/fov angles */
 typedef struct _viewArea
