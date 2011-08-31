@@ -32,6 +32,11 @@ void gtk_widget_get_allocation (GtkWidget *widget, GtkAllocation *allocation)
 	*allocation = widget->allocation;
 }
 
+void gtk_widget_set_allocation (GtkWidget *widget, const GtkAllocation *allocation)
+{
+	widget->allocation = *allocation;
+}
+
 void gtk_cell_renderer_get_alignment (GtkCellRenderer *cell, gfloat *xalign, gfloat *yalign)
 {
 	*xalign = cell->xalign;

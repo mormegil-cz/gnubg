@@ -68,6 +68,7 @@
 
 
 extern void gtk_widget_get_allocation (GtkWidget *widget, GtkAllocation *allocation);
+extern void gtk_widget_set_allocation (GtkWidget *widget, const GtkAllocation *allocation);
 extern void gtk_cell_renderer_get_alignment (GtkCellRenderer *cell, gfloat *xalign, gfloat *yalign);
 extern void gtk_cell_renderer_set_padding (GtkCellRenderer *cell, gint xpad, gint ypad);
 #endif
