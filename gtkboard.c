@@ -3244,11 +3244,9 @@ static void board_size_allocate( GtkWidget *board, GtkAllocation *allocation )
     guint old_size = bd->rd->nSize, new_size;
     GtkAllocation child_allocation;
     GtkRequisition requisition;
-    GtkAllocation bdallocation;
-    gtk_widget_get_allocation(board, &bdallocation);
-    
-    memcpy( &bdallocation, allocation, sizeof( GtkAllocation ) );
 
+    gtk_widget_set_allocation(board, allocation);
+    
     /* position ID, match ID: just below toolbar */
 
     if ( bd->rd->fShowGameInfo ) {
