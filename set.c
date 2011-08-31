@@ -624,7 +624,7 @@ extern void CommandSetVsync3d( char * sz )
 	SetToggle( "vsync", &fSync, sz, _("Set vsync on."), _("Set vsync off.") );
 	if (setVSync(fSync) == FALSE)
 	{
-		if (GTK_WIDGET_REALIZED(pwMain))
+		if (gtk_widget_get_realized(pwMain))
 		{
 			fSync = -1;
 			outputl( _("Unable to set vsync.") );

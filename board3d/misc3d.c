@@ -2522,10 +2522,13 @@ extern gboolean display_is_2d (const renderdata *prd)
 extern void Draw3d(const BoardData* bd)
 {	/* Render board: quick drawing, standard or 2 passes for shadows */
 #ifdef WIN32
+        GtkAllocation allocation;
+        gtk_widget_get_allocation (bd->bd3d->drawing_area3d, &allocation);
+
 	if (bd->bd3d->fBuffers)
 	{
 		if (bd->bd3d->fBasePreRendered)
-			RestoreBufferRegion(bd->bd3d->wglBuffer, 0, 0, bd->bd3d->drawing_area3d->allocation.width, bd->bd3d->drawing_area3d->allocation.height);
+			RestoreBufferRegion(bd->bd3d->wglBuffer, 0, 0, allocation.width, allocation.height);
 		else
 		{
 			drawBasePreRender(bd, bd->bd3d, bd->rd);

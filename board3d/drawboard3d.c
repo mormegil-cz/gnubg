@@ -3965,6 +3965,9 @@ extern void drawBasePreRender(const BoardData *bd, const BoardData3d *bd3d, cons
 	}
 	else
 		drawBoardBase(bd, bd3d, prd);
-	SaveBufferRegion(bd3d->wglBuffer, 0, 0, bd3d->drawing_area3d->allocation.width, bd3d->drawing_area3d->allocation.height);
+
+	GtkAllocation allocation;
+	gtk_widget_get_allocation (bd3d->drawing_area3d, &allocation);
+	SaveBufferRegion(bd3d->wglBuffer, 0, 0, allocation.width, allocation.height);
 }
 #endif
