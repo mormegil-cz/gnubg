@@ -3688,11 +3688,15 @@ static void StopNotButton( GtkWidget *pw, gpointer unused )
 static void FileDragDropped(GtkWidget *widget, GdkDragContext * drag_context,
 			    gint x, gint y, GtkSelectionData * data, guint info, guint time)
 {
-	if (strlen ( (gchar *)gtk_selection_data_get_text ( data ) ) > 0) {
+	gchar **list;
+	list = g_uri_list_extract_uris( gtk_selection_data_get_data( data ) );
+
+	if ( list[0] ){
 		char *next, *file, *quoted;
-		char *uri = (char *)gtk_selection_data_get_text ( data );
+		char *uri = (char *)list[0];
 		if (StrNCaseCmp("file:", uri, 5) != 0) {
 			outputerrf(_("Only local files supported in dnd"));
+			g_strfreev( list );
 			return;
 		}
 
@@ -3700,6 +3704,7 @@ static void FileDragDropped(GtkWidget *widget, GdkDragContext * drag_context,
 
 		if (!file) {
 			outputerrf(_("Failed to parse uri"));
+			g_strfreev( list );
 			return;
 		}
 
@@ -3711,6 +3716,9 @@ static void FileDragDropped(GtkWidget *widget, GdkDragContext * drag_context,
 		g_free(quoted);
 		g_free(file);
 	}
+
+	if ( list )
+		g_strfreev( list );
 }
 
 
