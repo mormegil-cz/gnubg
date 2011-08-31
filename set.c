@@ -20,6 +20,7 @@
  */
 
 #include "config.h"
+#include "gtklocdefs.h"
 
 #ifdef WIN32
 /* Needed for thread priority defines */

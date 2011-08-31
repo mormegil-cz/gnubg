@@ -24,6 +24,7 @@
  */
 
 #include "config.h"
+#include "gtklocdefs.h"
 
 #include <gtk/gtk.h>
 
@@ -189,7 +190,7 @@ CalcTempMapEquities( evalcontext *pec, tempmapwidget *ptmw ) {
 static void
 UpdateStyle( GtkWidget *pw, const float r ) {
 
-  GtkStyle *ps = gtk_style_copy( pw->style );
+  GtkStyle *ps = gtk_style_copy( gtk_widget_get_style( pw ) );
 
   ps->bg[ GTK_STATE_NORMAL ].red = 0xFFFF;
   ps->bg[ GTK_STATE_NORMAL ].blue = 
@@ -326,9 +327,12 @@ static void ExposeQuadrant(GtkWidget * pw, GdkEventExpose *UNUSED(pev), tempmapw
 	float y;
 	GString *str;
 	char *pch, *tmp;
+	GtkAllocation allocation;
+	gtk_widget_get_allocation (pw, &allocation);
 
-	gtk_paint_box(pw->style, pw->window, GTK_STATE_NORMAL, GTK_SHADOW_IN, NULL, NULL, NULL,
-		      0, 0, pw->allocation.width, pw->allocation.height);
+	gtk_paint_box(gtk_widget_get_style( pw ), gtk_widget_get_window( pw ), GTK_STATE_NORMAL, 
+		GTK_SHADOW_IN, NULL, NULL, NULL,
+		0, 0, allocation.width, allocation.height);
 	if (pi == NULL)
 		return;
 
@@ -377,12 +381,12 @@ static void ExposeQuadrant(GtkWidget * pw, GdkEventExpose *UNUSED(pev), tempmapw
 	if (ptmw->fShowEquity && j >= 0 && ptmw->fShowBestMove)
 		y = 2;
 	else if (ptmw->fShowEquity)
-		y = (pw->allocation.height - 4) / 2.0f;
+		y = (allocation.height - 4) / 2.0f;
 	else
-		y = 2 +(pw->allocation.height - 4) / 10.0f;
+		y = 2 +(allocation.height - 4) / 10.0f;
 
 	description = pango_font_description_from_string("sans");
-	pango_font_description_set_size(description, pw->allocation.height * PANGO_SCALE / 8);
+	pango_font_description_set_size(description, allocation.height * PANGO_SCALE / 8);
 	layout = gtk_widget_create_pango_layout(pw, NULL);
 	pango_layout_set_font_description(layout, description);
 	do
@@ -391,9 +395,10 @@ static void ExposeQuadrant(GtkWidget * pw, GdkEventExpose *UNUSED(pev), tempmapw
 		if (tmp)
 			*tmp = 0;
 		pango_layout_set_text(layout, pch, -1);
-		gtk_paint_layout(pw->style, pw->window, GTK_STATE_NORMAL, TRUE, NULL, pw, NULL, 2, (int) y, layout);
+		gtk_paint_layout(gtk_widget_get_style( pw ), gtk_widget_get_window( pw ), 
+			GTK_STATE_NORMAL, TRUE, NULL, pw, NULL, 2, (int) y, layout);
 		pch = tmp + 1;
-		y += (pw->allocation.height - 4) / 5.0f;
+		y += (allocation.height - 4) / 5.0f;
 	} while (tmp);
 
 	g_object_unref(layout);
@@ -406,10 +411,12 @@ static void ExposeDie( GtkWidget *pw, GdkEventExpose *pev, tempmapwidget *ptmw )
   GdkGC *gc = ( ( BoardData *) ( BOARD( pwBoard ) )->board_data )->gc_copy;
   int x, y;
   int nSizeDie;
+  GtkAllocation allocation;
+  gtk_widget_get_allocation (pw, &allocation);
 
-  nSizeDie = ( pw->allocation.width - 4 ) / 7;
-  if ( nSizeDie > ( ( pw->allocation.height - 4 ) / 7 ) )
-    nSizeDie = ( pw->allocation.height - 4 )/ 7;
+  nSizeDie = ( allocation.width - 4 ) / 7;
+  if ( nSizeDie > ( ( allocation.height - 4 ) / 7 ) )
+    nSizeDie = ( allocation.height - 4 )/ 7;
 
   if ( ptmw->nSizeDie != nSizeDie )
   {
@@ -436,12 +443,12 @@ static void ExposeDie( GtkWidget *pw, GdkEventExpose *pev, tempmapwidget *ptmw )
     RenderPips( &rd, ptmw->achPips[ 0 ], ptmw->achPips[ 1 ], nSizeDie * 3 );
   }
 
-  x = ( pw->allocation.width - ptmw->nSizeDie * 7 ) / 2;
-  y = ( pw->allocation.height - ptmw->nSizeDie * 7 ) / 2;
+  x = ( allocation.width - ptmw->nSizeDie * 7 ) / 2;
+  y = ( allocation.height - ptmw->nSizeDie * 7 ) / 2;
 
-  gdk_window_clear_area( pw->window, pev->area.x, pev->area.y,
+  gdk_window_clear_area( gtk_widget_get_window( pw ), pev->area.x, pev->area.y,
 			 pev->area.width, pev->area.height);
-  DrawDie( pw->window, ptmw->achDice, ptmw->achPips, ptmw->nSizeDie,
+  DrawDie( gtk_widget_get_window( pw ), ptmw->achDice, ptmw->achPips, ptmw->nSizeDie,
            gc, x, y, ptmw->atm[ 0 ].pms->fMove, *pi + 1, FALSE );
 }
 

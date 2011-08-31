@@ -25,6 +25,7 @@
 */
 
 #include "config.h"
+#include "gtklocdefs.h"
 
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -326,7 +327,7 @@ static gboolean board_expose( GtkWidget *drawing_area, GdkEventExpose *event,
     RenderArea( bd, puch, x, y, cx, cy );
 
     /* FIXME use dithalign */
-    gdk_draw_rgb_image( drawing_area->window, bd->gc_copy, x, y, cx, cy,
+    gdk_draw_rgb_image( gtk_widget_get_window ( drawing_area ), bd->gc_copy, x, y, cx, cy,
 			GDK_RGB_DITHER_MAX, puch, cx * 3 );
     
     free(puch);
@@ -353,8 +354,8 @@ static void board_invalidate_rect( GtkWidget *drawing_area, int x, int y, int
 	r.width = cx;
 	r.height = cy;
 	
-	if (drawing_area->window)
-		gdk_window_invalidate_rect( drawing_area->window, &r, FALSE );
+	if (gtk_widget_get_window ( drawing_area ) )
+		gdk_window_invalidate_rect( gtk_widget_get_window ( drawing_area ), &r, FALSE );
     }
 }
 
@@ -795,7 +796,7 @@ static void board_start_drag( GtkWidget *widget, BoardData *bd, int
 	{
 	    board_invalidate_point( bd, drag_point );
 
-    gdk_window_process_updates( bd->drawing_area->window, FALSE );
+    gdk_window_process_updates( gtk_widget_get_window ( bd->drawing_area ), FALSE );
     
 		bd->x_drag = x;
 		bd->y_drag = y;
@@ -952,7 +953,7 @@ static void board_drag( GtkWidget *widget, BoardData *bd, int x, int y )
 	}
 #endif
 
-    gdk_window_process_updates( bd->drawing_area->window, FALSE );
+    gdk_window_process_updates( gtk_widget_get_window ( bd->drawing_area ), FALSE );
 
     puch = g_alloca( 6 * s * 6 * s * 3 );
     puchNew = g_alloca( 6 * s * 6 * s * 3 );
@@ -983,18 +984,18 @@ static void board_drag( GtkWidget *widget, BoardData *bd, int x, int y )
 	r.y = y - 3 * s;
 	gdk_region_union_with_rect( pr, &r );
 	
-	gdk_window_begin_paint_region( bd->drawing_area->window, pr );
+	gdk_window_begin_paint_region( gtk_widget_get_window ( bd->drawing_area ), pr );
 	
 	gdk_region_destroy( pr );
     }
     
-    gdk_draw_rgb_image( bd->drawing_area->window, bd->gc_copy,
+    gdk_draw_rgb_image( gtk_widget_get_window ( bd->drawing_area ), bd->gc_copy,
 			bd->x_drag - 3 * s, bd->y_drag - 3 * s, 6 * s, 6 * s,
 			GDK_RGB_DITHER_MAX, puch, 6 * s * 3 );
-    gdk_draw_rgb_image( bd->drawing_area->window, bd->gc_copy,
+    gdk_draw_rgb_image( gtk_widget_get_window ( bd->drawing_area ), bd->gc_copy,
 			x - 3 * s, y - 3 * s, 6 * s, 6 * s,
 			GDK_RGB_DITHER_MAX, puchChequer, 6 * s * 3 );
-    gdk_window_end_paint( bd->drawing_area->window );
+    gdk_window_end_paint( gtk_widget_get_window ( bd->drawing_area ) );
     bd->x_drag = x;
     bd->y_drag = y;
 }
@@ -1005,7 +1006,7 @@ static void board_end_drag( GtkWidget *widget, BoardData *bd )
     unsigned char *puch;
     int s = bd->rd->nSize;
     
-    gdk_window_process_updates( bd->drawing_area->window, FALSE );
+    gdk_window_process_updates( gtk_widget_get_window ( bd->drawing_area ), FALSE );
 
     puch = g_alloca( 6 * s * 6 * s * 3 );
     
@@ -1013,7 +1014,7 @@ static void board_end_drag( GtkWidget *widget, BoardData *bd )
 		6 * s, 6 * s );
 
     /* FIXME use dithalign */
-    gdk_draw_rgb_image( bd->drawing_area->window, bd->gc_copy,
+    gdk_draw_rgb_image( gtk_widget_get_window ( bd->drawing_area ), bd->gc_copy,
 			bd->x_drag - 3 * s, bd->y_drag - 3 * s, 6 * s, 6 * s,
 			GDK_RGB_DITHER_MAX, puch, 6 * s * 3 );
 }
@@ -1667,8 +1668,10 @@ extern gboolean board_button_press(GtkWidget *board, GdkEventButton *event,
 		if (Animating3d(bd->bd3d))
 			return TRUE;
 
+		GtkAllocation allocation;
+		gtk_widget_get_allocation(board, &allocation);
 		/* Reverse screen y coords for openGL */
-		y = board->allocation.height - y;
+		y = allocation.height - y;
 		bd->drag_point = BoardPoint3d(bd, x, y);
 	}
 	else
@@ -2047,7 +2050,10 @@ extern gboolean board_button_release(GtkWidget *board, GdkEventButton *event,
 #if USE_BOARD3D
 	if (display_is_3d(bd->rd))
 	{	/* Reverse screen y coords for OpenGL */
-		y = board->allocation.height - y;
+		GtkAllocation allocation;
+		gtk_widget_get_allocation(board, &allocation);
+
+		y = allocation.height - y;
 		release_point = BoardPoint3d(bd, x, y);
 	}
 	else
@@ -2157,7 +2163,10 @@ extern gboolean board_motion_notify(GtkWidget *board, GdkEventMotion *event,
 #if USE_BOARD3D
 	if (display_is_3d(bd->rd))
 	{	/* Reverse screen y coords for openGL */
-		y = board->allocation.height - y;
+		GtkAllocation allocation;
+		gtk_widget_get_allocation(board, &allocation);
+
+		y = allocation.height - y;
 	}
 #endif
 
@@ -2213,7 +2222,7 @@ extern gboolean board_motion_notify(GtkWidget *board, GdkEventMotion *event,
 				if ( bd->iTargetHelpPoints[i] != -1 ) {
 					/* calculate region coordinates for point */
 					point_area( bd, bd->iTargetHelpPoints[i], &ptx, &pty, &ptcx, &ptcy );
-					gdk_draw_rectangle( board->window, bd->gc_copy, FALSE, ptx + 1, pty + 1, ptcx - 2, ptcy - 2 );
+					gdk_draw_rectangle( gtk_widget_get_window ( board ), bd->gc_copy, FALSE, ptx + 1, pty + 1, ptcx - 2, ptcy - 2 );
 				}
 			}
 		
@@ -2234,12 +2243,13 @@ static void score_changed( GtkAdjustment *adj, BoardData *bd )
 {
 
   gchar buf[ 32 ];
-  int nMatchLen = (int)GTK_SPIN_BUTTON( bd->match )->adjustment->value;
+  int nMatchLen = (int)gtk_adjustment_get_value(gtk_spin_button_get_adjustment( GTK_SPIN_BUTTON( bd->match ) ) );
 
   if ((bd->match_to != nMatchLen) && (adj == bd->amatch)) {
     /* reset limits for scores if match length is changed */
-    bd->ascore0->upper = bd->ascore1->upper =
-      (gfloat) (nMatchLen == 0) ? 32767 : nMatchLen - 1;
+    gfloat upper = (gfloat) (nMatchLen == 0) ? 32767 : nMatchLen - 1;
+    gtk_adjustment_set_upper( bd->ascore0, upper );
+    gtk_adjustment_set_upper( bd->ascore1, upper );
   }
     
   gtk_adjustment_changed( bd->ascore0 );
@@ -2814,7 +2824,7 @@ static gint board_blink_timeout( gpointer p )
 		blink_move += 2;	
     }
     
-    gdk_window_process_updates( pbd->drawing_area->window, FALSE );
+    gdk_window_process_updates( gtk_widget_get_window ( pbd->drawing_area ), FALSE );
 
     return TRUE;
 }
@@ -2933,7 +2943,7 @@ static gint board_slide_timeout( gpointer p )
 	    bd->drag_point = -1;
 	    slide_phase = 0;
 	    slide_move += 2;
-	    gdk_window_process_updates( bd->drawing_area->window, FALSE );
+	    gdk_window_process_updates( gtk_widget_get_window ( bd->drawing_area ), FALSE );
 	    playSound( SOUND_CHEQUER );
 
 	    return TRUE;
@@ -3044,7 +3054,7 @@ extern gint game_set( Board *board, TanBoard points, int roll,
 	       opp_score, die0, die1, ms.nCube, ms.fCubeOwner, ms.fDoubled,
 	       ms.fTurn, ms.fCrawford, nchequers );
 
-	if (GTK_WIDGET_REALIZED(pwMain))
+	if (gtk_widget_get_realized(pwMain))
 		board_set( board, board_str, ms.fResigned ==-1 ? 0 : -bd->turn * ms.fResigned, ms.fCubeUse );
 
     /* FIXME update names, score, match length */
@@ -3234,8 +3244,10 @@ static void board_size_allocate( GtkWidget *board, GtkAllocation *allocation )
     guint old_size = bd->rd->nSize, new_size;
     GtkAllocation child_allocation;
     GtkRequisition requisition;
+    GtkAllocation bdallocation;
+    gtk_widget_get_allocation(board, &bdallocation);
     
-    memcpy( &board->allocation, allocation, sizeof( GtkAllocation ) );
+    memcpy( &bdallocation, allocation, sizeof( GtkAllocation ) );
 
     /* position ID, match ID: just below toolbar */
 
@@ -3272,7 +3284,7 @@ static void board_size_allocate( GtkWidget *board, GtkAllocation *allocation )
 		new_size = 1;
     
     if( ( bd->rd->nSize = new_size ) != old_size &&
-	GTK_WIDGET_REALIZED( board ) ) {
+	gtk_widget_get_realized( board ) ) {
 	board_free_pixmaps( bd );
 	board_create_pixmaps( board, bd );
     }
@@ -3384,8 +3396,8 @@ static void UpdateCrawfordToggle ( GtkWidget *pw, BoardData *bd )
     /* Adjust the crawford toggle box by disabling it when the score & matchlen
        make crawford impossible */
     int nMatchLen = (int)gtk_adjustment_get_value ( GTK_ADJUSTMENT( bd->amatch ) );
-	 anScoreNew[ 0 ] = (int)GTK_SPIN_BUTTON( bd->score0 )->adjustment->value;
-	 anScoreNew[ 1 ] = (int)GTK_SPIN_BUTTON( bd->score1 )->adjustment->value;
+	 anScoreNew[ 0 ] = (int)gtk_adjustment_get_value( gtk_spin_button_get_adjustment( GTK_SPIN_BUTTON( bd->score0 ) ) );
+	 anScoreNew[ 1 ] = (int)gtk_adjustment_get_value( gtk_spin_button_get_adjustment( GTK_SPIN_BUTTON( bd->score1 ) ) );
     allowCrawford = ( ( nMatchLen > 0 )&& (anScoreNew[0] != anScoreNew[1]) && 
                     ( ( ( nMatchLen - anScoreNew[0] ) == 1 ) || 
                     ( ( nMatchLen - anScoreNew[1] ) == 1  ) ) &&
@@ -3498,9 +3510,9 @@ extern void board_edit( BoardData *bd )
 	
 	pch0 = gtk_entry_get_text( GTK_ENTRY( bd->name0 ) );
 	pch1 = gtk_entry_get_text( GTK_ENTRY( bd->name1 ) );
-	anScoreNew[ 0 ] = (int)GTK_SPIN_BUTTON( bd->score0 )->adjustment->value;
-	anScoreNew[ 1 ] = (int)GTK_SPIN_BUTTON( bd->score1 )->adjustment->value;
-        nMatchToNew = (int)GTK_SPIN_BUTTON( bd->match )->adjustment->value;
+	anScoreNew[ 0 ] = (int)gtk_adjustment_get_value( gtk_spin_button_get_adjustment( GTK_SPIN_BUTTON( bd->score0 ) ) );
+	anScoreNew[ 1 ] = (int)gtk_adjustment_get_value( gtk_spin_button_get_adjustment( GTK_SPIN_BUTTON( bd->score1 ) ) );
+        nMatchToNew = (int)gtk_adjustment_get_value( gtk_spin_button_get_adjustment( GTK_SPIN_BUTTON( bd->match ) ) );
 	read_board( bd, points );
 
 	outputpostpone();
@@ -3658,10 +3670,10 @@ static gboolean dice_expose( GtkWidget *dice, GdkEventExpose *event,
 	if (bd->rd->nSize <= 0 || bd->diceShown == DICE_NOT_SHOWN)
 		return TRUE;
 
-    DrawDie( dice->window, bd->ri.achDice, bd->ri.achPip,
+    DrawDie( gtk_widget_get_window ( dice ), bd->ri.achDice, bd->ri.achPip,
 	     bd->rd->nSize, bd->gc_copy,
              0, 0, bd->turn > 0, bd->diceRoll[ 0 ], TRUE );
-    DrawDie( dice->window, bd->ri.achDice, bd->ri.achPip,
+    DrawDie( gtk_widget_get_window ( dice ), bd->ri.achDice, bd->ri.achPip,
 	     bd->rd->nSize, bd->gc_copy,
              ( DIE_WIDTH + 1 ) * bd->rd->nSize, 0,
 	     bd->turn > 0, bd->diceRoll[ 1 ], TRUE );
@@ -4063,11 +4075,11 @@ static gboolean cube_widget_expose( GtkWidget *cube, GdkEventExpose *event,
 			CUBE_LABEL_WIDTH * setSize,
 			CUBE_LABEL_HEIGHT * setSize,
 			2 - n / N_CUBES_IN_WIDGET );
-    DrawAlphaImage( cube->window, 0, 0,
+    DrawAlphaImage( gtk_widget_get_window ( cube ), 0, 0,
 		    TTachCube, cubeStride,
 		    CUBE_WIDTH * setSize,
 		    CUBE_HEIGHT * setSize );
-    gdk_draw_rgb_image( cube->window, bd->gc_copy,
+    gdk_draw_rgb_image( gtk_widget_get_window ( cube ), bd->gc_copy,
 			setSize, setSize,
 			CUBE_LABEL_WIDTH * setSize,
 			CUBE_LABEL_HEIGHT * setSize,
@@ -4081,7 +4093,7 @@ static gboolean cube_widget_press( GtkWidget *cube, GdkEvent *event,
 				   BoardData *bd )
 {
 
-    GtkWidget *pwTable = cube->parent;
+    GtkWidget *pwTable = gtk_widget_get_parent ( cube );
     int n = GPOINTER_TO_INT(g_object_get_data( G_OBJECT( cube ), "user_data" ));
     int *an = g_object_get_data( G_OBJECT( pwTable ), "user_data" );
 
@@ -4163,9 +4175,9 @@ static gboolean setdice_widget_expose(GtkWidget *dice, GdkEventExpose * event, S
 
 	if (sdd->mdt == MT_FIRSTMOVE && (n % 6 == n / 6))
 	{
-		DrawDie(dice->window, &sdd->TTachGrayDice, &sdd->TTachGrayPip, setSize, sdd->bd->gc_copy,
+		DrawDie(gtk_widget_get_window ( dice ), &sdd->TTachGrayDice, &sdd->TTachGrayPip, setSize, sdd->bd->gc_copy,
 			0, 0, 0, n % 6 + 1, FALSE);
-		DrawDie(dice->window, &sdd->TTachGrayDice, &sdd->TTachGrayPip, setSize, sdd->bd->gc_copy,
+		DrawDie(gtk_widget_get_window ( dice ), &sdd->TTachGrayDice, &sdd->TTachGrayPip, setSize, sdd->bd->gc_copy,
 			DIE_WIDTH * setSize, 0, 0, n / 6 + 1, FALSE);
 	}
 	else
@@ -4178,9 +4190,9 @@ static gboolean setdice_widget_expose(GtkWidget *dice, GdkEventExpose * event, S
 		else
 			col1 = col2 = ((n % 6) <= n / 6);
 
-		DrawDie(dice->window, sdd->TTachDice, sdd->TTachPip, setSize, sdd->bd->gc_copy,
+		DrawDie(gtk_widget_get_window ( dice ), sdd->TTachDice, sdd->TTachPip, setSize, sdd->bd->gc_copy,
 			0, 0, col1, n % 6 + 1, FALSE);
-		DrawDie(dice->window, sdd->TTachDice, sdd->TTachPip, setSize, sdd->bd->gc_copy,
+		DrawDie(gtk_widget_get_window ( dice ), sdd->TTachDice, sdd->TTachPip, setSize, sdd->bd->gc_copy,
 			DIE_WIDTH * setSize, 0, col2, n / 6 + 1, FALSE);
 	}
 	return TRUE;
@@ -4189,7 +4201,7 @@ static gboolean setdice_widget_expose(GtkWidget *dice, GdkEventExpose * event, S
 static gboolean dice_widget_press( GtkWidget *dice, GdkEvent *event, BoardData
 		*bd )
 {
-    GtkWidget *pwTable = dice->parent->parent;
+    GtkWidget *pwTable = gtk_widget_get_parent ( gtk_widget_get_parent ( dice ) );
     int n = GPOINTER_TO_INT(g_object_get_data( G_OBJECT( dice ), "user_data" ));
     int *an = g_object_get_data( G_OBJECT( pwTable ), "user_data" );
 

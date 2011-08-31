@@ -38,6 +38,7 @@ Jim Segrave
 Joern Thyssen
 Gary Wong
 Christian Anthon
+Michael Petch
 EOF
 
 cat > $contributors <<EOF
@@ -48,7 +49,6 @@ Petr Kadlec
 Kaoru Takahashi
 Stein Kulseth
 Philippe Michel
-Mike Petch
 Rod Roark
 Ingo Macherius
 EOF
@@ -85,6 +85,7 @@ Chuck Bower
 Adrian Bunk
 Nick Bratby
 Craig Campbell
+Timothy Chow
 John Chuang
 Tristan Colgate
 Olivier Croisille
@@ -127,6 +128,7 @@ Massimiliano Maini
 Giulio De Marco
 John Marttila
 Alix Martin
+Tom Martin
 William Maslen
 Joachim Matussek
 Thomas Meyer
@@ -177,6 +179,7 @@ Frank Worrell
 Christopher D. Yep
 Anders Zachrison
 Douglas Zare
+Louis Zulli
 EOF
 
 cat > $extra <<EOF

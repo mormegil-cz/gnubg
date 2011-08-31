@@ -25,7 +25,7 @@
 extern GtkWidget *
 MoveFilterWidget ( movefilter *pmf, 
                    int *pfOK,
-                   GtkSignalFunc pfChanged, gpointer userdata );
+                   GCallback pfChanged, gpointer userdata );
 
 extern void
 SetMovefilterCommands ( const char *sz,

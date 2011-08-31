@@ -177,7 +177,7 @@ EffectivePipCount( const float arPips[ 2 ], const float arWastage[ 2 ],
 static void
 PerformOSR ( GtkWidget *UNUSED(pw), racewidget *prw ) {
 
-  unsigned int nTrials = (unsigned int)prw->padjTrials->value;
+  unsigned int nTrials = (unsigned int)gtk_adjustment_get_value( prw->padjTrials );
   float ar[ 5 ];
   int i, j;
   char sz[ 16 ];

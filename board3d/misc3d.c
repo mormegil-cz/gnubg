@@ -101,7 +101,7 @@ NTH_STATIC void setIdleFunc(BoardData* bd, idleFunc* pFun)
 	pIdleFun = pFun;
 	pIdleBD = bd;
 
-	idleId = g_idle_add((GtkFunction)idle, bd->bd3d);
+	idleId = g_idle_add((GSourceFunc)idle, bd->bd3d);
 }
 
 /* Test function to show normal direction */

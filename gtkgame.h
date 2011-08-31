@@ -29,16 +29,12 @@
 
 #define TOOLBAR_ACTION_OFFSET 10000
 
-extern GdkColor wlCol;
-extern GtkAccelGroup *pagMain;
-#if (GTK_MAJOR_VERSION < 3) && (GTK_MINOR_VERSION < 12)
-extern GtkTooltips *ptt;
-#define gtk_widget_set_tooltip_text(pw,text) gtk_tooltips_set_tip(ptt, (pw), (text), NULL)
+#if (USE_GTKUIMANAGER)
+extern GtkUIManager *puim;
 #endif
 
-#if (GTK_MAJOR_VERSION < 3) && (GTK_MINOR_VERSION < 20)
-#define gtk_widget_get_realized(p)  GTK_WIDGET_REALIZED((p))
-#endif
+extern GdkColor wlCol;
+extern GtkAccelGroup *pagMain;
 
 extern GtkWidget *pwAnalysis;
 extern GtkWidget *pwBoard;
@@ -174,7 +170,13 @@ extern void ShowList(char *asz[], const char *szTitle, GtkWidget *parent);
 extern void ShowMove(hintdata * phd, const int f);
 extern void SwapBoardToPanel(int ToPanel, int updateEvents);
 extern void DoHideAllPanels(int updateEvents);
+#if (USE_GTKUIMANAGER)
+extern void ToggleEdit( GtkToggleAction *action, gpointer user_data );
+extern void ToggleClockwise ( GtkToggleAction *action, gpointer user_data );
+extern void ToggleDockPanels ( GtkToggleAction *action, gpointer user_data );
+#else
 extern void ToggleDockPanels(gpointer p, guint n, GtkWidget * pw);
+#endif
 extern void GTKUndo(void);
 extern void UserCommand(const char *sz);
 extern void ShowToolbar(void);

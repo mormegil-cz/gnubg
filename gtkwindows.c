@@ -22,6 +22,7 @@
  */
 
 #include "config.h"
+#include "gtklocdefs.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -121,7 +122,11 @@ static void DialogResponse(GtkWidget *dialog, gint response, CallbackStruct *dat
 static void dialog_mapped(GtkWidget *window, gpointer data)
 {
 	GdkRectangle monitorrect;
+	GtkAllocation allocation;
 	GdkScreen *screen = gtk_widget_get_screen(window);
+
+	gtk_widget_get_allocation (window, &allocation);
+
 	if (!screen || gdk_screen_get_n_monitors(screen) == 1)
 	{
 		monitorrect.x = 0;
@@ -131,18 +136,18 @@ static void dialog_mapped(GtkWidget *window, gpointer data)
 	}
 	else
 	{
-		int monitor = gdk_screen_get_monitor_at_window(screen, window->window);
+		int monitor = gdk_screen_get_monitor_at_window(screen, gtk_widget_get_window( window ) );
 		gdk_screen_get_monitor_geometry(screen, monitor, &monitorrect);
 	}
 
-	if (window->allocation.width > monitorrect.width || window->allocation.height > monitorrect.height)
+	if (allocation.width > monitorrect.width || allocation.height > monitorrect.height)
 	{	/* Dialog bigger than window! (just show at top left) */
 	    gtk_widget_set_uposition(window, monitorrect.x, monitorrect.y);
 	}
 	else
 	{
 		GdkRectangle rect;
-		gdk_window_get_frame_extents(window->window, &rect);
+		gdk_window_get_frame_extents(gtk_widget_get_window( window ), &rect);
 		if (rect.x < monitorrect.x)
 			rect.x = monitorrect.x;
 		if (rect.y < monitorrect.y)
@@ -172,7 +177,7 @@ extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt,
 		parent = GTKGetCurrentParent();
 	if (!GTK_IS_WINDOW(parent))
 		parent = gtk_widget_get_toplevel(parent);
-	if (parent && !GTK_WIDGET_REALIZED(parent))
+	if (parent && !gtk_widget_get_realized(parent))
 		/* if parent isn't realized we should not present it.*/
 		parent = NULL;
 	if (parent && GTK_IS_WINDOW(parent))
@@ -187,7 +192,7 @@ extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt,
 	gtk_window_add_accel_group(GTK_WINDOW(pwDialog), pag);
 
 	pwHbox = gtk_hbox_new(FALSE, 0);
-    gtk_container_add( GTK_CONTAINER( GTK_DIALOG( pwDialog )->vbox ), pwHbox );
+    gtk_container_add( GTK_CONTAINER( gtk_dialog_get_content_area ( GTK_DIALOG( pwDialog ) ) ), pwHbox );
 
     if (dt != DT_CUSTOM)
     {
@@ -234,16 +239,16 @@ extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da )
 
 	switch( da ) {
     case DA_MAIN:
-		pl = gtk_container_get_children(GTK_CONTAINER(GTK_DIALOG(pw)->vbox));
+		pl = gtk_container_get_children(GTK_CONTAINER(gtk_dialog_get_content_area( GTK_DIALOG( pw ) ) ) );
 		pwChild = pl->data;
 		g_list_free( pl );
 		return pwChild;
 
     case DA_BUTTONS:
-		return GTK_DIALOG( pw )->action_area;
+		return gtk_dialog_get_action_area( GTK_DIALOG( pw ) );
 
     case DA_OK:
-		pl = pl_org = gtk_container_get_children( GTK_CONTAINER( GTK_DIALOG( pw )->action_area ) );
+		pl = pl_org = gtk_container_get_children( GTK_CONTAINER( gtk_dialog_get_action_area( GTK_DIALOG( pw ) ) ) );
 		while (pl)
 		{
 			pwChild = pl->data;

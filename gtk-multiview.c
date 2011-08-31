@@ -23,6 +23,7 @@
    with GNU Backgammon. */
 
 #include "config.h"
+#include "gtklocdefs.h"
 #include <gtk/gtk.h>
 #include "gtk-multiview.h"
 
@@ -48,7 +49,7 @@ static void    gtk_multiview_remove        (GtkContainer      *widget,
 static void
 gtk_multiview_init (GtkMultiview *multiview)
 {
-  GTK_WIDGET_SET_FLAGS (GTK_WIDGET (multiview), GTK_NO_WINDOW);
+  gtk_widget_set_has_window (GTK_WIDGET (multiview), FALSE);
 
   multiview->current = NULL;
   multiview->children = NULL;
@@ -94,12 +95,12 @@ gtk_multiview_size_request  (GtkWidget      *widget,
       child = GTK_WIDGET (tmp_list->data);
       tmp_list = tmp_list->next;
 
-      if (GTK_WIDGET_VISIBLE (child))
+      if (gtk_widget_get_visible (child))
 	{
 	  gtk_widget_size_request (child, &child_requisition);
 	  requisition->width = MAX (requisition->width, child_requisition.width);
 	  requisition->height = MAX (requisition->height, child_requisition.height);
-	  if (GTK_WIDGET_MAPPED (child) && child != multiview->current)
+	  if (gtk_widget_get_mapped (child) && child != multiview->current)
 	    {
 	      gtk_widget_unmap (GTK_WIDGET(child));
 	    }
@@ -114,12 +115,14 @@ gtk_multiview_size_allocate (GtkWidget     *widget,
   GtkMultiview *multiview;
   GList *tmp_list;
   GtkWidget *child;
+  GtkAllocation mvallocation;
   
   g_return_if_fail (widget != NULL);
   g_return_if_fail (GTK_IS_MULTIVIEW (widget));
 
   multiview = GTK_MULTIVIEW (widget);
-  widget->allocation = *allocation;
+  gtk_widget_get_allocation (widget, &mvallocation);
+  mvallocation = *allocation;
 
   tmp_list = multiview->children;
   while (tmp_list)
@@ -127,7 +130,7 @@ gtk_multiview_size_allocate (GtkWidget     *widget,
       child = GTK_WIDGET (tmp_list->data);
       tmp_list = tmp_list->next;
 
-      if (GTK_WIDGET_VISIBLE (child))
+      if (gtk_widget_get_visible (child))
 	{
 	  gtk_widget_size_allocate (child, allocation);
 	}
@@ -143,11 +146,11 @@ gtk_multiview_map (GtkWidget *widget)
   g_return_if_fail (GTK_IS_MULTIVIEW (widget));
 
   multiview = GTK_MULTIVIEW (widget);
-  GTK_WIDGET_SET_FLAGS (widget, GTK_MAPPED);
+  gtk_widget_set_mapped (widget, TRUE);
 
   if (multiview->current &&
-      GTK_WIDGET_VISIBLE (multiview->current) &&
-      !GTK_WIDGET_MAPPED (multiview->current))
+      gtk_widget_get_visible (multiview->current) &&
+      !gtk_widget_get_mapped (multiview->current))
     {
       gtk_widget_map (GTK_WIDGET (multiview->current));
     }
@@ -162,11 +165,11 @@ gtk_multiview_unmap (GtkWidget *widget)
   g_return_if_fail (GTK_IS_MULTIVIEW (widget));
 
   multiview = GTK_MULTIVIEW (widget);
-  GTK_WIDGET_UNSET_FLAGS (widget, GTK_MAPPED);
+  gtk_widget_set_mapped (widget, FALSE);
 
   if (multiview->current &&
-      GTK_WIDGET_VISIBLE (multiview->current) &&
-      GTK_WIDGET_MAPPED (multiview->current))
+      gtk_widget_get_visible (multiview->current) &&
+      gtk_widget_get_mapped (multiview->current))
     {
       gtk_widget_unmap (GTK_WIDGET (multiview->current));
     }
@@ -232,7 +235,7 @@ gtk_multiview_remove (GtkContainer *container,
   g_return_if_fail (list != NULL);
   
   /* If we are mapped and visible, we want to deal with changing the page. */
-  if ((GTK_WIDGET_MAPPED (GTK_WIDGET (container))) &&
+  if ((gtk_widget_get_mapped (GTK_WIDGET (container))) &&
       (list->data == (gpointer) multiview->current) &&
       (list->next != NULL))
     {
@@ -292,12 +295,12 @@ gtk_multiview_insert_child (GtkMultiview *multiview,
     }
   gtk_widget_set_parent (GTK_WIDGET (child), GTK_WIDGET (multiview));
 
-  if (GTK_WIDGET_REALIZED (GTK_WIDGET (multiview)))
+  if (gtk_widget_get_realized (GTK_WIDGET (multiview)))
     gtk_widget_realize (GTK_WIDGET (child));
 
-  if (GTK_WIDGET_VISIBLE (GTK_WIDGET (multiview)) && GTK_WIDGET_VISIBLE (GTK_WIDGET (child)))
+  if (gtk_widget_get_visible (GTK_WIDGET (multiview)) && gtk_widget_get_visible (GTK_WIDGET (child)))
     {
-      if (GTK_WIDGET_MAPPED (GTK_WIDGET (child)))
+      if (gtk_widget_get_mapped (GTK_WIDGET (child)))
 	gtk_widget_unmap (GTK_WIDGET (child));
       gtk_widget_queue_resize (GTK_WIDGET (multiview));
     }
@@ -348,18 +351,18 @@ gtk_multiview_set_current (GtkMultiview *multiview,
   g_return_if_fail (list != NULL);
 
   if ((multiview->current) &&
-      (GTK_WIDGET_VISIBLE (multiview->current)) &&
-      (GTK_WIDGET_MAPPED (multiview)))
+      (gtk_widget_get_visible (multiview->current)) &&
+      (gtk_widget_get_mapped (GTK_WIDGET(multiview))))
     {
       old = GTK_WIDGET (multiview->current);
     }
 
   multiview->current = GTK_WIDGET (list->data);
-  if (GTK_WIDGET_VISIBLE (multiview->current) &&
-      (GTK_WIDGET_MAPPED (multiview)))
+  if (gtk_widget_get_visible (multiview->current) &&
+      (gtk_widget_get_mapped (GTK_WIDGET(multiview))))
     {
       gtk_widget_map (multiview->current);
     }
-  if (old && GTK_WIDGET_MAPPED (old))
+  if (old && gtk_widget_get_mapped (old))
     gtk_widget_unmap (old);
 }

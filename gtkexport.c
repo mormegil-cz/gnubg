@@ -129,7 +129,7 @@ ExportGetValues ( exportwidget *pew, exportsetup *pexs ) {
 
   /* board */
 
-  pexs->fDisplayBoard = (int)pew->padjDisplayBoard->value;
+  pexs->fDisplayBoard = (int)gtk_adjustment_get_value( pew->padjDisplayBoard );
 
   pexs->fSide = 0;
   for ( i = 0; i < 2; i++ ) 
@@ -138,7 +138,7 @@ ExportGetValues ( exportwidget *pew, exportsetup *pexs ) {
 
   /* moves */
 
-  pexs->nMoves = (int)pew->padjMoves->value;
+  pexs->nMoves = (int)gtk_adjustment_get_value( pew->padjMoves );
 
   pexs->fMovesDetailProb = 
     gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( 
@@ -184,8 +184,8 @@ ExportGetValues ( exportwidget *pew, exportsetup *pexs ) {
   pexs->hecss = (htmlexportcss)gtk_combo_box_get_active (GTK_COMBO_BOX (pew->pwHTMLCSS));
 
   /* sizes */
-  pexs->nPNGSize = (int)pew->adjPNGSize->value;
-  pexs->nHtmlSize = (int)pew->adjHtmlSize->value;
+  pexs->nPNGSize = (int)gtk_adjustment_get_value( pew->adjPNGSize );
+  pexs->nHtmlSize = (int)gtk_adjustment_get_value( pew->adjHtmlSize );
 }
 
 #define CHECKVALUE(orig,new,flag,text,format) \
@@ -429,7 +429,7 @@ ExportSet ( exportwidget *pew ) {
 static void
 SizeChanged ( GtkAdjustment *adj, GtkWidget *pwSize ) {
 
-  int n = (int) adj->value;
+  int n = (int) gtk_adjustment_get_value( adj );
 
   char *sz = g_strdup_printf ( _("%dx%d pixels"), 
                                 n * BOARD_WIDTH, n * BOARD_HEIGHT );

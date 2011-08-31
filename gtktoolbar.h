@@ -23,7 +23,9 @@
 #define _GTKTOOLBAR_H_
 
 #include "gtkboard.h"
+#if !(USE_GTKUIMANAGER)
 extern GtkItemFactory *pif;
+#endif
 
 typedef enum _toolbarcontrol { 
   C_NONE, 

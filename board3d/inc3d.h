@@ -52,7 +52,6 @@
 #endif
 
 #include <gtk/gtkgl.h>
-
 #include "fun3d.h"
 #include "matrix.h"
 #include "gtkwindows.h"

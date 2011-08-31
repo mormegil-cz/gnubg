@@ -22,6 +22,7 @@
  */
 
 #include "config.h"
+#include "gtklocdefs.h"
 
 #include "gtkgame.h"
 #include "gtkmovelistctrl.h"
@@ -109,9 +110,8 @@ custom_cell_renderer_movelist_get_type (void)
 static void
 custom_cell_renderer_movelist_init (CustomCellRendererMovelist *cellrendererprogress)
 {
-  GTK_CELL_RENDERER(cellrendererprogress)->mode = (int)GTK_CELL_RENDERER_MODE_INERT;
-  GTK_CELL_RENDERER(cellrendererprogress)->xpad = 2;
-  GTK_CELL_RENDERER(cellrendererprogress)->ypad = 2;
+  gtk_cell_renderer_set_padding( GTK_CELL_RENDERER( cellrendererprogress ), 2, 2  );
+  g_object_set(GTK_CELL_RENDERER( cellrendererprogress ), "mode", (int)GTK_CELL_RENDERER_MODE_INERT, NULL );
 }
 
 
@@ -259,6 +259,9 @@ custom_cell_renderer_movelist_get_size (GtkCellRenderer *cell,
 	gint calc_width;
 	gint calc_height;
 	char buf[100];
+	gfloat xalign, yalign;
+
+	gtk_cell_renderer_get_alignment (cell, &xalign, &yalign);
 
 	if (fontheight == -1)
 	{	/* Calculate sizes (if not known) */
@@ -341,13 +344,13 @@ custom_cell_renderer_movelist_get_size (GtkCellRenderer *cell,
   {
     if (x_offset)
     {
-      *x_offset = (int)(cell->xalign * (cell_area->width - calc_width));
+      *x_offset = (int)(xalign * (cell_area->width - calc_width));
       *x_offset = MAX(*x_offset, 0);
     }
 
     if (y_offset)
     {
-      *y_offset = (int)(cell->yalign * (cell_area->height - calc_height));
+      *y_offset = (int)(yalign * (cell_area->height - calc_height));
       *y_offset = MAX(*y_offset, 0);
     }
   }
@@ -383,7 +386,7 @@ custom_cell_renderer_movelist_render (GtkCellRenderer *cell,
 	cubeinfo ci;
 	GetMatchStateCubeInfo( &ci, &ms );
 	/*lint --e(641)*/
-	selected = (flags & GTK_CELL_RENDERER_SELECTED) && GTK_WIDGET_HAS_FOCUS (widget);
+	selected = (flags & GTK_CELL_RENDERER_SELECTED) && gtk_widget_has_focus (widget);
 
 	gc = gdk_gc_new(window);
 	if (expose_area)               
@@ -396,15 +399,15 @@ custom_cell_renderer_movelist_render (GtkCellRenderer *cell,
 
 	if (!(flags & GTK_CELL_RENDERER_SELECTED))
 	{
-		gdk_gc_set_rgb_fg_color(gc, &widget->style->base[GTK_STATE_NORMAL]);
+		gdk_gc_set_rgb_fg_color(gc, &gtk_widget_get_style( widget )->base[GTK_STATE_NORMAL]);
 		gdk_draw_rectangle (window, gc, TRUE, background_area->x, background_area->y,
 							background_area->width, background_area->height);
-		gdk_gc_set_rgb_fg_color(gc, &widget->style->fg[GTK_STATE_NORMAL]);
+		gdk_gc_set_rgb_fg_color(gc, &gtk_widget_get_style( widget )->fg[GTK_STATE_NORMAL]);
 	}
 	else
 	{	/* Draw text in reverse colours for highlight cell */
 		if (!pFontCol && selected)
-			pFontCol = &widget->style->base[GTK_STATE_NORMAL];
+			pFontCol = &gtk_widget_get_style( widget )->base[GTK_STATE_NORMAL];
 	}
 
 	/* First line of control */
@@ -467,7 +470,7 @@ custom_cell_renderer_movelist_render (GtkCellRenderer *cell,
 	ar = cellprogress->pml->arEvalMove;
 
 	if (selected)
-		fg = &widget->style->base[GTK_STATE_NORMAL];
+		fg = &gtk_widget_get_style( widget )->base[GTK_STATE_NORMAL];
 	else
 		fg = &wlCol;
 

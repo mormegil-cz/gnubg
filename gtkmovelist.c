@@ -21,7 +21,7 @@
  */
 
 #include "config.h"
-
+#include "gtklocdefs.h"
 #include "gtkgame.h"
 #include <string.h>
 

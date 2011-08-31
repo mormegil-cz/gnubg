@@ -20,6 +20,7 @@
  */
 
 #include "config.h"
+#include "gtklocdefs.h"
 #include "backgammon.h"
 
 #include <ctype.h>
@@ -273,7 +274,7 @@ static void SetTitle(void)
 	{
 		strcat(title, _("Custom design"));
 		gtk_widget_set_sensitive ( GTK_WIDGET ( pwDesignAdd ), TRUE );
-		if (GTK_WIDGET_IS_SENSITIVE(pwDesignRemove))
+		if (gtk_widget_is_sensitive(pwDesignRemove))
 		{
 			gtk_widget_set_sensitive(pwDesignUpdate, TRUE );
 			gtk_widget_set_sensitive(pwDesignRemove, FALSE );
@@ -408,7 +409,7 @@ static void redraw_changed(GtkWidget *widget, GtkWidget **ppw)
 static void DiceSizeChanged(GtkWidget *pw)
 {
 	BoardData *bd = BOARD(pwPrevBoard)->board_data;
-	bd->rd->diceSize = (float)padjDiceSize->value;
+	bd->rd->diceSize = (float)gtk_adjustment_get_value( padjDiceSize );
 	if (DiceTooClose(bd->bd3d, bd->rd))
 		setDicePos(bd, bd->bd3d);
 	option_changed(0, 0);
@@ -1128,10 +1129,10 @@ static void BoardPrefsOK( GtkWidget *pw, GtkWidget *mainBoard )
 
 static void WorkOut2dLight(renderdata* prd)
 {
-    prd->arLight[ 2 ] = (float)sinf( paElevation->value / 180 * G_PI );
-    prd->arLight[ 0 ] = (float)(cosf( paAzimuth->value / 180 * G_PI ) *
+    prd->arLight[ 2 ] = (float)sinf( gtk_adjustment_get_value( paElevation ) / 180 * G_PI );
+    prd->arLight[ 0 ] = (float)(cosf( gtk_adjustment_get_value( paAzimuth ) / 180 * G_PI ) *
     	sqrt( 1.0 - prd->arLight[ 2 ] * prd->arLight[ 2 ] ));
-    prd->arLight[ 1 ] = (float)(sinf( paAzimuth->value / 180 * G_PI ) *
+    prd->arLight[ 1 ] = (float)(sinf( gtk_adjustment_get_value( paAzimuth ) / 180 * G_PI ) *
 	    sqrt( 1.0 - prd->arLight[ 2 ] * prd->arLight[ 2 ] ));
 }
 
@@ -1190,7 +1191,7 @@ static void toggle_display_type(GtkWidget *widget, BoardData* bd)
 {
 	int i;
 	int state = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
-	int numPages = g_list_length(GTK_NOTEBOOK(pwNotebook)->children);
+	int numPages = g_list_length( gtk_container_get_children( GTK_CONTAINER( GTK_NOTEBOOK( pwNotebook ) ) ) );
 	/* Show pages with correct 2d/3d settings */
 	for (i = numPages - 1; i >= NUM_NONPREVIEW_PAGES; i--)
 		gtk_notebook_remove_page(GTK_NOTEBOOK(pwNotebook), i);
@@ -2637,7 +2638,7 @@ static void DesignSelectNew(GtkTreeView *treeview, gpointer userdata)
 	gtk_tree_selection_get_selected(gtk_tree_view_get_selection(treeview), &model, &selected_iter);
 	gtk_tree_model_get(model, &selected_iter, DATA_COL, &pbde, -1);
 
-	if (GTK_WIDGET_IS_SENSITIVE(pwDesignAdd))
+	if (gtk_widget_is_sensitive(pwDesignAdd))
 	{
 		GTKSetCurrentParent(GTK_WIDGET(pwDesignList));
     	if (!GetInputYN(_("Select new design and lose current changes?")))
@@ -2768,7 +2769,7 @@ static void GetPrefs ( renderdata* prd ) {
 		}
 
 		prd->showShadows = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwShowShadows));
-		prd->shadowDarkness = (int)padjDarkness->value;
+		prd->shadowDarkness = (int)gtk_adjustment_get_value( padjDarkness );
 		/* Darkness as percentage of ambient light */
 		prd->dimness = ((prd->lightLevels[1] / 100.0f) * (100 - prd->shadowDarkness)) / 100;
 
@@ -2776,23 +2777,23 @@ static void GetPrefs ( renderdata* prd ) {
 		prd->animateFlag = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwAnimateFlag));
 		prd->closeBoardOnExit = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwCloseBoard));
 
-		newCurveAccuracy = (int)padjAccuracy->value;
+		newCurveAccuracy = (int)gtk_adjustment_get_value( padjAccuracy );
 		newCurveAccuracy -= (newCurveAccuracy % 4);
 		prd->curveAccuracy = newCurveAccuracy;
 
 		prd->lightType = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwLightSource) ) ? LT_POSITIONAL : LT_DIRECTIONAL;
-		prd->lightPos[0] = (float)padjLightPosX->value;
-		prd->lightPos[1] = (float)padjLightPosY->value;
-		prd->lightPos[2] = (float)padjLightPosZ->value;
-		prd->lightLevels[0] = (int)padjLightLevelAmbient->value;
-		prd->lightLevels[1] = (int)padjLightLevelDiffuse->value;
-		prd->lightLevels[2] = (int)padjLightLevelSpecular->value;
+		prd->lightPos[0] = (float)gtk_adjustment_get_value( padjLightPosX );
+		prd->lightPos[1] = (float)gtk_adjustment_get_value( padjLightPosY );
+		prd->lightPos[2] = (float)gtk_adjustment_get_value( padjLightPosZ );
+		prd->lightLevels[0] = (int)gtk_adjustment_get_value( padjLightLevelAmbient );
+		prd->lightLevels[1] = (int)gtk_adjustment_get_value( padjLightLevelDiffuse );
+		prd->lightLevels[2] = (int)gtk_adjustment_get_value( padjLightLevelSpecular );
 
-		prd->boardAngle = (int)padjBoardAngle->value;
-		prd->skewFactor = (int)padjSkewFactor->value;
+		prd->boardAngle = (int)gtk_adjustment_get_value( padjBoardAngle );
+		prd->skewFactor = (int)gtk_adjustment_get_value( padjSkewFactor );
 		prd->pieceType = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwRoundedPiece) ) ? PT_ROUNDED : PT_FLAT;
 		prd->pieceTextureType = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwTextureAllPiece) ) ? PTT_ALL : PTT_TOP;
-		prd->diceSize = (float)padjDiceSize->value;
+		prd->diceSize = (float)gtk_adjustment_get_value( padjDiceSize );
 		prd->roundedEdges = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwRoundedEdges));
 		prd->bgInTrays = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwBgTrays));
 		prd->roundedPoints = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwRoundPoints));
@@ -2816,8 +2817,8 @@ static void GetPrefs ( renderdata* prd ) {
 	prd->arCoefficient[ i ] = (float)gtk_adjustment_get_value(apadjCoefficient[ i ]);
 	prd->arExponent[ i ] = (float)gtk_adjustment_get_value(apadjExponent[ i ]);
 
-        prd->arDiceCoefficient[ i ] = (float)apadjDiceCoefficient[ i ]->value;
-	prd->arDiceExponent[ i ] = (float)apadjDiceExponent[ i ]->value;
+        prd->arDiceCoefficient[ i ] = (float)gtk_adjustment_get_value( apadjDiceCoefficient[ i ] );
+	prd->arDiceExponent[ i ] = (float)gtk_adjustment_get_value( apadjDiceExponent[ i ] );
     }
     
     gtk_color_button_get_array( GTK_COLOR_BUTTON( apwColour[ 0 ] ), ar );
@@ -2862,17 +2863,17 @@ static void GetPrefs ( renderdata* prd ) {
 	    prd->aanBoardColour[ j ][ i ] = (unsigned char)(ar[ i ] * 0xFF);
     }
     
-    prd->aSpeckle[ 0 ] = (int)(apadjBoard[ 0 ]->value * 0x80);
-/*    prd->aSpeckle[ 1 ] = (int)(apadjBoard[ 1 ]->value * 0x80); */
-    prd->aSpeckle[ 2 ] = (int)(apadjBoard[ 2 ]->value * 0x80);
-    prd->aSpeckle[ 3 ] = (int)(apadjBoard[ 3 ]->value * 0x80);
+    prd->aSpeckle[ 0 ] = (int)(gtk_adjustment_get_value( apadjBoard[ 0 ] ) * 0x80);
+/*    prd->aSpeckle[ 1 ] = (int)(gtk_adjustment_get_value( apadjBoard[ 1 ] ) * 0x80); */
+    prd->aSpeckle[ 2 ] = (int)(gtk_adjustment_get_value( apadjBoard[ 2 ] ) * 0x80);
+    prd->aSpeckle[ 3 ] = (int)(gtk_adjustment_get_value( apadjBoard[ 3 ] ) * 0x80);
     
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pwWood ) ))
 	    prd->wt = gtk_combo_box_get_active(GTK_COMBO_BOX(pwWoodType));
 	else
 		prd->wt = WOOD_PAINT;
 
-    prd->rRound = 1.0f - (float)padjRound->value;
+    prd->rRound = 1.0f - (float)gtk_adjustment_get_value( padjRound );
 
 	prd->fHinges = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwHinges ) );
 
@@ -2949,7 +2950,7 @@ void AddPages(BoardData* bd, GtkWidget* pwNotebook, GList *plBoardDesigns)
 	}
 }
 
-static void ChangePage(GtkNotebook *notebook, GtkNotebookPage *page, 
+static void ChangePage(GtkNotebook *notebook, GtkNotebook *page, 
 				guint page_num, gpointer user_data)
 {
 	BoardData *bd = BOARD(pwPrevBoard)->board_data;
@@ -3070,13 +3071,13 @@ extern void SetBoardPreferences(GtkWidget *pwBoard, char *sz)
 	char *apch[2];
 	BoardData *bd = BOARD(pwBoard)->board_data;
 
-	if (GTK_WIDGET_REALIZED(pwBoard))
+	if (gtk_widget_get_realized(pwBoard))
 		board_free_pixmaps(bd);
 
 	while (ParseKeyValue(&sz, apch))
 		RenderPreferencesParam(GetMainAppearance(), apch[0], apch[1]);
 
-	if (GTK_WIDGET_REALIZED(pwBoard))
+	if (gtk_widget_get_realized(pwBoard))
 	{
 		board_create_pixmaps(pwBoard, bd);
 #if USE_BOARD3D

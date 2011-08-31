@@ -20,7 +20,7 @@
  */
 
 #include "config.h"
-
+#include "gtklocdefs.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -214,7 +214,7 @@ static void SoundAllDefaultClicked(GtkWidget *UNUSED(widget), gpointer UNUSED(us
 static void SoundEnabledClicked(GtkWidget *UNUSED(widget), gpointer UNUSED(userdata))
 {
 	int enabled;
-	if (!GTK_WIDGET_REALIZED(soundEnabled) || !GTK_WIDGET_SENSITIVE(soundEnabled))
+	if (!gtk_widget_get_realized(soundEnabled) || !gtk_widget_get_sensitive(soundEnabled))
 		return;
 	enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(soundEnabled));
 	gtk_widget_set_sensitive(soundPath, enabled);
@@ -1449,7 +1449,7 @@ static void OptionsOK(GtkWidget *pw, optionswidget *pow)
   CHECKUPDATE(pow->pwOutputGWC,fOutputWinPC, "set output winpc %s")
   CHECKUPDATE(pow->pwOutputMWCpst,fOutputMatchPC, "set output matchpc %s")
 
-  if(( n = (unsigned int)pow->padjDigits->value ) != fOutputDigits ){
+  if(( n = (unsigned int)gtk_adjustment_get_value( pow->padjDigits ) ) != fOutputDigits ){
     sprintf(sz, "set output digits %d", n );
     UserCommand(sz); 
   }
@@ -1460,17 +1460,17 @@ static void OptionsOK(GtkWidget *pw, optionswidget *pow)
   CHECKUPDATE(pow->pwConfStart,fConfirmNew, "set confirm new %s")
   CHECKUPDATE(pow->pwConfOverwrite,fConfirmSave, "set confirm save %s")
   
-  if(( n = (unsigned int)pow->padjCubeAutomatic->value ) != cAutoDoubles){
+  if(( n = (unsigned int)gtk_adjustment_get_value( pow->padjCubeAutomatic ) ) != cAutoDoubles){
     sprintf(sz, "set automatic doubles %d", n );
     UserCommand(sz); 
   }
 
-  if(( n = (unsigned int)pow->padjCubeBeaver->value ) != nBeavers){
+  if(( n = (unsigned int)gtk_adjustment_get_value( pow->padjCubeBeaver ) ) != nBeavers){
     sprintf(sz, "set beavers %d", n );
     UserCommand(sz); 
   }
   
-  if(( n = (unsigned int)pow->padjLength->value ) != nDefaultLength){
+  if(( n = (unsigned int)gtk_adjustment_get_value( pow->padjLength ) ) != nDefaultLength){
     sprintf(sz, "set matchlength %d", n );
     UserCommand(sz); 
   }
@@ -1510,12 +1510,12 @@ static void OptionsOK(GtkWidget *pw, optionswidget *pow)
   CHECKUPDATE(pow->pwRecordGames,fRecord, "set record %s" )   
   CHECKUPDATE(pow->pwDisplay,fDisplay, "set display %s" )   
 
-  if((n = (unsigned int)pow->padjCache->value) != GetEvalCacheSize()) {
+  if((n = (unsigned int)gtk_adjustment_get_value( pow->padjCache ) ) != GetEvalCacheSize()) {
     SetEvalCacheSize(n);
   }
 
 #if USE_MULTITHREAD
-  if((n = (unsigned int)pow->padjThreads->value) != MT_GetNumThreads()) {
+  if((n = (unsigned int)gtk_adjustment_get_value( pow->padjThreads ) ) != MT_GetNumThreads()) {
     sprintf(sz, "set threads %d", n );
     UserCommand(sz); 
   }
@@ -1530,14 +1530,14 @@ static void OptionsOK(GtkWidget *pw, optionswidget *pow)
   CHECKUPDATE(pow->pwAutoSaveRollout, fAutoSaveRollout, "set autosave rollout %s");
   CHECKUPDATE(pow->pwAutoSaveConfirmDelete, fAutoSaveConfirmDelete, "set autosave confirm %s");
 
-  if((n = (unsigned int)pow->padjDelay->value) != nDelay) {
+  if((n = (unsigned int)gtk_adjustment_get_value( pow->padjDelay ) ) != nDelay) {
     sprintf(sz, "set delay %d", n );
     UserCommand(sz); 
   }
 
   if( pow->fChanged == 1 ) 
   { 
-     n = (unsigned int)pow->padjSeed->value;
+     n = (unsigned int)gtk_adjustment_get_value( pow->padjSeed );
      sprintf(sz, "set seed %d", n); 
      UserCommand(sz); 
   }
@@ -1560,7 +1560,7 @@ static void OptionsOK(GtkWidget *pw, optionswidget *pow)
 		updateDiceOccPos(bd, bd->bd3d);
 	else
 #endif
-	if( GTK_WIDGET_REALIZED( pwBoard ) )
+	if( gtk_widget_get_realized( pwBoard ) )
 	{
 		board_create_pixmaps( pwBoard, bd );
 		gtk_widget_queue_draw( bd->drawing_area );
@@ -1601,7 +1601,7 @@ switch(gtk_combo_box_get_active(GTK_COMBO_BOX(pow->pwShowPips)))
       && animGUI != ANIMATE_SLIDE )
       UserCommand( "set gui animation slide" );
 
-  if( ( n = (unsigned int)pow->padjSpeed->value ) != nGUIAnimSpeed ) {
+  if( ( n = (unsigned int)gtk_adjustment_get_value( pow->padjSpeed ) ) != nGUIAnimSpeed ) {
       sprintf( sz, "set gui animation speed %d", n );
       UserCommand( sz );
   }
@@ -1743,7 +1743,7 @@ OptionsSet( optionswidget *pow) {
                                 fStyledGamelist );
 }
 
-static void OptionsPageChange(GtkNotebook *UNUSED(notebook), GtkNotebookPage *UNUSED(page), gint tabNumber, gpointer UNUSED(data))
+static void OptionsPageChange(GtkNotebook *UNUSED(notebook), gpointer *UNUSED(page), gint tabNumber, gpointer UNUSED(data))
 {
 	if (tabNumber == relPage && !relPageActivated)
 	{

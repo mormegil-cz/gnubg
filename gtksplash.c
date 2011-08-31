@@ -20,6 +20,7 @@
  */
 
 #include "config.h"
+#include "gtklocdefs.h"
 
 #include "gtkgame.h"
 #include "util.h"

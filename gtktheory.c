@@ -20,6 +20,7 @@
  */
 
 #include "config.h"
+#include "gtklocdefs.h"
 
 #include <gtk/gtk.h>
 
@@ -170,7 +171,7 @@ TheoryGetValues ( theorywidget *ptw, cubeinfo *pci,
 
   for ( i = 0; i < 2; i++ )
     for ( j = 0; j < 2; j++ )
-      aarRates[ i ][ j ] = 0.01f * (float)ptw->aapwRates[ i ][ j ]->value;
+      aarRates[ i ][ j ] = 0.01f * (float)gtk_adjustment_get_value ( ptw->aapwRates[ i ][ j ] );
 
 
   /* money game or match play */
@@ -179,8 +180,8 @@ TheoryGetValues ( theorywidget *ptw, cubeinfo *pci,
 
     /* match play */
 
-    int n0 = (int)ptw->apwScoreAway[ 0 ]->value;
-    int n1 = (int)ptw->apwScoreAway[ 1 ]->value;
+    int n0 = (int)gtk_adjustment_get_value ( ptw->apwScoreAway[ 0 ] );
+    int n1 = (int)gtk_adjustment_get_value ( ptw->apwScoreAway[ 1 ] );
 
     pci->nMatchTo = ( n1 > n0 ) ? n1 : n0;
 
@@ -354,7 +355,7 @@ static void TheoryUpdated(GtkWidget *UNUSED(pw), theorywidget *ptw)
   /* set max on the gammon spinners */
 
   for ( i = 0; i < 2; ++i ) 
-    ptw->aapwRates[ i ][ 1 ]->upper = 100.0f - ptw->aapwRates[ i ][ 0 ]->value;
+    gtk_adjustment_set_upper( ptw->aapwRates[ i ][ 1 ], 100.0f - gtk_adjustment_get_value ( ptw->aapwRates[ i ][ 0 ] ) );
 
   SetCubeInfo ( &ci, ci.nCube, 0, 0, ci.nMatchTo,
                 ci.anScore, ci.fCrawford, ci.fJacoby, ci.fBeavers, ci.bgv );
@@ -488,8 +489,11 @@ static void TheoryUpdated(GtkWidget *UNUSED(pw), theorywidget *ptw)
 static void GraphExpose( GtkWidget *pwGraph, GdkEventExpose *UNUSED(pev),
 			 theorywidget *ptw ) {
     
-    int i, x = 8, y = 12, cx = pwGraph->allocation.width - 16 - 1,
-	cy = pwGraph->allocation.height - 12, iPlayer, ax[ 3 ];
+    GtkAllocation allocation;
+    gtk_widget_get_allocation (pwGraph, &allocation);
+
+    int i, x = 8, y = 12, cx = allocation.width - 16 - 1,
+	cy = allocation.height - 12, iPlayer, ax[ 3 ];
     char sz[ 4 ];
     PangoLayout *layout = gtk_widget_create_pango_layout(pwGraph, NULL);
     
@@ -503,7 +507,7 @@ static void GraphExpose( GtkWidget *pwGraph, GdkEventExpose *UNUSED(pev),
     iPlayer = pwGraph == ptw->apwGraph[ 1 ];
     
     for( i = 0; i <= 20; i++ ) {
-	gtk_paint_vline( pwGraph->style, pwGraph->window, GTK_STATE_NORMAL,
+	gtk_paint_vline( gtk_widget_get_style( pwGraph ), gtk_widget_get_window ( pwGraph ), GTK_STATE_NORMAL,
 			 NULL, pwGraph, "tick", y - 1, i & 3 ? y - 3 : y - 5,
 			 x + cx * i / 20 );
 
@@ -513,8 +517,9 @@ static void GraphExpose( GtkWidget *pwGraph, GdkEventExpose *UNUSED(pev),
 		sprintf( sz, "%d", i * 5 );
 		pango_layout_set_text(layout, sz, -1);
 		pango_layout_get_pixel_size(layout, &width, &height);
-		gtk_paint_layout( pwGraph->style, pwGraph->window, GTK_STATE_NORMAL, TRUE, NULL, pwGraph, "label",
-			      x + cx * i / 20 - width/2 /* FIXME */, y-height-1, layout );
+		gtk_paint_layout( gtk_widget_get_style ( pwGraph ), gtk_widget_get_window ( pwGraph ), 
+			GTK_STATE_NORMAL, TRUE, NULL, pwGraph, "label",
+			x + cx * i / 20 - width/2 /* FIXME */, y-height-1, layout );
 	}
     }
     g_object_unref(layout);
@@ -522,25 +527,25 @@ static void GraphExpose( GtkWidget *pwGraph, GdkEventExpose *UNUSED(pev),
     for( i = 0; i < 3; i++ )
 	ax[ i ] = (int)(x + cx * ptw->aar[ iPlayer ][ i ]);
 
-    gtk_paint_box( pwGraph->style, pwGraph->window, GTK_STATE_NORMAL,
-		   GTK_SHADOW_IN, NULL, pwGraph, "doubling-window",
-		   x, 12, cx, cy );
+    gtk_paint_box( gtk_widget_get_style( pwGraph ), gtk_widget_get_window( pwGraph ), GTK_STATE_NORMAL,
+		GTK_SHADOW_IN, NULL, pwGraph, "doubling-window",
+		x, 12, cx, cy );
 
     /* FIXME it's horrible to abuse the "state" parameters like this */
     if( ptw->aar[ iPlayer ][ 1 ] > ptw->aar[ iPlayer ][ 0 ] )
-	gtk_paint_box( pwGraph->style, pwGraph->window, GTK_STATE_ACTIVE,
-		       GTK_SHADOW_OUT, NULL, pwGraph, "take",
-		       ax[ 0 ], 13, ax[ 1 ] - ax[ 0 ], cy - 2 );
+	gtk_paint_box( gtk_widget_get_style( pwGraph ), gtk_widget_get_window( pwGraph ), 
+		GTK_STATE_ACTIVE, GTK_SHADOW_OUT, NULL, pwGraph, "take",
+		ax[ 0 ], 13, ax[ 1 ] - ax[ 0 ], cy - 2 );
     
     if( ptw->aar[ iPlayer ][ 2 ] > ptw->aar[ iPlayer ][ 1 ] )
-	gtk_paint_box( pwGraph->style, pwGraph->window, GTK_STATE_PRELIGHT,
-		       GTK_SHADOW_OUT, NULL, pwGraph, "drop",
-		       ax[ 1 ], 13, ax[ 2 ] - ax[ 1 ], cy - 2 );
+	gtk_paint_box(gtk_widget_get_style( pwGraph ), gtk_widget_get_window( pwGraph ), 
+		GTK_STATE_PRELIGHT, GTK_SHADOW_OUT, NULL, pwGraph, "drop",
+		ax[ 1 ], 13, ax[ 2 ] - ax[ 1 ], cy - 2 );
     
     if( ptw->aar[ iPlayer ][ 2 ] < 1.0 )
-	gtk_paint_box( pwGraph->style, pwGraph->window, GTK_STATE_SELECTED,
-		       GTK_SHADOW_OUT, NULL, pwGraph, "too-good",
-		       ax[ 2 ], 13, x + cx - ax[ 2 ], cy - 2 );
+	gtk_paint_box( gtk_widget_get_style( pwGraph ), gtk_widget_get_window( pwGraph ), 
+		GTK_STATE_SELECTED, GTK_SHADOW_OUT, NULL, pwGraph, "too-good",
+		ax[ 2 ], 13, x + cx - ax[ 2 ], cy - 2 );
 }
 
 

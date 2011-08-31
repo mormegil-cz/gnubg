@@ -20,8 +20,8 @@
  */
 
 #include "config.h"
-#undef GTK_DISABLE_DEPRECATED
-#undef GSEAL_ENABLE
+#include "gtklocdefs.h"
+#include "gtkuidefs.h"
 
 #include <glib.h>
 #include <ctype.h>
@@ -84,6 +84,15 @@
 
 /* Offset action to avoid predefined values */
 #define MENU_OFFSET 50
+
+
+#if (USE_GTKUIMANAGER)
+static void TogglePanel ( guint iType, guint iActionID, GtkToggleAction *action, 
+	GtkToggleAction *alt, gpointer user_data );
+
+static void ToolbarStyle ( guint iType, guint iActionID, GtkRadioAction *action, 
+	GtkRadioAction *alt, gpointer user_data );
+#endif
 
 char *newLang;
 
@@ -162,8 +171,212 @@ typedef enum _gnubgcommand {
     CMD_SHOW_VERSION,
     CMD_SHOW_WARRANTY,
     CMD_SWAP_PLAYERS,
-    NUM_CMDS
+    NUM_CMDS,
+    TOGGLE_GAMELIST,
+    TOGGLE_ANALYSIS, 
+    TOGGLE_COMMENTARY, 
+    TOGGLE_MESSAGE, 
+    TOGGLE_THEORY, 
+    TOGGLE_COMMAND, 
+    VIEW_TOOLBAR_ICONSONLY,
+    VIEW_TOOLBAR_TEXTONLY,
+    VIEW_TOOLBAR_BOTH    
 } gnubgcommand;
+
+/* TRUE if gnubg is automatically setting the state of a menu item. */
+static int fAutoCommand;
+
+#if (USE_GTKUIMANAGER)
+static void ExecToggleActionCommand_internal ( guint iWidgetType, guint iCommand, gchar *szCommand, 
+	gpointer *widget, gpointer *widgetalt, gpointer user_data ) {
+	
+	char sz[ 80 ];
+
+	if( fAutoCommand )
+		return;
+
+	sprintf( sz, "%s %s", szCommand,
+		 gtk_toggle_action_get_active (GTK_TOGGLE_ACTION(widget)) ? "on" : "off" );
+	UserCommand( sz );
+	
+	return;
+}
+
+static void ExecRadioActionCommand_internal ( guint iWidgetType, guint iCommand, gchar *szCommand, 
+	gpointer *widget, gpointer *widgetalt, gpointer user_data ) {
+
+	char sz[ 80 ];
+	gint actionID;
+	
+	if( fAutoCommand )
+		return;
+
+	actionID = gtk_radio_action_get_current_value  ( GTK_RADIO_ACTION ( widget ) );
+	switch( actionID ) {
+	
+	case CMD_SET_TURN_0:
+	case CMD_SET_TURN_1:
+		sprintf( sz, "set turn %s", ap[ actionID - iCommand ].szName );
+		UserCommand( sz );
+		break;	
+	}
+	
+	return;
+}
+
+static void ExecActionCommand_internal ( guint iWidgetType, guint iCommand, gchar *szCommand, 
+	gpointer *widget, gpointer *widgetalt, gpointer user_data ) {
+
+    char sz[ 80 ];
+
+    if( fAutoCommand )
+	return;
+
+    switch( iCommand ) {
+    case CMD_SET_APPEARANCE:
+	BoardPreferences( pwBoard );
+	return;
+	
+    case CMD_SET_TURN_0:
+    case CMD_SET_TURN_1:
+	sprintf( sz, "set turn %s",
+		 ap[ iCommand - CMD_SET_TURN_0 ].szName );
+	UserCommand( sz );
+	return;	
+	
+
+    default:
+	UserCommand( szCommand );
+    }
+}
+
+#define CREATE_CMD_ACTION_CALLBACK(CMDID, szCommand) \
+	static void CMDID##_action_cb ( GtkAction *action, gpointer user_data ) \
+	{ \
+		ExecActionCommand_internal ( 0, CMDID, szCommand, (gpointer)action, NULL, user_data ); \
+		return; \
+	} ;
+
+#define CREATE_CMD_TOGGLE_CALLBACK(CMDID, szCommand) \
+	static void CMDID##_toggle_cb ( GtkToggleAction *action, gpointer user_data ) \
+	{ \
+		ExecToggleActionCommand_internal ( 1, CMDID, szCommand, (gpointer)action, NULL, user_data ); \
+		return; \
+	} ;
+
+#define CREATE_CMD_RADIO_CALLBACK(CMDID, szCommand) \
+	static void CMDID##_radio_cb ( GtkRadioAction *action, GtkRadioAction *current, gpointer user_data ) \
+	{ \
+		ExecRadioActionCommand_internal ( 2, CMDID, szCommand, (gpointer)action, (gpointer)current, user_data ); \
+		return; \
+	} ;
+
+#define CREATE_GENERIC_ACTION_CALLBACK(ACTIONID, callbackfunc) \
+	static void ACTIONID##_action_g_cb ( GtkAction *action, gpointer user_data ) \
+	{ \
+		callbackfunc ( 0, ACTIONID, action, NULL, user_data ); \
+		return; \
+	} ;
+
+#define CREATE_GENERIC_TOGGLE_CALLBACK(ACTIONID, callbackfunc) \
+	static void ACTIONID##_toggle_g_cb ( GtkToggleAction *action, gpointer user_data ) \
+	{ \
+		callbackfunc ( 1, ACTIONID, action, NULL, user_data ); \
+		return; \
+	} ;
+
+#define CREATE_GENERIC_RADIO_CALLBACK(ACTIONID, callbackfunc) \
+	static void ACTIONID##_radio_g_cb ( GtkRadioAction *action, GtkRadioAction *current, gpointer user_data ) \
+	{ \
+		callbackfunc ( 2, ACTIONID, action, current, user_data ); \
+		return; \
+	} ;
+
+
+#define CMD_ACTION_CALLBACK_FROMID(CMDID) (GCallback)CMDID##_action_cb 
+#define CMD_TOGGLE_CALLBACK_FROMID(CMDID) (GCallback)CMDID##_toggle_cb 
+#define CMD_RADIO_CALLBACK_FROMID(CMDID)  (GCallback)CMDID##_radio_cb 
+#define GENERIC_ACTION_CALLBACK_FROMID(ACTIONID) (GCallback)ACTIONID##_action_g_cb 
+#define GENERIC_TOGGLE_CALLBACK_FROMID(ACTIONID) (GCallback)ACTIONID##_toggle_g_cb 
+#define GENERIC_RADIO_CALLBACK_FROMID(ACTIONID)  (GCallback)ACTIONID##_radio_g_cb 
+
+/* Create callback functions for all the commands. These do no need to be in any particular order */
+CREATE_CMD_ACTION_CALLBACK ( CMD_ACCEPT, "accept" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_ANALYSE_CLEAR_MOVE, "analyse clear move" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_ANALYSE_CLEAR_GAME, "analyse clear game" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_ANALYSE_CLEAR_MATCH, "analyse clear match" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_ANALYSE_MOVE, "analyse move" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_ANALYSE_GAME, "analyse game" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_ANALYSE_MATCH, "analyse match" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_ANALYSE_ROLLOUT_CUBE, "analyse rollout cube" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_ANALYSE_ROLLOUT_MOVE, "analyse rollout move" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_ANALYSE_ROLLOUT_GAME, "analyse rollout game" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_ANALYSE_ROLLOUT_MATCH, "analyse rollout match" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_CLEAR_TURN, "clear turn" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_CMARK_CUBE_CLEAR, "cmark cube clear" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_CMARK_CUBE_SHOW, "cmark cube show" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_CMARK_MOVE_CLEAR, "cmark move clear" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_CMARK_MOVE_SHOW, "cmark move show" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_CMARK_GAME_CLEAR, "cmark game clear" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_CMARK_GAME_SHOW, "cmark game show" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_CMARK_MATCH_CLEAR, "cmark match clear" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_CMARK_MATCH_SHOW, "cmark match show" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_END_GAME, "end game" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_DECLINE, "decline" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_DOUBLE, "double" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_EVAL, "eval" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_HELP, "help" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_HINT, "hint" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_LIST_GAME, "list game" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_NEXT, "next" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_NEXT_GAME, "next game" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_NEXT_MARKED, "next marked" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_NEXT_CMARKED, "next cmarked" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_NEXT_ROLL, "next roll" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_NEXT_ROLLED, "next rolled" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_PLAY, "play" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_PREV, "previous" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_PREV_GAME, "previous game" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_PREV_MARKED, "previous marked" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_PREV_CMARKED, "previous cmarked" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_PREV_ROLL, "previous roll" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_PREV_ROLLED, "previous rolled" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_QUIT, "quit" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_REJECT, "reject" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_RELATIONAL_ADD_MATCH, "relational add match" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_ROLL, "roll" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_ROLLOUT, "rollout" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_SAVE_SETTINGS, "save settings" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_SET_ANNOTATION_ON, "set annotation on" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_SET_APPEARANCE, NULL ); /* set appearance */
+CREATE_CMD_ACTION_CALLBACK ( CMD_SET_MESSAGE_ON, "set message on" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_SET_TURN_0, NULL );  /* set turn 0 */
+CREATE_CMD_ACTION_CALLBACK ( CMD_SET_TURN_1, NULL );  /* set turn 1 */
+CREATE_CMD_ACTION_CALLBACK ( CMD_SHOW_CALIBRATION, "show calibration" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_SHOW_COPYING, "show copying" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_SHOW_ENGINE, "show engine" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_SHOW_EXPORT, "show export" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_SHOW_MARKETWINDOW, "show marketwindow" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_SHOW_MATCHEQUITYTABLE, "show matchequitytable" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_SHOW_KLEINMAN, "show kleinman" ); /* opens race theory window */
+CREATE_CMD_ACTION_CALLBACK ( CMD_SHOW_MANUAL_ABOUT, "show manual about" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_SHOW_MANUAL_WEB, "show manual web" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_SHOW_ROLLS, "show rolls" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_SHOW_STATISTICS_MATCH, "show statistics match" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_SHOW_TEMPERATURE_MAP, "show temperaturemap" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_SHOW_TEMPERATURE_MAP_CUBE, "show temperaturemap =cube" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_SHOW_VERSION, "show version" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_SHOW_WARRANTY, "show warranty" );
+CREATE_CMD_ACTION_CALLBACK ( CMD_SWAP_PLAYERS, "swap players" );
+CREATE_GENERIC_TOGGLE_CALLBACK ( TOGGLE_GAMELIST, TogglePanel );
+CREATE_GENERIC_TOGGLE_CALLBACK ( TOGGLE_COMMENTARY, TogglePanel );
+CREATE_GENERIC_TOGGLE_CALLBACK ( TOGGLE_MESSAGE, TogglePanel );
+CREATE_GENERIC_TOGGLE_CALLBACK ( TOGGLE_ANALYSIS, TogglePanel );
+CREATE_GENERIC_TOGGLE_CALLBACK ( TOGGLE_THEORY, TogglePanel );
+CREATE_GENERIC_TOGGLE_CALLBACK ( TOGGLE_COMMAND, TogglePanel );
+CREATE_GENERIC_RADIO_CALLBACK  ( VIEW_TOOLBAR_ICONSONLY, ToolbarStyle );
+CREATE_CMD_RADIO_CALLBACK  ( CMD_SET_TURN_0, NULL );
+#else
 
 static const char *aszCommands[ NUM_CMDS ] = {
 	"accept",
@@ -234,7 +447,47 @@ static const char *aszCommands[ NUM_CMDS ] = {
     "show warranty",
     "swap players",
 };
-enum { TOGGLE_GAMELIST = NUM_CMDS + 1, TOGGLE_ANALYSIS, TOGGLE_COMMENTARY, TOGGLE_MESSAGE, TOGGLE_THEORY, TOGGLE_COMMAND };
+static void Command( gpointer p, guint iCommand, GtkWidget *widget ) {
+
+    char sz[ 80 ];
+
+    if( fAutoCommand )
+	return;
+
+    /* FIXME this isn't very good -- if UserCommand fails, the setting
+       won't have been changed, but the widget will automatically have
+       updated itself. */
+    
+    if( GTK_IS_RADIO_MENU_ITEM( widget ) ) {
+	if( !gtk_check_menu_item_get_active( GTK_CHECK_MENU_ITEM( widget ) ) )
+	    return;
+    } else if( GTK_IS_CHECK_MENU_ITEM( widget ) ) {
+	sprintf( sz, "%s %s", aszCommands[ iCommand ],
+		 gtk_check_menu_item_get_active( GTK_CHECK_MENU_ITEM( widget ) ) ? "on" : "off" );
+	UserCommand( sz );
+	
+	return;
+    }
+
+    switch( iCommand ) {
+    case CMD_SET_APPEARANCE:
+	BoardPreferences( pwBoard );
+	return;
+	
+    case CMD_SET_TURN_0:
+    case CMD_SET_TURN_1:
+	sprintf( sz, "set turn %s",
+		 ap[ iCommand - CMD_SET_TURN_0 ].szName );
+	UserCommand( sz );
+	return;	
+	
+
+    default:
+	UserCommand( aszCommands[ iCommand ] );
+    }
+}
+
+#endif
 
 typedef struct _analysiswidget {
 
@@ -273,7 +526,11 @@ GtkAccelGroup *pagMain;
 #if (GTK_MAJOR_VERSION < 3) && (GTK_MINOR_VERSION < 12)
 GtkTooltips *ptt;
 #endif
+#if (USE_GTKUIMANAGER)
+GtkUIManager *puim = NULL;
+#else
 GtkItemFactory *pif;
+#endif
 guint nNextTurn = 0; /* GTK idle function */
 static guint idOutput, idProgress;
 int fTTY = TRUE;
@@ -337,7 +594,7 @@ extern void GTKResumeInput(void)
 	suspendCount--;
 	if (suspendCount == 0)
 	{
-		if (GTK_IS_WIDGET(grabbedWidget) && GTK_WIDGET_HAS_GRAB(grabbedWidget))
+		if (GTK_IS_WIDGET(grabbedWidget) && gtk_widget_has_grab(grabbedWidget))
 		{
 			if (g_signal_handler_is_connected (G_OBJECT(grabbedWidget), grabIdSignal))
 				g_signal_handler_disconnect (G_OBJECT(grabbedWidget), grabIdSignal);
@@ -431,48 +688,6 @@ extern void GTKDelay( void ) {
     GTKResumeInput();
 }
 
-/* TRUE if gnubg is automatically setting the state of a menu item. */
-static int fAutoCommand;
-
-static void Command( gpointer p, guint iCommand, GtkWidget *widget ) {
-
-    char sz[ 80 ];
-
-    if( fAutoCommand )
-	return;
-
-    /* FIXME this isn't very good -- if UserCommand fails, the setting
-       won't have been changed, but the widget will automatically have
-       updated itself. */
-    
-    if( GTK_IS_RADIO_MENU_ITEM( widget ) ) {
-	if( !GTK_CHECK_MENU_ITEM( widget )->active )
-	    return;
-    } else if( GTK_IS_CHECK_MENU_ITEM( widget ) ) {
-	sprintf( sz, "%s %s", aszCommands[ iCommand ],
-		 GTK_CHECK_MENU_ITEM( widget )->active ? "on" : "off" );
-	UserCommand( sz );
-	
-	return;
-    }
-
-    switch( iCommand ) {
-    case CMD_SET_APPEARANCE:
-	BoardPreferences( pwBoard );
-	return;
-	
-    case CMD_SET_TURN_0:
-    case CMD_SET_TURN_1:
-	sprintf( sz, "set turn %s",
-		 ap[ iCommand - CMD_SET_TURN_0 ].szName );
-	UserCommand( sz );
-	return;	
-	
-
-    default:
-	UserCommand( aszCommands[ iCommand ] );
-    }
-}
 
 static void gui_clear_turn(GtkWidget *pw, GtkWidget *dialog)
 {
@@ -755,7 +970,7 @@ static GtkWidget *skill_label(skilltype st)
 
 extern void SetAnnotation( moverecord *pmr) {
 
-    GtkWidget *pwParent = pwAnalysis->parent, *pw = NULL, *pwBox, *pwAlign;
+    GtkWidget *pwParent = gtk_widget_get_parent( pwAnalysis ), *pw = NULL, *pwBox, *pwAlign;
     int fMoveOld, fTurnOld;
     listOLD *pl;
     char sz[ 64 ];
@@ -903,8 +1118,7 @@ extern void SetAnnotation( moverecord *pmr) {
               gtk_box_pack_start ( GTK_BOX ( pwAnalysis ),
                                    pwCubeAnalysis, TRUE, TRUE, 0 );
 
-
-	    if( !g_list_first( GTK_BOX( pwAnalysis )->children ) ) {
+	    if( !g_list_first( gtk_container_get_children ( GTK_CONTAINER ( GTK_BOX( pwAnalysis ) ) ) ) ) {
 		gtk_widget_destroy( pwAnalysis );
 		pwAnalysis = NULL;
 	    }
@@ -1071,7 +1285,9 @@ extern int GetPanelSize(void)
     if (!fFullScreen && fX && gtk_widget_get_realized(pwMain))
 	{
 		int pos = gtk_paned_get_position(GTK_PANED(hpaned));
-		return pwMain->allocation.width - pos;
+		GtkAllocation allocation;
+		gtk_widget_get_allocation (pwMain, &allocation);
+		return allocation.width - pos;
 	}
 	else
 		return panelSize;
@@ -1082,13 +1298,17 @@ extern void SetPanelWidth(int size)
 	panelSize = size;
     if( gtk_widget_get_realized( pwMain ) )
 	{
-		if (panelSize > pwMain->allocation.width * .8)
-			panelSize = (int)(pwMain->allocation.width * .8);
+		GtkAllocation allocation;
+		gtk_widget_get_allocation (pwMain, &allocation);
+		if (panelSize > allocation.width * .8)
+			panelSize = (int)(allocation.width * .8);
 	}
 }
 
 extern void SwapBoardToPanel(int ToPanel, int updateEvents)
 {	/* Show/Hide panel on right of screen */
+	GtkAllocation allocation;
+	gtk_widget_get_allocation (pwMain, &allocation);
 	if (ToPanel)
 	{
 		gtk_widget_reparent(pwEventBox, pwPanelGameBox);
@@ -1096,10 +1316,10 @@ extern void SwapBoardToPanel(int ToPanel, int updateEvents)
 		if (updateEvents)
 			ProcessEvents();
 		gtk_widget_hide(pwGameBox);
-		gtk_paned_set_position(GTK_PANED(hpaned), pwMain->allocation.width - panelSize);
+		gtk_paned_set_position(GTK_PANED(hpaned), allocation.width - panelSize);
 
 {	/* Hack to sort out widget positions - may be removed if works in later version of gtk */
-		GtkAllocation temp = pwMain->allocation;
+		GtkAllocation temp = allocation;
 		temp.height++;
 		gtk_widget_size_allocate(pwMain, &temp);
 		temp.height--;
@@ -1117,7 +1337,7 @@ extern void SwapBoardToPanel(int ToPanel, int updateEvents)
 		gtk_widget_show(pwGameBox);
 		if (updateEvents)
 			ProcessEvents();
-		if (GTK_WIDGET_VISIBLE(hpaned))
+		if (gtk_widget_get_visible(hpaned))
 		{
 			panelSize = GetPanelSize();
 			gtk_widget_hide(hpaned);
@@ -1152,21 +1372,31 @@ static void MainSize( GtkWidget *pw, GtkRequisition *preq, gpointer p ) {
 }
 
 
+#if !(USE_GTKUIMANAGER)
 static gchar *GTKTranslate ( const gchar *path, gpointer func_data ) {
-
   return (gchar *) gettext ( (const char *) path );
-
 }
+#endif
 
+#if (USE_GTKUIMANAGER)
+static void ToolbarStyle ( guint iType, guint iActionID, GtkRadioAction *action, 
+	GtkRadioAction *alt, gpointer user_data )
+{
+	guint actionID = gtk_radio_action_get_current_value  ( GTK_RADIO_ACTION ( action ) );
+	/* If radio button has been selected set style */
+	SetToolbarStyle( actionID - VIEW_TOOLBAR_ICONSONLY);
+}
+#else
 static void ToolbarStyle(gpointer    callback_data,
                        guint       callback_action,
                        GtkWidget  *widget)
 {
-	if(GTK_CHECK_MENU_ITEM(widget)->active)
+	if(gtk_check_menu_item_get_active( GTK_CHECK_MENU_ITEM( widget ) ) )
 	{	/* If radio button has been selected set style */
 		SetToolbarStyle(callback_action - TOOLBAR_ACTION_OFFSET);
 	}
 }
+#endif
 
 GtkClipboard *clipboard = NULL;
 
@@ -1290,15 +1520,15 @@ static void CopyPositionID(gpointer p, guint n, GtkWidget * pw)
 	gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idOutput, _("Position ID copied to the clipboard") );
 }
 
-static void TogglePanel(gpointer p, guint n, GtkWidget * pw)
+#if (USE_GTKUIMANAGER)
+static void TogglePanel ( guint iType, guint iActionID, GtkToggleAction *action, 
+	GtkToggleAction *alt, gpointer user_data )
 {
 	int f;
 	gnubgwindow panel = 0;
 
-	g_assert(GTK_IS_CHECK_MENU_ITEM(pw));
-
-	f = GTK_CHECK_MENU_ITEM(pw)->active;
-	switch (n) {
+	f = gtk_toggle_action_get_active (action);
+	switch (iActionID) {
 	case TOGGLE_ANALYSIS:
 		panel = WINDOW_ANALYSIS;
 		break;
@@ -1329,6 +1559,47 @@ static void TogglePanel(gpointer p, guint n, GtkWidget * pw)
 	SetMainWindowSize();
 }
 
+#else
+static void TogglePanel(gpointer p, guint n, GtkWidget * pw)
+{
+	int f;
+	gnubgwindow panel = 0;
+
+	g_assert(GTK_IS_CHECK_MENU_ITEM(pw));
+
+	f = gtk_check_menu_item_get_active( GTK_CHECK_MENU_ITEM( pw ) );
+	switch (n) {
+	case TOGGLE_ANALYSIS:
+		panel = WINDOW_ANALYSIS;
+		break;
+	case TOGGLE_COMMENTARY:
+		panel = WINDOW_ANNOTATION;
+		break;
+	case TOGGLE_GAMELIST:
+		panel = WINDOW_GAME;
+		break;
+	case TOGGLE_MESSAGE:
+		panel = WINDOW_MESSAGE;
+		break;
+	case TOGGLE_THEORY:
+		panel = WINDOW_THEORY;
+		break;
+	case TOGGLE_COMMAND:
+		panel = WINDOW_COMMAND;
+		break;
+	default:
+		g_assert(FALSE);
+	}
+	if (f)
+		PanelShow(panel);
+	else
+		PanelHide(panel);
+
+	/* Resize screen */
+	SetMainWindowSize();
+}
+#endif
+
 extern void GTKUndo(void)
 {
 	BoardData *bd = BOARD( pwBoard )->board_data;
@@ -1350,17 +1621,25 @@ extern void GTKUndo(void)
 }
 
 #if USE_BOARD3D
-
 extern void SetSwitchModeMenuText(void)
 {	/* Update menu text */
 	BoardData *bd = BOARD( pwBoard )->board_data;
+#if (USE_GTKUIMANAGER)
+	GtkWidget *pMenuItem = gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/ViewMenu/SwitchMode");
+#else
 	GtkWidget *pMenuItem = gtk_item_factory_get_widget_by_action(pif, TOOLBAR_ACTION_OFFSET + MENU_OFFSET);
+#endif
 	char *text;
 	if (display_is_2d(bd->rd))
 		text = _("Switch to 3D view");
 	else
 		text = _("Switch to 2D view");
+#if (USE_GTKUIMANAGER)
+	gtk_label_set_text( GTK_LABEL(gtk_bin_get_child(GTK_BIN(pMenuItem )) ), text );	
+#else
 	gtk_label_set_text(GTK_LABEL(gtk_bin_get_child(GTK_BIN(pMenuItem))), text);
+#endif
 	gtk_widget_set_sensitive(pMenuItem, gtk_gl_init_success);
 }
 
@@ -1405,15 +1684,27 @@ SwitchDisplayMode( gpointer p, guint n, GtkWidget *pw )
 
 #endif
 
+#if (USE_GTKUIMANAGER)
+static void ToggleShowingIDs ( GtkToggleAction *action, gpointer user_data ) 
+{
+	int newValue = gtk_toggle_action_get_active (action);
+	char *sz = g_strdup_printf("set gui showids %s", newValue ? "on" :
+			"off");
+	UserCommand(sz);
+	g_free(sz);
+	UserCommand("save settings");	
+}
+#else
 static void ToggleShowingIDs( gpointer p, guint n, GtkWidget *pw )
 {
-	int newValue = GTK_CHECK_MENU_ITEM( pw )->active;
+	int newValue = gtk_check_menu_item_get_active( GTK_CHECK_MENU_ITEM( pw ) );
 	char *sz = g_strdup_printf("set gui showids %s", newValue ? "on" :
 			"off");
 	UserCommand(sz);
 	g_free(sz);
 	UserCommand("save settings");
 }
+#endif
 
 int fToolbarShowing = TRUE;
 
@@ -1423,12 +1714,24 @@ extern void ShowToolbar(void)
 	gtk_widget_show(pwToolbar);
 	gtk_widget_show(pwHandle);
 
+#if (USE_GTKUIMANAGER)
+	gtk_widget_show ( (gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/ViewMenu/ToolBarMenu/HideToolBar" )) );
+	gtk_widget_hide ( (gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/ViewMenu/ToolBarMenu/ShowToolBar" )) );
+	gtk_widget_set_sensitive ( (gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/ViewMenu/ToolBarMenu/TextOnly" )), TRUE );
+	gtk_widget_set_sensitive ( (gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/ViewMenu/ToolBarMenu/IconsOnly" )), TRUE );
+	gtk_widget_set_sensitive ( (gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/ViewMenu/ToolBarMenu/Both" )), TRUE );
+#else
 	gtk_widget_show(gtk_item_factory_get_widget(pif, "/View/Toolbar/Hide Toolbar"));
 	gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Toolbar/Show Toolbar"));
 	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Toolbar/Text only"), TRUE);
 	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Toolbar/Icons only"), TRUE);
 	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Toolbar/Both"), TRUE);
-
+#endif	
 	fToolbarShowing = TRUE;
 }
 
@@ -1438,12 +1741,24 @@ extern void HideToolbar(void)
 	gtk_widget_hide(pwToolbar);
 	gtk_widget_hide(pwHandle);
 
+#if (USE_GTKUIMANAGER)
+	gtk_widget_hide ( (gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/ViewMenu/ToolBarMenu/HideToolBar" )) );
+	gtk_widget_show ( (gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/ViewMenu/ToolBarMenu/ShowToolBar" )) );
+	gtk_widget_set_sensitive ( (gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/ViewMenu/ToolBarMenu/TextOnly" )), FALSE );
+	gtk_widget_set_sensitive ( (gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/ViewMenu/ToolBarMenu/IconsOnly" )), FALSE );
+	gtk_widget_set_sensitive ( (gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/ViewMenu/ToolBarMenu/Both" )), FALSE );
+#else
 	gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Toolbar/Hide Toolbar"));
 	gtk_widget_show(gtk_item_factory_get_widget(pif, "/View/Toolbar/Show Toolbar"));
 	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Toolbar/Text only"), FALSE);
 	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Toolbar/Icons only"), FALSE);
 	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/View/Toolbar/Both"), FALSE);
-
+#endif
 	fToolbarShowing = FALSE;
 }
 
@@ -1474,8 +1789,13 @@ static void DoFullScreenMode(gpointer p, guint n, GtkWidget * pw)
 	static gulong id;
 	static int changedRP, changedDP;
 
+#if (USE_GTKUIMANAGER)
+	GtkWidget *pmiRP = gtk_ui_manager_get_widget (puim, "/MainMenu/ViewMenu/RestorePanels" );
+	GtkWidget *pmiDP = gtk_ui_manager_get_widget (puim, "/MainMenu/ViewMenu/DockPanels" );
+#else
 	GtkWidget *pmiRP = gtk_item_factory_get_widget(pif, "/View/Restore panels");
 	GtkWidget *pmiDP = gtk_item_factory_get_widget(pif, "/View/Dock panels");
+#endif
 
 #if USE_BOARD3D
     if (display_is_3d(bd->rd))
@@ -1484,8 +1804,12 @@ static void DoFullScreenMode(gpointer p, guint n, GtkWidget * pw)
 	}
 #endif
 
-	fFullScreen = GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/View/Full screen"))->active;
-
+#if (USE_GTKUIMANAGER) 
+	fFullScreen =  gtk_check_menu_item_get_active ( GTK_CHECK_MENU_ITEM ( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/ViewMenu/FullScreen" ) ) );
+#else
+	fFullScreen = gtk_check_menu_item_get_active( GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget( pif, "/View/Full screen") ) );
+#endif
 	if (fFullScreen)
 	{
 		if (!fullScreenOnStartup)
@@ -1495,17 +1819,16 @@ static void DoFullScreenMode(gpointer p, guint n, GtkWidget * pw)
 
 		bd->rd->fShowGameInfo = FALSE;
 
-		if (pmiRP && GTK_WIDGET_VISIBLE(pmiRP)
-		    && GTK_WIDGET_IS_SENSITIVE(pmiRP))
+		if (pmiRP && gtk_widget_get_visible(pmiRP)
+		    && gtk_widget_is_sensitive(pmiRP))
 			changedRP = TRUE;
-		if (pmiDP && GTK_WIDGET_VISIBLE(pmiDP)
-		    && GTK_WIDGET_IS_SENSITIVE(pmiDP))
+		if (pmiDP && gtk_widget_get_visible(pmiDP)
+		    && gtk_widget_is_sensitive(pmiDP))
 			changedDP = TRUE;
-
 		/* Check if window is maximized */
 		{
 			GdkWindowState state =
-			    gdk_window_get_state(GTK_WIDGET(ptl)->window);
+			    gdk_window_get_state(gtk_widget_get_window( GTK_WIDGET( ptl ) ) );
 			maximised =
 			    ((state & GDK_WINDOW_STATE_MAXIMIZED) ==
 			     GDK_WINDOW_STATE_MAXIMIZED);
@@ -1535,7 +1858,6 @@ static void DoFullScreenMode(gpointer p, guint n, GtkWidget * pw)
 
 		gtk_window_fullscreen(ptl);
 		gtk_window_set_decorated(ptl, FALSE);
-
 		if (pmiRP)
 			gtk_widget_set_sensitive(pmiRP, FALSE);
 		if (pmiDP)
@@ -1589,7 +1911,12 @@ static void DoFullScreenMode(gpointer p, guint n, GtkWidget * pw)
 extern void FullScreenMode(int state)
 {
 	BoardData *bd = BOARD( pwBoard )->board_data;
+#if (USE_GTKUIMANAGER)
+	GtkWidget *pw =   gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/ViewMenu/FullScreen" );
+#else
 	GtkWidget *pw = gtk_item_factory_get_widget(pif, "/View/Full screen");
+#endif
 	if (gtk_widget_get_realized(bd->table))
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(pw), state);
 }
@@ -1629,14 +1956,14 @@ typedef struct _evalwidget {
 
 static void EvalGetValues ( evalcontext *pec, evalwidget *pew ) {
 
-  pec->nPlies = (int)pew->padjPlies->value;
+  pec->nPlies = (int)gtk_adjustment_get_value( pew->padjPlies );
   pec->fCubeful =
     gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pew->pwCubeful ) );
 
   pec->fUsePrune =
     gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pew->pwUsePrune ) );
 
-  pec->rNoise = (float)pew->padjNoise->value;
+  pec->rNoise = (float)gtk_adjustment_get_value( pew->padjNoise );
   pec->fDeterministic =
     gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pew->pwDeterministic ) );
 }
@@ -1690,14 +2017,14 @@ static void EvalChanged ( GtkWidget *pw, evalwidget *pew ) {
 
 static void EvalNoiseValueChanged( GtkAdjustment *padj, evalwidget *pew ) {
 
-    gtk_widget_set_sensitive( pew->pwDeterministic, padj->value != 0.0f );
+    gtk_widget_set_sensitive( pew->pwDeterministic, gtk_adjustment_get_value( padj ) != 0.0f );
 
     EvalChanged ( NULL, pew );
     
 }
 
 static void EvalPliesValueChanged( GtkAdjustment *padj, evalwidget *pew ) {
-    gtk_widget_set_sensitive( pew->pwUsePrune, padj->value > 0 );
+    gtk_widget_set_sensitive( pew->pwUsePrune, gtk_adjustment_get_value ( padj ) > 0 );
     EvalChanged ( NULL, pew );
 
 }
@@ -1919,7 +2246,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
     if ( fMoveFilter ) {
       
       pew->pwMoveFilter = MoveFilterWidget ( pmf, pfOK, 
-                                             G_CALLBACK ( EvalChanged ), 
+                                             G_CALLBACK( EvalChanged ), 
                                              pew );
 
       pwev = gtk_event_box_new();
@@ -2168,20 +2495,20 @@ static GtkWidget *AddLevelSettings(GtkWidget *pwFrame, AnalysisDetails *pAnalDet
    }
 
 #define ADJUSTSKILLUPDATE(button,flag,string) \
-  if( paw->apadjSkill[(button)]->value != arSkillLevel[(flag)] ) \
+  if( gtk_adjustment_get_value ( paw->apadjSkill[(button)] ) != arSkillLevel[(flag)] ) \
   { \
      gchar buf[G_ASCII_DTOSTR_BUF_SIZE]; \
      sprintf(sz,  (string), g_ascii_formatd( buf, G_ASCII_DTOSTR_BUF_SIZE, \
-			           "%0.3f", (gdouble) paw->apadjSkill[(button)]->value )); \
+			           "%0.3f", (gdouble) gtk_adjustment_get_value( paw->apadjSkill[(button)] ) ) ); \
      UserCommand(sz); \
   }
 
 #define ADJUSTLUCKUPDATE(button,flag,string) \
-  if( paw->apadjLuck[(button)]->value != arLuckLevel[(flag)] ) \
+  if( gtk_adjustment_get_value( paw->apadjLuck[(button)] ) != arLuckLevel[(flag)] ) \
   { \
      gchar buf[G_ASCII_DTOSTR_BUF_SIZE]; \
      sprintf(sz,  (string), g_ascii_formatd( buf, G_ASCII_DTOSTR_BUF_SIZE, \
-			           "%0.3f", (gdouble) paw->apadjLuck[(button)]->value )); \
+			           "%0.3f", (gdouble) gtk_adjustment_get_value( paw->apadjLuck[(button)] ) ) ); \
      UserCommand(sz); \
   }
      
@@ -2743,7 +3070,7 @@ static gboolean FlagClicked(GtkWidget *pw, GdkEventButton *event, void* dummy)
 	eb = gtk_bin_get_child(GTK_BIN(frame));
 
 	gtk_frame_set_shadow_type(GTK_FRAME(gtk_bin_get_child(GTK_BIN(pw))), GTK_SHADOW_ETCHED_OUT);
-	gtk_widget_modify_bg(eb, GTK_STATE_NORMAL, &pwMain->style->bg[GTK_STATE_SELECTED]);
+	gtk_widget_modify_bg(eb, GTK_STATE_NORMAL, &gtk_widget_get_style( pwMain )->bg[GTK_STATE_SELECTED]);
 
 	if (SetupLanguage((char *) g_object_get_data(G_OBJECT(curSel), "lang")))
 		/* Immediately translate this dialog */
@@ -2766,13 +3093,13 @@ static GtkWidget *GetFlagWidget(char *language, char *langCode, const char *flag
 	GError *pix_error = NULL;
 
 	eb = gtk_event_box_new();
-	gtk_widget_modify_bg(eb, GTK_STATE_INSENSITIVE, &pwMain->style->bg[GTK_STATE_NORMAL]);
+	gtk_widget_modify_bg(eb, GTK_STATE_INSENSITIVE, &gtk_widget_get_style( pwMain )->bg[GTK_STATE_NORMAL]);
 	frame = gtk_frame_new(NULL);
 	gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_NONE);
 	gtk_container_add( GTK_CONTAINER( eb ), frame );
 
 	eb2 = gtk_event_box_new();
-	gtk_widget_modify_bg(eb2, GTK_STATE_INSENSITIVE, &pwMain->style->bg[GTK_STATE_NORMAL]);
+	gtk_widget_modify_bg(eb2, GTK_STATE_INSENSITIVE, &gtk_widget_get_style( pwMain )->bg[GTK_STATE_NORMAL]);
 	gtk_container_add( GTK_CONTAINER( frame ), eb2 );
 
 	vbox = gtk_vbox_new( FALSE, 5 );
@@ -2921,6 +3248,165 @@ static void ReportBug(gpointer p, guint n, GtkWidget * pwEvent)
 	OpenURL("http://savannah.gnu.org/bugs/?func=additem&group=gnubg");
 }
 
+#if (USE_GTKUIMANAGER)
+
+static GtkActionEntry actionEntries[] = {
+	{ "FileMenuAction", NULL, N_("_File") },
+	{ "FileNewAction", GTK_STOCK_NEW, N_("_New..."), "<control>N", NULL, G_CALLBACK(NewClicked) },
+	{ "FileOpenAction", GTK_STOCK_OPEN, N_("_Open"), "<control>O", NULL, G_CALLBACK(GTKOpen) },
+	{ "FileSaveAction", GTK_STOCK_SAVE, N_("_Save"), "<control>S", NULL, G_CALLBACK(GTKSave) },
+	{ "FileCommandsOpenAction", NULL, N_("Open _Commands..."), NULL, NULL, G_CALLBACK(GTKCommandsOpen) },
+	{ "FileMatchInfoAction", NULL, N_("Match information..."), NULL, NULL, G_CALLBACK(GTKMatchInfo) },
+#ifdef WIN32
+	{ "FileExitAction", NULL, N_("E_xit"), "<control>Q", NULL, CMD_ACTION_CALLBACK_FROMID(CMD_QUIT) },
+#else
+	{ "FileExitAction", NULL, N_("_Quit"), "<control>Q", NULL, CMD_ACTION_CALLBACK_FROMID(CMD_QUIT) },
+#endif
+	
+	{ "EditMenuAction", NULL, N_("_Edit") },
+	{ "UndoAction", GTK_STOCK_UNDO, N_("_Undo"), "<control>Z", NULL, G_CALLBACK(GTKUndo) },
+	{ "CopyIDMenuAction", NULL, N_("_Copy ID to Clipboard") },
+		{ "CopyGNUBGIDAction", NULL, N_("GNUBG ID"), "<control>C", NULL, G_CALLBACK(CopyIDs) },
+		{ "CopyMatchIDAction", NULL, N_("Match ID"), "<control>M", NULL, G_CALLBACK(CopyMatchID) },
+		{ "CopyPositionIDAction", NULL, N_("Position ID"), "<control>P", NULL, G_CALLBACK(CopyPositionID) },
+	
+	{ "CopyAsMenuAction", NULL, N_("Copy as") },
+		{ "CopyPosAsAsciiAction", NULL, N_("Position as ASCII"), NULL, NULL, G_CALLBACK(CommandCopy) },
+		{ "CopyAsGammOnLineAction", NULL, N_("GammOnLine (HTML)"), NULL, NULL, G_CALLBACK(CopyAsGOL) },
+		{ "CopyAsBackgammonBaseAction", NULL, N_("BackgammonBase.com (URL)"), NULL, NULL, G_CALLBACK(CopyAsBGbase) },
+
+	{ "PasteIDAction", GTK_STOCK_PASTE, N_("_Paste ID"), "<control>V", NULL, G_CALLBACK(PasteIDs) },
+
+	{ "ViewMenuAction", NULL, N_("_View") },
+	{ "PanelsMenuAction", NULL, N_("_Panels") },
+	
+	{ "RestorePanelsAction", NULL, N_("Restore panels"), NULL, NULL, G_CALLBACK(ShowAllPanels) },
+	{ "HidePanelsAction", NULL, N_("Hide panels"), NULL, NULL, G_CALLBACK(HideAllPanels) },
+
+	{ "ToolBarMenuAction", NULL, N_("_Toolbar") },
+		{ "HideToolBarAction", NULL, N_("_Hide Toolbar"), NULL, NULL, G_CALLBACK(HideToolbar) },
+		{ "ShowToolBarAction", NULL, N_("_Show Toolbar"), NULL, NULL, G_CALLBACK(ShowToolbar) },
+
+#if USE_BOARD3D
+	{ "SwitchModeAction", NULL, N_("Switch to xD view"), NULL, NULL, G_CALLBACK(SwitchDisplayMode) },
+#endif
+
+	{ "GameMenuAction", NULL, N_("_Game") },
+	{ "RollAction", NULL, N_("_Roll"), "<control>R", NULL, CMD_ACTION_CALLBACK_FROMID(CMD_ROLL) }, 
+	{ "FinishMoveAction", NULL, N_("_Finish move"), "<control>F", NULL, G_CALLBACK(FinishMove) }, 
+	{ "DoubleAction", GNUBG_STOCK_DOUBLE, N_("_Double"), "<control>D", NULL, CMD_ACTION_CALLBACK_FROMID(CMD_DOUBLE) }, 
+	{ "ResignAction", GNUBG_STOCK_RESIGN, N_("Re_sign"), NULL, NULL, G_CALLBACK(GTKResign) }, 
+	{ "AcceptAction", GNUBG_STOCK_ACCEPT, N_("_Accept"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_ACCEPT) }, 
+	{ "RejectAction", GNUBG_STOCK_REJECT, N_("Re_ject"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_REJECT) }, 
+	{ "PlayComputerTurnAction", NULL, N_("Play computer turn"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_PLAY) }, 
+	{ "EndGameAction", GNUBG_STOCK_END_GAME, N_("_End Game"), "<control>G", NULL, CMD_ACTION_CALLBACK_FROMID(CMD_END_GAME) }, 
+	{ "SwapPlayersAction", NULL, N_("Swap players"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_SWAP_PLAYERS) }, 
+	{ "SetCubeAction", NULL, N_("Set cube..."), NULL, NULL, G_CALLBACK(GTKSetCube) }, 
+	{ "SetDiceAction", NULL, N_("Set _dice..."), NULL, NULL, G_CALLBACK(GTKSetDice) }, 
+
+	{ "SetTurnMenuAction", NULL, N_("Set _turn") },
+
+	{ "ClearTurnAction", NULL, N_("Clear turn"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_CLEAR_TURN) }, 
+
+	{ "AnalyseMenuAction", NULL, N_("_Analyse") },
+	{ "EvaluateAction", NULL, N_("_Evaluate"), "<control>E", NULL, CMD_ACTION_CALLBACK_FROMID(CMD_EVAL) }, 
+	{ "HintAction", GNUBG_STOCK_HINT, N_("_Hint"), "<control>H", NULL, CMD_ACTION_CALLBACK_FROMID(CMD_HINT) }, 
+	{ "RolloutAction", NULL, N_("_Rollout"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_ROLLOUT) }, 
+	{ "AnalyseMoveAction", NULL, N_("Analyse move"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_ANALYSE_MOVE) }, 
+	{ "AnalyseGameAction", NULL, N_("Analyse game"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_ANALYSE_GAME) }, 
+	{ "AnalyseMatchAction", NULL, N_("Analyse match or session"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_ANALYSE_MATCH) }, 
+
+	{ "ClearAnalysisMenuAction", NULL, N_("Clear analysis") },
+		{ "ClearAnalysisMoveAction", GTK_STOCK_CLEAR, N_("Move"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_ANALYSE_CLEAR_MOVE) },
+		{ "ClearAnalysisGameAction", GTK_STOCK_CLEAR, N_("_Game"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_ANALYSE_CLEAR_GAME) },
+		{ "ClearAnalysisMatchOrSessionAction", GTK_STOCK_CLEAR, N_("_Match or session"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_ANALYSE_CLEAR_MATCH) },
+
+	{ "CMarkMenuAction", NULL, N_("CMark") },
+		{ "CMarkCubeMenuAction", NULL, N_("Cube") },
+			{ "CMarkCubeClearAction", NULL, N_("Clear"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_CMARK_CUBE_CLEAR) },
+			{ "CMarkCubeShowAction", NULL, N_("Show"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_CMARK_CUBE_SHOW) },
+		{ "CMarkMoveMenuAction", NULL, N_("Move") },
+			{ "CMarkMoveClearAction", NULL, N_("Clear"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_CMARK_MOVE_CLEAR) },
+			{ "CMarkMoveShowAction", NULL, N_("Show"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_CMARK_MOVE_SHOW) },
+		{ "CMarkGameMenuAction", NULL, N_("Game") },
+			{ "CMarkGameClearAction", NULL, N_("Clear"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_CMARK_GAME_CLEAR) },
+			{ "CMarkGameShowAction", NULL, N_("Show"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_CMARK_GAME_SHOW) },
+		{ "CMarkMatchMenuAction", NULL, N_("Match") },
+			{ "CMarkMatchClearAction", NULL, N_("Clear"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_CMARK_MATCH_CLEAR) },
+			{ "CMarkMatchShowAction", NULL, N_("Show"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_CMARK_MATCH_SHOW) },
+
+	{ "RolloutMenuAction", NULL, N_("Rollout") },
+		{ "RolloutCubeAction", NULL, N_("Cube"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_ANALYSE_ROLLOUT_CUBE) },
+		{ "RolloutMoveAction", NULL, N_("Move"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_ANALYSE_ROLLOUT_MOVE) },
+		{ "RolloutGameAction", NULL, N_("Game"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_ANALYSE_ROLLOUT_GAME) },
+		{ "RolloutMatchAction", NULL, N_("Match"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_ANALYSE_ROLLOUT_MATCH) },
+
+	{ "BatchAnalyseAction", NULL, N_("Batch analyse..."), NULL, NULL, G_CALLBACK (GTKBatchAnalyse) },
+	{ "MatchOrSessionStatsAction", NULL, N_("Match or session statistics"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_SHOW_STATISTICS_MATCH)  },
+	{ "AddMatchOrSessionStatsToDBAction", GTK_STOCK_ADD, N_("Add match or session to database"), NULL, NULL, G_CALLBACK (GtkRelationalAddMatch) },
+	{ "ShowRecordsAction", NULL, N_("Show Records"), NULL, NULL, G_CALLBACK (GtkShowRelational) },
+	{ "DistributionOfRollsAction", NULL, N_("Distribution of rolls"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_SHOW_ROLLS) },
+	{ "TemperatureMapAction", NULL, N_("Temperature Map"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_SHOW_TEMPERATURE_MAP) },
+	{ "TemperatureMapCubeAction", NULL, N_("Temperature Map (cube decision)"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_SHOW_TEMPERATURE_MAP_CUBE) },
+	{ "RaceTheoryAction", NULL, N_("_Race Theory"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_SHOW_KLEINMAN) },
+	{ "MarketWindowAction", NULL, N_("_Market window"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_SHOW_MARKETWINDOW) },
+	{ "MatchEquityTableAction", NULL, N_("M_atch equity table"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_SHOW_MATCHEQUITYTABLE) },
+	{ "EvaluationSpeedAction", NULL, N_("Evaluation speed"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_SHOW_CALIBRATION) },
+
+	{ "SettingsMenuAction", NULL, N_("_Settings") },
+	{ "SettingsAnalysisAction", NULL, N_("_Analysis..."), NULL, NULL, G_CALLBACK (SetAnalysis) },
+	{ "SettingsBoardAppearanceAction", NULL, N_("_Board Appearance..."), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_SET_APPEARANCE) },
+	{ "SettingsExportAction", NULL, N_("E_xport..."), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_SHOW_EXPORT) },
+	{ "SettingsPlayersAction", NULL, N_("_Players..."), NULL, NULL, G_CALLBACK (SetPlayers) },
+	{ "SettingsRolloutsAction", NULL, N_("_Rollouts..."), NULL, NULL, G_CALLBACK (SetRollouts) },
+	{ "SettingsOptionsAction", NULL, N_("_Options..."), NULL, NULL, G_CALLBACK (SetOptions) },
+	{ "SettingsLanguageAction", NULL, N_("_Language..."), NULL, NULL, G_CALLBACK (SetLanguage) },
+
+	{ "GoMenuAction", NULL, N_("G_o") },
+	{ "GoPreviousMarkedMoveAction", GNUBG_STOCK_GO_PREV_MARKED, N_("Previous marked move"), "<shift><control>Page_Up", NULL, CMD_ACTION_CALLBACK_FROMID(CMD_PREV_MARKED) },
+	{ "GoPreviousCMarkedMoveAction", GNUBG_STOCK_GO_PREV_CMARKED, N_("Previous cmarked move"), "<shift>Page_Up", NULL, CMD_ACTION_CALLBACK_FROMID(CMD_PREV_CMARKED) },
+	{ "GoPreviousRollAction", GNUBG_STOCK_GO_PREV, N_("Previous rol_l"), "Page_Up", NULL, CMD_ACTION_CALLBACK_FROMID(CMD_PREV_ROLL) },
+	{ "GoPreviousGameAction", GNUBG_STOCK_GO_PREV_GAME, N_("Pre_vious game"), "<control>Page_Up", NULL, CMD_ACTION_CALLBACK_FROMID(CMD_PREV_GAME) },
+	{ "GoNextGameAction", GNUBG_STOCK_GO_NEXT_GAME, N_("Next _game"), "<control>Page_Down", NULL, CMD_ACTION_CALLBACK_FROMID(CMD_NEXT_GAME) },
+	{ "GoNextRollAction", GNUBG_STOCK_GO_NEXT, N_("Next _roll"), "Page_Down", NULL, CMD_ACTION_CALLBACK_FROMID(CMD_NEXT_ROLL) },
+	{ "GoNextCMarkedMoveAction", GNUBG_STOCK_GO_NEXT_CMARKED, N_("Next cmarked move"), "<shift>Page_Down", NULL, CMD_ACTION_CALLBACK_FROMID(CMD_NEXT_CMARKED) },
+	{ "GoNextMarkedMoveAction", GNUBG_STOCK_GO_NEXT_MARKED, N_("Next marked move"), "<shift><control>Page_Down", NULL, CMD_ACTION_CALLBACK_FROMID(CMD_NEXT_MARKED) },
+
+	{ "HelpMenuAction", NULL, N_("_Help") },
+	{ "HelpCommandsAction", NULL, N_("_Commands"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_HELP) },
+	{ "HelpManualAllAboutAction", NULL, N_("_Manual (all about)"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_SHOW_MANUAL_ABOUT) },
+	{ "HelpManualWebAction", NULL, N_("Manual (_web)"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_SHOW_MANUAL_WEB) },
+	{ "HelpAboutGNUBGAction", GTK_STOCK_ABOUT, N_("_About gnubg"), NULL, NULL, CMD_ACTION_CALLBACK_FROMID(CMD_SHOW_VERSION) }
+};
+
+static GtkToggleActionEntry toggleActionEntries[] = {
+	{ "EditPositionAction", GTK_STOCK_EDIT, N_("_Edit Position"), NULL, NULL, G_CALLBACK(ToggleEdit) },
+
+	{ "PanelGameRecordAction", NULL, N_("_Game record"), NULL, NULL, GENERIC_TOGGLE_CALLBACK_FROMID(TOGGLE_GAMELIST) }, /* TOGGLE */
+	{ "PanelAnalysisAction", NULL, N_("_Analysis"), NULL, NULL, GENERIC_TOGGLE_CALLBACK_FROMID(TOGGLE_ANALYSIS) }, /* TOGGLE */
+	{ "PanelCommentaryAction", NULL, N_("_Commentary"), NULL, NULL, GENERIC_TOGGLE_CALLBACK_FROMID(TOGGLE_COMMENTARY)  }, /* TOGGLE */
+	{ "PanelMessageAction", NULL, N_("_Message"), NULL, NULL, GENERIC_TOGGLE_CALLBACK_FROMID(TOGGLE_MESSAGE)  }, /* TOGGLE */
+	{ "PanelTheoryAction", NULL, N_("_Theory"), NULL, NULL, GENERIC_TOGGLE_CALLBACK_FROMID(TOGGLE_THEORY)  }, /* TOGGLE */
+	{ "PanelCommandAction", NULL, N_("Command"), NULL, NULL, GENERIC_TOGGLE_CALLBACK_FROMID(TOGGLE_COMMAND)  }, /* TOGGLE */
+
+	{ "DockPanelsAction", NULL, N_("_Dock panels"), NULL, NULL, G_CALLBACK(ToggleDockPanels) },
+	{ "ShowIDStatusBarAction", NULL, N_("Show _ID in status bar"), NULL, NULL, G_CALLBACK(ToggleShowingIDs) }, /* TOGGLE */
+	{ "FullScreenAction", NULL, N_("Full screen"), "F11", NULL, G_CALLBACK(DoFullScreenMode) }, /* TOGGLE */
+	{ "PlayClockwiseAction", NULL, N_("Play _Clockwise"), NULL, NULL, G_CALLBACK(ToggleClockwise) } /* TOGGLE */
+};
+
+static GtkRadioActionEntry toolbarRadioActionEntries[] = {
+	{ "TextOnlyToolBarAction", NULL, N_("_Text only"), NULL, NULL, VIEW_TOOLBAR_TEXTONLY },
+	{ "IconsOnlyToolBarAction", NULL, N_("_Icons only"), NULL, NULL, VIEW_TOOLBAR_ICONSONLY },
+	{ "BothToolBarAction", NULL, N_("_Both"), NULL, NULL, VIEW_TOOLBAR_BOTH }
+};
+
+static GtkRadioActionEntry setTurnRadioActionEntries[] = {
+	{ "SetTurnPlayer0Action", NULL, "0", NULL, NULL, CMD_SET_TURN_0 }, 
+	{ "SetTurnPlayer1Action", NULL, "1", NULL, NULL, CMD_SET_TURN_1 }, 
+};
+
+#else
 GtkItemFactoryEntry aife[] = {
 	{ N_("/_File"), NULL, NULL, 0, "<Branch>", NULL },
 	{ N_("/_File/_New..."), "<control>N", NewClicked, 0,
@@ -3144,6 +3630,7 @@ GtkItemFactoryEntry aife[] = {
 		"<StockItem>", GTK_STOCK_ABOUT
 	}
 };
+#endif
 
 extern int automaticTask;
 
@@ -3201,9 +3688,9 @@ static void StopNotButton( GtkWidget *pw, gpointer unused )
 static void FileDragDropped(GtkWidget *widget, GdkDragContext * drag_context,
 			    gint x, gint y, GtkSelectionData * data, guint info, guint time)
 {
-	if (data->length > 0) {
+	if (strlen ( (gchar *)gtk_selection_data_get_text ( data ) ) > 0) {
 		char *next, *file, *quoted;
-		char *uri = (char *)data->data;
+		char *uri = (char *)gtk_selection_data_get_text ( data );
 		if (StrNCaseCmp("file:", uri, 5) != 0) {
 			outputerrf(_("Only local files supported in dnd"));
 			return;
@@ -3259,6 +3746,39 @@ static void CreateMainWindow(void)
 
     gtk_container_add( GTK_CONTAINER( pwMain ), pwVbox = gtk_vbox_new( FALSE, 0 ) );
 
+#if (USE_GTKUIMANAGER)
+    GError *error = NULL;
+    GtkActionGroup *action_group;
+    
+    puim = gtk_ui_manager_new ();
+
+    action_group = gtk_action_group_new ("Actions");
+    gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
+    gtk_action_group_add_actions (action_group, actionEntries, G_N_ELEMENTS (actionEntries), NULL);
+    gtk_action_group_add_toggle_actions (action_group, toggleActionEntries, G_N_ELEMENTS (toggleActionEntries), NULL);
+    gtk_action_group_add_radio_actions (action_group, toolbarRadioActionEntries, G_N_ELEMENTS (toolbarRadioActionEntries), 0, GENERIC_RADIO_CALLBACK_FROMID(VIEW_TOOLBAR_ICONSONLY), NULL );
+    gtk_action_group_add_radio_actions (action_group, setTurnRadioActionEntries, G_N_ELEMENTS (setTurnRadioActionEntries), 0, CMD_RADIO_CALLBACK_FROMID(CMD_SET_TURN_0), NULL );
+    gtk_ui_manager_insert_action_group (puim, action_group, 0);
+
+    gtk_ui_manager_add_ui_from_string (puim, GNUBG_MAIN_UI, -1, &error);
+    if (error) {
+        g_warning ("Cannot load UI: %s", error->message);
+        g_error_free (error);
+        error = NULL;
+    }
+#if USE_BOARD3D
+    gtk_ui_manager_add_ui_from_string (puim, UIADDITIONS3D, -1, &error);
+    if (error) {
+        g_warning ("Cannot load UI: %s", error->message);
+        g_error_free (error);
+        error = NULL;
+    }
+#endif
+    /* Bind the accelerators */
+    gtk_window_add_accel_group (GTK_WINDOW (pwMain), pagMain = gtk_ui_manager_get_accel_group (puim));
+    
+
+#else
     pagMain = gtk_accel_group_new();
     pif = gtk_item_factory_new( GTK_TYPE_MENU_BAR, "<main>", pagMain );
 
@@ -3266,22 +3786,28 @@ static void CreateMainWindow(void)
 
     gtk_item_factory_create_items( pif, sizeof( aife ) / sizeof( aife[ 0 ] ), aife, NULL );
 
-	/* Tick default toolbar style */
-	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget_by_action(pif, nToolbarStyle + TOOLBAR_ACTION_OFFSET)), TRUE);
+    /* Tick default toolbar style */
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget_by_action(pif, nToolbarStyle + TOOLBAR_ACTION_OFFSET)), TRUE);
     gtk_window_add_accel_group( GTK_WINDOW( pwMain ), pagMain );
-
+#endif
     gtk_box_pack_start( GTK_BOX( pwVbox ),
 			pwHandle = gtk_handle_box_new(),
 			FALSE, FALSE, 0 );
-    gtk_container_add( GTK_CONTAINER( pwHandle ),
+#if (USE_GTKUIMANAGER)
+    pwMenuBar = gtk_ui_manager_get_widget (puim, "/MainMenu");
+    gtk_container_add( GTK_CONTAINER( pwHandle ), pwMenuBar );
+
+#else
+   gtk_container_add( GTK_CONTAINER( pwHandle ),
 			pwMenuBar = gtk_item_factory_get_widget( pif,
 								 "<main>" ));
+#endif
 
    gtk_box_pack_start( GTK_BOX( pwVbox ),
                        pwHandle = gtk_handle_box_new(), FALSE, TRUE, 0 );
    gtk_container_add( GTK_CONTAINER( pwHandle ),
                        pwToolbar = ToolbarNew() );
-    
+
    gtk_box_pack_start( GTK_BOX( pwVbox ),
 			pwGameBox = gtk_hbox_new(FALSE, 0),
 			TRUE, TRUE, 0 );
@@ -3301,6 +3827,11 @@ static void CreateMainWindow(void)
    gtk_paned_pack2(GTK_PANED(hpaned), pwPanelHbox, FALSE, FALSE);
    gtk_box_pack_start( GTK_BOX( pwPanelHbox ), pwPanelVbox = gtk_vbox_new( FALSE, 1 ), TRUE, TRUE, 0);
 
+   /* Do this so that the menu is packed now instead of in the idle loop */
+#if (USE_GTKUIMANAGER)
+   gtk_ui_manager_ensure_update (puim);
+#endif
+
    DockPanels();
 
    /* Status bar */
@@ -3313,8 +3844,8 @@ static void CreateMainWindow(void)
     gtk_statusbar_set_has_resize_grip( GTK_STATUSBAR( pwStatus ), FALSE );
     /* It's a bit naughty to access pwStatus->label, but its default alignment
        is ugly, and GTK gives us no other way to change it. */
-    gtk_misc_set_alignment( GTK_MISC( GTK_STATUSBAR( pwStatus )->label ),
-			    0.0f, 0.5f );
+    gtk_misc_set_alignment( GTK_MISC( get_statusbar_label (GTK_STATUSBAR( pwStatus ) ) ),
+			0.0f, 0.5f );
     idOutput = gtk_statusbar_get_context_id( GTK_STATUSBAR( pwStatus ),
 					     "gnubg output" );
     idProgress = gtk_statusbar_get_context_id( GTK_STATUSBAR( pwStatus ),
@@ -3521,13 +4052,18 @@ extern void RunGTK( GtkWidget *pwSplash, char *commands, char *python_script, ch
 		GTKSet( &fShowIDs);
 
 		/* Set the default arrow cursor in the stop window so obvious it can be clicked */
-		gdk_window_set_cursor(pwStop->window, gdk_cursor_new(GDK_ARROW));
+		gdk_window_set_cursor(gtk_widget_get_window( pwStop ), gdk_cursor_new(GDK_ARROW));
 
 		/* Make sure toolbar looks correct */
 		{
 			int style = nToolbarStyle;
 			nToolbarStyle = 2;	/* Default style is fine */
 			SetToolbarStyle(style);
+#if (USE_GTKUIMANAGER)
+			gtk_check_menu_item_set_active ( GTK_CHECK_MENU_ITEM (gtk_ui_manager_get_widget (puim, 
+				"/MainMenu/ViewMenu/ToolBarMenu/Both" )), nToolbarStyle );
+#endif
+
 		}
 
 #if USE_BOARD3D
@@ -3551,30 +4087,54 @@ extern void RunGTK( GtkWidget *pwSplash, char *commands, char *python_script, ch
 		if (!ArePanelsDocked())
 		{
 			gtk_widget_hide(hpaned);
+#if (USE_GTKUIMANAGER)
+			gtk_widget_hide ( (gtk_ui_manager_get_widget (puim, 
+				"/MainMenu/ViewMenu/PanelsMenu/Commentary" )) );
+			gtk_widget_hide ( (gtk_ui_manager_get_widget (puim, 
+				"/MainMenu/ViewMenu/HidePanels" )) );
+			gtk_widget_hide ( (gtk_ui_manager_get_widget (puim, 
+				"/MainMenu/ViewMenu/RestorePanels" )) );
+#else
 			gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Panels/Commentary"));
 			gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Hide panels"));
 			gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Restore panels"));
+#endif
 		}
 		else 
 		{
 			if (ArePanelsShowing())
 			{
+#if (USE_GTKUIMANAGER)
+				gtk_widget_hide ( (gtk_ui_manager_get_widget (puim, 
+					"/MainMenu/ViewMenu/RestorePanels" )) );
+#else
 				gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Restore panels"));
+#endif
 				gtk_widget_hide(pwGameBox);
 			}
 			else
+#if (USE_GTKUIMANAGER)
+				gtk_widget_hide ( (gtk_ui_manager_get_widget (puim, 
+					"/MainMenu/ViewMenu/HidePanels" )) );
+#else
 				gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Hide panels"));
+#endif
 		}
 
 		/* Make sure main window is on top */
-		gdk_window_raise(pwMain->window);
+		gdk_window_raise( gtk_widget_get_window( pwMain ) );
 
 		/* force update of board; needed to display board correctly if user
 			has special settings, e.g., clockwise or nackgammon */
 		ShowBoard();
 
 		if (fToolbarShowing)
+#if (USE_GTKUIMANAGER)
+			gtk_widget_hide ( (gtk_ui_manager_get_widget (puim, 
+				"/MainMenu/ViewMenu/ToolBarMenu/ShowToolBar" )) );
+#else
 			gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Toolbar/Show Toolbar"));
+#endif
 
 		if (fFullScreen)
 		{	/* Change to full screen (but hide warning) */
@@ -4088,7 +4648,7 @@ SetMET (GtkWidget * pw, gpointer p)
       g_free (command);
       g_free (filename);
       /* update filename on option page */
-      if (p && GTK_WIDGET_VISIBLE (p))
+      if (p && gtk_widget_get_visible (p))
 	gtk_label_set_text (GTK_LABEL (p), (char *) miCurrent.szFileName);
     }
   UserCommand("save settings");
@@ -4139,10 +4699,10 @@ static void GetRolloutSettings( GtkWidget *pw, rolloutwidget *prw ) {
   int   p0, p1, i;
   int fCubeEqChequer, fPlayersAreSame;
 
-  prw->rcRollout.nTrials = (int)prw->prwGeneral->padjTrials->value;
-  prw->rcRollout.nTruncate = (unsigned short)prw->prwGeneral->padjTruncPlies->value;
+  prw->rcRollout.nTrials = (int)gtk_adjustment_get_value( prw->prwGeneral->padjTrials );
+  prw->rcRollout.nTruncate = (unsigned short)gtk_adjustment_get_value( prw->prwGeneral->padjTruncPlies );
 
-  prw->rcRollout.nSeed = (int)prw->prwGeneral->padjSeed->value;
+  prw->rcRollout.nSeed = (int)gtk_adjustment_get_value( prw->prwGeneral->padjSeed );
 
   prw->rcRollout.fCubeful = gtk_toggle_button_get_active(
                                                          GTK_TOGGLE_BUTTON( prw->prwGeneral->pwCubeful ) );
@@ -4171,7 +4731,7 @@ static void GetRolloutSettings( GtkWidget *pw, rolloutwidget *prw ) {
   prw->rcRollout.fLateEvals = gtk_toggle_button_get_active(
                                                            GTK_TOGGLE_BUTTON( prw->prwGeneral->pwDoLate ) );
 
-  prw->rcRollout.nLate = (unsigned short)prw->prwGeneral->padjLatePlies->value;
+  prw->rcRollout.nLate = (unsigned short)gtk_adjustment_get_value( prw->prwGeneral->padjLatePlies );
 
   fCubeEqChequer = 
     gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( prw->prwGeneral->pwCubeEqualChequer ) );
@@ -4182,11 +4742,11 @@ static void GetRolloutSettings( GtkWidget *pw, rolloutwidget *prw ) {
   prw->rcRollout.fStopOnSTD = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(
                                             prw->prwGeneral->pwDoSTDStop));
   prw->rcRollout.nMinimumGames = (unsigned int) gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (prw->prwGeneral->pwMinGames));
-  prw->rcRollout.rStdLimit = gtk_spin_button_get_value_as_float (GTK_SPIN_BUTTON (prw->prwGeneral->pwMaxError));
+  prw->rcRollout.rStdLimit = gtk_spin_button_get_value (GTK_SPIN_BUTTON (prw->prwGeneral->pwMaxError));
 
   prw->rcRollout.fStopOnJsd = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(prw->prwGeneral->pwJsdDoStop));
   prw->rcRollout.nMinimumJsdGames = (unsigned int) gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (prw->prwGeneral->pwJsdMinGames));
-  prw->rcRollout.rJsdLimit = gtk_spin_button_get_value_as_float (GTK_SPIN_BUTTON (prw->prwGeneral->pwJsdAdjLimit));
+  prw->rcRollout.rJsdLimit = gtk_spin_button_get_value (GTK_SPIN_BUTTON (prw->prwGeneral->pwJsdAdjLimit));
 
   /* if the players are the same, copy player 0 settings to player 1 */
   if (fPlayersAreSame) {
@@ -5200,7 +5760,7 @@ GTKHint( moverecord *pmr, int hist)
 
 static void SetMouseCursor(GdkCursorType cursorType)
 {
-	if (!GDK_IS_WINDOW(pwMain->window))
+	if (!GDK_IS_WINDOW(gtk_widget_get_window( pwMain ) ) )
 	{
 		g_print("no window\n");
 		return;
@@ -5209,11 +5769,11 @@ static void SetMouseCursor(GdkCursorType cursorType)
 	{
 		GdkCursor *cursor;
 		cursor = gdk_cursor_new(cursorType);
-		gdk_window_set_cursor(pwMain->window, cursor);
+		gdk_window_set_cursor( gtk_widget_get_window( pwMain ), cursor);
 		gdk_cursor_unref(cursor);
 	}
 	else
-		gdk_window_set_cursor(pwMain->window, NULL);
+		gdk_window_set_cursor( gtk_widget_get_window( pwMain ), NULL );
 }
 
 extern void GTKProgressStart( const char *sz )
@@ -5853,8 +6413,8 @@ static void enable_menu( GtkWidget *pw, int f ) {
 
     GtkMenuItem *pmi = GTK_MENU_ITEM( pw );
 
-    if( pmi->submenu )
-	enable_sub_menu( pmi->submenu, f );
+    if( gtk_menu_item_get_submenu ( pmi ) )
+	enable_sub_menu( gtk_menu_item_get_submenu ( pmi ), f );
     else
 	gtk_widget_set_sensitive( pw, f );
 }
@@ -5862,8 +6422,7 @@ static void enable_menu( GtkWidget *pw, int f ) {
 static void enable_sub_menu( GtkWidget *pw, int f ) {
 
     GtkMenuShell *pms = GTK_MENU_SHELL( pw );
-
-    g_list_foreach( pms->children, (GFunc) enable_menu, GINT_TO_POINTER(f) );
+    g_list_foreach( gtk_container_get_children ( GTK_CONTAINER ( pms ) ), (GFunc) enable_menu, GINT_TO_POINTER(f) );
 }
 
 /* A global setting has changed; update entry in Settings menu if necessary. */
@@ -5873,13 +6432,21 @@ extern void GTKSet( void *p ) {
 
     if( p == ap ) {
 	/* Handle the player names. */
-	gtk_label_set_text( GTK_LABEL( GTK_BIN(
+#if (USE_GTKUIMANAGER)
+	gtk_label_set_text( GTK_LABEL( gtk_bin_get_child ( GTK_BIN(
+	    gtk_ui_manager_get_widget (puim, "/MainMenu/GameMenu/SetTurnMenu/SetTurnPlayer0" )
+	    ) ) ), (ap[ 0 ].szName) );
+	gtk_label_set_text( GTK_LABEL( gtk_bin_get_child ( GTK_BIN(
+	    gtk_ui_manager_get_widget (puim, "/MainMenu/GameMenu/SetTurnMenu/SetTurnPlayer1" )
+	    ) ) ), (ap[ 1 ].szName) );
+#else
+	gtk_label_set_text( GTK_LABEL( gtk_bin_get_child ( GTK_BIN(
 	    gtk_item_factory_get_widget_by_action( pif, CMD_SET_TURN_0 )
-	    )->child ), (ap[ 0 ].szName) );
-	gtk_label_set_text( GTK_LABEL( GTK_BIN(
+	    ) ) ), (ap[ 0 ].szName) );
+	gtk_label_set_text( GTK_LABEL( gtk_bin_get_child( GTK_BIN( 
 	    gtk_item_factory_get_widget_by_action( pif, CMD_SET_TURN_1 )
-	    )->child ), (ap[ 1 ].szName) );
-
+	    ) ) ), (ap[ 1 ].szName) );
+#endif
     GL_SetNames();
 
 	GTKRegenerateGames();
@@ -5893,6 +6460,22 @@ extern void GTKSet( void *p ) {
     } else if( p == &ms.fTurn ) {
 	/* Handle the player on roll. */
 	fAutoCommand = TRUE;
+#if (USE_GTKUIMANAGER)
+	if( ms.fTurn >= 0 ) {
+	    if (ms.fTurn)
+		    gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(
+			gtk_ui_manager_get_widget (puim, 
+			"/MainMenu/GameMenu/SetTurnMenu/SetTurnPlayer0" ) ), TRUE );
+	    else 
+		    gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(
+			gtk_ui_manager_get_widget (puim, 
+			"/MainMenu/GameMenu/SetTurnMenu/SetTurnPlayer1" ) ), TRUE );
+	}    
+        enable_menu ( gtk_ui_manager_get_widget (puim, "/MainMenu/GameMenu/Roll" ),
+                      ms.fMove == ms.fTurn && 
+                      ap[ ms.fMove ].pt == PLAYER_HUMAN );
+
+#else
 	
 	if( ms.fTurn >= 0 )
 	    gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(
@@ -5903,6 +6486,7 @@ extern void GTKSet( void *p ) {
                       ms.fMove == ms.fTurn && 
                       ap[ ms.fMove ].pt == PLAYER_HUMAN );
 
+#endif
 	fAutoCommand = FALSE;
     } else if( p == &ms.gs ) {
 	/* Handle the game state. */
@@ -5911,6 +6495,112 @@ extern void GTKSet( void *p ) {
 	board_set_playing( BOARD( pwBoard ), plGame != NULL );
         ToolbarSetPlaying( pwToolbar, plGame != NULL );
 
+#if (USE_GTKUIMANAGER)
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/FileMenu/Save" ), plGame != NULL );
+	enable_menu( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/GameMenu" ), ms.gs == GAME_PLAYING );
+	enable_menu( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/GameMenu/Roll" ), 
+		ms.fMove == ms.fTurn && 
+		ap[ ms.fMove ].pt == PLAYER_HUMAN );
+
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/GoMenu/NextRoll" ), plGame != NULL );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/GoMenu/PreviousRoll" ), plGame != NULL );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/GoMenu/NextMarkedMove" ), plGame != NULL );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/GoMenu/PreviousMarkedMove" ), plGame != NULL );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/GoMenu/NextGame" ), plGame != NULL );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/GoMenu/PreviousGame" ), plGame != NULL );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/GoMenu/NextCMarkedMove" ), plGame != NULL );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/GoMenu/PreviousCMarkedMove" ), plGame != NULL );
+
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/FileMenu/MatchInfo" ), !ListEmpty( &lMatch ) );
+	enable_menu( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu" ), ms.gs == GAME_PLAYING );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu/BatchAnalyse" ), TRUE );
+
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu/AnalyseMove" ), 
+		plLastMove && plLastMove->plNext && plLastMove->plNext->p );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu/AnalyseGame" ), plGame != NULL );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu/AnalyseMatch" ), !ListEmpty( &lMatch ) );
+
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu/ClearAnalysisMenu/Move" ), 
+		plLastMove && plLastMove->plNext && plLastMove->plNext->p );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu/ClearAnalysisMenu/Game" ), plGame != NULL );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu/ClearAnalysisMenu/MatchOrSession" ), 
+		!ListEmpty( &lMatch ) );
+
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu/MatchOrSessionStats" ), 
+		!ListEmpty ( &lMatch ) );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu/MatchEquityTable" ), TRUE );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu/EvaluationSpeed" ), TRUE );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/GameMenu/SwapPlayers" ), 
+		!ListEmpty ( &lMatch ) );
+
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu/CMarkMenu/CMarkCubeMenu/Clear" ), 
+		!ListEmpty ( &lMatch ) );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu/CMarkMenu/CMarkCubeMenu/Show" ), 
+		!ListEmpty ( &lMatch ) );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu/CMarkMenu/CMarkMoveMenu/Clear" ), 
+		!ListEmpty ( &lMatch ) );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu/CMarkMenu/CMarkMoveMenu/Show" ), 
+		!ListEmpty ( &lMatch ) );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu/CMarkMenu/CMarkGameMenu/Clear" ), 
+		!ListEmpty ( &lMatch ) );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu/CMarkMenu/CMarkGameMenu/Show" ), 
+		!ListEmpty ( &lMatch ) );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu/CMarkMenu/CMarkMatchMenu/Clear" ), 
+		!ListEmpty ( &lMatch ) );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu/CMarkMenu/CMarkMatchMenu/Show" ), 
+		!ListEmpty ( &lMatch ) );
+
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu/RolloutMenu/Cube" ), 
+		!ListEmpty ( &lMatch ) );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu/RolloutMenu/Move" ), 
+		!ListEmpty ( &lMatch ) );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu/RolloutMenu/Game" ), 
+		!ListEmpty ( &lMatch ) );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu/RolloutMenu/Match" ), 
+		!ListEmpty ( &lMatch ) );
+
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu/AddMatchOrSessionStatsToDB" ), 
+		!ListEmpty ( &lMatch ) );
+	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim, 
+		"/MainMenu/AnalyseMenu/ShowRecords" ), TRUE );
+#else
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget( pif,
 				"/File/Save..." ), plGame != NULL );
 	
@@ -6000,7 +6690,7 @@ extern void GTKSet( void *p ) {
           gtk_item_factory_get_widget( pif,
                                        "/Analyse/Show Records" ), 
           TRUE );
-
+#endif
 	fAutoCommand = FALSE;
     } else if( p == &ms.fCrawford ) {
         bd->crawford_game = ms.fCrawford;
@@ -6033,9 +6723,9 @@ extern void GTKSet( void *p ) {
 #endif
 		{    
 			if( gtk_widget_get_realized( pwBoard ) ) {
-			    if( GTK_WIDGET_VISIBLE( bd->dice_area ) && !bd->rd->fDiceArea )
+			    if( gtk_widget_get_visible( bd->dice_area ) && !bd->rd->fDiceArea )
 				gtk_widget_hide( bd->dice_area );
-			    else if( ! GTK_WIDGET_VISIBLE( bd->dice_area ) && bd->rd->fDiceArea )
+			    else if( ! gtk_widget_get_visible( bd->dice_area ) && bd->rd->fDiceArea )
 				gtk_widget_show_all( bd->dice_area );
 			}
 		}}
@@ -6043,7 +6733,13 @@ extern void GTKSet( void *p ) {
 	else if( p == &fShowIDs )
 	{
 		inCallback = TRUE;
+#if (USE_GTKUIMANAGER)
+		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM( gtk_ui_manager_get_widget (puim, 
+			"/MainMenu/ViewMenu/ShowIDStatusBar" ) ), fShowIDs ); 
+
+#else
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/View/Show ID in status bar" )), fShowIDs);
+#endif
 		inCallback = FALSE;
 
 		if (!fShowIDs)
@@ -6690,9 +7386,9 @@ static void CalibrationOK( GtkWidget *pw, GtkWidget *ppw ) {
     GtkAdjustment *padj = gtk_spin_button_get_adjustment(
 	GTK_SPIN_BUTTON( ppw ) );
     
-    if( GTK_WIDGET_IS_SENSITIVE( ppw ) ) {
-	if( padj->value != rEvalsPerSec ) {
-	    sprintf( sz, "set calibration %.0f", padj->value );
+    if( gtk_widget_is_sensitive( ppw ) ) {
+	if( gtk_adjustment_get_value( padj ) != rEvalsPerSec ) {
+	    sprintf( sz, "set calibration %.0f", gtk_adjustment_get_value( padj ) );
 	    UserCommand( sz );
 	}
     } else if( rEvalsPerSec > 0 )

@@ -24,6 +24,7 @@
 #include "config.h"
 #include "inc3d.h"
 #include "tr.h"
+#include "gtklocdefs.h"
 
 gboolean gtk_gl_init_success = FALSE;
 
@@ -51,7 +52,9 @@ static gboolean configure_event_3d(GtkWidget *widget, GdkEventConfigure *UNUSED(
 	if (display_is_3d(bd->rd))
 	{
 		static int curHeight = -1, curWidth = -1;
-		int width = widget->allocation.width, height = widget->allocation.height;
+		GtkAllocation allocation;
+		gtk_widget_get_allocation (widget, &allocation);
+		int width = allocation.width, height = allocation.height;
 		if (width != curWidth || height != curHeight)
 		{
 			GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
@@ -131,7 +134,9 @@ static gboolean expose_event_3d(GtkWidget *widget, const GdkEventExpose *exposeE
 		{
 			if (numRestrictFrames == 0)
 			{	/* Redraw obscured part of window - need to flip y co-ord */
-				RestrictiveDrawFrameWindow(exposeEvent->area.x, widget->allocation.height - (exposeEvent->area.y + exposeEvent->area.height),
+				GtkAllocation allocation;
+				gtk_widget_get_allocation (widget, &allocation);
+				RestrictiveDrawFrameWindow(exposeEvent->area.x, allocation.height - (exposeEvent->area.y + exposeEvent->area.height),
 											exposeEvent->area.width, exposeEvent->area.height);
 			}
 
@@ -317,6 +322,7 @@ int DoAcceleratedCheck(const BoardData3d* UNUSED(bd3d), GtkWidget* UNUSED(pwPare
 void RenderToBuffer3d(const BoardData* bd, BoardData3d* bd3d, unsigned int width, unsigned int height, unsigned char* buf)
 {
 	TRcontext *tr;
+	GtkAllocation allocation;
 	GtkWidget *widget = bd3d->drawing_area3d;
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
 	int fSaveBufs = bd3d->fBuffers;
@@ -326,7 +332,8 @@ void RenderToBuffer3d(const BoardData* bd, BoardData3d* bd3d, unsigned int width
 	/* Sort out tile rendering stuff */
 	tr = trNew();
 	#define BORDER 10
-	trTileSize(tr, widget->allocation.width, widget->allocation.height, BORDER);
+	gtk_widget_get_allocation (widget, &allocation);
+	trTileSize(tr, allocation.width, allocation.height, BORDER);
 	trImageSize(tr, width, height);
 	trImageBuffer(tr, GL_RGB, GL_UNSIGNED_BYTE, buf);
 

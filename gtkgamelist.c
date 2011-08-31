@@ -21,7 +21,11 @@
 * $Id$
 */
 
+#undef GDK_DISABLE_DEPRECATED 
+#undef GTK_DISABLE_DEPRECATED
+
 #include "config.h"
+#include "gtklocdefs.h"
 
 #include <gtk/gtk.h>
 #include <glib.h>
@@ -180,7 +184,7 @@ void GetStyleFromRCFile(GtkStyle** ppStyle, char* name, GtkStyle* psBase)
 	/* Get default style so only changes to this are applied */
 	temp = gtk_button_new();
 	gtk_widget_ensure_style(temp);
-	psDefault = temp->style;
+	psDefault = gtk_widget_get_style( temp );
 
 	/* Get Style from rc file */
 	strcpy(styleName, "gnubg-");
@@ -224,7 +228,7 @@ extern GtkWidget* GL_Create(void)
 
 	asz[0] = _("#");
     pwGameList = gtk_clist_new_with_titles(3, asz);
-    GTK_WIDGET_UNSET_FLAGS(pwGameList, GTK_CAN_FOCUS);
+    gtk_widget_set_can_focus (pwGameList, FALSE);
 
     gtk_clist_set_selection_mode( GTK_CLIST( pwGameList ),
 				  GTK_SELECTION_BROWSE );
@@ -238,15 +242,15 @@ extern GtkWidget* GL_Create(void)
     gtk_clist_set_column_resizeable( GTK_CLIST( pwGameList ), 1, FALSE );
     gtk_clist_set_column_resizeable( GTK_CLIST( pwGameList ), 2, FALSE );
     gtk_widget_ensure_style( pwGameList );
-    GetStyleFromRCFile(&ps, "gnubg", pwGameList->style);
+    GetStyleFromRCFile(&ps, "gnubg", gtk_widget_get_style( pwGameList ) );
     ps->base[ GTK_STATE_SELECTED ] =
     	ps->base[ GTK_STATE_ACTIVE ] =
     	ps->base[ GTK_STATE_NORMAL ] =
-    	pwGameList->style->base[ GTK_STATE_NORMAL ];
+    	gtk_widget_get_style( pwGameList )->base[ GTK_STATE_NORMAL ];
     ps->fg[ GTK_STATE_SELECTED ] =
     	ps->fg[ GTK_STATE_ACTIVE ] =
     	ps->fg[ GTK_STATE_NORMAL ] =
-    	pwGameList->style->fg[ GTK_STATE_NORMAL ];
+    	gtk_widget_get_style( pwGameList )->fg[ GTK_STATE_NORMAL ];
     gtk_widget_set_style( pwGameList, ps );
     
     psGameList = gtk_style_copy( ps );
