@@ -9,7 +9,7 @@
 	  board3d/inc3d.h, board3d/misc3d.c, board3d/widget3d.c,
 	  +gtklocdefs.h, +gtklocdefs.c, +gtkuidefs.h:
 	Work around deprecated functions in GTK 2.24, 
-	remove direct member access to opaque types,
+	remove direct member access of opaque types,
 	convert GtkItemFactory to GtkUIManager for the menu
 	and toolbars. Building with 2.24 using compile flags
 	-DGDK_DISABLE_DEPRECATED -DGTK_DISABLE_DEPRECATED
