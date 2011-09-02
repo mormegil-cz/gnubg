@@ -1,3 +1,8 @@
+2011-09-02  Michael Petch  <mpetch@capp-sysware.com>
+	* gtkboard.c, gtkfile.c, gtkgame.c, gtklocdefs.c, 
+	  gtklocdefs.h, gtktoolbar.c, gtktoolbar.h, gtkwindows.c:
+	Work around more deprecated functions. 
+
 2011-08-30  Michael Petch  <mpetch@capp-sysware.com>
 	* Makefile.am, credits.sh gtk-multiview.c, gtkboard.c,
 	  gtkexport.c, gtkgame.c, gtkgame.h, gtkgamelist.c,
