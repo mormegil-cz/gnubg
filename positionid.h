@@ -60,5 +60,8 @@ extern unsigned int Combination ( const unsigned int n, const unsigned int r );
 
 extern unsigned char Base64( const unsigned char ch );
 
+extern void oldPositionFromKey(TanBoard anBoard, const oldpositionkey* pkey);
+extern void oldPositionKey(const TanBoard anBoard, oldpositionkey* pkey);
+
 #endif
 

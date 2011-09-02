@@ -23,6 +23,9 @@
 
 #include "gnubgmodule.h"
 #include "backgammon.h"
+#include "positionid.h"
+#include "drawboard.h"
+
 #include <signal.h>
 #include <glib.h>
 #include <glib/gstdio.h>
