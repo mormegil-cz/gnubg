@@ -330,7 +330,7 @@ static GtkWidget* ToolbarAddButton(GtkToolbar *pwToolbar, const char *stockID, c
 	return GTK_WIDGET(but);
 }
 
-static GtkWidget* ToolbarAddWidget(GtkToolbar *pwToolbar, GtkWidget *pWidget, const char *tooltip)
+GtkWidget* ToolbarAddWidget(GtkToolbar *pwToolbar, GtkWidget *pWidget, const char *tooltip)
 {
 	GtkToolItem* ti = gtk_tool_item_new();
 	gtk_widget_set_tooltip_text(GTK_WIDGET(ti), tooltip);

@@ -212,9 +212,9 @@ static void SaveCommon (guint f, gchar * prompt)
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (so.upext), TRUE);
 
   hbox = gtk_hbox_new (FALSE, 10);
-  gtk_box_pack_start_defaults (GTK_BOX (hbox), so.mgp);
-  gtk_box_pack_start_defaults (GTK_BOX (hbox), so.description);
-  gtk_box_pack_start_defaults (GTK_BOX (hbox), so.upext);
+  gtk_box_pack_start (GTK_BOX (hbox), so.mgp, TRUE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (hbox), so.description, TRUE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (hbox), so.upext, TRUE, TRUE, 0);
   gtk_widget_show_all (hbox);
   gtk_file_chooser_set_extra_widget (GTK_FILE_CHOOSER (so.fc), hbox);
 

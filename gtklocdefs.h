@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+* along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Id$
@@ -89,7 +89,7 @@ extern GtkTooltips *ptt;
 #endif
 
 extern GtkWidget *get_statusbar_label (GtkStatusbar *statusbar);
-
+extern void toolbar_set_orientation (GtkToolbar *toolbar, GtkOrientation orientation);
 
 #ifdef GTK_DISABLE_DEPRECATED
 #define USE_GTKUIMANAGER 1

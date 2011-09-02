@@ -61,5 +61,6 @@ image_from_xpm_d ( char **xpm, GtkWidget *pw );
 
 extern void click_edit(void);
 extern void click_swapdirection(void);
+extern GtkWidget* ToolbarAddWidget(GtkToolbar *pwToolbar, GtkWidget *pWidget, const char *tooltip);
 
 #endif /* _GTKTOOLBAR_H_ */

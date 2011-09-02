@@ -1,4 +1,3 @@
-
 /*
  * gtkboard.c
  *
@@ -2214,7 +2213,7 @@ extern gboolean board_motion_notify(GtkWidget *board, GdkEventMotion *event,
 							   TargetHelpColor->green * 256 +
 							   TargetHelpColor->blue );
 			/* get the closest color available in the colormap if no 24-bit*/
-			gdk_color_alloc(gtk_widget_get_colormap( board ), TargetHelpColor);
+			gdk_colormap_alloc_color (gtk_widget_get_colormap( board ), TargetHelpColor, TRUE, TRUE);
 			gdk_gc_set_foreground(bd->gc_copy, TargetHelpColor);
 
 			/* draw help rectangles around target points */
@@ -3627,9 +3626,7 @@ static void DrawAlphaImage( GdkDrawable *pd, int x, int y,
 	
     ppb = gdk_pixbuf_new_from_data( auch, GDK_COLORSPACE_RGB, TRUE, 8,
 				    cx, cy, cx * 4, NULL, NULL );
-    
-    gdk_pixbuf_render_to_drawable_alpha( ppb, pd, 0, 0, x, y, cx, cy,
-					 GDK_PIXBUF_ALPHA_FULL, 128,
+	gdk_draw_pixbuf ( pd, NULL, ppb, 0, 0, x, y, cx, cy,
 					 GDK_RGB_DITHER_MAX, 0, 0 );
     g_object_unref( G_OBJECT( ppb ) );
 }    
@@ -3758,9 +3755,11 @@ static void board_init( Board *board )
 
     bd->gc_copy = gtk_gc_get( vis->depth, cmap, &gcval, 0 );
 
-    gcval.foreground.pixel = gdk_rgb_xpixel_from_rgb( 0x000080 );
-    /* ^^^ use gdk_get_color  and gdk_gc_set_foreground.... */
-    bd->gc_cube = gtk_gc_get( vis->depth, cmap, &gcval, GDK_GC_FOREGROUND );
+	GdkColor color;
+	gdk_color_parse ("#000080", &color);
+	gdk_colormap_alloc_color (cmap, &color, TRUE, TRUE);
+	gcval.foreground.pixel = color.pixel;
+	bd->gc_cube = gtk_gc_get( vis->depth, cmap, &gcval, GDK_GC_FOREGROUND );
 
     bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -10;    
     bd->diceRoll[0] = bd->diceRoll[1] = 0;
@@ -3996,8 +3995,8 @@ static void board_init( Board *board )
                          bd->pwvboxcnt,
                        	 FALSE, FALSE, 0 );
     
-    gtk_widget_ref(bd->jacoby);
-    gtk_widget_ref(bd->crawford);
+    g_object_ref (bd->jacoby);
+    g_object_ref (bd->crawford);
     gtk_adjustment_value_changed ( GTK_ADJUSTMENT ( bd->amatch ) );
 
 
