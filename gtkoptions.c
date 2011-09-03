@@ -530,10 +530,10 @@ static void append_tutor_options(optionswidget *pow)
 	gtk_container_add(GTK_CONTAINER(pwev), pwhbox);
 
 	gtk_box_pack_start(GTK_BOX(pwhbox), gtk_label_new(_("Warning level:")), FALSE, FALSE, 0);
-	pow->pwTutorSkill = gtk_combo_box_new_text();
+	pow->pwTutorSkill = gtk_combo_box_text_new();
 	gtk_box_pack_start(GTK_BOX(pwhbox), pow->pwTutorSkill, FALSE, FALSE, 0);
 	for (ppch = aszTutor; *ppch; ppch++) {
-		gtk_combo_box_append_text(GTK_COMBO_BOX(pow->pwTutorSkill), gettext(*ppch));
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(pow->pwTutorSkill), gettext(*ppch));
 	}
 	g_assert(nTutorSkillCurrent >= 0 && nTutorSkillCurrent <= 2);
 	gtk_widget_set_tooltip_text(pwev,
@@ -617,11 +617,11 @@ static void append_display_options(optionswidget *pow)
 				      "exchanging board positions and match situations."));
 
 	pwhbox = gtk_hbox_new(FALSE, 2);
-	pow->pwShowPips = gtk_combo_box_new_text();
-	gtk_combo_box_append_text(GTK_COMBO_BOX(pow->pwShowPips), _("None"));
-	gtk_combo_box_append_text(GTK_COMBO_BOX(pow->pwShowPips), _("Pips"));
-	gtk_combo_box_append_text(GTK_COMBO_BOX(pow->pwShowPips), _("Pips or EPC"));
-	gtk_combo_box_append_text(GTK_COMBO_BOX(pow->pwShowPips), _("Pips and EPC"));
+	pow->pwShowPips = gtk_combo_box_text_new();
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(pow->pwShowPips), _("None"));
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(pow->pwShowPips), _("Pips"));
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(pow->pwShowPips), _("Pips or EPC"));
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(pow->pwShowPips), _("Pips and EPC"));
 	gtk_combo_box_set_active(GTK_COMBO_BOX(pow->pwShowPips), gui_show_pips);
 	gtk_box_pack_start(GTK_BOX(pwhbox), gtk_label_new(_("Show Pips")), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(pwhbox), pow->pwShowPips, FALSE, FALSE, 0);
@@ -1017,7 +1017,7 @@ static void append_dice_options(optionswidget *pow)
 				gtk_box_pack_start(GTK_BOX(pwvbox3), pwhbox, FALSE, FALSE, 0);
 
 				/* Rng types */
-				pow->pwRngComboBox = gtk_combo_box_new_text();
+				pow->pwRngComboBox = gtk_combo_box_text_new();
 				gtk_box_pack_start(GTK_BOX(pwhbox), pow->pwRngComboBox, FALSE, FALSE, 26);
 				/* NB. Doesn't look like gtk currently supports tooltips for individual combobox entries */
 				gtk_widget_set_tooltip_text(pow->pwRngComboBox, _("Select a random number generator to use"));
@@ -1047,7 +1047,7 @@ static void append_dice_options(optionswidget *pow)
 
 			if (!((i == RNG_BSD && !bsd) || (i == RNG_BBS && !blumblum)))
 			{
-				gtk_combo_box_append_text(GTK_COMBO_BOX(pow->pwRngComboBox), aszRNG[i]);
+				gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(pow->pwRngComboBox), aszRNG[i]);
 				if (i == rngCurrent)
 					rngSelected = rngsAdded;
 				rngsAdded++;
@@ -1098,12 +1098,12 @@ static void append_dice_options(optionswidget *pow)
 		gtk_box_pack_start(GTK_BOX(pwhbox), gtk_label_new(_("Always roll the ")), FALSE,
 				   FALSE, 0);
 
-		pow->apwCheatRoll[i] = gtk_combo_box_new_text();
+		pow->apwCheatRoll[i] = gtk_combo_box_text_new();
 		gtk_box_pack_start(GTK_BOX(pwhbox), pow->apwCheatRoll[i], FALSE, FALSE, 0);
 		gtk_container_set_border_width(GTK_CONTAINER(pow->apwCheatRoll[i]), 1);
 
 		for (ppch = aszCheatRoll; *ppch; ++ppch)
-			gtk_combo_box_append_text(GTK_COMBO_BOX(pow->apwCheatRoll[i]), gettext(*ppch));
+			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(pow->apwCheatRoll[i]), gettext(*ppch));
 
 		sz = g_strdup_printf(_("roll for player %s."), ap[i].szName);
 
@@ -1477,7 +1477,7 @@ static void OptionsOK(GtkWidget *pw, optionswidget *pow)
 
   if (gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->apwDice[0])))
   {	/* rng selected */
-	char *selRNG = gtk_combo_box_get_active_text(GTK_COMBO_BOX(pow->pwRngComboBox));
+	char *selRNG = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(pow->pwRngComboBox));
 	for (i = 0; i < NUM_RNGS - 3; i++)
 	{
 		if (!strcmp(selRNG, aszRNG[i]))

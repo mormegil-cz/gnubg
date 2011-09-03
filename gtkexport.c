@@ -34,6 +34,7 @@
 #include "gtkexport.h"
 #include "boarddim.h"
 #include "gtkwindows.h"
+#include "gtklocdefs.h"
 
 static char *aszInclude[] = {
     N_("Annotations"), 
@@ -788,11 +789,11 @@ extern void GTKShowExport ( exportsetup *pexs )
                        gtk_label_new ( _("HTML board type:") ),
                        TRUE, TRUE, 0 );
   
-  pew->pwHTMLType = gtk_combo_box_new_text ();
+  pew->pwHTMLType = gtk_combo_box_text_new ();
   gtk_box_pack_start (GTK_BOX (pwHBox), pew->pwHTMLType, FALSE, FALSE, 0);
-  gtk_combo_box_append_text(GTK_COMBO_BOX(pew->pwHTMLType), _("GNU Backgammon"));
-  gtk_combo_box_append_text(GTK_COMBO_BOX(pew->pwHTMLType), _("BBS"));
-  gtk_combo_box_append_text(GTK_COMBO_BOX(pew->pwHTMLType), _("fibs2html"));
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(pew->pwHTMLType), _("GNU Backgammon"));
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(pew->pwHTMLType), _("BBS"));
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(pew->pwHTMLType), _("fibs2html"));
   gtk_combo_box_set_active(GTK_COMBO_BOX (pew->pwHTMLType), 0);
 
   gtk_container_set_border_width (GTK_CONTAINER (pwHBox), 4);
@@ -805,11 +806,11 @@ extern void GTKShowExport ( exportsetup *pexs )
                        gtk_label_new ( _("CSS Style sheet:") ),
                        TRUE, TRUE, 0 );
   
-  pew->pwHTMLCSS = gtk_combo_box_new_text();
+  pew->pwHTMLCSS = gtk_combo_box_text_new();
   gtk_box_pack_start (GTK_BOX (pwHBox), pew->pwHTMLCSS, FALSE, FALSE, 0);
-  gtk_combo_box_append_text(GTK_COMBO_BOX(pew->pwHTMLCSS), _("In <head>"));
-  gtk_combo_box_append_text(GTK_COMBO_BOX(pew->pwHTMLCSS), _("Inline (in tags)"));
-  gtk_combo_box_append_text(GTK_COMBO_BOX(pew->pwHTMLCSS), _("External file"));
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(pew->pwHTMLCSS), _("In <head>"));
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(pew->pwHTMLCSS), _("Inline (in tags)"));
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(pew->pwHTMLCSS), _("External file"));
   gtk_combo_box_set_active(GTK_COMBO_BOX (pew->pwHTMLCSS), 0);
 
   gtk_container_set_border_width (GTK_CONTAINER (pwHBox), 4);

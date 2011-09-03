@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include "gtkrelational.h"
 #include "gtkwindows.h"
+#include "gtklocdefs.h"
 
 enum {
 	COLUMN_NICK,
@@ -687,9 +688,9 @@ extern GtkWidget *RelationalOptions(void)
 
 	g_signal_connect(dbList, "cursor-changed", G_CALLBACK(DBListSelected), NULL);
 
-	dbtype = gtk_combo_box_new_text();
+	dbtype = gtk_combo_box_text_new();
 	for (i = 0; i < NUM_PROVIDERS; i++)
-		gtk_combo_box_append_text(GTK_COMBO_BOX(dbtype), GetProviderName(i));
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(dbtype), GetProviderName(i));
 	g_signal_connect(dbtype, "changed", G_CALLBACK(TypeChanged), dbList);
 
 	vb2 = gtk_vbox_new(FALSE, 0);

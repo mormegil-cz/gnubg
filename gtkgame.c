@@ -32,6 +32,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <locale.h>
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -2112,11 +2114,11 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
                             "beginner's play to the grandmaster setting "
                             "that will test your patience"));
 
-    pew->pwOptionMenu = gtk_combo_box_new_text();
+    pew->pwOptionMenu = gtk_combo_box_text_new();
 
     for ( i = 0; i < NUM_SETTINGS; i++ )
-	    gtk_combo_box_append_text(GTK_COMBO_BOX(pew->pwOptionMenu), Q_(aszSettings[i]));
-    gtk_combo_box_append_text(GTK_COMBO_BOX(pew->pwOptionMenu), _("user defined"));
+	    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(pew->pwOptionMenu), Q_(aszSettings[i]));
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(pew->pwOptionMenu), _("user defined"));
     g_signal_connect(G_OBJECT(pew->pwOptionMenu), "changed", G_CALLBACK(SettingsMenuActivate), pew);
     gtk_container_add ( GTK_CONTAINER ( pw2 ), pew->pwOptionMenu );
 
@@ -2395,7 +2397,7 @@ static void UpdateSummaryEvalMenuSetting(AnalysisDetails *pAnalDetails )
 		|| (chequerDefault == SETTINGS_SUPREMO && cubeDefault == SETTINGS_WORLDCLASS))
 		setting = chequerDefault;
 
-    gtk_combo_box_set_active(GTK_COMBO_BOX ( pAnalDetails->pwOptionMenu ), setting );
+    gtk_combo_box_set_active(GTK_COMBO_BOX( pAnalDetails->pwOptionMenu ), setting );
 }
 
 static void ShowDetailedAnalysis(GtkWidget *button, AnalysisDetails *pDetails)
@@ -2472,11 +2474,11 @@ static GtkWidget *AddLevelSettings(GtkWidget *pwFrame, AnalysisDetails *pAnalDet
 
 	/* option menu with selection of predefined settings */
 
-	pAnalDetails->pwOptionMenu = gtk_combo_box_new_text();
+	pAnalDetails->pwOptionMenu = gtk_combo_box_text_new();
 
 	for ( i = 0; i < NUM_SETTINGS; i++ )
-		gtk_combo_box_append_text(GTK_COMBO_BOX(pAnalDetails->pwOptionMenu), Q_(aszSettings[i]));
-	gtk_combo_box_append_text(GTK_COMBO_BOX(pAnalDetails->pwOptionMenu), _("user defined"));
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(pAnalDetails->pwOptionMenu), Q_(aszSettings[i]));
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(pAnalDetails->pwOptionMenu), _("user defined"));
 	g_signal_connect(G_OBJECT(pAnalDetails->pwOptionMenu), "changed", G_CALLBACK(SummaryMenuActivate), pAnalDetails);
 	gtk_container_add ( GTK_CONTAINER ( pw2 ), pAnalDetails->pwOptionMenu );
 
@@ -4191,7 +4193,7 @@ extern void RunGTK( GtkWidget *pwSplash, char *commands, char *python_script, ch
 
 extern void GtkChangeLanguage(void)
 {
-	gtk_set_locale();
+	setlocale(LC_ALL, "C");
 	if (pwMain && gtk_widget_get_realized(pwMain))
 	{
 		reasonExited = RE_LANGUAGE_CHANGE;
@@ -6958,7 +6960,7 @@ static GtkWidget *AddNavigation(GtkWidget *pvbox)
 	int anFinalScore[2];
 	listOLD *pl;
 
-	box = gtk_combo_box_new_text();
+	box = gtk_combo_box_text_new();
 
 	if (getFinalScore(anFinalScore))
 		sprintf(sz, _("All games: %s %d, %s %d"), ap[0].szName,
@@ -6978,7 +6980,7 @@ static GtkWidget *AddNavigation(GtkWidget *pvbox)
 	gtk_box_pack_start(GTK_BOX(phbox), pw, FALSE, FALSE, 4);
 	gtk_widget_set_tooltip_text(pw, _("Move ahead to the next game"));
 
-	gtk_combo_box_append_text(GTK_COMBO_BOX(box), sz);
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(box), sz);
 	numStatGames = 0;
 	for (pl = lMatch.plNext; pl->p; pl = pl->plNext) {
 		listOLD *plGame = pl->p;
@@ -6987,7 +6989,7 @@ static GtkWidget *AddNavigation(GtkWidget *pvbox)
 
 		sprintf(sz, _("Game %d: %s %d, %s %d"), pmr->g.i + 1, ap[0].szName,
 			pmr->g.anScore[0], ap[1].szName, pmr->g.anScore[1]);
-		gtk_combo_box_append_text(GTK_COMBO_BOX(box), sz);
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(box), sz);
 	}
 	g_signal_connect(G_OBJECT(box), "changed", G_CALLBACK(StatsSelectGame), NULL);
 	gtk_box_pack_start(GTK_BOX(phbox), box, TRUE, TRUE, 4);

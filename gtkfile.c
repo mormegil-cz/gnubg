@@ -24,6 +24,7 @@
 
 #include "config.h"
 #include "backgammon.h"
+#include "gtklocdefs.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -190,10 +191,10 @@ static void SaveCommon (guint f, gchar * prompt)
   so.fc = GnuBGFileDialog (prompt, folder, fn, GTK_FILE_CHOOSER_ACTION_SAVE);
   g_free (fn);
 
-  so.description = gtk_combo_box_new_text ();
+  so.description = gtk_combo_box_text_new ();
   for (j = i = 0; i < f; ++i)
     {
-      gtk_combo_box_append_text (GTK_COMBO_BOX (so.description),
+      gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (so.description),
 				 export_format[i].description);
       if (i == last_export_type)
 	gtk_combo_box_set_active (GTK_COMBO_BOX (so.description), j);
@@ -202,10 +203,10 @@ static void SaveCommon (guint f, gchar * prompt)
   if (f == 1)
     gtk_combo_box_set_active (GTK_COMBO_BOX (so.description), 0);
 
-  so.mgp = gtk_combo_box_new_text ();
-  gtk_combo_box_append_text (GTK_COMBO_BOX (so.mgp), _("match"));
-  gtk_combo_box_append_text (GTK_COMBO_BOX (so.mgp), _("game"));
-  gtk_combo_box_append_text (GTK_COMBO_BOX (so.mgp), _("position"));
+  so.mgp = gtk_combo_box_text_new ();
+  gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (so.mgp), _("match"));
+  gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (so.mgp), _("game"));
+  gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (so.mgp), _("position"));
   gtk_combo_box_set_active (GTK_COMBO_BOX (so.mgp), last_export_mgp);
 
   so.upext = gtk_check_button_new_with_label (_("Update extension"));
@@ -318,17 +319,17 @@ static void OpenTypeChanged(GtkComboBox *widget, gpointer fc)
 static GtkWidget* import_types_combo(void)
 {
 	gint i;
-	GtkWidget *type_combo = gtk_combo_box_new_text();
+	GtkWidget *type_combo = gtk_combo_box_text_new();
 
 	/* Default option 'automatic' */
-	gtk_combo_box_append_text(GTK_COMBO_BOX(type_combo), _("Automatic"));
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(type_combo), _("Automatic"));
 	gtk_combo_box_set_active(GTK_COMBO_BOX(type_combo), 0);
 
 	for (i = 0; i < N_IMPORT_TYPES; ++i)
-		gtk_combo_box_append_text(GTK_COMBO_BOX(type_combo), import_format[i].description);
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(type_combo), import_format[i].description);
 
 	/* Extra option 'command file' */
-	gtk_combo_box_append_text(GTK_COMBO_BOX(type_combo), _("Gnubg Command file"));
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(type_combo), _("Gnubg Command file"));
 
 	return type_combo;
 }

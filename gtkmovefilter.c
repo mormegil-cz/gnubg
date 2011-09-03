@@ -28,6 +28,7 @@
 #include "gtkgame.h"
 #include "gtkmovefilter.h"
 #include "gtkwindows.h"
+#include "gtklocdefs.h"
 
 typedef struct _movefilterwidget {
 
@@ -321,14 +322,14 @@ static GtkWidget *MoveFilterSetup(movefilter aamf[MAX_FILTER_PLIES][MAX_FILTER_P
 
 	pwFrame = gtk_frame_new(_("Predefined move filters:"));
 	gtk_box_pack_start(GTK_BOX(pwSetup), pwFrame, TRUE, TRUE, 0);
-	pmfsw->pwOptionMenu = gtk_combo_box_new_text();
+	pmfsw->pwOptionMenu = gtk_combo_box_text_new();
 	for (i = 0; i <= NUM_MOVEFILTER_SETTINGS; i++) {
 
 		if (i < NUM_MOVEFILTER_SETTINGS)
-			gtk_combo_box_append_text(GTK_COMBO_BOX(pmfsw->pwOptionMenu),
+			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(pmfsw->pwOptionMenu),
 						  Q_(aszMoveFilterSettings[i]));
 		else
-			gtk_combo_box_append_text(GTK_COMBO_BOX(pmfsw->pwOptionMenu),
+			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(pmfsw->pwOptionMenu),
 						  _("user defined"));
 	}
 
@@ -489,14 +490,14 @@ extern GtkWidget *MoveFilterWidget(movefilter * pmf, int *UNUSED(pfOK),
 
 	pw = gtk_hbox_new(FALSE, 4);
 	gtk_container_add(GTK_CONTAINER(pwFrame), pw);
-	pmfw->pwOptionMenu = gtk_combo_box_new_text();
+	pmfw->pwOptionMenu = gtk_combo_box_text_new();
 	for (i = 0; i <= NUM_MOVEFILTER_SETTINGS; i++) {
 
 		if (i < NUM_MOVEFILTER_SETTINGS)
-			gtk_combo_box_append_text(GTK_COMBO_BOX(pmfw->pwOptionMenu),
+			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(pmfw->pwOptionMenu),
 						  Q_(aszMoveFilterSettings[i]));
 		else
-			gtk_combo_box_append_text(GTK_COMBO_BOX(pmfw->pwOptionMenu),
+			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(pmfw->pwOptionMenu),
 						  _("user defined"));
 
 	}

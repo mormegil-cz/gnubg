@@ -495,8 +495,8 @@ static void PopulateCommandHistory(CommandEntryData_T *pData)
 	int i;
 
 	for (i = 0; i < pData->numHistory; i++) {
-		gtk_combo_box_remove_text (GTK_COMBO_BOX(pData->cmdEntryCombo), i);
-		gtk_combo_box_insert_text (GTK_COMBO_BOX(pData->cmdEntryCombo), i, pData->cmdHistory[i]); 
+		gtk_combo_box_text_remove (GTK_COMBO_BOX_TEXT(pData->cmdEntryCombo), i);
+		gtk_combo_box_text_insert_text (GTK_COMBO_BOX_TEXT(pData->cmdEntryCombo), i, pData->cmdHistory[i]); 
 	}
 }
 
@@ -764,7 +764,7 @@ extern void GTKAddGame(moverecord * pmr)
     else
         sprintf(sz, _("Game %d: %d, %d"), pmr->g.i + 1,
 		pmr->g.anScore[0], pmr->g.anScore[1]);
-    gtk_combo_box_append_text(GTK_COMBO_BOX(game_select_combo), sz);
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(game_select_combo), sz);
     model = gtk_combo_box_get_model(GTK_COMBO_BOX(game_select_combo));
     last_game = gtk_tree_model_iter_n_children(model, NULL);
     GTKSetGame(last_game - 1);
@@ -834,7 +834,7 @@ static void CreateGameWindow( void ) {
 	}
     gtk_box_pack_start( GTK_BOX( pvbox ), phbox, FALSE, FALSE, 4 );
 
-    game_select_combo = gtk_combo_box_new_text();
+    game_select_combo = gtk_combo_box_text_new();
     g_signal_connect (G_OBJECT (game_select_combo), "changed",
 		    G_CALLBACK (SelectGame), NULL);
     gtk_box_pack_start( GTK_BOX( phbox ), game_select_combo, TRUE, TRUE, 4 );
