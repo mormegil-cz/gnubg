@@ -249,10 +249,15 @@ RollsTree ( const int n, evalcontext *pec, const matchstate *pms )
   return ptv;
 }
 
+static gboolean fScrollComplete = FALSE;
+
 static void DepthChanged ( GtkRange *pr, rollswidget *prw )
 {
 	GtkWidget *pNewRolls;
 	int n;
+
+	if (!fScrollComplete)
+		return;
 
 	if (fInterrupt)
 	{	/* Stop recursion on cancel */
@@ -325,6 +330,22 @@ static gint RollsClose(GtkWidget *UNUSED(widget), GdkEvent *UNUSED(eventDetails)
 		return FALSE;
 }
 
+static gboolean DepthEvent (GtkWidget *widget, GdkEvent *event, rollswidget *prw) {
+	switch (event->type) {
+	case GDK_BUTTON_PRESS:
+		fScrollComplete = FALSE;
+		break;
+	case GDK_BUTTON_RELEASE:
+		fScrollComplete = TRUE;
+		g_signal_emit_by_name( G_OBJECT ( prw->pScale ), "value-changed", prw);
+		break;
+	default:
+		;
+	} 
+
+	return FALSE;
+}
+ 
 extern void
 GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
 
@@ -380,7 +401,6 @@ GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
   gtk_box_pack_start ( GTK_BOX ( hbox ), prw->pScale, FALSE, FALSE, 4 );
   gtk_scale_set_digits( GTK_SCALE( prw->pScale ), 0 );
   gtk_scale_set_draw_value( GTK_SCALE( prw->pScale ), TRUE );
-  gtk_range_set_update_policy( GTK_RANGE( prw->pScale ), GTK_UPDATE_DISCONTINUOUS );
 
   /* Separate vbox to make button height correct */
   vb2 = gtk_vbox_new ( FALSE, 0 );
@@ -391,6 +411,8 @@ GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
   g_signal_connect( G_OBJECT( prw->pCancel ), "clicked", G_CALLBACK( CancelRolls ), NULL );
   gtk_box_pack_start ( GTK_BOX ( vb2 ), prw->pCancel, FALSE, FALSE, 4 );
 
+  g_signal_connect( G_OBJECT(  prw->pScale ), "button-press-event", G_CALLBACK( DepthEvent ), prw );
+  g_signal_connect( G_OBJECT(  prw->pScale ), "button-release-event", G_CALLBACK( DepthEvent ), prw );
   g_signal_connect( G_OBJECT ( prw->pScale ), "value-changed", G_CALLBACK ( DepthChanged ), prw );
 
   /* tree  */
