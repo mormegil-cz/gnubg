@@ -25,6 +25,12 @@
 #if (USE_GTK)
 #include <gtk/gtk.h>
 
+#if ! GTK_CHECK_VERSION(2,22,0)
+gint gdk_visual_get_depth (GdkVisual *visual)
+{
+	return visual->depth;
+}
+#endif
 
 #if ! GTK_CHECK_VERSION(2,18,0)
 void gtk_widget_get_allocation (GtkWidget *widget, GtkAllocation *allocation) 

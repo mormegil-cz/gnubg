@@ -3705,7 +3705,7 @@ static GtkWidget *chequer_key_new( int iPlayer, Board *board )
 
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pw), FALSE);
     ppm = bd->appmKey[ iPlayer ] = gdk_pixmap_new(
-	NULL, 20, 20, gtk_widget_get_visual( GTK_WIDGET( board ) )->depth );
+	NULL, 20, 20, gdk_visual_get_depth( gtk_widget_get_visual( GTK_WIDGET( board ) ) ) );
 
     pwImage = gtk_image_new_from_pixmap( ppm, NULL ); 
 
@@ -3747,19 +3747,22 @@ static void board_init( Board *board )
     gcval.function = GDK_AND;
     gcval.foreground.pixel = (guint32)~0L; /* AllPlanes */
     gcval.background.pixel = 0;
-    bd->gc_and = gtk_gc_get( vis->depth, cmap, &gcval, GDK_GC_FOREGROUND |
-			     GDK_GC_BACKGROUND | GDK_GC_FUNCTION );
+    bd->gc_and = gtk_gc_get( gdk_visual_get_depth( vis ), cmap, &gcval, 
+			     GDK_GC_FOREGROUND | GDK_GC_BACKGROUND | 
+			     GDK_GC_FUNCTION );
 
     gcval.function = GDK_OR;
-    bd->gc_or = gtk_gc_get( vis->depth, cmap, &gcval, GDK_GC_FUNCTION );
+    bd->gc_or = gtk_gc_get( gdk_visual_get_depth( vis ), cmap, &gcval, 
+			    GDK_GC_FUNCTION );
 
-    bd->gc_copy = gtk_gc_get( vis->depth, cmap, &gcval, 0 );
+    bd->gc_copy = gtk_gc_get( gdk_visual_get_depth( vis ), cmap, &gcval, 0 );
 
 	GdkColor color;
 	gdk_color_parse ("#000080", &color);
 	gdk_colormap_alloc_color (cmap, &color, TRUE, TRUE);
 	gcval.foreground.pixel = color.pixel;
-	bd->gc_cube = gtk_gc_get( vis->depth, cmap, &gcval, GDK_GC_FOREGROUND );
+	bd->gc_cube = gtk_gc_get( gdk_visual_get_depth( vis ), cmap, 
+				  &gcval, GDK_GC_FOREGROUND );
 
     bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -10;    
     bd->diceRoll[0] = bd->diceRoll[1] = 0;
