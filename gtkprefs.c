@@ -1015,11 +1015,11 @@ static GtkWidget *BorderPage( BoardData *bd ) {
 								  _("Wooden") ),
 			FALSE, FALSE, 0 );
 
-    gtk_box_pack_start( GTK_BOX( pw ), pwWoodType = gtk_combo_box_new_text(),
+    gtk_box_pack_start( GTK_BOX( pw ), pwWoodType = gtk_combo_box_text_new(),
 			FALSE, FALSE, 4 );
 
 	for (bw = 0; bw < WOOD_PAINT; bw++)
-		gtk_combo_box_append_text(GTK_COMBO_BOX(pwWoodType), gettext(aszWood[bw]));
+		  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(pwWoodType), gettext(aszWood[bw]));
 
 	if (bd->rd->wt == WOOD_PAINT)
 		gtk_combo_box_set_active(GTK_COMBO_BOX(pwWoodType), 0 );
