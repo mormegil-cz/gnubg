@@ -619,7 +619,7 @@ static gboolean StdinReadNotify(GIOChannel *source, GIOCondition cond, gpointer 
 
     rl_callback_read_char();
 
-    return;
+    return TRUE;
 #endif
 
     while( nNextTurn )
@@ -631,7 +631,7 @@ static gboolean StdinReadNotify(GIOChannel *source, GIOCondition cond, gpointer 
 	    exit( EXIT_SUCCESS );
 
 	PromptForExit();
-	return;
+	return TRUE;
     }
 
     if( ( pch = strchr( sz, '\n' ) ) )
@@ -648,6 +648,8 @@ static gboolean StdinReadNotify(GIOChannel *source, GIOCondition cond, gpointer 
 	fNeedPrompt = TRUE;
     else
 	Prompt();
+	
+	return TRUE;
 }
 
 
@@ -3689,7 +3691,7 @@ static void FileDragDropped(GtkWidget *widget, GdkDragContext * drag_context,
 			    gint x, gint y, GtkSelectionData * data, guint info, guint time)
 {
 	gchar **list;
-	list = g_uri_list_extract_uris( gtk_selection_data_get_data( data ) );
+	list = g_uri_list_extract_uris( (gchar *)gtk_selection_data_get_data( data ) );
 
 	if ( list[0] ){
 		char *next, *file, *quoted;
