@@ -1560,13 +1560,15 @@ RenderLabels( renderdata *prd, unsigned char *puch, int nStride,
 
 static unsigned char BoardPixel(renderdata *prd, int i, int antialias, int j)
 {
+	int rand1 = RAND;
+	int rand2 = RAND;
     return clamp( ( ( (int) prd->aanBoardColour[ 0 ][ j ] -
 		      (int) prd->aSpeckle[ 0 ] / 2 +
-		      (int) RAND % ( prd->aSpeckle[ 0 ] + 1 ) ) *
+		      (int) rand1 % ( prd->aSpeckle[ 0 ] + 1 ) ) *
 		    ( 20 - antialias ) +
 		    ( (int) prd->aanBoardColour[ i ][ j ] -
 		      (int) prd->aSpeckle[ i ] / 2 +
-		      (int) RAND % ( prd->aSpeckle[ i ] + 1 ) ) *
+		      (int) rand2 % ( prd->aSpeckle[ i ] + 1 ) ) *
 		    antialias ) * ( prd->arLight[ 2 ] * 0.8 + 0.2 ) / 20 );
 }
 

@@ -1084,7 +1084,8 @@ static void TextRolloutProgress(float aarOutput[][NUM_ROLLOUT_OUTPUTS],
 
 	}
 
-	prp->iNextAlternative = (++prp->iNextAlternative) % prp->n;
+	prp->iNextAlternative++;
+	prp->iNextAlternative = (prp->iNextAlternative) % prp->n;
 	if (iAlternative == (prp->n - 1))
 		prp->iNextGame += prc->nTrials / 10;
 
