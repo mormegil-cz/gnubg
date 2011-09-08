@@ -4419,14 +4419,14 @@ extern void CommandSetGNUBgID(char *sz)
 			break;
 	}
 	if (!posid && !matchid) {
-		outputerrf(_("No valid id's found"));
+		outputerrf(_("No valid IDs found"));
 		return;
 	}
 	if (matchid)
 		CommandSetMatchID(matchid);
 	if (posid)
 		CommandSetBoard(posid);
-	outputf(_("Setting GNUBG id %s:%s\n"), posid ? posid : "",
+	outputf(_("Setting GNUbg ID %s:%s\n"), posid ? posid : "",
 		matchid ? matchid : "");
 	g_free(posid);
 	g_free(matchid);

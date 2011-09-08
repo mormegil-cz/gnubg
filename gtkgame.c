@@ -3270,7 +3270,7 @@ static GtkActionEntry actionEntries[] = {
 	{ "EditMenuAction", NULL, N_("_Edit") },
 	{ "UndoAction", GTK_STOCK_UNDO, N_("_Undo"), "<control>Z", NULL, G_CALLBACK(GTKUndo) },
 	{ "CopyIDMenuAction", NULL, N_("_Copy ID to Clipboard") },
-		{ "CopyGNUBGIDAction", NULL, N_("GNUBG ID"), "<control>C", NULL, G_CALLBACK(CopyIDs) },
+		{ "CopyGNUBGIDAction", NULL, N_("GNUbg ID"), "<control>C", NULL, G_CALLBACK(CopyIDs) },
 		{ "CopyMatchIDAction", NULL, N_("Match ID"), "<control>M", NULL, G_CALLBACK(CopyMatchID) },
 		{ "CopyPositionIDAction", NULL, N_("Position ID"), "<control>P", NULL, G_CALLBACK(CopyPositionID) },
 
@@ -3445,7 +3445,7 @@ GtkItemFactoryEntry aife[] = {
 	{ N_("/_Edit/-"), NULL, NULL, 0, "<Separator>", NULL },
 
 	{ N_("/_Edit/_Copy ID to Clipboard"), NULL, NULL, 0, "<Branch>", NULL },
-	{ N_("/_Edit/_Copy ID to Clipboard/GNUBG ID"), "<control>C", CopyIDs, 0, NULL, NULL },
+	{ N_("/_Edit/_Copy ID to Clipboard/GNUbg ID"), "<control>C", CopyIDs, 0, NULL, NULL },
 	{ N_("/_Edit/_Copy ID to Clipboard/Match ID"), "<control>M", CopyMatchID, 0, NULL, NULL },
 	{ N_("/_Edit/_Copy ID to Clipboard/Position ID"), "<control>P", CopyPositionID, 0, NULL, NULL },
 
@@ -3883,7 +3883,7 @@ static void CreateMainWindow(void)
 	pwHbox2 = gtk_hbox_new( FALSE, 0 );
 	gtk_container_add(GTK_CONTAINER(pwIDBox), pwHbox2);
 
-	gtk_box_pack_start( GTK_BOX( pwHbox2 ), gtk_label_new("Gnubg id:"), FALSE, FALSE, 0 );
+	gtk_box_pack_start( GTK_BOX( pwHbox2 ), gtk_label_new("GNUbg ID:"), FALSE, FALSE, 0 );
 	pwFrame = gtk_frame_new(NULL);
 	gtk_box_pack_start( GTK_BOX( pwHbox2 ), pwFrame, FALSE, FALSE, 0 );
 
