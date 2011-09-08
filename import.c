@@ -882,7 +882,7 @@ ImportGame( FILE *fp, int iGame, int nLength, bgvariation bgVariation, int *warn
 	*pch-- = 0;
     for( ; pch >= sz0; pch-- )
 	if( isspace( *pch ) )
-	    *pch = '_';
+	    *pch = ' ';
         else if ( *pch == ',' ) {    /* GamesGrid mat files have ratings */
             *pch = '\0';             /* after player name                */
             SetMatchInfo( &mi.pchRating[ 0 ], pch+1, NULL );
@@ -895,7 +895,7 @@ ImportGame( FILE *fp, int iGame, int nLength, bgvariation bgVariation, int *warn
 	*pch-- = 0;
     for( ; pch >= sz1; pch-- )
 	if( isspace( *pch ) )
-	    *pch = '_';
+	    *pch = ' ';
         else if ( *pch == ',' ) {    /* GamesGrid mat files have ratings */
             *pch = '\0';             /* after player name                */
             SetMatchInfo( &mi.pchRating[ 1 ], pch+1, NULL );
