@@ -2949,15 +2949,18 @@ extern void ChangeGame(listOLD *plGameNew)
 	SetMoveRecord(plLastMove->p);
 
 	/* The real last move, before get_current_moverecord()
-	   possibly adds a hint record */
+	   possibly adds an empty hint record. If it does and
+	   last move is a MOVE_SETxxx record, its fPlayer will
+	   be bogus and we will have to fix it */
+
 	pmr_cur = plLastMove->p;
 	reallastmt = pmr_cur->mt;
-	reallastplayer =  pmr_cur->fPlayer;
+	reallastplayer = pmr_cur->fPlayer;
 
 	pmr_cur = get_current_moverecord(NULL);
 
 	if (pmr_cur) {
-		if (reallastmt >= MOVE_SETBOARD)
+		if (reallastmt >= MOVE_SETBOARD && pmr_cur->ml.cMoves == 0)
 			pmr_cur->fPlayer = reallastplayer;
 		if (pmr_cur->fPlayer != ms.fTurn) {
 			char *sz =
