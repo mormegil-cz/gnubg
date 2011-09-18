@@ -81,7 +81,7 @@ static void MoveListRolloutClicked(GtkWidget *pw, hintdata *phd)
 
 	res = ScoreMoveRollout ( ppm, (const cubeinfo**)ppci, c, RolloutProgress, p );
 
-	RolloutProgressEnd( &p, TRUE );
+	RolloutProgressEnd( &p, FALSE );
 
 	free(asz);
 	free(ppm);
