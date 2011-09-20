@@ -43,6 +43,8 @@
 #if USE_BOARD3D
 #include "fun3d.h"
 #endif
+#include "gtklocdefs.h"
+
 
 int showMoveListDetail = 1;
 moverecord *pmrCurAnn;

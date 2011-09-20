@@ -37,7 +37,7 @@
 #include "gtkwindows.h"
 #include "progress.h"
 #include "format.h"
-
+#include "gtklocdefs.h"
 
 
 typedef struct _cubehintdata {
