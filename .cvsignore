@@ -1,5 +1,6 @@
 aclocal.m4
 autom4te.cache
+AUTHORS
 *.bd
 bearoffdump
 config.guess
