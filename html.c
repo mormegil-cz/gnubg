@@ -74,6 +74,8 @@ typedef enum _stylesheetclass {
   CLASS_CUBE_PLY,
   CLASS_CUBE_PROBABILITIES,
   CLASS_CUBE_CUBELESS_TEXT,
+  CLASS_BOARD_IMG_HEADER,
+  CLASS_BOARD_IMG,
   NUM_CLASSES 
 } stylesheetclass;
 
@@ -116,7 +118,9 @@ static const char *aaszStyleSheetClasses[ NUM_CLASSES ][ 2 ] = {
   { "cubeaction", "color: red" },
   { "cubeply", "font-weight: bold" },
   { "cubeprobs", "font-weight: bold" },
-  { "cubecubelesstext", "font-style: italic" }
+  { "cubecubelesstext", "font-style: italic" },
+  { "boardimagetop", "vertical-align: bottom" },
+  { "boardimage", "vertical-align: top" }
 };
 
 #define FORMATHTMLPROB(f) \
@@ -463,19 +467,42 @@ printStatTableRow ( FILE *pf, const char *format1, const char *format2,
  */
 
 static void
-printImage ( FILE *pf, const char *szImageDir, const char *szImage,
+printImageClass ( FILE *pf, const char *szImageDir, const char *szImage,
              const char *szExtension, const char *szAlt,
-             const htmlexportcss hecss, const htmlexporttype het ) {
+             const htmlexportcss hecss, const htmlexporttype het,
+             const stylesheetclass ssc ) {
 
   fprintf ( pf, "<img src=\"%s%s%s.%s\" %s alt=\"%s\" />",
             ( szImageDir ) ? szImageDir : "",
             ( ! szImageDir || szImageDir[ strlen ( szImageDir ) - 1 ] == '/' ) ? "" : "/",
             szImage, szExtension, 
-            ( het == HTML_EXPORT_TYPE_GNU ) ? 
-            GetStyle ( CLASS_BLOCK, hecss ) : "", 
+            ( het == HTML_EXPORT_TYPE_GNU || (het == HTML_EXPORT_TYPE_BBS && ssc != CLASS_BLOCK ) ) ? 
+            GetStyle ( ssc, hecss ) : "", 
             ( szAlt ) ? szAlt : "" );
 
 }
+
+/*
+ * Print img tag.
+ *
+ * Input:
+ *    pf : write to file
+ *    szImageDir: path (URI) to images
+ *    szImage: the image to print
+ *    szExtension: extension of the image (e.g. gif or png)
+ *
+ */
+
+static void
+printImage ( FILE *pf, const char *szImageDir, const char *szImage,
+             const char *szExtension, const char *szAlt,
+             const htmlexportcss hecss, const htmlexporttype het ) {
+
+  printImageClass ( pf, szImageDir, szImage, szExtension, 
+                    szAlt, hecss, het, CLASS_BLOCK );
+
+}
+
 
 /*
  * print image for a point
@@ -525,8 +552,8 @@ printPointBBS ( FILE *pf, const char *szImageDir, const char *szExtension,
     sprintf ( szAlt, "&nbsp;'" );
   }
 
-  printImage ( pf, szImageDir, sz, szExtension, szAlt, hecss,
-               HTML_EXPORT_TYPE_BBS );
+  printImageClass ( pf, szImageDir, sz, szExtension, szAlt, hecss,
+               HTML_EXPORT_TYPE_BBS, CLASS_BOARD_IMG );
 
 }
 
@@ -565,15 +592,16 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
    * Top row
    */
 
-  printImage ( pf, szImageDir, fTurn ? "n_high" : "n_low", 
-               szExtension, NULL, hecss, HTML_EXPORT_TYPE_BBS );
+  printImageClass ( pf, szImageDir, fTurn ? "n_high" : "n_low", 
+               szExtension, NULL, hecss, HTML_EXPORT_TYPE_BBS, 
+               CLASS_BOARD_IMG_HEADER );
   fputs ( "<br />\n", pf );
 
   /* chequers off */
 
   sprintf ( sz, "o_w_%d", acOff[ 1 ] );
-  printImage ( pf, szImageDir, sz, szExtension, NULL, 
-               hecss, HTML_EXPORT_TYPE_BBS );
+  printImageClass ( pf, szImageDir, sz, szExtension, NULL, 
+                    hecss, HTML_EXPORT_TYPE_BBS, CLASS_BOARD_IMG );
 
   /* player 0's inner board */
 
@@ -586,8 +614,8 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
   /* player 0's chequers on the bar */
 
   sprintf ( sz, "b_up_%d", anBoard[ 0 ][ 24 ] );
-  printImage ( pf, szImageDir, sz, szExtension, NULL, 
-               hecss, HTML_EXPORT_TYPE_BBS );
+  printImageClass ( pf, szImageDir, sz, szExtension, NULL, 
+               hecss, HTML_EXPORT_TYPE_BBS, CLASS_BOARD_IMG );
 
   /* player 0's outer board */
 
@@ -601,12 +629,12 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
 
   if ( ! pms->fCubeOwner ) {
     sprintf ( sz, "c_up_%d", pms->nCube );
-    printImage ( pf, szImageDir, sz, szExtension, NULL, 
-                 hecss, HTML_EXPORT_TYPE_BBS );
+    printImageClass ( pf, szImageDir, sz, szExtension, NULL, 
+                 hecss, HTML_EXPORT_TYPE_BBS, CLASS_BOARD_IMG );
   }    
   else
-    printImage ( pf, szImageDir, "c_up_0", szExtension, NULL, 
-                 hecss, HTML_EXPORT_TYPE_BBS );
+    printImageClass ( pf, szImageDir, "c_up_0", szExtension, NULL, 
+                 hecss, HTML_EXPORT_TYPE_BBS, CLASS_BOARD_IMG );
 
   fputs ( "<br />\n", pf );
 
@@ -626,23 +654,23 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
               ( pms->anDice[ 0 ] < pms->anDice[ 1 ] ) ? 
               pms->anDice[ 1 ] : pms->anDice[ 0 ], 
               pms->fMove ? "right" : "left" );
-    printImage ( pf, szImageDir, sz, szExtension, NULL, 
-                hecss, HTML_EXPORT_TYPE_BBS );
+    printImageClass ( pf, szImageDir, sz, szExtension, NULL, 
+                hecss, HTML_EXPORT_TYPE_BBS, CLASS_BOARD_IMG );
 
   }
   else 
     /* no dice rolled */
-    printImage ( pf, szImageDir, "b_center", szExtension, NULL, 
-                hecss, HTML_EXPORT_TYPE_BBS );
+    printImageClass ( pf, szImageDir, "b_center", szExtension, NULL, 
+                hecss, HTML_EXPORT_TYPE_BBS, CLASS_BOARD_IMG  );
 
   /* center cube */
 
   if ( pms->fCubeOwner == -1 )
-    printImage ( pf, szImageDir, "c_center", szExtension, NULL, 
-                hecss, HTML_EXPORT_TYPE_BBS );
+    printImageClass ( pf, szImageDir, "c_center", szExtension, NULL, 
+                hecss, HTML_EXPORT_TYPE_BBS, CLASS_BOARD_IMG );
   else
-    printImage ( pf, szImageDir, "c_blank", szExtension, NULL, 
-                 hecss, HTML_EXPORT_TYPE_BBS );
+    printImageClass ( pf, szImageDir, "c_blank", szExtension, NULL, 
+                 hecss, HTML_EXPORT_TYPE_BBS, CLASS_BOARD_IMG );
 
   fputs ( "<br />\n", pf );
 
@@ -655,8 +683,8 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
   /* player 1's chequers off */
 
   sprintf ( sz, "o_b_%d", acOff[ 0 ] );
-  printImage ( pf, szImageDir, sz, szExtension, NULL, 
-               hecss, HTML_EXPORT_TYPE_BBS );
+  printImageClass ( pf, szImageDir, sz, szExtension, NULL, 
+               hecss, HTML_EXPORT_TYPE_BBS, CLASS_BOARD_IMG );
 
   /* player 1's inner board */
 
@@ -669,8 +697,8 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
   /* player 1's chequers on the bar */
 
   sprintf ( sz, "b_dn_%d", anBoard[ 1 ][ 24 ] );
-  printImage ( pf, szImageDir, sz, szExtension, NULL, 
-               hecss, HTML_EXPORT_TYPE_BBS );
+  printImageClass ( pf, szImageDir, sz, szExtension, NULL, 
+               hecss, HTML_EXPORT_TYPE_BBS, CLASS_BOARD_IMG );
 
   /* player 1's outer board */
 
@@ -684,19 +712,20 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
 
   if ( pms->fCubeOwner == 1 ) {
     sprintf ( sz, "c_dn_%d", pms->nCube );
-    printImage ( pf, szImageDir, sz, szExtension, NULL, 
-                 hecss, HTML_EXPORT_TYPE_BBS );
+    printImageClass ( pf, szImageDir, sz, szExtension, NULL, 
+                 hecss, HTML_EXPORT_TYPE_BBS, CLASS_BOARD_IMG );
   }    
   else
-    printImage ( pf, szImageDir, "c_dn_0", szExtension, NULL, 
-                 hecss, HTML_EXPORT_TYPE_BBS );
+    printImageClass ( pf, szImageDir, "c_dn_0", szExtension, NULL, 
+                 hecss, HTML_EXPORT_TYPE_BBS, CLASS_BOARD_IMG );
 
   fputs ( "<br />\n", pf );
 
   /* point numbers */
 
-  printImage ( pf, szImageDir, fTurn ? "n_low" : "n_high", 
-               szExtension, NULL, hecss, HTML_EXPORT_TYPE_BBS );
+  printImageClass ( pf, szImageDir, fTurn ? "n_low" : "n_high", 
+               szExtension, NULL, hecss, HTML_EXPORT_TYPE_BBS, 
+               CLASS_BOARD_IMG );
 
   fputs( "</p>\n", pf );
 
