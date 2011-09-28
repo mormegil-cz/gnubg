@@ -1,3 +1,10 @@
+2011-09-27  Michael Petch  <mpetch@capp-sysware.com>
+	* html.c: BBS Match output rendered with white space
+	when outputting a complete match. Rendering problem
+	was because Strict XHTML DocType. Reported by Chris Yep
+	ToDo: The BBS output needs to be cleaned up to validate
+	properly as Strict XHTML 1.0.
+
 2011-09-08  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* import.c: Don't replace spaces by underscores in players' names
