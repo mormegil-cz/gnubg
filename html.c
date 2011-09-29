@@ -747,8 +747,6 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
 	  _("Match ID:"),
             MatchIDFromMatchState ( pms ) );
 
-  fputs ( "\n", pf );
-
 }
 
 
