@@ -583,10 +583,10 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
   PipCount ( (ConstTanBoard)anBoard, anPips );
 
   /* Begin table  and print for player 0*/
-  fprintf ( pf, "<table><tr><th align=\"left\">%s<th align=\"right\">%d<tr><th align=\"center\" colspan=\"2\">", ap[ 0 ].szName,  anPips[ 1 ]);
+  fprintf ( pf, "<table style=\"page-break-inside: avoid\"><tr><th align=\"left\">%s</th><th align=\"right\">%d</th></tr>", ap[ 0 ].szName,  anPips[ 1 ]);
 
   /* avoid page break when printing */
-  fputs( "<p style=\"page-break-inside: avoid\">", pf );
+  fputs( "<tr><td align=\"center\" colspan=\"2\">", pf );
     
   /* 
    * Top row
@@ -727,13 +727,13 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
                szExtension, NULL, hecss, HTML_EXPORT_TYPE_BBS, 
                CLASS_BOARD_IMG );
 
-  fputs( "</p>\n", pf );
+  fputs( "</td></tr>\n", pf );
 
-  fprintf ( pf, "<tr><th align=\"left\">%s<th align=\"right\">%d<tr><th align=\"center\" colspan=\"2\">", ap[ 1 ].szName, anPips[ 0 ] );
+  fprintf ( pf, "<tr><th align=\"left\">%s</th><th align=\"right\">%d</th><th align=\"center\" colspan=\"2\"></th></tr>", ap[ 1 ].szName, anPips[ 0 ] );
 
   /* pip counts */
 
-  fputs ( "<p>", pf );
+  fputs ( "<tr><td><p>", pf );
 
 
   /* position ID Player 1 and end of table*/
@@ -741,12 +741,13 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
   fprintf( pf, "<span %s>", 
            GetStyle ( CLASS_POSITIONID, hecss ) );
 
-  fprintf ( pf, "%s <tt>%s</tt> %s <tt>%s</tt><br /></span></table>\n",
+  fprintf ( pf, "%s <tt>%s</tt> %s <tt>%s</tt><br /></span></p></td></tr></table>\n",
 	  _("Position ID:"),
             PositionID ( (ConstTanBoard)pms->anBoard ),
 	  _("Match ID:"),
             MatchIDFromMatchState ( pms ) );
 
+  fputs ( "\n", pf );
 
 }
 
