@@ -733,7 +733,7 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
 
   /* pip counts */
 
-  fputs ( "<tr><td><p>", pf );
+  fputs ( "<tr><td align=\"center\" colspan=\"2\">", pf );
 
 
   /* position ID Player 1 and end of table*/
@@ -741,7 +741,7 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
   fprintf( pf, "<span %s>", 
            GetStyle ( CLASS_POSITIONID, hecss ) );
 
-  fprintf ( pf, "%s <tt>%s</tt> %s <tt>%s</tt><br /></span></p></td></tr></table>\n",
+  fprintf ( pf, "%s <tt>%s</tt> %s <tt>%s</tt><br /></span></td></tr></table>\n",
 	  _("Position ID:"),
             PositionID ( (ConstTanBoard)pms->anBoard ),
 	  _("Match ID:"),
