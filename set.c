@@ -606,15 +606,15 @@ extern void CommandSetThreads( char *sz )
 
 	return;
     }
-	if (n > MAX_NUMTHREADS)
-	{
-		outputf( _("%d is the maximum number of threads supported"), MAX_NUMTHREADS );
-		output("\n");
-		return;
-	}
 
-	MT_SetNumThreads(n);
-	outputf( _("The number of threads has been set to %d.\n"), n );
+    if (n > MAX_NUMTHREADS) {
+	outputf( _("%d is the maximum number of threads supported"), MAX_NUMTHREADS );
+	output(".\n");
+	n = MAX_NUMTHREADS;
+      }
+
+    MT_SetNumThreads(n);
+    outputf( _("The number of threads has been set to %d.\n"), n );
 }
 #endif
 
