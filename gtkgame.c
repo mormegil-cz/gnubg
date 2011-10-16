@@ -7236,11 +7236,6 @@ GTKGetMove ( int anMove[ 8 ] ) {
 
 }
 
-typedef struct _recordwindowinfo {
-    GtkWidget *pwList, *pwTable, *apwStats[ 22 ];
-    int nRow;
-} recordwindowinfo;
-
 static void UpdateMatchinfo( const char *pch, const char *szParam, char **ppch ) {
 
     char *szCommand;
