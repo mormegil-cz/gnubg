@@ -1085,7 +1085,7 @@ static void check_sds(int *active)
 {
 	int alt;
 	for (alt = 0; alt < ro_alternatives; ++alt) {
-		double v, s;
+		double s;
 		int output;
 		int err_too_big = 0;
 		rolloutcontext *prc;
@@ -1095,16 +1095,11 @@ static void check_sds(int *active)
 		for (output = OUTPUT_EQUITY; output < NUM_ROLLOUT_OUTPUTS; output++) {
 			if (output == OUTPUT_EQUITY) { /* cubeless */
 				if (!ms.nMatchTo) {	/* money game */
-					v = fabs(aarMu[alt][output]);
 					s = fabs(aarSigma[alt][output]);
 					if (ro_fCubeRollout) {
-						v *= aciLocal[alt].nCube / aciLocal[0].nCube;
 						s *= aciLocal[alt].nCube / aciLocal[0].nCube;
 					}
 				} else {	/* match play */
-					v = fabs(mwc2eq(eq2mwc(aarMu[alt][output],
-							       &aciLocal[alt]),
-							&aciLocal[(ro_fCubeRollout ? 0 : alt)]));
 					s = fabs(se_mwc2eq(se_eq2mwc(aarSigma[alt][output],
 								     &aciLocal[alt]),
 							   &aciLocal[(ro_fCubeRollout ? 0 : alt)]));
@@ -1114,10 +1109,8 @@ static void check_sds(int *active)
 					continue;
 				/* cubeful */
 				if (!ms.nMatchTo) {	/* money game */
-					v = fabs(aarMu[alt][output]);
 					s = fabs(aarSigma[alt][output]);
 				} else {
-					v = fabs(mwc2eq(aarMu[alt][output], &aciLocal[alt]));
 					s = fabs(se_mwc2eq(aarSigma[alt][output],
 							   &aciLocal[(ro_fCubeRollout ? 0 : alt)]));
 				}
