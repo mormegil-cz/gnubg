@@ -908,11 +908,11 @@ ImportGame( FILE *fp, int iGame, int nLength, bgvariation bgVariation, int *warn
     pmr->g.nMatch = nLength;
     pmr->g.anScore[ 0 ] = n0;
     pmr->g.anScore[ 1 ] = n1;
-    pmr->g.fCrawford = TRUE; /* assume JF always uses Crawford rule */
+    pmr->g.fCrawford = (nLength > 0); /* assume JF always uses Crawford rule */
     if( ( pmr->g.fCrawfordGame = !fPostCrawford &&
 	  ( n0 == nLength - 1 ) ^ ( n1 == nLength - 1 ) ) )
 	fPostCrawford = TRUE;
-    pmr->g.fJacoby = fJacoby;
+    pmr->g.fJacoby = fJacoby && (nLength == 0);
     pmr->g.fWinner = -1;
     pmr->g.nPoints = 0;
     pmr->g.fResigned = FALSE;
