@@ -14,14 +14,12 @@ m4_ifvaln([$3$5], [else
                  sed 's/\([abcedfghi]\)/.\1/;
                       s/\([jklmnopqrs]\)/.1\1/;
                       s/\([tuvwxyz]\)/.2\1/;
-                      
-y/abcdefghijklmnopqrstuvwxyz/12345678901234567890123456/;'`
+ y/abcdefghijklmnopqrstuvwxyz/12345678901234567890123456/;'`
   as_version_2=`echo "[$2]" |
                  sed 's/\([abcedfghi]\)/.\1/;
                       s/\([jklmnopqrs]\)/.1\1/;
                       s/\([tuvwxyz]\)/.2\1/;
-                      
-y/abcdefghijklmnopqrstuvwxyz/12345678901234567890123456/;'`
+ y/abcdefghijklmnopqrstuvwxyz/12345678901234567890123456/;'`
   as_count=1
   as_save_IFS=$IFS
   IFS=.
