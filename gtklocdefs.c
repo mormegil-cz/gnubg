@@ -22,6 +22,7 @@
 
 #include "config.h"
 #include "gtkgame.h"
+#include "gtklocdefs.h"
 
 #if (USE_GTK)
 #include <gtk/gtk.h>
@@ -69,7 +70,7 @@ GtkWidget *gtk_dialog_get_content_area (GtkDialog *dialog)
 	return ( dialog->vbox );
 }
 
-GtkWindow *gtk_widget_get_window (GtkWidget *widget)
+GdkWindow *gtk_widget_get_window (GtkWidget *widget)
 {
 	return (widget->window);
 }
@@ -82,6 +83,11 @@ gdouble gtk_adjustment_get_upper (GtkAdjustment *adjustment)
 void gtk_adjustment_set_upper (GtkAdjustment *adjustment, gdouble upper)
 {
 	adjustment->upper = upper;
+}
+
+guchar *gtk_selection_data_get_data(GtkSelectionData *data)
+{
+	return data->data;
 }
 
 #endif

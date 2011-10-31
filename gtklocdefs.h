@@ -87,9 +87,10 @@ extern void gtk_cell_renderer_set_padding (GtkCellRenderer *cell, gint xpad, gin
 
 extern GtkWidget *gtk_dialog_get_action_area (GtkDialog *dialog);
 extern GtkWidget *gtk_dialog_get_content_area (GtkDialog *dialog);
-extern GtkWindow *gtk_widget_get_window (GtkWidget *widget);
+extern GdkWindow *gtk_widget_get_window (GtkWidget *widget);
 extern gdouble gtk_adjustment_get_upper (GtkAdjustment *adjustment);
 extern void gtk_adjustment_set_upper (GtkAdjustment *adjustment, gdouble upper);
+guchar *gtk_selection_data_get_data(GtkSelectionData *data);
 
 #endif
 

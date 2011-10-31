@@ -1,3 +1,8 @@
+Mon Oct 31 12:22:59 CET 2011 Christian Anthon <anthon@kiku.dk>
+
+	* gtklocdefs.c, gtklocdefs.h, m4/Makefile.amA
+	m4/versioncompare.m4: compile on centos5
+
 Mon Oct 31 10:40:01 CET 2011 Christian Anthon <anthon@kiku.dk>
 
 	* analysis.c, backgammon.h, export.c, format.c, gtkboard.c, gtkgame.c,
