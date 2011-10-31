@@ -2470,7 +2470,6 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
     char *pch;
     int c, fPlayer = 0, anRoll[ 2 ];
     moverecord *pmgi, *pmr;
-    int iMove;
     int j;
 
     typedef enum _tmgrecordtype {
@@ -2532,7 +2531,6 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
       if ( isdigit ( *pch ) || *pch == '-' ) {
 
-        iMove = abs ( atoi ( pch ) ); /* move number */
         fPlayer = ( *pch == '-' );    /* player: +n for player 0,
                                                  -n for player 1 */
         

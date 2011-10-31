@@ -204,7 +204,6 @@ static int draw_cairo_pages(cairo_t * cairo, listOLD * game_ptr)
 	matchstate msExport;
 	static statcontext scTotal;
 	moverecord *pmr;
-	xmovegameinfo *pmgi = NULL;
 	statcontext *psc = NULL;
 	listOLD *pl;
 	int iMove = 0;
@@ -220,7 +219,6 @@ static int draw_cairo_pages(cairo_t * cairo, listOLD * game_ptr)
 	ApplyMoveRecord(&msExport, game_ptr, pmr);
 	g_assert(pmr->mt == MOVE_GAMEINFO);
 	msExport.gs = GAME_PLAYING;
-	pmgi = &pmr->g;
 	psc = &pmr->g.sc;
 	AddStatcontext(psc, &scTotal);
 	iGame = getGameNumber(game_ptr);

@@ -53,8 +53,10 @@ static gboolean configure_event_3d(GtkWidget *widget, GdkEventConfigure *UNUSED(
 	{
 		static int curHeight = -1, curWidth = -1;
 		GtkAllocation allocation;
+		int width, height;
 		gtk_widget_get_allocation (widget, &allocation);
-		int width = allocation.width, height = allocation.height;
+		width = allocation.width;
+	       	height = allocation.height;
 		if (width != curWidth || height != curHeight)
 		{
 			GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);

@@ -21,6 +21,7 @@
 #include "config.h"
 #include "gnubg-types.h"
 #include "sse.h"
+#include "eval.h"
 
 #if USE_SSE_VECTORIZE
 #ifdef USE_SSE2 

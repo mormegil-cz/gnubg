@@ -58,12 +58,12 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *UNUSED(eve
 {
 	int width, height;
 	float maxY, maxX;
+	GtkAllocation allocation;
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
 
 	if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(widget)))
 		return FALSE;
 
-	GtkAllocation allocation;
 	gtk_widget_get_allocation (widget, &allocation);
 	width = allocation.width;
 	height = allocation.height;

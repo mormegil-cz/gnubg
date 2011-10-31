@@ -1,3 +1,10 @@
+Mon Oct 31 10:40:01 CET 2011 Christian Anthon <anthon@kiku.dk>
+
+	* analysis.c, backgammon.h, export.c, format.c, gtkboard.c, gtkgame.c,
+	gtkgame.h, gtklocdefs.c, gtkpanels.c, gtktheory.c, import.c,
+	makebearoff.c, play.c, set.c, sgf.c, board3d/graph.c,
+	board3d/widget3d.c, lib/inputs.c: silence compiler warnings from gcc
+
 2011-09-29  Michael Petch  <mpetch@capp-sysware.com>
 	* html.c: BBS Match output rendered with white space
 	when outputting a complete match. Rendering problem

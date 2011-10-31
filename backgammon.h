@@ -1037,3 +1037,6 @@ extern int getDiceRandomDotOrg(void);
 extern int GetManualDice(unsigned int anDice[2]);
 extern double get_time(void);
 #endif
+
+extern int fJustSwappedPlayers;
+

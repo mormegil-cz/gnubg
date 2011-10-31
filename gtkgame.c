@@ -569,7 +569,7 @@ extern void GTKSuspendInput(void)
 	if (!fX)
 		return;
 
-	if (suspendCount == 0)
+	if (suspendCount == 0 && GDK_IS_WINDOW(pwGrab))
 	{	/* Grab events so that the board window knows this is a re-entrant
 		call, and won't allow commands like roll, move or double. */
 		grabbedWidget = pwGrab;
@@ -4630,12 +4630,12 @@ extern void GTKNew( void )
 {
   GtkWidget *pwDialog, *pwPage;
   newwidget nw;
+  GtkAllocation allocation;
 
   pwDialog = GTKCreateDialog( _("GNU Backgammon - New"),
 			   DT_QUESTION, NULL, DIALOG_FLAG_MODAL, G_CALLBACK( NewOK ), &nw );
   gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
  		        pwPage = NewWidget(&nw));
-	GtkAllocation allocation;
 	gtk_widget_get_allocation (pwToolbar, &allocation);
 	gtk_widget_set_size_request (pwToolbar, allocation.width, allocation.height);
 

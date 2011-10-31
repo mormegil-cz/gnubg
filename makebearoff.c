@@ -385,7 +385,6 @@ static void BearOff( int nId, unsigned int nPoints,
 
     unsigned int usGammonBest;
     unsigned short int ausGammonBest[ 32 ];
-    int iGammonBest;
     unsigned int nBack;
 
     /* get board for given position */
@@ -437,7 +436,7 @@ static void BearOff( int nId, unsigned int nPoints,
 	    GenerateMoves( &ml, (ConstTanBoard)anBoard, anRoll[ 0 ], anRoll[ 1 ], FALSE );
 
 	    usBest = 0xFFFFFFFF; iBest = -1;
-            usGammonBest = 0xFFFFFFFF; iGammonBest = -1;
+            usGammonBest = 0xFFFFFFFF;
 	    
 	    for( i = 0; i < ml.cMoves; i++ ) {
 		PositionFromKey( anBoardTemp, &ml.amMoves[ i ].key );
@@ -476,7 +475,6 @@ static void BearOff( int nId, unsigned int nPoints,
                   
                 if ( fGammon && 
                      ( ( us = RollsOS ( pusj + 32 ) ) < usGammonBest ) ) {
-                  iGammonBest = j;
                   usGammonBest = us;
                   memcpy ( ausGammonBest, pusj + 32, 64 );
                 }
@@ -929,10 +927,7 @@ CubeEquity ( const short int siND, const short int siDT,
 static int
 CalcPosition ( const int i, const int j, const int n ) {
 
-  int max;
   int k;
-
-  max = ( i > j ) ? i : j;
 
   if ( i + j < n )
     k = ( i + j ) * ( i + j + 1 ) / 2 + j;

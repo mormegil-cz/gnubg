@@ -2511,7 +2511,6 @@ extern void CommandSetTurn( char *sz ) {
     fNextTurn = FALSE;
 #if USE_GTK
     if (fX) {
-	    extern int fJustSwappedPlayers;
 
 	    BoardData *bd = BOARD(pwBoard)->board_data;
 	    bd->diceRoll[0] = bd->diceRoll[1] = -1;

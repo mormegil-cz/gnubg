@@ -21,6 +21,7 @@
 
 
 #include "config.h"
+#include "gtkgame.h"
 
 #if (USE_GTK)
 #include <gtk/gtk.h>
@@ -89,7 +90,7 @@ void gtk_adjustment_set_upper (GtkAdjustment *adjustment, gdouble upper)
 GtkTooltips *ptt;
 #endif
 
-GtkWidget *get_statusbar_label (GtkStatusbar *statusbar)
+extern GtkWidget *get_statusbar_label (GtkStatusbar *statusbar)
 {
 #if GTK_CHECK_VERSION(2,20,0)
 	return GTK_WIDGET (  gtk_container_get_children (GTK_CONTAINER( \
@@ -100,7 +101,7 @@ GtkWidget *get_statusbar_label (GtkStatusbar *statusbar)
 }
 
 
-void toolbar_set_orientation (GtkToolbar *toolbar, GtkOrientation orientation)
+extern void toolbar_set_orientation (GtkToolbar *toolbar, GtkOrientation orientation)
 {
 #if GTK_CHECK_VERSION(2,16,0)
 	gtk_orientable_set_orientation( GTK_ORIENTABLE( toolbar ), orientation );

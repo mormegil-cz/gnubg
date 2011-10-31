@@ -814,9 +814,7 @@ static void CreateGameWindow( void ) {
     GtkWidget *psw = gtk_scrolled_window_new( NULL, NULL ),
 	*pvbox = gtk_vbox_new( FALSE, 0 ),
 	*phbox = gtk_hbox_new( FALSE, 0 );
-    GdkColormap *pcmap;
 
-    pcmap = gtk_widget_get_colormap( pwMain );
 	if (!woPanel[WINDOW_GAME].docked)
 	{
 		woPanel[WINDOW_GAME].pwWin = gtk_window_new( GTK_WINDOW_TOPLEVEL );

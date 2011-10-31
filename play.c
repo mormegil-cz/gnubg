@@ -4378,9 +4378,9 @@ extern const char* GetMoveString(moverecord *pmr, int* pPlayer, gboolean addSkil
 {
     doubletype dt;
     static char sz[40];
-	const char* pch = NULL;
-	*pPlayer = 0;
-	TanBoard anBoard;
+    const char* pch = NULL;
+    TanBoard anBoard;
+    *pPlayer = 0;
 
 	switch( pmr->mt )
 	{

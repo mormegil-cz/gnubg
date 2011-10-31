@@ -1292,7 +1292,7 @@ static int board_point_with_border( GtkWidget *board, BoardData *bd, int x0,
 static int board_chequer_number( GtkWidget *board, BoardData *bd, int point,
 		int x0, int y0 )
 {
-    int i, x, y, cx, cy, dy, c_chequer;
+    int i, y, cx, cy, dy, c_chequer;
 
     if( point < 0 || point > 27 )
 	return -1;
@@ -1305,7 +1305,6 @@ static int board_chequer_number( GtkWidget *board, BoardData *bd, int point,
 
     c_chequer = ( !point || point == 25 ) ? 3 : 5;
 
-    x = positions[ fClockwise ][ point ][ 0 ]; 
     cx = CHEQUER_WIDTH;
 
     y = positions[ fClockwise ][ point ][ 1 ];
@@ -1362,7 +1361,7 @@ static void board_quick_edit(GtkWidget *board, BoardData *bd, int x, int y,
 {
     int current, delta, c_chequer;
     int off, opponent_off;
-    int bar, opponent_bar;
+    int opponent_bar;
     int n, i;
 
 	int colour = bd->drag_button == 1 ? 1 : -1;
@@ -1420,7 +1419,6 @@ static void board_quick_edit(GtkWidget *board, BoardData *bd, int x, int y,
     off          = (colour == 1) ? 26 : 27;
     opponent_off = (colour == 1) ? 27 : 26;
 
-    bar          = (colour == 1) ? 25 : 0;
     opponent_bar = (colour == 1) ? 0 : 25;
 
     /* Can't add checkers to the wrong bar */
@@ -1664,10 +1662,11 @@ extern gboolean board_button_press(GtkWidget *board, GdkEventButton *event,
 #if USE_BOARD3D
 	if (display_is_3d(bd->rd))
 	{	/* Ignore clicks when animating */
+		GtkAllocation allocation;
+
 		if (Animating3d(bd->bd3d))
 			return TRUE;
 
-		GtkAllocation allocation;
 		gtk_widget_get_allocation(board, &allocation);
 		/* Reverse screen y coords for openGL */
 		y = allocation.height - y;
@@ -2961,8 +2960,6 @@ static gint board_slide_timeout( gpointer p )
 
 extern void board_animate( Board *board, int move[ 8 ], int player )
 {
-    int n;
-	
 	if (animGUI == ANIMATE_NONE || ms.fResigned)
 	{
 #if USE_BOARD3D
@@ -2988,9 +2985,9 @@ extern void board_animate( Board *board, int move[ 8 ], int player )
 }
 #endif
 	if( animGUI == ANIMATE_BLINK )
-		n = g_timeout_add( 0x300 >> nGUIAnimSpeed, board_blink_timeout, board );
+		g_timeout_add( 0x300 >> nGUIAnimSpeed, board_blink_timeout, board );
 	else /* ANIMATE_SLIDE */
-		n = g_timeout_add( 0x100 >> nGUIAnimSpeed, board_slide_timeout, board );
+		g_timeout_add( 0x100 >> nGUIAnimSpeed, board_slide_timeout, board );
 
     while( !animation_finished )
 	{
@@ -3078,8 +3075,6 @@ if (display_is_3d(bd->rd))
 else
 #endif
 {
-    extern int fJustSwappedPlayers;
-
     if (fJustSwappedPlayers) {
 	if (ms.anDice[ 0 ] > 0)
             RollDice2d(bd);
@@ -3732,6 +3727,7 @@ static void board_init( Board *board )
     GtkWidget *pw;
     GtkWidget *pwFrame;
     GtkWidget *pwvbox;
+    GdkColor color;
     
     board->board_data = bd;
     bd->widget = GTK_WIDGET( board );
@@ -3757,7 +3753,6 @@ static void board_init( Board *board )
 
     bd->gc_copy = gtk_gc_get( gdk_visual_get_depth( vis ), cmap, &gcval, 0 );
 
-	GdkColor color;
 	gdk_color_parse ("#000080", &color);
 	gdk_colormap_alloc_color (cmap, &color, TRUE, TRUE);
 	gcval.foreground.pixel = color.pixel;
