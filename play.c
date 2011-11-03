@@ -565,7 +565,6 @@ static void add_moverecord_sanity_check(moverecord *pmr)
 	case MOVE_NORMAL:
 		if (pmr->ml.cMoves)
 			g_assert(pmr->n.iMove <= pmr->ml.cMoves);
-		break;
 
 		break;
 

@@ -2154,8 +2154,6 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
     *pfCubeUse = ! strcmp ( szTemp, "Yes" );
     break;
 
-    break;
-
   case 14:
 
     /* rated */
