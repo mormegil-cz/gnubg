@@ -4456,7 +4456,7 @@ cmp_evalcontext ( const evalcontext *pec1, const evalcontext *pec2 ) {
 
   if ( pec1->rNoise > 0 ) {
 
-    if ( pec1->fDeterministic > pec2->fDeterministic )
+    if ( pec1->fDeterministic < pec2->fDeterministic )
       return -1;
     else if ( pec1->fDeterministic > pec2->fDeterministic )
       return +1;
