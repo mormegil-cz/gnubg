@@ -1390,7 +1390,7 @@ command cER = {
       NULL, NULL },
     { "decline", CommandDecline, N_("Decline a resignation"), NULL, NULL },
     { "dicerolls", CommandDiceRolls, N_("Generate a list of rolls"), 
-      NULL, NULL },
+      szTRIALS, NULL },
     { "double", CommandDouble, N_("Offer a double"), NULL, NULL },
     { "drop", CommandDrop, N_("Decline an offered double"), NULL, NULL },
     { "eq2mwc", CommandEq2MWC,
