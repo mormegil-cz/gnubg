@@ -2389,11 +2389,11 @@ extern int
 PerfectCubeful ( bearoffcontext *pbc, 
                  const TanBoard anBoard, float arEquity[] ) {
 
-  unsigned short int nUs = 
+  unsigned int nUs = 
     PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
-  unsigned short int nThem = 
+  unsigned int nThem = 
     PositionBearoff ( anBoard[ 0 ], pbc->nPoints, pbc->nChequers );
-  int n = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
+  unsigned int n = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
   unsigned int iPos = nUs * n + nThem;
 
   return BearoffCubeful ( pbc, iPos, arEquity, NULL );
@@ -2904,7 +2904,7 @@ extern int CompareMoves(const move *pm0, const move *pm1)
 static int CompareMovesGeneral(const move *pm0, const move *pm1)
 {
 	TanBoard board[2];
-	unsigned int back[2] = { -1, -1 };
+	int back[2] = { -1, -1 };
 	int a, b;
 
 	int i = cmp_evalsetup(&pm0->esMove, &pm1->esMove);
@@ -6246,7 +6246,7 @@ EvaluatePositionCubeful4( NNState *nnStates, const TanBoard anBoard,
 
       bearoffcontext *pbc = apbcHyper[ pc - CLASS_HYPERGAMMON1 ];
       unsigned int nUs, nThem, iPos;
-      int n;
+      unsigned int n;
 
       if (!pbc)
         return -1;
