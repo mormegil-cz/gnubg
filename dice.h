@@ -46,7 +46,7 @@ extern void CloseRNG( const rng rngx, rngcontext *rngctx );
 extern void DestroyRNG( const rng rngx, rngcontext **rngctx );
 extern void PrintRNGSeed( const rng rngx, rngcontext *rngctx );
 extern void PrintRNGCounter( const rng rngx, rngcontext *rngctx );
-extern void InitRNGSeed( int n, const rng rngx, rngcontext *rngctx );
+extern void InitRNGSeed( unsigned int n, const rng rngx, rngcontext *rngctx );
 extern int RNGSystemSeed( const rng rngx, void *p, unsigned long *pnSeed );
 
 extern int RollDice( unsigned int anDice[ 2 ], rng *prngx, rngcontext *rngctx );

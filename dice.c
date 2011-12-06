@@ -103,12 +103,12 @@ struct _rngcontext {
 #if HAVE_LIBGMP
   mpz_t nz; /* seed */
 #endif
-  int n; /* seed */
+  unsigned int n; /* seed */
 
 };
   
 
-static int
+static unsigned int
 ReadDiceFile( rngcontext *rngctx );
 
 
@@ -212,19 +212,19 @@ extern int InitRNGBBSFactors( char *sz0, char *sz1, rngcontext *rngctx ) {
     return 0;
 }
 
-static int BBSGetBit( rngcontext *rngctx ) {
+static unsigned int BBSGetBit( rngcontext *rngctx ) {
 
     mpz_powm_ui( rngctx->zSeed, rngctx->zSeed, 2, rngctx->zModulus );
     return ( mpz_get_ui( rngctx->zSeed ) & 1 );
 }
 
-static int BBSGetTrit( rngcontext *rngctx ) {
+static unsigned int BBSGetTrit( rngcontext *rngctx ) {
 
     /* Return a trinary digit from a uniform distribution, given binary
        digits as inputs.  This function is perfectly distributed and
        uses the fewest number of bits on average. */
 
-    int state = 0;
+    unsigned int state = 0;
 
     while( 1 ) {
 	switch( state ) {
@@ -378,7 +378,7 @@ PrintRNGSeedMP( mpz_t n ) {
 #else
 
 static void
-PrintRNGSeedNormal( int n ) {
+PrintRNGSeedNormal( unsigned int n ) {
 
   g_print( _("The current seed is") );
   g_print( " %d.\n", n );
@@ -447,7 +447,7 @@ extern void PrintRNGSeed( const rng rngx, rngcontext *rngctx ) {
 	g_printerr("\n");
 }
 
-extern void InitRNGSeed( int n, const rng rngx, rngcontext *rngctx ) {
+extern void InitRNGSeed( unsigned int n, const rng rngx, rngcontext *rngctx ) {
 
     rngctx->n = n;
     rngctx->c = 0;
@@ -460,7 +460,7 @@ extern void InitRNGSeed( int n, const rng rngx, rngcontext *rngctx ) {
     case RNG_BBS:
 #if HAVE_LIBGMP
 	g_assert( rngctx->fZInit );
-	mpz_set_ui( rngctx->zSeed, n );
+	mpz_set_ui( rngctx->zSeed, (unsigned long)n );
 	BBSCheckInitialSeed( rngctx );
 	break;
 #else
@@ -479,7 +479,7 @@ extern void InitRNGSeed( int n, const rng rngx, rngcontext *rngctx ) {
 	int i;
 
 	for( i = 0; i < RANDSIZ; i++ )
-          rngctx->rc.randrsl[ i ] = n;
+          rngctx->rc.randrsl[ i ] = (ub4)n;
         
 	irandinit( &rngctx->rc, TRUE );
 	
@@ -491,7 +491,7 @@ extern void InitRNGSeed( int n, const rng rngx, rngcontext *rngctx ) {
 	break;
     
     case RNG_MERSENNE:
-	init_genrand( n, &rngctx->mti, rngctx->mt );
+	init_genrand( (unsigned long)n, &rngctx->mti, rngctx->mt );
 	break;
 
     case RNG_MANUAL:
@@ -516,8 +516,8 @@ static void InitRNGSeedMP( mpz_t n, rng rng, rngcontext *rngctx ) {
     case RNG_ANSI:
     case RNG_BSD:
     case RNG_MERSENNE:
-    case RNG_MD5: /* FIXME MD5 seed can be extended to 128 bits */
-	InitRNGSeed( mpz_get_ui( n ), rng, rngctx );
+    case RNG_MD5:
+	InitRNGSeed( (unsigned int)(mpz_get_ui( n ) % UINT_MAX), rng, rngctx );
 	break;
 	    
     case RNG_BBS:
@@ -597,7 +597,7 @@ RNGSystemSeed( const rng rngx, void *p, unsigned long *pnSeed ) {
 
   int f = FALSE;
   rngcontext *rngctx = (rngcontext *) p;
-  int n = 0;
+  unsigned int n = 0;
 
 #if HAVE_LIBGMP
   int h;
@@ -633,13 +633,13 @@ RNGSystemSeed( const rng rngx, void *p, unsigned long *pnSeed ) {
     if( !f ) {
 	    GTimeVal tv;
 	    g_get_current_time(&tv);
-	    n = tv.tv_sec ^ tv.tv_usec;
+	    n = (unsigned int)tv.tv_sec ^ (unsigned int)tv.tv_usec;
     }
 
     InitRNGSeed( n, rngx, rngctx );
 
     if ( pnSeed )
-      *pnSeed = n;
+      *pnSeed = (unsigned long)n;
 
     return f;
 
@@ -690,8 +690,8 @@ extern int RollDice(unsigned int anDice[2], rng *prng, rngcontext *rngctx)
 
 	switch (*prng) {
 	case RNG_ANSI:
-		anDice[0] = 1 + (int)(6.0 * rand() / (RAND_MAX + 1.0));
-		anDice[1] = 1 + (int)(6.0 * rand() / (RAND_MAX + 1.0));
+		anDice[0] = 1 + (unsigned int)(6.0 * rand() / (RAND_MAX + 1.0));
+		anDice[1] = 1 + (unsigned int)(6.0 * rand() / (RAND_MAX + 1.0));
 		rngctx->c += 2;
 		break;
 
@@ -711,8 +711,8 @@ extern int RollDice(unsigned int anDice[2], rng *prng, rngcontext *rngctx)
 
 	case RNG_BSD:
 #if HAVE_RANDOM
-		anDice[0] = 1 + (int)(6.0 * random() / (RAND_MAX + 1.0));
-		anDice[1] = 1 + (int)(6.0 * random() / (RAND_MAX + 1.0));
+		anDice[0] = 1 + (unsigned int)(6.0 * random() / (RAND_MAX + 1.0));
+		anDice[1] = 1 + (unsigned int)(6.0 * random() / (RAND_MAX + 1.0));
 		rngctx->c += 2;
 		break;
 #else
@@ -720,8 +720,8 @@ extern int RollDice(unsigned int anDice[2], rng *prng, rngcontext *rngctx)
 #endif
 
 	case RNG_ISAAC:
-		anDice[0] = 1 + (int)(6.0 * irand(&rngctx->rc) / (0xFFFFFFFF + 1.0));
-		anDice[1] = 1 + (int)(6.0 * irand(&rngctx->rc) / (0xFFFFFFFF + 1.0));
+		anDice[0] = 1 + (unsigned int)(6.0 * irand(&rngctx->rc) / (0xFFFFFFFF + 1.0));
+		anDice[1] = 1 + (unsigned int)(6.0 * irand(&rngctx->rc) / (0xFFFFFFFF + 1.0));
 		rngctx->c += 2;
 		break;
 
@@ -747,9 +747,9 @@ extern int RollDice(unsigned int anDice[2], rng *prng, rngcontext *rngctx)
 
 	case RNG_MERSENNE:
 		anDice[0] =
-		    1 + (int)(6.0 * genrand_int32(&rngctx->mti, rngctx->mt) / (0xFFFFFFFF + 1.0));
+		    1 + (unsigned int)(6.0 * genrand_int32(&rngctx->mti, rngctx->mt) / (0xFFFFFFFF + 1.0));
 		anDice[1] =
-		    1 + (int)(6.0 * genrand_int32(&rngctx->mti, rngctx->mt) / (0xFFFFFFFF + 1.0));
+		    1 + (unsigned int)(6.0 * genrand_int32(&rngctx->mti, rngctx->mt) / (0xFFFFFFFF + 1.0));
 		rngctx->c += 2;
 		break;
 
@@ -794,11 +794,11 @@ extern void CloseDiceFile ( rngcontext *rngctx )
 }
 
 
-static int
+static unsigned int
 ReadDiceFile( rngcontext *rngctx ) {
 
   unsigned char uch;
-  int n;
+  size_t n;
 
 uglyloop:
   {
@@ -813,7 +813,7 @@ uglyloop:
     }
     else if ( n != 1 ) {
       g_printerr("%s", rngctx->szDiceFilename);
-      return -1;
+      return (unsigned int)(-1);
     }
     else if ( uch >= '1' && uch <= '6' )
       return (uch - '0');
