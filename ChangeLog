@@ -1,6 +1,17 @@
+2011-12-07  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* dice.c: fix small modulo bias in dice generation with some
+	RNGs. Affects ansi, bsd, isaac, md5 and mersenne.
+
+	As a consequence, a match or session started with the same seed
+	can very occasionally unfold differently from how it did before
+	the change. Rollouts using the same seed can give a marginally
+	different result as well. The probability of the dice sequence
+	diverging at each roll is on the order of 1 in 1,000,000,000.
+
 Mon Oct 31 12:22:59 CET 2011 Christian Anthon <anthon@kiku.dk>
 
-	* gtklocdefs.c, gtklocdefs.h, m4/Makefile.amA
+	* gtklocdefs.c, gtklocdefs.h, m4/Makefile.am
 	m4/versioncompare.m4: compile on centos5
 
 Mon Oct 31 10:40:01 CET 2011 Christian Anthon <anthon@kiku.dk>

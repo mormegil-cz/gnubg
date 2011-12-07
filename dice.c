@@ -686,12 +686,22 @@ extern void *InitRNG( unsigned long *pnSeed, int *pfInitFrom,
 
 extern int RollDice(unsigned int anDice[2], rng *prng, rngcontext *rngctx)
 {
+	unsigned long tmprnd;
+	const unsigned long rand_max_q = RAND_MAX/6;
+	const unsigned long rand_max_l = rand_max_q*6;
+	const unsigned long exp232_q = 715827882;
+	const unsigned long exp232_l = 4294967292U;
+
 	anDice[0] = anDice[1] = 0;
 
 	switch (*prng) {
 	case RNG_ANSI:
-		anDice[0] = 1 + (unsigned int)(6.0 * rand() / (RAND_MAX + 1.0));
-		anDice[1] = 1 + (unsigned int)(6.0 * rand() / (RAND_MAX + 1.0));
+		while ((tmprnd = rand()) >= rand_max_l)
+			;	/* Try again */
+		anDice[0] = 1 + tmprnd / rand_max_q;
+		while ((tmprnd = rand()) >= rand_max_l)
+			;
+		anDice[1] = 1 +  tmprnd / rand_max_q;
 		rngctx->c += 2;
 		break;
 
@@ -711,8 +721,12 @@ extern int RollDice(unsigned int anDice[2], rng *prng, rngcontext *rngctx)
 
 	case RNG_BSD:
 #if HAVE_RANDOM
-		anDice[0] = 1 + (unsigned int)(6.0 * random() / (RAND_MAX + 1.0));
-		anDice[1] = 1 + (unsigned int)(6.0 * random() / (RAND_MAX + 1.0));
+		while ((tmprnd = random()) >= rand_max_l)
+			;	/* Try again */
+		anDice[0] = 1 + tmprnd / rand_max_q;
+		while ((tmprnd = random()) >= rand_max_l)
+			;
+		anDice[1] = 1 +  tmprnd / rand_max_q;
 		rngctx->c += 2;
 		break;
 #else
@@ -720,8 +734,12 @@ extern int RollDice(unsigned int anDice[2], rng *prng, rngcontext *rngctx)
 #endif
 
 	case RNG_ISAAC:
-		anDice[0] = 1 + (unsigned int)(6.0 * irand(&rngctx->rc) / (0xFFFFFFFF + 1.0));
-		anDice[1] = 1 + (unsigned int)(6.0 * irand(&rngctx->rc) / (0xFFFFFFFF + 1.0));
+		while ((tmprnd = irand(&rngctx->rc)) >= exp232_l)
+			;	 /* Try again */
+		anDice[0] = 1 + tmprnd / exp232_q;
+		while ((tmprnd = irand(&rngctx->rc)) >= exp232_l)
+			;
+		anDice[1] = 1 + tmprnd / exp232_q;
 		rngctx->c += 2;
 		break;
 
@@ -735,9 +753,13 @@ extern int RollDice(unsigned int anDice[2], rng *prng, rngcontext *rngctx)
 			} h;
 
 			md5_buffer((char *)&rngctx->nMD5, sizeof rngctx->nMD5, &h);
+			while (h.an[0] >= exp232_l || h.an[1] >= exp232_l) {
+				md5_buffer((char *)&rngctx->nMD5, sizeof rngctx->nMD5, &h);
+				rngctx->nMD5++; /* useful ? indispensable ? */
+			}
 
-			anDice[0] = h.an[0] / 715827882 + 1;
-			anDice[1] = h.an[1] / 715827882 + 1;
+			anDice[0] = h.an[0] / exp232_q + 1;
+			anDice[1] = h.an[1] / exp232_q + 1;
 
 			rngctx->nMD5++;
 			rngctx->c += 2;
@@ -746,10 +768,12 @@ extern int RollDice(unsigned int anDice[2], rng *prng, rngcontext *rngctx)
 		}
 
 	case RNG_MERSENNE:
-		anDice[0] =
-		    1 + (unsigned int)(6.0 * genrand_int32(&rngctx->mti, rngctx->mt) / (0xFFFFFFFF + 1.0));
-		anDice[1] =
-		    1 + (unsigned int)(6.0 * genrand_int32(&rngctx->mti, rngctx->mt) / (0xFFFFFFFF + 1.0));
+		while ((tmprnd = genrand_int32(&rngctx->mti, rngctx->mt))  >= exp232_l)
+			;	/* Try again */
+		anDice[0] = 1 + tmprnd / exp232_q;
+		while ((tmprnd = genrand_int32(&rngctx->mti, rngctx->mt))  >= exp232_l)
+			;
+		anDice[1] =  1 + tmprnd / exp232_q;
 		rngctx->c += 2;
 		break;
 
