@@ -1,3 +1,9 @@
+2011-12-31  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* lib/neuralnetsse.c: Fixes error in sigmoid approximation when
+	using SSE instructions. This will cause occasional small
+	discrepancies in evalation output compared to previous code.
+
 2011-12-07  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* dice.c: fix small modulo bias in dice generation with some
@@ -266,7 +272,7 @@ Mon Oct 31 10:40:01 CET 2011 Christian Anthon <anthon@kiku.dk>
 
 2011-04-09  Philippe Michel  <philippe.michel7@sfr.fr>
 
-	* gtkexport.c, gtkgame.c, gtktempmap.c: Alter some pop-up panel
+	* gtkexport.c, gtkgame.c, gtktempmap.c: Alter some pop-up panels
 	that were too tall too be usable on smaller screens (the OK button
 	was below the bottom of the display). Affected are
 	Settings|Export, Settings|Rollouts and Analyze|Temperature Map.

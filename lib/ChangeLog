@@ -1,3 +1,9 @@
+2011-12-31  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* neuralnetsse.c: Fixes error in sigmoid approximation. In
+	addition, uses reciprocal instead of division only if compiled
+	with -ffast-math to keep output identical to non-SSE code.
+
 2011-07-14  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* cache.c, cache.h: On Intel CPUs, use Gcc builtins for locking
