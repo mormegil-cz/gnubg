@@ -217,6 +217,12 @@ dnl
 AC_CHECK_FUNCS(sigaction sigvec,break)
 AC_CHECK_FUNCS(strptime random setpriority)
 
+dnl 	 
+dnl Checks for declarations 	 
+dnl
+
+AC_CHECK_DECLS(signbit, , , [#include <math.h>])
+
 dnl *******************
 dnl optional components
 dnl *******************

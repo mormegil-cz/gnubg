@@ -18,7 +18,7 @@
 
 #ifndef _COMMON_H_
 #define _COMMON_H_
-#include "math.h"
+#include <math.h>
 
 #if !_GNU_SOURCE && !defined (__attribute__)
 /*! \brief GNU C specific attributes, e.g. unused
@@ -52,6 +52,14 @@ typedef void(*psighandler) (int);
 
 /* abs returns unsigned int by definition */
 #define Abs(a) ((unsigned int)abs(a))
+
+/* signbit() is used only in a somewhat performance sensitive place
+   in lib/sigmoid.h. If HAVE_DECL_SIGNBIT is false, maybe we should
+   work around it there instead of using this */
+#if !HAVE_DECL_SIGNBIT
+/* copysign() caters for special IEEE 754 numbers */
+#define signbit(x) (copysign(1, (x)) < 0)
+#endif
 
 /* Do we need to use g_utf8_casefold() for utf8 anywhere? */
 #define StrCaseCmp(s1, s2) g_ascii_strcasecmp(s1, s2)
