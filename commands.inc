@@ -1,4 +1,4 @@
-/* $Id: */
+/* $Id$ */
 
 /* All the commands are in this file */
 
