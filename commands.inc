@@ -1,3 +1,4 @@
+/* $Id: */
 
 /* All the commands are in this file */
 
@@ -1082,7 +1083,8 @@ command cER = {
       "position. Accepted formats are:\n"
       " set board =2 (sets the board to match the second position in the hint list.)\n"
       " set board simple 3 2 4 0 -3 -5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2\n"
-      " set board 4PPgASjgc/ABMA (sets the board to match the position id.)\n"
+      " set board 4PPgASjgc/ABMA (sets the board to match the position ID.)\n"
+      " set board PPGPAABAAAPHNNAAAAAA (sets the board to match the gnubg-nn position string.)\n"
 	      ), szPOSITION, NULL },
     { "browser", CommandSetBrowser, 
       N_("Set web browser"), szOPTCOMMAND, NULL },
