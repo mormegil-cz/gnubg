@@ -16,10 +16,9 @@ TARGET                     SOURCE
 ../AUTHORS                 ../credits.sh
 
 ../external_l.c            ../external_l.l
-
 ../external_y.c            ../external_y.y
 ../external_y.h            ../external_y.y
 
-../sgfl.c                  ../sgf.l
-../sgfp.c                  ../sgf.y
-../sgfp.h                  ../sgf.y
+../sgf_l.c                 ../sgf_l.l
+../sgf_y.c                 ../sgf_y.y
+../sgf_y.h                 ../sgf_y.y
