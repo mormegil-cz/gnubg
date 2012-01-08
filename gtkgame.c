@@ -6171,7 +6171,7 @@ extern void GTKCommandShowCredits(GtkWidget * pw, GtkWidget * pwParent)
 	treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	g_object_unref(store);
 	renderer = gtk_cell_renderer_text_new();
-	column = gtk_tree_view_column_new_with_attributes(_("Contributers"), renderer, "text", 0, NULL);
+	column = gtk_tree_view_column_new_with_attributes(_("Contributors"), renderer, "text", 0, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
 
 	while (names.plNext->p)
