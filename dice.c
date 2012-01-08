@@ -24,7 +24,11 @@
 
 #include <fcntl.h>
 #if HAVE_LIBGMP
+#ifdef sun
+#include <gmp/gmp.h>
+#else
 #include <gmp.h>
+#endif
 #endif
 #include <glib.h>
 #if HAVE_UNISTD_H
