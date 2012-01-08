@@ -95,6 +95,7 @@ Ian Dunstan
 Max Durbano
 Peter Eberhard
 Robert Eberlein
+Guido Flohr
 Fotis
 Kennedy Fraser
 Ric Gerace
@@ -257,7 +258,7 @@ cat > credits.c <<EOF
 #include "credits.h"
 
 const char aszCOPYRIGHT[] = N_("Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004 by Gary Wong.\n"
-                               "Copyright (C) 2009 by Gary Wong and the AUTHORS; for details type \`show version'.");
+                               "Copyright (C) 2012 by Gary Wong and the AUTHORS; for details type \`show version'.");
 
 credEntry ceAuthors[] = {
 EOF
@@ -407,7 +408,7 @@ cat >> AUTHORS <<'EOF'
   Library code from the following authors has been included in GNU Backgammon:
 
      Ulrich Drepper (an implementation of the public domain MD5 algorithm)
-             Bob Jenkins (the ISAAC pseudo random number generator)
+   Bob Jenkins (the ISAAC pseudo random number generator, hashing functions)
        Takuji Nishimura and Makoto Matsumoto (the Mersenne Twister PRNG)
                 Gerry Tesauro (the "pubeval" position evaluator)
              Claes Tornberg (the mec match equity table generator)
