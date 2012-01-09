@@ -244,7 +244,7 @@ SetPosInfo( posinfo *ppi, const int fTurn, const int fResigned,
                   const int fDoubled, const gamestate gs, const int anDice[ 2 ] ) {
     
     if( fTurn < 0 || fTurn > 1 || fResigned < 0 || fResigned > 1 || 
-    	  fResigned < 0 || fResigned > 1 || anDice[ 0 ] > 6 || anDice[ 0 ] < 0 ||
+    	  fDoubled < 0 || fDoubled > 1 || anDice[ 0 ] > 6 || anDice[ 0 ] < 0 ||
     	  anDice[ 1 ] > 6 || anDice[ 1 ] < 0 ||  gs > 7) {
 		memset(ppi, 0, sizeof(posinfo));
 		return -1;
