@@ -1540,9 +1540,9 @@ extern void CommandShowMarketWindow ( char * sz ) {
        has entered 25.1 instead of 0.251 */
 
     if ( aarRates[ 0 ][ 0 ] > 1.0 || aarRates[ 1 ][ 0 ] > 1.0 ||
-         aarRates[ 1 ][ 1 ] > 1.0 || aarRates[ 1 ][ 1 ] > 1.0 ) {
-      aarRates[ 0 ][ 0 ]  /= 100.0;
-      aarRates[ 1 ][ 0 ]  /= 100.0;
+         aarRates[ 0 ][ 1 ] > 1.0 || aarRates[ 1 ][ 1 ] > 1.0 ) {
+      aarRates[ 0 ][ 0 ] /= 100.0;
+      aarRates[ 1 ][ 0 ] /= 100.0;
       aarRates[ 0 ][ 1 ] /= 100.0;
       aarRates[ 1 ][ 1 ] /= 100.0;
     }
