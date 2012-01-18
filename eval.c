@@ -3087,13 +3087,7 @@ static void StatusNeuralNet( neuralnet *pnn, char *szTitle, char *sz )
   sz += sprintf( sz, " * %s %s:\n", szTitle, _("neural network evaluator"));
   sprintf(buf, _("version %s, %d inputs, %d hidden units"),
 	  WEIGHTS_VERSION, pnn->cInput, pnn->cHidden);
-  sz += sprintf( sz, "   - %s", buf);
-  
-  if( pnn->nTrained > 1 )
-      sprintf( sz, _("trained on %d positions"), pnn->nTrained );
-
-  strcat( sz, ".\n\n" );
-
+  sz += sprintf( sz, "   - %s.\n\n", buf);
 }
 
 static void StatusRace( char *sz ) {
