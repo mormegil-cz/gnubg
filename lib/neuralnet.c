@@ -259,13 +259,13 @@ extern int NeuralNetLoad( neuralnet *pnn, FILE *pf )
 {
 
     unsigned int i;
-	int nTrained;
     float *pr;
+    char dummy[16];
 
-    if( fscanf( pf, "%u %u %u %d %f %f\n", &pnn->cInput, &pnn->cHidden,
-		&pnn->cOutput, &nTrained, &pnn->rBetaHidden,
+    if( fscanf( pf, "%u %u %u %s %f %f\n", &pnn->cInput, &pnn->cHidden,
+		&pnn->cOutput, dummy, &pnn->rBetaHidden,
 		&pnn->rBetaOutput ) < 5 || pnn->cInput < 1 ||
-	pnn->cHidden < 1 || pnn->cOutput < 1 || nTrained < 0 ||
+	pnn->cHidden < 1 || pnn->cOutput < 1 ||
 	pnn->rBetaHidden <= 0.0 || pnn->rBetaOutput <= 0.0 ) {
 		errno = EINVAL;
 		return -1;
@@ -275,7 +275,7 @@ extern int NeuralNetLoad( neuralnet *pnn, FILE *pf )
 			 pnn->rBetaHidden, pnn->rBetaOutput ) )
 		return -1;
 
-    pnn->nTrained = nTrained;
+    pnn->nTrained = 1;
     
     for( i = pnn->cInput * pnn->cHidden, pr = pnn->arHiddenWeight; i; i-- )
 	if( fscanf( pf, "%f\n", pr++ ) < 1 )
@@ -299,7 +299,7 @@ extern int NeuralNetLoad( neuralnet *pnn, FILE *pf )
 extern int NeuralNetLoadBinary( neuralnet *pnn, FILE *pf )
 {
 
-	int nTrained;
+    int dummy;
 
 #define FREAD( p, c ) \
     if( fread( (p), sizeof( *(p) ), (c), pf ) < (unsigned int)(c) ) return -1;
@@ -307,12 +307,12 @@ extern int NeuralNetLoadBinary( neuralnet *pnn, FILE *pf )
     FREAD( &pnn->cInput, 1 );
     FREAD( &pnn->cHidden, 1 );
     FREAD( &pnn->cOutput, 1 );
-    FREAD( &nTrained, 1 );
+    FREAD( &dummy, 1 );
     FREAD( &pnn->rBetaHidden, 1 );
     FREAD( &pnn->rBetaOutput, 1 );
 
     if( pnn->cInput < 1 || pnn->cHidden < 1 || pnn->cOutput < 1 ||
-			nTrained < 0 || pnn->rBetaHidden <= 0.0 || pnn->rBetaOutput <= 0.0 ) {
+			pnn->rBetaHidden <= 0.0 || pnn->rBetaOutput <= 0.0 ) {
 		errno = EINVAL;
 		return -1;
     }
@@ -321,7 +321,7 @@ extern int NeuralNetLoadBinary( neuralnet *pnn, FILE *pf )
 			 pnn->rBetaHidden, pnn->rBetaOutput ) )
 		return -1;
 
-    pnn->nTrained = nTrained;
+    pnn->nTrained = 1;
     
     FREAD( pnn->arHiddenWeight, pnn->cInput * pnn->cHidden );
     FREAD( pnn->arOutputWeight, pnn->cHidden * pnn->cOutput );
