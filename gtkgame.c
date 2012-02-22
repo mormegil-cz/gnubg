@@ -7071,7 +7071,7 @@ static GtkWidget *CreateList(void)
 		renderer = gtk_cell_renderer_text_new();
 		g_object_set(renderer, "xalign", 1.0, NULL);
 		column = gtk_tree_view_column_new_with_attributes("", renderer, "text", i, NULL);
-		gtk_tree_view_column_set_alignment  (column, 0.97);
+		gtk_tree_view_column_set_alignment  (column, 0.97f);
 		gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	}
 	gtk_tree_view_column_set_title (gtk_tree_view_get_column (GTK_TREE_VIEW(view), 1), ap[0].szName);
@@ -7509,14 +7509,14 @@ extern void *GTKCalibrationStart( void ) {
 
 	ProcessEvents();
 
-    g_object_unref( pwResult );
+    g_object_ref( G_OBJECT( pwResult) );
 
     return pwResult;
 }
 
 extern void GTKCalibrationUpdate( void *context, float rEvalsPerSec ) {
 
-    char sz[ 32 ];
+    gchar sz[ 32 ];
 
     sprintf( sz, "%.0f", rEvalsPerSec );
     gtk_label_set_text( GTK_LABEL( context ), sz );
@@ -7526,7 +7526,7 @@ extern void GTKCalibrationUpdate( void *context, float rEvalsPerSec ) {
 
 extern void GTKCalibrationEnd( void *context ) {
 
-    g_object_unref( GTK_WIDGET( context ) );
+    g_object_unref( G_OBJECT( context ) );
 
     gtk_widget_destroy( gtk_widget_get_toplevel( GTK_WIDGET( context ) ) );
 
