@@ -2058,6 +2058,90 @@ raceBGprob(const TanBoard anBoard, int side, const bgvariation bgv)
   }
 }  
 
+extern int
+EvalRaceBG(const TanBoard anBoard, float arOutput[], const bgvariation bgv )
+
+/* anBoard[1] is on roll */
+{
+    /* total men for side not on roll */
+    int totMen0 = 0;
+ 
+    /* total men for side on roll */
+    int totMen1 = 0;
+ 
+    /* a set flag for every possible outcome */
+    int any = 0;
+  
+    int i;
+ 
+    for(i = 23; i >= 0; --i) {
+      totMen0 += anBoard[0][i];
+      totMen1 += anBoard[1][i];
+    }
+
+    if( totMen1 == 15 ) {
+      any |= OG_POSSIBLE;
+    }
+
+    if( totMen0 == 15 ) {
+      any |= G_POSSIBLE;
+    }
+
+    if( any ) {
+      if( any & OG_POSSIBLE ) {
+        for(i = 23; i >= 18; --i) {
+          if( anBoard[1][i] > 0 ) {
+            break;
+          }
+        }
+        if( i >= 18 ) {
+          any |= OBG_POSSIBLE;
+        }
+      }
+
+      if( any & G_POSSIBLE ) {
+        for(i = 23; i >= 18; --i) {
+          if( anBoard[0][i] > 0 ) {
+            break;
+          }
+        }
+
+        if( i >= 18 ) {
+          any |= BG_POSSIBLE;
+        }
+      }
+    }
+
+    if( any & (BG_POSSIBLE | OBG_POSSIBLE) ) {
+      /* side that can have the backgammon */
+      int side = (any & BG_POSSIBLE) ? 1 : 0;
+
+      float pr = raceBGprob(anBoard, side, bgv);
+
+      if( pr > 0.0 ) {
+        if( side == 1 ) {
+          arOutput[OUTPUT_WINBACKGAMMON] = pr;
+
+          if( arOutput[OUTPUT_WINGAMMON] < arOutput[OUTPUT_WINBACKGAMMON] ) {
+            arOutput[OUTPUT_WINGAMMON] = arOutput[OUTPUT_WINBACKGAMMON];
+          }
+        } else {
+          arOutput[OUTPUT_LOSEBACKGAMMON] = pr;
+
+          if(arOutput[OUTPUT_LOSEGAMMON] < arOutput[OUTPUT_LOSEBACKGAMMON]) {
+            arOutput[OUTPUT_LOSEGAMMON] = arOutput[OUTPUT_LOSEBACKGAMMON];
+          }
+        }
+      } else {
+        if( side == 1 ) {
+          arOutput[OUTPUT_WINBACKGAMMON] = 0.0;
+        } else {
+          arOutput[OUTPUT_LOSEBACKGAMMON] = 0.0;
+        }
+      }
+    }
+}
+
 static int
 EvalRace(const TanBoard anBoard, float arOutput[], const bgvariation bgv, NNState *nnStates )
 {
@@ -2072,88 +2156,9 @@ EvalRace(const TanBoard anBoard, float arOutput[], const bgvariation bgv, NNStat
 #endif
     return -1;
   
-  /* anBoard[1] is on roll */
-  {
-    /* total men for side not on roll */
-    int totMen0 = 0;
-    
-    /* total men for side on roll */
-    int totMen1 = 0;
+  /* special evaluation of backgammons overrides net output */
 
-    /* a set flag for every possible outcome */
-    int any = 0;
-    
-    int i;
-    
-    for(i = 23; i >= 0; --i) {
-      totMen0 += anBoard[0][i];
-      totMen1 += anBoard[1][i];
-    }
-
-    if( totMen1 == 15 ) {
-      any |= OG_POSSIBLE;
-    }
-    
-    if( totMen0 == 15 ) {
-      any |= G_POSSIBLE;
-    }
-
-    if( any ) {
-      if( any & OG_POSSIBLE ) {
-	for(i = 23; i >= 18; --i) {
-	  if( anBoard[1][i] > 0 ) {
-	    break;
-	  }
-	}
-
-	if( i >= 18 ) {
-	  any |= OBG_POSSIBLE;
-	}
-      }
-
-      if( any & G_POSSIBLE ) {
-	for(i = 23; i >= 18; --i) {
-	  if( anBoard[0][i] > 0 ) {
-	    break;
-	  }
-	}
-
-	if( i >= 18 ) {
-	  any |= BG_POSSIBLE;
-	}
-      }
-    }
-    
-    if( any & (BG_POSSIBLE | OBG_POSSIBLE) ) {
-      /* side that can have the backgammon */
-      
-      int side = (any & BG_POSSIBLE) ? 1 : 0;
-
-      float pr = raceBGprob(anBoard, side, bgv);
-
-      if( pr > 0.0 ) {
-	if( side == 1 ) {
-	  arOutput[OUTPUT_WINBACKGAMMON] = pr;
-
-	  if( arOutput[OUTPUT_WINGAMMON] < arOutput[OUTPUT_WINBACKGAMMON] ) {
-	    arOutput[OUTPUT_WINGAMMON] = arOutput[OUTPUT_WINBACKGAMMON];
-	  }
-	} else {
-	  arOutput[OUTPUT_LOSEBACKGAMMON] = pr;
-
-	  if(arOutput[OUTPUT_LOSEGAMMON] < arOutput[OUTPUT_LOSEBACKGAMMON]) {
-	    arOutput[OUTPUT_LOSEGAMMON] = arOutput[OUTPUT_LOSEBACKGAMMON];
-	  }
-	}
-      } else {
-	if( side == 1 ) {
-	  arOutput[OUTPUT_WINBACKGAMMON] = 0.0;
-	} else {
-	  arOutput[OUTPUT_LOSEBACKGAMMON] = 0.0;
-	}
-      }
-    }  
-  }
+  EvalRaceBG(anBoard, arOutput, bgv);
   
   /* sanity check will take care of rest */
 
@@ -5516,6 +5521,11 @@ static void FindBestMoveInEval(NNState * nnStates, int const nDice0, int const n
 				if (nnStates)
 					nnStates[pc - CLASS_RACE].state = (i == 0) ? NNSTATE_INCREMENTAL : NNSTATE_DONE;
 				NeuralNetEvaluate(n, arInput, arOutput, nnStates);
+				if (pc == CLASS_RACE)
+					/* special evaluation of backgammons
+					   overrides net output */
+					EvalRaceBG((ConstTanBoard) anBoardOut, arOutput, VARIATION_STANDARD);
+
 				SanityCheck((ConstTanBoard) anBoardOut, arOutput);
 			}
 			memcpy(ec.ar, arOutput, sizeof(float) * NUM_OUTPUTS);

@@ -1,3 +1,8 @@
+2012-03-03  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* eval.c: Improve backgammons estimation in race pruning by using
+	the same method than in the regular evaluation.
+
 2011-12-31  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* lib/neuralnetsse.c: Fixes error in sigmoid approximation when
