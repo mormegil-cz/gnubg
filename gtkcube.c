@@ -131,6 +131,9 @@ TakeAnalysis(cubehintdata *pchd) {
 
     iRow = 0;
 
+    InvertEvaluationR( cdec->aarOutput[ 0 ], &ci );
+    InvertEvaluationR( cdec->aarOutput[ 1 ], &ci );
+
     switch ( pes->et ) {
     case EVAL_EVAL:
       if ( ci.nMatchTo )
@@ -212,6 +215,9 @@ TakeAnalysis(cubehintdata *pchd) {
 
     }
 
+    InvertEvaluationR( cdec->aarOutput[ 0 ], &ci );
+    InvertEvaluationR( cdec->aarOutput[ 1 ], &ci );
+                               
     /* sub-header */
 
     pw = gtk_label_new( _("Cubeful equities:") );
