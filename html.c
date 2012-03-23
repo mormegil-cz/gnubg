@@ -2096,7 +2096,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf,
   else
     r = arDouble[ OUTPUT_NODOUBLE ] - arDouble[ OUTPUT_TAKE ];
 
-  if ( fDouble > 0 && r > 0.0f ) {
+  if ( fDouble > 0 && fTake < 0 && r > 0.0f ) {
 
     fAnno = TRUE;
 
