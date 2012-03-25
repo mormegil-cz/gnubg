@@ -30,7 +30,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <glib.h>
-#include <glib/gthread.h>
 #if USE_GTK
 #include <gtk/gtk.h>
 #include <gtkgame.h>
