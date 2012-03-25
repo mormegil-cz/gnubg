@@ -788,10 +788,10 @@ extern void BearoffClose(bearoffcontext * pbc)
 	if (pbc->pf)
 		fclose(pbc->pf);
 
-#if (GLIB_MAJOR_VERSION > 2) || ((GLIB_MAJOR_VERSION > 1) && (GLIB_MINOR_VERSION > 7))
+#if GLIB_CHECK_VERSION(2,8,0)
 	if (pbc->map)
 	{
-#if defined(G_DISABLE_DEPRECATED) && G_DISABLE_DEPRECATED
+#if GLIB_CHECK_VERSION(2,22,0)
 		 g_mapped_file_unref(pbc->map);
 #else
 		 g_mapped_file_free(pbc->map);
@@ -809,7 +809,7 @@ extern void BearoffClose(bearoffcontext * pbc)
 	g_free(pbc);
 }
 
-#if (GLIB_MAJOR_VERSION > 2) || ((GLIB_MAJOR_VERSION > 1) && (GLIB_MINOR_VERSION > 7))
+#if GLIB_CHECK_VERSION(2,8,0)
 static unsigned char *ReadIntoMemory ( bearoffcontext *pbc )
 {
 	GError *error = NULL;
@@ -985,7 +985,7 @@ extern bearoffcontext *BearoffInit(const char *szFilename, const int bo, void (*
 	 * read database into memory if requested 
 	 */
 
-#if (GLIB_MAJOR_VERSION > 2) || ((GLIB_MAJOR_VERSION > 1) && (GLIB_MINOR_VERSION > 7))
+#if GLIB_CHECK_VERSION(2,8,0)
 	if (bo & (int) BO_IN_MEMORY) {
 		fclose(pbc->pf);
 		pbc->pf = NULL;
