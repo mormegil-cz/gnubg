@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _EVAL_H_
-#define _EVAL_H_
+#ifndef EVAL_H
+#define EVAL_H
 
 #include "dice.h"
 #include "bearoff.h"
@@ -439,6 +439,8 @@ ClassifyPosition( const TanBoard anBoard, const bgvariation bgv );
 /* internal use only */
 extern int EvalBearoff1Full( const TanBoard anBoard,
                              float arOutput[] );
+extern void EvalRaceBG(const TanBoard anBoard, float arOutput[],
+			const bgvariation bgv );
 
 extern float
 Utility( float ar[ NUM_OUTPUTS ], const cubeinfo* pci );

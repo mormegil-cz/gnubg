@@ -2058,7 +2058,7 @@ raceBGprob(const TanBoard anBoard, int side, const bgvariation bgv)
   }
 }  
 
-extern int
+extern void
 EvalRaceBG(const TanBoard anBoard, float arOutput[], const bgvariation bgv )
 
 /* anBoard[1] is on roll */
