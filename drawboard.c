@@ -979,6 +979,7 @@ extern int ParseFIBSBoard( char *pch, TanBoard anBoard,
 			   int *pfDoubled, int *pfTurn, int *pfCrawford ) {
     
     int i, c, n, fCanDouble, fOppCanDouble, anOppDice[ 2 ];
+    int fNonCrawford, fPostCrawford;
 
     for( i = 0; i < 25; i++ )
 	anBoard[ 0 ][ i ] = anBoard[ 1 ][ i ] = 0;
@@ -1051,9 +1052,9 @@ extern int ParseFIBSBoard( char *pch, TanBoard anBoard,
 
     c = -1;
     sscanf( pch, "%d:%d:%d:%d:%d:%d:%d:%d:%d:%*d:%*d:%*d:%*d:%*d:%*d:%*d:%*d:"
-	    "%*d:%*d:%d:%n", pfTurn, anDice, anDice + 1, anOppDice,
+	    "%*d:%d:%d:%n", pfTurn, anDice, anDice + 1, anOppDice,
 	    anOppDice + 1, pnCube, &fCanDouble, &fOppCanDouble,
-	    pfDoubled, pfCrawford, &c );
+	    pfDoubled, &fNonCrawford, &fPostCrawford, &c );
     if( c < 0 )
 	return -1;
 
@@ -1062,6 +1063,47 @@ extern int ParseFIBSBoard( char *pch, TanBoard anBoard,
     if( !anDice[ 0 ] ) {
 	anDice[ 0 ] = anOppDice[ 0 ];
 	anDice[ 1 ] = anOppDice[ 1 ];
+    }
+
+    /*
+     * Crawford detection.  This is rather tricky with FIBS board states
+     * because FIBS sets both may-double flags to 1 in the Crawford game.
+     *
+     * We have to inspect the last but one and last but two fields for that.
+     * The last but one field is the post-Crawford flag, the last but two
+     * field is the non-Crawford flag.
+     *
+     * Until at least one of the players is 1-away, you cannot deduce whether
+     * the Crawford rule is in use or not.  Once that one of the opponents
+     * is 1-away, the non-Crawford flag is set to 3 if the Crawford rule
+     * is not in use; otherwise everything is still 0.
+     *
+     * Once the Crawford game is finished, the post-Crawford flag is set
+     * to 1.
+     *
+     * Since we cannot find out whether the Crawford rule is in use or not
+     * in the pre-Crawford games, the cubeful evaluation can be slightly
+     * biased.  But since we the vast majority of matches on FIBS is played
+     * with the Crawford rule and we assume usage of the Crawford rule
+     * as a default, the bias is negligible.
+     */
+    if ( !*pnMatchTo ) {
+        *pfCrawford = 0;
+    } else {
+        *pfCrawford = 1;
+        if ( *pnMatchTo - *pnScore == 1 || *pnMatchTo - *pnScore == 1 ) {
+            if ( fNonCrawford ) {
+                *pfCrawford = 0;
+            } else if ( !fPostCrawford ) {
+                if ( *pnMatchTo - *pnScore == 1 ) {
+                    fCanDouble = 0;
+                    fOppCanDouble = 1;
+                } else {
+                    fCanDouble = 1;
+                    fOppCanDouble = 0;
+                }
+            }
+        }
     }
 
     *pfCubeOwner = fCanDouble != fOppCanDouble ? fCanDouble : -1;
