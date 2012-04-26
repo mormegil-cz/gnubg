@@ -737,7 +737,7 @@ extern void CommandSetConfirmSave( char *sz ) {
 	       "overwriting existing files.") );
 }
 
-extern void CommandSetCubeCentre( char *sz ) {
+extern void CommandSetCubeCentre( char *UNUSED(sz) ) {
 
     moverecord *pmr;
     
@@ -1024,17 +1024,17 @@ extern void CommandSetEvalPlies( char *sz ) {
 }
 
 #if USE_GTK
-extern void CommandSetGUIAnimationBlink( char *sz ) {
+extern void CommandSetGUIAnimationBlink( char *UNUSED(sz) ) {
 
     animGUI = ANIMATE_BLINK;
 }
 
-extern void CommandSetGUIAnimationNone( char *sz ) {
+extern void CommandSetGUIAnimationNone( char *UNUSED(sz) ) {
 
     animGUI = ANIMATE_NONE;
 }
 
-extern void CommandSetGUIAnimationSlide( char *sz ) {
+extern void CommandSetGUIAnimationSlide( char *UNUSED(sz) ) {
 
     animGUI = ANIMATE_SLIDE;
 }
@@ -1127,28 +1127,28 @@ extern void CommandSetGUIMoveListDetail( char *sz )
 			_("Basic details will be shown in the move analysis") );
 }
 
-extern void CommandSetGUIShowPipsNone(char *sz)
+extern void CommandSetGUIShowPipsNone(char *UNUSED(sz))
 {
 	gui_show_pips = GUI_SHOW_PIPS_NONE;
 	outputf(_("The pip counts will not be shown."));
 	UpdateSetting(&gui_show_pips);
 }
 
-extern void CommandSetGUIShowPipsPips(char *sz)
+extern void CommandSetGUIShowPipsPips(char *UNUSED(sz))
 {
 	gui_show_pips = GUI_SHOW_PIPS_PIPS;
 	outputf(_("Pip counts will be shown."));
 	UpdateSetting(&gui_show_pips);
 }
 
-extern void CommandSetGUIShowPipsEPC(char *sz)
+extern void CommandSetGUIShowPipsEPC(char *UNUSED(sz))
 {
 	gui_show_pips = GUI_SHOW_PIPS_EPC;
 	outputf(_("Effective pip counts will be shown."));
 	UpdateSetting(&gui_show_pips);
 }
 
-extern void CommandSetGUIShowPipsWastage(char *sz)
+extern void CommandSetGUIShowPipsWastage(char *UNUSED(sz))
 {
 	gui_show_pips = GUI_SHOW_PIPS_WASTAGE;
 	outputf(_("Pip wastage will be shown."));
@@ -1345,7 +1345,7 @@ extern void CommandSetPlayerExternal( char *sz ) {
 #endif /* !HAVE_SOCKETS */
 }
 
-extern void CommandSetPlayerGNU( char *sz ) {
+extern void CommandSetPlayerGNU( char *UNUSED(sz) ) {
 
 #if HAVE_SOCKETS
     if( ap[ iPlayerSet ].pt == PLAYER_EXTERNAL )
@@ -1364,7 +1364,7 @@ extern void CommandSetPlayerGNU( char *sz ) {
 #endif /* USE_GTK */
 }
 
-extern void CommandSetPlayerHuman( char *sz ) {
+extern void CommandSetPlayerHuman( char *UNUSED(sz) ) {
 
 #if HAVE_SOCKETS
     if( ap[ iPlayerSet ].pt == PLAYER_EXTERNAL )
@@ -1548,7 +1548,7 @@ extern void CommandSetRNGFile( char *sz ) {
     SetRNG( rngSet, rngctxSet, RNG_FILE, sz );
 }
 
-extern void CommandSetRNGBBS( char *sz ) {
+extern void CommandSetRNGBBS( char *UNUSED(sz) ) {
 #if HAVE_LIBGMP
     SetRNG( rngSet, rngctxSet, RNG_BBS, sz );
 #else
@@ -3401,21 +3401,21 @@ SetExportHTMLType ( const htmlexporttype het,
 }
 
 extern void 
-CommandSetExportHTMLTypeBBS ( char *sz ) {
+CommandSetExportHTMLTypeBBS ( char *UNUSED(sz) ) {
 
   SetExportHTMLType ( HTML_EXPORT_TYPE_BBS, "gif" );
 
 }
 
 extern void 
-CommandSetExportHTMLTypeFibs2html ( char *sz ) {
+CommandSetExportHTMLTypeFibs2html ( char *UNUSED(sz) ) {
 
   SetExportHTMLType ( HTML_EXPORT_TYPE_FIBS2HTML, "gif" );
 
 }
 
 extern void 
-CommandSetExportHTMLTypeGNU ( char *sz ) {
+CommandSetExportHTMLTypeGNU ( char *UNUSED(sz) ) {
 
   SetExportHTMLType ( HTML_EXPORT_TYPE_GNU, "png" );
 
@@ -3440,21 +3440,21 @@ SetExportHTMLCSS ( const htmlexportcss hecss ) {
 
 
 extern void
-CommandSetExportHTMLCSSHead ( char *sz ) {
+CommandSetExportHTMLCSSHead ( char *UNUSED(sz) ) {
 
   SetExportHTMLCSS ( HTML_EXPORT_CSS_HEAD );
 
 }
 
 extern void
-CommandSetExportHTMLCSSInline ( char *sz ) {
+CommandSetExportHTMLCSSInline ( char *UNUSED(sz) ) {
 
   SetExportHTMLCSS ( HTML_EXPORT_CSS_INLINE );
 
 }
 
 extern void
-CommandSetExportHTMLCSSExternal ( char *sz ) {
+CommandSetExportHTMLCSSExternal ( char *UNUSED(sz) ) {
 
   SetExportHTMLCSS ( HTML_EXPORT_CSS_EXTERNAL );
 
@@ -3527,17 +3527,17 @@ static void _set_tutor_skill (skilltype Skill, int skillno, char *skill) {
   outputf ( _("Tutor warnings will be given for play marked `%s'.\n"), skill);
 }
 
-extern void CommandSetTutorSkillDoubtful( char * sz) {
+extern void CommandSetTutorSkillDoubtful( char *UNUSED(sz)) {
 
   _set_tutor_skill (SKILL_DOUBTFUL, 0, _("doubtful") );
 }
 
-extern void CommandSetTutorSkillBad( char * sz) {
+extern void CommandSetTutorSkillBad( char *UNUSED(sz)) {
 
   _set_tutor_skill (SKILL_BAD, 1, _("bad") );
 }
 
-extern void CommandSetTutorSkillVeryBad( char * sz) {
+extern void CommandSetTutorSkillVeryBad( char *UNUSED(sz)) {
 
   _set_tutor_skill (SKILL_VERYBAD, 2, _("very bad") );
 }
@@ -3739,22 +3739,22 @@ static void SetPriority( int n ) {
 #endif /* HAVE_SETPRIORITY */
 }
 
-extern void CommandSetPriorityAboveNormal ( char *sz ) {
+extern void CommandSetPriorityAboveNormal ( char *UNUSED(sz) ) {
 
     SetPriority( -10 );
 }
 
-extern void CommandSetPriorityBelowNormal ( char *sz ) {
+extern void CommandSetPriorityBelowNormal ( char *UNUSED(sz) ) {
 
     SetPriority( 10 );
 }
 
-extern void CommandSetPriorityHighest ( char *sz ) {
+extern void CommandSetPriorityHighest ( char *UNUSED(sz) ) {
 
     SetPriority( -19 );
 }
 
-extern void CommandSetPriorityIdle ( char *sz ) {
+extern void CommandSetPriorityIdle ( char *UNUSED(sz) ) {
 
     SetPriority( 19 );
 }
@@ -3771,12 +3771,12 @@ extern void CommandSetPriorityNice ( char *sz ) {
     SetPriority( n );
 }
 
-extern void CommandSetPriorityNormal ( char *sz ) {
+extern void CommandSetPriorityNormal ( char *UNUSED(sz) ) {
 
     SetPriority( 0 );
 }
 
-extern void CommandSetPriorityTimeCritical ( char *sz ) {
+extern void CommandSetPriorityTimeCritical ( char *UNUSED(sz) ) {
 
     SetPriority( -20 );
 }
@@ -3933,35 +3933,35 @@ SetVariation( const bgvariation bgvx ) {
 }
 
 extern void
-CommandSetVariation1ChequerHypergammon( char *sz ) {
+CommandSetVariation1ChequerHypergammon( char *UNUSED(sz) ) {
 
   SetVariation( VARIATION_HYPERGAMMON_1 );
 
 }
 
 extern void
-CommandSetVariation2ChequerHypergammon( char *sz ) {
+CommandSetVariation2ChequerHypergammon( char *UNUSED(sz) ) {
 
   SetVariation( VARIATION_HYPERGAMMON_2 );
 
 }
 
 extern void
-CommandSetVariation3ChequerHypergammon( char *sz ) {
+CommandSetVariation3ChequerHypergammon( char *UNUSED(sz) ) {
 
   SetVariation( VARIATION_HYPERGAMMON_3 );
 
 }
 
 extern void
-CommandSetVariationNackgammon( char *sz ) {
+CommandSetVariationNackgammon( char *UNUSED(sz) ) {
 
   SetVariation( VARIATION_NACKGAMMON );
 
 }
 
 extern void
-CommandSetVariationStandard( char *sz ) {
+CommandSetVariationStandard( char *UNUSED(sz) ) {
 
   SetVariation( VARIATION_STANDARD );
 
