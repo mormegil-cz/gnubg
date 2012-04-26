@@ -373,7 +373,7 @@ CalculateBoard( void )
   do {
     pl = pl->plNext;
 
-    g_assert( pl->p );
+    g_assert( pl && pl->p );
 
     ApplyMoveRecord( &ms, plGame, pl->p );
 
@@ -1185,7 +1185,6 @@ static int ComputerTurn( void ) {
 	  findData fd;
       TanBoard anBoardMove;
       float arResign[ NUM_ROLLOUT_OUTPUTS ];
-      int nResign;
       static char achResign[ 3 ] = { 'n', 'g', 'b' };
       char ach[ 2 ];
 	 
@@ -1199,6 +1198,8 @@ static int ComputerTurn( void ) {
 
       if( ClassifyPosition( msBoard(), ms.bgv ) <= CLASS_RACE )
 	  {
+          int nResign;
+
           evalcontext ecResign = { FALSE, 0, FALSE, TRUE, 0.0 };
           evalsetup esResign;
 
@@ -1645,7 +1646,7 @@ static int TryBearoff( void ) {
 }
 
 extern int NextTurn( int fPlayNext ) {
-    int n;
+
     g_assert( !fComputing );
 	
 #if USE_GTK
@@ -1699,6 +1700,7 @@ extern int NextTurn( int fPlayNext ) {
 	{
 		moverecord *pmr = (moverecord *) plGame->plNext->p;
 		xmovegameinfo *pmgi = &pmr->g;
+		int n;
 
 		if( ms.fJacoby && ms.fCubeOwner == -1 && !ms.nMatchTo )
 			/* gammons do not count on a centred cube during money
@@ -2689,7 +2691,6 @@ CommandMove( char *sz ) {
     TurnDone();
 
     return;
-    outputl( _("Illegal move.") );
 }
 
 static void StartNewGame(void)
@@ -2922,7 +2923,6 @@ extern void ChangeGame(listOLD *plGameNew)
 		plGame = plGameNew;
 		plLastMove = plGame->plNext;
 	} else {
-		plGameNew = plGame;
 		if (ms.anDice[0] > 0)
 			dice_rolled = TRUE;
 	}
@@ -3170,8 +3170,8 @@ int InternalCommandNext(int mark, int cmark, int n)
 	int done = 0;
 
 	if (mark || cmark) {
-		listOLD *pgame = plGame;
-		moverecord *pmr = 0;
+		listOLD *pgame;
+		moverecord *pmr;
 		listOLD *p = plLastMove->plNext;
 
 		for (pgame = lMatch.plNext; pgame->p != plGame && pgame != &lMatch;
@@ -3698,7 +3698,6 @@ extern void CommandReject( char *sz ) {
 extern void CommandResign( char *sz ) {
 
     char *pch;
-    size_t cch;
     
     if( ms.gs != GAME_PLAYING ) {
 	outputl( _("You must be playing a game if you want to resign it.") );
@@ -3716,7 +3715,7 @@ extern void CommandResign( char *sz ) {
      or treat resignations while doubled as drops? */
     
     if( ( pch = NextToken( &sz ) ) ) {
-	cch = strlen( pch );
+	const size_t cch = strlen( pch );
 
 	if( !StrNCaseCmp( "single", pch, cch ) ||
 	    !StrNCaseCmp( "normal", pch, cch ) )
