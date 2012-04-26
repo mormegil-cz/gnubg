@@ -95,7 +95,7 @@ optjacobyrule  : JACOBYRULE ON { ec.fJacobyRule = TRUE; }
 
 optcrawfordrule : CRAWFORDRULE ON { ec.fCrawfordRule = TRUE; }
                |  CRAWFORDRULE OFF { ec.fCrawfordRule = FALSE; }
-               |  /* empty */ { ec.fCrawfordRule = fAutoCrawford; }
+               |  /* empty */ { ec.fCrawfordRule = TRUE; }
                ;
 
 optplies       : PLIES NUMBER { ec.nPlies = $2; }
@@ -167,7 +167,7 @@ reset_command(void) {
   ec.fCubeful = 0;
   ec.nReduced = 0;
   ec.fUsePrune = 0;
-  ec.fCrawfordRule = fAutoCrawford;
+  ec.fCrawfordRule = 1;
   ec.fJacobyRule = fJacoby;
   free(ec.szFIBSBoard);
   ec.szFIBSBoard = NULL;
