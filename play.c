@@ -671,7 +671,7 @@ extern void ClearMoveRecord( void ) {
 #if USE_GTK
 static guint nTimeout, fDelaying;
 
-static gint DelayTimeout( gpointer p ) {
+static gint DelayTimeout( gpointer UNUSED(p) ) {
 
     if( fDelaying )
 	fEndDelay = TRUE;
@@ -1880,7 +1880,7 @@ extern void CommandAccept( char *sz ) {
 		 "offered.") );
 }
 
-extern void CommandAgree( char *sz ) {
+extern void CommandAgree( char *UNUSED(sz) ) {
 
     moverecord *pmr;
     
@@ -1919,7 +1919,6 @@ extern void CommandAgree( char *sz ) {
     pmr->r.nResigned = ms.fResigned;
     pmr->r.esResign.et = EVAL_NONE;
     
-
     AddMoveRecord( pmr );
 
     TurnDone();
@@ -2123,7 +2122,7 @@ CommandAnnotateResign ( char *sz ) {
 
 }
 
-extern void CommandAnnotateBad( char *sz ) {
+extern void CommandAnnotateBad( char *UNUSED(sz) ) {
 
     AnnotateMove( SKILL_BAD );
 }
@@ -2152,7 +2151,7 @@ extern void CommandAnnotateAddComment( char *sz ) {
 
 }
 
-extern void CommandAnnotateClearComment( char *sz ) {
+extern void CommandAnnotateClearComment( char *UNUSED(sz) ) {
 
     moverecord *pmr;
 
@@ -2176,47 +2175,47 @@ extern void CommandAnnotateClearComment( char *sz ) {
 
 }
 
-extern void CommandAnnotateClearLuck( char *sz ) {
+extern void CommandAnnotateClearLuck( char *UNUSED(sz) ) {
 
     AnnotateRoll( LUCK_NONE );
 }
 
-extern void CommandAnnotateClearSkill( char *sz ) {
+extern void CommandAnnotateClearSkill( char *UNUSED(sz) ) {
 
     AnnotateMove( SKILL_NONE );
 }
 
-extern void CommandAnnotateDoubtful( char *sz ) {
+extern void CommandAnnotateDoubtful( char *UNUSED(sz) ) {
 
     AnnotateMove( SKILL_DOUBTFUL );
 }
 
-extern void CommandAnnotateLucky( char *sz ) {
+extern void CommandAnnotateLucky( char *UNUSED(sz) ) {
 
     AnnotateRoll( LUCK_GOOD );
 }
 
-extern void CommandAnnotateUnlucky( char *sz ) {
+extern void CommandAnnotateUnlucky( char *UNUSED(sz) ) {
 
     AnnotateRoll( LUCK_BAD );
 }
 
-extern void CommandAnnotateVeryBad( char *sz ) {
+extern void CommandAnnotateVeryBad( char *UNUSED(sz) ) {
 
     AnnotateMove( SKILL_VERYBAD );
 }
 
-extern void CommandAnnotateVeryLucky( char *sz ) {
+extern void CommandAnnotateVeryLucky( char *UNUSED(sz) ) {
 
     AnnotateRoll( LUCK_VERYGOOD );
 }
 
-extern void CommandAnnotateVeryUnlucky( char *sz ) {
+extern void CommandAnnotateVeryUnlucky( char *UNUSED(sz) ) {
 
     AnnotateRoll( LUCK_VERYBAD );
 }
 
-extern void CommandDecline( char *sz ) {
+extern void CommandDecline( char *UNUSED(sz) ) {
 
     if( ms.gs != GAME_PLAYING ) {
 	outputl( _("No game in progress (type `new game' to start one).") );
@@ -2270,7 +2269,7 @@ static skilltype tutor_double(int did_double)
 	return pmr ? pmr->stCube : SKILL_NONE;
 }
 
-extern void CommandDouble( char *sz ) {
+extern void CommandDouble( char *UNUSED(sz) ) {
 
     moverecord *pmr;
     
@@ -2355,7 +2354,6 @@ extern void CommandDouble( char *sz ) {
     }
 #endif
     
-
     AddMoveRecord( pmr );
     
     TurnDone();
@@ -2376,8 +2374,9 @@ static skilltype tutor_take(int did_take)
 }
 
 
-extern void CommandDrop( char *sz ) {
-      moverecord *pmr;
+extern void CommandDrop( char *UNUSED(sz) )
+{
+     moverecord *pmr;
     
     if( ms.gs != GAME_PLAYING || !ms.fDoubled ) {
 	outputl( _("The cube must have been offered before you can drop it.") );
@@ -2410,12 +2409,10 @@ extern void CommandDrop( char *sz ) {
       return;
     }
 
-
     if( fDisplay )
        outputf(ngettext("%s refuses the cube and gives up %d point.\n", "%s refuses the cube and gives up %d points.\n", ms.nCube),
 	       ap[ ms.fTurn ].szName, ms.nCube);
     
-
     AddMoveRecord( pmr );
     
     TurnDone();
@@ -2488,7 +2485,7 @@ static void DumpGameList(GString *gsz, listOLD *plGame)
 
 }
 
-extern void CommandListGame(char *sz)
+extern void CommandListGame(char *UNUSED(sz))
 {
 	GString *gsz = g_string_new(NULL);
 
@@ -2511,7 +2508,8 @@ extern void CommandListGame(char *sz)
 	g_string_free(gsz, TRUE);
 }
 
-extern void CommandListMatch( char *sz ) {
+extern void CommandListMatch( char *UNUSED(sz) )
+{
 #if USE_GTK
     if( fX ) {
 	ShowGameWindow();
@@ -2707,7 +2705,7 @@ static void StartNewGame(void)
 	fComputing = FALSE;
 }
 
-extern void CommandNewGame( char *sz )
+extern void CommandNewGame( char *UNUSED(sz) )
 {
     if (ms.nMatchTo && ( ms.anScore[ 0 ] >= ms.nMatchTo ||
 			 ms.anScore[ 1 ] >= ms.nMatchTo ))
@@ -2838,8 +2836,8 @@ extern void CommandNewMatch( char *sz )
     CommandNewGame( NULL );
 }
 
-extern void CommandNewSession( char *sz ) {
-
+extern void CommandNewSession( char *UNUSED(sz) )
+{
     if (!get_input_discard())
 		    return;
     
@@ -2859,7 +2857,6 @@ extern void CommandNewSession( char *sz ) {
     UpdateSetting( &ms.fJacoby );
     UpdateSetting( &ms.gs );
     
-
     outputl( _("A new session has been started.") );
     
 #if USE_GTK
@@ -3012,20 +3009,19 @@ static void CommandNextGame( char *sz ) {
 }
 
 extern void
-CommandFirstMove( char *sz ) {
-
+CommandFirstMove( char *UNUSED(sz) )
+{
   ChangeGame( plGame );
 }
 
 extern void
-CommandFirstGame( char *sz ) {
-
+CommandFirstGame( char *UNUSED(sz) )
+{
   ChangeGame( lMatch.plNext->p );
-
 }
 
-static void CommandNextRoll( char *sz ) {
-
+static void CommandNextRoll( char *UNUSED(sz) )
+{
     moverecord *pmr;
 
 #if USE_GTK
@@ -3073,8 +3069,8 @@ static void CommandNextRoll( char *sz ) {
     UpdateGame( FALSE );
 }
 
-static void CommandNextRolled( char *sz ) {
-
+static void CommandNextRolled( char *UNUSED(sz) )
+{
     moverecord *pmr;
 
     /* goto next move */
@@ -3084,7 +3080,6 @@ static void CommandNextRolled( char *sz ) {
     if( plLastMove && plLastMove->plNext &&
         ( pmr = plLastMove->plNext->p ) && pmr->mt == MOVE_NORMAL )
        CommandNextRoll ( NULL );
-
 }
 
 static int MoveIsCMarked(moverecord *pmr)
@@ -3285,7 +3280,7 @@ extern void CommandNext(char *sz)
 	InternalCommandNext(mark, cmark, n);
 }
 
-extern void CommandEndGame(char *sz)
+extern void CommandEndGame(char *UNUSED(sz))
 {
 	playertype pt_store[2] = { ap[0].pt, ap[1].pt };
 	int fAutoGame_store = fAutoGame;
@@ -3389,7 +3384,7 @@ extern void CommandEndGame(char *sz)
 		StartNewGame();
 }
 
-extern void CommandPlay( char *sz )
+extern void CommandPlay( char *UNUSED(sz) )
 {
     if( ms.gs != GAME_PLAYING )
 	{
@@ -3445,9 +3440,8 @@ static void CommandPreviousGame(char *sz)
 	ChangeGame(pl->p);
 }
 
-static void CommandPreviousRoll(char *sz)
+static void CommandPreviousRoll(char *UNUSED(sz))
 {
-
 	moverecord *pmr;
 
 	if (!plLastMove || !plLastMove->p)
@@ -3486,8 +3480,8 @@ static void CommandPreviousRoll(char *sz)
 	}
 }
 
-static void CommandPreviousRolled( char *sz ) {
-
+static void CommandPreviousRolled( char *UNUSED(sz) )
+{
     moverecord *pmr;
 
     if( !plLastMove || !plLastMove->p )
@@ -3616,8 +3610,8 @@ extern void CommandPrevious(char *sz)
 	SetMoveRecord(plLastMove->p);
 }
 
-extern void CommandRedouble( char *sz ) {
-
+extern void CommandRedouble( char *UNUSED(sz) )
+{
     moverecord *pmr;
 
     if( ms.nMatchTo > 0 ) {
@@ -3765,8 +3759,8 @@ extern void CommandResign( char *sz ) {
 /* evaluate wisdom of not having doubled/redoubled */
 
 extern void 
-CommandRoll( char *sz ) {
-
+CommandRoll( char *UNUSED(sz) )
+{
   movelist ml;
   moverecord *pmr;
 
@@ -3877,8 +3871,8 @@ CommandRoll( char *sz ) {
 
 
 
-extern void CommandTake( char *sz ) {
-
+extern void CommandTake( char *UNUSED(sz) )
+{
   moverecord *pmr;
     
     if( ms.gs != GAME_PLAYING || !ms.fDoubled ) {
@@ -4619,7 +4613,7 @@ getMoveNumber ( const listOLD *plGame, const void *p ) {
 }
 
 
-extern void CommandClearTurn(char *sz)
+extern void CommandClearTurn(char *UNUSED(sz))
 {
 	moverecord *pmr;
 	if (ms.gs != GAME_PLAYING) {
