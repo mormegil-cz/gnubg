@@ -869,9 +869,9 @@ extern void CommandSetCubeValue( char *sz ) {
 
 extern void CommandSetDelay( char *sz ) {
 #if USE_GTK
-    int n;
-
     if( fX ) {
+	int n;
+
 	if( *sz && !StrNCaseCmp( sz, "none", strlen( sz ) ) )
 	    n = 0;
 	else if( ( n = ParseNumber( &sz ) ) < 0 || n > 10000 ) {
@@ -3057,8 +3057,8 @@ extern void CommandSetMatchDate( char *sz ) {
 	return;
     }
     
-    if( sscanf( sz, "%d-%d-%d", &nYear, &nMonth, &nDay ) < 3 ||
-	nYear < 1753 || nYear > 9999 || nMonth < 1 || nMonth > 12 ||
+    if( sscanf( sz, "%4d-%2d-%2d", &nYear, &nMonth, &nDay ) < 3 ||
+	nYear < 1753 || nMonth < 1 || nMonth > 12 ||
 	nDay < 1 || nDay > DaysInMonth( nYear, nMonth ) ) {
 	outputf( _("%s is not a valid date (see `help set matchinfo "
 		   "date').\n"), sz );
