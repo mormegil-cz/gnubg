@@ -53,6 +53,9 @@ NUMSTR -?[0-9]+
 			return STRING;
 		}
 
+
+jacobyrule      { return JACOBYRULE; }
+crawfordrule    { return CRAWFORDRULE; }
 evaluation      { return EVALUATION; }
 fibsboard       { return FIBSBOARD; }
 cubeful         { return CUBEFUL; }

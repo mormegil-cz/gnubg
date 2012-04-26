@@ -368,7 +368,7 @@ ExtEvaluation( extcmd *pec ) {
 
   char szName[ MAX_NAME_LEN ], szOpp[ MAX_NAME_LEN ];
   int nMatchTo, anScore[ 2 ],
-    anDice[ 2 ], nCube, fCubeOwner, fDoubled, fTurn, fCrawford;
+    anDice[ 2 ], nCube, fCubeOwner, fDoubled, fTurn, fCrawford, fJacoby;
   TanBoard anBoard;
   float arOutput[ NUM_ROLLOUT_OUTPUTS ];
   cubeinfo ci;
@@ -388,6 +388,13 @@ ExtEvaluation( extcmd *pec ) {
     
     anScore[ 0 ] = fTurn ? nScoreOpponent : nScore;
     anScore[ 1 ] = fTurn ? nScore : nScoreOpponent;
+	/* If the session isn't using Crawford rule, set crawford flag to false */
+	fCrawford = pec->fCrawfordRule ? fCrawford : FALSE;
+	/* Set the Jacoby flag appropriately from the external interface settings */
+	fJacoby   = pec->fJacobyRule;
+
+	/* printf ("Jacoby Setting: %d\n", fJacoby);*/
+	/* printf ("Crawford Setting: %d\n", fCrawford); */
     
     SetCubeInfo ( &ci, nCube, fCubeOwner, fTurn, nMatchTo, anScore,
                   fCrawford, fJacoby, nBeavers, bgvDefault ); 
@@ -397,7 +404,7 @@ ExtEvaluation( extcmd *pec ) {
     ec.fUsePrune = pec->fUsePrune;
     ec.fDeterministic = pec->fDeterministic;
     ec.rNoise = pec->rNoise;
-    
+
     if ( !fTurn )
       SwapSides( anBoard );
 
@@ -431,7 +438,7 @@ ExtFIBSBoard( extcmd *pec ) {
 
   char szName[ MAX_NAME_LEN ], szOpp[ MAX_NAME_LEN ];
   int nMatchTo, anScore[ 2 ],
-    anDice[ 2 ], nCube, fCubeOwner, fDoubled, fTurn, fCrawford,
+    anDice[ 2 ], nCube, fCubeOwner, fDoubled, fTurn, fCrawford, fJacoby,
     anMove[ 8 ];
   TanBoard anBoard, anBoardOrig;
   float arDouble[ NUM_CUBEFUL_OUTPUTS ],
@@ -453,7 +460,15 @@ ExtFIBSBoard( extcmd *pec ) {
     
     anScore[ 0 ] = fTurn ? nScoreOpponent : nScore;
     anScore[ 1 ] = fTurn ? nScore : nScoreOpponent;
-    
+
+	/* If the session isn't using Crawford rule, set crawford flag to false */
+	fCrawford = pec->fCrawfordRule ? fCrawford : FALSE;
+	/* Set the Jacoby flag appropriately from the external interface settings */
+	fJacoby   = pec->fJacobyRule;
+
+	/* printf ("Crawford Setting: %d\n", fCrawford); */
+	/* printf ("Jacoby Setting: %d\n", fJacoby); */
+	    
     SetCubeInfo ( &ci, nCube, fCubeOwner, fTurn, nMatchTo, anScore,
                   fCrawford, fJacoby, nBeavers, bgvDefault ); 
     

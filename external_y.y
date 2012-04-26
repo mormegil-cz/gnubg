@@ -28,6 +28,7 @@
 #include <glib.h>
 
 #include "external.h"
+#include "backgammon.h"
 
 extern int extlex(void);
 extern int exterror(const char *s);
@@ -53,6 +54,7 @@ void ( *ExtErrorHandler )( const char *, const char *, const int ) = NULL;
 %token <sval> STRING
 %token <number> NUMBER
 %token EVALUATION PLIES CUBE CUBEFUL CUBELESS NOISE REDUCED PRUNE
+%token CRAWFORDRULE JACOBYRULE
 %token FIBSBOARD
 %token <sval> AFIBSBOARD
 %token ON
@@ -65,7 +67,7 @@ the_command    : /* empty */
                ;
 
 command        : evaluation
-               | cmdfibsboard
+               | cmdfibsboard sessionrules
                ;
 
 reset_command  : /* empty */ {
@@ -84,6 +86,16 @@ fibsboard      : AFIBSBOARD {
   free( ec.szFIBSBoard );
   ec.szFIBSBoard = $1;
 }
+               ;
+
+optjacobyrule  : JACOBYRULE ON { ec.fJacobyRule = TRUE; }
+               | JACOBYRULE OFF { ec.fJacobyRule = FALSE; }
+               | /* empty */ { ec.fJacobyRule = fJacoby; }
+               ;
+
+optcrawfordrule : CRAWFORDRULE ON { ec.fCrawfordRule = TRUE; }
+               |  CRAWFORDRULE OFF { ec.fCrawfordRule = FALSE; }
+               |  /* empty */ { ec.fCrawfordRule = fAutoCrawford; }
                ;
 
 optplies       : PLIES NUMBER { ec.nPlies = $2; }
@@ -115,10 +127,13 @@ optreduced     : REDUCED NUMBER { ec.nReduced = $2; }
                | /* empty */
                ;
 
+sessionrules   : optcrawfordrule optjacobyrule
+               ;
+
 evalcontext    : optplies optcube optcubeful optprune optcubeless optnoise optreduced
                ;
 
-evaluation     : EVALUATION FIBSBOARD fibsboard evalcontext {
+evaluation     : EVALUATION FIBSBOARD fibsboard evalcontext sessionrules {
   ec.ct = COMMAND_EVALUATION;
 }
 ;
@@ -152,6 +167,8 @@ reset_command(void) {
   ec.fCubeful = 0;
   ec.nReduced = 0;
   ec.fUsePrune = 0;
+  ec.fCrawfordRule = fAutoCrawford;
+  ec.fJacobyRule = fJacoby;
   free(ec.szFIBSBoard);
   ec.szFIBSBoard = NULL;
 
@@ -183,8 +200,11 @@ main( int argc, char *argv[] ) {
           "reduced %d\n"
           "prune %d\n"
           "fibsboard %s\n",
+          "crawfordrule %s\n",
+          "jacobyrule %s\n",
           ec.ct, ec.nPlies, ec.rNoise, ec.fDeterministic, ec.fCubeful,
-          ec.nReduced, ec.fUsePrune, ec.szFIBSBoard );
+          ec.nReduced, ec.fUsePrune, ec.szFIBSBoard, ec.fCrawfordRule, 
+          ec.fJacobyRule );
 
   return 0;
 

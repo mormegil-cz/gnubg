@@ -55,6 +55,10 @@ typedef struct _extcmd {
   int nReduced;
   int fUsePrune;
 
+  /* session rules */
+  int fCrawfordRule;
+  int fJacobyRule;
+
   /* fibs board */
   char *szFIBSBoard;
 } extcmd;
