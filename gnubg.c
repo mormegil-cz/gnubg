@@ -2527,15 +2527,13 @@ extern void PromptForExit( void )
 	}
 }
 
-extern void CommandNotImplemented( char *sz )
+extern void CommandNotImplemented( char *UNUSED(sz) )
 {
-
     outputl( _("That command is not yet implemented.") );
 }
 
-extern void CommandQuit( char *sz )
+extern void CommandQuit( char *UNUSED(sz) )
 {
-
     PromptForExit();
 }
 
@@ -2670,9 +2668,9 @@ extern void CommandLoadCommands( char *sz )
 }
 
 
-extern void CommandCopy (char *sz)
+extern void CommandCopy (char *UNUSED(sz))
 {
-    char *aps[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+  char *aps[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
   char szOut[2048];
   char szCube[32], szPlayer0[MAX_NAME_LEN + 3], szPlayer1[MAX_NAME_LEN + 3],
     szScore0[35], szScore1[35], szMatch[35];
@@ -3338,13 +3336,13 @@ extern void CommandSaveSettings(char *szParam)
 #if HAVE_LIBREADLINE
 static command *pcCompleteContext;
 
-static char *NullGenerator( const char *sz, int nState ) {
-
+static char *NullGenerator( const char *UNUSED(sz), int UNUSED(nState) )
+{
   return NULL;
 }
 
-static char *GenerateKeywords( const char *sz, int nState ) {
-
+static char *GenerateKeywords( const char *sz, int nState )
+{
     static int cch;
     static command *pc;
     char *szDup;
@@ -3372,8 +3370,8 @@ static char *GenerateKeywords( const char *sz, int nState ) {
     return NULL;
 }
 
-static char *ERCompletion( const char *sz, int nState ) {
-
+static char *ERCompletion( const char *sz, int nState )
+{
     static int i, cch;
     const char *pch;
     char *szDup;
@@ -3398,9 +3396,9 @@ static char *ERCompletion( const char *sz, int nState ) {
     return NULL;
 }
 
-static char *OnOffCompletion( const char *sz, int nState ) {
-
-	static unsigned int i;
+static char *OnOffCompletion( const char *sz, int nState )
+{
+    static unsigned int i;
     static int cch;
     static const char *asz[] = { "false", "no", "off", "on", "true", "yes" };
     const char *pch;
@@ -3425,8 +3423,8 @@ static char *OnOffCompletion( const char *sz, int nState ) {
     return NULL;
 }
 
-static char *PlayerCompletionGen( const char *sz, int nState, int fBoth ) {
-
+static char *PlayerCompletionGen( const char *sz, int nState, int fBoth )
+{
     static int i, cch;
     const char *pch;
     char *szDup;
@@ -3470,19 +3468,19 @@ static char *PlayerCompletionGen( const char *sz, int nState, int fBoth ) {
     return NULL;
 }
 
-static char *PlayerCompletion( const char *sz, int nState ) {
-
+static char *PlayerCompletion( const char *sz, int nState )
+{
     return PlayerCompletionGen( sz, nState, FALSE );
 }
 
-static char *PlayerCompletionBoth( const char *sz, int nState ) {
-
+static char *PlayerCompletionBoth( const char *sz, int nState )
+{
     return PlayerCompletionGen( sz, nState, TRUE );
 }
 
 
-static command *FindContext( command *pc, char *szOrig, int ich ) {
-
+static command *FindContext( command *pc, char *szOrig, int ich )
+{
     char *sz = (char*) g_alloca(strlen( szOrig )  * sizeof(char) + 1);
     char *pch, *pchCurrent;
     command *pcResume = NULL;
@@ -3675,7 +3673,7 @@ extern void UserCommand(const char *szCommand)
 #endif
 }
 
-extern gint NextTurnNotify( gpointer p )
+extern gint NextTurnNotify( gpointer UNUSED(p) )
 {
     NextTurn( TRUE );
 
@@ -4121,7 +4119,7 @@ ProgressValueAdd ( int iValue ) {
 }
 
 
-static gboolean Progress( gpointer unused )
+static gboolean Progress( gpointer UNUSED(unused) )
 {
     static int i = 0;
     static char ach[ 5 ] = "/-\\|";
@@ -4253,9 +4251,8 @@ CreateGnubgDirectory (void)
 }
 
 
-extern void HandleInterrupt( int idSignal )
+extern void HandleInterrupt( int UNUSED(idSignal) )
 {
-
     /* NB: It is safe to write to fInterrupt even if it cannot be read
        atomically, because it is only used to hold a binary value. */
     fInterrupt = TRUE;
@@ -4610,7 +4607,6 @@ extern unsigned int getDiceRandomDotOrg(void)
 		else
 			startOfNums = acBuf;
 
-		i = 0;
 		nRead = 0;
 		for (i = 0; i < nBytesRead && nRead < BUFLENGTH; i++) {
 
@@ -4713,7 +4709,7 @@ static void init_autosave(void)
 	g_free(backupdir);
 }
 
-static void null_debug (const gchar* dom, GLogLevelFlags logflags, const gchar* message, gpointer unused)
+static void null_debug (const gchar* UNUSED(dom), GLogLevelFlags UNUSED(logflags), const gchar* UNUSED(message), gpointer UNUSED(unused))
 {
 }
 
@@ -5083,9 +5079,8 @@ swapGame ( listOLD *plGame ) {
 
 
 
-extern void CommandSwapPlayers ( char *sz )
+extern void CommandSwapPlayers ( char *UNUSED(sz) )
 {
-
   listOLD *pl;
   char *pc;
   int n;
@@ -5308,7 +5303,7 @@ CommandDiceRolls (char *sz) {
 
 #if HAVE_LIBREADLINE
 extern void
-CommandHistory( char *sz ) {
+CommandHistory( char *UNUSED(sz) ) {
 
   int i;
   HIST_ENTRY *phe;
@@ -5323,7 +5318,7 @@ CommandHistory( char *sz ) {
 
 #endif /* HAVE_LIBREADLINE */
 
-extern void CommandClearHint(char *sz)
+extern void CommandClearHint(char *UNUSED(sz))
 {
 	pmr_hint_destroy();
 	outputl(_("Analysis used for `hint' has been cleared"));
@@ -5619,7 +5614,7 @@ extern int CheckGameExists(void)
 	}
 }
 
-extern gboolean save_autosave(gpointer unused)
+extern gboolean save_autosave(gpointer UNUSED(unused))
 {
 	int fd;
 	FILE *pf;
