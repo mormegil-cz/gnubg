@@ -118,7 +118,7 @@ typedef struct _optionswidget {
 	GtkAdjustment *padjDigits;
 	GtkWidget *pwDigits;
 	int fChanged;
-} optionswidget;;
+} optionswidget;
 
 typedef struct _SoundDetail
 {

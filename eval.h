@@ -30,7 +30,7 @@
 	typedef ret (*f_##name)( __VA_ARGS__); \
 	extern f_##name name; \
 	extern ret name##NoLocking( __VA_ARGS__); \
-	extern ret name##WithLocking( __VA_ARGS__);
+	extern ret name##WithLocking( __VA_ARGS__)
 
 #define WEIGHTS_VERSION "0.15"
 #define WEIGHTS_VERSION_BINARY 0.15f
