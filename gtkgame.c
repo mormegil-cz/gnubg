@@ -6487,21 +6487,21 @@ extern void GTKSet( void *p ) {
 		    gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(
 			gtk_ui_manager_get_widget (puim,
 			"/MainMenu/GameMenu/SetTurnMenu/SetTurnPlayer1" ) ), TRUE );
+	    enable_menu ( gtk_ui_manager_get_widget (puim, "/MainMenu/GameMenu/Roll" ),
+			  ms.fMove == ms.fTurn &&
+			  ap[ ms.fMove ].pt == PLAYER_HUMAN );
 	}
-        enable_menu ( gtk_ui_manager_get_widget (puim, "/MainMenu/GameMenu/Roll" ),
-                      ms.fMove == ms.fTurn &&
-                      ap[ ms.fMove ].pt == PLAYER_HUMAN );
-
 #else
 
-	if( ms.fTurn >= 0 )
+	if( ms.fTurn >= 0 ) {
 	    gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(
 		gtk_item_factory_get_widget_by_action( pif, CMD_SET_TURN_0 +
 						       ms.fTurn ) ), TRUE );
 
-        enable_menu ( gtk_item_factory_get_widget ( pif, "/Game/Roll" ),
-                      ms.fMove == ms.fTurn &&
-                      ap[ ms.fMove ].pt == PLAYER_HUMAN );
+	    enable_menu ( gtk_item_factory_get_widget ( pif, "/Game/Roll" ),
+			  ms.fMove == ms.fTurn &&
+			  ap[ ms.fMove ].pt == PLAYER_HUMAN );
+	}
 
 #endif
 	fAutoCommand = FALSE;
@@ -6517,10 +6517,11 @@ extern void GTKSet( void *p ) {
 		"/MainMenu/FileMenu/Save" ), plGame != NULL );
 	enable_menu( gtk_ui_manager_get_widget (puim,
 		"/MainMenu/GameMenu" ), ms.gs == GAME_PLAYING );
-	enable_menu( gtk_ui_manager_get_widget (puim,
-		"/MainMenu/GameMenu/Roll" ),
-		ms.fMove == ms.fTurn &&
-		ap[ ms.fMove ].pt == PLAYER_HUMAN );
+	if( ms.fTurn >= 0 )
+	  enable_menu( gtk_ui_manager_get_widget (puim,
+						  "/MainMenu/GameMenu/Roll" ),
+		       ms.fMove == ms.fTurn &&
+		       ap[ ms.fMove ].pt == PLAYER_HUMAN );
 
 	gtk_widget_set_sensitive( gtk_ui_manager_get_widget (puim,
 		"/MainMenu/GoMenu/NextRoll" ), plGame != NULL );
@@ -6624,9 +6625,10 @@ extern void GTKSet( void *p ) {
 	enable_sub_menu( gtk_item_factory_get_widget( pif, "/Game" ),
 			 ms.gs == GAME_PLAYING );
 
-        enable_menu ( gtk_item_factory_get_widget ( pif, "/Game/Roll" ),
-                      ms.fMove == ms.fTurn &&
-                      ap[ ms.fMove ].pt == PLAYER_HUMAN );
+	if( ms.fTurn >= 0 )
+	  enable_menu ( gtk_item_factory_get_widget ( pif, "/Game/Roll" ),
+			ms.fMove == ms.fTurn &&
+			ap[ ms.fMove ].pt == PLAYER_HUMAN );
 
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_NEXT_ROLL ), plGame != NULL );
