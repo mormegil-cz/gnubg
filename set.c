@@ -1548,10 +1548,11 @@ extern void CommandSetRNGFile( char *sz ) {
     SetRNG( rngSet, rngctxSet, RNG_FILE, sz );
 }
 
-extern void CommandSetRNGBBS( char *UNUSED(sz) ) {
 #if HAVE_LIBGMP
+extern void CommandSetRNGBBS( char *sz ) {
     SetRNG( rngSet, rngctxSet, RNG_BBS, sz );
 #else
+extern void CommandSetRNGBBS( char *UNUSED(sz) ) {
     outputl( _("This installation of GNU Backgammon was compiled without the "
                "Blum, Blum and Shub generator.") );
 #endif /* HAVE_LIBGMP */
