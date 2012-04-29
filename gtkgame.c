@@ -2447,9 +2447,9 @@ static void SummaryMenuActivate(GtkComboBox *box, AnalysisDetails *pAnalDetails)
   *pAnalDetails->esChequer = aecSettings[selected];
   *pAnalDetails->esCube = aecSettings[selected];
 
-  if (pAnalDetails->mfChequer)
+  if (pAnalDetails->mfChequer && aiSettingsMoveFilter[selected] >= 0)
     memcpy(pAnalDetails->mfChequer, aaamfMoveFilterSettings[aiSettingsMoveFilter[selected]], sizeof(aaamfMoveFilterSettings[aiSettingsMoveFilter[selected]]));
-  if (pAnalDetails->mfCube)
+  if (pAnalDetails->mfCube && aiSettingsMoveFilter[selected] >= 0)
     memcpy(pAnalDetails->mfCube, aaamfMoveFilterSettings[aiSettingsMoveFilter[selected]], sizeof(aaamfMoveFilterSettings[aiSettingsMoveFilter[selected]]));
 }
 
