@@ -12,7 +12,7 @@ SOURCE = analysis bearoff bearoffgammon non-src/copying non-src/credits \
 	dice drawboard eval evallock export external gnubg \
 	htmlimages play \
 	html import multithread latex matchequity \
-	matchid positionid record \
+	matchid positionid gtklocdefs \
 	render rollout set sgf non-src/sgf_l non-src/sgf_y show sound \
 	text osr renderprefs speed openurl \
 	boardpos progress format \
