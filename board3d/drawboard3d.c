@@ -3226,7 +3226,7 @@ NTH_STATIC float GetFOVAngle(const BoardData* bd)
 	return (47 - 2.3f * temp * temp) / skewFactor;
 }
 
-static void WorkOutViewArea(const BoardData* bd, viewArea *pva, float *pHalfRadianFOV, float aspectRatio, int AssumeCubeAtTop)
+static void WorkOutViewArea(const BoardData* bd, viewArea *pva, float *pHalfRadianFOV, float aspectRatio)
 {
 	float p[3];
 	float boardRadAngle;
@@ -3251,16 +3251,6 @@ static void WorkOutViewArea(const BoardData* bd, viewArea *pva, float *pHalfRadi
 		addViewAreaHeightPoint(pva, *pHalfRadianFOV, boardRadAngle, getBoardHeight() / 2, BASE_DEPTH + EDGE_DEPTH);
 	}
 
-	if (AssumeCubeAtTop)
-		addViewAreaHeightPoint(pva, *pHalfRadianFOV, boardRadAngle, -(getBoardHeight() / 2 - EDGE_HEIGHT), BASE_DEPTH + EDGE_DEPTH + DOUBLECUBE_SIZE);
-
-	if (!bd->doubled)
-	{
-		if (bd->cube_owner == 1)
-			addViewAreaHeightPoint(pva, *pHalfRadianFOV, boardRadAngle, -(getBoardHeight() / 2 - EDGE_HEIGHT), BASE_DEPTH + EDGE_DEPTH + DOUBLECUBE_SIZE);
-		if (bd->cube_owner == -1)
-			addViewAreaHeightPoint(pva, *pHalfRadianFOV, boardRadAngle, getBoardHeight() / 2 - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH + DOUBLECUBE_SIZE);
-	}
 	p[0] = getBoardWidth() / 2;
 	p[1] = getBoardHeight() / 2;
 	p[2] = BASE_DEPTH + EDGE_DEPTH;
@@ -3289,18 +3279,7 @@ void SetupPerspVolume(const BoardData* bd, BoardData3d* bd3d, const renderdata* 
 		}
 
 		/* Workout how big the board is (in 3d space) */
-		WorkOutViewArea(bd, &va, &halfRadianFOV, aspectRatio, FALSE);
-
-		/* If the cube not at top of board and some spare vertical space,
-			see if adding cube at top would fit without changing the board size */
-		if ((bd->doubled || bd->cube_owner != 1) && (aspectRatio <= getAreaRatio(&va)))
-		{
-			WorkOutViewArea(bd, &va, &halfRadianFOV, aspectRatio, TRUE);
-			if (aspectRatio > getAreaRatio(&va))
-			{	/* Didn't fit - go back to original values */
-				WorkOutViewArea(bd, &va, &halfRadianFOV, aspectRatio, FALSE);
-			}
-		}
+		WorkOutViewArea(bd, &va, &halfRadianFOV, aspectRatio);
 
 		fovScale = zNear * tanf(halfRadianFOV);
 
@@ -3972,3 +3951,4 @@ extern void drawBasePreRender(const BoardData *bd, const BoardData3d *bd3d, cons
 	SaveBufferRegion(bd3d->wglBuffer, 0, 0, allocation.width, allocation.height);
 }
 #endif
+

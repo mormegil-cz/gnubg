@@ -1,3 +1,8 @@
+2012-05-04 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* drawboard3d.c: remove no longer needed board resize when cube moves
+	to top of screen.
+
 2012-03-03  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* eval.c: Improve backgammons estimation in race pruning by using
