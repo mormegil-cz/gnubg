@@ -389,10 +389,9 @@ extern unsigned int PositionBearoff(const unsigned int anBoard[], unsigned int n
 
     fBits = 1u << j;
     
-    for( i = 0; i < nPoints; i++ ) {
+    for( i = 0; i < nPoints - 1; i++ ) {
         j -= anBoard[ i ] + 1;
         fBits |= ( 1u << j );
-
     }
 
     return PositionF( fBits, nChequers + nPoints, nPoints );
@@ -446,7 +445,7 @@ extern unsigned short PositionIndex(unsigned int g, const unsigned int anBoard[6
 
   fBits = 1u << j;
     
-  for(i = 0; i < g; i++)
+  for(i = 0; i < g - 1; i++)
   {
     j -= anBoard[ i ] + 1;
     fBits |= ( 1u << j );
