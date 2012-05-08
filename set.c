@@ -4346,7 +4346,7 @@ static int SetXGID(char *sz)
 	CommandSetBoard(posid);
 	g_free(posid);
 
-	if (( anDice[0] == 0 && fSidesSwapped && fCubeOwner != -1 ) ||
+	if (( anDice[0] == 0 && fSidesSwapped ) ||
 		( anDice[0] && !fMove ) ) {
 		
 		if (GetInputYN( _("This position has player on roll appearing on top. \nSwap players so the player on roll appears on the bottom? " ) ) )
