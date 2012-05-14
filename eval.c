@@ -330,8 +330,8 @@ const char *aszSettings[ NUM_SETTINGS ] = {
 
 /* which evaluation context does the predefined settings use */
 evalcontext aecSettings[ NUM_SETTINGS ] = {
-  { TRUE, 0, FALSE, TRUE, 0.060f }, /* casual play */
-  { TRUE, 0, FALSE, TRUE, 0.050f }, /* beginner */
+  { TRUE, 0, FALSE, TRUE, 0.060f }, /* beginner */
+  { TRUE, 0, FALSE, TRUE, 0.050f }, /* casual player */
   { TRUE, 0, FALSE, TRUE, 0.040f }, /* intermediate */
   { TRUE, 0, FALSE, TRUE, 0.015f }, /* advanced */
   { TRUE, 0, FALSE, TRUE, 0.0f }, /* expert */
