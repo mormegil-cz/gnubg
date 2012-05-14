@@ -47,6 +47,6 @@ extern int ParseFIBSBoard( char *pch, TanBoard anBoard,
 			   char *szPlayer, char *szOpp, int *pnMatchTo,
 			   int *pnScore, int *pnScoreOpponent,
 			   int anDice[ 2 ], int *pnCube, int *pfCubeOwner,
-			   int *pfDoubled, int *pfTurn, int *pfCrawford );
+			   int *pfDoubled, int *pfCrawford );
 
 #endif

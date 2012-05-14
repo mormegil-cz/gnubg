@@ -976,14 +976,14 @@ extern int ParseFIBSBoard( char *pch, TanBoard anBoard,
 			   char *szPlayer, char *szOpp, int *pnMatchTo,
 			   int *pnScore, int *pnScoreOpp,
 			   int anDice[ 2 ], int *pnCube, int *pfCubeOwner,
-			   int *pfDoubled, int *pfTurn, int *pfCrawford ) {
+			   int *pfDoubled, int *pfCrawford ) {
     
     int i, c, n, fCanDouble, fOppCanDouble, anOppDice[ 2 ];
-    int tmp, fNonCrawford, fPostCrawford;
+    int nTmp, fNonCrawford, fPostCrawford;
+    char *szTmp;
+    int nTurn, nColor, nDirection;
+    int anFIBSBoard[ 26 ];
 
-    for( i = 0; i < 25; i++ )
-	anBoard[ 0 ][ i ] = anBoard[ 1 ][ i ] = 0;
-    
     /* Names and match length/score */
     c = -1;
     sscanf( pch, "board:%31[^:]:%31[^:]:%d:%d:%d:%n", szPlayer, szOpp,
@@ -994,82 +994,100 @@ extern int ParseFIBSBoard( char *pch, TanBoard anBoard,
 
     /* FIBS has a maximum match length of 99.  Unlimited matches are 
      * encoded with a match length of 9999.
-     *
-     * FIXME! Is 0 correct for money sessions here?
      */
-    if ( *pnMatchTo == 9999 )
+    if( *pnMatchTo == 9999 )
         *pnMatchTo = 0;
 
-    if ( *pnMatchTo
+    if( *pnMatchTo
          && ( *pnMatchTo <= *pnScore || *pnMatchTo <= *pnScoreOpp ))
         return -1;
 
     /* If the match length exceeds MAXSCORE we correct the match length
      * to MAXSCORE and the scores to the closest equivalents.
      */
-    if ( *pnMatchTo > MAXSCORE ) {
-        if ( *pnMatchTo - *pnScore > MAXSCORE )
-                *pnScore = 0;
+    if( *pnMatchTo > MAXSCORE ) {
+        if( *pnMatchTo - *pnScore > MAXSCORE )
+            *pnScore = 0;
         else
-                *pnScore -= *pnMatchTo - MAXSCORE;
+            *pnScore -= *pnMatchTo - MAXSCORE;
 
-        if ( *pnMatchTo - *pnScoreOpp > MAXSCORE )
-                *pnScoreOpp = 0;
+        if( *pnMatchTo - *pnScoreOpp > MAXSCORE )
+            *pnScoreOpp = 0;
         else
-                *pnScoreOpp -= *pnMatchTo - MAXSCORE;
+            *pnScoreOpp -= *pnMatchTo - MAXSCORE;
 
         *pnMatchTo = MAXSCORE;
     }
 
-    /* Opponent on bar */
-    c = -1;
-    sscanf( pch, "%d:%n", &n, &c );
-    if( c < 0 )
-	return -1;
-    pch += c;
-    anBoard[ 0 ][ 24 ] = -n;
-
     /* Board */
-    for( i = 0; i < 24; i++ ) {
+    for( i = 0; i < 26; ++i ) {
 	c = -1;
 	sscanf( pch, "%d:%n", &n, &c );
 	if( c < 0 )
 	    return -1;
 	pch += c;
-	if( n < 0 )
-	    anBoard[ 0 ][ 23 - i ] = -n;
-	else
-	    anBoard[ 1 ][ i ] = n;
+        anFIBSBoard[ i ] = -n;
     }
 
-    /* Player on bar */
     c = -1;
-    sscanf( pch, "%d:%n", &n, &c );
-    if( c < 0 )
-	return -1;
-    pch += c;
-    anBoard[ 1 ][ 24 ] = n;
-
-    c = -1;
-    sscanf( pch, "%d:%d:%d:%d:%d:%d:%d:%d:%d:%*d:%*d:%*d:%*d:%*d:%*d:%*d:%*d:"
-	    "%*d:%d:%d:%n", pfTurn, anDice, anDice + 1, anOppDice,
+    sscanf( pch, "%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%*d:%*d:%*d:%*d:%*d:%*d:"
+	    "%*d:%d:%d:%n", &nTurn, anDice, anDice + 1, anOppDice,
 	    anOppDice + 1, pnCube, &fCanDouble, &fOppCanDouble,
-	    pfDoubled, &fNonCrawford, &fPostCrawford, &c );
+	    pfDoubled, &nColor, &nDirection,
+            &fNonCrawford, &fPostCrawford, &c );
     if( c < 0 )
 	return -1;
 
-    if ( *pfTurn > 0 ) {
-        *pfTurn = 1;
-    } else {
-        *pfTurn = 0;
-        tmp = *pnScore;
+    /* Consistency check: 0 is a valid value for nColor but signifies
+     * end of game which is invalid for our purposes here.
+     */
+    if( !nTurn || !nColor || !nDirection )
+        return -1;
+
+    /* Opponent's turn? */
+    if( nTurn * nColor < 0 ) {
+        szTmp = szPlayer;
+        szPlayer = szOpp;
+        szOpp = szTmp;
+        nTmp = *pnScore;
         *pnScore = *pnScoreOpp;
-        *pnScoreOpp = tmp;
+        *pnScoreOpp = nTmp;
+        nTmp = fCanDouble;
+        fCanDouble = fOppCanDouble;
+        fOppCanDouble = nTmp;
+
+        nDirection = -nDirection;
+    }
+    nColor = nTurn > 0 ? 1 : -1;
+
+    for( i = 0; i < 24; ++i ) {
+        n = nDirection < 0 ? anFIBSBoard[ i + 1 ] : anFIBSBoard[ 25 - i - 1 ];
+        if( nColor * n < 0 ) {
+            anBoard[ 1 ][ i ] = n < 0 ? -n : n;
+            anBoard[ 0 ][ 23 - i ] = 0;
+        } else if( nColor * n > 0 ) {
+            anBoard[ 1 ][ i ] = 0;
+            anBoard[ 0 ][ 23 - i ] = n < 0 ? -n : n;
+        } else {
+            anBoard[ 1 ][ i ] = anBoard[ 0 ][ 23 - i ] = 0;
+        }
     }
 
-    if( !anDice[ 0 ] ) {
-	anDice[ 0 ] = anOppDice[ 0 ];
-	anDice[ 1 ] = anOppDice[ 1 ];
+    if ( nDirection < 0 ) {
+        n = anFIBSBoard[ 25 ];
+        anBoard[ 1 ][ 24 ] = n < 0 ? -n : n;
+        n = anFIBSBoard[ 0 ];
+        anBoard[ 0 ][ 24 ] = n < 0 ? -n : n;
+    } else {
+        n = anFIBSBoard[ 0 ];
+        anBoard[ 1 ][ 24 ] = n < 0 ? -n : n;
+        n = anFIBSBoard[ 25 ];
+        anBoard[ 0 ][ 24 ] = n < 0 ? -n : n;
+    }
+
+    if( !anDice[ 0 ] && anOppDice[ 0 ]) {
+        anDice[ 0 ] = anOppDice[ 0 ];
+        anDice[ 1 ] = anOppDice[ 1 ];
     }
 
     /*
@@ -1109,16 +1127,6 @@ extern int ParseFIBSBoard( char *pch, TanBoard anBoard,
     }
 
     *pfCubeOwner = fCanDouble != fOppCanDouble ? fCanDouble : -1;
-
-/*
-printf ("*pnCube: %d\n", *pnCube);
-printf ("*pfCubeOwner: %d\n", *pfCubeOwner);
-printf ("*pfDoubled: %d\n", *pfDoubled);
-printf ("*pfTurn: %d\n", *pfTurn);
-printf ("*pfCrawford: %d\n", *pfCrawford);
-printf ("fCanDouble: %d\n", fCanDouble);
-printf ("fOppCanDouble: %d\n", fOppCanDouble);
-*/
 
     return 0;
 }

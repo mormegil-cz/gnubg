@@ -368,7 +368,7 @@ ExtEvaluation( extcmd *pec ) {
 
   char szName[ MAX_NAME_LEN ], szOpp[ MAX_NAME_LEN ];
   int nMatchTo, anScore[ 2 ],
-    anDice[ 2 ], nCube, fCubeOwner, fDoubled, fTurn, fCrawford, fJacoby;
+    anDice[ 2 ], nCube, fCubeOwner, fDoubled, fCrawford, fJacoby;
   TanBoard anBoard;
   float arOutput[ NUM_ROLLOUT_OUTPUTS ];
   cubeinfo ci;
@@ -379,15 +379,15 @@ ExtEvaluation( extcmd *pec ) {
 
   if( ParseFIBSBoard( pec->szFIBSBoard, anBoard, szName, szOpp, &nMatchTo,
                       &nScore, &nScoreOpponent, anDice, &nCube,
-                      &fCubeOwner, &fDoubled, &fTurn, &fCrawford ) ) {
+                      &fCubeOwner, &fDoubled, &fCrawford ) ) {
     outputl( _("Warning: badly formed board from external controller.") );
     szResponse = 
       g_strdup_printf( "Error: badly formed board ('%s')\n", pec->szFIBSBoard );
   }
   else {
     
-    anScore[ 0 ] = fTurn ? nScoreOpponent : nScore;
-    anScore[ 1 ] = fTurn ? nScore : nScoreOpponent;
+    anScore[ 0 ] = nScoreOpponent;
+    anScore[ 1 ] = nScore;
 	/* If the session isn't using Crawford rule, set crawford flag to false */
 	fCrawford = pec->fCrawfordRule ? fCrawford : FALSE;
 	/* Set the Jacoby flag appropriately from the external interface settings */
@@ -396,7 +396,7 @@ ExtEvaluation( extcmd *pec ) {
 	/* printf ("Jacoby Setting: %d\n", fJacoby);*/
 	/* printf ("Crawford Setting: %d\n", fCrawford); */
     
-    SetCubeInfo ( &ci, nCube, fCubeOwner, fTurn, nMatchTo, anScore,
+    SetCubeInfo ( &ci, nCube, fCubeOwner, 1, nMatchTo, anScore,
                   fCrawford, fJacoby, nBeavers, bgvDefault ); 
 
     ec.fCubeful = pec->fCubeful;
@@ -404,9 +404,6 @@ ExtEvaluation( extcmd *pec ) {
     ec.fUsePrune = pec->fUsePrune;
     ec.fDeterministic = pec->fDeterministic;
     ec.rNoise = pec->rNoise;
-
-    if ( !fTurn )
-      SwapSides( anBoard );
 
     if ( GeneralEvaluationE( arOutput, (ConstTanBoard)anBoard, &ci, &ec ) )
       return NULL;
@@ -438,7 +435,7 @@ ExtFIBSBoard( extcmd *pec ) {
 
   char szName[ MAX_NAME_LEN ], szOpp[ MAX_NAME_LEN ];
   int nMatchTo, anScore[ 2 ],
-    anDice[ 2 ], nCube, fCubeOwner, fDoubled, fTurn, fCrawford, fJacoby,
+    anDice[ 2 ], nCube, fCubeOwner, fDoubled, fCrawford, fJacoby,
     anMove[ 8 ];
   TanBoard anBoard, anBoardOrig;
   float arDouble[ NUM_CUBEFUL_OUTPUTS ],
@@ -448,18 +445,18 @@ ExtFIBSBoard( extcmd *pec ) {
   cubeinfo ci;
   int nScore, nScoreOpponent;
   char *szResponse;
-  
+ 
   if( ParseFIBSBoard( pec->szFIBSBoard, anBoard, szName, szOpp, &nMatchTo,
                       &nScore, &nScoreOpponent, anDice, &nCube,
-                      &fCubeOwner, &fDoubled, &fTurn, &fCrawford ) ) {
+                      &fCubeOwner, &fDoubled, &fCrawford ) ) {
     outputl( _("Warning: badly formed board from external controller.") );
     szResponse = 
       g_strdup_printf( "Error: badly formed board ('%s')\n", pec->szFIBSBoard );
   }
   else {
     
-    anScore[ 0 ] = fTurn ? nScoreOpponent : nScore;
-    anScore[ 1 ] = fTurn ? nScore : nScoreOpponent;
+    anScore[ 0 ] = nScoreOpponent;
+    anScore[ 1 ] = nScore;
 
 	/* If the session isn't using Crawford rule, set crawford flag to false */
 	fCrawford = pec->fCrawfordRule ? fCrawford : FALSE;
@@ -469,24 +466,21 @@ ExtFIBSBoard( extcmd *pec ) {
 	/* printf ("Crawford Setting: %d\n", fCrawford); */
 	/* printf ("Jacoby Setting: %d\n", fJacoby); */
 	    
-    SetCubeInfo ( &ci, nCube, fCubeOwner, fTurn, nMatchTo, anScore,
+    SetCubeInfo ( &ci, nCube, fCubeOwner, 1, nMatchTo, anScore,
                   fCrawford, fJacoby, nBeavers, bgvDefault ); 
     
-    if ( !fTurn )
-      SwapSides( anBoard );
-
 #if 0
     {
       char *asz[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
-      cha szBoard[ 10000 ];
-      outputl( DrawBoard( szBoard, anBoard, fTurn, asz,
+      char szBoard[ 10000 ];
+      outputl( DrawBoard( szBoard, anBoard, 1, asz,
                           "no matchid", 15 ) );
 
       printf( "score %d-%d to %d ", anScore[ 0 ], anScore[ 1 ],
               nMatchTo );
       printf( "dice %d %d ", anDice[ 0 ], anDice[ 1 ] );
       printf( "cubeowner %d cube %d turn %d crawford %d doubled %d\n",
-              fCubeOwner, nCube, fTurn, fCrawford, fDoubled );
+              fCubeOwner, nCube, 1, fCrawford, fDoubled );
     }
 #endif
 
