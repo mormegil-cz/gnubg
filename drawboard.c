@@ -974,12 +974,12 @@ extern char *FIBSBoard( char *pch, TanBoard anBoard, int fRoll,
 
 extern int ParseFIBSBoard( char *pch, TanBoard anBoard,
 			   char *szPlayer, char *szOpp, int *pnMatchTo,
-			   int *pnScore, int *pnScoreOpponent,
+			   int *pnScore, int *pnScoreOpp,
 			   int anDice[ 2 ], int *pnCube, int *pfCubeOwner,
 			   int *pfDoubled, int *pfTurn, int *pfCrawford ) {
     
     int i, c, n, fCanDouble, fOppCanDouble, anOppDice[ 2 ];
-    int fNonCrawford, fPostCrawford;
+    int tmp, fNonCrawford, fPostCrawford;
 
     for( i = 0; i < 25; i++ )
 	anBoard[ 0 ][ i ] = anBoard[ 1 ][ i ] = 0;
@@ -987,7 +987,7 @@ extern int ParseFIBSBoard( char *pch, TanBoard anBoard,
     /* Names and match length/score */
     c = -1;
     sscanf( pch, "board:%31[^:]:%31[^:]:%d:%d:%d:%n", szPlayer, szOpp,
-	    pnMatchTo, pnScore, pnScoreOpponent, &c );
+	    pnMatchTo, pnScore, pnScoreOpp, &c );
     if( c < 0 )
 	return -1;
     pch += c;
@@ -1001,7 +1001,7 @@ extern int ParseFIBSBoard( char *pch, TanBoard anBoard,
         *pnMatchTo = 0;
 
     if ( *pnMatchTo
-         && ( *pnMatchTo <= *pnScore || *pnMatchTo <= *pnScoreOpponent ))
+         && ( *pnMatchTo <= *pnScore || *pnMatchTo <= *pnScoreOpp ))
         return -1;
 
     /* If the match length exceeds MAXSCORE we correct the match length
@@ -1013,10 +1013,10 @@ extern int ParseFIBSBoard( char *pch, TanBoard anBoard,
         else
                 *pnScore -= *pnMatchTo - MAXSCORE;
 
-        if ( *pnMatchTo - *pnScoreOpponent > MAXSCORE )
-                *pnScoreOpponent = 0;
+        if ( *pnMatchTo - *pnScoreOpp > MAXSCORE )
+                *pnScoreOpp = 0;
         else
-                *pnScoreOpponent -= *pnMatchTo - MAXSCORE;
+                *pnScoreOpp -= *pnMatchTo - MAXSCORE;
 
         *pnMatchTo = MAXSCORE;
     }
@@ -1058,7 +1058,14 @@ extern int ParseFIBSBoard( char *pch, TanBoard anBoard,
     if( c < 0 )
 	return -1;
 
-    *pfTurn = *pfTurn > 0;
+    if ( *pfTurn > 0 ) {
+        *pfTurn = 1;
+    } else {
+        *pfTurn = 0;
+        tmp = *pnScore;
+        *pnScore = *pnScoreOpp;
+        *pnScoreOpp = tmp;
+    }
 
     if( !anDice[ 0 ] ) {
 	anDice[ 0 ] = anOppDice[ 0 ];
@@ -1090,23 +1097,28 @@ extern int ParseFIBSBoard( char *pch, TanBoard anBoard,
     if ( !*pnMatchTo ) {
         *pfCrawford = 0;
     } else {
-        *pfCrawford = 1;
-        if ( *pnMatchTo - *pnScore == 1 || *pnMatchTo - *pnScore == 1 ) {
-            if ( fNonCrawford ) {
+        if ( *pnMatchTo - *pnScore == 1 || *pnMatchTo - *pnScoreOpp == 1 ) {
+            if ( fNonCrawford || fPostCrawford) {
                 *pfCrawford = 0;
-            } else if ( !fPostCrawford ) {
-                if ( *pnMatchTo - *pnScore == 1 ) {
-                    fCanDouble = 0;
-                    fOppCanDouble = 1;
-                } else {
-                    fCanDouble = 1;
-                    fOppCanDouble = 0;
-                }
+            } else {
+                *pfCrawford = 1;
             }
+        } else {
+            *pfCrawford = 0;
         }
     }
 
     *pfCubeOwner = fCanDouble != fOppCanDouble ? fCanDouble : -1;
+
+/*
+printf ("*pnCube: %d\n", *pnCube);
+printf ("*pfCubeOwner: %d\n", *pfCubeOwner);
+printf ("*pfDoubled: %d\n", *pfDoubled);
+printf ("*pfTurn: %d\n", *pfTurn);
+printf ("*pfCrawford: %d\n", *pfCrawford);
+printf ("fCanDouble: %d\n", fCanDouble);
+printf ("fOppCanDouble: %d\n", fOppCanDouble);
+*/
 
     return 0;
 }
