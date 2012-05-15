@@ -3365,6 +3365,16 @@ extern void CommandEndGame(char *UNUSED(sz))
 	fDisplay = fDisplay_store;
 	fQuiet = fQuiet_store;
 	fEndGame = FALSE;
+
+	/* If the game ended in a resign then make sure the
+	   the state for the user truly reflects the game is over
+	   and that no further action from them is necessary */
+	if (ms.fResigned)
+	{
+		ms.fResigned = 0;
+		ShowBoard();
+	}
+
 	if (manual_dice)
 	{
 		outputoff();
