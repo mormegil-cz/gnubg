@@ -436,7 +436,7 @@ ExtFIBSBoard( extcmd *pec ) {
   char szName[ MAX_NAME_LEN ], szOpp[ MAX_NAME_LEN ];
   int nMatchTo, anScore[ 2 ],
     anDice[ 2 ], nCube, fCubeOwner, fDoubled, fCrawford, fJacoby,
-    anMove[ 8 ];
+    anMove[ 8 ], fTurn;
   TanBoard anBoard, anBoardOrig;
   float arDouble[ NUM_CUBEFUL_OUTPUTS ],
     aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
@@ -465,11 +465,12 @@ ExtFIBSBoard( extcmd *pec ) {
 
 	/* printf ("Crawford Setting: %d\n", fCrawford); */
 	/* printf ("Jacoby Setting: %d\n", fJacoby); */
-	    
-    SetCubeInfo ( &ci, nCube, fCubeOwner, 1, nMatchTo, anScore,
+    
+    fTurn = 1;
+    SetCubeInfo ( &ci, nCube, fCubeOwner, fTurn, nMatchTo, anScore,
                   fCrawford, fJacoby, nBeavers, bgvDefault ); 
     
-#if 0
+#if 0 
     {
       char *asz[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
       char szBoard[ 10000 ];
@@ -480,7 +481,7 @@ ExtFIBSBoard( extcmd *pec ) {
               nMatchTo );
       printf( "dice %d %d ", anDice[ 0 ], anDice[ 1 ] );
       printf( "cubeowner %d cube %d turn %d crawford %d doubled %d\n",
-              fCubeOwner, nCube, 1, fCrawford, fDoubled );
+              fCubeOwner, nCube, fTurn, fCrawford, fDoubled );
     }
 #endif
 
