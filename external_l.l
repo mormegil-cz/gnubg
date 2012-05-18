@@ -70,7 +70,7 @@ on              { return ON; }
 no              { return OFF; }
 off             { return OFF; }
 
-board:[[:alpha:]_]+:[[:alpha:]_]+(:{NUMSTR})+  { 
+board:[[:alnum:]_]+:[[:alnum:]_]+(:{NUMSTR})+  { 
 			char *buf = malloc( strlen( exttext ) + 1 );
 			escapes(exttext, buf);
 			extlval.sval = buf;
