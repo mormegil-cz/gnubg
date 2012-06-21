@@ -1048,6 +1048,7 @@ gboolean place_chequer_or_revert(BoardData *bd, int dest )
     int oldpoints[ 28 ];
     int passpoint;
     int source, dest2, i;
+    int diceset = (bd->diceRoll[0]  != -1 && bd->diceRoll[1] != -1);
 
     /* dest2 is the destination point used  for numerical calculations */
     dest2 = dest;
@@ -1086,7 +1087,7 @@ gboolean place_chequer_or_revert(BoardData *bd, int dest )
              board_invalidate_point( bd, bar );
         }
 
-        if ( bd->diceRoll[0] == bd->diceRoll[1] ) {
+        if ( diceset && ( bd->diceRoll[0] == bd->diceRoll[1] ) ) {
             for (i = 1; i <= 3; i++) {
                     passpoint = source - i * bd->diceRoll[0] * bd->drag_colour;
                     if ((dest2 - passpoint) * bd->drag_colour >= 0 ) break;
@@ -1100,9 +1101,9 @@ gboolean place_chequer_or_revert(BoardData *bd, int dest )
                     }
             }
         } else {
-          if (Abs(source - dest2) == bd->diceRoll [ 0 ] + bd->diceRoll [ 1 ] || 
+          if ( diceset && ( Abs(source - dest2) == bd->diceRoll [ 0 ] + bd->diceRoll [ 1 ] || 
 			  (dest > 25 && Abs(source - dest2) > MAX(bd->diceRoll[ 0 ], bd->diceRoll[ 1 ]))
-              ) 
+              ) )
             for (i = 0; i < 2; i++) {
                     passpoint = source - bd->diceRoll[ i ] * bd->drag_colour;
                     if ((dest2 - passpoint) * bd->drag_colour >= 0 ) continue;
@@ -1138,7 +1139,7 @@ gboolean place_chequer_or_revert(BoardData *bd, int dest )
             board_invalidate_point( bd, source );
         }
  
-        if ( bd->diceRoll[0] == bd->diceRoll[1]) {
+        if ( diceset && ( bd->diceRoll[0] == bd->diceRoll[1] ) ) {
             /* Doubles are tricky - we can have pick-and-passed with 2 chequers */
             for (i = 1; i <= 3; i++) {
                 passpoint = source +  i * bd->diceRoll[ 0 ] * bd->drag_colour;
@@ -1154,7 +1155,7 @@ gboolean place_chequer_or_revert(BoardData *bd, int dest )
                         board_invalidate_point( bd, passpoint );
                 }
             }
-        } else {
+        } else if ( diceset ) {
             for ( i = 0; i < 2; i++) {
                 passpoint = source + bd->diceRoll[ i ] * bd->drag_colour;
                 if ((dest2 - passpoint) * bd->drag_colour <= 0) continue;
