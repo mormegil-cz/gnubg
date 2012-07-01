@@ -1,4 +1,4 @@
-2011-07-01  Michael Petch  <mpetch@capp-sysware.com>
+2012-07-01  Michael Petch  <mpetch@capp-sysware.com>
 	* gnubg.c: Added a define NO_OVERLAYSCROLLBARS that can be
 	used to override LIB_OVERLAYSCROLLBARS to be 0 on platforms
 	where overlay scrollbars currently cause problems. The long
@@ -7,7 +7,7 @@
 	problem can be found at:
 	https://bugs.launchpad.net/ubuntu/+source/gnubg/+bug/1002063
 
-2011-06-21  Michael Petch  <mpetch@capp-sysware.com>
+2012-06-21  Michael Petch  <mpetch@capp-sysware.com>
 	* gtkboard.c: Fix bug reported by motiv4u and Tim Chow that
 	caused edit mode to act oddly when the player on roll is changed.
 
