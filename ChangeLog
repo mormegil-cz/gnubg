@@ -1,5 +1,5 @@
 2011-07-01  Michael Petch  <mpetch@capp-sysware.com>
-	* gtkboard.c: Added a define NO_OVERLAYSCROLLBARS that can be
+	* gnubg.c: Added a define NO_OVERLAYSCROLLBARS that can be
 	used to override LIB_OVERLAYSCROLLBARS to be 0 on platforms
 	where overlay scrollbars currently cause problems. The long
 	term fix is to replace GtkCList with GtkTreeview. mdpetch
