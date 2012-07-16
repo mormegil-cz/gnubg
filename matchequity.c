@@ -785,18 +785,19 @@ ExtendMET ( float aarMET[ MAXSCORE ][ MAXSCORE ],
 
 /* Extend match equity table */
   for ( i = nMaxScore; i < MAXSCORE; i++ ) {
+      
+    nScore0 = i + 1;
+
+    if ( nScore0 > 10 ) 
+      rStddev0 = 1.77f;
+    else
+      rStddev0 = arStddevTable[ nScore0 ];
 
     for ( j = 0; j <= i ; j++ ) {
 
-      nScore0 = i + 1;
       nScore1 = j + 1;
 
       rGames = ( nScore0 + nScore1 ) / 2.00f;
-
-      if ( nScore0 > 10 ) 
-        rStddev0 = 1.77f;
-      else
-        rStddev0 = arStddevTable[ nScore0 ];
 
       if ( nScore1 > 10 ) 
         rStddev1 = 1.77f;
