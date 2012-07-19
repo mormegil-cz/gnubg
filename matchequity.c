@@ -803,11 +803,13 @@ ExtendMET ( float aarMET[ MAXSCORE ][ MAXSCORE ],
         rStddev1 = 1.77f;
       else
         rStddev1 = arStddevTable[ nScore1 ];
-	  {
-	  rSigma = sqrtf( rStddev0 * rStddev0 + rStddev1 * rStddev1 ) * sqrtf( rGames );
-	  g_assert ( 6.0f * rSigma > nScore0 - nScore1 );
-	  }
-      aafMET[ i ][ j ] = NormalDistArea ( (float)(nScore0 - nScore1), 6.0f * rSigma, 0.0f, rSigma );
+
+      rSigma = sqrtf( rStddev0 * rStddev0 + rStddev1 * rStddev1 ) * sqrtf( rGames );
+
+      if ( 6.0f * rSigma > nScore0 - nScore1 )
+        aafMET[ i ][ j ] = NormalDistArea ( (float)(nScore0 - nScore1), 6.0f * rSigma, 0.0f, rSigma );
+      else
+        aafMET[ i ][ j ] = 0.0f;
     }
   }
 
