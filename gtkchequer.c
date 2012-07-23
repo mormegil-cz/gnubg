@@ -449,8 +449,10 @@ GtkWidget *pwDetails;
 static void MoveListCopy(GtkWidget *UNUSED(pw), hintdata *phd)
 {
   char *pc = MoveListCopyData(phd);
-  if ( pc )
+  if ( pc ) {
 	  GTKTextWindow(pc, _("Move details"), DT_INFO, NULL);
+          free(pc);
+  }
 }
 
 static GtkWidget *
