@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _BACKGAMMON_H_
-#define _BACKGAMMON_H_
+#ifndef BACKGAMMON_H
+#define BACKGAMMON_H
 
 #include "analysis.h"
 #include "eval.h"
@@ -722,7 +722,6 @@ extern void CommandSetEvalParamRollout(char *);
 extern void CommandSetEvalParamType(char *);
 extern void CommandSetEvalPlies(char *);
 extern void CommandSetEvalPrune(char *);
-extern void CommandSetEvalReduced(char *);
 extern void CommandSetEvalSameAsAnalysis(char *);
 extern void CommandSetExportCubeDisplayActual(char *);
 extern void CommandSetExportCubeDisplayBad(char *);
