@@ -63,7 +63,6 @@ cubeless        { return CUBELESS; }
 cube            { return CUBE; }
 plies           { return PLIES; }
 noise           { return NOISE; }
-reduced         { return REDUCED; }
 prune           { return PRUNE; }
 yes             { return ON; }
 on              { return ON; }

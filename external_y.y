@@ -53,7 +53,7 @@ void ( *ExtErrorHandler )( const char *, const char *, const int ) = NULL;
 
 %token <sval> STRING
 %token <number> NUMBER
-%token EVALUATION PLIES CUBE CUBEFUL CUBELESS NOISE REDUCED PRUNE
+%token EVALUATION PLIES CUBE CUBEFUL CUBELESS NOISE PRUNE
 %token CRAWFORDRULE JACOBYRULE
 %token FIBSBOARD
 %token <sval> AFIBSBOARD
@@ -123,14 +123,10 @@ optnoise       : NOISE NUMBER /* FIXME: FLOAT */ { ec.rNoise = $2; }
                | /* empty */
                ;
 
-optreduced     : REDUCED NUMBER { ec.nReduced = $2; }
-               | /* empty */
-               ;
-
 sessionrules   : optcrawfordrule optjacobyrule
                ;
 
-evalcontext    : optplies optcube optcubeful optprune optcubeless optnoise optreduced
+evalcontext    : optplies optcube optcubeful optprune optcubeless optnoise
                ;
 
 evaluation     : EVALUATION FIBSBOARD fibsboard evalcontext sessionrules {
@@ -165,7 +161,6 @@ reset_command(void) {
   ec.rNoise = 0;
   ec.fDeterministic = 1;
   ec.fCubeful = 0;
-  ec.nReduced = 0;
   ec.fUsePrune = 0;
   ec.fCrawfordRule = 1;
   ec.fJacobyRule = fJacoby;
@@ -197,14 +192,12 @@ main( int argc, char *argv[] ) {
           "noise %f\n"
           "deterministic %d\n"
           "cubeful %d\n"
-          "reduced %d\n"
           "prune %d\n"
           "fibsboard %s\n",
           "crawfordrule %s\n",
           "jacobyrule %s\n",
           ec.ct, ec.nPlies, ec.rNoise, ec.fDeterministic, ec.fCubeful,
-          ec.nReduced, ec.fUsePrune, ec.szFIBSBoard, ec.fCrawfordRule, 
-          ec.fJacobyRule );
+          ec.fUsePrune, ec.szFIBSBoard, ec.fCrawfordRule, ec.fJacobyRule );
 
   return 0;
 
