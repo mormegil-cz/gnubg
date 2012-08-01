@@ -1681,6 +1681,15 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 		    if( ( fPlayer = *pch == '\t' ) != 0 )
 			pch++;
 
+		    if( *pch == ' ' && pch[ 1 ] == '-' ) {
+		      /*
+			Closeout. The SGG file doesn't contain any dice
+			number but gnubg needs a roll. Set it to 6-6 then
+			fall through to normal processing.
+		      */
+		      pch[ 0 ] =  pch[ 1 ] = '6';
+		    }
+
 		    if( *pch >= '1' && *pch <= '6' && pch[ 1 ] >= '1' &&
 			pch[ 1 ] <= '6' ) {
 			/* dice roll */

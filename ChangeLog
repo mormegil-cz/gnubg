@@ -1,3 +1,8 @@
+2012-08-01  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* import.c: Fix some import problems with files exported by
+	eXtreme Gammon and GridGammon.
+
 2012-07-01  Michael Petch  <mpetch@capp-sysware.com>
 	* gnubg.c: Added a define NO_OVERLAYSCROLLBARS that can be
 	used to override LIB_OVERLAYSCROLLBARS to be 0 on platforms
@@ -12,7 +17,7 @@
 	caused edit mode to act oddly when the player on roll is changed.
 
 2012-05-15  Michael Petch  <mpetch@capp-sysware.com>
-	* play.c: Fix bug reported on R.G.B. by murat that prevented 
+	* play.c: Fix bug reported on R.G.B. by murat that prevented
 	the GUI from navigating to the next game when a resignation
 	is offered and the "End Game" feature is used. The issue only
 	occurred in 3D view.
@@ -601,7 +606,7 @@ Wed Feb  2 22:00:24 CET 2011 Christian Anthon <anthon@kiku.dk>
 2010-10-31  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* play.c: don't do luck analysis while playing as highlighting
-	very lucky or unlucky moves in the game record panel gives away
+	very lucky or unlucky rolls in the game record panel gives away
 	big equity swings.
 	http://lists.gnu.org/archive/html/bug-gnubg/2010-06/msg00034.html
 
