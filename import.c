@@ -605,6 +605,18 @@ static void ParseMatMove( char *sz, int iPlayer, int *warned ) {
 	    Put it back to '   ' and fall through to "standard" .mat handling
 	  */
 	  sz[4] = sz[5] = sz[6] = ' ';
+	  /*
+	    Sometimes it puts a 4th one...
+	  */
+	  if ( ! StrNCaseCmp( sz + 7, "?", 1 ) )
+	    sz[7] = ' ';
+	}
+
+	if ( ! StrNCaseCmp( sz + 4, "Cannot Move", 11 ) ) {
+	  /*
+	    Sometimes it writes this instead of nothing for dancing rolls
+	  */
+	  sz[4] = 0;
 	}
 
         if ( ! StrNCaseCmp( sz + 4, "illegal play", 12 ) ) {
