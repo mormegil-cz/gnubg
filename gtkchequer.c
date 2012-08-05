@@ -383,7 +383,9 @@ static char *MoveListCopyData ( hintdata *phd )
 	c = g_list_length(plSelList);
 
 	an = (int*)malloc( c * sizeof( an[ 0 ] ) );
-	sz = (char*)malloc( c * 9 * 80 );
+	/* TODO: This needs to be cleaned up since the maximum number of
+	   lines or length of a string can vary depending on settings */
+	sz = (char*)malloc( c * 25 * 80 );
 
 	*sz = 0;
 

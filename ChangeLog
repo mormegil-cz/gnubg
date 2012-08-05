@@ -1,3 +1,9 @@
+2012-08-05  Michael Petch  <mpetch@capp-sysware.com>
+	* gtkchequer.c: Fix string buffer over run when copying
+	move analysis data. Reported by Mike Mannon, see bug 
+	http://savannah.gnu.org/bugs/?37025. TODO: introduce a better
+	way to allocate space for the text buffer.
+
 2012-08-01  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* import.c: Fix some import problems with files exported by
