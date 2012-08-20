@@ -492,7 +492,7 @@ TextPrintMoveAnalysis ( GString *gsz, const matchstate *pms, moverecord *pmr ) {
   if( pmr->rLuck != ERR_VAL )
     g_string_append_printf(gsz, " (%s):\n", GetLuckAnalysis( pms, pmr->rLuck ) );
   else
-    g_string_append_printf(gsz, ":" );
+    g_string_append_printf(gsz, ":\n" );
 
   if ( pmr->ml.cMoves ) {
 	
