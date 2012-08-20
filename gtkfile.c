@@ -80,7 +80,6 @@ char *programdir, *pc, *tmp;
       break;
     default:
       return NULL;
-      break;
     }
   gtk_window_set_modal (GTK_WINDOW (fc), TRUE);
   gtk_window_set_transient_for (GTK_WINDOW (fc), GTK_WINDOW (pwMain));
@@ -144,7 +143,7 @@ typedef struct _SaveOptions
   GtkWidget *fc, *description, *mgp, *upext;
 } SaveOptions;
 
-static void SaveOptionsCallBack (GtkWidget * pw, SaveOptions * pso)
+static void SaveOptionsCallBack (GtkWidget *UNUSED(pw), SaveOptions * pso)
 {
   gchar *fn, *fnn, *fnd;
   gint type, mgp;
@@ -257,7 +256,7 @@ ImportType lastOpenType;
 GtkWidget *openButton, *selFileType;
 int autoOpen;
 
-static void selection_changed_cb (GtkFileChooser *file_chooser, void *notused)
+static void selection_changed_cb (GtkFileChooser *file_chooser, void *UNUSED(notused))
 {
 	const char *label;
 	char *buf;
@@ -355,7 +354,7 @@ static void do_import_file(gint import_type, gchar * fn)
 
 }
 
-extern void GTKOpen(gpointer p, guint n, GtkWidget * pw)
+extern void GTKOpen(gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw))
 {
 	GtkWidget *fc;
 	GtkWidget *type_combo, *box, *box2;
@@ -421,7 +420,7 @@ extern void GTKOpen(gpointer p, guint n, GtkWidget * pw)
 	gtk_widget_destroy(fc);
 }
 
-extern void GTKCommandsOpen(gpointer p, guint n, GtkWidget *pw)
+extern void GTKCommandsOpen(gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw))
 {
 	gchar *filename = NULL;
 	gchar *quoted = NULL;
@@ -438,7 +437,7 @@ extern void GTKCommandsOpen(gpointer p, guint n, GtkWidget *pw)
 	gtk_widget_destroy(fc);
 }
 
-extern void GTKSave (gpointer p, guint n, GtkWidget * pw)
+extern void GTKSave (gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw))
 {
   SaveCommon (N_EXPORT_TYPES, _("Save or export to file"));
 }
@@ -567,7 +566,7 @@ static void batch_do_all(gpointer batch_model, gboolean add_to_db, gboolean add_
 	}
 }
 
-static void batch_cancel (GtkWidget *pw, gpointer model)
+static void batch_cancel (GtkWidget *UNUSED(pw), gpointer UNUSED(model))
 {
     pwGrab = pwOldGrab;
     fInterrupt = TRUE;
@@ -575,14 +574,14 @@ static void batch_cancel (GtkWidget *pw, gpointer model)
 }
 
 
-static void batch_stop(GtkWidget * pw, gpointer p) 
+static void batch_stop(GtkWidget *UNUSED(pw), gpointer p) 
 {
 	fMatchCancelled = TRUE;
 	fInterrupt = TRUE;
 	g_object_set_data(G_OBJECT(p), "cancelled", GINT_TO_POINTER(1));
 }
 
-static void batch_skip_file(GtkWidget * pw, gpointer p) 
+static void batch_skip_file(GtkWidget *UNUSED(pw), gpointer UNUSED(p)) 
 {
 	fMatchCancelled = TRUE;
 	fInterrupt = TRUE;
@@ -684,13 +683,13 @@ static void batch_open_selected_file(GtkTreeView * view)
 	g_free(cmd);
 }
 
-static void batch_row_activate(GtkTreeView * view, GtkTreePath * path,
-			       GtkTreeViewColumn * col, gpointer userdata)
+static void batch_row_activate(GtkTreeView * view,
+	GtkTreePath *UNUSED(path), GtkTreeViewColumn *UNUSED(col), gpointer UNUSED(userdata))
 {
 	batch_open_selected_file(view);
 }
 
-static void batch_row_open(GtkWidget *widget, GtkTreeView * view)
+static void batch_row_open(GtkWidget *UNUSED(widget), GtkTreeView * view)
 {
 	batch_open_selected_file(view);
 }
@@ -769,14 +768,13 @@ static void batch_create_dialog_and_run(GSList * filenames, gboolean add_to_db)
 	gtk_window_set_modal(GTK_WINDOW(dialog), FALSE);
 }
 
-extern void GTKBatchAnalyse(gpointer p, guint n, GtkWidget * pw)
+extern void GTKBatchAnalyse(gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw))
 {
 	gchar *folder = NULL;
 	GSList *filenames = NULL;
 	GtkWidget *fc;
 	static gchar *last_folder = NULL;
 	GtkWidget *add_to_db;
-	int fConfirmNew_s;
 	fInterrupt = FALSE;
 
 	folder = last_folder ? last_folder : default_import_folder;
@@ -797,6 +795,8 @@ extern void GTKBatchAnalyse(gpointer p, guint n, GtkWidget * pw)
 	}
 	if (filenames) {
 		gboolean add_to_db_set;
+		int fConfirmNew_s;
+
 		g_free(last_folder);
 		last_folder =
 		    gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER
