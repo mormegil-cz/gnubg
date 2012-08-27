@@ -11,8 +11,8 @@
 * along with this program; if not, write to the Free Software
 * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
-#ifndef _MODEL_H_
-#define _MODEL_H_
+#ifndef MODEL_H
+#define MODEL_H
 
 /* Occulsion model */
 typedef struct _OccModel

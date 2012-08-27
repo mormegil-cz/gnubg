@@ -20,8 +20,8 @@
 *
 * $Id$
 */
-#ifndef _INC3D_H_
-#define _INC3D_H_
+#ifndef INC3D_H
+#define INC3D_H
 
 #include <math.h>
 #include <stdio.h>

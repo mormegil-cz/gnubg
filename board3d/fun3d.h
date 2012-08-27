@@ -11,8 +11,8 @@
 * along with this program; if not, write to the Free Software
 * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
-#ifndef _FUN3D_H
-#define _FUN3D_H
+#ifndef FUN3D_H
+#define FUN3D_H
 
 #include "types3d.h"
 #include "gtkboard.h"

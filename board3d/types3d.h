@@ -11,8 +11,8 @@
 * along with this program; if not, write to the Free Software
 * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
-#ifndef _TYPES3D_H
-#define _TYPES3D_H
+#ifndef TYPES3D_H
+#define TYPES3D_H
 
 typedef struct _BoardData3d BoardData3d;
 typedef struct _Material Material;
