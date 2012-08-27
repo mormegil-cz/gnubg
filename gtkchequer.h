@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _GTKCHEQUER_H_
-#define _GTKCHEQUER_H_
+#ifndef GTKCHEQUER_H
+#define GTKCHEQUER_H
 
 #include "backgammon.h"
 

@@ -1,5 +1,5 @@
 /*
- * pythonmodule.h
+ * gnubgmodule.h
  *
  * by Joern Thyssen <jth@gnubg.org>, 2003
  *
@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _PYTHONMODULE_H_
-#define _PYTHONMODULE_H_
+#ifndef GNUBGMODULE_H
+#define GNUBGMODULE_H
 
 #if USE_PYTHON
 #ifdef WIN32
@@ -40,4 +40,4 @@ extern void PythonShutdown(void);
 extern void PythonRun(const char *sz);
 extern int LoadPythonFile(const char *sz);
 
-#endif /* _PYTHONMODULE_H_ */
+#endif /* GNUBGMODULE_H */

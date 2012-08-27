@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _FORMATGS_H_
-#define _FORMATGS_H_
+#ifndef FORMATGS_H
+#define FORMATGS_H
 
 #include <glib.h>
 
@@ -37,4 +37,4 @@ extern GList *formatGS( const statcontext *psc, const int nMatchTo, const enum _
 extern void
 freeGS( GList *list );
 
-#endif /* _FORMATGS_H_ */
+#endif /* FORMATGS_H */

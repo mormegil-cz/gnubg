@@ -19,10 +19,10 @@
  * $Id$
  */
 
-#ifndef _GTKOPTIONS_H_
-#define _GTKOPTIONS_H_
+#ifndef GTKOPTIONS_H
+#define GTKOPTIONS_H
 
 extern void GTKSetOptions( void );
 extern void GTKSound(void);
 
-#endif /* _GTKOPTIONS_H_ */
+#endif /* GTKOPTIONS_H */

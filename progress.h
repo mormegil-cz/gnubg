@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _PROGRESS_H_
-#define _PROGRESS_H_
+#ifndef PROGRESS_H
+#define PROGRESS_H
 
 #include "eval.h"
 #include "rollout.h"
@@ -48,5 +48,5 @@ RolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 extern int
 RolloutProgressEnd( void **pp, gboolean destroy );
 
-#endif /* _PROGRESS_H_ */
+#endif /* PROGRESS_H */
 

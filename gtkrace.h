@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _GTKRACE_H_
-#define _GTKRACE_H_
+#ifndef GTKRACE_H
+#define GTKRACE_H
 
 extern void
 GTKShowRace ( TanBoard anBoard );

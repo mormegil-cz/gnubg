@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _ROLLOUT_H_
-#define _ROLLOUT_H_
+#ifndef ROLLOUT_H
+#define ROLLOUT_H
 
 #define MAXHIT 50 /* for statistics */
 #define STAT_MAXCUBE 10

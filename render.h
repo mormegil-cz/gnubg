@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _RENDER_H_
-#define _RENDER_H_
+#ifndef RENDER_H
+#define RENDER_H
 
 #include "gnubg-types.h"
 

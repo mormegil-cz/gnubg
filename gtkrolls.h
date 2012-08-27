@@ -19,10 +19,10 @@
  * $Id$
  */
 
-#ifndef _GTKROLLS_H_
-#define _GTKROLLS_H_
+#ifndef GTKROLLS_H
+#define GTKROLLS_H
 
 extern void
 GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms );
 
-#endif /* _GTKROLLS_H_ */
+#endif /* GTKROLLS_H */

@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _GTKTHEORY_H_
-#define _GTKTHEORY_H_
+#ifndef GTKTHEORY_H
+#define GTKTHEORY_H
 
 extern void
 GTKShowTheory ( const int fActivePage );

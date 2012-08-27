@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _OSR_H_
-#define _OSR_H_
+#ifndef OSR_H
+#define OSR_H
 
 extern void
 raceProbs ( const TanBoard anBoard, const unsigned int nGames,
@@ -28,4 +28,4 @@ raceProbs ( const TanBoard anBoard, const unsigned int nGames,
             float arMu[ 2 ] );
 
 
-#endif /* _OSR_H_ */
+#endif /* OSR_H */

@@ -19,10 +19,10 @@
  * $Id$
  */
 
-#ifndef _RENDERPREFS_H_
-#define _RENDERPREFS_H_
+#ifndef RENDERPREFS_H
+#define RENDERPREFS_H
 
-#ifndef _RENDER_H_
+#ifndef RENDER_H
 #include "render.h"
 #endif
 

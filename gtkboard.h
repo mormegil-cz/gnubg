@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _GTKBOARD_H_
-#define _GTKBOARD_H_
+#ifndef GTKBOARD_H
+#define GTKBOARD_H
 
 #include "backgammon.h"
 #include <gtk/gtk.h>

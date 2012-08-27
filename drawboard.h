@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _DRAWBOARD_H_
-#define _DRAWBOARD_H_
+#ifndef DRAWBOARD_H
+#define DRAWBOARD_H
 
 #include "gnubg-types.h"
 

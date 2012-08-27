@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _GTKGAME_H_
-#define _GTKGAME_H_
+#ifndef GTKGAME_H
+#define GTKGAME_H
 
 #include <gtk/gtk.h>
 #include "backgammon.h"

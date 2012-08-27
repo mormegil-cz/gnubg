@@ -20,8 +20,8 @@
  * $Id$
  */
 
-#ifndef _GTKMOVELISTCTRL_H_
-#define _GTKMOVELISTCTRL_H_
+#ifndef GTKMOVELISTCTRL_H
+#define GTKMOVELISTCTRL_H
 
 
 /* Some boilerplate GObject type check and type cast macros.

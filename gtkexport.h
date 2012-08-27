@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _GTKEXPORT_H_
-#define _GTKEXPORT_H_
+#ifndef GTKEXPORT_H
+#define GTKEXPORT_H
 
 #include "export.h"
 

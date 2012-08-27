@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _GTKTOOLBAR_H_
-#define _GTKTOOLBAR_H_
+#ifndef GTKTOOLBAR_H
+#define GTKTOOLBAR_H
 
 #include "gtkboard.h"
 #if !(USE_GTKUIMANAGER)
@@ -63,4 +63,4 @@ extern void click_edit(void);
 extern void click_swapdirection(void);
 extern GtkWidget* ToolbarAddWidget(GtkToolbar *pwToolbar, GtkWidget *pWidget, const char *tooltip);
 
-#endif /* _GTKTOOLBAR_H_ */
+#endif /* GTKTOOLBAR_H */

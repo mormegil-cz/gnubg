@@ -23,8 +23,8 @@
 #include "list.h"
 #include <glib.h>
 
-#ifndef _EXPORT_H_
-#define _EXPORT_H_
+#ifndef EXPORT_H
+#define EXPORT_H
 
 #define EXPORT_CUBE_ACTUAL   7
 #define EXPORT_CUBE_MISSED   8

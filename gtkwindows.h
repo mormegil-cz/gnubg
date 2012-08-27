@@ -1,4 +1,5 @@
-/* This program is free software; you can redistribute it and/or modify
+/*
+ * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 3 or later of the GNU General Public License as
  * published by the Free Software Foundation.
  *
@@ -10,10 +11,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * $Id$
  */
 
-#ifndef _GTKWINDOWS_H_
-#define _GTKWINDOWS_H_
+#ifndef GTKWINDOWS_H
+#define GTKWINDOWS_H
 
 #define GTK_STOCK_DIALOG_GNU "gtk-dialog-gnu" /* stock gnu head icon */
 #define GTK_STOCK_DIALOG_GNU_QUESTION "gtk-dialog-gnuquestion" /* stock gnu head icon with question mark */

@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _UTIL_H_
-#define _UTIL_H_
+#ifndef UTIL_H
+#define UTIL_H
 
 #include "stdio.h"
 

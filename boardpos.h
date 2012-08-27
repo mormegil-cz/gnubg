@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _BOARDPOS_H_
-#define _BOARDPOS_H_
+#ifndef BOARDPOS_H
+#define BOARDPOS_H
 
 #define POINT_UNUSED0 28 /* the top unused bearoff tray */
 #define POINT_UNUSED1 29 /* the bottom unused bearoff tray */

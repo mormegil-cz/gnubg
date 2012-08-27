@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _RELATIONAL_H_
-#define _RELATIONAL_H_
+#ifndef RELATIONAL_H
+#define RELATIONAL_H
 
 #include <dbprovider.h>
 #include <stddef.h>
@@ -34,4 +34,4 @@ extern int RelationalUpdatePlayerDetails(const char* oldName, const char* newNam
 extern float Ratio(float a, int b);
 extern statcontext *relational_player_stats_get(const char *player0, const char *player1);
 
-#endif /* _RELATIONAL_H_ */
+#endif /* RELATIONAL_H */

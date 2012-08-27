@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _GTKSPLASH_H_
-#define _GTKSPLASH_H_
+#ifndef GTKSPLASH_H
+#define GTKSPLASH_H
 
 extern GtkWidget *
 CreateSplash ( void );
@@ -31,4 +31,4 @@ DestroySplash ( GtkWidget *pwSplash );
 extern void
 PushSplash ( GtkWidget *pwSplash, const gchar *szText0, const gchar *szText1 );
 
-#endif /* _GTKSPLASH_H_ */
+#endif /* GTKSPLASH_H */

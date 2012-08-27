@@ -18,7 +18,7 @@
  * $Id$
  */
 
-#ifndef _IMPORT_H_
-#define _IMPORT_H_
+#ifndef IMPORT_H
+#define IMPORT_H
 
 #endif

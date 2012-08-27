@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _ANALYSIS_H_
-#define _ANALYSIS_H_
+#ifndef ANALYSIS_H
+#define ANALYSIS_H
 
 #include "list.h"
 #include "gnubg-types.h"

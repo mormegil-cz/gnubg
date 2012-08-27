@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _DICE_H_
-#define _DICE_H_
+#ifndef DICE_H
+#define DICE_H
 
 #include <stdio.h>
 

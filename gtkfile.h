@@ -22,8 +22,8 @@
  * $Id$
  */
 
-#ifndef _GTKFILE_H_
-#define _GTKFILE_H_
+#ifndef GTKFILE_H
+#define GTKFILE_H
 extern void GTKOpen (gpointer p, guint n, GtkWidget * pw);
 extern void GTKCommandsOpen(gpointer p, guint n, GtkWidget *pw);
 extern void GTKSave (gpointer p, guint n, GtkWidget * pw);

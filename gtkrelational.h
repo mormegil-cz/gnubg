@@ -23,8 +23,8 @@
 
 #include <gtk/gtk.h>
 
-#ifndef _GTKRELATIONAL_H_
-#define _GTKRELATIONAL_H_
+#ifndef GTKRELATIONAL_H
+#define GTKRELATIONAL_H
 extern void GtkRelationalAddMatch(gpointer p, guint n, GtkWidget * pw);
 extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw);
 extern GtkWidget *RelationalOptions(void);

@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _MATCHID_H_
-#define _MATCHID_H_
+#ifndef MATCHID_H
+#define MATCHID_H
 
 #define L_MATCHID 12
 

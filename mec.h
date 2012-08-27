@@ -19,8 +19,8 @@
  */
 
 
-#ifndef _MEC_H_
-#define _MEC_H_
+#ifndef MEC_H
+#define MEC_H
 
 #include "matchequity.h"
 
@@ -37,5 +37,5 @@ mec_pc( const float rGammonRate,
         const float rWinRate,
         float arMetPC[ MAXSCORE ] );
 
-#endif /* _MEC_H_ */
+#endif /* MEC_H */
 

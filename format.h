@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _FORMAT_H_
-#define _FORMAT_H_
+#ifndef FORMAT_H
+#define FORMAT_H
 
 extern int fOutputMWC, fOutputWinPC, fOutputMatchPC;
 extern unsigned int fOutputDigits;
@@ -84,4 +84,4 @@ FormatCubePosition ( char *sz, cubeinfo *pci );
 extern void
 FormatCubePositions( const cubeinfo *pci, char asz[ 2 ][ 40 ] );
 
-#endif /* _FORMAT_H_ */
+#endif /* FORMAT_H */

@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _GTKMET_H_
-#define _GTKMET_H_
+#ifndef GTKMET_H
+#define GTKMET_H
 
 extern void GTKShowMatchEquityTable( const unsigned int nMatchTo,
                                      const int anScore[ 2 ] );

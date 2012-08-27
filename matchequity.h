@@ -19,8 +19,8 @@
  */
 
 
-#ifndef _MATCHEQUITY_H_
-#define _MATCHEQUITY_H_
+#ifndef MATCHEQUITY_H
+#define MATCHEQUITY_H
 
 #include "eval.h"
 

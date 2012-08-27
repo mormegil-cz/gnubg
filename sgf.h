@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _SGF_H_
-#define _SGF_H_
+#ifndef SGF_H
+#define SGF_H
 
 #include "list.h"
 #include <stdio.h>

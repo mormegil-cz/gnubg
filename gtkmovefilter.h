@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _GTKMOVEFILTER_H_
-#define _GTKMOVEFILTER_H_
+#ifndef GTKMOVEFILTER_H
+#define GTKMOVEFILTER_H
 
 extern GtkWidget *
 MoveFilterWidget ( movefilter *pmf, 
@@ -36,4 +36,4 @@ extern void
 MoveFilterSetPredefined ( GtkWidget *pwMoveFilter, 
                           const int i );
 
-#endif /* _GTKMOVEFILTER_H_ */
+#endif /* GTKMOVEFILTER_H */

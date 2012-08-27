@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _BEAROFF_H_
-#define _BEAROFF_H_
+#ifndef BEAROFF_H
+#define BEAROFF_H
 
 #include "gnubg-types.h"
 
@@ -102,4 +102,4 @@ BearoffHyper( const bearoffcontext *pbc,
               const unsigned int iPos,
               float arOutput[], float arEquity[] );
 
-#endif /* _BEAROFF_H_ */
+#endif /* BEAROFF_H */

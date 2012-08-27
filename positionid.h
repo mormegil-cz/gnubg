@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _POSITIONID_H_
-#define _POSITIONID_H_
+#ifndef POSITIONID_H
+#define POSITIONID_H
 
 #include "gnubg-types.h"
 

@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _GTKLOCDEFS_H_
-#define _GTKLOCDEFS_H_
+#ifndef GTKLOCDEFS_H
+#define GTKLOCDEFS_H
 
 #include "config.h"
 

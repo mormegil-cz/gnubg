@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _GTKPREFS_H_
-#define _GTKPREFS_H_
+#ifndef GTKPREFS_H
+#define GTKPREFS_H
 
 #include "gtkboard.h"
 

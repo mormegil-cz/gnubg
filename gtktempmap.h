@@ -19,11 +19,11 @@
  * $Id$
  */
 
-#ifndef _GTKTEMPMAP_H_
-#define _GTKTEMPMAP_H_
+#ifndef GTKTEMPMAP_H
+#define GTKTEMPMAP_H
 
 extern void
 GTKShowTempMap( const matchstate ams[], const int n,
                 const gchar *aszTitle[], const int fInvert );
 
-#endif /* _GTKTEMPMAP_H_ */
+#endif /* GTKTEMPMAP_H */

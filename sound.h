@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _SOUND_H_
-#define _SOUND_H_
+#ifndef SOUND_H
+#define SOUND_H
 
 
 typedef enum _gnubgsound {

@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _BOARDDIM_H_
-#define _BOARDDIM_H_
+#ifndef BOARDDIM_H
+#define BOARDDIM_H
 
 
 /* fundamental constants */
@@ -136,4 +136,4 @@
 #define HINGE_TOP_Y ((BOARD_HEIGHT + CUBE_HEIGHT) / 2 + \
                      2 * CHEQUER_HEIGHT + 1)
 
-#endif /* _BOARDDIM_H_ */
+#endif /* BOARDDIM_H */
