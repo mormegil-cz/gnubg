@@ -5,8 +5,8 @@ Modified for inclusion with GNU Backgammon by Gary Wong
 $Id$
 ------------------------------------------------------------------------------
 */
-#ifndef _ISAACS_H_
-#define _ISAACS_H_
+#ifndef ISAACS_H
+#define ISAACS_H
 typedef  unsigned long  int  ub4;   /* unsigned 4-byte quantities */
 #define UB4MAXVAL 0xffffffff
 typedef    signed long  int  sb4;

@@ -13,8 +13,8 @@ MODIFIED:
 
 #include "isaacs.h"
 
-#ifndef _ISAAC_H_
-#define _ISAAC_H_
+#ifndef ISAAC_H
+#define ISAAC_H
 
 #define RANDSIZL   (4)  /* I recommend 8 for crypto, 4 for simulations */
 #define RANDSIZ    (1<<RANDSIZL)

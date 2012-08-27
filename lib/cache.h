@@ -18,8 +18,8 @@
  * $Id$
  */
 
-#ifndef _CACHE_H_
-#define _CACHE_H_
+#ifndef CACHE_H
+#define CACHE_H
 
 #include <stdlib.h>
 

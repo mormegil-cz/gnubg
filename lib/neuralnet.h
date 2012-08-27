@@ -18,8 +18,8 @@
  * $Id$
  */
 
-#ifndef _NEURALNET_H_
-#define _NEURALNET_H_
+#ifndef NEURALNET_H
+#define NEURALNET_H
 
 #include <stdio.h>
 #include "common.h"

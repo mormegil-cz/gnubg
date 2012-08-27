@@ -24,8 +24,8 @@
    reasons why the executable file might be covered by the GNU General
    Public License.  */
 
-#ifndef _MM_MALLOC_H_INCLUDED
-#define _MM_MALLOC_H_INCLUDED
+#ifndef MM_MALLOC_H_INCLUDED
+#define MM_MALLOC_H_INCLUDED
 
 #include <stdlib.h>
 #include <errno.h>
@@ -74,4 +74,4 @@ _mm_free (void * aligned_ptr)
     free (((void **) aligned_ptr) [-1]);
 }
 
-#endif /* _MM_MALLOC_H_INCLUDED */
+#endif /* MM_MALLOC_H_INCLUDED */

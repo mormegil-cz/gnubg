@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _SIGMOID_H
-#define _SIGMOID_H
+#ifndef SIGMOID_H
+#define SIGMOID_H
 /* e[k] = exp(k/10) / 10 */
 static float e[101] = {
 0.10000000000000001f, 

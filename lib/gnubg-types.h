@@ -19,8 +19,8 @@
  * $Id$
  */
 
-#ifndef _GNUBG_TYPES_H_
-#define _GNUBG_TYPES_H_
+#ifndef GNUBG_TYPES_H
+#define GNUBG_TYPES_H
 
 typedef unsigned int TanBoard[2][25];
 typedef const unsigned int (*ConstTanBoard)[25];

@@ -4,8 +4,8 @@
  * $Id$
  */
 
-#ifndef _MT19937AR_H_
-#define _MT19937AR_H_
+#ifndef MT19937AR_H
+#define MT19937AR_H
 
 #define N 624
 

@@ -18,8 +18,8 @@
  * $Id$
  */
 
-#ifndef _LIST_H_
-#define _LIST_H_
+#ifndef LIST_H
+#define LIST_H
 
 typedef struct _list {
   struct _list* plPrev;
