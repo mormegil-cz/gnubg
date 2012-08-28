@@ -330,7 +330,7 @@ static gint RollsClose(GtkWidget *UNUSED(widget), GdkEvent *UNUSED(eventDetails)
 		return FALSE;
 }
 
-static gboolean DepthEvent (GtkWidget *widget, GdkEvent *event, rollswidget *prw) {
+static gboolean DepthEvent (GtkWidget *UNUSED(widget), GdkEvent *event, rollswidget *prw) {
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
 		fScrollComplete = FALSE;
