@@ -229,7 +229,7 @@ static void SoundEnabledClicked(GtkWidget *UNUSED(widget), gpointer UNUSED(userd
 		SoundDefaultClicked(0, 0);
 }
 
-static void SoundGrabFocus(GtkWidget *pw, void *UNUSED(dummy))
+static void SoundGrabFocus(GtkWidget *UNUSED(pw), void *UNUSED(dummy))
 {
 	gtk_widget_grab_focus(soundList);
 	SoundEnabledClicked(0, 0);
