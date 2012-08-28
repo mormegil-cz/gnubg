@@ -449,7 +449,7 @@ static const char *aszCommands[ NUM_CMDS ] = {
     "show warranty",
     "swap players",
 };
-static void Command( gpointer p, guint iCommand, GtkWidget *widget ) {
+static void Command( gpointer UNUSED(p), guint iCommand, GtkWidget *widget ) {
 
     char sz[ 80 ];
 
@@ -609,7 +609,7 @@ extern void GTKResumeInput(void)
 	GTKAllowStdin();
 }
 
-static gboolean StdinReadNotify(GIOChannel *source, GIOCondition cond, gpointer p) {
+static gboolean StdinReadNotify(GIOChannel *UNUSED(source), GIOCondition UNUSED(cond), gpointer UNUSED(p)) {
 
     char sz[ 2048 ], *pch;
 
@@ -693,7 +693,7 @@ extern void GTKDelay( void ) {
 }
 
 
-static void gui_clear_turn(GtkWidget *pw, GtkWidget *dialog)
+static void gui_clear_turn(GtkWidget *UNUSED(pw), GtkWidget *dialog)
 {
 	if (dialog)
 		gtk_widget_destroy(dialog);
@@ -744,7 +744,7 @@ extern int GTKGetManualDice(unsigned int an[2])
 	return an[0] ? 0 : -1;
 }
 
-extern void GTKSetDice( gpointer p, guint n, GtkWidget *pw ) {
+extern void GTKSetDice( gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw) ) {
 
     unsigned int an[ 2 ];
     char sz[ 13 ]; /* "set dice x y" */
@@ -755,7 +755,7 @@ extern void GTKSetDice( gpointer p, guint n, GtkWidget *pw ) {
     }
 }
 
-extern void GTKSetCube( gpointer p, guint n, GtkWidget *pw ) {
+extern void GTKSetCube( gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw) ) {
 
     int valChanged;
     int an[ 2 ];
@@ -800,7 +800,7 @@ extern void GTKSetCube( gpointer p, guint n, GtkWidget *pw ) {
 
 static int fAutoCommentaryChange;
 
-extern void CommentaryChanged( GtkWidget *pw, GtkTextBuffer *buffer ) {
+extern void CommentaryChanged( GtkWidget *UNUSED(pw), GtkTextBuffer *buffer ) {
 
     char *pch;
     GtkTextIter begin, end;
@@ -1265,7 +1265,7 @@ extern void GTKSaveSettings( void ) {
     g_free(sz);
 }
 
-static gboolean main_delete( GtkWidget *pw ) {
+static gboolean main_delete( GtkWidget *UNUSED(pw) ) {
 
     getWindowGeometry(WINDOW_MAIN);
 
@@ -1278,7 +1278,7 @@ static gboolean main_delete( GtkWidget *pw ) {
    so we have to use a signal to see if anything was actually popped. */
 static int fFinishedPopping;
 
-static void TextPopped( GtkWidget *pw, guint id, gchar *text, void *p ) {
+static void TextPopped( GtkWidget *UNUSED(pw), guint UNUSED(id), gchar *text, void *UNUSED(p) ) {
 
     if( !text )
 	fFinishedPopping = TRUE;
@@ -1377,7 +1377,7 @@ static void MainSize( GtkWidget *pw, GtkRequisition *preq, gpointer p ) {
 
 
 #if !(USE_GTKUIMANAGER)
-static gchar *GTKTranslate ( const gchar *path, gpointer func_data ) {
+static gchar *GTKTranslate ( const gchar *path, gpointer UNUSED(func_data) ) {
   return (gchar *) gettext ( (const char *) path );
 }
 #endif
@@ -1391,7 +1391,7 @@ static void ToolbarStyle ( guint iType, guint iActionID, GtkRadioAction *action,
 	SetToolbarStyle( actionID - VIEW_TOOLBAR_ICONSONLY);
 }
 #else
-static void ToolbarStyle(gpointer    callback_data,
+static void ToolbarStyle(gpointer    UNUSED(callback_data),
                        guint       callback_action,
                        GtkWidget  *widget)
 {
@@ -1439,7 +1439,7 @@ extern void GTKTextToClipboard(const char *text)
   gtk_clipboard_set_text(clipboard, text, -1);
 }
 
-static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *eCon, void* null)
+static gboolean configure_event(GtkWidget *UNUSED(widget), GdkEventConfigure *eCon, void *UNUSED(null))
 {	/* Maintain panel size */
 	if (DockedPanelsShowing())
 		gtk_paned_set_position(GTK_PANED(hpaned), eCon->width - GetPanelSize());
@@ -1447,26 +1447,26 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *eCon, void
 	return FALSE;
 }
 
-static void NewClicked(gpointer  p, guint n, GtkWidget * pw)
+static void NewClicked(gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw))
 {
 	GTKNew();
 }
 
-static void CopyAsBGbase(gpointer p, guint n, GtkWidget * pw)
+static void CopyAsBGbase(gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw))
 {
 
 	UserCommand("export position backgammonbase2clipboard");
 
 }
 
-static void CopyAsGOL(gpointer p, guint n, GtkWidget * pw)
+static void CopyAsGOL(gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw))
 {
 
 	UserCommand("export position gol2clipboard");
 
 }
 
-static void CopyIDs(gpointer p, guint n, GtkWidget * pw)
+static void CopyIDs(gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw))
 {				/* Copy the position and match ids to the clipboard */
 	char buffer[1024];
 
@@ -1486,7 +1486,7 @@ static void CopyIDs(gpointer p, guint n, GtkWidget * pw)
 	gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idOutput, _("Position and Match IDs copied to the clipboard") );
 }
 
-static void CopyMatchID(gpointer p, guint n, GtkWidget * pw)
+static void CopyMatchID(gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw))
 {				/* Copy the position and match ids to the clipboard */
 	char buffer[1024];
 
@@ -1505,7 +1505,7 @@ static void CopyMatchID(gpointer p, guint n, GtkWidget * pw)
 	gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idOutput, _("Match ID copied to the clipboard") );
 }
 
-static void CopyPositionID(gpointer p, guint n, GtkWidget * pw)
+static void CopyPositionID(gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw))
 {				/* Copy the position and match ids to the clipboard */
 	char buffer[1024];
 
@@ -1564,7 +1564,7 @@ static void TogglePanel ( guint iType, guint iActionID, GtkToggleAction *action,
 }
 
 #else
-static void TogglePanel(gpointer p, guint n, GtkWidget * pw)
+static void TogglePanel(gpointer UNUSED(p), guint n, GtkWidget * pw)
 {
 	int f;
 	gnubgwindow panel = 0;
@@ -1648,7 +1648,7 @@ extern void SetSwitchModeMenuText(void)
 }
 
 static void
-SwitchDisplayMode( gpointer p, guint n, GtkWidget *pw )
+SwitchDisplayMode( gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw) )
 {
 	BoardData *bd = BOARD( pwBoard )->board_data;
 	BoardData3d *bd3d = bd->bd3d;
@@ -1699,7 +1699,7 @@ static void ToggleShowingIDs ( GtkToggleAction *action, gpointer user_data )
 	UserCommand("save settings");
 }
 #else
-static void ToggleShowingIDs( gpointer p, guint n, GtkWidget *pw )
+static void ToggleShowingIDs( gpointer UNUSED(p), guint UNUSED(n), GtkWidget *pw )
 {
 	int newValue = gtk_check_menu_item_get_active( GTK_CHECK_MENU_ITEM( pw ) );
 	char *sz = g_strdup_printf("set gui showids %s", newValue ? "on" :
@@ -1766,7 +1766,7 @@ extern void HideToolbar(void)
 	fToolbarShowing = FALSE;
 }
 
-static gboolean EndFullScreen(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
+static gboolean EndFullScreen(GtkWidget *UNUSED(widget), GdkEventKey *event, gpointer UNUSED(user_data))
 {
 	short k = (short)event->keyval;
 
@@ -1783,7 +1783,7 @@ static void SetFullscreenWindowSettings(int panels, int ids, int maxed)
 	maximised = maxed;
 }
 
-static void DoFullScreenMode(gpointer p, guint n, GtkWidget * pw)
+static void DoFullScreenMode(gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw))
 {
 	BoardData *bd = BOARD(pwBoard)->board_data;
 	GtkWindow *ptl = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(bd->table)));
@@ -1932,7 +1932,7 @@ void GetFullscreenWindowSettings(int *panels, int *ids, int *maxed)
 	*maxed = maximised;
 }
 
-static void FinishMove(gpointer p, guint n, GtkWidget * pw)
+static void FinishMove(gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw))
 {
 
 	int anMove[8];
@@ -1973,7 +1973,7 @@ static void EvalGetValues ( evalcontext *pec, evalwidget *pew ) {
 }
 
 
-static void EvalChanged ( GtkWidget *pw, evalwidget *pew ) {
+static void EvalChanged ( GtkWidget *UNUSED(pw), evalwidget *pew ) {
 
   int i;
   evalcontext ecCurrent;
@@ -2607,7 +2607,7 @@ static void AnalysisSet( analysiswidget *paw) {
 		 arLuckLevel[LUCK_VERYBAD] );
 }
 
-static void HintSameToggled( GtkWidget *notused, analysiswidget *paw )
+static void HintSameToggled( GtkWidget *UNUSED(notused), analysiswidget *paw )
 {
 	int active = !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(paw->pwHintSame));
 	gtk_widget_set_sensitive(paw->pwCubeSummary, active);
@@ -2627,7 +2627,7 @@ static AnalysisDetails *CreateEvalSettings(GtkWidget *pwParent, const char *titl
 	return pAnalDetail;
 }
 
-extern void SetAnalysis(gpointer p, guint n, GtkWidget * pw)
+extern void SetAnalysis(gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw))
 {
 	const char *aszSkillLabel[3] = { N_("Doubtful:"), N_("Bad:"), N_("Very bad:") };
 	const char *aszLuckLabel[4] = { N_("Very lucky:"), N_("Lucky:"),
@@ -2798,7 +2798,7 @@ typedef struct _playerswidget {
 	AnalysisDetails *pLevelSettings[2];
 } playerswidget;
 
-static void PlayerTypeToggled( GtkWidget *pw, playerswidget *ppw )
+static void PlayerTypeToggled( GtkWidget *UNUSED(pw), playerswidget *ppw )
 {
 	int i;
 
@@ -2898,7 +2898,7 @@ static void PlayersOK( GtkWidget *pw, playerswidget *pplw ) {
     gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }
 
-static void SetPlayers(gpointer p, guint n, GtkWidget *pw)
+static void SetPlayers(gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw))
 {
 	GtkWidget *pwDialog, *pwHBox;
 	int i, fOK = FALSE;
@@ -2989,7 +2989,7 @@ static void SetPlayers(gpointer p, guint n, GtkWidget *pw)
 	}
 }
 
-static void SetOptions(gpointer p, guint n, GtkWidget * pw)
+static void SetOptions(gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw))
 {
 
 	GTKSetOptions();
@@ -3050,7 +3050,7 @@ static void SetLangOk(void)
 	gtk_widget_destroy(pwLangDialog);
 }
 
-static gboolean FlagClicked(GtkWidget *pw, GdkEventButton *event, void* dummy)
+static gboolean FlagClicked(GtkWidget *pw, GdkEventButton *event, void *UNUSED(dummy))
 {
 	/* Manually highlight clicked flag */
 	GtkWidget *frame, *eb;
@@ -3136,7 +3136,7 @@ static GtkWidget *GetFlagWidget(char *language, char *langCode, const char *flag
 	return eb;
 }
 
-static int defclick(GtkWidget *pw, void *dummy, GtkWidget *table)
+static int defclick(GtkWidget *UNUSED(pw), void *UNUSED(dummy), GtkWidget *table)
 {
 	gtk_widget_set_sensitive(table, FALSE);
 	SetupLanguage("");
@@ -3145,7 +3145,7 @@ static int defclick(GtkWidget *pw, void *dummy, GtkWidget *table)
 	return FALSE;
 }
 
-static int selclick(GtkWidget *pw, void *dummy, GtkWidget *table)
+static int selclick(GtkWidget *UNUSED(pw), void *UNUSED(dummy), GtkWidget *table)
 {
 	gtk_widget_set_sensitive(table, TRUE);
 	if (curSel)
@@ -3222,7 +3222,7 @@ static void AddLangWidgets(GtkWidget *cont)
 }
 
 
-static void SetLanguage( gpointer p, guint n, GtkWidget *pw )
+static void SetLanguage( gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(w) )
 {
 	GList *pl;
 
@@ -3247,7 +3247,7 @@ static void SetLanguage( gpointer p, guint n, GtkWidget *pw )
 }
 
 
-static void ReportBug(gpointer p, guint n, GtkWidget * pwEvent)
+static void ReportBug(gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pwEvent))
 {
 	OpenURL("http://savannah.gnu.org/bugs/?func=additem&group=gnubg");
 }
@@ -3638,7 +3638,7 @@ GtkItemFactoryEntry aife[] = {
 
 extern int automaticTask;
 
-static void Stop( GtkWidget *pw, gpointer unused )
+static void Stop( GtkWidget *pw, gpointer UNUSED(unused) )
 {
 	if (automaticTask)
 		StopAutomaticPlay();
@@ -3683,14 +3683,14 @@ static gboolean StopAnyAnimations(void)
 	return FALSE;
 }
 
-static void StopNotButton( GtkWidget *pw, gpointer unused )
+static void StopNotButton( GtkWidget *UNUSED(pw), gpointer UNUSED(unused) )
 {	/* Interrupt any animations or show message in status bar */
 	if (!StopAnyAnimations())
 		gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idOutput, _("Press the stop button to interrupt the current process") );
 }
 
-static void FileDragDropped(GtkWidget *widget, GdkDragContext * drag_context,
-			    gint x, gint y, GtkSelectionData * data, guint info, guint time)
+static void FileDragDropped(GtkWidget *UNUSED(widget), GdkDragContext *UNUSED(drag_context),
+			    gint UNUSED(x), gint UNUSED(y), GtkSelectionData * data, guint UNUSED(info), guint UNUSED(time))
 {
 	gchar **list;
 	list = g_uri_list_extract_uris( (gchar *)gtk_selection_data_get_data( data ) );
@@ -3726,7 +3726,7 @@ static void FileDragDropped(GtkWidget *widget, GdkDragContext * drag_context,
 }
 
 
-static gboolean ContextMenu(GtkWidget *widget, GdkEventButton *event, GtkWidget* menu)
+static gboolean ContextMenu(GtkWidget *UNUSED(widget), GdkEventButton *event, GtkWidget* menu)
 {
 	if (event->type != GDK_BUTTON_PRESS || event->button != 3)
 		return FALSE;
@@ -4243,7 +4243,7 @@ static void TutorEnd( GtkWidget *pw, int *pf ) {
 }
 
 static void
-TutorHint ( GtkWidget *pw, void *unused ) {
+TutorHint ( GtkWidget *pw, void *UNUSED(unused) ) {
 
   gtk_widget_destroy ( gtk_widget_get_toplevel( pw ) );
   UserCommand ( "hint" );
@@ -4251,7 +4251,7 @@ TutorHint ( GtkWidget *pw, void *unused ) {
 }
 
 static void
-TutorRethink ( GtkWidget *pw, void *unused ) {
+TutorRethink ( GtkWidget *pw, void *UNUSED(unused) ) {
 
 #if USE_BOARD3D
 	RestrictiveRedraw();
@@ -4436,7 +4436,7 @@ static void UpdatePlayerSettings( newwidget *pnw ) {
   UserCommand("save settings");
 }
 
-static void SettingsPressed( GtkWidget *pw, gpointer data )
+static void SettingsPressed( GtkWidget *pw, gpointer UNUSED(data) )
 {
 	GTKSetCurrentParent(pw);
 	SetPlayers( NULL, 0, NULL);
@@ -4648,7 +4648,7 @@ extern void GTKNew( void )
 }
 
 extern void
-SetMET (GtkWidget * pw, gpointer p)
+SetMET (GtkWidget *UNUSED(pw), gpointer p)
 {
   gchar *filename, *command;
 
@@ -4820,7 +4820,7 @@ static void load_rs_clicked (GtkWidget *pw, rolloutwidget *prw ) {
 
 /* create one page for rollout settings  for playes & truncation */
 
-static AnalysisDetails *RolloutPage( rolloutpagewidget *prpw, const char *title, const int fMoveFilter, GtkWidget **frameRet )
+static AnalysisDetails *RolloutPage( rolloutpagewidget *prpw, const char *title, const int UNUSED(fMoveFilter), GtkWidget **frameRet )
 {
 	GtkWidget *pwFrame;
 	pwFrame = gtk_frame_new ( title );
@@ -4830,7 +4830,7 @@ static AnalysisDetails *RolloutPage( rolloutpagewidget *prpw, const char *title,
 	return CreateEvalSettings(pwFrame, title, prpw->precCheq, prpw->pmf, prpw->precCube, NULL);
 }
 
-static void LateEvalToggled( GtkWidget *pw, rolloutwidget *prw) {
+static void LateEvalToggled( GtkWidget *UNUSED(pw), rolloutwidget *prw) {
 
   int do_late = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
                                                  prw->prwGeneral->pwDoLate ) );
@@ -4845,7 +4845,7 @@ static void LateEvalToggled( GtkWidget *pw, rolloutwidget *prw) {
                             do_late);
 }
 
-static void STDStopToggled( GtkWidget *pw, rolloutwidget *prw) {
+static void STDStopToggled( GtkWidget *UNUSED(pw), rolloutwidget *prw) {
 
   int do_std_stop = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
                        prw->prwGeneral->pwDoSTDStop ) );
@@ -4856,7 +4856,7 @@ static void STDStopToggled( GtkWidget *pw, rolloutwidget *prw) {
                             do_std_stop);
 }
 
-static void JsdStopToggled( GtkWidget *pw, rolloutwidget *prw) {
+static void JsdStopToggled( GtkWidget *UNUSED(pw), rolloutwidget *prw) {
 
   int do_jsd_stop = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (prw->prwGeneral->pwJsdDoStop ) );
 
@@ -4866,7 +4866,7 @@ static void JsdStopToggled( GtkWidget *pw, rolloutwidget *prw) {
 
 }
 
-static void TruncEnableToggled( GtkWidget *pw, rolloutwidget *prw)
+static void TruncEnableToggled( GtkWidget *UNUSED(pw), rolloutwidget *prw)
 {
   int do_trunc = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
                                                                    prw->prwGeneral->pwDoTrunc ) );
@@ -4883,7 +4883,7 @@ static void TruncEnableToggled( GtkWidget *pw, rolloutwidget *prw)
 
 }
 
-static void TruncEqualPlayer0Toggled( GtkWidget *pw, rolloutwidget *prw)
+static void TruncEqualPlayer0Toggled( GtkWidget *UNUSED(pw), rolloutwidget *prw)
 {
   int do_trunc =
 	gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
@@ -4897,7 +4897,7 @@ static void TruncEqualPlayer0Toggled( GtkWidget *pw, rolloutwidget *prw)
   gtk_widget_set_sensitive(prw->analysisDetails[4]->pwSettingWidgets, do_trunc && !sameas_p0);
 }
 
-static void CubeEqCheqToggled( GtkWidget *pw, rolloutwidget *prw)
+static void CubeEqCheqToggled( GtkWidget *UNUSED(pw), rolloutwidget *prw)
 {
   int i, are_same = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (prw->prwGeneral->pwCubeEqualChequer ) );
 
@@ -4908,7 +4908,7 @@ static void CubeEqCheqToggled( GtkWidget *pw, rolloutwidget *prw)
 }
 
 static void
-CubefulToggled ( GtkWidget *pw, rolloutwidget *prw ) {
+CubefulToggled ( GtkWidget *UNUSED(pw), rolloutwidget *prw ) {
 
   int f = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
                                                             prw->prwGeneral->pwCubeful ) );
@@ -4918,7 +4918,7 @@ CubefulToggled ( GtkWidget *pw, rolloutwidget *prw ) {
 
 }
 
-static void PlayersSameToggled( GtkWidget *pw, rolloutwidget *prw)
+static void PlayersSameToggled( GtkWidget *UNUSED(pw), rolloutwidget *prw)
 {
   int   are_same = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON ( prw->prwGeneral->pwPlayersAreSame ) );
   int do_late = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON ( prw->prwGeneral->pwDoLate ) );
@@ -5237,7 +5237,7 @@ static void gtk_load_rollout_settings(void)
 }
 
 
-extern void SetRollouts( gpointer p, guint n, GtkWidget *pwIgnore )
+extern void SetRollouts( gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pwIgnore) )
 {
   GtkWidget *pwDialog, *pwTable, *pwVBox;
   GtkWidget *saveAsButton;
@@ -5619,7 +5619,7 @@ extern void GTKEval( char *szOutput ) {
     GTKTextWindow( szOutput,  _("GNU Backgammon - Evaluation"), DT_INFO, NULL);
 }
 
-static void DestroyHint( gpointer p, GObject *obj ) {
+static void DestroyHint( gpointer p, GObject *UNUSED(obj) ) {
 
   movelist *pml = p;
 
@@ -5634,7 +5634,7 @@ static void DestroyHint( gpointer p, GObject *obj ) {
 }
 
 static void
-HintOK ( GtkWidget *pw, void *unused )
+HintOK ( GtkWidget *UNUSED(pw), void *UNUSED(unused) )
 {
 	getWindowGeometry(WINDOW_HINT);
 	DestroyPanel(WINDOW_HINT);
@@ -5680,7 +5680,7 @@ extern void GTKCubeHint(moverecord *pmr, const matchstate *pms, int did_double, 
  */
 
 extern void
-GTKResignHint( float arOutput[], float rEqBefore, float rEqAfter,
+GTKResignHint( float UNUSED(arOutput[]), float rEqBefore, float rEqAfter,
                cubeinfo *pci, int fMWC )
 {
     GtkWidget *pwDialog = GTKCreateDialog( _("GNU Backgammon - Hint"), DT_INFO,
@@ -5803,7 +5803,7 @@ extern void GTKProgressStart( const char *sz )
 	SetMouseCursor(GDK_WATCH);
 }
 
-extern void GTKProgressStartValue( char *sz, int iMax )
+extern void GTKProgressStartValue( char *sz, int UNUSED(iMax) )
 {
 	GTKSuspendInput();
 
@@ -6017,14 +6017,14 @@ extern void GTKShowVersion( void )
 	GTKRunDialog(pwDialog);
 }
 
-static GtkWidget* SelectableLabel(GtkWidget* reference, const char* text)
+static GtkWidget* SelectableLabel(GtkWidget *UNUSED(reference), const char* text)
 {
 	GtkWidget* pwLabel = gtk_label_new(text);
 	gtk_label_set_selectable(GTK_LABEL(pwLabel), TRUE);
 	return pwLabel;
 }
 
-extern void GTKShowBuildInfo(GtkWidget *pw, GtkWidget *pwParent)
+extern void GTKShowBuildInfo(GtkWidget *UNUSED(pw), GtkWidget *pwParent)
 {
 	GtkWidget *pwDialog, *pwBox, *pwPrompt;
 	const char* pch;
@@ -6098,7 +6098,7 @@ static int FindName(listOLD* pList, const char* name)
 	return FALSE;
 }
 
-extern void GTKCommandShowCredits(GtkWidget * pw, GtkWidget * pwParent)
+extern void GTKCommandShowCredits(GtkWidget *UNUSED(pw), GtkWidget * pwParent)
 {
 	GtkWidget *pwDialog;
 	GtkWidget *pwBox;
@@ -6200,7 +6200,7 @@ static void GTKHelpAdd( GtkTreeStore *pts, GtkTreeIter *ptiParent,
 	}
 }
 
-static void GTKHelpSelect( GtkTreeSelection *pts, gpointer p ) {
+static void GTKHelpSelect( GtkTreeSelection *pts, gpointer UNUSED(p) ) {
 
     GtkTreeModel *ptm;
     GtkTreeIter ti;
@@ -6814,7 +6814,7 @@ static void AddList(char *pStr, GtkWidget *view, const char *pTitle)
 	sprintf(strchr(pStr, 0), "\n");
 }
 
-static void CopyData(GtkWidget *pwNotebook, int page)
+static void CopyData(GtkWidget *UNUSED(pwNotebook), int page)
 {
 	char szOutput[4096];
 
@@ -6832,7 +6832,7 @@ static void CopyData(GtkWidget *pwNotebook, int page)
 	TextToClipboard(szOutput);
 }
 
-static void CopyPage( GtkWidget *pwWidget, GtkWidget *pwNotebook )
+static void CopyPage( GtkWidget *UNUSED(pwWidget), GtkWidget *pwNotebook )
 {
 	switch(gtk_notebook_get_current_page(GTK_NOTEBOOK(pwNotebook)))
 	{
@@ -6851,7 +6851,7 @@ static void CopyPage( GtkWidget *pwWidget, GtkWidget *pwNotebook )
 	}
 }
 
-static void CopyAll( GtkWidget *pwWidget, GtkWidget *pwNotebook )
+static void CopyAll( GtkWidget *UNUSED(pwWidget), GtkWidget *pwNotebook )
 {
 	CopyData(pwNotebook, FORMATGS_ALL);
 }
@@ -6927,7 +6927,7 @@ static const statcontext *GetStatContext(int game)
 	}
 }
 
-static void StatsSelectGame(GtkWidget *box, int i)
+static void StatsSelectGame(GtkWidget *box, int UNUSED(i))
 {
 	int curStatGame = gtk_combo_box_get_active(GTK_COMBO_BOX(box));
 	if (!curStatGame) {
@@ -6941,14 +6941,14 @@ static void StatsSelectGame(GtkWidget *box, int i)
 	SetStats(GetStatContext(curStatGame));
 }
 
-static void StatsPreviousGame( GtkWidget *button, GtkWidget *combo )
+static void StatsPreviousGame( GtkWidget *UNUSED(button), GtkWidget *combo )
 {
 	int i = gtk_combo_box_get_active(GTK_COMBO_BOX(combo));
 	if (i > 0)
 		gtk_combo_box_set_active(GTK_COMBO_BOX(combo), i -1 );
 }
 
-static void StatsNextGame( GtkWidget *button, GtkWidget *combo)
+static void StatsNextGame( GtkWidget *UNUSED(button), GtkWidget *combo)
 {
 	int i = gtk_combo_box_get_active(GTK_COMBO_BOX(combo));
 	if (i < numStatGames)
@@ -6999,7 +6999,7 @@ static GtkWidget *AddNavigation(GtkWidget *pvbox)
 	return box;
 }
 
-static void toggle_fGUIUseStatsPanel(GtkWidget *widget, GtkWidget *pw)
+static void toggle_fGUIUseStatsPanel(GtkWidget *widget, GtkWidget *UNUSED(pw))
 {
 	fGUIUseStatsPanel = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 
@@ -7015,7 +7015,7 @@ static void toggle_fGUIUseStatsPanel(GtkWidget *widget, GtkWidget *pw)
 	}
 }
 
-static void StatcontextCopy(GtkWidget *pw, GtkTreeView *view)
+static void StatcontextCopy(GtkWidget *UNUSED(pw), GtkTreeView *view)
 {
 	static char szOutput[4096];
 	GtkTreeSelection *selection;
@@ -7097,7 +7097,7 @@ static GtkWidget *CreateList(void)
 	return view;
 }
 
-static void stat_dialog_map(GtkWidget *window, GtkWidget *pwUsePanels)
+static void stat_dialog_map(GtkWidget *UNUSED(window), GtkWidget *pwUsePanels)
 {
 	toggle_fGUIUseStatsPanel(pwUsePanels, 0);
 }
@@ -7257,7 +7257,7 @@ GtkWidget *apwRating[ 2 ], *pwDate, *pwEvent,
 		*pwRound, *pwPlace, *pwAnnotator;
 GtkTextBuffer *buffer;
 
-static void MatchInfoOK( GtkWidget *pw, int *pf )
+static void MatchInfoOK( GtkWidget *pw, int *UNUSED(pf) )
 {
     GtkTextIter begin, end;
 	unsigned int nYear, nMonth, nDay;
@@ -7478,7 +7478,7 @@ extern void GTKShowCalibration( void )
 	GTKRunDialog(pwDialog);
 }
 
-static gboolean CalibrationCancel( GtkObject *po, gpointer p ) {
+static gboolean CalibrationCancel( GtkObject *UNUSED(po), gpointer UNUSED(p) ) {
 
     fInterrupt = TRUE;
 
@@ -7549,7 +7549,7 @@ static void CallbackResign(GtkWidget *pw, gpointer data)
     return;
 }
 
-extern void GTKResign(gpointer p, guint n, GtkWidget * pw)
+extern void GTKResign(gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw))
 {
 	GtkWidget *pwDialog, *pwVbox, *pwHbox, *pwButtons;
 	int i;
