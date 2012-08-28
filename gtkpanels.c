@@ -629,7 +629,7 @@ static gboolean CommandKeyPress(GtkWidget *UNUSED(widget), GdkEventKey * event,
 	return FALSE;
 }
 
-static gboolean CommandFocusIn(GtkWidget * widget, GdkEventFocus *UNUSED(eventDetails),
+static gboolean CommandFocusIn(GtkWidget *UNUSED(widget), GdkEventFocus *UNUSED(eventDetails),
 			       CommandEntryData_T *pData)
 {
 	if (pData->completing) {

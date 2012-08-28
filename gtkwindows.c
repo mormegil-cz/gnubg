@@ -88,7 +88,7 @@ static char *aszStockItem[ NUM_DIALOG_TYPES ] =
 	NULL
 };
 
-static void quitter(GtkWidget *widget, GtkWidget *parent)
+static void quitter(GtkWidget *UNUSED(widget), GtkWidget *parent)
 {
   gtk_main_quit();
   if (parent)
@@ -119,7 +119,7 @@ static void DialogResponse(GtkWidget *dialog, gint response, CallbackStruct *dat
 	}
 }
 
-static void dialog_mapped(GtkWidget *window, gpointer data)
+static void dialog_mapped(GtkWidget *window, gpointer UNUSED(data))
 {
 	GdkRectangle monitorrect;
 	GtkAllocation allocation;
