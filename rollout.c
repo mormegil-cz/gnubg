@@ -1137,7 +1137,7 @@ static void check_sds(int *active)
 
 }
 
-extern void RolloutLoopMT(void *unused)
+extern void RolloutLoopMT(void *UNUSED(unused))
 {
 	TanBoard anBoardEval;
 	float aar[NUM_ROLLOUT_OUTPUTS];
@@ -1278,7 +1278,7 @@ extern void RolloutLoopMT(void *unused)
 rolloutprogressfunc *ro_pfProgress;
 void *ro_pUserData;
 
-static gboolean UpdateProgress(gpointer unused)
+static gboolean UpdateProgress(gpointer UNUSED(unused))
 {
 	if (fShowProgress && ro_alternatives > 0) {
 		int alt;

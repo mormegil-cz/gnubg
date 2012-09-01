@@ -178,7 +178,7 @@ extern void click_swapdirection(void)
 #endif
 	}
 }
-static void ToolbarToggleClockwise( GtkWidget *pw, toolbarwidget *ptw )
+static void ToolbarToggleClockwise( GtkWidget *pw, toolbarwidget *UNUSED(ptw) )
 {
   GtkWidget **aapw = (GtkWidget **) g_object_get_data( G_OBJECT( pw ), "toggle_images" );
   int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) );

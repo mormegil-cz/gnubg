@@ -1006,7 +1006,7 @@ static int GTKRolloutProgressEnd(void **pp, gboolean destroy)
 static void
 TextRolloutProgressStart( const cubeinfo *UNUSED(pci), const int n,
                           rolloutstat UNUSED(aars[ 2 ][ 2 ]),
-                          rolloutcontext *prc, char asz[][ 40 ], gboolean multiple, void **pp ) {
+                          rolloutcontext *prc, char asz[][ 40 ], gboolean UNUSED(multiple), void **pp ) {
 
   int i;
 

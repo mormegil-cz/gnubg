@@ -631,7 +631,7 @@ extern GList *formatGS( const statcontext *psc, const int nMatchTo, const enum _
 }
 
 static void
-_freeGS( gpointer data, gpointer userdata ) {
+_freeGS( gpointer data, gpointer UNUSED(userdata) ) {
 
   char **aasz = data;
   int i;

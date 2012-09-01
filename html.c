@@ -1651,8 +1651,8 @@ printHTMLBoard ( FILE *pf, matchstate *pms, int fTurn,
 
 static void 
 HTMLBoardHeader ( FILE *pf, const matchstate *pms, 
-                  const htmlexporttype het,
-                  const htmlexportcss hecss,
+                  const htmlexporttype UNUSED(het),
+                  const htmlexportcss UNUSED(hecss),
                   const int iGame, const int iMove,
                   const int fHR ) {
 
@@ -1732,7 +1732,7 @@ static void
 HTMLPrologue ( FILE *pf, const matchstate *pms,
 	       const int iGame,
 	       char *aszLinks[ 4 ],
-	       const htmlexporttype het,
+	       const htmlexporttype UNUSED(het),
 	       const htmlexportcss hecss )
 {
   char szTitle[ 100 ];
@@ -1839,8 +1839,8 @@ HTMLPrologue ( FILE *pf, const matchstate *pms,
  */
 
 static void 
-HTMLEpilogue ( FILE *pf, const matchstate *pms, char *aszLinks[ 4 ],
-               const htmlexportcss hecss ) {
+HTMLEpilogue ( FILE *pf, const matchstate *UNUSED(pms), char *aszLinks[ 4 ],
+               const htmlexportcss UNUSED(hecss) ) {
 
   time_t t;
   int fFirst;
@@ -1973,7 +1973,7 @@ static void
 HTMLPrintCubeAnalysisTable ( FILE *pf, 
                              float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                              float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                             int fPlayer,
+                             int UNUSED(fPlayer),
                              evalsetup *pes, cubeinfo *pci,
                              int fDouble, int fTake,
                              skilltype stDouble,
@@ -2358,8 +2358,8 @@ HTMLPrintCubeAnalysisTable ( FILE *pf,
 
 static void
 HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
-                        const char *szImageDir, const char *szExtension,
-                        const htmlexporttype het, const htmlexportcss hecss ) {
+                        const char *UNUSED(szImageDir), const char *UNUSED(szExtension),
+                        const htmlexporttype UNUSED(het), const htmlexportcss hecss ) {
 
   cubeinfo ci;
   /* we need to remember the double type to be able to do the right
@@ -2449,8 +2449,8 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
 static void
 HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
-                        const char *szImageDir, const char *szExtension,
-                        const htmlexporttype het, const htmlexportcss hecss ) {
+                        const char *UNUSED(szImageDir), const char *UNUSED(szExtension),
+                        const htmlexporttype UNUSED(het), const htmlexportcss hecss ) {
 
   char sz[ 64 ];
   unsigned int i;
@@ -3072,7 +3072,7 @@ HTMLPrintMI( FILE *pf, const char *szTitle, const char *sz ) {
 
 static void
 HTMLMatchInfo ( FILE *pf, const matchinfo *pmi,
-                const htmlexportcss hecss ) {
+                const htmlexportcss UNUSED(hecss) ) {
 
   int i;
   char sz[ 80 ];
@@ -3684,7 +3684,7 @@ extern void CommandExportPositionGammOnLine ( char *sz ) {
 
 }
 
-extern void CommandExportPositionGOL2Clipboard( char *sz )
+extern void CommandExportPositionGOL2Clipboard( char *UNUSED(sz) )
 {
     char *szClipboard;
     long l;
@@ -3782,7 +3782,7 @@ surlencode(char * dst, const char * to_encode)
  */
 
 
-extern void CommandExportPositionBGbase2Clipboard(char *sz)
+extern void CommandExportPositionBGbase2Clipboard(char *UNUSED(sz))
 {
     char szClipboard[256];
     int fHistory;

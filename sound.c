@@ -387,7 +387,7 @@ int fQuiet = FALSE;
 static char *sound_cmd = NULL;
 
 void
-playSoundFile (char *file, /*lint -e{715}*/gboolean sync)
+playSoundFile (char *file, gboolean UNUSED(sync))
 {
     GError *error = NULL;
 #if HAVE_CANBERRA

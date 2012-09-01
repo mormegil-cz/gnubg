@@ -159,7 +159,7 @@ static int intersects( int x0, int y0, int cx0, int cy0, int x1, int y1, int
 	( x1 + cx1 > x0 ) && ( x1 < x0 + cx0 );
 }
 
-extern void board_beep( BoardData *bd )
+extern void board_beep( BoardData *UNUSED(bd) )
 {
     if(fGUIBeep)
 	gdk_beep();
@@ -340,7 +340,7 @@ extern void stop_board_expose(BoardData *bd)
 }
 
 static void board_invalidate_rect( GtkWidget *drawing_area, int x, int y, int
-		cx, int cy, BoardData *bd )
+		cx, int cy, BoardData *UNUSED(bd) )
 {
     
     g_assert( GTK_IS_DRAWING_AREA( drawing_area ) );
@@ -448,7 +448,7 @@ static void board_invalidate_arrow( BoardData *bd )
 			   ARROW_HEIGHT * bd->rd->nSize, bd );
 }
 
-static int board_point( GtkWidget *board, BoardData *bd, int x0, int y0 )
+static int board_point( GtkWidget *UNUSED(board), BoardData *bd, int x0, int y0 )
 {
 
     int i, x, y, cx, cy, xCube, yCube;
@@ -597,7 +597,7 @@ extern char * ReturnHits( TanBoard anBoard )
 
 }
 
-static void show_pip_none(BoardData *bd, const TanBoard points, GString *gst[4])
+static void show_pip_none(BoardData *UNUSED(bd), const TanBoard UNUSED(points), GString *gst[4])
 {
 	g_string_append_printf(gst[0], _("n/a"));
 	g_string_append_printf(gst[1], _("n/a"));
@@ -773,7 +773,7 @@ extern void Confirm( BoardData *bd )
 	board_beep( bd );
 }
 
-static void board_start_drag( GtkWidget *widget, BoardData *bd, int
+static void board_start_drag( GtkWidget *UNUSED(widget), BoardData *bd, int
 		drag_point, int x, int y )
 {
 
@@ -937,7 +937,12 @@ static gboolean legal_dest_points(BoardData * bd, int dest_points[4])
 	}
 	return count ? TRUE : FALSE;
 }
+
+#if USE_BOARD3D
 static void board_drag( GtkWidget *widget, BoardData *bd, int x, int y )
+#else
+static void board_drag( GtkWidget *UNUSED(widget), BoardData *bd, int x, int y )
+#endif
 {
 
     unsigned char *puch, *puchNew, *puchChequer;
@@ -999,7 +1004,7 @@ static void board_drag( GtkWidget *widget, BoardData *bd, int x, int y )
     bd->y_drag = y;
 }
 
-static void board_end_drag( GtkWidget *widget, BoardData *bd )
+static void board_end_drag( GtkWidget *UNUSED(widget), BoardData *bd )
 {
     
     unsigned char *puch;
@@ -1048,7 +1053,8 @@ gboolean place_chequer_or_revert(BoardData *bd, int dest )
     int oldpoints[ 28 ];
     int passpoint;
     int source, dest2, i;
-    int diceset = (bd->diceRoll[0]  != -1 && bd->diceRoll[1] != -1);
+    int diceset = (bd->diceRoll[0] >= 1 && bd->diceRoll[0] <= 6
+			&& bd->diceRoll[1] >= 1 && bd->diceRoll[1] <= 6);
 
     /* dest2 is the destination point used  for numerical calculations */
     dest2 = dest;
@@ -1228,7 +1234,7 @@ gboolean place_chequer_or_revert(BoardData *bd, int dest )
 
 /* jsc: Special version :( of board_point which also allows clicking on a
    small border and all bearoff trays */
-static int board_point_with_border( GtkWidget *board, BoardData *bd, int x0,
+static int board_point_with_border( GtkWidget *UNUSED(board), BoardData *bd, int x0,
 		int y0 )
 {
     int i, x, y, cx, cy, xCube, yCube;
@@ -1290,7 +1296,7 @@ static int board_point_with_border( GtkWidget *board, BoardData *bd, int x0,
 /* jsc: Given (x0,y0) which is ASSUMED to intersect point, return a
    non-negative integer i representing the ith chequer position which
    intersects (x0, y0).  On failure, return -1 */
-static int board_chequer_number( GtkWidget *board, BoardData *bd, int point,
+static int board_chequer_number( GtkWidget *UNUSED(board), BoardData *bd, int point,
 		int x0, int y0 )
 {
     int i, y, cx, cy, dy, c_chequer;
@@ -1331,7 +1337,11 @@ static int board_chequer_number( GtkWidget *board, BoardData *bd, int point,
     return 0;
 }
 
+#if USE_BOARD3D
 static void updateBoard(GtkWidget *board, BoardData* bd)
+#else
+static void updateBoard(GtkWidget *UNUSED(board), BoardData* bd)
+#endif
 {
 	TanBoard points;
 	read_board(bd, points);
@@ -3102,7 +3112,7 @@ void GrayScaleColC(unsigned char *pCols)
 }
 
 /* Create all of the size/colour-dependent pixmaps. */
-extern void board_create_pixmaps( GtkWidget *board, BoardData *bd )
+extern void board_create_pixmaps( GtkWidget *UNUSED(board), BoardData *bd )
 {
     unsigned char auch[ 20 * 20 * 3 ],
 	auchBoard[ BOARD_WIDTH * 3 * BOARD_HEIGHT * 3 * 3 ],
@@ -3212,8 +3222,8 @@ extern void board_free_pixmaps( BoardData *bd )
 
 #if USE_BOARD3D
 
-extern void DisplayCorrectBoardType(BoardData* bd, BoardData3d* bd3d,
-		renderdata* prd)
+extern void DisplayCorrectBoardType(BoardData* bd, 
+		BoardData3d *UNUSED(bd3d), renderdata *UNUSED(prd))
 {
 	if (display_is_3d(bd->rd))
 	{
@@ -3381,7 +3391,7 @@ static void board_show_all( GtkWidget *pw )
     gtk_widget_show( pw );
 }
 
-static void UpdateCrawfordToggle ( GtkWidget *pw, BoardData *bd ) 
+static void UpdateCrawfordToggle ( GtkWidget *UNUSED(pw), BoardData *bd ) 
 {
     int anScoreNew[2];
     int allowCrawford;
@@ -3400,7 +3410,7 @@ static void UpdateCrawfordToggle ( GtkWidget *pw, BoardData *bd )
     		gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->crawford ), FALSE );
 }
 
-static void match_change_val ( GtkWidget *pw, BoardData *bd )
+static void match_change_val ( GtkWidget *UNUSED(pw), BoardData *bd )
 {    
     int nMatchLen = (int)gtk_adjustment_get_value ( GTK_ADJUSTMENT( bd->amatch ) );
     if (nMatchLen && gtk_widget_get_parent_window ( GTK_WIDGET ( bd->jacoby ) ) ) {
@@ -3417,7 +3427,7 @@ static void match_change_val ( GtkWidget *pw, BoardData *bd )
     }
 }
 
-static void board_set_crawford( GtkWidget *pw, BoardData *bd )
+static void board_set_crawford( GtkWidget *UNUSED(pw), BoardData *bd )
 {
 	/* Don't allow changes unless editing */
 	if (!ToolbarIsEditing( pwToolbar ))
@@ -3428,7 +3438,7 @@ static void board_set_crawford( GtkWidget *pw, BoardData *bd )
 	}
 }
 
-static void board_set_jacoby( GtkWidget *pw, BoardData *bd )
+static void board_set_jacoby( GtkWidget *UNUSED(pw), BoardData *bd )
 {
 	/* Don't allow changes unless editing */
 	if (!ToolbarIsEditing( pwToolbar ))
@@ -3654,7 +3664,7 @@ extern void DrawDie( GdkDrawable *pd, unsigned char *achDice[ 2 ], unsigned
 			    GDK_RGB_DITHER_MAX, achPip[fColour], s * 3);
 }
 
-static gboolean dice_expose( GtkWidget *dice, GdkEventExpose *event,
+static gboolean dice_expose( GtkWidget *dice, GdkEventExpose *UNUSED(event),
                              BoardData *bd )
 {
 
@@ -3672,18 +3682,17 @@ static gboolean dice_expose( GtkWidget *dice, GdkEventExpose *event,
     return TRUE;
 }
 
-static gboolean dice_press( GtkWidget *dice, GdkEvent *event,
-			    BoardData *bd )
+static gboolean dice_press( GtkWidget *UNUSED(dice), GdkEvent *UNUSED(event),
+			    BoardData *UNUSED(bd) )
 {
+    quick_roll();
 
-	quick_roll();
     return TRUE;
 }
 
-static gboolean key_press( GtkWidget *pw, GdkEvent *event,
+static gboolean key_press( GtkWidget *UNUSED(pw), GdkEvent *UNUSED(event),
 			   void *p )
 {
-
     UserCommand( p ? "set turn 1" : "set turn 0" );
     
     return TRUE;
@@ -4046,7 +4055,7 @@ static void board_class_init( BoardClass *c )
 
 
 #define N_CUBES_IN_WIDGET 8
-static gboolean cube_widget_expose( GtkWidget *cube, GdkEventExpose *event,
+static gboolean cube_widget_expose( GtkWidget *cube, GdkEventExpose *UNUSED(event),
 				    BoardData *bd )
 {
 
@@ -4085,8 +4094,8 @@ static gboolean cube_widget_expose( GtkWidget *cube, GdkEventExpose *event,
     return TRUE;
 }
 
-static gboolean cube_widget_press( GtkWidget *cube, GdkEvent *event,
-				   BoardData *bd )
+static gboolean cube_widget_press( GtkWidget *cube, GdkEvent *UNUSED(event),
+				   BoardData *UNUSED(bd) )
 {
 
     GtkWidget *pwTable = gtk_widget_get_parent ( cube );
@@ -4106,7 +4115,7 @@ static gboolean cube_widget_press( GtkWidget *cube, GdkEvent *event,
     return TRUE;
 }
 
-extern void DestroySetCube(GtkObject *po, GtkWidget *pw)
+extern void DestroySetCube(GtkObject *UNUSED(po), GtkWidget *pw)
 {
 	free(TTachCubeFaces);
 	free(TTachCube);
@@ -4164,7 +4173,7 @@ extern GtkWidget *board_cube_widget( Board *board )
 }
 
 
-static gboolean setdice_widget_expose(GtkWidget *dice, GdkEventExpose * event, SetDiceData *sdd)
+static gboolean setdice_widget_expose(GtkWidget *dice, GdkEventExpose *UNUSED(event), SetDiceData *sdd)
 {
 	int setSize = sdd->bd->rd->nSize;
 	int n = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(dice), "user_data"));
@@ -4194,8 +4203,8 @@ static gboolean setdice_widget_expose(GtkWidget *dice, GdkEventExpose * event, S
 	return TRUE;
 }
 
-static gboolean dice_widget_press( GtkWidget *dice, GdkEvent *event, BoardData
-		*bd )
+static gboolean dice_widget_press( GtkWidget *dice,
+		GdkEvent *UNUSED(event), BoardData *UNUSED(bd) )
 {
     GtkWidget *pwTable = gtk_widget_get_parent ( gtk_widget_get_parent ( dice ) );
     int n = GPOINTER_TO_INT(g_object_get_data( G_OBJECT( dice ), "user_data" ));

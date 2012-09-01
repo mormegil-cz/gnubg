@@ -148,7 +148,7 @@ printTextBoard ( FILE *pf, const matchstate *pms ) {
 
 extern void 
 TextBoardHeader ( GString *gsz, const matchstate *pms, 
-                  const int notused/*iGame*/, const int iMove ) {
+                  const int UNUSED(iGame), const int iMove ) {
 
   if ( iMove >= 0 )
     g_string_append_printf(gsz, _("Move number %d: "), iMove + 1 );
@@ -206,7 +206,7 @@ TextBoardHeader ( GString *gsz, const matchstate *pms,
  */
 
 extern void 
-TextPrologue ( GString *gsz, const matchstate *pms, const int iGame ) {
+TextPrologue ( GString *gsz, const matchstate *pms, const int UNUSED(iGame) ) {
 
   g_string_append_printf( gsz, pms->cGames == 1 ? 
            _("The score (after %d game) is: %s %d, %s %d") :
@@ -242,7 +242,7 @@ TextPrologue ( GString *gsz, const matchstate *pms, const int iGame ) {
  */
 
 static void 
-TextEpilogue ( FILE *pf, const matchstate *pms ) {
+TextEpilogue ( FILE *pf, const matchstate *UNUSED(pms) ) {
 
   time_t t;
 
@@ -283,7 +283,7 @@ static void
 TextPrintCubeAnalysisTable ( GString *gsz, 
                              float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                              float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                             int fPlayer,
+                             int UNUSED(fPlayer),
                              const evalsetup* pes, const cubeinfo* pci,
                              int fDouble, int fTake,
                              skilltype stDouble,

@@ -44,7 +44,7 @@ static const char *szFile;
 static int fError;
 
 static int CheckSGFVersion(const char **sz);
-static void ErrorHandler(char *sz, int fParseError)
+static void ErrorHandler(char *sz, int UNUSED(fParseError))
 {
 
     if (!fError) {

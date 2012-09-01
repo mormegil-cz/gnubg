@@ -192,7 +192,7 @@ static GList *read_board_designs ( void )
 }
 
 static void
-free_board_design (boarddesign *pbde, void *dummy) {
+free_board_design (boarddesign *pbde, void *UNUSED(dummy)) {
 
   if (pbde == NULL)
     return;
@@ -362,7 +362,7 @@ static void DieColourChanged (GtkWidget *pw, gpointer pf)
 	UpdatePreview();
 }
 
-static void option_changed(GtkWidget *widget, GtkWidget *pw)
+static void option_changed(GtkWidget *UNUSED(widget), GtkWidget *UNUSED(pw))
 {
 	BoardData *bd = BOARD(pwPrevBoard)->board_data;
 	if (!fUpdate)
@@ -396,7 +396,7 @@ static void option_changed(GtkWidget *widget, GtkWidget *pw)
 
 #if USE_BOARD3D
 
-static void redraw_changed(GtkWidget *widget, GtkWidget **ppw)
+static void redraw_changed(GtkWidget *UNUSED(widget), GtkWidget **UNUSED(ppw))
 {	/* Update 3d colour previews */
 	if (!fUpdate)
 		return;
@@ -406,7 +406,7 @@ static void redraw_changed(GtkWidget *widget, GtkWidget **ppw)
 	UpdateColPreviews();
 }
 
-static void DiceSizeChanged(GtkWidget *pw)
+static void DiceSizeChanged(GtkWidget *UNUSED(pw))
 {
 	BoardData *bd = BOARD(pwPrevBoard)->board_data;
 	bd->rd->diceSize = (float)gtk_adjustment_get_value( padjDiceSize );
@@ -415,7 +415,7 @@ static void DiceSizeChanged(GtkWidget *pw)
 	option_changed(0, 0);
 }
 
-static void HingeChanged (GtkWidget *pw)
+static void HingeChanged (GtkWidget *UNUSED(pw))
 {
 	gtk_widget_set_sensitive(pmHingeCol, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pwHinges)));
 	option_changed(0, 0);
@@ -972,7 +972,7 @@ static GtkWidget *BoardPage( BoardData *bd ) {
     return pwx;
 }
 
-static void ToggleWood( GtkWidget *pw, BoardData *bd ) {
+static void ToggleWood( GtkWidget *pw, BoardData *UNUSED(bd) ) {
 
     int fWood;
     
@@ -1136,7 +1136,7 @@ static void WorkOut2dLight(renderdata* prd)
 	    sqrt( 1.0 - prd->arLight[ 2 ] * prd->arLight[ 2 ] ));
 }
 
-static void LightChanged2d( GtkWidget *pwWidget, void* data )
+static void LightChanged2d( GtkWidget *UNUSED(pwWidget), void *UNUSED(data) )
 {
 	BoardData *bd = BOARD(pwPrevBoard)->board_data;
 	if (!fUpdate)
@@ -1148,7 +1148,7 @@ static void LightChanged2d( GtkWidget *pwWidget, void* data )
 	UpdatePreview();
 }
 
-static void LabelsToggled( GtkWidget *pwWidget, void* data )
+static void LabelsToggled( GtkWidget *UNUSED(pwWidget), void *UNUSED(data) )
 {
 	BoardData *bd = BOARD(pwPrevBoard)->board_data;
 	int showLabels = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwLabels ) );
@@ -1168,7 +1168,7 @@ static void LabelsToggled( GtkWidget *pwWidget, void* data )
 	option_changed(0, 0);
 }
 
-static void MoveIndicatorToggled( GtkWidget *pwWidget, void* data )
+static void MoveIndicatorToggled( GtkWidget *UNUSED(pwWidget), void *UNUSED(data) )
 {
 	BoardData *bd = BOARD(pwPrevBoard)->board_data;
 	/* Update preview */
@@ -1250,7 +1250,7 @@ static void toggle_show_shadows(GtkWidget *widget, int init)
 	option_changed(0, 0);
 }
 
-static void toggle_planview(GtkWidget *widget, GtkWidget *pw)
+static void toggle_planview(GtkWidget *widget, GtkWidget *UNUSED(pw))
 {
 	int set = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 	gtk_widget_set_sensitive(pwSkewFactor, !set);
@@ -1516,13 +1516,17 @@ static GtkWidget *LightingPage(BoardData *bd)
 
 #endif
 
+#if USE_BOARD3D
 static GtkWidget *GeneralPage( BoardData *bd, GtkWidget* bdMain ) {
+#else
+static GtkWidget *GeneralPage( BoardData *bd, GtkWidget *UNUSED(bdMain) ) {
+#endif
 
     GtkWidget *pw, *pwx;
 #if USE_BOARD3D
-	GtkWidget *dtBox, *button, *dtFrame, *hBox, *lab, *pwev, *pwhbox, *pwvbox,
+    GtkWidget *dtBox, *button, *dtFrame, *hBox, *lab, *pwev, *pwhbox, *pwvbox,
 			*pwAccuracy, *pwDiceSize;
-	pwQuickDraw = 0;
+    pwQuickDraw = 0;
 #endif
 
     pwx = gtk_hbox_new ( FALSE, 0 );
@@ -2009,7 +2013,7 @@ WriteDesignFooter( FILE *pf ) {
 
 
 static void
-DesignSave ( GtkWidget *pw, gpointer data ) {
+DesignSave ( GtkWidget *UNUSED(pw), gpointer data ) {
 
   gchar *szFile;
   FILE *pf;
@@ -2045,7 +2049,7 @@ static void DesignAddOK( GtkWidget *pw, boarddesign *pbde ) {
 }
 
 static void
-DesignAddChanged ( GtkWidget *pw, GtkWidget *pwDialog ) {
+DesignAddChanged ( GtkWidget *UNUSED(pw), GtkWidget *pwDialog ) {
 
   char *szAuthor = gtk_editable_get_chars( GTK_EDITABLE( pwDesignAddAuthor ), 
                                            0, -1 );
@@ -2406,7 +2410,7 @@ static void DesignAdd ( GtkWidget *pw, gpointer data )
   SetTitle();
 }
 
-static void ExportDesign ( GtkWidget *pw, gpointer data ) 
+static void ExportDesign ( GtkWidget *UNUSED(pw), gpointer UNUSED(data) ) 
 {
 	GList* designs;
 	gchar *pch;
@@ -2599,7 +2603,7 @@ static void UpdateDesign( GtkWidget *pw, gpointer data )
 	SetTitle();
 }
 
-static void AddDesignRow ( gpointer data, gpointer user_data )
+static void AddDesignRow ( gpointer data, gpointer UNUSED(user_data) )
 {
 	boarddesign *pbde = data;
 	GtkTreeIter iter;
@@ -2629,7 +2633,7 @@ static void AddDesignRowIfNew( gpointer data, gpointer user_data )
 	outputf("Design %s added\n", pbde->szTitle);
 }
 
-static void DesignSelectNew(GtkTreeView *treeview, gpointer userdata)
+static void DesignSelectNew(GtkTreeView *treeview, gpointer UNUSED(userdata))
 {
 	GtkTreeIter selected_iter;
 	GtkTreeModel *model;
@@ -2653,7 +2657,7 @@ static void DesignSelectNew(GtkTreeView *treeview, gpointer userdata)
 	UseDesign();
 }
 
-static GtkWidget *DesignPage ( GList *plBoardDesigns, BoardData *bd )
+static GtkWidget *DesignPage ( GList *plBoardDesigns, BoardData *UNUSED(bd) )
 {
 	GtkWidget *pwhbox;
 	GtkWidget *pwScrolled;
@@ -2744,7 +2748,7 @@ static GtkWidget *DesignPage ( GList *plBoardDesigns, BoardData *bd )
 
 }
 
-static void BoardPrefsDestroy ( GtkWidget *pw, GList *plBoardDesigns)
+static void BoardPrefsDestroy ( GtkWidget *UNUSED(pw), GList *plBoardDesigns)
 {
 	fUpdate = FALSE;
 	free_board_designs ( plBoardDesigns );
@@ -2888,7 +2892,7 @@ static void GetPrefs ( renderdata* prd ) {
 }
 
 static void append_preview_page( GtkWidget *pwNotebook, GtkWidget *pwPage,
-				 char *szLabel, pixmapindex pi ) {
+				 char *szLabel, pixmapindex UNUSED(pi) ) {
 
     GtkWidget *pw;
 
@@ -2950,8 +2954,8 @@ void AddPages(BoardData* bd, GtkWidget* pwNotebook, GList *plBoardDesigns)
 	}
 }
 
-static void ChangePage(GtkNotebook *notebook, GtkNotebook *page, 
-				guint page_num, gpointer user_data)
+static void ChangePage(GtkNotebook *UNUSED(notebook), GtkNotebook *UNUSED(page), 
+				guint page_num, gpointer UNUSED(user_data))
 {
 	BoardData *bd = BOARD(pwPrevBoard)->board_data;
 	unsigned int dicePage = NUM_NONPREVIEW_PAGES + PI_DICE0;
@@ -2988,15 +2992,21 @@ static void ChangePage(GtkNotebook *notebook, GtkNotebook *page,
 #endif
 }
 
-static void pref_dialog_map(GtkWidget *window, BoardData *bd)
-{
 #if USE_BOARD3D
+static void pref_dialog_map(GtkWidget *UNUSED(window), BoardData *bd)
+{
 	DisplayCorrectBoardType(bd, bd->bd3d, bd->rd);
 	redrawChange = FALSE;
 	bd->rd->quickDraw = FALSE;
-#endif
 	SetTitle();	/* Make sure title selected properly */
 }
+#else
+static void pref_dialog_map(GtkWidget *UNUSED(window), BoardData *UNUSED(bd))
+{
+	SetTitle();     /* Make sure title selected properly */
+}
+#endif
+
 
 extern void BoardPreferences(GtkWidget *pwBoard)
 {
@@ -3213,12 +3223,12 @@ typedef struct _DesignParser
   gboolean deletable;
 } DesignParser;
 
-static void design_parser_start_element (GMarkupParseContext *context,
+static void design_parser_start_element (GMarkupParseContext *UNUSED(context),
  	const gchar *element_name,
- 	const gchar **attribute_names,
- 	const gchar **attribute_values,
+ 	const gchar **UNUSED(attribute_names),
+ 	const gchar **UNUSED(attribute_values),
  	gpointer user_data,
- 	GError **error){
+ 	GError **UNUSED(error)){
 
 	DesignParser *parser = (DesignParser *) user_data;
 	
@@ -3254,10 +3264,10 @@ static void design_parser_start_element (GMarkupParseContext *context,
 	}
 }
 
-static void design_parser_end_element (GMarkupParseContext *context,
- 	const gchar *element_name,
+static void design_parser_end_element (GMarkupParseContext *UNUSED(context),
+ 	const gchar *UNUSED(element_name),
  	gpointer user_data,
- 	GError **error)
+ 	GError **UNUSED(error))
 {
 	DesignParser *parser = (DesignParser *) user_data;
 	
@@ -3291,11 +3301,11 @@ static void design_parser_end_element (GMarkupParseContext *context,
 	}
 }
 
-static void design_parser_characters (GMarkupParseContext *context,
+static void design_parser_characters (GMarkupParseContext *UNUSED(context),
  	const gchar *text,
- 	gsize text_len,
+ 	gsize UNUSED(text_len),
  	gpointer user_data,
- 	GError **error)
+ 	GError **UNUSED(error))
 {
 	DesignParser *parser = (DesignParser *) user_data;
 	
@@ -3314,8 +3324,8 @@ static void design_parser_characters (GMarkupParseContext *context,
 	}
 }
 
-static void design_parser_error (GMarkupParseContext *context,
- 	GError *error,
+static void design_parser_error (GMarkupParseContext *UNUSED(context),
+ 	GError *UNUSED(error),
  	gpointer user_data) 
 {
 	DesignParser *parser = (DesignParser *) user_data;

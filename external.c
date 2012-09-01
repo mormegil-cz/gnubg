@@ -341,7 +341,7 @@ extern int ExternalWrite( int h, char *pch, size_t cch ) {
 #if HAVE_SOCKETS
 static void
 ErrorHandler( const char *szMessage, const char *szNear, 
-              const int fParseError ) {
+              const int UNUSED(fParseError) ) {
 
   fError = TRUE;
 

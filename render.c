@@ -1709,7 +1709,7 @@ extern void RenderBoard( renderdata *prd, unsigned char *puch, int nStride ) {
 
 extern void RenderChequers( renderdata *prd, unsigned char *puch0,
 			    unsigned char *puch1, unsigned short *psRefract0,
-			    unsigned short *psRefract1, int nStride ) {
+			    unsigned short *psRefract1, int UNUSED(nStride) ) {
 
     int size = CHEQUER_WIDTH * prd->nSize;
     int ix, iy, in, fx, fy, i;
@@ -2450,7 +2450,7 @@ static void RenderArrow(unsigned char* puch, double arColour[4], int nSize, int 
 }
 
 extern void RenderArrows( renderdata *prd, unsigned char* puch0,
-			  unsigned char* puch1, int nStride, int fClockwise )
+			  unsigned char* puch1, int UNUSED(nStride), int fClockwise )
 {
 	RenderArrow(puch0, prd->aarColour[0], prd->nSize, fClockwise);
 	RenderArrow(puch1, prd->aarColour[1], prd->nSize, fClockwise);
@@ -2519,7 +2519,7 @@ extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
                            int anResignPosition[ 2 ],
                            int fResign, int nResignOrientation,
                            int anArrowPosition[ 2 ],
-			   int fPlaying, int nPlayer,
+			   int UNUSED(fPlaying), int nPlayer,
 			   int x, int y, int cx, int cy ) {
     
     int i, xPoint, yPoint, cxPoint, cyPoint, n;
@@ -2748,7 +2748,7 @@ extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
 
 extern void
 RenderBoardLabels( renderdata *prd, 
-                   unsigned char *achLo, unsigned char *achHi, int nStride ) {
+                   unsigned char *achLo, unsigned char *achHi, int UNUSED(nStride) ) {
 
     unsigned char *achTemp = malloc( BOARD_WIDTH * prd->nSize * 5 * prd->nSize * 5 );
 

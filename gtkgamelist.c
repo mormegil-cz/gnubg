@@ -65,7 +65,7 @@ extern void GTKClearMoveRecord( void ) {
     gtk_clist_clear( GTK_CLIST( pwGameList ) );
 }
 
-static void GameListSelectRow(GtkCList *pcl, gint y, gint x, GdkEventButton *pev, gpointer p)
+static void GameListSelectRow(GtkCList *pcl, gint y, gint x, GdkEventButton *UNUSED(pev), gpointer UNUSED(p))
 {
 #if USE_BOARD3D
     BoardData *bd = BOARD( pwBoard )->board_data;

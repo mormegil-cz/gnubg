@@ -23,6 +23,7 @@
    with GNU Backgammon. */
 
 #include "config.h"
+#include "common.h"
 #include "gtklocdefs.h"
 #include <gtk/gtk.h>
 #include "gtk-multiview.h"
@@ -174,14 +175,14 @@ gtk_multiview_unmap (GtkWidget *widget)
 }
 
 static GType
-gtk_multiview_child_type (GtkContainer *container)
+gtk_multiview_child_type (GtkContainer *UNUSED(container))
 {
   return gtk_widget_get_type ();
 }
 
 static void
 gtk_multiview_forall (GtkContainer *container,
-		      gboolean      include_internals,
+		      gboolean      UNUSED(include_internals),
 		      GtkCallback   callback,
 		      gpointer      callback_data)
 {
