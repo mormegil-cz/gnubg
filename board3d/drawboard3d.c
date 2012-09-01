@@ -1009,7 +1009,7 @@ static void drawSpecialPieces(const BoardData *bd, const BoardData3d *bd3d, cons
 		glDisable(GL_BLEND);
 }
 
-static void drawPieceSimplified(GLuint pieceList, const BoardData3d* bd3d, unsigned int point, unsigned int pos)
+static void drawPieceSimplified(GLuint UNUSED(pieceList), const BoardData3d *UNUSED(bd3d), unsigned int point, unsigned int pos)
 {
 	float v[3];
 	glPushMatrix();
@@ -2335,7 +2335,7 @@ static int DiceShowing(const BoardData* bd)
 		(bd->rd->fDiceArea && bd->diceShown == DICE_BELOW_BOARD));
 }
 
-NTH_STATIC void drawPickAreas(const BoardData *bd, void *data)
+NTH_STATIC void drawPickAreas(const BoardData *bd, void *UNUSED(data))
 {	/* Draw main board areas to see where user clicked */
 	renderdata *prd = bd->rd;
 	float barHeight;
@@ -2579,7 +2579,7 @@ void waveFlag(float wag)
 			flag.ctlpoints[i][j][2] = sinf((GLfloat)i + wag) * FLAG_WAG;
 }
 
-NTH_STATIC void drawFlagPick(const BoardData *bd, void *data)
+NTH_STATIC void drawFlagPick(const BoardData *bd, void *UNUSED(data))
 {
 	BoardData3d *bd3d = bd->bd3d;
 	renderdata *prd = bd->rd;
@@ -2616,7 +2616,7 @@ NTH_STATIC void drawFlagPick(const BoardData *bd, void *data)
 	glPopMatrix();
 }
 
-NTH_STATIC void drawPointPick(const BoardData *bd, void *data)
+NTH_STATIC void drawPointPick(const BoardData *UNUSED(bd), void *data)
 {	/* Draw sub parts of point to work out which part of point clicked */
 	unsigned int point = GPOINTER_TO_UINT(data);
 	unsigned int i;
@@ -3951,4 +3951,3 @@ extern void drawBasePreRender(const BoardData *bd, const BoardData3d *bd3d, cons
 	SaveBufferRegion(bd3d->wglBuffer, 0, 0, allocation.width, allocation.height);
 }
 #endif
-
