@@ -978,7 +978,7 @@ NumberMovesGame ( listOLD *plGame ) {
 }
 
 
-static gboolean UpdateProgressBar(gpointer unused)
+static gboolean UpdateProgressBar(gpointer UNUSED(unused))
 {
 	ProgressValue(MT_GetDoneTasks());
 	return TRUE;
@@ -987,7 +987,7 @@ static gboolean UpdateProgressBar(gpointer unused)
 static void AnalyseMoveMT(Task *task)
 {
 	AnalyseMoveTask *amt;
-    float doubleError;
+	float doubleError;
 
 analyzeDouble:
 	amt = (AnalyseMoveTask *)task;

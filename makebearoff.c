@@ -178,7 +178,7 @@ XhashLookup ( xhash *ph, const unsigned int iKey ) {
 
 static int
 OSLookup ( const unsigned int iPos,
-           const int nPoints,
+           const int UNUSED(nPoints),
            unsigned short int aProb[ 64 ],
            const int fGammon, const int fCompress,
            FILE *pfOutput, FILE *pfTmp ) {
@@ -950,7 +950,7 @@ CalcPosition ( const int i, const int j, const int n ) {
 
 static void
 TSLookup ( const int nUs, const int nThem,
-           const int nTSP, const int nTSC,
+           const int UNUSED(nTSP), const int UNUSED(nTSC),
            short int arEquity[ 4 ], 
            const int n, const int fCubeful,
            FILE *pfTmp ) {

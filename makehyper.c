@@ -133,7 +133,7 @@ HyperOver ( const TanBoard anBoard, float ar[ NUM_OUTPUTS ], const int nC ) {
 
 
 static void
-StartGuessHyper ( hyperequity ahe[], const int nC, bearoffcontext *pbc ) {
+StartGuessHyper ( hyperequity ahe[], const int nC, bearoffcontext *UNUSED(pbc) ) {
 
   int i, j;
   unsigned int k;
