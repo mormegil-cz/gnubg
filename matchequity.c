@@ -930,7 +930,6 @@ getDefaultMET ( metdata *pmd ) {
 static int
 initMETFromParameters ( float aafMET [ MAXSCORE ][ MAXSCORE ],
                         float aafMETPostCrawford[ 2 ][ MAXSCORE ],
-                        int nLength,
                         metparameters *pmp ) {
 
   if ( ! strcmp ( (char*)pmp->szName, "mec" ) ) {
@@ -1016,7 +1015,6 @@ initMETFromParameters ( float aafMET [ MAXSCORE ][ MAXSCORE ],
 
 static int
 initPostCrawfordMETFromParameters ( float afMETPostCrawford[ MAXSCORE ],
-                                    int nLength,
                                     metparameters *pmp ) {
 
   if ( ! strcmp ( (char*) pmp->szName, "zadeh" ) ) {
@@ -1685,7 +1683,6 @@ extern void InitMatchEquity(const char *szFileName)
 		  /* generate match equity table using Zadeh's formula */
 
 		  if ( initPostCrawfordMETFromParameters ( aafMETPostCrawford[ j ], 
-												   md.mi.nLength,
 												   &md.ampPostCrawford[ j ] ) < 0 ) {
 
 			fprintf ( stderr, _("Error generating post-Crawford MET\n") );
@@ -1705,9 +1702,8 @@ extern void InitMatchEquity(const char *szFileName)
 	}
 	else
 	{
-		/* generate matc equity table using Zadeh's formula */
+		/* generate match equity table using Zadeh's formula */
 		if ( initMETFromParameters ( aafMET, aafMETPostCrawford,
-									 md.mi.nLength,
 									 &md.mpPreCrawford ) < 0 ) {
 
 		  fprintf ( stderr, _("Error generating pre-Crawford MET\n") );
