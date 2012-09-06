@@ -1278,12 +1278,12 @@ static void SetNameFromType(char **pName, tabletype type)
 	}
 }
 
-static void met_parser_start_element (GMarkupParseContext *context,
+static void met_parser_start_element (GMarkupParseContext *UNUSED(context),
      const gchar *element_name,
      const gchar **attribute_names,
      const gchar **attribute_values,
      gpointer user_data,
-     GError **error)
+     GError **UNUSED(error))
 {
 
     MatchEquityParser *parser = (MatchEquityParser *) user_data;
@@ -1377,10 +1377,10 @@ static void met_parser_start_element (GMarkupParseContext *context,
     }
 }
 
-static void met_parser_end_element (GMarkupParseContext *context,
-     const gchar *element_name,
+static void met_parser_end_element (GMarkupParseContext *UNUSED(context),
+     const gchar *UNUSED(element_name),
      gpointer user_data,
-     GError **error)
+     GError **UNUSED(error))
 {
     MatchEquityParser *parser = (MatchEquityParser *) user_data;
     
@@ -1444,11 +1444,11 @@ static void met_parser_end_element (GMarkupParseContext *context,
     }
 }
 
-static void met_parser_characters (GMarkupParseContext *context,
+static void met_parser_characters (GMarkupParseContext *UNUSED(context),
      const gchar *text,
-     gsize text_len,
+     gsize UNUSED(text_len),
      gpointer user_data,
-     GError **error)
+     GError **UNUSED(error))
 {
     MatchEquityParser *parser = (MatchEquityParser *) user_data;
     
@@ -1486,8 +1486,8 @@ static void met_parser_characters (GMarkupParseContext *context,
     }
 }
 
-static void met_parser_error (GMarkupParseContext *context,
-     GError *error,
+static void met_parser_error (GMarkupParseContext *UNUSED(context),
+     GError *UNUSED(error),
      gpointer user_data) 
 {
     MatchEquityParser *parser = (MatchEquityParser *) user_data;

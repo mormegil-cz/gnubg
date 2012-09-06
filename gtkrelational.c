@@ -180,7 +180,7 @@ static GtkTreeModel *create_model(void)
 }
 
 static void
-cell_data_func(GtkTreeViewColumn * col,
+cell_data_func(GtkTreeViewColumn * UNUSED(col),
 	       GtkCellRenderer * renderer,
 	       GtkTreeModel * model, GtkTreeIter * iter, gpointer column)
 {
@@ -264,8 +264,8 @@ static char *GetSelectedPlayer(void)
 	return name;
 }
 
-static void ShowRelationalSelect(GtkWidget * pw, int y, int x,
-				 GdkEventButton * peb, GtkWidget * pwCopy)
+static void ShowRelationalSelect(GtkWidget * UNUSED(pw), int UNUSED(y), int UNUSED(x),
+				 GdkEventButton * UNUSED(peb), GtkWidget * UNUSED(pwCopy))
 {
 	char *pName = GetSelectedPlayer();
 	RowSet *rs;
@@ -296,8 +296,8 @@ static void ShowRelationalSelect(GtkWidget * pw, int y, int x,
 	FreeRowset(rs);
 }
 
-static void ShowRelationalClicked(GtkTreeView *treeview, GtkTreePath *path,
-		    GtkTreeViewColumn *col, gpointer userdata)
+static void ShowRelationalClicked(GtkTreeView *UNUSED(treeview), GtkTreePath *UNUSED(path),
+		    GtkTreeViewColumn *UNUSED(col), gpointer UNUSED(userdata))
 {
 	gchar *name = GetSelectedPlayer();
 	if (!name)
@@ -332,7 +332,7 @@ static GtkWidget *GtkRelationalShowStats(void)
 	return scrolledWindow;
 }
 
-extern void GtkRelationalAddMatch(gpointer p, guint n, GtkWidget * pw)
+extern void GtkRelationalAddMatch(gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw))
 {
 	CommandRelationalAddMatch(NULL);
 	outputx();
@@ -372,7 +372,7 @@ static GtkWidget *GetRelList(RowSet * pRow)
 	return treeview;
 }
 
-static void ShowRelationalErase(GtkWidget *pw, GtkWidget *notused)
+static void ShowRelationalErase(GtkWidget *UNUSED(pw), GtkWidget *UNUSED(notused))
 {
 	char *buf;
 	gchar *player = GetSelectedPlayer();
@@ -402,7 +402,7 @@ static char *GetText(GtkTextView * pwText)
 	return pch;
 }
 
-static void UpdatePlayerDetails(GtkWidget *pw, GtkWidget *notused)
+static void UpdatePlayerDetails(GtkWidget *UNUSED(pw), GtkWidget *UNUSED(notused))
 {
 	char *notes;
 	const char *newname;
@@ -419,7 +419,7 @@ static void UpdatePlayerDetails(GtkWidget *pw, GtkWidget *notused)
 	g_free(oldname);
 }
 
-static void RelationalQuery(GtkWidget * pw, GtkWidget * pwVbox)
+static void RelationalQuery(GtkWidget * UNUSED(pw), GtkWidget * UNUSED(pwVbox))
 {
 	RowSet *rs;
 	char *pch, *query;
@@ -512,7 +512,7 @@ static void CredentialsChanged(void)
 	gtk_widget_set_sensitive(login, TRUE);
 }
 
-static void LoginClicked(GtkButton *button, gpointer dbList)
+static void LoginClicked(GtkButton *UNUSED(button), gpointer dbList)
 {
 	DBProvider *pdb = GetSelectedDBType();
 	const char *tmpUser = pdb->username, *tmpPass = pdb->password;
@@ -524,7 +524,7 @@ static void LoginClicked(GtkButton *button, gpointer dbList)
 	pdb->username = tmpUser, pdb->password = tmpPass;
 }
 
-static void TypeChanged(GtkComboBox *widget, gpointer dbList)
+static void TypeChanged(GtkComboBox *UNUSED(widget), gpointer dbList)
 {
 	DBProvider *pdb = GetSelectedDBType();
 
@@ -605,7 +605,7 @@ static char *GetSelectedDB(GtkTreeView * treeview)
 	return db;
 }
 
-static void DBListSelected(GtkTreeView *treeview, gpointer userdata)
+static void DBListSelected(GtkTreeView *treeview, gpointer UNUSED(userdata))
 {
 	char *db = GetSelectedDB(treeview);
 	if (db)
@@ -615,7 +615,7 @@ static void DBListSelected(GtkTreeView *treeview, gpointer userdata)
 	}
 }
 
-static void AddDBClicked(GtkButton *button, gpointer dbList)
+static void AddDBClicked(GtkButton *UNUSED(button), gpointer dbList)
 {
 	char* dbName = GTKGetInput(_("Add Database"), _("Database Name:"), NULL);
 	if (dbName)
@@ -638,7 +638,7 @@ static void AddDBClicked(GtkButton *button, gpointer dbList)
 	}
 }
 
-static void DelDBClicked(GtkButton *button, gpointer dbList)
+static void DelDBClicked(GtkButton *UNUSED(button), gpointer dbList)
 {
 	char *db = GetSelectedDB(GTK_TREE_VIEW(dbList));
 	if (db && GetInputYN(_("Are you sure you want to delete all the matches in this database?")))
@@ -767,7 +767,7 @@ extern GtkWidget *RelationalOptions(void)
 	return vb2;
 }
 
-extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw)
+extern void GtkShowRelational(gpointer UNUSED(p), guint UNUSED(n), GtkWidget * UNUSED(pw))
 {
 	GtkWidget *pwRun, *pwDialog, *pwHbox2, *pwVbox2,
 	    *pwPlayerFrame, *pwUpdate, *pwPaned, *pwVbox, *pwErase, *pwOpen,
