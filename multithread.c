@@ -96,7 +96,7 @@ static void TLSCreate(TLSItem *pItem)
     *pItem = g_private_new(free);
 }
 
-static void TLSFree(TLSItem pItem)
+static void TLSFree(TLSItem UNUSED(pItem))
 {	/* Done automaticaly by glib */
 }
 
@@ -371,7 +371,7 @@ static void MT_WorkerThreadFunction(void *id)
 	}
 }
 
-static gboolean WaitingForThreads(gpointer unused)
+static gboolean WaitingForThreads(gpointer UNUSED(unused))
 {	/* Unlikely to be called */
 	multi_debug("Waiting for threads to be created!");
 	return FALSE;
@@ -641,12 +641,11 @@ extern void MT_SyncStart(void)
 extern double MT_SyncEnd(void)
 {
 	static int count = 0;
-	double now;
 
 	/* Wait for all threads to get here */
 	if (MT_SafeIncValue(&count) == (int)td.numThreads)
 	{
-		now = get_time();
+		const double now = get_time();
 		count--;
 		SetManualEvent(td.syncEnd);
 		return now - start;
