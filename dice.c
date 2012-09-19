@@ -519,28 +519,27 @@ static void InitRNGSeedMP( mpz_t n, rng rng, rngcontext *rngctx ) {
     switch( rng ) {
 
     case RNG_MERSENNE: {
-	ub4 *achState;
+	gint32 *achState;
 	unsigned long tempmtkey[ N ];
 	size_t cb;
 	unsigned int i;
 
-    if (mpz_cmp_ui (n, UINT_MAX) > 0) {
+        if (mpz_cmp_ui (n, UINT_MAX) > 0) {
 
-        achState = mpz_export( NULL, &cb, -1, sizeof( ub4 ), 0, 0, n );
-        
-        for( i = 0; i < N && i < cb; i++ )
-            tempmtkey[ i ] = achState[ i ];
+            achState = mpz_export( NULL, &cb, -1, sizeof ( gint32 ), 0, 0, n );
+            printf ("cb: %d\n", cb);
+            for( i = 0; i < N && i < cb; i++ ){
+                tempmtkey[ i ] = achState[ i ];
+	    }
+            for( ; i < N; i++ ) {
+                tempmtkey[ i ] = 0;
+            }
+            init_by_array(tempmtkey, N, &rngctx->mti, rngctx->mt);
 
-        for( ; i < N; i++ )
-            tempmtkey[ i ] = 0;
-        
-        init_by_array(tempmtkey, N, &rngctx->mti, rngctx->mt);
-
-        free( achState );
-    }
-    else{
-        InitRNGSeed( (unsigned long)(mpz_get_ui( n )), rng, rngctx );    
-    }
+            free( achState );
+        } else {
+            InitRNGSeed( (unsigned long)(mpz_get_ui( n )), rng, rngctx );    
+        }
 	break;	
 	}
     case RNG_ANSI:
