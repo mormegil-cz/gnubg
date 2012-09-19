@@ -527,7 +527,6 @@ static void InitRNGSeedMP( mpz_t n, rng rng, rngcontext *rngctx ) {
         if (mpz_cmp_ui (n, UINT_MAX) > 0) {
 
             achState = mpz_export( NULL, &cb, -1, sizeof ( gint32 ), 0, 0, n );
-            printf ("cb: %d\n", cb);
             for( i = 0; i < N && i < cb; i++ ){
                 tempmtkey[ i ] = achState[ i ];
 	    }
