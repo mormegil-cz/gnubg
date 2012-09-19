@@ -1029,7 +1029,7 @@ static void append_dice_options(optionswidget *pow)
 				gtk_box_pack_start(GTK_BOX(pwhbox), pow->pwSeed, TRUE, TRUE, 26);
 				gtk_box_pack_start(GTK_BOX(pow->pwSeed), gtk_label_new(_("Seed: ")), FALSE, FALSE, 0);
 
-				pow->padjSeed = GTK_ADJUSTMENT(gtk_adjustment_new(nRandom, 0, INT_MAX, 1, 1, 0));
+				pow->padjSeed = GTK_ADJUSTMENT(gtk_adjustment_new(nRandom, 0, UINT_MAX, 1, 1, 0));
 
 				pw = gtk_spin_button_new(GTK_ADJUSTMENT(pow->padjSeed), 1, 0);
 				gtk_box_pack_start(GTK_BOX(pow->pwSeed), pw, FALSE, FALSE, 0);

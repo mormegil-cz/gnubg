@@ -469,6 +469,7 @@ extern int InternalCommandNext(int mark, int cmark, int n);
 extern int NextTurn(int fPlayNext);
 extern int ParseKeyValue(char **ppch, char *apch[2]);
 extern int ParseNumber(char **ppch);
+extern gboolean ParseULong( char **ppch, unsigned long *pretVal );
 extern int ParsePlayer(char *sz);
 extern int ParsePosition(TanBoard an, char **ppch, char *pchDesc);
 extern int SetToggle(const char *szName, int *pf, char *sz, const char *szOn,

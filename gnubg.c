@@ -806,6 +806,36 @@ extern int ParseNumber( char **ppch )
     return atoi( pchOrig );
 }
 
+/* get the next token from the input and convert as an
+   integer. Returns 0 on empty input or non-numerics found, and
+   1 on success. On failure, one token (if any were available)
+   will have been consumed, it is not pushed back into the input.
+   Unsigned long is returned in pretVal
+*/
+extern gboolean ParseULong( char **ppch, unsigned long *pretVal )
+{
+
+    char *pch, *pchOrig;
+
+    if( !ppch || !( pchOrig = NextToken( ppch ) ) )
+	return FALSE;
+
+    for( pch = pchOrig; *pch; pch++ )
+	if( !isdigit( *pch ) )
+	    return FALSE;
+
+    errno = 0;    /* To distinguish success/failure after call */
+    *pretVal = strtol(pchOrig, NULL, 10);
+
+   /* Check for various possible errors */
+   if ((errno == ERANGE && (*pretVal == LONG_MAX || *pretVal == LONG_MIN))
+            || (errno != 0 && pretVal == 0)) 
+	return FALSE;
+
+   return TRUE;
+
+}
+
 /* get a player either by name or as player 0 or 1 (indicated by the single
    character '0' or '1'. Returns -1 on no input, 2 if not a recoginsed name
    Note - this is not a token extracting routine, it expects to be handed
