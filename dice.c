@@ -629,6 +629,22 @@ RNGSystemSeed( const rng rngx, void *p, unsigned long *pnSeed ) {
 #if HAVE_LIBGMP
   int h;
     if( !pnSeed ) {
+#if defined(WIN32)
+	/* Can be amended to support seeds > 32 bit */
+	guint32 achState;
+	mpz_t n;
+
+	GTimeVal tv;
+	g_get_current_time(&tv);
+	achState = (unsigned int)tv.tv_sec ^ (unsigned int)tv.tv_usec;
+		
+	mpz_init( n );
+	mpz_import( n, 1, -1, sizeof(guint32), 0, 0, &achState );
+	InitRNGSeedMP( n, rngx, rngctx );
+	mpz_clear( n );
+                
+	return TRUE;
+#else
 	/* We can use long seeds and don't have to save the seed anywhere,
 	   so try 512 bits of state instead of 32. */
 	if( ( h = open( "/dev/urandom", O_RDONLY ) ) >= 0 ) {
@@ -648,13 +664,18 @@ RNGSystemSeed( const rng rngx, void *p, unsigned long *pnSeed ) {
 	    } else
 		close( h );
 	}
+#endif
+
     }
-#elif !defined(WIN32)  /* HAVE_LIBGMP */
+#else
+#if !defined(WIN32)  /* HAVE_LIBGMP */
   int h;
     if( ( h = open( "/dev/urandom", O_RDONLY ) ) >= 0 ) {
 	f = read( h, &n, sizeof n ) == sizeof n;
 	close( h );
     }
+#endif
+
 #endif
 
     if( !f ) {
@@ -664,6 +685,9 @@ RNGSystemSeed( const rng rngx, void *p, unsigned long *pnSeed ) {
     }
 
     InitRNGSeed( n, rngx, rngctx );
+#if HAVE_LIBGMP
+    mpz_set_ui( rngctx->nz, (unsigned long)n );    
+#endif
 
     if ( pnSeed )
       *pnSeed = (unsigned long)n;
