@@ -56,12 +56,17 @@ esac
 AM_CONDITIONAL(WIN32, test "x$win32" = "xyes")
 AC_MSG_RESULT([$host])
 
+if test "x$win32" = "xyes"; then
+AC_CHECK_TOOL(WINDRES, windres)
+fi
+
 dnl
 dnl Compiler setup
 dnl
 
 AC_GNU_SOURCE
 AC_PROG_CC
+AM_PROG_CC_C_O
 AM_CONDITIONAL(CROSS_COMPILING, test "x$cross_compiling" = "xyes")
 
 
@@ -385,8 +390,7 @@ dnl
 dnl config files
 dnl
 
-AC_CONFIG_FILES([Makefile doc/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile m4/Makefile sounds/Makefile board3d/Makefile textures/Makefile scripts/Makefile flags/Makefile fonts/Makefile non-src/Makefile pixmaps/Makefile])
-
+AC_CONFIG_FILES([Makefile doc/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile m4/Makefile sounds/Makefile board3d/Makefile textures/Makefile scripts/Makefile flags/Makefile fonts/Makefile non-src/Makefile pixmaps/Makefile win32/Makefile])
 dnl
 dnl
 dnl

@@ -4,9 +4,10 @@ ACLOCAL_AMFLAGS = -I m4
 
 AM_CPPFLAGS = -DAC_DOCDIR='"$(datadir)/doc/gnubg/"' -DAC_DATADIR='"$(datadir)"' -DAC_PKGDATADIR='"$(datadir)/gnubg"'
 
-SUBDIRS = lib doc met po m4 sounds board3d textures scripts flags fonts non-src pixmaps .
+SUBDIRS = win32 lib doc met po m4 sounds board3d textures scripts flags fonts non-src pixmaps .
 
 bin_PROGRAMS = gnubg makebearoff makehyper bearoffdump makeweights
+
 
 #
 ##include path
@@ -22,11 +23,23 @@ if USE_PYTHON
 INCLUDES += @PYTHON_INCLUDES@ 
 endif
 
+OTHER_LIBS =
+if WIN32
+OTHER_LIBS += win32/win32res.o
+endif
+
 BUILT_SOURCES = sgf_y.c sgf_l.c copying.c credits.c external_l.c external_y.c
 
 #
 ## sources for building the main executable
 #
+if WIN32
+if USE_GTK
+gnubg_CFLAGS = -mwindows
+endif
+endif
+
+
 gnubg_SOURCES = \
 		analysis.c \
 		analysis.h \
@@ -129,10 +142,13 @@ endif
 #
 ##linkpath for gnubg
 #
+
 gnubg_LDADD = -L$(srcdir)/lib lib/libevent.la @GTK_LIBS@ @LIBPNG_LIBS@ @CAIRO_LIBS@ @PANGOCAIRO_LIBS@ \
 	      @GTHREAD_LIBS@ \
 	      @LTLIBOBJS@ \
-	      @FREETYPE2_LIBS@ @GLIB_LIBS@ @LIBPNG_LIBS@ @CANBERRA_LIBS@
+	      @FREETYPE2_LIBS@ @GLIB_LIBS@ @LIBPNG_LIBS@ @CANBERRA_LIBS@ \
+           $(OTHER_LIBS)
+
 if USE_SQLITE
 gnubg_LDADD += @SQLITE_LIBS@
 endif

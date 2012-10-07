@@ -1,3 +1,29 @@
+2012-10-07  Michael Petch  <mpetch@capp-sysware.com>
+	* +win32/*, pixmaps/Makefile.am, configure.in, Makefile.am: 
+	Added WIN32 resource support (icons etc), and gemeral
+	automake cleanup 
+
+2012-09-18  Michael Petch  <mpetch@capp-sysware.com>
+	* backgammon.h, dice.c, gnubg.c, gtkoptions.c, set.c:
+
+	Better Mersenne Twister seed support when compiled with libgmp.
+	MT Seeds with libgmp support can be full range from 0 to 2^19973-1. To
+	retain backward comaptibility with rolls generated from seeds between
+	0 and 2^32-1 on previous releases of GNUBG, seeds in this range will 
+	be set using the old method.
+
+	GUI modified to support a seed value between 0 and 2^32-1 instead
+	of 2^31-1
+
+	When libgmp support is absent we now support unsigned 32 bit integers
+	rather than signed. When compiling 64bit (without libgmp), seeds
+	will be limited to 32 bit integers. Compile with libgmp to support
+	seeds greater than 32 bits.
+
+	Note: In previous releases, if libgmp support was present, seeds 
+	exceeding 2^32-1 did not work as expected even though the seed 
+	appeared to be successfully set.
+
 2012-08-05  Michael Petch  <mpetch@capp-sysware.com>
 	* gtkchequer.c: Fix string buffer over run when copying
 	move analysis data. Reported by Mike Mannon, see bug 

@@ -63,6 +63,8 @@ STOCK_IMAGES = \
 	       $(STOCK_MENU_IMAGES) \
 	       $(STOCK_BUTTON_IMAGES)
 
+if USE_GTK
+
 PIXMAPS = gnubg-big.png
 
 EXTRA_DIST = \
@@ -82,7 +84,7 @@ stock-icons.list: $(STOCK_IMAGES) Makefile.am
               sed -e 's|.*/||' -e 's|-|_|g' -e 's|\.png$$||' >> $@; \
 	    echo "  $(srcdir)/$$image" >> $@; \
 	  done )
-if USE_GTK
+
 if FOUND_GDK_PIXBUF_CSOURCE
 gnubg-stock-pixbufs.h: stock-icons.list
 	$(GDK_PIXBUF_CSOURCE) --raw --build-list `cat $<` > $(@F)
@@ -92,7 +94,6 @@ gnubg-stock-pixbufs.h: stock-icons.list
 	@echo ' ****************************'
 	@echo ' ** unable to rebuild pixmaps'
 	@echo ' ****************************'
-endif
 endif
 
 
@@ -106,3 +107,5 @@ nobase_dist_gnubgicons_DATA = \
 dist_gnubgpixmaps_DATA = $(PIXMAPS)
 
 noinst_DATA = gnubg-stock-pixbufs.h
+
+endif
