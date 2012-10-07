@@ -4,7 +4,8 @@
 	automake cleanup 
 
 2012-09-18  Michael Petch  <mpetch@capp-sysware.com>
-	* backgammon.h, dice.c, gnubg.c, gtkoptions.c, set.c:
+	* backgammon.h, dice.c, gnubg.c, gtkoptions.c, set.c,
+	  lib/mt19937ar.c lib/mt19937ar.c	
 
 	Better Mersenne Twister seed support when compiled with libgmp.
 	MT Seeds with libgmp support can be full range from 0 to 2^19973-1. To
