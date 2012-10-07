@@ -14,7 +14,7 @@ endif
 
 BUILT_SOURCES = win32res.o
 
-win32res.o: $(WINRESOURCES)
+win32res.o: $(WINRESOURCES) Makefile
 	$(WINDRES) $< -o $@
 
 CLEANFILES=win32res.o
