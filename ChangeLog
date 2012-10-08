@@ -1,3 +1,8 @@
+2012-10-08  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* configure.in: This file name is deprecated, rename it to
+	configure.ac.
+
 2012-10-07  Michael Petch  <mpetch@capp-sysware.com>
 	* backgammon.h, gnubg.c, configure.in : Convert BUILD_DATE
 	define to literal string before usage. Allow VERSION_EXT
