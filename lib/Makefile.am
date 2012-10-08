@@ -3,7 +3,7 @@
 ## a standalone library, it would be better for them to be installed.
 ##
 
-INCLUDES = -I$(srcdir)/.. @GLIB_CFLAGS@
+AM_CPPFLAGS = -I$(srcdir)/.. @GLIB_CFLAGS@
 LIBADD = @GLIB_LIBS@
 
 noinst_LTLIBRARIES = libevent.la libsse.la

@@ -2,26 +2,26 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
-AM_CPPFLAGS = -DAC_DOCDIR='"$(datadir)/doc/gnubg/"' -DAC_DATADIR='"$(datadir)"' -DAC_PKGDATADIR='"$(datadir)/gnubg"'
-
 SUBDIRS = win32 lib doc met po m4 sounds board3d textures scripts flags fonts non-src pixmaps .
 
 bin_PROGRAMS = gnubg makebearoff makehyper bearoffdump makeweights
 
-
 #
 ##include path
 #
-INCLUDES = -I$(srcdir)/lib -I$(srcdir)/board3d \
+AM_CPPFLAGS = -I$(srcdir)/lib -I$(srcdir)/board3d \
 	   -DLOCALEDIR=\"$(localedir)\" @FREETYPE2_CFLAGS@ @GLIB_CFLAGS@ \
-	   @LIBPNG_CFLAGS@ @GTK_CFLAGS@ @CAIRO_CFLAGS@ @PANGOCAIRO_CFLAGS@ @GTHREAD_CFLAGS@ \
-	   @GTKGLEXT_CFLAGS@ @CANBERRA_CFLAGS@
+	   @LIBPNG_CFLAGS@ @GTK_CFLAGS@ @CAIRO_CFLAGS@ @PANGOCAIRO_CFLAGS@ \
+	   @GTHREAD_CFLAGS@ @GTKGLEXT_CFLAGS@ @CANBERRA_CFLAGS@
+
 if USE_SQLITE
-INCLUDES += @SQLITE_CFLAGS@
+AM_CPPFLAGS += @SQLITE_CFLAGS@
 endif
 if USE_PYTHON
-INCLUDES += @PYTHON_INCLUDES@ 
+AM_CPPFLAGS += @PYTHON_INCLUDES@ 
 endif
+
+AM_CPPFLAGS += -DAC_DOCDIR='"$(datadir)/doc/gnubg/"' -DAC_DATADIR='"$(datadir)"' -DAC_PKGDATADIR='"$(datadir)/gnubg"'
 
 OTHER_LIBS =
 if WIN32
