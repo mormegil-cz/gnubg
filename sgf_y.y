@@ -182,8 +182,10 @@ extern listOLD *SGFParse( FILE *pf ) {
 	
 #ifdef SGFTEST
 
+#ifdef HAVE_MCHECK_H
 #include <mcheck.h>
-	
+#endif
+
 static void Indent( int n ) {
     while( n-- )
 	putchar( ' ' );
@@ -191,11 +193,11 @@ static void Indent( int n ) {
 
 static void PrintProperty( property *pp, int n ) {
 
-    list *pl;
+    listOLD *pl;
     
     Indent( n );
     putchar( pp->ach[ 0 ] );
-    putchar( pp->ach[ 1 ] );
+    if ( pp->ach[ 1 ] ) putchar( pp->ach[ 1 ] );
 
     for( pl = pp->pl->plNext; pl->p; pl = pl->plNext )
 	printf( "[%s]", (char *) pl->p );
@@ -203,7 +205,7 @@ static void PrintProperty( property *pp, int n ) {
     putchar( '\n' );
 }
 
-static void PrintNode( list *pl, int n ) {
+static void PrintNode( listOLD *pl, int n ) {
 
     for( pl = pl->plNext; pl->p; pl = pl->plNext )
 	PrintProperty( pl->p, n );
@@ -211,15 +213,15 @@ static void PrintNode( list *pl, int n ) {
     Indent( n ); puts( "-" );
 }
 
-static void PrintSequence( list *pl, int n ) {
+static void PrintSequence( listOLD *pl, int n ) {
 
     for( pl = pl->plNext; pl->p; pl = pl->plNext )
 	PrintNode( pl->p, n );
 }
 
-static void PrintGameTreeSeq( list *pl, int n );
+static void PrintGameTreeSeq( listOLD *pl, int n );
 
-static void PrintGameTree( list *pl, int n ) {
+static void PrintGameTree( listOLD *pl, int n ) {
 
     pl = pl->plNext;
 
@@ -229,13 +231,13 @@ static void PrintGameTree( list *pl, int n ) {
     Indent( n ); puts( ">>>>>" );
 }
 
-static void PrintGameTreeSeq( list *pl, int n ) {
+static void PrintGameTreeSeq( listOLD *pl, int n ) {
 
     for( pl = pl->plNext; pl->p; pl = pl->plNext )
 	PrintGameTree( pl->p, n );
 }
 
-void Error( char *s, int f ) {
+static void Error( char *s, int f ) {
 
     fprintf( stderr, _("sgf error: %s\n"), s );
 }
@@ -243,15 +245,17 @@ void Error( char *s, int f ) {
 int main( int argc, char *argv[] ) {
 
     FILE *pf = NULL;
-    list *pl;
-    
+    listOLD *pl;
+
+#ifdef HAVE_MTRACE
     mtrace();
+#endif
 
     SGFErrorHandler = Error;
 
     if( argc > 1 )
 	if( !( pf = fopen( argv[ 1 ], "r" ) ) ) {
-	    outputerr( argv[ 1 ] );
+	    perror( argv[ 1 ] );
 	    return 1;
 	}
     
@@ -259,9 +263,11 @@ int main( int argc, char *argv[] ) {
 	PrintGameTreeSeq( pl, 0 );
     else {
 	puts( _("Fatal error; can't print collection.") );
+	fclose( pf );
 	return 2;
     }
-    
+
+    fclose( pf );
     return 0;
 }
 #endif

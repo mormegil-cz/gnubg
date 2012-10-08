@@ -207,6 +207,7 @@ dnl Checks for header files.
 dnl
 
 AC_CHECK_HEADERS(sys/resource.h sys/socket.h sys/time.h sys/types.h unistd.h)
+AC_CHECK_HEADERS(mcheck.h)
 
 dnl
 dnl Checks for typedefs, structures, and compiler characteristics.
@@ -221,6 +222,7 @@ dnl
 
 AC_CHECK_FUNCS(sigaction sigvec,break)
 AC_CHECK_FUNCS(strptime random setpriority)
+AC_CHECK_FUNCS(mtrace)
 
 dnl 	 
 dnl Checks for declarations 	 
