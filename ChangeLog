@@ -1,7 +1,7 @@
 2012-10-07  Michael Petch  <mpetch@capp-sysware.com>
 	* backgammon.h, gnubg.c, configure.in : Convert BUILD_DATE
 	define to literal string before usage. Allow VERSION_EXT
-	environment variable to be pass to autogen.sh to specify an
+	environment variable to be passed to autogen.sh to specify an
 	extension on a version number. VERSION_EXT="-mingw" 
 	would yield a version that would appear as 0.90.0-mingw .	
 
