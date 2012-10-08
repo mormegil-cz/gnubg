@@ -1,4 +1,11 @@
 2012-10-07  Michael Petch  <mpetch@capp-sysware.com>
+	* backgammon.h, gnubg.c, configure.in : Convert BUILD_DATE
+	define to literal string before usage. Allow VERSION_EXT
+	environment variable to be pass to autogen.sh to specify an
+	extension on a version number. VERSION_EXT="-mingw" 
+	would yield a version that would appear as 0.90.0-mingw .	
+
+2012-10-07  Michael Petch  <mpetch@capp-sysware.com>
 	* +win32/*, pixmaps/Makefile.am, configure.in, Makefile.am: 
 	Added WIN32 resource support (icons etc), and gemeral
 	automake cleanup 
