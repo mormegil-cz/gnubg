@@ -45,9 +45,6 @@ static int fReadingOther;
 static char szCommandSeparators[] = " \t\n\r\v\f";
 #endif
 
-#define STRINGIZEAUX(num) #num
-#define STRINGIZE(num) STRINGIZEAUX(num)
-
 #include "analysis.h"
 #include "backgammon.h"
 #include "dice.h"
