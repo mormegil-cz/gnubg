@@ -165,8 +165,13 @@ MatchID ( const unsigned int anDice[ 2 ],
   SetBits ( auchKey, 11, 1, fTurn );
   SetBits ( auchKey, 12, 1, fDoubled );
   SetBits ( auchKey, 13, 2, fResigned );
-  SetBits ( auchKey, 15, 3, anDice[ 0 ] & 0x7 );
-  SetBits ( auchKey, 18, 3, anDice[ 1 ] & 0x7 );
+  if (anDice[ 0 ] >= anDice[ 1 ]) {
+    SetBits ( auchKey, 15, 3, anDice[ 0 ] & 0x7 );
+    SetBits ( auchKey, 18, 3, anDice[ 1 ] & 0x7 );
+  } else {
+    SetBits ( auchKey, 15, 3, anDice[ 1 ] & 0x7 );
+    SetBits ( auchKey, 18, 3, anDice[ 0 ] & 0x7 );
+  }
   SetBits ( auchKey, 21, 15, nMatchTo & 0x7FFF );
   SetBits ( auchKey, 36, 15, anScore[ 0 ] & 0x7FFF );
   SetBits ( auchKey, 51, 15, anScore[ 1 ] & 0x7FFF );
