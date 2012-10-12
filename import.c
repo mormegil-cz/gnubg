@@ -3842,9 +3842,9 @@ static int ConvertBackGammonRoomFileToMat(FILE *bgrFP, FILE *matFP)
 	int doubled, stake, side = 0;
 	int gameCount = 0, moveCount;
 	char buffer[1024 * 4];
-    player1 = malloc(sizeof(char)*128);
-    player2 = malloc(sizeof(char)*128);
-    
+	player1 = malloc(sizeof(char)*128);
+	player2 = malloc(sizeof(char)*128);
+
 	while (fgets(buffer, sizeof(buffer), bgrFP) != NULL)
 	{
 		if (strncmp(buffer, BGR_STRING, strlen(BGR_STRING)) == 0)
@@ -3863,7 +3863,7 @@ static int ConvertBackGammonRoomFileToMat(FILE *bgrFP, FILE *matFP)
 	while (!feof(bgrFP))
 	{
 		char *value, *ptr, *tempptr;
-        gboolean fSwap;
+		gboolean fSwap;
 
 		do
 		{
@@ -3889,13 +3889,12 @@ static int ConvertBackGammonRoomFileToMat(FILE *bgrFP, FILE *matFP)
 		g_assert(!strcmp(ptr, "vs."));
 		strcpy(player2, NextTokenGeneral(&value, " "));
 
-        if (fSwap)
-        {
-            tempptr = player1;
-            player1 = player2;
-            player2 = tempptr;            
-        }
-        
+		if (fSwap) {
+			tempptr = player1;
+			player1 = player2;
+			player2 = tempptr;
+		}
+
 		if (fgets(buffer, sizeof(buffer), bgrFP) == NULL)
 		{
 			if (ferror(bgrFP))
@@ -3986,8 +3985,8 @@ static int ConvertBackGammonRoomFileToMat(FILE *bgrFP, FILE *matFP)
 done:
 	fclose(bgrFP);
 	fclose(matFP);
-    if (player1) free(player1);
-    if (player2) free(player2);
+	if (player1) free(player1);
+	if (player2) free(player2);
 
 	return TRUE;
 }
