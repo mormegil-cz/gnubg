@@ -365,16 +365,35 @@ dnl Threads
 dnl
 
 AC_MSG_CHECKING([for threading])
-AC_ARG_ENABLE( threads, [  --disable-threads  enable multithread support (Default enabled)])
+AC_ARG_ENABLE( threads, [  --enable-threads=TYPE  enable multithread support (TYPE=yes,glib,win32,no) (Default glib)], threads=$enableval, threads="glib")
 AM_CONDITIONAL(USE_MULTITHREAD, test "x$enable_threads" != "xno" )
+if test "x$enable_threads" == "xyes"; then
+	threads=glib
+fi
 if test "x$enable_threads" != "xno"; then
-        if test "$have_gthread" != "yes"; then
+        if test "x$have_gthread" != "xyes" && test "x$win32" != "xno" ; then
+		threads=win32
+	fi
+        if test "x$have_gthread" != "xyes" && test "x$win32" != "xyes"; then
                 AC_MSG_ERROR([Threads enabled but glib doesn't seem to have gthread support])
         fi
+        if test "x$enable_threads" == "xwin32" && test "x$win32" != "xyes" ; then
+                AC_MSG_ERROR([Win32 Threads only available on Win32 platforms])
+	fi
+	
         AC_DEFINE(USE_MULTITHREAD, 1, Define if you want to have multithread support)
-        AC_DEFINE(GLIB_THREADS, 1, Define if you wish to use glib threads)
+	case "$threads" in
+		glib )
+	        AC_DEFINE(GLIB_THREADS, 1, Define if you wish to use glib threads)
+		;;
+		win32 )
+		;;
+		*)
+                AC_MSG_ERROR([Thread type $threads unsupported])
+		;;
+	esac
 fi
-AS_IF( [test "x$enable_threads" != "xno"], [AC_MSG_RESULT(yes)], [AC_MSG_RESULT(no)] )
+AS_IF( [test "x$enable_threads" != "xno"], [AC_MSG_RESULT($threads)], [AC_MSG_RESULT(no)] )
 
 dnl *************
 dnl Misc. setings
