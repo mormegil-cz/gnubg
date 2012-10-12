@@ -1,3 +1,8 @@
+2012-10-11  Michael Petch  <mpetch@capp-sysware.com>
+	* configure.ac : Configure process modified to support a thread type 
+	with --enable-threads default threading is glib threads. 
+	Supports win32, glib and no threading
+
 2012-10-08  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* configure.in: This file name is deprecated, rename it to
