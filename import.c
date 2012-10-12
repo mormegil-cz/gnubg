@@ -3834,13 +3834,17 @@ static void OutputMove(FILE *fpOut, int side, const char *outBuf)
 
 static int ConvertBackGammonRoomFileToMat(FILE *bgrFP, FILE *matFP)
 {
-	char player1[100], player2[100];
+
+	char *player1 = NULL;
+	char *player2 = NULL;
 	int p1Score = 0, p2Score = 0;
 	int dice1, dice2;
 	int doubled, stake, side = 0;
 	int gameCount = 0, moveCount;
 	char buffer[1024 * 4];
-
+    player1 = malloc(sizeof(char)*128);
+    player2 = malloc(sizeof(char)*128);
+    
 	while (fgets(buffer, sizeof(buffer), bgrFP) != NULL)
 	{
 		if (strncmp(buffer, BGR_STRING, strlen(BGR_STRING)) == 0)
@@ -3858,7 +3862,8 @@ static int ConvertBackGammonRoomFileToMat(FILE *bgrFP, FILE *matFP)
 
 	while (!feof(bgrFP))
 	{
-		char *value, *ptr;
+		char *value, *ptr, *tempptr;
+        gboolean fSwap;
 
 		do
 		{
@@ -3879,10 +3884,18 @@ static int ConvertBackGammonRoomFileToMat(FILE *bgrFP, FILE *matFP)
 		ptr = NextTokenGeneral(&value, " ");	/* Skip '-' */
 		strcpy(player1, NextTokenGeneral(&value, " "));
 		ptr = NextTokenGeneral(&value, " ");	/* Skip '(0|X)' */
+		fSwap = *(ptr+1)=='0';
 		ptr = NextTokenGeneral(&value, " ");	/* Skip 'vs.' */
 		g_assert(!strcmp(ptr, "vs."));
 		strcpy(player2, NextTokenGeneral(&value, " "));
 
+        if (fSwap)
+        {
+            tempptr = player1;
+            player1 = player2;
+            player2 = tempptr;            
+        }
+        
 		if (fgets(buffer, sizeof(buffer), bgrFP) == NULL)
 		{
 			if (ferror(bgrFP))
@@ -3973,6 +3986,8 @@ static int ConvertBackGammonRoomFileToMat(FILE *bgrFP, FILE *matFP)
 done:
 	fclose(bgrFP);
 	fclose(matFP);
+    if (player1) free(player1);
+    if (player2) free(player2);
 
 	return TRUE;
 }

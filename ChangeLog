@@ -1,4 +1,9 @@
 2012-10-11  Michael Petch  <mpetch@capp-sysware.com>
+	* import.c : Fix BGRoom import bug reported by Adi Kadmon where 
+	player names were not properly applied to Player 1 and 
+	Player 2 (They could be reversed).
+
+2012-10-11  Michael Petch  <mpetch@capp-sysware.com>
 	* configure.ac : Configure process modified to support a thread type 
 	with --enable-threads default threading is glib threads. 
 	Supports win32, glib and no threading
