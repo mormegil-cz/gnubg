@@ -4035,5 +4035,6 @@ extern void CommandImportBGRoom(char *sz)
     else
             outputerrf("Failed to convert gam to mat\n");
 
+	g_unlink( matfile );
     g_free(matfile);
 }
