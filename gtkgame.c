@@ -1452,13 +1452,6 @@ static void NewClicked(gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw
 	GTKNew();
 }
 
-static void CopyAsBGbase(gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw))
-{
-
-	UserCommand("export position backgammonbase2clipboard");
-
-}
-
 static void CopyAsGOL(gpointer UNUSED(p), guint UNUSED(n), GtkWidget *UNUSED(pw))
 {
 
@@ -3277,7 +3270,6 @@ static GtkActionEntry actionEntries[] = {
 	{ "CopyAsMenuAction", NULL, N_("Copy as") },
 		{ "CopyPosAsAsciiAction", NULL, N_("Position as ASCII"), NULL, NULL, G_CALLBACK(CommandCopy) },
 		{ "CopyAsGammOnLineAction", NULL, N_("GammOnLine (HTML)"), NULL, NULL, G_CALLBACK(CopyAsGOL) },
-		{ "CopyAsBackgammonBaseAction", NULL, N_("BackgammonBase.com (URL)"), NULL, NULL, G_CALLBACK(CopyAsBGbase) },
 
 	{ "PasteIDAction", GTK_STOCK_PASTE, N_("_Paste ID"), "<control>V", NULL, G_CALLBACK(PasteIDs) },
 
@@ -3454,8 +3446,6 @@ GtkItemFactoryEntry aife[] = {
 	  CommandCopy, 0, NULL, NULL },
 	{ N_("/_Edit/Copy as/GammOnLine (HTML)"), NULL,
 	  CopyAsGOL, 0, NULL, NULL },
-	{ N_("/_Edit/Copy as/BackgammonBase.com (URL)"), NULL,
-	  CopyAsBGbase, 0, NULL, NULL },
 
 	{ N_("/_Edit/_Paste ID"), "<control>V", PasteIDs, 0,
 		"<StockItem>", GTK_STOCK_PASTE},
