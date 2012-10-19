@@ -35,6 +35,14 @@ typedef int Py_ssize_t;
 #endif
 #endif
 
+#if __GNUC__ && defined(WIN32)
+/* Align stack pointer on 16 byte boundary so SSE variables work correctly */
+#define STACKALIGN __attribute__((force_align_arg_pointer))
+#else
+#define STACKALIGN
+
+#endif
+
 extern void PythonInitialise(char *argv0);
 extern void PythonShutdown(void);
 extern void PythonRun(const char *sz);

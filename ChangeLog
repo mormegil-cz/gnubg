@@ -1,3 +1,16 @@
+2012-10-19  Michael Petch  <mpetch@capp-sysware.com>
+	* gtkprefs.c, renderprefs.c, set.c : Export of positions/matches
+	didn't honour the board styles when GNUBG launched with -t
+	or was built with --without-gtk option. Reported by Fredrik.
+	See: http://lists.gnu.org/archive/html/bug-gnubg/2012-10/msg00011.html
+
+2012-10-19  Michael Petch  <mpetch@capp-sysware.com>
+	* gnubgmodule.c, gnubgmodule.h : Stack alignment issue.
+	On Win32/GCC builds, SSE instructions acting on variables
+	allocated on the stack in Python code would cause a segfault.
+	Properly align stack in Python functions that may call SSE
+	code. Reported by bagratte. See https://savannah.gnu.org/bugs/?37583 
+
 2012-10-18  Michael Petch  <mpetch@capp-sysware.com>
 	* play.c : Murar (R.G.B) noticed that in some cases resignations
 	acted differently in some cases. Found that resignations can be

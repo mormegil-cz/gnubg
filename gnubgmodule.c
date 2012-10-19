@@ -666,7 +666,7 @@ PythonErrorRating( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
 }
 
-static PyObject *
+STACKALIGN static PyObject *
 PythonEvaluate( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   PyObject *pyBoard = NULL;
@@ -710,7 +710,7 @@ PythonEvaluate( PyObject* self UNUSED_PARAM, PyObject *args ) {
   }
 }
 
-static PyObject *
+STACKALIGN static PyObject *
 PythonEvaluateCubeful( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   PyObject *pyBoard = NULL;
@@ -761,7 +761,7 @@ PythonEvaluateCubeful( PyObject* self UNUSED_PARAM, PyObject *args ) {
   }
 }
 
-static PyObject *
+STACKALIGN static PyObject *
 PythonFindBestMove( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   PyObject *pyDice = NULL;
@@ -953,7 +953,7 @@ PythonMET( PyObject* self UNUSED_PARAM, PyObject *args ) {
 }
 
 
-static PyObject *
+STACKALIGN static PyObject *
 PythonEq2mwc( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   PyObject *pyCubeInfo = NULL;
@@ -977,7 +977,7 @@ static PyObject *PythonMatchChecksum( PyObject* self UNUSED_PARAM, PyObject *arg
 	return PyString_FromString(GetMatchCheckSum());
 }
 
-static PyObject *
+STACKALIGN static PyObject *
 PythonMwc2eq( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   PyObject *pyCubeInfo = NULL;
@@ -1519,7 +1519,7 @@ addLuck(PyObject* dict, float const rLuck, lucktype const lt)
   }
 }
 
-static PyObject*
+STACKALIGN static PyObject*
 PyMoveAnalysis(const movelist* pml, PyMatchState* ms)
 {
   unsigned int i;
@@ -1619,7 +1619,7 @@ PyMoveAnalysis(const movelist* pml, PyMatchState* ms)
   }
 }
 
-static PyObject*
+STACKALIGN static PyObject*
 PyDoubleAnalysis(const evalsetup* pes,
 		 float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 		 float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
