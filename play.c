@@ -859,7 +859,7 @@ static void ShowAutoMove( const TanBoard anBoard, int anMove[ 8 ] ) {
 
 static void get_eq_before_resign(cubeinfo *pci, decisionData *pdd)
 {
-	const evalcontext ecResign = { FALSE, 2, FALSE, TRUE, 0.0 };
+	const evalcontext ecResign = { FALSE, 0, FALSE, TRUE, 0.0 };
 
 	pdd->pboard = msBoard();
 	pdd->pci = pci;
