@@ -58,7 +58,6 @@ CopyAppearance (renderdata * prd)
   memcpy (prd, &rdAppearance, sizeof (rdAppearance));
 }
 
-#if USE_GTK
 static char
 HexDigit (char ch)
 {
@@ -154,7 +153,6 @@ SetColourF (float arColour[4], const char *sz)
   return -1;
 }
 #endif /* USE_BOARD3D */
-#endif /* USE_GTK */
 
 #if USE_BOARD3D
 static int
@@ -245,7 +243,6 @@ SetMaterialDice (Material * pMat, const char *sz, int *flag)
 
 #endif
 
-#if USE_GTK
 /* Set colour, alpha, refraction, shine, specular. */
 static int
 SetColourARSS (double aarColour[2][4],
@@ -371,7 +368,6 @@ SetWood (const char *sz, woodtype * pbw)
 
   return -1;
 }
-#endif
 
 #if USE_BOARD3D
 static displaytype check_for_board3d (char *szValue)
@@ -386,14 +382,12 @@ static displaytype check_for_board3d (char *szValue)
 extern void
 RenderPreferencesParam (renderdata * prd, const char *szParam, char *szValue)
 {
-#if USE_GTK
 int c, fValueError = FALSE;
 
   if (!szParam || !*szParam)
     return;
 
   c = strlen (szParam);
-
   if (!StrNCaseCmp (szParam, "board", c))
     /* board=colour;speckle */
     fValueError = SetColourSpeckle (szValue, prd->aanBoardColour[0],
@@ -418,6 +412,7 @@ int c, fValueError = FALSE;
     prd->fDiceArea = toupper (*szValue) == 'Y';
   else if (!StrNCaseCmp (szParam, "show pips", c)) {
     /* FIXME deprecated in favour of "set gui animation ..." */
+#if USE_GTK
     switch (toupper (*szValue)) {
     case 'N':
       gui_show_pips = GUI_SHOW_PIPS_NONE;
@@ -435,8 +430,10 @@ int c, fValueError = FALSE;
       animGUI = ANIMATE_NONE;
       break;
     }
+#endif
   }
-  else if (!StrNCaseCmp (szParam, "illegal", c))
+#if USE_GTK
+  else if (!StrNCaseCmp (szParam, "illegal", c)) 
     /* FIXME deprecated in favour of "set gui illegal" */
     fGUIIllegal = toupper (*szValue) == 'Y';
   else if (!StrNCaseCmp (szParam, "beep", c))
@@ -445,12 +442,14 @@ int c, fValueError = FALSE;
   else if (!StrNCaseCmp (szParam, "highdie", c))
     /* FIXME deprecated in favour of "set gui highdie" */
     fGUIHighDieFirst = toupper (*szValue) == 'Y';
+#endif
   else if (!StrNCaseCmp (szParam, "wood", c))
     fValueError = SetWood (szValue, &prd->wt);
   else if (!StrNCaseCmp (szParam, "hinges", c))
     prd->fHinges = toupper (*szValue) == 'Y';
   else if (!StrNCaseCmp (szParam, "animate", c)) {
     /* FIXME deprecated in favour of "set gui animation ..." */
+#if USE_GTK
     switch (toupper (*szValue)) {
     case 'B':
       animGUI = ANIMATE_BLINK;
@@ -462,6 +461,7 @@ int c, fValueError = FALSE;
       animGUI = ANIMATE_NONE;
       break;
     }
+#endif
   }
   else if (!StrNCaseCmp (szParam, "speed", c)) {
     /* FIXME deprecated in favour of "set gui animation speed" */
@@ -469,8 +469,11 @@ int c, fValueError = FALSE;
 
     if (n < 0 || n > 7)
       fValueError = TRUE;
-    else
+    else {
+#if USE_GTK
       nGUIAnimSpeed = n;
+#endif
+    }
   }
   else if (!StrNCaseCmp (szParam, "light", c)) {
     /* light=azimuth;elevation */
@@ -621,9 +624,6 @@ int c, fValueError = FALSE;
   if (fValueError)
     outputf (_("`%s' is not a legal value for parameter `%s'.\n"), szValue,
        szParam);
-
-#endif
-
 }
 
 #if USE_BOARD3D

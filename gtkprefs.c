@@ -3079,31 +3079,34 @@ extern void BoardPreferences(GtkWidget *pwBoard)
 extern void SetBoardPreferences(GtkWidget *pwBoard, char *sz)
 {
 	char *apch[2];
-	BoardData *bd = BOARD(pwBoard)->board_data;
-
-	if (gtk_widget_get_realized(pwBoard))
-		board_free_pixmaps(bd);
 
 	while (ParseKeyValue(&sz, apch))
 		RenderPreferencesParam(GetMainAppearance(), apch[0], apch[1]);
 
-	if (gtk_widget_get_realized(pwBoard))
-	{
-		board_create_pixmaps(pwBoard, bd);
-#if USE_BOARD3D
-		DisplayCorrectBoardType(bd, bd->bd3d, bd->rd);
-		if (display_is_3d(bd->rd))
-			UpdateShadows(bd->bd3d);
-		else
-			StopIdle3d(bd, bd->bd3d);
+	if (fX) {
+		BoardData *bd = BOARD(pwBoard)->board_data;
 
-		if (display_is_2d(bd->rd))
-#endif
+		if (gtk_widget_get_realized(pwBoard))
+			board_free_pixmaps(bd);
+
+		if (gtk_widget_get_realized(pwBoard))
 		{
-			gtk_widget_queue_draw(bd->drawing_area);
-			gtk_widget_queue_draw(bd->dice_area);
+			board_create_pixmaps(pwBoard, bd);
+#if USE_BOARD3D
+			DisplayCorrectBoardType(bd, bd->bd3d, bd->rd);
+			if (display_is_3d(bd->rd))
+				UpdateShadows(bd->bd3d);
+			else
+				StopIdle3d(bd, bd->bd3d);
+
+			if (display_is_2d(bd->rd))
+#endif
+			{
+				gtk_widget_queue_draw(bd->drawing_area);
+				gtk_widget_queue_draw(bd->dice_area);
+			}
+			gtk_widget_queue_draw(bd->table);
 		}
-		gtk_widget_queue_draw(bd->table);
 	}
 }
 

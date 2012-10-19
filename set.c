@@ -698,8 +698,12 @@ extern void CommandSetClockwise( char *sz ) {
 extern void CommandSetAppearance( char *sz )
 {
 #if USE_GTK
-	if (fX)
-		SetBoardPreferences(pwBoard, sz);
+	SetBoardPreferences(pwBoard, sz);
+#else
+	char *apch[2];
+
+	while (ParseKeyValue(&sz, apch))
+		RenderPreferencesParam(GetMainAppearance(), apch[0], apch[1]);
 #endif
 }
 
