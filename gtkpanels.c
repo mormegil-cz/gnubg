@@ -768,6 +768,10 @@ extern void GTKAddGame(moverecord * pmr)
     model = gtk_combo_box_get_model(GTK_COMBO_BOX(game_select_combo));
     last_game = gtk_tree_model_iter_n_children(model, NULL);
     GTKSetGame(last_game - 1);
+
+	/* Update Crawford flag on the board */
+    ms.fCrawford = pmr->g.fCrawford && pmr->g.fCrawfordGame;
+    GTKSet(&ms.fCrawford);
 }
 
 extern void GTKRegenerateGames(void)

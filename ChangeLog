@@ -1,3 +1,13 @@
+2012-10-20  Michael Petch  <mpetch@capp-sysware.com>
+	* analysis.c gtkpanels.c : Fix issues with crawford games. If
+	not using "automatically start next game" and you analyse a game
+	or match in the game preceding the crawford game the next game
+	will not be treated as a crawford game.
+	See: https://savannah.gnu.org/bugs/?35179
+
+	Fixed bug with the Crawford flag beneath the board not being 
+	properly set when Crawford game is reached.
+
 2012-10-19  Michael Petch  <mpetch@capp-sysware.com>
 	* gtkprefs.c, renderprefs.c, set.c : Export of positions/matches
 	didn't honour the board styles when GNUBG launched with -t

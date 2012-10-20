@@ -1227,13 +1227,15 @@ NumberMovesMatch ( listOLD *plMatch ) {
 extern void CommandAnalyseGame( char *UNUSED(sz) )
 {
   int nMoves;
-  
+  int fStore_crawford;
+
   if (!CheckGameExists())
     return;
     
   if( CheckSettings() )
     return;
   
+  fStore_crawford = ms.fCrawford;
   nMoves = NumberMovesGame ( plGame );
 
   ProgressStartValue( _("Analysing game; move:"), nMoves );
@@ -1246,6 +1248,7 @@ extern void CommandAnalyseGame( char *UNUSED(sz) )
   if( fX )
     ChangeGame(NULL);
 #endif
+  ms.fCrawford = fStore_crawford;
 
   playSound( SOUND_ANALYSIS_FINISHED );
 
@@ -1257,6 +1260,7 @@ extern void CommandAnalyseMatch( char *UNUSED(sz) )
   listOLD *pl;
   moverecord *pmr;
   int nMoves;
+  int fStore_crawford;
   
   if (!CheckGameExists())
       return;
@@ -1264,6 +1268,7 @@ extern void CommandAnalyseMatch( char *UNUSED(sz) )
   if( CheckSettings() )
       return;
 
+  fStore_crawford = ms.fCrawford;
   nMoves = NumberMovesMatch ( &lMatch );
 
   ProgressStartValue( _("Analysing match; move:"), nMoves );
@@ -1288,11 +1293,12 @@ extern void CommandAnalyseMatch( char *UNUSED(sz) )
   MT_WaitForTasks(UpdateProgressBar, 250, fAutoSaveAnalysis);
 
   ProgressEnd();
-
+  
 #if USE_GTK
   if( fX )
       ChangeGame(NULL);
 #endif
+  ms.fCrawford = fStore_crawford;
 
   playSound( SOUND_ANALYSIS_FINISHED );
 }
