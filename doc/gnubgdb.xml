@@ -2577,12 +2577,6 @@ To roll the dice the CL version type 'roll'.
           evaluation by specifying the plies to be evaluated. Each ply costs
           approximately a factor of 21 in computational time. Also note that
           2-ply is equivalent to Snowie's 3-ply setting.</para>
-        <para>For evaluation deeper than 0 plies, it's possible to reduce the
-          number of rolls to evaluate in the lookahead. This can be set in the
-          Reduced evaluation box. Instead of averaging over all 21 possible dice
-          rolls it is possible to average over a reduced set, for example 7
-          rolls for the 33% speed option. The 33% speed option will typically be
-          three times faster than the full search without reduction.</para>
         <para>In the box for Cubeful evaluations, you can specify if you want
           GNU Backgammon to evaluate the cube ownership in it's evaluations.
           With this option turned on it generally improves the evaluation,
@@ -3072,17 +3066,6 @@ To roll the dice the CL version type 'roll'.
         <para>You can read more about cubeful evaluations in the [[Appendix]].</para>
         <para>It's recommended that you use cubeful checker evaluations.</para>
       </sect3>
-      <sect3 id="gnubg-custom_eval_reduced">
-        <title>Reduced evaluations</title>
-        <para>This option is designed to increase the speed of play by taking a
-          shortcut. Instead of averaging over all 21 possible dice rolls, it is
-          possible to average over a reduced set, such as only 7 rolls which
-          would be 1/3 or 33%. The 33% speed option should be approximately 3
-          times faster than the full search with no reduction. One point, it has
-          been noted that this can badly hurt <application>GNU
-          Backgammon</application>'s checker play so it is not advised to use it
-          here.</para>
-      </sect3>
       <sect3 id="gnubg-custom_eval_pruning">
         <title>Pruning neural networks</title>
         <para>A new feature in the evaluation is the use of a set of neural
@@ -3093,8 +3076,6 @@ To roll the dice the CL version type 'roll'.
           less than 1% of all moves come out different with the pruning nets
           activated. In most of these positions the move would not have made any
           difference to the game at all.</para>
-        <para>Notice, You can not use both reduced evaluations and pruning
-          neural nets.</para>
       </sect3>
       <sect3 id="gnubg-custom_eval_noise">
         <title>Noise</title>
@@ -3557,7 +3538,7 @@ Correct cube action: No double, beaver
         <para>Example, </para>
         <para>&gt;&gt;&gt; m['match-info']</para>
         <para>{'match-length': 25, 'rules': ('Crawford',),
-          'default-eval-context': {'plies': 2, 'deterministic': 1, 'reduced': 0,
+          'default-eval-context': {'plies': 2, 'deterministic': 1,
           'noise': 0.0, 'cubeful': 1}, 'annotator': 'GNU 0.14', 'O': {'rating':
           '0 (Exp 0)', 'name': 'Moshe Tissona'}, 'round': 'Final', 'place':
           'Monte Carlo', 'variation': 'Standard', 'default-rollout-context':
@@ -5050,12 +5031,6 @@ Equity
         <para>Noise is a facility for disturbing <application>GNU
           Backgammon</application>'s 0-ply evaluation. Raising the noise level
           decreases its playing strength.</para>
-      </sect3>
-      <sect3 id="gnubg-faq_settings_reduced">
-        <title>What is reduced evaluation?</title>
-        <para>Reduced searches only work with 2-ply evaluations and deeper. It
-          cuts the search for candidate moves to increase evaluation
-        speed.</para>
       </sect3>
     </sect2>
     <sect2 id="gnubg-faq_analysing">
