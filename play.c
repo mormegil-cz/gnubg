@@ -910,7 +910,7 @@ extern int check_resigns(cubeinfo * pci)
 		else if (rEqAfter - rEqBefore < max_gain )
 			break;
 	}
-	while (resigned++ < 3);
+	while (resigned++ <= 3);
 	return resigned == 4 ? -1 : resigned;
 }
 

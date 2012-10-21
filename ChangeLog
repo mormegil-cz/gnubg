@@ -1,3 +1,8 @@
+2012-10-21  Michael Petch  <mpetch@capp-sysware.com>
+	* play.c : Fix issue with GNUBG not resigning if the opponent
+	is guaranteed to win a backgammon or a gammon. Discovered in matches
+	played by Murat (R.G.B).
+
 2012-10-20  Michael Petch  <mpetch@capp-sysware.com>
 	* analysis.c gtkpanels.c : Fix issues with crawford games. If
 	not using "automatically start next game" and you analyse a game
@@ -22,7 +27,7 @@
 	code. Reported by bagratte. See https://savannah.gnu.org/bugs/?37583 
 
 2012-10-18  Michael Petch  <mpetch@capp-sysware.com>
-	* play.c : Murar (R.G.B) noticed that resignations acted differently \
+	* play.c : Murat (R.G.B) noticed that resignations acted differently 
 	in some cases. Found that resignations can be analysed in 0 ply in 
 	some places and 2 ply in others. To remain consistent we now compute 
 	them at 0 ply.
