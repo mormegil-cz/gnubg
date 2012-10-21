@@ -377,7 +377,7 @@ PyToEvalContext( PyObject *p, evalcontext *pec ) {
   Py_ssize_t iPos = 0;
   char *pchKey;
   static const char *aszKeys[] = {
-    "cubeful", "plies", "reduced", "deterministic", "noise", NULL };
+    "cubeful", "plies", "deterministic", "noise", NULL };
   int iKey;
   int i;
   
@@ -528,11 +528,11 @@ static PyObject *
 PythonEvalContext( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   evalcontext ec;
-  int fCubeful = 0, nPlies = 0, nReduced = 0, fDeterministic = 1;
+  int fCubeful = 0, nPlies = 0, fDeterministic = 1;
   float rNoise = 0.0f;
 
-  if ( ! PyArg_ParseTuple( args, "|iiiif",
-                           &fCubeful, &nPlies, &nReduced, &fDeterministic,
+  if ( ! PyArg_ParseTuple( args, "|iiif",
+                           &fCubeful, &nPlies, &fDeterministic,
                            &rNoise ) )
     return NULL;
 
@@ -2514,7 +2514,7 @@ PyMethodDef gnubgMethods[] = {
     "           'matchto'=>length (0 for money), 'bgv'=>0..4\n"
     "           'score'=>(int, int), 'gammonprice'=(float[4])\n"
     "       eval-context = dictionary: 'cubeful'=>0/1, 'plies'=>int,\n"
-    "           'reduced'=>0/1, 'deterministic'=> 0/1, 'noise'->float\n"
+    "           'deterministic'=> 0/1, 'noise'->float\n"
     "    returns: evaluation = tuple (floats optimal, nodouble, take, drop, int recommendation, String recommendationtext)" },
   { "dicerolls", PythonDiceRolls, METH_VARARGS,
     "return a list of dice rolls from current RNG\n"
