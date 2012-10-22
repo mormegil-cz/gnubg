@@ -2009,6 +2009,7 @@ PythonGame(const listOLD*    plGame,
     for( pl = pl->plNext; pl != plGame; pl = pl->plNext ) {
       const char* action = 0;
       int player = -1;
+	  long points = -1;
       PyObject* recordDict = PyDict_New();
       PyObject* analysis = doAnalysis ? PyDict_New() : 0;
       
@@ -2119,6 +2120,9 @@ PythonGame(const listOLD*    plGame,
 	{
 	  action = "resign";
 	  player = pmr->fPlayer;
+	  points = pmr->r.nResigned;
+	  if (points < 1) points = 1;
+	  else if (points > 3) points = 3;
 	  break;
 	}
 	
@@ -2188,6 +2192,11 @@ PythonGame(const listOLD*    plGame,
       if( player != -1 ) {
 	DictSetItemSteal(recordDict, "player",
 			     PyString_FromString(player ? "O" : "X"));
+      }
+
+      if( points != -1 ) {
+	DictSetItemSteal(recordDict, "points",
+			     PyInt_FromLong(points));
       }
 
       if( analysis ) {
