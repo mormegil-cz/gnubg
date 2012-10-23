@@ -404,7 +404,6 @@ PyToEvalContext( PyObject *p, evalcontext *pec ) {
     case 0:
     case 1:
     case 2:
-    case 3:
       /* simple integer */
       if ( ! PyInt_Check( pyValue ) ) {
         /* not an integer */
@@ -426,7 +425,7 @@ PyToEvalContext( PyObject *p, evalcontext *pec ) {
 
       break;
 
-    case 4:
+    case 3:
       /* float */
       if( ! PyFloat_Check( pyValue ) ) {
         /* not a float */
