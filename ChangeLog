@@ -1,4 +1,4 @@
-2012-10-21  Michael Petch  <mpetch@capp-sysware.com>
+2012-10-23  Michael Petch  <mpetch@capp-sysware.com>
 	* gnubgmodule.c : recent removal of reduced dict item from the 
 	Python eval contexts introduced a bug that produced an error
 	processing the noise dict item. Reported by Bagrat Lazaryan
