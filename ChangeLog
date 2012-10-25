@@ -1,3 +1,7 @@
+2012-10-25  Michael Petch  <mpetch@capp-sysware.com>
+	* gnubgmodule.c : Add movetupletostring method to the Python
+	interface
+
 2012-10-23  Michael Petch  <mpetch@capp-sysware.com>
 	* gnubgmodule.c : recent removal of reduced dict item from the 
 	Python eval contexts introduced a bug that produced an error

@@ -73,6 +73,28 @@ Board1ToPy( unsigned int anBoard [ 25 ] ) {
 
 
 static int
+PyToMove( PyObject* p, unsigned int anMove[ 8 ] )
+{
+  int tuplelen;
+
+  if( !PySequence_Check(p))
+    return 0;
+
+  tuplelen = PySequence_Size(p);
+  if( tuplelen > 0 && tuplelen <= 8 ) {
+    int j;
+
+    for ( j = 0; j < tuplelen; ++j ) {
+      PyObject* pi = PySequence_Fast_GET_ITEM(p, j);
+      anMove[ j ] = (int) PyInt_AsLong( pi ) - 1;
+    }
+    return 1;
+  }
+
+  return 0;
+}
+
+static int
 PyToBoard1( PyObject* p, unsigned int anBoard[ 25 ] )
 {
   if( PySequence_Check(p) && PySequence_Size(p) == 25 ) {
@@ -663,6 +685,48 @@ PythonErrorRating( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   return PyInt_FromLong( GetRating( r ) );
 
+}
+
+static PyObject *
+PythonMoveTuple2String( PyObject* self UNUSED_PARAM, PyObject *args ) {
+
+  PyObject *pyBoard = NULL;
+  PyObject *pyMove = NULL;
+
+  char szMove[32];
+  unsigned int anMove [ 8 ];
+  TanBoard anBoard;
+
+  memset( anBoard, 0, sizeof(TanBoard) );
+  memset( anMove, 0, sizeof(anMove) );
+
+  if ( ! PyArg_ParseTuple( args, "|OO", 
+                           &pyMove, &pyBoard ) ) 
+    return NULL;
+
+  if ( !pyMove || !pyBoard ) {
+    PyErr_SetString( PyExc_TypeError, 
+                     _("requires 2 arguments (MoveTuple, Board). "
+                       "(see gnubg.findbestmove() and gnubg.board() for examples)") );
+	 return NULL;
+  }
+
+  if ( !PyToMove( pyMove, anMove ) ) {
+    PyErr_SetString( PyExc_StandardError, 
+                     _("Invalid move tuple as argument") );
+    return NULL;
+  }
+
+  if ( pyBoard && !PyToBoard( pyBoard, anBoard ) ) {
+    PyErr_SetString( PyExc_StandardError, 
+                     _("Invalid board as argument ") );
+    return NULL;
+  }
+
+  szMove[0] = '\0';
+  FormatMove( szMove, (ConstTanBoard)anBoard, anMove );
+
+  return PyString_FromString(szMove);
 }
 
 STACKALIGN static PyObject *
@@ -2592,6 +2656,10 @@ PyMethodDef gnubgMethods[] = {
     "        board, cube-info: see 'cfevaluate'\n"
     "        pos-info: see 'posinfo'\n"
     "    returns: GNUBGID as string" },
+  { "movetupletostring", PythonMoveTuple2String, METH_VARARGS,
+    "Convert a move tuple to a move string\n"
+    "    arguments: tuple of 8 ints\n"
+    "    returns: String represtation of move" },
   { "parsemove", PythonParseMove, METH_VARARGS,
     "Parse move\n"
     "    arguments: string containing move to parse\n"
