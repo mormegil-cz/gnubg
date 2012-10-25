@@ -725,7 +725,6 @@ PythonMoveTuple2String( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   szMove[0] = '\0';
   FormatMove( szMove, (ConstTanBoard)anBoard, anMove );
-  parse_move_is_legal(szMove, (ConstTanBoard)anBoard, anMove);
 
   return PyString_FromString(szMove);
 }
