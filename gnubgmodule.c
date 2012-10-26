@@ -95,8 +95,12 @@ PyToMove( PyObject* p, unsigned int anMove[ 8 ] )
     for ( j = 0; j < tuplelen && anIndex < 8; ++j ) {
       PyObject* pi = PySequence_Fast_GET_ITEM(p, j);
       if( !PySequence_Check(pi))
-        /* Found value like findbestmove returns */
-        anMove[ anIndex++ ] = (int) PyInt_AsLong( pi ) - 1;
+        if (PyInt_Check(pi))
+          /* Found value like findbestmove returns */
+          anMove[ anIndex++ ] = (int) PyInt_AsLong( pi ) - 1;
+       else
+          /* Value not an integer */
+          return 0;
       else {
         /* Found inner tuple like parsemove returns */
         if ( PySequence_Check(pi) && PySequence_Size(pi) == 2 ) {
@@ -104,7 +108,11 @@ PyToMove( PyObject* p, unsigned int anMove[ 8 ] )
           /* Process inner tuple */
           for ( k = 0; k < 2 && anIndex < 8; ++k, anIndex++ ) {
             PyObject* pii = PySequence_Fast_GET_ITEM(pi, k);
-  	        anMove[ anIndex ] = (int) PyInt_AsLong( pii ) - 1;
+            if (PyInt_Check(pii))
+   	          anMove[ anIndex ] = (int) PyInt_AsLong( pii ) - 1;
+            else
+              /* Value not an integer */
+              return 0;
           }
         }
         /*if an inner tuple doesn't have exactly 2 elements there is an error */
