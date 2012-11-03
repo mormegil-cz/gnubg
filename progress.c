@@ -43,7 +43,7 @@
 #include "gtkgame.h"
 #include "gtkwindows.h"
 typedef enum _rollout_colls {
-	TITLE_C, RANK_C, TRIALS_C, WIN_C, WIN_G_C, WIN_BG_C, LOOSE_G_C, LOOSE_BG_C, CLESS_C, CFUL_C, CFUL_S_C, JSD_C, N_ROLLOUT_COLS
+	TITLE_C, RANK_C, TRIALS_C, WIN_C, WIN_G_C, WIN_BG_C, LOSE_G_C, LOSE_BG_C, CLESS_C, CFUL_C, CFUL_S_C, JSD_C, N_ROLLOUT_COLS
 } rollout_cols;
 
 #endif /* USE_GTK */
