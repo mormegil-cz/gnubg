@@ -155,7 +155,7 @@ gnubg moves 8/5 6/5.
           may be stored on disk.</para>
       </listitem>
       <listitem>
-        <para>Automated rollouts of positions, with lookahead and race variance
+        <para>Automated rollouts of positions, with lookahead and variance
           reduction where appropriate. Rollouts may be extended.</para>
       </listitem>
       <listitem>
@@ -256,8 +256,8 @@ gnubg moves 8/5 6/5.
         twenty-four point, five on each player's thirteen point, three on each
         player's eight point, and five on each player's six point.</para>
       <para>Both players have their own pair of dice and a dice cup used for
-        shaking. A double cube, with the numerals 2, 4, 8, 16, 32, and 64 on its
-        faces, is used to keep track of the current stake of the game.</para>
+        shaking. A doubling cube, with the numerals 2, 4, 8, 16, 32, and 64 on
+	its faces, is used to keep track of the current stake of the game.</para>
     </sect2>
     <sect2 id="gnubg-rules_object">
       <title>Object of the Game</title>
@@ -462,10 +462,10 @@ gnubg moves 8/5 6/5.
     <sect2 id="gnubg-rules_gammons">
       <title>Gammons and Backgammons</title>
       <para>At the end of the game, if the losing player has borne off at least
-        one checker, he loses only the value showing on the double cube (one
+        one checker, he loses only the value showing on the doubling cube (one
         point, if there have been no doubles). However, if the loser has
           <emphasis>not</emphasis> borne off any of his checkers, he is gammoned
-        and loses <emphasis>twice</emphasis> the value of the double cube. Or,
+        and loses <emphasis>twice</emphasis> the value of the doubling cube. Or,
         worse, if the loser has not borne off any of his checkers and still has
         a checker on the bar or in the winner's home board, he is backgammoned
         and loses <emphasis>three times</emphasis> the value of the double
@@ -477,7 +477,7 @@ gnubg moves 8/5 6/5.
       <orderedlist continuation="restarts" inheritnum="ignore">
         <listitem>
           <para>Automatic doubles. If identical numbers are thrown on the first
-            roll, the stakes are doubled. The double cube is turned to 2 and
+            roll, the stakes are doubled. The doubling cube is turned to 2 and
             remains in the middle. Players usually agree to limit the number of
             automatic doubles to one per game. </para>
         </listitem>
@@ -505,13 +505,13 @@ gnubg moves 8/5 6/5.
       <para>Matches are played to a specified number of points. The first player
         to accumulate the required points wins the match. Points are awarded in
         the usual manner: one for a single game, two for a gammon, and three for
-        a backgammon. The double cube is used, so the winner receives the value
-        of the game multiplied by the final value of the double cube.</para>
+        a backgammon. The doubling cube is used, so the winner receives the value
+        of the game multiplied by the final value of the doubling cube.</para>
       <para>Matches are normally played using the Crawford rule. The Crawford
         rule states that if one player reaches a score one point short of the
         match, neither player may offer a double in the immediately following
         game. This one game with no doubling is called the Crawford game. If the
-        Crawford game is won by the trailing player then the double cube becomes
+        Crawford game is won by the trailing player then the doubling cube becomes
         available in all subsequent games (and it's most often in the best
         interests of the trailing player to double immediately in these games).</para>
       <informaltable frame="all">
@@ -808,7 +808,7 @@ To roll the dice the CL version type 'roll'.
       </sect3>
     </sect2>
     <sect2 id="gnubg-playing_double">
-      <title>Using the double cube</title>
+      <title>Using the doubling cube</title>
       <sect3 id="gnubg-playing_double_offer">
         <title>Offering a double</title>
         <para>You offer a double to your opponent by clicking on the cube. This
@@ -817,7 +817,7 @@ To roll the dice the CL version type 'roll'.
       <sect3 id="gnubg-playing_double_tp">
         <title>Accepting or declining a cube</title>
         <para>You accept a double made by your opponent by clicking on the
-          offered double cube at the board. If you want to decline the double,
+          offered doubling cube at the board. If you want to decline the double,
           you can right click on the cube.</para>
         <para>There are also three buttons in the toolbar for handling cube
           offers. These buttons are marked Accept, Decline and Beaver. The
@@ -934,7 +934,7 @@ To roll the dice the CL version type 'roll'.
             backgammon. </para>
         </listitem>
         <listitem>
-          <para><emphasis>Loose</emphasis> is the fractions of games that
+          <para><emphasis>Lose</emphasis> is the fractions of games that
               <application>GNU Backgammon</application> thinks will be lost by a
             single game, gammon or backgammon. (Notice that this number is equal
             to 1 - Win) </para>
@@ -1133,7 +1133,7 @@ To roll the dice the CL version type 'roll'.
       choice between two move candidates. Which move was the best? Or what about
       that match score cube decision from the weekend tournament. Wouldn't it be
       nice to be able to set up the position in <application>GNU
-      Backgammon</application> and ask for it's opinion? This is possible in
+      Backgammon</application> and ask for its opinion? This is possible in
         <application>GNU Backgammon</application>, and it's one of the features
       that really can give you the answer to a lot of questions, and in that way
       give you a better understanding of the game.</para>
@@ -1284,7 +1284,7 @@ To roll the dice the CL version type 'roll'.
         up-side-down, the top player will be the cube owner. The value of the
         cube will be the value of the cube you click in the widget. Note that
         the unturned cube is the leftmost cube labeled 64, just as it usually is
-        on real double cube.</para>
+        on real doubling cube.</para>
     </sect2>
     <sect2 id="gnubg-edit_score">
       <title>Setting the score</title>
@@ -1402,7 +1402,7 @@ To roll the dice the CL version type 'roll'.
 <entry> <command>import snowietxt &lt;filepath&gt;</command> </entry>
 </row>
               <row>
-                <entry>True Moneygames</entry>
+                <entry>TrueMoneyGames</entry>
 <entry> <command>import tmg &lt;filepath&gt;</command> </entry>
 </row>
             </tbody>
@@ -1421,10 +1421,6 @@ To roll the dice the CL version type 'roll'.
           also be saved to the file. You can also use the tool bar button
           labeled Save to open the file dialog box directly. There is also a
           keyboard shortcut, Ctrl-S, for saving a match or session.</para>
-        <warning>
-          <para>Please note that saving a position will not save any
-          analysis.</para>
-        </warning>
         <para>The export dialog is accessed by choosing <menuchoice><guimenu>File</guimenu><guimenuitem>Export</guimenuitem></menuchoice> This dialog is similar to the save dialog. Again you may
           choose a different filename and whether to export an entire match, a
           game or a position. Then you must choose an export format as well.
@@ -2578,7 +2574,7 @@ To roll the dice the CL version type 'roll'.
           approximately a factor of 21 in computational time. Also note that
           2-ply is equivalent to Snowie's 3-ply setting.</para>
         <para>In the box for Cubeful evaluations, you can specify if you want
-          GNU Backgammon to evaluate the cube ownership in it's evaluations.
+          GNU Backgammon to evaluate the cube ownership in its evaluations.
           With this option turned on it generally improves the evaluation,
           specially when it's close to cube decisions, so we recommend that this
           option is turned on.</para>
@@ -2642,9 +2638,7 @@ To roll the dice the CL version type 'roll'.
           <title>Introduction to move filters</title>
           <para><application>GNU Backgammon</application> uses a technique
             called move filters in order to prune the complete list of legal
-            moves when analyzing checker play decisions. Move filters can be
-            considered a generalization of the search space used in earlier
-            versions of <application>GNU Backgammon</application>.</para>
+            moves when analyzing checker play decisions.</para>
           <para>A move filter for a given ply, say, 2-ply, consists of four
             parameters for each sub ply:</para>
           <orderedlist continuation="restarts" inheritnum="ignore">
@@ -3587,7 +3581,7 @@ Correct cube action: No double, beaver
         <para>This is the value of the position in money game, e.g., if your
           equity is +0.4 an you are playing money game with a $1 stake, you will
           win $0.40 on average. The money equity can be calculated with or
-          without taking the effect of the double cube into consideration, or
+          without taking the effect of the doubling cube into consideration, or
             <emphasis>cubeful</emphasis> or <emphasis>cubeless</emphasis>. The
           cubeless equity can be calculated from the basic formula:
           2*p(w)-1+2(p(wg)-p(lg))+3(p(wbg)-p(lbg)). Evaluating the cubeful
@@ -3602,7 +3596,7 @@ Correct cube action: No double, beaver
           outcome of the individual games as much as the outcome of the entire
           match, so the interesting quantity for match play is <emphasis>match
             winning chance</emphasis> (MWC). As for the money equity the MWC can
-          be calculated with and without the effect of the double cube. The MWCs
+          be calculated with and without the effect of the doubling cube. The MWCs
           are generally calculated with the use of a match equity table, which
           contains the chance of winning the match before a game starts, e.g.,
           if the score is 0-0 in a 1pt match each player has 50% chance of
@@ -4564,7 +4558,7 @@ Equity
         <para>Currently, <application>GNU Backgammon</application> is actually
           designed for <emphasis>GNU/Linux</emphasis>. It also compiles and
           (hopefully) runs under <emphasis>*BSD, IRIX, Solaris</emphasis> and
-            <emphasis>True64 Unix</emphasis>. Last but not least there are
+            <emphasis>Tru64 Unix</emphasis>. Last but not least there are
           frequently binaries for <emphasis>MS Windows</emphasis>. It has also
           been ported to <emphasis>MacOS</emphasis>. When you successfully port
           GNU Backgammon to other operating systems, you are welcome to give us
@@ -4634,7 +4628,7 @@ Equity
       </sect3>
       <sect3 id="gnubg-faq_install_new">
         <title>I want to install a newer version.</title>
-        <para>Go a head, your settings should be saved..</para>
+        <para>Go ahead, your settings should be saved.</para>
       </sect3>
       <sect3 id="gnubg-faq_install_compile">
         <title>I would like to compile it from the source code.</title>
@@ -4943,14 +4937,11 @@ Equity
       </sect3>
       <sect3 id="gnubg-faq_play_5">
         <title>Why am I allowed to place more than 5 checkers on a point?</title>
-        <para>The official backgammon tournament rules allow to put all 15
-          checkers on a point. If you want to play with a maximum of 5 checkers,
-          go to the menu Settings and activate the Egyptian Rule. Notice, the
-          Egyptian Rule is not in the standard rules of backgammon. The position
-          evaluator in <application>GNU Backgammon</application> doesn't have a
-          clue about how to evaluate positions according to the Egyptian rule
-          either. It strongly recommended that this rule is not used if you're
-          trying to learn backgammon.</para>
+        <para>The official backgammon tournament rules allow to put
+          up to all 15 checkers on a point. Playing with a maximum of 5
+          checkers, sometimes known as the Egyptian Rule, is no longer
+          supported by
+          <application>GNU Backgammon</application>.</para>
       </sect3>
       <sect3 id="gnubg-faq_play_poorly">
         <title><application>GNU Backgammon</application> plays poorly.</title>
@@ -5105,16 +5096,11 @@ Equity
         </informaltable>
         <para>You may change these comment in the menu `Window, Annotation'
           choosing another comment for moves and/or double</para>
-        <note>
-          <para>Why a ? move
-          should be deemed worse than a ?! move - that's one of life's little
-            mysteries.</para>
-        </note>
       </sect3>
       <sect3 id="gnubg-faq_analysing_rate">
         <title>How is the error rate determined?</title>
         <para><application>GNU Backgammon</application> determines a player's
-          strength according to it's average error (per move):</para>
+          strength according to its average error (per move):</para>
         <informaltable frame="all">
           <tgroup cols="2">
             <colspec colname="c1" colnum="1" colwidth="1*"/>
