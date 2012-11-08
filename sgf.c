@@ -2284,7 +2284,7 @@ extern void SaveGame(FILE * pf, listOLD * plGame)
 	case MOVE_SETBOARD:
 	    PositionFromKey(anBoard, &pmr->sb.key);
 
-	    fputs("\n;AE[a:y]", pf);
+	    fputs("\n;AE[a:x]", pf);
 
 	    for (i = 0, j = 0; i < 25; ++i)
 		j += anBoard[1][i];
