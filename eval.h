@@ -38,7 +38,6 @@
 
 #define NUM_OUTPUTS 5
 #define NUM_CUBEFUL_OUTPUTS 4
-#define MAX_ROLLOUT_CUBEINFO 16
 #define NUM_ROLLOUT_OUTPUTS 7
 
 #define BETA_HIDDEN 0.1f
@@ -59,8 +58,7 @@ typedef enum {
   OUTPUT_OPTIMAL = 0,
   OUTPUT_NODOUBLE ,
   OUTPUT_TAKE, 
-  OUTPUT_DROP,
-  N_CUBEFUL_OUTPUTS
+  OUTPUT_DROP
 } CubefulOutputs;
 
 /* A trivial upper bound on the number of (complete or incomplete)
