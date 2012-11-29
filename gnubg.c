@@ -3558,7 +3558,7 @@ static command *FindContext( command *pc, char *szOrig, int ich )
     return NULL;
 }
 
-static char **CompleteKeyword( const char *szText, int iStart, int iEnd)
+static char **CompleteKeyword( const char *szText, int iStart, int UNUSED(iEnd))
 {
 
     if( fReadingOther )
