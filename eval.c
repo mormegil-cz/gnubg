@@ -1903,7 +1903,7 @@ ClassifyPosition( const TanBoard anBoard, const bgvariation bgv )
 }
 
 static int
-EvalBearoff2( const TanBoard anBoard, float arOutput[], const bgvariation bgv, NNState *nnStates )
+EvalBearoff2( const TanBoard anBoard, float arOutput[], const bgvariation UNUSED(bgv), NNState *UNUSED(nnStates) )
 {
   g_assert ( pbc2 );
 
@@ -1912,7 +1912,7 @@ EvalBearoff2( const TanBoard anBoard, float arOutput[], const bgvariation bgv, N
 
 static int
 EvalBearoffOS( const TanBoard anBoard, 
-               float arOutput[], const bgvariation bgv, NNState *nnStates ) {
+               float arOutput[], const bgvariation UNUSED(bgv), NNState *UNUSED(nnStates) ) {
 
   return BearoffEval ( pbcOS, anBoard, arOutput );
 
@@ -1921,7 +1921,7 @@ EvalBearoffOS( const TanBoard anBoard,
 
 static int
 EvalBearoffTS( const TanBoard anBoard, 
-               float arOutput[], const bgvariation bgv, NNState *nnStates ) {
+               float arOutput[], const bgvariation UNUSED(bgv), NNState *UNUSED(nnStates) ) {
 
   return BearoffEval ( pbcTS, anBoard, arOutput );
 
@@ -1929,7 +1929,7 @@ EvalBearoffTS( const TanBoard anBoard,
 
 static int
 EvalHypergammon1( const TanBoard anBoard,
-                  float arOutput[], const bgvariation bgv, NNState *nnStates ) {
+                  float arOutput[], const bgvariation UNUSED(bgv), NNState *UNUSED(nnStates) ) {
 
   return BearoffEval ( apbcHyper[ 0 ], anBoard, arOutput );
 
@@ -1937,7 +1937,7 @@ EvalHypergammon1( const TanBoard anBoard,
 
 static int
 EvalHypergammon2( const TanBoard anBoard,
-                  float arOutput[], const bgvariation bgv, NNState *nnStates ) {
+                  float arOutput[], const bgvariation UNUSED(bgv), NNState *UNUSED(nnStates) ) {
 
   return BearoffEval ( apbcHyper[ 1 ], anBoard, arOutput );
 
@@ -1945,7 +1945,7 @@ EvalHypergammon2( const TanBoard anBoard,
 
 static int
 EvalHypergammon3( const TanBoard anBoard,
-                  float arOutput[], const bgvariation bgv, NNState *nnStates ) {
+                  float arOutput[], const bgvariation UNUSED(bgv), NNState *UNUSED(nnStates) ) {
 
   return BearoffEval ( apbcHyper[ 2 ], anBoard, arOutput );
 
@@ -1962,7 +1962,7 @@ EvalBearoff1Full( const TanBoard anBoard, float arOutput[] ) {
 
 extern int
 EvalBearoff1( const TanBoard anBoard, float arOutput[], 
-              const bgvariation bgv, NNState *nnStates ) {
+              const bgvariation UNUSED(bgv), NNState *UNUSED(nnStates) ) {
 
   return BearoffEval( pbc1, anBoard, arOutput );
 
@@ -2168,7 +2168,7 @@ EvalRace(const TanBoard anBoard, float arOutput[], const bgvariation bgv, NNStat
 
 
 static int
-EvalContact(const TanBoard anBoard, float arOutput[], const bgvariation bgv, NNState *nnStates)
+EvalContact(const TanBoard anBoard, float arOutput[], const bgvariation UNUSED(bgv), NNState *nnStates)
 {
   SSE_ALIGN(float arInput[ NUM_INPUTS ]);
     
@@ -2182,7 +2182,7 @@ EvalContact(const TanBoard anBoard, float arOutput[], const bgvariation bgv, NNS
 }
 
 static int
-EvalCrashed(const TanBoard anBoard, float arOutput[], const bgvariation bgv, NNState *nnStates)
+EvalCrashed(const TanBoard anBoard, float arOutput[], const bgvariation UNUSED(bgv), NNState *nnStates)
 {
   SSE_ALIGN(float arInput[ NUM_INPUTS ]);
 
@@ -2196,7 +2196,7 @@ EvalCrashed(const TanBoard anBoard, float arOutput[], const bgvariation bgv, NNS
 }
 
 extern int
-EvalOver( const TanBoard anBoard, float arOutput[], const bgvariation bgv, NNState *nnStates )
+EvalOver( const TanBoard anBoard, float arOutput[], const bgvariation bgv, NNState *UNUSED(nnStates) )
 {
   int i, c;
   int n = anChequers[ bgv ];
@@ -3195,7 +3195,7 @@ EvalCacheFlush(void)
   CacheFlush( & cEval );
 }
 
-void CommandClearCache(char *sz)
+void CommandClearCache(char *UNUSED(sz))
 {
 	EvalCacheFlush();
 }
@@ -4493,7 +4493,7 @@ cmp_evalcontext ( const evalcontext *pec1, const evalcontext *pec2 ) {
  */
 
 extern int
-cmp_rolloutcontext ( const rolloutcontext *prc1, const rolloutcontext *prc2 ) {
+cmp_rolloutcontext ( const rolloutcontext *UNUSED(prc1), const rolloutcontext *UNUSED(prc2) ) {
 
   /* FIXME: write me */
 
@@ -6002,7 +6002,7 @@ extern int
 GeneralCubeDecisionE ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                        const TanBoard anBoard,
                        const cubeinfo* pci,
-		       const evalcontext* pec, const evalsetup* pes ) {
+		       const evalcontext* pec, const evalsetup *UNUSED(pes) ) {
 
   float arOutput[ NUM_OUTPUTS ];
   cubeinfo aciCubePos[ 2 ];
