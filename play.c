@@ -213,13 +213,10 @@ ApplyMoveRecord(matchstate* pms, const listOLD* plGame, const moverecord* pmr)
     xmovegameinfo* pmgi;
     /* FIXME this is wrong -- plGame is not necessarily the right game */
 
-    g_assert( pmr->mt == MOVE_GAMEINFO || pmrx->mt == MOVE_GAMEINFO );
+    g_assert( pmr->mt == MOVE_GAMEINFO || (pmrx && pmrx->mt == MOVE_GAMEINFO) );
 
-    pmgi = &pmrx->g;
-    
     pms->gs = GAME_PLAYING;
-
-        pms->fResigned = pms->fResignationDeclined = 0;
+    pms->fResigned = pms->fResignationDeclined = 0;
 
 #if USE_GTK
     if( pms == &ms )
@@ -286,6 +283,7 @@ ApplyMoveRecord(matchstate* pms, const listOLD* plGame, const moverecord* pmr)
 	pms->fDoubled = FALSE;
 	pms->cBeavers = 0;
 	pms->gs = GAME_DROP;
+	pmgi = &pmrx->g;
 	pmgi->nPoints = pms->nCube;
 	pmgi->fWinner = !pmr->fPlayer;
 	pmgi->fResigned = FALSE;
@@ -307,6 +305,7 @@ ApplyMoveRecord(matchstate* pms, const listOLD* plGame, const moverecord* pmr)
                 n = 1;
 
 	    pms->gs = GAME_OVER;
+	    pmgi = &pmrx->g;
 	    pmgi->nPoints = pms->nCube * n;
 	    pmgi->fWinner = pmr->fPlayer;
 	    pmgi->fResigned = FALSE;
@@ -317,12 +316,14 @@ ApplyMoveRecord(matchstate* pms, const listOLD* plGame, const moverecord* pmr)
 
     case MOVE_RESIGN:
 	pms->gs = GAME_RESIGNED;
+	pmgi = &pmrx->g;
 	pmgi->nPoints = pms->nCube * ( pms->fResigned = pmr->r.nResigned );
 	pmgi->fWinner = !pmr->fPlayer;
 	pmgi->fResigned = TRUE;
 	
 	ApplyGameOver( pms, plGame );
 	break;
+
     case MOVE_SETBOARD:
 	PositionFromKey( pms->anBoard, &pmr->sb.key );
 
