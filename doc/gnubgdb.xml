@@ -3679,7 +3679,7 @@ Correct cube action: No double, beaver
         <title>Cubeful equities</title>
         <para>This chapter is a brief description of how <application>GNU
             Backgammon</application> calculates cubeful equities. The formula
-          build directly on the work by Rick Janowski <ulink url="http://www.msoworld.com/mindzine/news/classic/bg/cubeformulae.html">Take-Points in Money Games</ulink> from 1993.</para>
+          build directly on the work by Rick Janowski <ulink url="http://www.bkgm.com/articles/Janowski/cubeformulae.pdf">Take-Points in Money Games</ulink> from 1993.</para>
       <sect4 id="gnubg-tech_equities_cubeful_basic">
         <title>Basic formula for cubeful equities</title>
         <para>The basic formula for cubeful equities as derived by Janowski is</para>
@@ -4258,11 +4258,6 @@ Equity
                 bits by using <ulink url="http://www.bkgm.com/rgb/rgb.cgi?view+371">Walter Trice's </ulink>
                 <ulink url="http://www.bkgm.com/rgb/rgb.cgi?view+371"><emphasis>D() expressions</emphasis></ulink>, but I think you'd have to be a mathematical masochist
                 to try it! </para>
-            </listitem>
-            <listitem>
-              <para><ulink url="http://savannah.gnu.org/cgi-bin/viewcvs/gnubg/gnubg/positionid.c?rev=HEAD&amp;sortby=date&amp;content-type=text/vnd.viewcvs-markup">Example code</ulink> to convert between a raw board encoding
-                (the number of checkers on each point) and these keys/IDs is
-                available licensed under GPL. </para>
             </listitem>
             <listitem>
               <para>Thanks to Tom Keith and David desJardins for their
@@ -5239,13 +5234,13 @@ Equity
       </sect3>
       <sect3 id="gnubg-faq_abbr_cp">
         <title>CP?</title>
-        <para>From Max Friis page <ulink url="http://xfriis.dk/maxfriis/bg/double.html">http://xfriis.dk/maxfriis/bg/double.html</ulink> Cash-point(CP) is:
-            <emphasis>your opponent's take-point now seen from your side of the
-            board (your cash-point which equals 100% minus your opponent's
-            take-point</emphasis>). <application>GNU Backgammon</application>
+        <para>Cash-point(CP) is
+          your opponent's take-point now seen from your side of the
+          board (your cash-point which equals 100% minus your opponent's
+          take-point). <application>GNU Backgammon</application>
           uses the term <emphasis>missed double below cash-point</emphasis>,
           which means that the player should have doubled, and had he done so,
-          his opponent should take. <emphasis>. Missed double above CP</emphasis>
+          his opponent should take. <emphasis>Missed double above CP</emphasis>
           in a similar way means that the correct cube-action was double pass.</para>
         <para>If you are the leader in the match, the relevant take- and
           double-points will often look something like this (where TP*=CP):</para>
