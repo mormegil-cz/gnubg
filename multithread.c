@@ -497,7 +497,7 @@ void mt_add_tasks(unsigned int num_tasks, AsyncFun pFun, void *taskData, gpointe
 	{
 #ifdef DEBUG_MULTITHREADED
 		char buf[20];
-		sprintf(buf, "add %d tasks", num_tasks);
+		sprintf(buf, "add %u tasks", num_tasks);
 		Mutex_Lock(td.queueLock, buf);
 #else
 		Mutex_Lock(td.queueLock, NULL);
