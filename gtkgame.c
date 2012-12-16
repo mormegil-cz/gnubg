@@ -4604,7 +4604,7 @@ static void NewOK( GtkWidget *pw, newwidget *pnw )
 	if (ToolbarIsEditing(NULL))
 		click_edit();	/* Come out of editing mode */
 
-  sprintf(sz, "new match %d", Mlength );
+  sprintf(sz, "new match %u", Mlength );
   UserCommand(sz);
 }
 
@@ -7268,7 +7268,7 @@ static void MatchInfoOK( GtkWidget *pw, int *UNUSED(pf) )
 	else if( nDay && ( !mi.nYear || mi.nYear != nYear ||
 			   mi.nMonth != nMonth || mi.nDay != nDay ) ) {
 	    char sz[ 64 ];
-	    sprintf( sz, "set matchinfo date %04d-%02d-%02d", nYear, nMonth,
+	    sprintf( sz, "set matchinfo date %04u-%02u-%02u", nYear, nMonth,
 		     nDay );
 	    UserCommand( sz );
 	}
