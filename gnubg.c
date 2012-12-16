@@ -3125,7 +3125,7 @@ static void SaveGUISettings(FILE * pf)
 		fprintf(pf, "set gui showids %s\n", fShowIDs ? "on" : "off");
 
 	fprintf(pf, "set gui animation %s\n", aszAnimation[animGUI]);
-	fprintf(pf, "set gui animation speed %d\n", nGUIAnimSpeed);
+	fprintf(pf, "set gui animation speed %u\n", nGUIAnimSpeed);
 	fprintf(pf, "set gui beep %s\n", fGUIBeep ? "on" : "off");
 	fprintf(pf, "set gui dicearea %s\n", GetMainAppearance()->fDiceArea ? "on" : "off");
 	fprintf(pf, "set gui highdiefirst %s\n", fGUIHighDieFirst ? "on" : "off");
@@ -3138,7 +3138,7 @@ static void SaveGUISettings(FILE * pf)
 	fprintf(pf, "set gui windowpositions %s\n", fGUISetWindowPos ? "on" : "off");
 
 	fprintf(pf, "set styledgamelist %s\n", fStyledGamelist ? "on" : "off");
-	fprintf(pf, "set delay %d\n", nDelay);
+	fprintf(pf, "set delay %u\n", nDelay);
 
 	fprintf(pf, "set toolbar %d\n", nToolbarStyle);
 	if (!fToolbarShowing)
@@ -3209,10 +3209,10 @@ static void SavePlayingSettings(FILE * pf)
 
 static void SaveRuleSettings(FILE * pf)
 {
-	fprintf(pf, "set automatic doubles %d\n", cAutoDoubles);
-	fprintf(pf, "set beavers %d\n", nBeavers);
+	fprintf(pf, "set automatic doubles %u\n", cAutoDoubles);
+	fprintf(pf, "set beavers %u\n", nBeavers);
 	fprintf(pf, "set jacoby %s\n", fJacoby ? "on" : "off");
-	fprintf(pf, "set matchlength %d\n", nDefaultLength);
+	fprintf(pf, "set matchlength %u\n", nDefaultLength);
 	fprintf(pf, "set variation %s\n", aszVariationCommands[bgvDefault]);
 }
 
@@ -3271,7 +3271,7 @@ static void SaveMiscSettings(FILE * pf)
 	fprintf(pf, "set output mwc %s\n", fOutputMWC ? "on" : "off");
 	fprintf(pf, "set output rawboard %s\n", fOutputRawboard ? "on" : "off");
 	fprintf(pf, "set output winpc %s\n", fOutputWinPC ? "on" : "off");
-	fprintf(pf, "set output digits %d\n", fOutputDigits);
+	fprintf(pf, "set output digits %u\n", fOutputDigits);
 	fprintf(pf, "set output errorratefactor %s\n",
 		g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%f", rErrorRateFactor));
 	fprintf(pf, "set prompt %s\n", szPrompt);
