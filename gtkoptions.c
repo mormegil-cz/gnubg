@@ -1450,7 +1450,7 @@ static void OptionsOK(GtkWidget *pw, optionswidget *pow)
   CHECKUPDATE(pow->pwOutputMWCpst,fOutputMatchPC, "set output matchpc %s")
 
   if(( n = (unsigned int)gtk_adjustment_get_value( pow->padjDigits ) ) != fOutputDigits ){
-    sprintf(sz, "set output digits %d", n );
+    sprintf(sz, "set output digits %u", n );
     UserCommand(sz); 
   }
   
@@ -1461,17 +1461,17 @@ static void OptionsOK(GtkWidget *pw, optionswidget *pow)
   CHECKUPDATE(pow->pwConfOverwrite,fConfirmSave, "set confirm save %s")
   
   if(( n = (unsigned int)gtk_adjustment_get_value( pow->padjCubeAutomatic ) ) != cAutoDoubles){
-    sprintf(sz, "set automatic doubles %d", n );
+    sprintf(sz, "set automatic doubles %u", n );
     UserCommand(sz); 
   }
 
   if(( n = (unsigned int)gtk_adjustment_get_value( pow->padjCubeBeaver ) ) != nBeavers){
-    sprintf(sz, "set beavers %d", n );
+    sprintf(sz, "set beavers %u", n );
     UserCommand(sz); 
   }
   
   if(( n = (unsigned int)gtk_adjustment_get_value( pow->padjLength ) ) != nDefaultLength){
-    sprintf(sz, "set matchlength %d", n );
+    sprintf(sz, "set matchlength %u", n );
     UserCommand(sz); 
   }
 
@@ -1516,7 +1516,7 @@ static void OptionsOK(GtkWidget *pw, optionswidget *pow)
 
 #if USE_MULTITHREAD
   if((n = (unsigned int)gtk_adjustment_get_value( pow->padjThreads ) ) != MT_GetNumThreads()) {
-    sprintf(sz, "set threads %d", n );
+    sprintf(sz, "set threads %u", n );
     UserCommand(sz); 
   }
 #endif
@@ -1531,14 +1531,14 @@ static void OptionsOK(GtkWidget *pw, optionswidget *pow)
   CHECKUPDATE(pow->pwAutoSaveConfirmDelete, fAutoSaveConfirmDelete, "set autosave confirm %s");
 
   if((n = (unsigned int)gtk_adjustment_get_value( pow->padjDelay ) ) != nDelay) {
-    sprintf(sz, "set delay %d", n );
+    sprintf(sz, "set delay %u", n );
     UserCommand(sz); 
   }
 
   if( pow->fChanged == 1 ) 
   { 
      n = (unsigned int)gtk_adjustment_get_value( pow->padjSeed );
-     sprintf(sz, "set seed %d", n); 
+     sprintf(sz, "set seed %u", n); 
      UserCommand(sz); 
   }
   
@@ -1602,7 +1602,7 @@ switch(gtk_combo_box_get_active(GTK_COMBO_BOX(pow->pwShowPips)))
       UserCommand( "set gui animation slide" );
 
   if( ( n = (unsigned int)gtk_adjustment_get_value( pow->padjSpeed ) ) != nGUIAnimSpeed ) {
-      sprintf( sz, "set gui animation speed %d", n );
+      sprintf( sz, "set gui animation speed %u", n );
       UserCommand( sz );
   }
 
@@ -1618,7 +1618,7 @@ switch(gtk_combo_box_get_active(GTK_COMBO_BOX(pow->pwShowPips)))
   for ( i = 0; i < 2; ++i ) {
     n = gtk_combo_box_get_active(GTK_COMBO_BOX( pow->apwCheatRoll[ i ] ));
     if ( n != afCheatRoll[ i ] ) {
-      sprintf( sz, "set cheat player %d roll %d", i, n + 1 );
+      sprintf( sz, "set cheat player %u roll %d", i, n + 1 );
       UserCommand( sz );
     }
   }
