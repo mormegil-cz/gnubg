@@ -1826,7 +1826,7 @@ static void WriteMoveAnalysis(FILE * pf, int fPlayer, movelist * pml,
     unsigned int i;
     gchar buffer[G_ASCII_DTOSTR_BUF_SIZE];
 
-    fprintf(pf, "A[%d]", iMove);
+    fprintf(pf, "A[%u]", iMove);
 
     for (i = 0; i < pml->cMoves; i++) {
 	fputc('[', pf);
