@@ -589,7 +589,7 @@ static int BearoffDumpTwoSided ( const bearoffcontext *pbc, const TanBoard anBoa
     N_("Opponent owns cube")
   };
 
-  sprintf ( sz + strlen(sz), "%19s %14s\n%s %12d  %12d\n\n",
+  sprintf ( sz + strlen(sz), "%19s %14s\n%s %12u  %12u\n\n",
 	  _("Player"), _("Opponent"), _("Position"), nUs, nThem);
 
   ReadTwoSidedBearoff ( pbc, iPos, ar, NULL );
@@ -632,7 +632,7 @@ static int BearoffDumpOneSided ( const bearoffcontext *pbc, const TanBoard anBoa
                      NULL, NULL ) )
     return -1;
 
-  sz += sprintf(sz, "%19s %14s\n%s %12d  %12d\n\n",
+  sz += sprintf(sz, "%19s %14s\n%s %12u  %12u\n\n",
 	  _("Player"), _("Opponent"), _("Position"), nUs, nThem);
 
   sz += sprintf(sz, "%s \t\t\t\t%s\n", _("Bearing off"), _("Bearing at least one chequer off"));
@@ -663,7 +663,7 @@ static int BearoffDumpOneSided ( const bearoffcontext *pbc, const TanBoard anBoa
         break;
       
       sprintf( sz = sz + strlen(sz),
-               "%5d\t%7.3f\t%7.3f" "\t\t",
+               "%5u\t%7.3f\t%7.3f" "\t\t",
                i, 
                aarProb[ 0 ][ i ] * 100.0f,
                aarProb[ 1 ][ i ] * 100.0f );
@@ -751,7 +751,7 @@ static int BearoffDumpHyper( const bearoffcontext *pbc, const TanBoard anBoard, 
   if ( BearoffHyper ( pbc, iPos, NULL, ar ) )
     return -1;
 
-  sprintf ( sz + strlen(sz), "%19s %14s\n%s %12d  %12d\n\n",
+  sprintf ( sz + strlen(sz), "%19s %14s\n%s %12u  %12u\n\n",
 	  _("Player"), _("Opponent"), _("Position"), nUs, nThem);
 
   for ( i = 0; i < 4 ; ++i )
