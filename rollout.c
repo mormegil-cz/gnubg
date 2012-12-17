@@ -149,7 +149,7 @@ extern FILE *log_game_start(const char *name, const cubeinfo * pci, int fCubeful
 	fprintf(logfp, ";PL[%s]\n", pci->fMove ? "B" : "W");
 	fprintf(logfp, ";CP[%s]\n", pci->fCubeOwner == 0 ? "w" : pci->fCubeOwner == 1 ? "b" : "c");
 	fprintf(logfp, ";CV[%d]\n", pci->nCube);
-	fprintf(logfp, ";AE[a:x]AW");
+	fprintf(logfp, ";AE[a:y]AW");
 	if (!pci->fMove) {
 		board_to_sgf(logfp, anBoard[1], 1);
 		fprintf(logfp, "AB");
