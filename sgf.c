@@ -1097,7 +1097,7 @@ static void PointList(listOLD * pl, int an[])
 	    ch0 = ch1 = 0;
 	    sscanf(pch, "%c:%c", &ch0, &ch1);
 	    if (ch0 >= 'a' && ch1 <= 'y' && ch0 < ch1)
-		for (i = ch0 - 'a'; i < ch1 - 'a'; i++)
+		for (i = ch0 - 'a'; i <= ch1 - 'a'; i++)
 		    an[i]++;
 	} else if (*pch >= 'a' && *pch <= 'y')
 	    an[*pch - 'a']++;
