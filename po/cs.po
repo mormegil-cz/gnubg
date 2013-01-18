@@ -7711,8 +7711,9 @@ msgstr ""
 
 #: latex.c:349
 #, c-format
+#msgstr "%1$dbodový zápas (hra %3$d)"
 msgid "%d point%s match (game %d)"
-msgstr "%1$dbodový zápas (hra %3$d)"
+msgstr "%d point%s match (game %d)"
 
 #: latex.c:352
 #, c-format
