@@ -239,7 +239,7 @@ static void draw_cube(SimpleBoard * board)
 	fill_and_stroke(cr, color);
 	text = g_strdup_printf("%d", cube);
 	cairo_move_to(cr, x, y + 8);
-	draw_centered_text(cr, color.text, 8.0, text);
+	draw_centered_text(cr, color.text, 10.0-2*floorf(log10f(cube)), text);
 	g_free(text);
 }
 
