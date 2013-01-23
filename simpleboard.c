@@ -512,7 +512,8 @@ extern SimpleBoard *simple_board_new(matchstate * ms, cairo_t * cr)
 	return board;
 }
 
-extern SimpleBoard *simple_board_new_from_ids(gchar * position_id,
+#ifdef SB_STAND_ALONE
+static SimpleBoard *simple_board_new_from_ids(gchar * position_id,
 					      gchar * match_id,
 					      cairo_t * cr)
 {
@@ -541,7 +542,6 @@ extern SimpleBoard *simple_board_new_from_ids(gchar * position_id,
 	return (board);
 }
 
-#ifdef SB_STAND_ALONE
 #include <cairo-svg.h>
 main(int argc, char *argv[])
 {
