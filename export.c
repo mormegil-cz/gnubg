@@ -135,7 +135,7 @@ static moverecord *export_get_moverecord(int *game_nr, int *move_nr)
 
 static int draw_simple_board_on_cairo(matchstate * sb_pms,
 				      moverecord * sb_pmr, int move_nr,
-				      int game_nr, cairo_t * cairo)
+				      int game_nr, cairo_t * cairo, float size)
 {
 	SimpleBoard *board;
 	GString *header = NULL;
@@ -144,7 +144,7 @@ static int draw_simple_board_on_cairo(matchstate * sb_pms,
 	g_return_val_if_fail(cairo, 0);
 	g_return_val_if_fail(sb_pms->gs != GAME_NONE, 0);
 
-	board = simple_board_new(sb_pms, cairo);
+	board = simple_board_new(sb_pms, cairo, size);
 	board->surface_x = SIMPLE_BOARD_WIDTH;
 	board->surface_y = SIMPLE_BOARD_HEIGHT;
 
@@ -169,7 +169,7 @@ static int draw_simple_board_on_cairo(matchstate * sb_pms,
 }
 
 static int export_boards(moverecord * pmr, matchstate * msExport,
-			 int *iMove, int iGame, cairo_t * cairo)
+			 int *iMove, int iGame, cairo_t * cairo, float size)
 {
 	FixMatchState(msExport, pmr);
 	switch (pmr->mt) {
@@ -182,14 +182,14 @@ static int export_boards(moverecord * pmr, matchstate * msExport,
 		msExport->anDice[0] = pmr->anDice[0];
 		msExport->anDice[1] = pmr->anDice[1];
 		draw_simple_board_on_cairo(msExport, pmr, *iMove, iGame,
-					   cairo);
+					   cairo, size);
 		(*iMove)++;
 		break;
 	case MOVE_TAKE:
 	case MOVE_DROP:
 	case MOVE_DOUBLE:
 		draw_simple_board_on_cairo(msExport, pmr, *iMove, iGame,
-					   cairo);
+					   cairo, size);
 		(*iMove)++;
 		break;
 	default:
@@ -226,7 +226,7 @@ static int draw_cairo_pages(cairo_t * cairo, listOLD * game_ptr)
 		pl_hint = game_add_pmr_hint(game_ptr);
 	for (pl = pl->plNext, page = 1; pl != game_ptr;
 	     pl = pl->plNext, page++) {
-		export_boards(pl->p, &msExport, &iMove, iGame, cairo);
+		export_boards(pl->p, &msExport, &iMove, iGame, cairo, SIZE_2PERPAGE);
 		if (page % 2) {
 			cairo_translate(cairo, 0,
 					SIMPLE_BOARD_HEIGHT / 2.0);
@@ -274,7 +274,7 @@ extern void CommandExportPositionSVG(char *sz)
 	if (surface) {
 		cairo = cairo_create(surface);
 		draw_simple_board_on_cairo(&ms, pmr, move_nr, game_nr,
-					   cairo);
+					   cairo, SIZE_1PERPAGE);
 		cairo_surface_destroy(surface);
 		cairo_destroy(cairo);
 	} else
@@ -309,7 +309,7 @@ extern void CommandExportPositionPDF(char *sz)
 	if (surface) {
 		cairo = cairo_create(surface);
 		draw_simple_board_on_cairo(&ms, pmr, move_nr, game_nr,
-					   cairo);
+					   cairo, SIZE_1PERPAGE);
 		cairo_surface_destroy(surface);
 		cairo_destroy(cairo);
 	} else
@@ -345,7 +345,7 @@ extern void CommandExportPositionPS(char *sz)
 	if (surface) {
 		cairo = cairo_create(surface);
 		draw_simple_board_on_cairo(&ms, pmr, move_nr, game_nr,
-					   cairo);
+					   cairo, SIZE_1PERPAGE);
 		cairo_surface_destroy(surface);
 		cairo_destroy(cairo);
 	} else
