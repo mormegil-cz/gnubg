@@ -2511,8 +2511,10 @@ static void cmark_match_rollout(listOLD *match)
 
 static gint check_cube_in_pmr(const moverecord *pmr)
 {
-	if (!pmr)
+	if (!pmr) {
 		outputerrf(_("No moverecord stored for this cube."));
+		return 0;
+	}
 
 	if (pmr->mt != MOVE_NORMAL && pmr->mt != MOVE_DOUBLE
 	    && pmr->mt != MOVE_TAKE && pmr->mt != MOVE_DROP) {
@@ -2527,8 +2529,10 @@ static gint check_cmoves_in_pmr(const moverecord *pmr)
 {
 	gint c;
 
-	if (!pmr)
+	if (!pmr) {
 		outputerrf(_("No moverecord stored for this move."));
+		return 0;
+	}
 
 	if (pmr->mt != MOVE_NORMAL) {
 		outputerrf(_("This is not a normal chequer move. "
