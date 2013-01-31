@@ -84,7 +84,7 @@ static void AllocTextList(rolloutprogress *prp)
 {	/* 2d array to cache displayed widget text */
 	int i;
 	int lines = prp->n;
-	prp->pListText = malloc(sizeof(char*) * lines * 2);
+	prp->pListText = malloc(sizeof(char**) * lines * 2);
 
 	for (i = 0; i < lines; i++)
 	{
