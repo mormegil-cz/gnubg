@@ -675,39 +675,39 @@ static void AllocObjects(void)
 
 	s = exsExport.nHtmlSize;
 
-	auchMidlb = malloc((BOARD_WIDTH * s * 3 * BOARD_HEIGHT * s) * sizeof(char));
+	auchMidlb = malloc((BOARD_WIDTH * s * 3 * BOARD_HEIGHT * s) * sizeof(unsigned char));
 #if USE_GTK
     auchArrow[0] = malloc(s * ARROW_WIDTH * 4 * s * ARROW_HEIGHT);
     auchArrow[1] = malloc(s * ARROW_WIDTH * 4 * s * ARROW_HEIGHT);
 #endif
 
-	auchBoard = malloc((BOARD_WIDTH * s * 3 * BOARD_HEIGHT * s) * sizeof(char));
+	auchBoard = malloc((BOARD_WIDTH * s * 3 * BOARD_HEIGHT * s) * sizeof(unsigned char));
 	for (i = 0; i < 2; i++)
-		auchChequer[i] = malloc((CHEQUER_WIDTH * s * 4 * CHEQUER_HEIGHT * s) * sizeof(char));
-	auchChequerLabels = malloc((12 * CHEQUER_LABEL_WIDTH * s * 3 * CHEQUER_LABEL_HEIGHT * s) * sizeof(char));
-	auchLo = malloc((BOARD_WIDTH * s * 4 * BORDER_HEIGHT * s) * sizeof(char));
-	auchHi = malloc((BOARD_WIDTH * s * 4 * BORDER_HEIGHT * s) * sizeof(char));
-	auchLoRev = malloc((BOARD_WIDTH * s * 4 * BORDER_HEIGHT * s) * sizeof(char));
-	auchHiRev = malloc((BOARD_WIDTH * s * 4 * BORDER_HEIGHT * s) * sizeof(char));
-	auchCube = malloc((CUBE_WIDTH * ss * 4 * CUBE_HEIGHT * ss) * sizeof(char));
-	auchCubeFaces = malloc((12 * CUBE_LABEL_WIDTH * ss * 3 * CUBE_LABEL_HEIGHT * ss) * sizeof(char));
+		auchChequer[i] = malloc((CHEQUER_WIDTH * s * 4 * CHEQUER_HEIGHT * s) * sizeof(unsigned char));
+	auchChequerLabels = malloc((12 * CHEQUER_LABEL_WIDTH * s * 3 * CHEQUER_LABEL_HEIGHT * s) * sizeof(unsigned char));
+	auchLo = malloc((BOARD_WIDTH * s * 4 * BORDER_HEIGHT * s) * sizeof(unsigned char));
+	auchHi = malloc((BOARD_WIDTH * s * 4 * BORDER_HEIGHT * s) * sizeof(unsigned char));
+	auchLoRev = malloc((BOARD_WIDTH * s * 4 * BORDER_HEIGHT * s) * sizeof(unsigned char));
+	auchHiRev = malloc((BOARD_WIDTH * s * 4 * BORDER_HEIGHT * s) * sizeof(unsigned char));
+	auchCube = malloc((CUBE_WIDTH * ss * 4 * CUBE_HEIGHT * ss) * sizeof(unsigned char));
+	auchCubeFaces = malloc((12 * CUBE_LABEL_WIDTH * ss * 3 * CUBE_LABEL_HEIGHT * ss) * sizeof(unsigned char));
 	for (i = 0; i < 2; i++)
 	{
-		auchDice[i] = malloc((DIE_WIDTH * ss * 4 * DIE_HEIGHT * ss) * sizeof(char));
-		auchPips[i] = malloc((ss * ss * 3) * sizeof(char));
+		auchDice[i] = malloc((DIE_WIDTH * ss * 4 * DIE_HEIGHT * ss) * sizeof(unsigned char));
+		auchPips[i] = malloc((ss * ss * 3) * sizeof(unsigned char));
 	}
-	auchLabel = malloc((BOARD_WIDTH * s * 3 * BOARD_HEIGHT * s) * sizeof(char));
+	auchLabel = malloc((BOARD_WIDTH * s * 3 * BOARD_HEIGHT * s) * sizeof(unsigned char));
 	for (i = 0; i < 2; i++)
-		auchOff[i] = malloc((BEAROFF_WIDTH * s * 3 * DISPLAY_BEAROFF_HEIGHT * s) * sizeof(char));
-	auchMidBoard = malloc((BOARD_CENTER_WIDTH * s * 3 * BOARD_CENTER_HEIGHT * s) * sizeof(char));
+		auchOff[i] = malloc((BEAROFF_WIDTH * s * 3 * DISPLAY_BEAROFF_HEIGHT * s) * sizeof(unsigned char));
+	auchMidBoard = malloc((BOARD_CENTER_WIDTH * s * 3 * BOARD_CENTER_HEIGHT * s) * sizeof(unsigned char));
 	for (i = 0; i < 2; i++)
-		auchBar[i] = malloc((BAR_WIDTH * s * 3 * (POINT_HEIGHT - CUBE_HEIGHT) * s) * sizeof(char));
+		auchBar[i] = malloc((BAR_WIDTH * s * 3 * (POINT_HEIGHT - CUBE_HEIGHT) * s) * sizeof(unsigned char));
 	for (i = 0; i < 2; i++)
 		for (j = 0; j < 2; j++)
 			for (k = 0; k < 2; k++)
-				auchPoint[i][j][k] = malloc((POINT_WIDTH * s * 3 * DISPLAY_POINT_HEIGHT * s) * sizeof(char));
+				auchPoint[i][j][k] = malloc((POINT_WIDTH * s * 3 * DISPLAY_POINT_HEIGHT * s) * sizeof(unsigned char));
 	for (i = 0; i < 2; i++)
-		asRefract[i] = malloc((CHEQUER_WIDTH * s * CHEQUER_HEIGHT * s) * sizeof(short));
+		asRefract[i] = malloc((CHEQUER_WIDTH * s * CHEQUER_HEIGHT * s) * sizeof(unsigned short));
 }
 
 static void TidyObjects(void)
