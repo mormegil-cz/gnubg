@@ -99,7 +99,7 @@ static RowSet* MallocRowset(size_t rows, size_t cols)
 	pRow->widths = (size_t*)malloc(cols * sizeof(size_t));
 	memset(pRow->widths, 0, cols * sizeof(size_t));
 
-	pRow->data = malloc(rows * sizeof(char*));
+	pRow->data = malloc(rows * sizeof(char**));
 	for (i = 0; i < rows; i++)
 	{
 		pRow->data[i] = malloc(cols * sizeof(char*));
