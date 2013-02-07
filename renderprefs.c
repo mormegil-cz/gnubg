@@ -200,7 +200,7 @@ SetMaterialCommon (Material * pMat, const char *sz, const char **arg)
     opac;
   pMat->alphaBlend = (opac != 1) && (opac != 0);
 
-  if (pch) {
+  if (pch && sz) {
     sz += strlen (sz) + 1;
     if (sz && *sz) {
       *arg = sz;

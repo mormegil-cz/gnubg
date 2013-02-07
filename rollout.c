@@ -1331,6 +1331,11 @@ RolloutGeneral(ConstTanBoard * apBoard,
 
 	show_jsds = 1;
 
+	if (alternatives < 1) {
+		errno = EINVAL;
+		return -1;
+	}
+
 	ajiJSD = g_alloca(alternatives * sizeof(jsdinfo));
 	fNoMore = g_alloca(alternatives * sizeof(int));
 	aciLocal = g_alloca(alternatives * sizeof(cubeinfo));
@@ -1341,11 +1346,6 @@ RolloutGeneral(ConstTanBoard * apBoard,
 	aarSigma = g_alloca(alternatives * NUM_ROLLOUT_OUTPUTS * sizeof(float));
 	aarResult = g_alloca(alternatives * NUM_ROLLOUT_OUTPUTS * sizeof(double));
 	aarVariance = g_alloca(alternatives * NUM_ROLLOUT_OUTPUTS * sizeof(double));
-
-	if (alternatives < 1) {
-		errno = EINVAL;
-		return -1;
-	}
 
 	if (ms.nMatchTo == 0)
 		fOutputMWC = 0;
