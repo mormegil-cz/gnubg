@@ -124,7 +124,7 @@ SetSeed ( const rng rngx, void *rngctx, char *sz ) {
 
 	bSuccess = ParseULong( &sz, &n );
 
-	if( !bSuccess || n > UINT_MAX || n < 0) {
+	if( !bSuccess || n > UINT_MAX ) {
 	    outputl( _("You must specify a valid seed (see `help set seed').") );
 
 	    return;
