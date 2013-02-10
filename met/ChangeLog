@@ -1,3 +1,9 @@
+2013-02-10  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* Makefile.am, Kazaross-Shaw.xml, dunstan.xml : remove older
+	small tables that are less accurate subsets of Rockwell-Kazaross
+	* TODO : remove useless file
+
 2011-08-25  Michael Petch  <mpetch@capp-sysware.com>
 
 	* Kazaross-XG2.xml: new file
@@ -21,7 +27,7 @@ Tue Aug 31 14:21:56 Øystein Johansen  <oystein@gnubg.org>
 	* dunstan.xml: new file
 	(contributed by Ian Dunstan)
 
-Fri Apr 23 18:15:56 CEST 2004  JOern Thyssen  <jth@gnubg.org>
+Fri Apr 23 18:15:56 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* g7.xml: delete file
 	* g11.xml: new file
@@ -59,13 +65,13 @@ Thu Aug 28 16:35:01 2003  Joseph Heled  <pepster@users.sourceforge.net>
 Thu Jul  3 15:17:25 2003  Oystein Johansen  <oystein@gnubg.org>
 
         * Kazaross-Shaw.xml: new file. Table based on rollouts
-	This file is still work in progress and should not be used for 
+	This file is still work in progress and should not be used for
 	anaysis or playing.
-	
+
 Fri Apr 19 18:32:25 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* jac100.xml: new file. Jacobs & Trice met for players that
-	differ by 100 ELO rating points. 
+	differ by 100 ELO rating points.
 	[Credits to CTCampbell for typing in MET]
 
 Wed Apr 17 02:41:37 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
@@ -75,7 +81,7 @@ Wed Apr 17 02:41:37 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 Tue Apr 16 21:53:38 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* jac050.xml: new file. Jacobs & Trice met for players that
-	differ by 50 ELO rating points. 
+	differ by 50 ELO rating points.
 	[Credits to CTCampbell for typing in MET]
 
 Tue Mar 26 18:06:09 2002  Øystein Johansen <oeysteij@online.no>
@@ -85,7 +91,7 @@ Tue Mar 26 18:06:09 2002  Øystein Johansen <oeysteij@online.no>
 Sun Mar 24 18:36:09 2002  Øystein Johansen <oeysteij@online.no>
 
         * ortega.xml: New file.
- 
+
 Fri Mar 15 21:06:09 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* catalog, *.xml: update with new PUBLIC identifier.
@@ -102,8 +108,8 @@ Mon Mar 11 22:25:25 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 Sun Mar 10 22:35:28 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* woolsey.xml, jacobs.xml, snowie.xml: Calculate post crawford table as
-	"The trailer's equity at 1-away T-away post-Crawford can be calculated 
-	as twice the equity for the 1-away S-away Crawford, where S is the 
-	next odd number greater than T.". Add 1.5% for 2-away, 2-away and 
+	"The trailer's equity at 1-away T-away post-Crawford can be calculated
+	as twice the equity for the 1-away S-away Crawford, where S is the
+	next odd number greater than T.". Add 1.5% for 2-away, 2-away and
 	0.4% for 2-away, 4-away.
 
