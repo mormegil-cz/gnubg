@@ -825,7 +825,7 @@ extern gboolean ParseULong( char **ppch, unsigned long *pretVal )
     *pretVal = strtol(pchOrig, NULL, 10);
 
    /* Check for various possible errors */
-   if ((errno == ERANGE && (*pretVal == LONG_MAX || *pretVal == LONG_MIN))
+   if ((errno == ERANGE && (*pretVal == LONG_MAX || *pretVal == (unsigned long)LONG_MIN))
             || (errno != 0 && pretVal == 0)) 
 	return FALSE;
 
