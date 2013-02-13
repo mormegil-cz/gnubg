@@ -807,9 +807,9 @@ ExtendMET ( float aarMET[ MAXSCORE ][ MAXSCORE ],
       rSigma = sqrtf( rStddev0 * rStddev0 + rStddev1 * rStddev1 ) * sqrtf( rGames );
 
       if ( 6.0f * rSigma > nScore0 - nScore1 )
-        aafMET[ i ][ j ] = NormalDistArea ( (float)(nScore0 - nScore1), 6.0f * rSigma, 0.0f, rSigma );
+        aarMET[ i ][ j ] = NormalDistArea ( (float)(nScore0 - nScore1), 6.0f * rSigma, 0.0f, rSigma );
       else
-        aafMET[ i ][ j ] = 0.0f;
+        aarMET[ i ][ j ] = 0.0f;
     }
   }
 
@@ -818,7 +818,7 @@ ExtendMET ( float aarMET[ MAXSCORE ][ MAXSCORE ],
   for ( i = 0; i < MAXSCORE; i++ )
     for ( j = ( (i < nMaxScore) ? nMaxScore : i + 1);
           j < MAXSCORE; j++ )
-      aafMET[ i ][ j ] = 1.0f - aafMET[ j ][ i ];
+      aarMET[ i ][ j ] = 1.0f - aarMET[ j ][ i ];
 
 }
 
