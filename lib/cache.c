@@ -376,6 +376,8 @@ void CacheStats(const evalCache* pc, unsigned int* pcLookup, unsigned int* pcHit
    if( pcUsed )
       *pcUsed = pc->nAdds;
 #else
+   (void)pc;	/* suppress unused parameter compiler warning */
+
    if ( pcLookup )
       *pcLookup = 0;
 
