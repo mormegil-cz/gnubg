@@ -780,8 +780,8 @@ ExtendMET ( float aarMET[ MAXSCORE ][ MAXSCORE ],
   { 0, 1.24f, 1.27f, 1.47f, 1.50f, 1.60f, 1.61f, 1.66f, 1.68f, 1.70f, 1.72f, 1.77f };
 
   float rStddev0, rStddev1, rGames, rSigma;
-  unsigned int i, j;
-  unsigned int nScore0, nScore1;
+  int i, j;
+  int nScore0, nScore1;
 
 /* Extend match equity table */
   for ( i = nMaxScore; i < MAXSCORE; i++ ) {
