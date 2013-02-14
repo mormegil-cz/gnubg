@@ -763,7 +763,7 @@ extern void CommandExportHTMLImages( char *sz )
 }
 
 #else /* not HAVE_LIBPNG */
-extern void CommandExportHTMLImages( char *sz )
+extern void CommandExportHTMLImages( char *UNUSED(sz) )
 {
 	outputl( _("This installation of GNU Backgammon was compiled without\n"
 		"support for writing HTML images.") );

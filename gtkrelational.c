@@ -675,7 +675,7 @@ extern void RelationalSaveOptions(void)
 
 extern GtkWidget *RelationalOptions(void)
 {
-	unsigned int i;
+	int i;
 	GtkWidget *hb1, *hb2, *vb1, *vb2, *table, *lbl, *align,
 		*help, *pwScrolled;
 
