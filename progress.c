@@ -1199,6 +1199,8 @@ RolloutProgressEnd( void **pp, gboolean destroy ) {
   if ( fX ) {
     return GTKRolloutProgressEnd( pp, destroy );
   }
+#else
+  (void)destroy;	/* suppress unused parameter compiler warning */
 #endif /* USE_GTK */
 
   return TextRolloutProgressEnd( pp );

@@ -2743,6 +2743,8 @@ extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
 			 0, 0,
 			 prd->nSize * ARROW_WIDTH, prd->nSize * ARROW_HEIGHT );
 	}
+#else
+	(void)anArrowPosition;	/* suppress unused parameter compiler warning */
 #endif
 }
 
