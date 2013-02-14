@@ -221,7 +221,7 @@ void SetDBSettings(DBProviderType dbType, const char *database, const char *user
 
 void RelationalSaveSettings(FILE *pf)
 {
-	unsigned int i;
+	int i;
 	fprintf(pf, "relational setup storegamestats=%s\n", storeGameStats ? "yes" : "no");
 	
 	if (dbProviderType != INVALID_PROVIDER)
@@ -260,6 +260,7 @@ extern DBProvider* GetDBProvider(DBProviderType dbType)
 	}
 #endif
 #if !NUM_PROVIDERS
+	(void)dbType;	/* suppress unused parameter compiler warning */
 	return NULL;
 #else
 	if (dbType == INVALID_PROVIDER)
