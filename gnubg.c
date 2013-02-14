@@ -1000,6 +1000,8 @@ extern void UpdateSetting( void *p )
 #if USE_GTK
     if( fX )
 	GTKSet( p );
+#else
+    (void)p;	/* suppress unused parameter compiler warning */
 #endif
 }
 
@@ -4450,7 +4452,7 @@ static void setup_readline(void)
 }
 
 #if !USE_GTK
-static void PushSplash(char *unused, char *heading, char *message)
+static void PushSplash(char *UNUSED(unused), char *UNUSED(heading), char *UNUSED(message))
 {
 }
 #endif
