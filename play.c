@@ -655,6 +655,8 @@ extern void SetMoveRecord( void *pv ) {
 #if USE_GTK
     if( fX )
 	GTKSetMoveRecord( pv );
+#else
+    (void)pv;	/* suppress unused parameter compiler warning */
 #endif
 }
 
