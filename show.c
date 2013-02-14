@@ -2022,6 +2022,8 @@ CommandShowRolls ( char *sz ) {
 
 #if USE_GTK
   int nDepth = ParseNumber ( &sz );
+#else
+  (void)sz;	 /* suppress unused parameter compiler warning */
 #endif
 
   if( ms.gs != GAME_PLAYING ) {
@@ -2097,6 +2099,8 @@ CommandShowTemperatureMap( char *sz ) {
     
     return;
   }
+#else
+  (void)sz;	/* suppress unused parameter compiler warning */
 #endif
 
   CommandNotImplemented( NULL );
