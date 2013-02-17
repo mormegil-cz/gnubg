@@ -265,8 +265,6 @@ float    arLuckLevel[] = {
 	0,     /* SKILL_NONE */
     };
 
-evalcontext ecTD = { FALSE, 0, FALSE, TRUE, 0.0 };
-
 /* this is the "normal" movefilter*/
 #define MOVEFILTER \
   { { { 0,  8, 0.16f }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , \
