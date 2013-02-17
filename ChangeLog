@@ -1,3 +1,8 @@
+2013-02-17  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* format.c: Use EMG by default in matchplay analysis output since
+	these numbers are generally easier to interpret than MWC.
+
 2013-01-23  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* simpleboard.c, simpleboard.h, export.c: Improve export of

@@ -32,7 +32,7 @@
 #include "positionid.h"
 
 
-int fOutputMWC = TRUE;
+int fOutputMWC = FALSE;
 int fOutputWinPC = FALSE;
 int fOutputMatchPC = TRUE;
 unsigned int fOutputDigits = 3;
