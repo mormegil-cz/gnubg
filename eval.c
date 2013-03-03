@@ -347,7 +347,7 @@ int aiSettingsMoveFilter[ NUM_SETTINGS ] = {
   -1, /* casual play: n/a */
   -1, /* intermediate: n/a */
   -1, /* advanced: n/a */
-  -1, /* expoert: n/a */
+  -1, /* expert: n/a */
   2,  /* wc: normal */
   3,  /* supremo: large */
   3,  /* grandmaster: large */
@@ -3721,16 +3721,15 @@ Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX )
 
   /* First calculate average win and loss W and L: */
 
-  if ( arOutput[ 0 ] > epsilon )
-    rW = 1.0f + ( arOutput[ 1 ] + arOutput[ 2 ] ) / arOutput[ 0 ];
+  if ( arOutput[ OUTPUT_WIN ] > epsilon )
+    rW = 1.0f + ( arOutput[ OUTPUT_WINGAMMON ] + arOutput[ OUTPUT_WINBACKGAMMON ] ) / arOutput[ OUTPUT_WIN ];
   else {
     /* basically a dead cube */
     return Utility ( arOutput, pci );
   }
 
-  if ( arOutput[ 0 ] < omepsilon )
-    rL = 1.0f + ( arOutput[ 3 ] + arOutput[ 4 ] ) /
-      ( 1.0f - arOutput [ 0 ] );
+  if ( arOutput[ OUTPUT_WIN ] < omepsilon )
+    rL = 1.0f + ( arOutput[ OUTPUT_LOSEGAMMON ] + arOutput[ OUTPUT_LOSEBACKGAMMON ] ) / ( 1.0f - arOutput[ OUTPUT_WIN ] );
   else {
     /* basically a dead cube */
     return Utility ( arOutput, pci );
@@ -3738,7 +3737,7 @@ Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX )
 
   
   rEqDead = Utility( arOutput, pci );
-  rEqLive = MoneyLive( rW, rL, arOutput[ 0 ], pci );
+  rEqLive = MoneyLive( rW, rL, arOutput[ OUTPUT_WIN ], pci );
 
   return rEqDead * ( 1.0f - rCubeX ) + rEqLive * rCubeX;
 
@@ -3760,18 +3759,18 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX
 
   /* Calculate normal, gammon, and backgammon ratios */
 
-  if ( arOutput[ 0 ] > 0.0 ) {
-    rG0 = ( arOutput[ 1 ] - arOutput[ 2 ] ) / arOutput[ 0 ];
-    rBG0 = arOutput[ 2 ] / arOutput[ 0 ];
+  if ( arOutput[ OUTPUT_WIN ] > 0.0 ) {
+    rG0 = ( arOutput[ OUTPUT_WINGAMMON ] - arOutput[ OUTPUT_WINBACKGAMMON ] ) / arOutput[ OUTPUT_WIN ];
+    rBG0 = arOutput[ OUTPUT_WINBACKGAMMON ] / arOutput[ OUTPUT_WIN ];
   }
   else {
     rG0 = 0.0;
     rBG0 = 0.0;
   }
 
-  if ( arOutput[ 0 ] < 1.0 ) {
-    rG1 = ( arOutput[ 3 ] - arOutput[ 4 ] ) / ( 1.0f - arOutput[ 0 ] );
-    rBG1 = arOutput[ 4 ] / ( 1.0f - arOutput[ 0 ] );
+  if ( arOutput[ OUTPUT_WIN ] < 1.0 ) {
+    rG1 = ( arOutput[ OUTPUT_LOSEGAMMON ] - arOutput[ OUTPUT_LOSEBACKGAMMON ] ) / ( 1.0f - arOutput[ OUTPUT_WIN ] );
+    rBG1 = arOutput[ OUTPUT_LOSEBACKGAMMON ] / ( 1.0f - arOutput[ OUTPUT_WIN ] );
   }
   else {
     rG1 = 0.0;
@@ -3798,7 +3797,7 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX
   rOppTG = 1.0f - arCP[ ! pci->fMove ];
   rTG = arCP[ pci->fMove ];
 
-  if ( arOutput[ 0 ] <= rOppTG ) {
+  if ( arOutput[ OUTPUT_WIN ] <= rOppTG ) {
 
     /* Opp too good to double */
 
@@ -3809,7 +3808,7 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX
     if ( rOppTG > 0.0 ) 
       /* avoid division by zero */
       rMWCLive = rMWCLose + 
-        ( rMWCOppCash - rMWCLose ) * arOutput[ 0 ] / rOppTG;
+        ( rMWCOppCash - rMWCLose ) * arOutput[ OUTPUT_WIN ] / rOppTG;
     else
       rMWCLive = rMWCLose;
       
@@ -3818,13 +3817,13 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX
     return  rMWCDead * ( 1.0f - rCubeX ) + rMWCLive * rCubeX;
 
   }
-  else if ( rOppTG < arOutput[ 0 ] && arOutput[ 0 ] < rTG ) {
+  else if ( rOppTG < arOutput[ OUTPUT_WIN ] && arOutput[ OUTPUT_WIN ] < rTG ) {
 
     /* In double window */
 
     rMWCLive = 
       rMWCOppCash + 
-      (rMWCCash - rMWCOppCash) * ( arOutput[ 0 ] - rOppTG ) / ( rTG - rOppTG); 
+      (rMWCCash - rMWCOppCash) * ( arOutput[ OUTPUT_WIN ] - rOppTG ) / ( rTG - rOppTG); 
     return  rMWCDead * ( 1.0f - rCubeX ) + rMWCLive * rCubeX;
 
   } else {
@@ -3845,7 +3844,7 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX
 
     if ( rTG < 1.0 )
       rMWCLive = rMWCCash + 
-        ( rMWCWin - rMWCCash ) * ( arOutput[ 0 ] - rTG ) / ( 1.0f - rTG );
+        ( rMWCWin - rMWCCash ) * ( arOutput[ OUTPUT_WIN ] - rTG ) / ( 1.0f - rTG );
     else
       rMWCLive = rMWCWin;
 
@@ -3873,18 +3872,18 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX ) 
 
   /* Calculate normal, gammon, and backgammon ratios */
 
-  if ( arOutput[ 0 ] > 0.0 ) {
-    rG0 = ( arOutput[ 1 ] - arOutput[ 2 ] ) / arOutput[ 0 ];
-    rBG0 = arOutput[ 2 ] / arOutput[ 0 ];
+  if ( arOutput[ OUTPUT_WIN ] > 0.0 ) {
+    rG0 = ( arOutput[ OUTPUT_WINGAMMON ] - arOutput[ OUTPUT_WINBACKGAMMON ] ) / arOutput[ OUTPUT_WIN ];
+    rBG0 = arOutput[ OUTPUT_WINBACKGAMMON ] / arOutput[ OUTPUT_WIN ];
   }
   else {
     rG0 = 0.0;
     rBG0 = 0.0;
   }
 
-  if ( arOutput[ 0 ] < 1.0 ) {
-    rG1 = ( arOutput[ 3 ] - arOutput[ 4 ] ) / ( 1.0f - arOutput[ 0 ] );
-    rBG1 = arOutput[ 4 ] / ( 1.0f - arOutput[ 0 ] );
+  if ( arOutput[ OUTPUT_WIN ] < 1.0 ) {
+    rG1 = ( arOutput[ OUTPUT_LOSEGAMMON ] - arOutput[ OUTPUT_LOSEBACKGAMMON ] ) / ( 1.0f - arOutput[ OUTPUT_WIN ] );
+    rBG1 = arOutput[ OUTPUT_LOSEBACKGAMMON ] / ( 1.0f - arOutput[ OUTPUT_WIN ] );
   }
   else {
     rG1 = 0.0;
@@ -3908,7 +3907,7 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX ) 
 
   rTG = arCP[ pci->fMove ];
 
-  if ( arOutput[ 0 ] <= rTG ) {
+  if ( arOutput[ OUTPUT_WIN ] <= rTG ) {
     
     /* MWC(live cube) linear interpolation between the
        points:
@@ -3924,7 +3923,7 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX ) 
 
     if ( rTG > 0.0 )
       rMWCLive = rMWCLose + 
-        ( rMWCCash - rMWCLose ) * arOutput[ 0 ] / rTG;
+        ( rMWCCash - rMWCLose ) * arOutput[ OUTPUT_WIN ] / rTG;
     else
       rMWCLive = rMWCLose;
 
@@ -3952,7 +3951,7 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX ) 
 
     if ( rTG < 1.0 )
       rMWCLive = rMWCCash + 
-        ( rMWCWin - rMWCCash ) * ( arOutput[ 0 ] - rTG ) / ( 1.0f - rTG );
+        ( rMWCWin - rMWCCash ) * ( arOutput[ OUTPUT_WIN ] - rTG ) / ( 1.0f - rTG );
     else
       rMWCLive = rMWCWin;
       
@@ -3981,18 +3980,18 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCu
 
   /* Calculate normal, gammon, and backgammon ratios */
 
-  if ( arOutput[ 0 ] > 0.0 ) {
-    rG0 = ( arOutput[ 1 ] - arOutput[ 2 ] ) / arOutput[ 0 ];
-    rBG0 = arOutput[ 2 ] / arOutput[ 0 ];
+  if ( arOutput[ OUTPUT_WIN ] > 0.0 ) {
+    rG0 = ( arOutput[ OUTPUT_WINGAMMON ] - arOutput[ OUTPUT_WINBACKGAMMON ] ) / arOutput[ OUTPUT_WIN ];
+    rBG0 = arOutput[ OUTPUT_WINBACKGAMMON ] / arOutput[ OUTPUT_WIN ];
   }
   else {
     rG0 = 0.0;
     rBG0 = 0.0;
   }
 
-  if ( arOutput[ 0 ] < 1.0 ) {
-    rG1 = ( arOutput[ 3 ] - arOutput[ 4 ] ) / ( 1.0f - arOutput[ 0 ] );
-    rBG1 = arOutput[ 4 ] / ( 1.0f - arOutput[ 0 ] );
+  if ( arOutput[ OUTPUT_WIN ] < 1.0 ) {
+    rG1 = ( arOutput[ OUTPUT_LOSEGAMMON ] - arOutput[ OUTPUT_LOSEBACKGAMMON ] ) / ( 1.0f - arOutput[ OUTPUT_WIN ] );
+    rBG1 = arOutput[ OUTPUT_LOSEBACKGAMMON ] / ( 1.0f - arOutput[ OUTPUT_WIN ] );
   }
   else {
     rG1 = 0.0;
@@ -4016,7 +4015,7 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCu
 
   rOppTG = 1.0f - arCP[ ! pci->fMove ];
 
-  if ( arOutput[ 0 ] <= rOppTG ) {
+  if ( arOutput[ OUTPUT_WIN ] <= rOppTG ) {
 
     /* Opponent is too good to double.
 
@@ -4035,7 +4034,7 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCu
     if ( rOppTG > 0.0 ) 
       /* avoid division by zero */
       rMWCLive = rMWCLose + 
-        ( rMWCOppCash - rMWCLose ) * arOutput[ 0 ] / rOppTG;
+        ( rMWCOppCash - rMWCLose ) * arOutput[ OUTPUT_WIN ] / rOppTG;
     else
       rMWCLive = rMWCLose;
       
@@ -4058,9 +4057,9 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCu
       + rG0 * aarMETResult[pci->fMove][NDWG]
       + rBG0 * aarMETResult[pci->fMove][NDWB];
 
-    if ( arOutput[ 0 ] != rOppTG )
+    if ( arOutput[ OUTPUT_WIN ] != rOppTG )
       rMWCLive = rMWCOppCash + 
-        ( rMWCWin - rMWCOppCash ) * ( arOutput[ 0 ] - rOppTG ) 
+        ( rMWCWin - rMWCOppCash ) * ( arOutput[ OUTPUT_WIN ] - rOppTG ) 
         / ( 1.0f - rOppTG );
     else
       rMWCLive = rMWCWin;
@@ -4566,7 +4565,7 @@ getCurrentGammonRates ( float aarRates[ 2 ][ 2 ],
 /*
  * Get take, double, beaver, etc points for money game using
  * Rick Janowski's formulae:
- *   http://www.msoworld.com/mindzine/news/classic/bg/cubeformulae.html
+ *   http://www.bkgm.com/articles/Janowski/cubeformulae.pdf
  *
  * Input:
  *   fJacoby, fBeavers: flags for different flavours of money game
@@ -4800,11 +4799,11 @@ getMatchPoints ( float aaarPoints[ 2 ][ 4 ][ 2 ],
 
   /* get cash points */
 
-  arOutput[ 0 ] = 0.5f;
-  arOutput[ 1 ] = 0.5f * ( aarRates[ 0 ][ 0 ] + aarRates[ 0 ][ 1 ] );
-  arOutput[ 2 ] = 0.5f * aarRates[ 0 ][ 1 ];
-  arOutput[ 3 ] = 0.5f * ( aarRates[ 1 ][ 0 ] + aarRates[ 1 ][ 1 ] );
-  arOutput[ 4 ] = 0.5f * aarRates[ 1 ][ 1 ];
+  arOutput[ OUTPUT_WIN ] = 0.5f;
+  arOutput[ OUTPUT_WINGAMMON ] = 0.5f * ( aarRates[ 0 ][ 0 ] + aarRates[ 0 ][ 1 ] );
+  arOutput[ OUTPUT_WINBACKGAMMON ] = 0.5f * aarRates[ 0 ][ 1 ];
+  arOutput[ OUTPUT_LOSEGAMMON ] = 0.5f * ( aarRates[ 1 ][ 0 ] + aarRates[ 1 ][ 1 ] );
+  arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.5f * aarRates[ 1 ][ 1 ];
 
   GetPoints ( arOutput, pci, arCP2 );
 
@@ -6271,8 +6270,8 @@ EvaluatePositionCubeful4( NNState *nnStates, const TanBoard anBoard,
         return -1;
       }
 
-      arOutput[ 0 ] = ( arEquity[ 0 ] + 1.0f ) / 2.0f;
-      arOutput[ 1 ] = arOutput[ 2 ] = arOutput[ 3 ] = arOutput[ 4 ] = 0.0;
+      arOutput[ OUTPUT_WIN ] = ( arEquity[ 0 ] + 1.0f ) / 2.0f;
+      arOutput[ OUTPUT_WINGAMMON ] = arOutput[ OUTPUT_WINBACKGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ] = arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0;
 
     }
     else {
@@ -6463,11 +6462,6 @@ EvaluatePositionCubeful3( NNState *nnStates, const TanBoard anBoard,
 	  {
         continue;
 	  }
-      /* argh, bug #9211: the stuff in EvalKey only stores 4 bit for
-         the score, so a score of -20,-20 is treated identical to
-         -4,-4.... */
-
-
 
       ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ], TRUE );
 
