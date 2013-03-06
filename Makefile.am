@@ -239,7 +239,7 @@ gnubg.wd:
 	@echo ' ** on the host system.'
 else
 gnubg.wd: gnubg.weights makeweights$(EXEEXT)
-	[ -s $@ ] || \
+	[ $@ -nt $< ] || \
 	./makeweights -f $@ $< 
 gnubg_os0.bd: makebearoff$(EXEEXT)
 	[ -s $@ ] || \
