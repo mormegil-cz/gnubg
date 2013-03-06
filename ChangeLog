@@ -1,3 +1,8 @@
+2013-03-06  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* configure.ac, credits.sh, eval.h, gnubg.weights: New nets.
+	Version bumped to 0.91.
+
 2013-02-17  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* format.c: Use EMG by default in matchplay analysis output since
@@ -77,7 +82,7 @@
 
 2012-10-07  Michael Petch  <mpetch@capp-sysware.com>
 	* +win32/*, pixmaps/Makefile.am, configure.in, Makefile.am: 
-	Added WIN32 resource support (icons etc), and gemeral
+	Added WIN32 resource support (icons etc), and general
 	automake cleanup 
 
 2012-09-18  Michael Petch  <mpetch@capp-sysware.com>

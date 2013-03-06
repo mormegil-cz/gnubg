@@ -37,6 +37,7 @@ Joern Thyssen
 Gary Wong
 Christian Anthon
 Michael Petch
+Philippe Michel
 EOF
 
 cat > $contributors <<EOF
@@ -46,7 +47,6 @@ Nis Joergensen
 Petr Kadlec
 Kaoru Takahashi
 Stein Kulseth
-Philippe Michel
 Rod Roark
 Ingo Macherius
 EOF
@@ -258,7 +258,7 @@ cat > credits.c <<EOF
 #include "credits.h"
 
 const char aszCOPYRIGHT[] = N_("Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004 by Gary Wong.\n"
-                               "Copyright (C) 2012 by Gary Wong and the AUTHORS; for details type \`show version'.");
+                               "Copyright (C) 2013 by Gary Wong and the AUTHORS; for details type \`show version'.");
 
 credEntry ceAuthors[] = {
 EOF
