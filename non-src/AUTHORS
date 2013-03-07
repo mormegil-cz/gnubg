@@ -1,8 +1,9 @@
                          GNU Backgammon was written by:
 
-    Joseph Heled            David Montgomery        Gary Wong
-    Oystein Johansen        Jim Segrave             Christian Anthon
-    Jonathan Kinsey         Joern Thyssen           Michael Petch
+    Joseph Heled            Jim Segrave             Michael Petch
+    Oystein Johansen        Joern Thyssen           Philippe Michel
+    Jonathan Kinsey         Gary Wong
+    David Montgomery        Christian Anthon
  
                                    Support by:
 
@@ -11,9 +12,9 @@
 
                          Contributors of code include:
 
-    Olivier Baur            Petr Kadlec             Philippe Michel
-    Holger Bochnig          Kaoru Takahashi         Rod Roark
-    Nis Joergensen          Stein Kulseth           Ingo Macherius
+    Olivier Baur            Petr Kadlec             Rod Roark
+    Holger Bochnig          Kaoru Takahashi         Ingo Macherius
+    Nis Joergensen          Stein Kulseth           Guido Flohr
 
                             Translations by:
 
@@ -30,42 +31,41 @@
 
              Contributors (of bug reports and suggestions) include:
 
-    Misja Alma              Neil Kazaross           James Rech
-    Kazuaki Asai            Mathias Kegelmann       Jared Riley
-    Eric Augustine          Matija Kejzar           Klaus Rindholt
-    Erik Barfoed            Bert Van Kerckhove      Oliver Riordan
-    Ron Barry               James F. Kibler         Alex Romosan
-    Steve Baedke            Johnny Kirk             Hans-Juergen Schaefer
-    Stefan van den Berg     Gerhard Knop            Steve Schreiber
-    Chuck Bower             Robert Konigsberg       Hugh Sconyers
-    Adrian Bunk             Martin Krainer          Martin Schrode
-    Nick Bratby             Elias Kritikos          Paul Selick
-    Craig Campbell          Corrin Lakeland         Sho Sengoku
-    Timothy Chow            Tim Laursen             Ian Shaw
-    John Chuang             Eli Liang               Alberta di Silvio
-    Tristan Colgate         Ege Lundgren            Peter Sochovsky
-    Olivier Croisille       Kevin Maguire           Mark Spencer
-    Ned Cross               Massimiliano Maini      Scott Steiner
-    Ian Curtis              Giulio De Marco         Maik Stiebler
-    Bill Davidson           John Marttila           W. Stroop (Rob)
-    Michael Depreli         Alix Martin             Yoshito Takeuchi
-    Ian Dunstan             Tom Martin              Jacques Thiriat
-    Max Durbano             William Maslen          Malene Thyssen
-    Peter Eberhard          Joachim Matussek        Claes Tornberg
-    Robert Eberlein         Thomas Meyer            Sander van Rijnswou
-    Guido Flohr             Daniel Murphy           Robert-Jan Veldhuizen
-    Fotis                   Magnar Naustdalslid     Morten Wang
-    Kennedy Fraser          Dave Neary              Jeff White
-    Ric Gerace              Rolf Nielsen            JP White
-    Michel Grimminck        Mirori Orange           Mike Whitton
-    Eric Groleau            Peter Orum              Chris Wilson
-    Jeff Haferman           Roy Passfield           Kit Woolsey
-    Morten Juul Henriksen   Thomas Patrick          Frank Worrell
-    Alain Henry             Billie Patterson        Christopher D. Yep
-    Jens Hoefkens           Zvezdan Petkovic        Anders Zachrison
-    Casey Hopkins           Petri Pitkanen          Douglas Zare
-    Martin Janke            Sam Pottle              Louis Zulli
-    Nis Jorgensen           Henrik Ravn
+    Misja Alma              Mathias Kegelmann       James Rech
+    Kazuaki Asai            Matija Kejzar           Jared Riley
+    Eric Augustine          Bert Van Kerckhove      Klaus Rindholt
+    Erik Barfoed            James F. Kibler         Oliver Riordan
+    Ron Barry               Johnny Kirk             Alex Romosan
+    Steve Baedke            Gerhard Knop            Hans-Juergen Schaefer
+    Stefan van den Berg     Robert Konigsberg       Steve Schreiber
+    Chuck Bower             Martin Krainer          Hugh Sconyers
+    Adrian Bunk             Elias Kritikos          Martin Schrode
+    Nick Bratby             Corrin Lakeland         Paul Selick
+    Craig Campbell          Tim Laursen             Sho Sengoku
+    Timothy Chow            Eli Liang               Ian Shaw
+    John Chuang             Ege Lundgren            Alberta di Silvio
+    Tristan Colgate         Kevin Maguire           Peter Sochovsky
+    Olivier Croisille       Massimiliano Maini      Mark Spencer
+    Ned Cross               Giulio De Marco         Scott Steiner
+    Ian Curtis              John Marttila           Maik Stiebler
+    Bill Davidson           Alix Martin             W. Stroop (Rob)
+    Michael Depreli         Tom Martin              Yoshito Takeuchi
+    Ian Dunstan             William Maslen          Jacques Thiriat
+    Max Durbano             Joachim Matussek        Malene Thyssen
+    Peter Eberhard          Thomas Meyer            Claes Tornberg
+    Robert Eberlein         Daniel Murphy           Sander van Rijnswou
+    Fotis                   Magnar Naustdalslid     Robert-Jan Veldhuizen
+    Kennedy Fraser          Dave Neary              Morten Wang
+    Ric Gerace              Rolf Nielsen            Jeff White
+    Michel Grimminck        Mirori Orange           JP White
+    Eric Groleau            Peter Orum              Mike Whitton
+    Jeff Haferman           Roy Passfield           Chris Wilson
+    Morten Juul Henriksen   Thomas Patrick          Kit Woolsey
+    Alain Henry             Billie Patterson        Frank Worrell
+    Jens Hoefkens           Zvezdan Petkovic        Christopher D. Yep
+    Casey Hopkins           Petri Pitkanen          Anders Zachrison
+    Martin Janke            Sam Pottle              Douglas Zare
+    Neil Kazaross           Henrik Ravn             Louis Zulli
 
 
   Credit is also due to those who have published information about backgammon
