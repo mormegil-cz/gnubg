@@ -49,6 +49,7 @@ Kaoru Takahashi
 Stein Kulseth
 Rod Roark
 Ingo Macherius
+Guido Flohr
 EOF
 
 cat > $support <<EOF
@@ -95,7 +96,6 @@ Ian Dunstan
 Max Durbano
 Peter Eberhard
 Robert Eberlein
-Guido Flohr
 Fotis
 Kennedy Fraser
 Ric Gerace
@@ -107,7 +107,6 @@ Alain Henry
 Jens Hoefkens
 Casey Hopkins
 Martin Janke
-Nis Jorgensen
 Neil Kazaross
 Mathias Kegelmann
 Matija Kejzar
