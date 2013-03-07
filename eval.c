@@ -40,12 +40,6 @@
 #include "multithread.h"
 #include "util.h"
 
-#ifdef WIN32
-#define BINARY O_BINARY
-#else
-#define BINARY 0
-#endif
-
 typedef int ( *classevalfunc )( const TanBoard anBoard, float arOutput[],
                                  const bgvariation bgv, NNState *nnStates );
 
@@ -239,10 +233,6 @@ enum {
 #define NUM_INPUTS ((25 * MINPPERPOINT + MORE_INPUTS) * 2)
 #define NUM_RACE_INPUTS ( HALF_RACE_INPUTS * 2 )
 #define NUM_PRUNING_INPUTS (25 * MINPPERPOINT * 2)
-
-#define DATABASE1_SIZE ( 54264 * 32 * 2 )
-#define DATABASE2_SIZE ( 924 * 924 * 2 )
-#define DATABASE_SIZE ( DATABASE1_SIZE + DATABASE2_SIZE )
 
 static int anEscapes[ 0x1000 ];
 static int anEscapes1[ 0x1000 ];
@@ -691,8 +681,8 @@ extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 	}
 
     if( szWeightsBinary)
-    { 
-		pfWeights = g_fopen(szWeightsBinary, "rb");
+      { 
+	    pfWeights = g_fopen(szWeightsBinary, "rb");
 	    if (!binary_weights_failed(szWeightsBinary, pfWeights))
 	    {
 		    if( !fReadWeights && !( fReadWeights =
@@ -713,7 +703,7 @@ extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 
     if( !fReadWeights && szWeights )
 	{
-		pfWeights = g_fopen(szWeights, "r");
+	    pfWeights = g_fopen(szWeights, "r");
 	    if (!weights_failed(szWeights, pfWeights))
 	    {
 		setlocale (LC_ALL, "C");
