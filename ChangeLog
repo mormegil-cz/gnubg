@@ -1,3 +1,9 @@
+2013-03-07  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* eval.c: Use SSE instructions, if available, in the pruning nets
+	computations. This is a small speed improvement but constrains the
+	size of the pruning nets' intermediate layer to be a multiple of 4.
+
 2013-03-06  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* configure.ac, credits.sh, eval.h, gnubg.weights: New nets.

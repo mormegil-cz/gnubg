@@ -5488,7 +5488,11 @@ static void FindBestMoveInEval(NNState * nnStates, int const nDice0, int const n
 				neuralnet *n = nets[pc - CLASS_RACE];
 				if (nnStates)
 					nnStates[pc - CLASS_RACE].state = (i == 0) ? NNSTATE_INCREMENTAL : NNSTATE_DONE;
+#if USE_SSE_VECTORIZE
+				NeuralNetEvaluateSSE(n, arInput, arOutput, nnStates);
+#else
 				NeuralNetEvaluate(n, arInput, arOutput, nnStates);
+#endif
 				if (pc == CLASS_RACE)
 					/* special evaluation of backgammons
 					   overrides net output */
