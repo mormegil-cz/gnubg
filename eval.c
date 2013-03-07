@@ -1809,15 +1809,12 @@ ClassifyPosition( const TanBoard anBoard, const bgvariation bgv )
   switch ( bgv ) {
   case VARIATION_HYPERGAMMON_1:
     return CLASS_HYPERGAMMON1;
-    break;
 
   case VARIATION_HYPERGAMMON_2:
     return CLASS_HYPERGAMMON2;
-    break;
 
   case VARIATION_HYPERGAMMON_3:
     return CLASS_HYPERGAMMON3;
-    break;
 
   case VARIATION_STANDARD:
   case VARIATION_NACKGAMMON:
@@ -1879,8 +1876,6 @@ ClassifyPosition( const TanBoard anBoard, const bgvariation bgv )
       return CLASS_RACE;
 
     }
-
-    break;
 
   default:
 
@@ -2407,10 +2402,8 @@ EvaluatePerfectCubeful ( const TanBoard anBoard, float arEquity[],
   switch ( pc ) {
   case CLASS_BEAROFF2:
     return PerfectCubeful( pbc2, anBoard, arEquity );
-    break;
   case CLASS_BEAROFF_TS:
     return PerfectCubeful( pbcTS, anBoard, arEquity );
-    break;
   default:
     g_assert ( FALSE );
     break;
@@ -4100,8 +4093,7 @@ EvalEfficiency( const TanBoard anBoard, positionclass pc )
 
   switch ( pc ) {
   case CLASS_OVER:
-    return 0.0; /* dead cube */
-    break;
+    return 0.0f; /* dead cube */
 
   case CLASS_HYPERGAMMON1:
   case CLASS_HYPERGAMMON2:
@@ -4110,7 +4102,6 @@ EvalEfficiency( const TanBoard anBoard, positionclass pc )
     /* FIXME */
     
      return 0.60f;
-     break;
      
   case CLASS_BEAROFF1:
   case CLASS_BEAROFF_OS:
@@ -4123,7 +4114,6 @@ EvalEfficiency( const TanBoard anBoard, positionclass pc )
        situations. */
 
     return rOSCubeX;
-    break;
 
   case CLASS_RACE:
     {
@@ -4154,18 +4144,15 @@ EvalEfficiency( const TanBoard anBoard, positionclass pc )
     /* FIXME: very important: use opponents inputs as well */
     
     return rContactX ;
-    break;
 
   case CLASS_CRASHED:
 
     return rCrashedX;
-    break;
 
   case CLASS_BEAROFF2:
   case CLASS_BEAROFF_TS:
 
     return rTSCubeX;	/* for match play only */
-    break;
 
   default:
     g_assert( FALSE );
@@ -5093,14 +5080,12 @@ getPercent ( const cubedecision cd,
   case OPTIONAL_DOUBLE_PASS:
   case OPTIONAL_REDOUBLE_PASS:
     /* correct cube action */
-    return -1.0;
-    break;
+    return -1.0f;
 
   case TOOGOODRE_TAKE:
   case TOOGOOD_TAKE:
     /* never correct to double */
-    return -1.0;
-    break;
+    return -1.0f;
 
   case NODOUBLE_TAKE:
   case NODOUBLE_BEAVER:
@@ -5112,7 +5097,6 @@ getPercent ( const cubedecision cd,
     return 
       ( arDouble[ OUTPUT_NODOUBLE ] - arDouble[ OUTPUT_TAKE ] ) /
       (arDouble[ OUTPUT_DROP ] - arDouble[ OUTPUT_TAKE ] );
-    break;
 
   case TOOGOOD_PASS:
   case TOOGOODRE_PASS:
@@ -5122,13 +5106,11 @@ getPercent ( const cubedecision cd,
       /* strange match play scenario 
          (see 3-ply eval on cAmgACAAGAAA/4HPkAUgzW8EBMA):
          never correct to double! */
-      return -1.0;
+      return -1.0f;
     else
       return 
         ( arDouble[ OUTPUT_NODOUBLE ] - arDouble[ OUTPUT_DROP ] ) /
         (arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_DROP ] );
-
-    break;
 
   default:
 
@@ -5136,7 +5118,7 @@ getPercent ( const cubedecision cd,
 
   }
 
-  return -1.0;
+  return -1.0f;
 }
 
 
@@ -5266,13 +5248,10 @@ isMissedDouble ( float arDouble[],
   case REDOUBLE_PASS:
 
     return ! fDouble;
-    break;
 
   default:
 
     return 0;
-    break;
-
 
   }
 
