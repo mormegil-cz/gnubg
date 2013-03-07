@@ -211,7 +211,12 @@ int nAutoSaveTime = 15;
 int fAutoSaveRollout = FALSE;
 int fAutoSaveAnalysis = FALSE;
 int fAutoSaveConfirmDelete = TRUE;
-int fCubeEqualChequer = TRUE;
+
+/* FIXME: This is at best useless, at worst misleading, as a global flag.
+          It should be deduced from the rollout context when needed.
+          See for instance show.c:ShowRollout() around line 270 */
+int fCubeEqualChequer = FALSE;
+
 int fCubeUse = TRUE;
 int fDisplay = TRUE;
 int fFullScreen = FALSE;
@@ -227,7 +232,7 @@ int fTruncEqualPlayer0 =TRUE;
 int fTutorChequer = TRUE;
 int fTutorCube = TRUE;
 int fTutor = FALSE;
-int fEvalSameAsAnalysis = TRUE;
+int fEvalSameAsAnalysis = FALSE;
 int fJustSwappedPlayers = FALSE;
 int nConfirmDefault = -1;
 int nThreadPriority = 0;
@@ -265,12 +270,18 @@ float    arLuckLevel[] = {
 	0,     /* SKILL_NONE */
     };
 
-/* this is the "normal" movefilter*/
-#define MOVEFILTER \
+#define MOVEFILTER_NORMAL \
   { { { 0,  8, 0.16f }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , \
     { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , \
     { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 2, 0.04f }, {  0, 0, 0 } }, \
     { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 2, 0.04f }, { -1, 0, 0 } } , \
+  }
+
+#define MOVEFILTER_LARGE \
+  { { { 0, 16, 0.32f }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , \
+    { { 0, 16, 0.32f }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , \
+    { { 0, 16, 0.32f }, { -1, 0, 0 }, { 0, 4, 0.08f }, {  0, 0, 0 } }, \
+    { { 0, 16, 0.32f }, { -1, 0, 0 }, { 0, 4, 0.08f }, { -1, 0, 0 } } , \
   }
 
 rngcontext *rngctxRollout = NULL;
@@ -279,8 +290,8 @@ rolloutcontext rcRollout =
 { 
   {
 	/* player 0/1 cube decision */
-        { TRUE, 0, TRUE, TRUE, 0.0 },
-	{ TRUE, 0, TRUE, TRUE, 0.0 }
+        { TRUE, 2, TRUE, TRUE, 0.0 },
+	{ TRUE, 2, TRUE, TRUE, 0.0 }
   }, 
   {
 	/* player 0/1 chequerplay */
@@ -290,8 +301,8 @@ rolloutcontext rcRollout =
 
   {
 	/* player 0/1 late cube decision */
-	{ TRUE, 0, TRUE, TRUE, 0.0 },
-	{ TRUE, 0, TRUE, TRUE, 0.0 }
+	{ TRUE, 2, TRUE, TRUE, 0.0 },
+	{ TRUE, 2, TRUE, TRUE, 0.0 }
   }, 
   {
 	/* player 0/1 late chequerplay */
@@ -299,12 +310,12 @@ rolloutcontext rcRollout =
 	{ TRUE, 0, TRUE, TRUE, 0.0 } 
   }, 
   /* truncation point cube and chequerplay */
-  { TRUE, 0, TRUE, TRUE, 0.0 },
-  { TRUE, 0, TRUE, TRUE, 0.0 },
+  { TRUE, 2, TRUE, TRUE, 0.0 },
+  { TRUE, 2, TRUE, TRUE, 0.0 },
 
   /* move filters */
-  { MOVEFILTER, MOVEFILTER },
-  { MOVEFILTER, MOVEFILTER },
+  { MOVEFILTER_NORMAL, MOVEFILTER_NORMAL },
+  { MOVEFILTER_NORMAL, MOVEFILTER_NORMAL },
 
   TRUE, /* cubeful */
   TRUE, /* variance reduction */
@@ -322,43 +333,43 @@ rolloutcontext rcRollout =
   5,  /* late evals start here */
   RNG_MERSENNE, /* RNG */
   0,  /* seed */
-  144,    /* minimum games  */
+  324,    /* minimum games  */
   0.01,	  /* stop when std's are lower than 0.01 */
-  144,    /* minimum games  */
-  1.96,   /* stop when best has j.s.d. for 95% confidence */
+  324,    /* minimum games  */
+  2.33,   /* stop when best has j.s.d. for 99% confidence */
   0,      /* nGamesDone */
   0,      /* nSkip */
 };
 
 /* parameters for `eval' and `hint' */
 
-#define EVALSETUP  { \
+#define EVALSETUP_WORLDCLASS  { \
   /* evaltype */ \
   EVAL_EVAL, \
   /* evalcontext */ \
-  { TRUE, 0, FALSE, TRUE, 0.0 }, \
+  { TRUE, 2, TRUE, TRUE, 0.0 }, \
   /* rolloutcontext */ \
   { \
     { \
-      { FALSE, 0, TRUE, TRUE, 0.0 }, /* player 0 cube decision */ \
-      { FALSE, 0, TRUE, TRUE, 0.0 } /* player 1 cube decision */ \
+      { FALSE, 2, TRUE, TRUE, 0.0 }, /* player 0 cube decision */ \
+      { FALSE, 2, TRUE, TRUE, 0.0 } /* player 1 cube decision */ \
     }, \
     { \
       { FALSE, 0, TRUE, TRUE, 0.0 }, /* player 0 chequerplay */ \
       { FALSE, 0, TRUE, TRUE, 0.0 } /* player 1 chequerplay */ \
     }, \
     { \
-      { FALSE, 0, TRUE, TRUE, 0.0 }, /* p 0 late cube decision */ \
-      { FALSE, 0, TRUE, TRUE, 0.0 } /* p 1 late cube decision */ \
+      { FALSE, 2, TRUE, TRUE, 0.0 }, /* p 0 late cube decision */ \
+      { FALSE, 2, TRUE, TRUE, 0.0 } /* p 1 late cube decision */ \
     }, \
     { \
       { FALSE, 0, TRUE, TRUE, 0.0 }, /* p 0 late chequerplay */ \
       { FALSE, 0, TRUE, TRUE, 0.0 } /* p 1 late chequerplay */ \
     }, \
-    { FALSE, 0, TRUE, TRUE, 0.0 }, /* truncate cube decision */ \
-    { FALSE, 0, TRUE, TRUE, 0.0 }, /* truncate chequerplay */ \
-    { MOVEFILTER, MOVEFILTER }, \
-    { MOVEFILTER, MOVEFILTER }, \
+    { FALSE, 2, TRUE, TRUE, 0.0 }, /* truncate cube decision */ \
+    { FALSE, 2, TRUE, TRUE, 0.0 }, /* truncate chequerplay */ \
+    { MOVEFILTER_NORMAL, MOVEFILTER_NORMAL }, \
+    { MOVEFILTER_NORMAL, MOVEFILTER_NORMAL }, \
   FALSE, /* cubeful */ \
   TRUE, /* variance reduction */ \
   FALSE, /* initial position */ \
@@ -375,22 +386,76 @@ rolloutcontext rcRollout =
   5,  /* late evals start here */ \
   RNG_MERSENNE, /* RNG */ \
   0,  /* seed */ \
-  144,    /* minimum games  */ \
+  324,    /* minimum games  */ \
   0.01,	  /* stop when std's are lower than 0.01 */ \
-  144,    /* minimum games  */ \
-  1.96,   /* stop when best has j.s.d. for 95% confidence */ \
+  324,    /* minimum games  */ \
+  2.33,   /* stop when best has j.s.d. for 99% confidence */ \
   0, \
   0 \
   } \
 } 
 
-evalsetup esEvalChequer = EVALSETUP;
-evalsetup esEvalCube = EVALSETUP;
-evalsetup esAnalysisChequer = EVALSETUP;
-evalsetup esAnalysisCube = EVALSETUP;
+/* parameters for analysis */
 
-movefilter aamfEval[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] = MOVEFILTER;
-movefilter aamfAnalysis[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] = MOVEFILTER;
+#define EVALSETUP_SUPREMO  { \
+  /* evaltype */ \
+  EVAL_EVAL, \
+  /* evalcontext */ \
+  { TRUE, 2, TRUE, TRUE, 0.0 }, \
+  /* rolloutcontext */ \
+  { \
+    { \
+      { FALSE, 2, TRUE, TRUE, 0.0 }, /* player 0 cube decision */ \
+      { FALSE, 2, TRUE, TRUE, 0.0 } /* player 1 cube decision */ \
+    }, \
+    { \
+      { FALSE, 0, TRUE, TRUE, 0.0 }, /* player 0 chequerplay */ \
+      { FALSE, 0, TRUE, TRUE, 0.0 } /* player 1 chequerplay */ \
+    }, \
+    { \
+      { FALSE, 2, TRUE, TRUE, 0.0 }, /* p 0 late cube decision */ \
+      { FALSE, 2, TRUE, TRUE, 0.0 } /* p 1 late cube decision */ \
+    }, \
+    { \
+      { FALSE, 0, TRUE, TRUE, 0.0 }, /* p 0 late chequerplay */ \
+      { FALSE, 0, TRUE, TRUE, 0.0 } /* p 1 late chequerplay */ \
+    }, \
+    { FALSE, 2, TRUE, TRUE, 0.0 }, /* truncate cube decision */ \
+    { FALSE, 2, TRUE, TRUE, 0.0 }, /* truncate chequerplay */ \
+    { MOVEFILTER_NORMAL, MOVEFILTER_NORMAL }, \
+    { MOVEFILTER_NORMAL, MOVEFILTER_NORMAL }, \
+  FALSE, /* cubeful */ \
+  TRUE, /* variance reduction */ \
+  FALSE, /* initial position */ \
+  TRUE, /* rotate */ \
+  TRUE, /* truncate at BEAROFF2 for cubeless rollouts */ \
+  TRUE, /* truncate at BEAROFF2_OS for cubeless rollouts */ \
+  FALSE, /* late evaluations */ \
+  TRUE,  /* Truncation enabled */ \
+  FALSE,  /* no stop on STD */ \
+  FALSE,  /* no stop on JSD */ \
+  FALSE,  /* no move stop on JSD */ \
+  10, /* truncation */ \
+  1296, /* number of trials */ \
+  5,  /* late evals start here */ \
+  RNG_MERSENNE, /* RNG */ \
+  0,  /* seed */ \
+  324,    /* minimum games  */ \
+  0.01,	  /* stop when std's are lower than 0.01 */ \
+  324,    /* minimum games  */ \
+  2.33,   /* stop when best has j.s.d. for 99% confidence */ \
+  0, \
+  0 \
+  } \
+} 
+
+evalsetup esEvalChequer = EVALSETUP_WORLDCLASS;
+evalsetup esEvalCube = EVALSETUP_WORLDCLASS;
+evalsetup esAnalysisChequer = EVALSETUP_SUPREMO;
+evalsetup esAnalysisCube = EVALSETUP_SUPREMO;
+
+movefilter aamfEval[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] = MOVEFILTER_NORMAL;
+movefilter aamfAnalysis[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] = MOVEFILTER_LARGE;
 
 extern evalsetup *GetEvalChequer(void)
 {
@@ -439,8 +504,8 @@ exportsetup exsExport = {
 #define DEFAULT_NET_SIZE 128
 
 player ap[ 2 ] = {
-    { "gnubg", PLAYER_GNU, EVALSETUP, EVALSETUP, MOVEFILTER, 0, NULL },
-    { "user", PLAYER_HUMAN, EVALSETUP, EVALSETUP, MOVEFILTER, 0, NULL } 
+    { "gnubg", PLAYER_GNU, EVALSETUP_WORLDCLASS, EVALSETUP_WORLDCLASS, MOVEFILTER_NORMAL, 0, NULL },
+    { "user", PLAYER_HUMAN, EVALSETUP_WORLDCLASS, EVALSETUP_WORLDCLASS, MOVEFILTER_NORMAL, 0, NULL } 
 };
 
 char default_names[2][31] = {"gnubg", "user"};

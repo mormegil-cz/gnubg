@@ -1,5 +1,10 @@
 2013-03-07  Philippe Michel  <philippe.michel7@sfr.fr>
 
+	* gnubg.c: Use stronger default settings for Computer opponent,
+	Tutor and Analysis (2 ply instead of 0 ply) and for rollouts (0 ply
+	checker play and 2 ply cube instead of 0 ply for everything).
+	Increase the default JSDs and minimum trials to stop a rollout early.
+
 	* eval.c: Use SSE instructions, if available, in the pruning nets
 	computations. This is a small speed improvement but constrains the
 	size of the pruning nets' intermediate layer to be a multiple of 4.
