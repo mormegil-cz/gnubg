@@ -2148,9 +2148,7 @@ EvalRace(const TanBoard anBoard, float arOutput[], const bgvariation bgv, NNStat
   /* sanity check will take care of rest */
 
   return 0;
-
 }
-
 
 static int
 EvalContact(const TanBoard anBoard, float arOutput[], const bgvariation UNUSED(bgv), NNState *nnStates)
@@ -2766,19 +2764,21 @@ static void SaveMoves( movelist *pml, unsigned int cMoves, unsigned int cPip, in
     
     for( i = 0; i < pml->cMoves; i++ )
 	{
-		if( EqualKeys( key, pml->amMoves[ i ].key ) )
+		move *pm = &(pml->amMoves[ i ]);
+
+		if( EqualKeys( key, pm->key ) )
 		{
-			if( cMoves > pml->amMoves[ i ].cMoves ||
-				cPip > pml->amMoves[ i ].cPips )
+			if( cMoves > pm->cMoves ||
+				cPip > pm->cPips )
 			{
 				for( j = 0; j < cMoves * 2; j++ )
-					pml->amMoves[ i ].anMove[ j ] = anMoves[ j ] > -1 ? anMoves[ j ] : -1;
+					pm->anMove[ j ] = anMoves[ j ] > -1 ? anMoves[ j ] : -1;
 			
 				if( cMoves < 4 )
-					pml->amMoves[ i ].anMove[ cMoves * 2 ] = -1;
+					pm->anMove[ cMoves * 2 ] = -1;
 
-				pml->amMoves[ i ].cMoves = cMoves;
-				pml->amMoves[ i ].cPips = cPip;
+				pm->cMoves = cMoves;
+				pm->cPips = cPip;
 			}
 		    
 			return;
