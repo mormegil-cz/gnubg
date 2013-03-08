@@ -3923,7 +3923,8 @@ static int ConvertBackGammonRoomFileToMat(FILE *bgrFP, FILE *matFP)
 					outputerr("tomat");
 				return FALSE;
 			}
-			while (buffer[strlen(buffer) - 1] == '\n')
+			while (buffer[strlen(buffer) - 1] == '\n'
+				|| buffer[strlen(buffer) - 1] == '\r')
 				buffer[strlen(buffer) - 1] = '\0';
 			if (!*buffer)
 			{
