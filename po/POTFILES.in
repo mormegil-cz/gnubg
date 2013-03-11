@@ -70,6 +70,8 @@ gtkfile.c
 gtkfile.h
 gtkgame.c
 gtkgame.h
+gtklocdefs.c
+gtklocdefs.h
 gtkgamelist.c
 gtkmet.c
 gtkmet.h
@@ -110,6 +112,7 @@ latex.c
 lib/cache.c
 lib/cache.h
 lib/gnubg-types.h
+lib/inputs.c
 lib/isaac.c
 lib/isaac.h
 lib/isaacs.h
