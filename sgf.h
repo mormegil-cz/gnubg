@@ -30,7 +30,7 @@ typedef struct _property {
 	listOLD *pl;		/* Values */
 } property;
 
-extern void (*SGFErrorHandler) (char *szMessage, int fParseError);
+extern void (*SGFErrorHandler) (const char *szMessage, int fParseError);
 
 /* Parse an SGF file, and return a syntax tree.  The tree is saved as a list
    of game trees; each game tree is a list where the first element is the

@@ -38,9 +38,9 @@ extern int sgflex( void );
 
 #define YYERROR_VERBOSE
 
-void ( *SGFErrorHandler )( char *, int ) = NULL;
+void ( *SGFErrorHandler )( const char *, int ) = NULL;
  
-static int sgferror( char *s ) {
+static int sgferror( const char *s ) {
 
     if( SGFErrorHandler )
 	SGFErrorHandler( s, 1 );
