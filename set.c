@@ -2794,7 +2794,7 @@ extern void CommandSetMET( char *sz ) {
   }
 
   InitMatchEquity ( sz );
-  /* Cubeful evaluation get confused withh entries from another table */
+  /* Cubeful evaluation get confused with entries from another table */
   EvalCacheFlush();
 
   /* clear hint */
@@ -2803,7 +2803,7 @@ extern void CommandSetMET( char *sz ) {
   outputf( _("GNU Backgammon will now use the %s match equity table.\n"),
            miCurrent.szName );
 
-  if ( miCurrent.nLength < MAXSCORE ) {
+  if ( miCurrent.nLength < MAXSCORE && miCurrent.nLength != -1 ) {
     
     outputf (_("\n"
              "Note that this match equity table only supports "
