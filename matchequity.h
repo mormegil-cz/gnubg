@@ -31,10 +31,10 @@
 
 typedef struct _metinfo {
 
-  gchar *szName;          /* Name of match equity table */
+  gchar *szName;         /* Name of match equity table */
   gchar *szFileName;     /* File name of met */
   gchar *szDescription;  /* Description of met */
-  int nLength;                /* native length of met */
+  int nLength;           /* native length of met, -1 : pure calculated table */
  
 } metinfo;
 
