@@ -102,6 +102,7 @@ NewMoveRecord( void ) {
 
   if ( !pmr ) {
     outputerr( "NewMoveRecord" );
+    g_assert_not_reached();
     return NULL;
   }
 
@@ -583,7 +584,7 @@ static void add_moverecord_sanity_check(moverecord *pmr)
 		break;
 
 	default:
-		g_assert(FALSE);
+		g_assert_not_reached();
 	}
 }
 
@@ -1120,7 +1121,7 @@ static int ComputerTurn( void ) {
 
         default:
 
-          g_assert ( FALSE );
+          g_assert_not_reached();
           
         } /* switch cubedecision */
 
@@ -1172,7 +1173,7 @@ static int ComputerTurn( void ) {
 
         default:
 
-          g_assert ( FALSE );
+          g_assert_not_reached();
 
         } /* switch cubedecision */
 
@@ -1310,8 +1311,7 @@ static int ComputerTurn( void ) {
 	    
           default:
 
-            g_assert ( FALSE );
-            break;
+            g_assert_not_reached();
 
           }
 
@@ -1545,7 +1545,7 @@ static int ComputerTurn( void ) {
       ;
   }
   
-  g_assert( FALSE );
+  g_assert_not_reached();
   return -1;
 }
 
@@ -4158,8 +4158,10 @@ extern moverecord *get_current_moverecord(int *pfHistory)
 		pmr_hint_destroy();
 
 	if (!pmr_hint) {
-		pmr_hint = NewMoveRecord();
-		pmr_hint->fPlayer = ms.fTurn;
+		if ((pmr_hint = NewMoveRecord()))
+			pmr_hint->fPlayer = ms.fTurn;
+		else
+			return NULL;
 	}
 
 	if (ms.anDice[0] > 0) {
@@ -4425,8 +4427,7 @@ extern const char* GetMoveString(moverecord *pmr, int* pPlayer, gboolean addSkil
 					_("Beaver to %d") : _("Raccoon to %d"), ms.nCube << 2 );
 			break;
 		default:
-			g_assert ( FALSE );
-			break;
+			g_assert_not_reached();
 		}
 		if (addSkillMarks)
 			strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
@@ -4494,7 +4495,7 @@ extern const char* GetMoveString(moverecord *pmr, int* pPlayer, gboolean addSkil
 		pch = sz;
 		break;
 	default:
-		g_assert( FALSE );
+		g_assert_not_reached();
 	}
 	return pch;
 }
