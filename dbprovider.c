@@ -33,7 +33,6 @@
 #include <glib/gstdio.h>
 #include <string.h>
 #include "dbprovider.h"
-#include <assert.h>
 
 DBProviderType dbProviderType = (DBProviderType)0;
 int storeGameStats = TRUE;
@@ -94,7 +93,7 @@ static RowSet* MallocRowset(size_t rows, size_t cols)
 {
 	size_t i;
 	RowSet* pRow = malloc(sizeof(RowSet));
-	assert(pRow);
+	g_assert(pRow);
 
 	pRow->widths = (size_t*)malloc(cols * sizeof(size_t));
 	memset(pRow->widths, 0, cols * sizeof(size_t));

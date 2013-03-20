@@ -30,9 +30,6 @@
 #include "sse.h"
 #include "neuralnet.h"
 #include <string.h>
-#if DEBUG_SSE
-#include <assert.h>
-#endif
 
 #ifdef USE_SSE2 
 #include <emmintrin.h> 
@@ -210,8 +207,8 @@ extern int NeuralNetEvaluateSSE(const neuralnet *pnn, /*lint -e{818}*/ float arI
 
 #if DEBUG_SSE
 	/* Not 64bit robust (pointer truncation) - causes strange crash */
-    assert(sse_aligned(ar));
-    assert(sse_aligned(arInput));
+    g_assert(sse_aligned(ar));
+    g_assert(sse_aligned(arInput));
 #endif
 
 	EvaluateSSE(pnn, arInput, ar, arOutput, 0);
