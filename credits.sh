@@ -409,6 +409,7 @@ cat >> AUTHORS <<'EOF'
      Ulrich Drepper (an implementation of the public domain MD5 algorithm)
    Bob Jenkins (the ISAAC pseudo random number generator, hashing functions)
        Takuji Nishimura and Makoto Matsumoto (the Mersenne Twister PRNG)
+                   Brian Paul (the TR tile rendering library)
                 Gerry Tesauro (the "pubeval" position evaluator)
              Claes Tornberg (the mec match equity table generator)
 
