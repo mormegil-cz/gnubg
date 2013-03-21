@@ -1,21 +1,7 @@
 /* $Id$ */
 
 /*
- * $Log$
- * Revision 1.5  2009/08/13 20:09:20  mdpetch
- * Added assert include for files callign assert macros but not explictly
- * including the macro file. Fixes issues beuilding on some distros like
- * Ubuntu
- *
- * Revision 1.4  2009/06/24 18:38:46  Superfly_Jon
- * Fix compiler warnings
- *
- * Revision 1.3  2008/03/13 18:15:09  Superfly_Jon
- * Minor comipler grumbles
- *
- * Revision 1.1  2008/03/05 19:16:33  Superfly_Jon
- * Fix 3d png export, replace render to pixmap code
- *
+ * $originalLog: tr.c,v $
  * Revision 1.9  1998/01/29  16:56:54  brianp
  * allow trOrtho() and trFrustum() to be called at any time, minor clean-up
  *

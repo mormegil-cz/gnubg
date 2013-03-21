@@ -1,13 +1,7 @@
 /* $Id$ */
 
 /*
- * $Log$
- * Revision 1.2  2008/03/13 18:15:09  Superfly_Jon
- * Minor comipler grumbles
- *
- * Revision 1.1  2008/03/05 19:16:34  Superfly_Jon
- * Fix 3d png export, replace render to pixmap code
- *
+ * $originalLog: tr.h,v $
  * Revision 1.5  1997/07/21  17:34:07  brianp
  * added tile borders, incremented version to 1.1
  *
