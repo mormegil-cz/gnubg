@@ -27,7 +27,6 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include <assert.h>
 
 struct _OGLFont
 {
@@ -158,7 +157,7 @@ static int RenderText(const char *text, FT_Library ftLib, OGLFont *pFont, const 
 
 		if (FT_Load_Glyph(face, glyphIndex, FT_LOAD_NO_HINTING))
 			return 0;
-		assert(face->glyph->format == ft_glyph_format_outline);
+		g_assert(face->glyph->format == ft_glyph_format_outline);
 		if (pFont->height == 0)
 			pFont->height = (float)face->glyph->metrics.height * scale * heightRatio / 64;
 
@@ -229,7 +228,7 @@ static int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, const char *pPath, in
 
 		if (FT_Load_Glyph(face, glyphIndex, FT_LOAD_NO_HINTING))
 			return 0;
-		assert(face->glyph->format == ft_glyph_format_outline);
+		g_assert(face->glyph->format == ft_glyph_format_outline);
 
 		glNewList(pFont->glyphs + i, GL_COMPILE);
 		if (!RenderGlyph(&face->glyph->outline))
@@ -272,7 +271,7 @@ static int RenderGlyph(const FT_Outline* pOutline)
 		{
 			Point* pPoint = &g_array_index(subMesh->tessPoints, Point, point);
 
-			assert(pPoint->data[2] == 0);
+			g_assert(pPoint->data[2] == 0);
 			glVertex2f((float)pPoint->data[0] / 64.0f, (float)pPoint->data[1] / 64.0f);
 		}
 		glEnd();
@@ -439,7 +438,7 @@ static void PopulateContour(GArray *contour, const FT_Vector* points, const char
 			nextPoint.data[0] = points[nextPointIndex].x;
 			nextPoint.data[1] = points[nextPointIndex].y;
 
-			assert(pointTag == FT_Curve_Tag_Conic);	/* Only this main type supported */
+			g_assert(pointTag == FT_Curve_Tag_Conic);	/* Only this main type supported */
 
 			while (pointTags[nextPointIndex] == FT_Curve_Tag_Conic)
 			{
@@ -509,7 +508,7 @@ static void TESS_CALLBACK tcbCombine(const double coords[3], const double *UNUSE
 {
 	/* Just return vertex position (colours etc. not required) */
 	Point *newEle = (Point*)malloc(sizeof(Point));
-	assert(newEle);
+	g_assert(newEle);
 	memcpy(newEle->data, coords, sizeof(double[3]));
 
 	combineList = g_list_append(combineList, newEle);
