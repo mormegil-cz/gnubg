@@ -292,13 +292,12 @@ const char *aszEvalType[] =
 evalcontext ecBasic = { FALSE, 0, FALSE, TRUE, 0.0 };
 
 /* defaults for the filters  - 0 ply uses no filters */
+
+#include "movefilters.inc"
+
 movefilter
-defaultFilters[MAX_FILTER_PLIES][MAX_FILTER_PLIES] = {
-  { { 0,  8, 0.16f }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } ,
-  { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , 
-  { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 2, 0.04f }, {  0, 0, 0 } }, 
-  { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 2, 0.04f }, { -1, 0, 0 } },
-};
+defaultFilters[MAX_FILTER_PLIES][MAX_FILTER_PLIES] = MOVEFILTER_NORMAL;
+
 
 /* Random context, for generating non-deterministic noisy evaluations. */
 static randctx rc;
@@ -355,31 +354,11 @@ const char *aszMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ] = {
 };
 
 movefilter aaamfMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ][ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] = {
-  /* tiny */
-  { { { 0,  5, 0.08f }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } ,
-    { { 0,  5, 0.08f }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , 
-    { { 0,  5, 0.08f }, { -1, 0, 0 }, { 0, 2, 0.02f }, {  0, 0, 0 } }, 
-    { { 0,  5, 0.08f }, { -1, 0, 0 }, { 0, 2, 0.02f }, { -1 , 0, 0 } } },
-  /* narrow */
-  { { { 0,  8, 0.12f }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } ,
-    { { 0,  8, 0.12f }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , 
-    { { 0,  8, 0.12f }, { -1, 0, 0 }, { 0, 2, 0.03f }, {  0, 0, 0 } }, 
-    { { 0,  8, 0.12f }, { -1, 0, 0 }, { 0, 2, 0.03f }, { -1, 0, 0 } } },
-  /* normal */
-  { { { 0,  8, 0.16f }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } ,
-    { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , 
-    { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 2, 0.04f }, {  0, 0, 0 } }, 
-    { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 2, 0.04f }, { -1, 0, 0 } } },
-  /* large */
-  { { { 0, 16, 0.32f }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } ,
-    { { 0, 16, 0.32f }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , 
-    { { 0, 16, 0.32f }, { -1, 0, 0 }, { 0, 4, 0.08f }, {  0, 0, 0 } }, 
-    { { 0, 16, 0.32f }, { -1, 0, 0 }, { 0, 4, 0.08f }, { -1, 0, 0.0f } } },
-  /* huge */
-  { { { 0, 20, 0.44f }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } ,
-    { { 0, 20, 0.44f }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , 
-    { { 0, 20, 0.44f }, { -1, 0, 0 }, { 0, 6, 0.11f }, {  0, 0, 0 } }, 
-    { { 0, 20, 0.44f }, { -1, 0, 0 }, { 0, 6, 0.11f }, { -1, 0, 0.0 } } }
+  MOVEFILTER_TINY,
+  MOVEFILTER_NARROW,
+  MOVEFILTER_NORMAL,
+  MOVEFILTER_LARGE,
+  MOVEFILTER_HUGE
 };
 
 
@@ -1879,8 +1858,7 @@ ClassifyPosition( const TanBoard anBoard, const bgvariation bgv )
 
   default:
 
-    g_assert ( FALSE );
-    break;
+    g_assert_not_reached();
 
   }
 
@@ -2403,8 +2381,7 @@ EvaluatePerfectCubeful ( const TanBoard anBoard, float arEquity[],
   case CLASS_BEAROFF_TS:
     return PerfectCubeful( pbcTS, anBoard, arEquity );
   default:
-    g_assert ( FALSE );
-    break;
+    g_assert_not_reached();
   }
 
   return -1;
@@ -3682,7 +3659,7 @@ MoneyLive( const float rW, const float rL, const float p,
 
   }
 
-  g_assert ( FALSE );
+  g_assert_not_reached();
   return 0;
 
 }
@@ -4155,8 +4132,7 @@ EvalEfficiency( const TanBoard anBoard, positionclass pc )
     return rTSCubeX;	/* for match play only */
 
   default:
-    g_assert( FALSE );
-    break;
+    g_assert_not_reached();
 
   }
   return 0;
@@ -4382,7 +4358,7 @@ cmp_evalsetup ( const evalsetup *pes1, const evalsetup *pes2 ) {
   case EVAL_ROLLOUT: return cmp_rolloutcontext ( &pes1->rc, &pes2->rc );
 
   default:
-    g_assert ( FALSE );
+    g_assert_not_reached();
   }
 
   return 0;
@@ -5051,9 +5027,7 @@ getCubeDecisionOrdering ( int aiOrder[ 3 ],
 
   default:
 
-    g_assert ( FALSE );
-
-    break;
+    g_assert_not_reached();
 
   }
 
@@ -5114,7 +5088,7 @@ getPercent ( const cubedecision cd,
 
   default:
 
-    g_assert ( FALSE );
+    g_assert_not_reached();
 
   }
 

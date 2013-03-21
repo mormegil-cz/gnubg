@@ -270,19 +270,7 @@ float    arLuckLevel[] = {
 	0,     /* SKILL_NONE */
     };
 
-#define MOVEFILTER_NORMAL \
-  { { { 0,  8, 0.16f }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , \
-    { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , \
-    { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 2, 0.04f }, {  0, 0, 0 } }, \
-    { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 2, 0.04f }, { -1, 0, 0 } } , \
-  }
-
-#define MOVEFILTER_LARGE \
-  { { { 0, 16, 0.32f }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , \
-    { { 0, 16, 0.32f }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , \
-    { { 0, 16, 0.32f }, { -1, 0, 0 }, { 0, 4, 0.08f }, {  0, 0, 0 } }, \
-    { { 0, 16, 0.32f }, { -1, 0, 0 }, { 0, 4, 0.08f }, { -1, 0, 0 } } , \
-  }
+#include "movefilters.inc"
 
 rngcontext *rngctxRollout = NULL;
 
@@ -1321,8 +1309,7 @@ extern void InitBoard( TanBoard anBoard, const bgvariation bgv )
     
   default:
 
-    g_assert ( FALSE );
-    break;
+    g_assert_not_reached();
 
   }
 
@@ -4461,6 +4448,7 @@ static void run_cl(void)
 		ResetInterrupt();
 	}
 }
+
 static void init_language(char **lang)
 {
 	char *szFile, szTemp[4096];
