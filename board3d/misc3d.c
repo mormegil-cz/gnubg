@@ -35,7 +35,6 @@
 #endif
 #include "util.h"
 #include <glib/gstdio.h>
-#include <assert.h>
 #include "gtklocdefs.h"
 
 #define MAX_FRAMES 10
@@ -252,7 +251,7 @@ static void CreateDotTexture(unsigned int *pDotTexture)
 	unsigned int i, j;
 	unsigned char* data = (unsigned char*)malloc(sizeof(*data) * DOT_SIZE * DOT_SIZE * 3);
 	unsigned char* pData = data;
-	assert(pData);
+	g_assert(pData);
 
 	for (i = 0; i < DOT_SIZE; i++)
 	{
@@ -564,7 +563,7 @@ void LoadTextureInfo(void)
 		if (!err)
 		{	/* Add texture type */
 			TextureInfo* pNewText = (TextureInfo*)malloc(sizeof(TextureInfo));
-			assert(pNewText);
+			g_assert(pNewText);
 			*pNewText = text;
 			textures = g_list_append(textures, pNewText);
 		}
@@ -932,7 +931,7 @@ float ***Alloc3d(unsigned int x, unsigned int y, unsigned int z)
 {	/* Allocate 3d array */
 	unsigned int i, j;
 	float ***array = (float ***)malloc(sizeof(float**) * x);
-	assert(array);
+	g_assert(array);
 	for (i = 0; i < x; i++)
 	{
 		array[i] = (float **)malloc(sizeof(float*) * y);
