@@ -41,7 +41,6 @@
 #include "config.h"
 #include "inc3d.h"
 #include "tr.h"
-#include <assert.h>
 
 #define DEFAULT_TILE_WIDTH  256
 #define DEFAULT_TILE_HEIGHT 256
@@ -94,8 +93,8 @@ static void Setup(TRcontext *tr)
    tr->Rows = (tr->ImageHeight + tr->TileHeightNB - 1) / tr->TileHeightNB;
    tr->CurrentTile = 0;
 
-   assert(tr->Columns >= 0);
-   assert(tr->Rows >= 0);
+   g_assert(tr->Columns >= 0);
+   g_assert(tr->Rows >= 0);
 }
 
 
@@ -131,11 +130,11 @@ void trTileSize(TRcontext *tr, GLint width, GLint height, GLint border)
    if (!tr)
       return;
 
-   assert(border >= 0);
-   assert(width >= 1);
-   assert(height >= 1);
-   assert(width >= 2*border);
-   assert(height >= 2*border);
+   g_assert(border >= 0);
+   g_assert(width >= 1);
+   g_assert(height >= 1);
+   g_assert(width >= 2*border);
+   g_assert(height >= 2*border);
 
    tr->TileBorder = border;
    tr->TileWidth = width;
@@ -312,8 +311,8 @@ void trBeginTile(TRcontext *tr)
       /* This should never happen */
       abort();
    }
-   assert(tr->CurrentRow < tr->Rows);
-   assert(tr->CurrentColumn < tr->Columns);
+   g_assert(tr->CurrentRow < tr->Rows);
+   g_assert(tr->CurrentColumn < tr->Columns);
 
    border = tr->TileBorder;
 
@@ -365,7 +364,7 @@ int trEndTile(TRcontext *tr)
    if (!tr)
       return 0;
 
-   assert(tr->CurrentTile>=0);
+   g_assert(tr->CurrentTile>=0);
 
    /* be sure OpenGL rendering is finished */
    glFlush();
