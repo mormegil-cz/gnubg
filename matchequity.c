@@ -613,7 +613,7 @@ GetPoints ( float arOutput [ 5 ], const cubeinfo *pci, float arCP[ 2 ] ) {
   arCP[ 0 ] = arCPLive[ 0 ][ 0 ];
   arCP[ 1 ] = arCPLive[ 1 ][ 0 ];
 
-  /* debug
+#if 0
      for ( n = nMax; n >= 0; n-- ) {
 
      printf ("Cube %i\n"
@@ -626,8 +626,7 @@ GetPoints ( float arOutput [ 5 ], const cubeinfo *pci, float arCP[ 2 ] ) {
      arCPLive[ 0 ][ n ], arCPLive[ 1 ][ n ] );
 
      }
-  */
-
+#endif
 
   return 0;
 
@@ -639,7 +638,6 @@ GetDoublePointDeadCube ( float arOutput [ 5 ], cubeinfo *pci ) {
    * Calculate double point for dead cubes
    */
 
-  float aarMETResults [2][DTLBP1 + 1];
   int	player = pci->fMove;
 
   if ( ! pci->nMatchTo ) {
@@ -682,6 +680,8 @@ GetDoublePointDeadCube ( float arOutput [ 5 ], cubeinfo *pci ) {
   else {
 
     /* Match play */
+
+    float aarMETResults [2][DTLBP1 + 1];
 
     /* normalize score */
 
@@ -1790,7 +1790,7 @@ getME ( const int nScore0, const int nScore1, const int nMatchTo,
     /* non-post-Crawford games */
     return ( fPlayer ) ? 1.0f - aafMET[ n0 ][ n1 ] : aafMET[ n0 ][ n1 ];
 
-  g_assert ( FALSE );
+  g_assert_not_reached();
   return 0.0f;
 
 }
@@ -1836,7 +1836,7 @@ getMEAtScore( const int nScore0, const int nScore1, const int nMatchTo,
     /* non-post-Crawford games */
     return ( fPlayer ) ? 1.0f - aafMET[ n0 ][ n1 ] : aafMET[ n0 ][ n1 ];
 
-  g_assert ( FALSE );
+  g_assert_not_reached();
   return 0.0f;
 
 }
