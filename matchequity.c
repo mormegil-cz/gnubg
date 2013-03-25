@@ -1871,6 +1871,8 @@ invertMET ( void ) {
 
     }
   }
+
+  calcGammonPrices ( aafMET, aafMETPostCrawford, aaaafGammonPrices, aaaafGammonPricesPostCrawford );
 }
 
 /* given a match score, return a pair of arrays with the METs for
