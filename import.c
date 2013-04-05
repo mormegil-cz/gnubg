@@ -2197,7 +2197,7 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
       outputf ( "Unknown variant in SGG file\n"
                 "Please send the SGG file to bug-gnubg@gnubg.org!\n" );
       outputx();
-      g_assert ( FALSE );
+      g_assert_not_reached();
     }
 
     break;
@@ -2425,7 +2425,7 @@ ParseTMGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
       outputf ( "Unknown variation in TMG file\n"
                 "Please send the TMG file to bug-gnubg@gnubg.org!\n" );
       outputx();
-      g_assert ( FALSE );
+      g_assert_not_reached();
       return -1;
     }
     
@@ -2691,9 +2691,7 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
           outputf ( "Please send the TMG file to bug-gnubg@gnubg.org!\n" );
           outputx();
-          g_assert ( FALSE );
-
-          break;
+          g_assert_not_reached();
 
         } 
 
