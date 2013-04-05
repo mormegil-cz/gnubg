@@ -3852,11 +3852,17 @@ static int ConvertBackGammonRoomFileToMat(FILE *bgrFP, FILE *matFP)
 	if (ferror(bgrFP))
 	{
 		outputerr("tomat");
+		free(player2);
+		free(player1);
 		return FALSE;
 	}
 
 	if (feof(bgrFP))
+	{
+		free(player2);
+		free(player1);
 		return FALSE;
+	}
 
 	while (!feof(bgrFP))
 	{
@@ -3869,6 +3875,8 @@ static int ConvertBackGammonRoomFileToMat(FILE *bgrFP, FILE *matFP)
 			{
 				if (ferror(bgrFP))
 					outputerr("tomat");
+				free(player2);
+				free(player1);
 				return FALSE;
 			}
 			if (strstr(buffer, "Win the Match"))
@@ -3897,6 +3905,8 @@ static int ConvertBackGammonRoomFileToMat(FILE *bgrFP, FILE *matFP)
 		{
 			if (ferror(bgrFP))
 				outputerr("tomat");
+			free(player2);
+			free(player1);
 			return FALSE;
 		}
 
@@ -3919,6 +3929,8 @@ static int ConvertBackGammonRoomFileToMat(FILE *bgrFP, FILE *matFP)
 			{
 				if (ferror(bgrFP))
 					outputerr("tomat");
+				free(player2);
+				free(player1);
 				return FALSE;
 			}
 			while (buffer[strlen(buffer) - 1] == '\n'
@@ -3984,8 +3996,8 @@ static int ConvertBackGammonRoomFileToMat(FILE *bgrFP, FILE *matFP)
 done:
 	fclose(bgrFP);
 	fclose(matFP);
-	if (player1) free(player1);
-	if (player2) free(player2);
+	free(player2);
+	free(player1);
 
 	return TRUE;
 }
