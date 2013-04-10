@@ -1911,7 +1911,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
           /* the text is most likely a comment */
 
-          if ( *sz != '\n' ) {
+          if ( *sz != '\n' && *sz != '\r' ) {
             /* non-empty line */
             if ( ! szComment )
               szComment = g_strdup ( sz );
@@ -2208,10 +2208,9 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
     if ( pmi->pchPlace )
       free ( pmi->pchPlace );
 
-    pmi->pchPlace = g_strdup ( sz );
-    if ( ( pc2 = strchr ( sz, '\n' ) ) != 0 )
+    if ( ( pc2 = strpbrk ( sz, "\n\r" ) ) != NULL )
       *pc2 = 0;
-
+    pmi->pchPlace = g_strdup ( sz );
   }
 
 }
