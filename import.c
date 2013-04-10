@@ -2110,8 +2110,11 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
   case 7:
 
     /* ratings */
-    if ( ( sscanf ( sz, "%*s %lf %d %lf %d", &arRating[ 1 ], &anExp[ 1 ], 
-                    &arRating[ 0 ], &anExp[ 0 ] ) ) != 4 )
+    /* Players are swapped later (at the end of ImportSGG()) and ratings
+       must be swapped here as well to be correctly attributed at the end
+       Order in SGG file is player1 player0 */
+    if ( ( sscanf ( sz, "%*s %lf %d %lf %d", &arRating[ 0 ], &anExp[ 0 ], 
+                    &arRating[ 1 ], &anExp[ 1 ] ) ) != 4 )
       break;
 
     for ( i = 0; i < 2; ++i ) {
