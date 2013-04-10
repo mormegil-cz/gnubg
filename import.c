@@ -2057,7 +2057,7 @@ ParseSGGDate ( const char *sz, unsigned int *pnDay, unsigned int *pnMonth, unsig
   *pnMonth = 1;
   *pnYear = 1900;
 
-  if ( sscanf ( sz, "%*s %79s %ud, %ud", szMonth, &nDay, &nYear ) != 3 ) 
+  if ( sscanf ( sz, "%*s %79s %u, %u", szMonth, &nDay, &nYear) != 3 )
     return;
 
   *pnDay = nDay;
