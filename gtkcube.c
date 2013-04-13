@@ -210,8 +210,7 @@ TakeAnalysis(cubehintdata *pchd) {
 
     default:
 
-      g_assert ( FALSE );
-      break;
+      g_assert_not_reached();
 
     }
 
@@ -660,7 +659,7 @@ static void UpdateCubeAnalysis(cubehintdata * pchd)
 		break;
 
 	default:
-		g_assert(FALSE);
+		g_assert_not_reached();
 		break;
 
 	}
@@ -1095,7 +1094,7 @@ extern GtkWidget *CreateCubeAnalysis(moverecord *pmr, const matchstate *pms, int
 		pchd->pwFrame = TakeAnalysis(pchd);
 		break;
 	default:
-		g_assert(FALSE);
+		g_assert_not_reached();
 		break;
 
 	}

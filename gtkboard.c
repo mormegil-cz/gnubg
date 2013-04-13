@@ -1886,7 +1886,7 @@ extern gboolean board_button_press(GtkWidget *board, GdkEventButton *event,
 				if ( UpdateMove( bd, anBoard ) ) {
 					/* should not happen as ForcedMove and GreadyBearoff
 					   always return legal moves */
-					g_assert(FALSE);
+					g_assert_not_reached();
 				}
 				/* Play a sound if any chequers have moved */
 				if (memcmp(old_points, bd->points, sizeof old_points))

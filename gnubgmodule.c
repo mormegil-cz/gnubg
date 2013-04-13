@@ -284,8 +284,7 @@ PyToCubeInfo( PyObject *p, cubeinfo *pci ) {
       break;
       
     default:
-
-      g_assert( FALSE );
+      g_assert_not_reached();
 
     }
 
@@ -404,8 +403,7 @@ PyToPosInfo( PyObject *p, posinfo *ppi ) {
       break;
       
     default:
-
-      g_assert( FALSE );
+      g_assert_not_reached();
 
     }
 
@@ -496,8 +494,7 @@ PyToEvalContext( PyObject *p, evalcontext *pec ) {
       break;
 
     default:
-
-      g_assert( FALSE );
+      g_assert_not_reached();
 
     }
 
@@ -1578,7 +1575,7 @@ luckString(lucktype const lt, int const ignoreNone)
     case LUCK_GOOD: return "good";
     case LUCK_VERYGOOD: return "verygood";
   }
-  g_assert(0);
+  g_assert_not_reached();
   return 0;
 }
     
@@ -1591,7 +1588,7 @@ skillString(skilltype const st, int const ignoreNone)
     case SKILL_DOUBTFUL:    return "doubtful";
     case SKILL_NONE:        return ignoreNone ? 0 : "unmarked";
   }
-  g_assert(0);
+  g_assert_not_reached();
   return 0;
 }
 
@@ -2285,7 +2282,7 @@ PythonGame(const listOLD*    plGame,
 
 	default:
 	{
-	  g_assert(0);
+	  g_assert_not_reached();
 	}
       }
 
