@@ -1,3 +1,10 @@
+2013-04-13  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* import.c: Interpret some of the comments eXtreme Gammon puts at
+	the start of .mat files to fill match information in and determine
+	game variation.
+	* export.c: Writes similar comments when exporting as .mat
+
 2013-03-26  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* matchequity.c: Recalculate gammon prices after inverting the MET.

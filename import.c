@@ -984,6 +984,9 @@ static int ImportMatVariation(FILE * fp, char *szFilename, bgvariation bgVariati
 			return -1;
 		}
 
+		if (*szLine == (char)0xef && *(szLine+1) == (char)0xbb && *(szLine+2) == (char)0xbf)
+		  szLine += 3;	/* skip UTF junk at the start of XG mat files */
+
 		if (*szLine == '#' || *szLine == ';') {
 			/* comment */
 			char *pchOld = pchComment;
@@ -994,9 +997,56 @@ static int ImportMatVariation(FILE * fp, char *szFilename, bgvariation bgVariati
 			while (isspace(*pch))
 				++pch;
 			if (*pch) {
-				pchComment = g_strconcat(pchComment ? pchComment : "",
-							 pch, "\n", NULL);
-				g_free(pchOld);
+			  gchar *p;
+
+			  if (g_str_has_prefix(pch, "[Event ")) {
+			    if ((p = g_strrstr(pch, "\"]")))
+				*p = 0;
+			    SetMatchInfo( &mi.pchEvent, pch+8, NULL);
+			  } else if (g_str_has_prefix(pch, "[Round ")) {
+			    if ((p = g_strrstr(pch, "\"]")))
+				*p = 0;
+			    SetMatchInfo( &mi.pchRound, pch+8, NULL);
+			  } else if (g_str_has_prefix(pch, "[Site ")) {
+			    if ((p = g_strrstr(pch, "\"]")))
+				*p = 0;
+			    SetMatchInfo( &mi.pchPlace, pch+7, NULL);
+			  } else if (g_str_has_prefix(pch, "[Transcriber ")) {
+			    if ((p = g_strrstr(pch, "\"]")))
+				*p = 0;
+			    SetMatchInfo( &mi.pchAnnotator, pch+14, NULL);
+			  } else if (g_str_has_prefix(pch, "[EventDate ")) {
+			    sscanf(pch+12, "%4u.%2u.%2u", &mi.nYear, &mi.nMonth,&mi.nDay);
+			  } else if (g_str_has_prefix(pch, "[EventTime ")) {
+			    ;	/* discard ; we don't have this in matchinfo */
+			  } else if (g_str_has_prefix(pch, "[Unrated ")) {
+			    ;	/* discard */
+			  } else if (g_str_has_prefix(pch, "[Player ")) {
+			    ; /* discard. We don't have player names
+				 in matchinfo and rely on games
+				 headers. Elos (even if not left at
+				 default 1600) are useless if their
+				 source is unknown. Maybe keep them
+				 for known Site values ? */
+			  } else if (g_str_has_prefix(pch, "[Match ID ")) {
+			    ;	/* discard */
+			  } else if (g_str_has_prefix(pch, "[CubeLimit ")) {
+			    ;	/* discard ; maybe keep as comment if != 1024 ? */
+			  } else if (g_str_has_prefix(pch, "[Variation \"Backgammon")) {
+			    bgVariation = VARIATION_STANDARD;
+                          } else if (g_str_has_prefix(pch, "[Variation \"NackGammon")) {
+                            bgVariation = VARIATION_NACKGAMMON;
+			  } else if (g_str_has_prefix(pch, "[Crawford ")) {
+			    ;	/* discard for now */
+			  } else if (g_str_has_prefix(pch, "[Jacoby ")) {
+			    ;	/* discard for now */
+			  } else if (g_str_has_prefix(pch, "[Beaver ")) {
+				   /* discard for now */
+			  } else {
+			    pchComment = g_strconcat(pchComment ? pchComment : "",
+						     pch, "\n", NULL);
+			    g_free(pchOld);
+			  }
 			}
 		} else
 			/* Look for start of mat file */
@@ -1018,7 +1068,8 @@ static int ImportMatVariation(FILE * fp, char *szFilename, bgvariation bgVariati
 	}
 #endif
 
-	ParseSetDate(szFilename);
+	if (mi.nYear == 0)
+	  ParseSetDate(szFilename);
 
 	if (pchComment)
 		mi.pchComment = g_strdup(pchComment);	/* no need to free mi.pchComment as it's

@@ -1292,6 +1292,32 @@ static void ExportMatchMat( char *sz, int fSst ) {
 	return;
     }
 
+    if (!fSst) {
+      if (mi.pchPlace)
+        fprintf( pf, "; [Site \"%s\"]\n", mi.pchPlace );
+      if (mi.pchEvent)
+        fprintf( pf, "; [Event \"%s\"]\n", mi.pchEvent );
+      if (mi.pchRound)
+        fprintf( pf, "; [Round \"%s\"]\n", mi.pchRound );
+      if (mi.nYear > 1900)
+        fprintf( pf, "; [EventDate \"%4u.%02u.%02u\"]\n", mi.nYear, mi.nMonth, mi.nDay );
+      if (ms.bgv == VARIATION_NACKGAMMON)
+        fprintf( pf, "; [Variation \"NackGammon\"]\n" );
+      if (mi.pchAnnotator)
+        fprintf( pf, "; [Transcriber \"%s\"]\n", mi.pchAnnotator );
+      if (mi.pchComment) {
+        char *pc;
+
+        fprintf( pf, "\n; ");
+        for (pc = mi.pchComment; *pc != 0; pc++)
+          if (*pc == '\n' && *(pc+1) != 0)
+            fputs("\n; ", pf);
+          else
+            fputc(*pc, pf);
+      }
+      fprintf( pf, "\n" );
+    }
+
     fprintf( pf, " %d point match\n\n", ms.nMatchTo );
 
     for( i = 0, pl = lMatch.plNext; pl != &lMatch; i++, pl = pl->plNext )
