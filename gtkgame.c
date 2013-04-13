@@ -1545,7 +1545,7 @@ static void TogglePanel ( guint iType, guint iActionID, GtkToggleAction *action,
 		panel = WINDOW_COMMAND;
 		break;
 	default:
-		g_assert(FALSE);
+		g_assert_not_reached();
 	}
 	if (f)
 		PanelShow(panel);
@@ -1585,7 +1585,7 @@ static void TogglePanel(gpointer UNUSED(p), guint n, GtkWidget * pw)
 		panel = WINDOW_COMMAND;
 		break;
 	default:
-		g_assert(FALSE);
+		g_assert_not_reached();
 	}
 	if (f)
 		PanelShow(panel);

@@ -2425,8 +2425,7 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
   default:
 
-    g_assert ( FALSE );
-
+    g_assert_not_reached();
 
   }
 
