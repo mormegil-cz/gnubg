@@ -1448,7 +1448,7 @@ extern void CommandShowMatchEquityTable ( char *sz ) {
   for ( i = 0; i < 2; i++ ) {
     outputf ( _("Post-Crawford table for player %d (%s):\n\n"),
               i, ap[ i ].szName );
-  writeMET ( (float (*)[MAXSCORE] ) aafMETPostCrawford[ i ], 1, n, TRUE );
+  writeMET ( (float (*)[MAXSCORE] ) aafMETPostCrawford[ i ], 1, n, FALSE );
   }
   
 }
