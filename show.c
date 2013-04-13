@@ -332,7 +332,7 @@ ShowEvalSetup ( const evalsetup *pes ) {
     ShowRollout ( &pes->rc );
     break;
   default:
-    g_assert ( FALSE );
+    g_assert_not_reached();
 
   }
 
@@ -2171,7 +2171,7 @@ extern void show_bearoff( TanBoard an, char *szTemp)
 
                 default:
 
-                        g_assert( FALSE );
+                        g_assert_not_reached();
 
         }
 
