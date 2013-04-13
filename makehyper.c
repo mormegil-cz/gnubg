@@ -193,8 +193,7 @@ StartGuessHyper ( hyperequity ahe[], const int nC, bearoffcontext *UNUSED(pbc) )
 
       default:
 
-        g_assert ( FALSE );
-        break;
+        g_assert_not_reached();
 
       }
 
