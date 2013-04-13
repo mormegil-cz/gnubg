@@ -1789,7 +1789,7 @@ static void WriteDoubleAnalysis(FILE * pf,
 	break;
 
     default:
-	g_assert(FALSE);
+	g_assert_not_reached();
     }
 
     fputc(']', pf);
@@ -1878,7 +1878,7 @@ static void WriteMoveAnalysis(FILE * pf, int fPlayer, movelist * pml,
 
 
 	default:
-	    g_assert(FALSE);
+	    g_assert_not_reached();
 	}
 
 	fputc(']', pf);
@@ -2325,7 +2325,7 @@ extern void SaveGame(FILE * pf, listOLD * plGame)
 	    break;
 
 	default:
-	    g_assert(FALSE);
+	    g_assert_not_reached();
 	}
 
 	if (pmr->sz) {
