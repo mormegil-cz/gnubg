@@ -1023,7 +1023,7 @@ static void WoodPixel( float x, float y, float z, unsigned char auch[ 3 ],
 	break;
 	
     default:
-	g_assert( FALSE );
+	g_assert_not_reached();
     }
 #if USE_GTK
 	if (showingGray)
