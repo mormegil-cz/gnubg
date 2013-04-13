@@ -2428,7 +2428,7 @@ ParseTMGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
 
   case 6: /* Startdate */
 
-    if ( ( sscanf ( sz, "Startdate: %ud-%ud-%ud", 
+    if ( ( sscanf ( sz, "Startdate: %u-%u-%u", 
                     &pmi->nYear, &pmi->nMonth, &pmi->nDay ) ) != 3 ) 
       pmi->nYear = pmi->nMonth = pmi->nDay = 0;
     return 0;
