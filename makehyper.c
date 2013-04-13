@@ -352,12 +352,10 @@ HyperEquity ( const int nUs, const int nThem,
       Utility ( phe->arOutput, &ciJacoby );
 
     return;
-    break;
 
   case HYPER_ILLEGAL:
 
     return;
-    break;
 
   case HYPER_BEAROFF:
   case HYPER_CONTACT:
