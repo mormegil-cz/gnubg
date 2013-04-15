@@ -170,6 +170,9 @@ int main (int argc, char **argv)
 	printf ("\n");
       }
   }
+
+  free(ec);
+  free(E);
 }
 
 #else /* MEC_STANDALONE */
@@ -247,7 +250,7 @@ mec_pc( const float rGammonRate,
   /* garbage collect */
 
   free( ec );
-
+  free( E );
 }
 
 
@@ -340,7 +343,7 @@ mec( const float rGammonRate,
   /* garbage collect */
 
   free( ec );
-
+  free( E );
 }
 
 #endif /* ! MEC_STANDALONE */
