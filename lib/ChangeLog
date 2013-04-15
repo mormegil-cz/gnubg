@@ -1,3 +1,9 @@
+2013-04-15  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* cache.c, cache.h, ../eval.c: Use 32 bits variables for keys
+	instead of long integers. This is what the hashing functions,
+	taken from an external source, expect.
+
 2011-12-31  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* neuralnetsse.c: Fixes error in sigmoid approximation. In

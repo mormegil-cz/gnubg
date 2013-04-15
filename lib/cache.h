@@ -23,6 +23,12 @@
 
 #include <stdlib.h>
 
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#else
+typedef unsigned int uint32_t;
+#endif
+
 #include "gnubg-types.h"
 
 /* Set to calculate simple cache stats */
@@ -52,7 +58,7 @@ typedef struct _cache
   cacheNode*	entries;
   
   unsigned int size;
-  unsigned long hashMask;
+  uint32_t hashMask;
 
 #if CACHE_STATS
   unsigned int nAdds;
@@ -65,13 +71,13 @@ typedef struct _cache
 int CacheCreate(evalCache* pc, unsigned int size);
 int CacheResize(evalCache *pc, unsigned int cNew);
 
-#define CACHEHIT ((unsigned int)-1)
+#define CACHEHIT ((uint32_t)-1)
 /* returns a value which is passed to CacheAdd (if a miss) */
 unsigned int CacheLookupWithLocking(evalCache* pc, const cacheNodeDetail* e, float *arOut, float *arCubeful);
 unsigned int CacheLookupNoLocking(evalCache* pc, const cacheNodeDetail* e, float *arOut, float *arCubeful);
 
-void CacheAddWithLocking(evalCache* pc, const cacheNodeDetail* e, unsigned long l);
-static inline void CacheAddNoLocking(evalCache* pc, const cacheNodeDetail* e, unsigned long l)
+void CacheAddWithLocking(evalCache* pc, const cacheNodeDetail* e, uint32_t l);
+static inline void CacheAddNoLocking(evalCache* pc, const cacheNodeDetail* e, const uint32_t l)
 {
 	pc->entries[l].nd_secondary = pc->entries[l].nd_primary;
 	pc->entries[l].nd_primary = *e;
@@ -84,6 +90,6 @@ void CacheFlush(const evalCache* pc);
 void CacheDestroy(const evalCache* pc);
 void CacheStats(const evalCache* pc, unsigned int* pcLookup, unsigned int* pcHit, unsigned int* pcUsed);
 
-unsigned long GetHashKey(unsigned long hashMask, const cacheNodeDetail* e);
+uint32_t GetHashKey(const uint32_t hashMask, const cacheNodeDetail* e);
 
 #endif
