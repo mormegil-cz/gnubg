@@ -75,10 +75,19 @@ extern double MT_SyncEnd(void);
 extern void MT_SetResultFailed(void);
 
 #ifdef GLIB_THREADS
-  #define MT_SafeInc(x) g_atomic_int_add(x, 1)
+#if GLIB_CHECK_VERSION (2,30,0)
+  #define MT_SafeIncValue(x) (g_atomic_int_add(x, 1) + 1)
+  #define MT_SafeIncCheck(x) (g_atomic_int_add(x, 1))
+#else
   #define MT_SafeIncValue(x) (g_atomic_int_exchange_and_add(x, 1) + 1)
   #define MT_SafeIncCheck(x) (g_atomic_int_exchange_and_add(x, 1))
-  #define MT_SafeAdd(x, y) g_atomic_int_exchange_and_add(x, y)
+#endif
+/*
+  We don't use the value returned by the next three
+  Pre-2.30 void atomic_int_add() is ok
+*/
+  #define MT_SafeInc(x) g_atomic_int_add(x, 1)
+  #define MT_SafeAdd(x, y) g_atomic_int_add(x, y)
   #define MT_SafeDec(x) g_atomic_int_add(x, -1)
   #define MT_SafeDecCheck(x) g_atomic_int_dec_and_test(x)
 #else
