@@ -29,6 +29,7 @@
 #endif
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <glib.h>
 #if USE_GTK
 #include <gtk/gtk.h>
@@ -664,14 +665,16 @@ void multi_debug(const char *str, ...)
 {
 	int id;
 	va_list vl;
-	char tn[4];
+	char tn[5];
 	char buf[1024];
 	/* Sync output so order makes some sense */
-#ifdef GLIB_THREADS
-	g_mutex_lock(td.multiLock);
-#else
+#ifdef WIN32
 	WaitForSingleObject(td.multiLock, INFINITE);
 #endif
+	/* With glib threads, locking here doesn't seem to work :
+GLib (gthread-posix.c): Unexpected error from C library during 'pthread_mutex_lock': Resource deadlock avoided.  Aborting.
+	Timestamp the output instead.
+	Maybe the g_get_*_time() calls will sync output as well anyway... */
 
 	va_start(vl, str);
 	vsprintf(buf, str, vl);
@@ -686,11 +689,22 @@ void multi_debug(const char *str, ...)
 	else
 		sprintf(tn, "T%d", id + 1);
 
-	printf("%s: %s\n", tn, buf);
-
 #ifdef GLIB_THREADS
-	g_mutex_unlock(td.multiLock);
+#if GLIB_CHECK_VERSION (2,28,0)
+	printf("%" G_GINT64_FORMAT " %s: %s\n", g_get_monotonic_time(), tn, buf);
 #else
+	{
+	GTimeVal tv;
+
+	g_get_current_time(&tv);
+	printf("%lu %s: %s\n", 1000000UL*tv.tv_sec+tv.tv_usec, tn, buf);
+	}
+#endif
+#else
+	printf("%s: %s\n", tn, buf);
+#endif
+
+#ifdef WIN32
 	ReleaseMutex(td.multiLock);
 #endif
 }
