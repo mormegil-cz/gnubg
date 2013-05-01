@@ -53,13 +53,21 @@ unsigned int mainThreadID;
 #ifdef GLIB_THREADS
 typedef struct _ManualEvent
 {
+#if GLIB_CHECK_VERSION (2,32,0)
+    GCond cond;
+#else
     GCond* cond;
+#endif
     int signalled;
 } *ManualEvent;
 typedef GPrivate* TLSItem;
-typedef GCond* Event;
+#if GLIB_CHECK_VERSION (2,32,0)
+typedef GMutex Mutex;
+static GMutex condMutex;   /* Extra mutex needed for waiting */
+#else
 typedef GMutex* Mutex;
 GMutex* condMutex=NULL;    /* Extra mutex needed for waiting */
+#endif
 GAsyncQueue *async_queue=NULL; /* Needed for async waiting */
 #else
 typedef HANDLE ManualEvent;
@@ -74,8 +82,8 @@ typedef struct _ThreadData
     TLSItem tlsItem;
     Mutex queueLock;
     Mutex multiLock;
-	ManualEvent syncStart;
-	ManualEvent syncEnd;
+    ManualEvent syncStart;
+    ManualEvent syncEnd;
 
     int addedTasks;
     int doneTasks;
@@ -84,18 +92,28 @@ typedef struct _ThreadData
     GList *tasks;
     int result;
 
-	int closingThreads;
-	unsigned int numThreads;
+    int closingThreads;
+    unsigned int numThreads;
 } ThreadData;
 
 ThreadData td;
 
 #ifdef GLIB_THREADS
 
+#if GLIB_CHECK_VERSION (2,32,0)
+/* Dynamic allocation of GPrivate is deprecated */
+static GPrivate private_item;
+
 static void TLSCreate(TLSItem *pItem)
 {
-    *pItem = g_private_new(free);
+    *pItem = &private_item;
 }
+#else
+static void TLSCreate(TLSItem *pItem)
+{
+    *pItem = g_private_new(g_free);
+}
+#endif
 
 static void TLSFree(TLSItem UNUSED(pItem))
 {	/* Done automaticaly by glib */
@@ -113,27 +131,48 @@ static void TLSSetValue(TLSItem pItem, int value)
 static void InitManualEvent(ManualEvent *pME)
 {
     ManualEvent pNewME = malloc(sizeof(*pNewME));
+#if GLIB_CHECK_VERSION (2,32,0)
+    g_cond_init(&pNewME->cond);
+#else
     pNewME->cond = g_cond_new();
+#endif
     pNewME->signalled = FALSE;
     *pME = pNewME;
 }
 
 static void FreeManualEvent(ManualEvent ME)
 {
+#if GLIB_CHECK_VERSION (2,32,0)
+    g_cond_clear(&ME->cond);
+#else
     g_cond_free(ME->cond);
+#endif
     free(ME);
 }
 
 static void WaitForManualEvent(ManualEvent ME)
 {
+#if GLIB_CHECK_VERSION (2,32,0)
+	gint64 end_time;
+#else
 	GTimeVal tv;
+#endif
 	multi_debug("wait for manual event locks");
+#if GLIB_CHECK_VERSION (2,32,0)
+	g_mutex_lock(&condMutex);
+	end_time = g_get_monotonic_time() + 10 * G_TIME_SPAN_SECOND;
+#else
 	g_mutex_lock(condMutex);
+#endif
 	while (!ME->signalled) {
 		multi_debug("waiting for manual event");
+#if GLIB_CHECK_VERSION (2,32,0)
+		if (!g_cond_wait_until(&ME->cond, &condMutex, end_time))
+#else
 		g_get_current_time(&tv);
 		g_time_val_add(&tv, 10 * 1000 * 1000);
 		if (g_cond_timed_wait(ME->cond, condMutex, &tv))
+#endif
 			break;
 		else
 		{
@@ -141,29 +180,57 @@ static void WaitForManualEvent(ManualEvent ME)
 		}
 	}
 
+#if GLIB_CHECK_VERSION (2,32,0)
+	g_mutex_unlock(&condMutex);
+#else
 	g_mutex_unlock(condMutex);
+#endif
 	multi_debug("wait for manual event unlocks");
 }
 
 static void ResetManualEvent(ManualEvent ME)
 {
-	multi_debug("reset manual event locks");
+    multi_debug("reset manual event locks");
+#if GLIB_CHECK_VERSION (2,32,0)
+    g_mutex_lock(&condMutex);
+    ME->signalled = FALSE;
+    g_mutex_unlock(&condMutex);
+#else
     g_mutex_lock(condMutex);
     ME->signalled = FALSE;
     g_mutex_unlock(condMutex);
-	multi_debug("reset manual event unlocks");
+#endif
+    multi_debug("reset manual event unlocks");
 }
 
 static void SetManualEvent(ManualEvent ME)
 {
-	multi_debug("reset manual event locks");
+    multi_debug("reset manual event locks");
+#if GLIB_CHECK_VERSION (2,32,0)
+    g_mutex_lock(&condMutex);
+    ME->signalled = TRUE;
+    g_cond_broadcast(&ME->cond);
+    g_mutex_unlock(&condMutex);
+#else
     g_mutex_lock(condMutex);
     ME->signalled = TRUE;
     g_cond_broadcast(ME->cond);
     g_mutex_unlock(condMutex);
-	multi_debug("reset manual event unlocks");
+#endif
+    multi_debug("reset manual event unlocks");
 }
 
+#if GLIB_CHECK_VERSION (2,32,0)
+static void InitMutex(Mutex *pMutex)
+{
+     g_mutex_init(pMutex);
+}
+
+static void FreeMutex(Mutex mutex)
+{
+     g_mutex_clear(&mutex);
+}
+#else
 static void InitMutex(Mutex *pMutex)
 {
     *pMutex = g_mutex_new();
@@ -173,22 +240,32 @@ static void FreeMutex(Mutex mutex)
 {
     g_mutex_free(mutex);
 }
+#endif
 
-#ifdef DEBUG_MULTITHREADED
 void Mutex_Lock(Mutex mutex, const char *reason)
 {
+#ifdef DEBUG_MULTITHREADED
 	multi_debug(reason);
+#else
+	(void)reason;
+#endif
+#if GLIB_CHECK_VERSION (2,32,0)
+	g_mutex_lock(&mutex);
+#else
 	g_mutex_lock(mutex);
+#endif
 }
 void Mutex_Release(Mutex mutex)
 {
+#ifdef DEBUG_MULTITHREADED
 	multi_debug("Releasing lock");
-	g_mutex_unlock(mutex);
-}
-#else
-#define Mutex_Lock(mutex, reason) g_mutex_lock(mutex)
-#define Mutex_Release(mutex) g_mutex_unlock(mutex)
 #endif
+#if GLIB_CHECK_VERSION (2,32,0)
+	g_mutex_unlock(&mutex);
+#else
+	g_mutex_unlock(mutex);
+#endif
+}
 
 #else    /* win32 */
 
@@ -389,7 +466,11 @@ static void MT_CreateThreads(void)
     	int *pID = (int*)malloc(sizeof(int));
     	*pID = i;
 #ifdef GLIB_THREADS
+#if GLIB_CHECK_VERSION (2,32,0)
+	if (!g_thread_try_new("Worker", MT_WorkerThreadFunction, pID, NULL))
+#else
         if (!g_thread_create(MT_WorkerThreadFunction, pID, FALSE, NULL))
+#endif
 #else
         if (_beginthread(MT_WorkerThreadFunction, 0, pID) == 0)
 #endif
@@ -434,9 +515,11 @@ void MT_SetNumThreads(unsigned int num)
 
 extern void MT_InitThreads(void)
 {
+#if !GLIB_CHECK_VERSION (2,32,0)
     if (!g_thread_supported ())
-        g_thread_init (NULL);
+         g_thread_init (NULL);
     g_assert(g_thread_supported());
+#endif
 
     td.tasks = NULL;
     td.doneTasks = td.addedTasks = 0;
@@ -451,7 +534,7 @@ extern void MT_InitThreads(void)
     InitMutex(&td.queueLock);
     InitManualEvent(&td.syncStart);
     InitManualEvent(&td.syncEnd);
-#ifdef GLIB_THREADS
+#if defined(GLIB_THREADS) && !GLIB_CHECK_VERSION (2,32,0)
     if (condMutex == NULL)
         condMutex = g_mutex_new();
 #endif
@@ -667,6 +750,7 @@ void multi_debug(const char *str, ...)
 	va_list vl;
 	char tn[5];
 	char buf[1024];
+
 	/* Sync output so order makes some sense */
 #ifdef WIN32
 	WaitForSingleObject(td.multiLock, INFINITE);
