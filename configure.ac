@@ -169,6 +169,14 @@ if test "x$have_canberra" = "xyes"; then
 	AC_DEFINE(HAVE_CANBERRA,1, [Define if you want to use gstreamer])
 fi
 
+dnl Enable workaround on recent Ubuntus.
+if test x`lsb_release -is` = "xUbuntu"; then
+   AS_VERSION_COMPARE("$(lsb_release -rs)", "11.04", [], [], [no_ovsb=yes])
+   if test "x$no_ovsb" = "xyes"; then
+   AC_DEFINE(NO_OVERLAYSCROLLBARS, 1, [Needed for now on recent Ubuntu releases])
+   fi
+fi
+
 dnl have_gthread, have_gtk and have_gtk are handled later, not having glib is fatal
 
 dnl
