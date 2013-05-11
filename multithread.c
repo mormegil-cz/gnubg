@@ -242,7 +242,7 @@ static void FreeMutex(Mutex mutex)
 }
 #endif
 
-void Mutex_Lock(Mutex mutex, const char *reason)
+static void Mutex_Lock(Mutex mutex, const char *reason)
 {
 #ifdef DEBUG_MULTITHREADED
 	multi_debug(reason);
@@ -255,7 +255,7 @@ void Mutex_Lock(Mutex mutex, const char *reason)
 	g_mutex_lock(mutex);
 #endif
 }
-void Mutex_Release(Mutex mutex)
+static void Mutex_Release(Mutex mutex)
 {
 #ifdef DEBUG_MULTITHREADED
 	multi_debug("Releasing lock");
