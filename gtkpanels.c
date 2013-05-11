@@ -75,7 +75,7 @@ static gboolean ShowTheoryWindow( void );
 static gboolean ShowCommandWindow( void );
 
 typedef struct _windowobject {
-	char* winName;
+	const char* winName;
 	int showing;
 	int docked;
 	int dockable;
@@ -253,7 +253,7 @@ static gboolean ShowCommandWindow( void )
 	return TRUE;
 }
 
-static void CreatePanel(gnubgwindow window, GtkWidget* pWidget, char* winTitle, char* windowRole)
+static void CreatePanel(gnubgwindow window, GtkWidget* pWidget, char* winTitle, const char* windowRole)
 {
 	if (!woPanel[window].docked)
 	{

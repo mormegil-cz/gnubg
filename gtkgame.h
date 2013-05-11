@@ -85,7 +85,7 @@ extern void DisplayWindows(void);
 extern void DockPanels(void);
 extern void FullScreenMode(int state);
 extern void GetFullscreenWindowSettings(int *panels, int *ids, int *maxed);
-extern void GetStyleFromRCFile(GtkStyle ** ppStyle, char *name,
+extern void GetStyleFromRCFile(GtkStyle ** ppStyle, const char *name,
 			       GtkStyle * psBase);
 extern void GL_Freeze(void);
 extern void GL_SetNames(void);

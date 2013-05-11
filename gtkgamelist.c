@@ -175,7 +175,7 @@ static void UpdateStyle(GtkStyle *psStyle, GtkStyle *psNew, GtkStyle *psDefault)
 		gtk_set_font(psStyle, psNew);
 }
 
-void GetStyleFromRCFile(GtkStyle** ppStyle, char* name, GtkStyle* psBase)
+void GetStyleFromRCFile(GtkStyle** ppStyle, const char* name, GtkStyle* psBase)
 {	/* Note gtk 1.3 doesn't seem to have a nice way to do this... */
 	BoardData *bd = BOARD(pwBoard)->board_data;
 	GtkStyle *psDefault, *psNew;

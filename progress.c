@@ -160,7 +160,7 @@ estimatedSE( const float rSE, const int iGame, const int nTrials ) {
  * Make pages with statistics.
  */
 
-static void add_stat_columns(GtkTreeView * treeview, char *title, char **headers, int n)
+static void add_stat_columns(GtkTreeView * treeview, const char *title, const char **headers, int n)
 {
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
@@ -258,7 +258,7 @@ static GtkWidget *GTKStatPageWin ( const rolloutstat *prs, const int cGames ) {
 	GtkWidget *pwLabel;
 	GtkWidget *treeview;
 	GtkTreeModel *model;
-	char *headers[] = {N_("Win Single\n"), N_("Win Gammon\n"), N_("Win BG\n")};
+	const char *headers[] = {N_("Win Single\n"), N_("Win Gammon\n"), N_("Win BG\n")};
 	int cGamesCount = 0;
 	char *sz;
 
@@ -339,7 +339,7 @@ static GtkWidget *GTKStatPageCube(const rolloutstat *prs, const int cGames)
 	GtkWidget *pwLabel;
 	GtkWidget *treeview;
 	GtkTreeModel *model;
-	char *headers[] = { N_("Double, take\n"), N_("Double, pass\n") };
+	const char *headers[] = { N_("Double, take\n"), N_("Double, pass\n") };
 	int anTotal[4];
 	char sz[100];
 
@@ -418,7 +418,7 @@ static GtkWidget *GTKStatPageBearoff ( const rolloutstat *prs, const int UNUSED(
 	GtkWidget *pwLabel;
 	GtkWidget *treeview;
 	GtkTreeModel *model;
-	char *headers[] = {""};
+	const char *headers[] = {""};
 
 	pw = gtk_vbox_new(FALSE, 0);
 
@@ -477,7 +477,7 @@ static GtkWidget *GTKStatPageClosedOut(const rolloutstat *prs, const int UNUSED(
 	GtkWidget *pwLabel;
 	GtkWidget *treeview;
 	GtkTreeModel *model;
-	char *headers[] = {""};
+	const char *headers[] = {""};
 
 	pw = gtk_vbox_new(FALSE, 0);
 
@@ -544,7 +544,7 @@ static GtkWidget *GTKStatPageHit(const rolloutstat *prs, const int cGames)
 	GtkWidget *pwLabel;
 	GtkWidget *treeview;
 	GtkTreeModel *model;
-	char *headers[] = { "" };
+	const char *headers[] = { "" };
 
 	pw = gtk_vbox_new(FALSE, 0);
 
