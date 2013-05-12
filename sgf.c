@@ -2283,7 +2283,13 @@ extern void SaveGame(FILE * pf, listOLD * plGame)
 	case MOVE_SETBOARD:
 	    PositionFromKey(anBoard, &pmr->sb.key);
 
-	    fputs("\n;AE[a:y]", pf);
+	    /* Insert a PL record. This will set the right player on
+	       roll when loading a before-diceroll position (instead
+	       of always player 0, which is usually wrong) and is
+	       transparent in the other cases. */
+            fprintf(pf, "\n;PL[%c]", pmr->fPlayer ? 'B' : 'W');
+
+	    fputs("AE[a:y]", pf);
 
 	    for (i = 0, j = 0; i < 25; ++i)
 		j += anBoard[1][i];
@@ -2487,6 +2493,7 @@ extern void CommandSavePosition(char *sz)
     pmsb = NewMoveRecord();
 
     pmsb->mt = MOVE_SETBOARD;
+    pmsb->fPlayer = ms.fMove;
     if (ms.fMove)
 	SwapSides(ms.anBoard);
     PositionKey(msBoard(), &pmsb->sb.key);
