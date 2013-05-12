@@ -84,7 +84,7 @@ static void GameListSelectRow(GtkCList *pcl, gint y, gint x, GdkEventButton *UNU
     	pmr = pglr->apmr[(pglr->fCombined) ? 0 : x - 1];
 
     /* Get previous move record */
-    if (!pglr->fCombined && x == 2)
+    if (pglr && !pglr->fCombined && x == 2)
     	x = 1;
     else
     {
