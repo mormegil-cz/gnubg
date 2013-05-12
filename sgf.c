@@ -343,8 +343,7 @@ static void RestoreText(char *sz, char **ppch)
     if (!sz || !*sz)
 	return;
 
-    if (*ppch)
-	free(*ppch);
+    free(*ppch);
 
     *ppch = CopyEscapedString(sz);
 }
@@ -2543,8 +2542,7 @@ extern void CommandSavePosition(char *sz)
 
     free(pmgi);
     free(pmsb);
-    if (pmsd)
-	    free(pmsd);
+    free(pmsd);
     free(pmscv);
     free(pmscp);
 
