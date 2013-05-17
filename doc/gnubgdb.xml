@@ -3,7 +3,7 @@
 <article id="gnubg" lang="en">
   <articleinfo>
     <title><application moreinfo="none">GNU Backgammon</application> Manual
-      V0.91.0</title>
+      V1.00.0</title>
     <titleabbrev role="texinfo-file">gnubg</titleabbrev>
     <abstract role="texinfo-node">
       <para>The GNU Backgammon manual</para>
@@ -61,7 +61,7 @@
         </revdescription>
       </revision>
     </revhistory>
-    <releaseinfo>This manual describes version 0.91.0 of GNU Backgammon. </releaseinfo>
+    <releaseinfo>This manual describes version 1.00.0 of GNU Backgammon. </releaseinfo>
     <legalnotice>
 
       <para> Permission is granted to copy, distribute and/or modify this document under the
@@ -85,7 +85,7 @@ the section entitled &#8220;GNU Free Documentation License&#8221;.<xref linkend=
     <title>Introduction</title>
     <para>This manual describes how to use <application moreinfo="none">GNU
         Backgammon</application> to play and analyze backgammon games and
-      matches. It corresponds to version 0.91.0 (updated in August, 2009).</para>
+      matches. It corresponds to version 1.00.0 (updated in August, 2009).</para>
     <para><application moreinfo="none">GNU Backgammon</application> (gnubg)
       plays and analyzes both money game sessions and tournament matches. It
       evaluates and rolls out positions, and much more. Driven by a command-line

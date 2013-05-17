@@ -2,13 +2,13 @@ This is gnubg.info, produced by makeinfo version 4.13 from gnubg.texi.
 
 INFO-DIR-SECTION Games
 START-INFO-DIR-ENTRY
-* GNU Backgammon Manual V0.91.0: (gnubg).   The GNU Backgammon manual
+* GNU Backgammon Manual V1.00.0: (gnubg).   The GNU Backgammon manual
 END-INFO-DIR-ENTRY
 
 
 File: gnubg.info,  Node: Top,  Next: Introduction,  Up: (dir)
 
-GNU Backgammon Manual  V0.91.0
+GNU Backgammon Manual  V1.00.0
 ******************************
 
 * Menu:
@@ -123,7 +123,7 @@ File: gnubg.info,  Node: Introduction,  Next: Rules of the game,  Prev: Top,  Up
 **************
 
 This manual describes how to use GNU Backgammon to play and analyze
-backgammon games and matches. It corresponds to version 0.91.0 (updated
+backgammon games and matches. It corresponds to version 1.00.0 (updated
 in August, 2009).
 
    GNU Backgammon (gnubg) plays and analyzes both money game sessions

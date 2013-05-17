@@ -32,8 +32,8 @@
 	extern ret name##NoLocking( __VA_ARGS__); \
 	extern ret name##WithLocking( __VA_ARGS__)
 
-#define WEIGHTS_VERSION "0.91"
-#define WEIGHTS_VERSION_BINARY 0.91f
+#define WEIGHTS_VERSION "1.00"
+#define WEIGHTS_VERSION_BINARY 1.00f
 #define WEIGHTS_MAGIC_BINARY 472.3782f
 
 #define NUM_OUTPUTS 5

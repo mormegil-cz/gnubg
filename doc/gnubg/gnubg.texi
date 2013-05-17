@@ -1,15 +1,15 @@
 \input texinfo
 @setfilename gnubg.info
 @documentencoding ISO-8859-1
-@settitle GNU Backgammon Manual  V0.91.0
+@settitle GNU Backgammon Manual  V1.00.0
 @dircategory Games
 @direntry
-* GNU Backgammon Manual V0.91.0: (gnubg).   The GNU Backgammon manual
+* GNU Backgammon Manual V1.00.0: (gnubg).   The GNU Backgammon manual
 @end direntry
 
 @node Top, Introduction, , (dir)
 @documentlanguage en
-@top GNU Backgammon Manual  V0.91.0
+@top GNU Backgammon Manual  V1.00.0
 
 @menu
 * Introduction::                Introduction to GNU Backgammon
@@ -124,7 +124,7 @@ Frequently Asked Questions
 
 This manual describes how to use GNU
 Backgammon to play and analyze backgammon games and
-matches. It corresponds to version 0.91.0 (updated in August, 2009).
+matches. It corresponds to version 1.00.0 (updated in August, 2009).
 
 GNU Backgammon (gnubg)
 plays and analyzes both money game sessions and tournament matches. It
