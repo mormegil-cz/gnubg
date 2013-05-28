@@ -2121,8 +2121,9 @@ extern void SaveGame(FILE * pf, listOLD * plGame)
     listOLD *pl;
     moverecord *pmr;
     unsigned int i, j;
-	TanBoard anBoard;
+    TanBoard anBoard;
     listOLD *pl_hint = NULL;
+    int fMoveNormalSeen;
 
     updateStatisticsGame(plGame);
 
@@ -2201,16 +2202,19 @@ extern void SaveGame(FILE * pf, listOLD * plGame)
     if (game_is_last(plGame))
 	    pl_hint = game_add_pmr_hint(plGame);
 
+    fMoveNormalSeen = FALSE;
+
     for (pl = pl->plNext; pl != plGame; pl = pl->plNext) {
 	pmr = pl->p;
 	switch (pmr->mt) {
 	case MOVE_NORMAL:
-		/* sanitise the move if from a hint record */
-		if ( pmr->ml.cMoves && pmr->n.iMove > pmr->ml.cMoves ) {
-			memcpy( pmr->n.anMove, pmr->ml.amMoves[ 0 ].anMove,
-					sizeof( pmr->n.anMove ) );
-			pmr->n.iMove = 0;
-		}
+	    fMoveNormalSeen = TRUE;
+	    /* sanitise the move if from a hint record */
+	    if ( pmr->ml.cMoves && pmr->n.iMove > pmr->ml.cMoves ) {
+	      memcpy( pmr->n.anMove, pmr->ml.amMoves[ 0 ].anMove,
+		    sizeof( pmr->n.anMove ) );
+	      pmr->n.iMove = 0;
+	    }
 	    fprintf(pf, "\n;%c[%d%d", pmr->fPlayer ? 'B' : 'W',
 		    pmr->anDice[0], pmr->anDice[1]);
 	    WriteMove(pf, pmr->fPlayer, pmr->n.anMove);
@@ -2235,18 +2239,31 @@ extern void SaveGame(FILE * pf, listOLD * plGame)
 	    break;
 
 	case MOVE_DOUBLE:
-	    fprintf(pf, "\n;%c[double]", pmr->fPlayer ? 'B' : 'W');
-
-	    if (pmr->CubeDecPtr->esDouble.et != EVAL_NONE)
-		WriteDoubleAnalysis(pf,
-				    pmr->CubeDecPtr->aarOutput,
-				    pmr->CubeDecPtr->aarStdDev,
-				    &pmr->CubeDecPtr->esDouble,
-				    pmr->CubeDecPtr->cmark);
-
-	    WriteSkill(pf, pmr->stCube);
-
+	  /* Last record cannot usually be a legitimate double, it
+	     is a placeholder for hint data for a possible double by
+	     the player on roll. Skip it. See discussion of bug #36716. */
+	  if (pl->plNext == plGame &&
+	      /* Exception. In a scenario like: copy id from position
+		 with dice not rolled yet / paste it into gnubg / hint
+		 / save, it is reasonable to assume that the user is
+		 interested in the doubling decision analysis. There
+		 was no explicit double action but save the
+		 MOVE_DOUBLE record anyway. */
+	      !(fMoveNormalSeen == FALSE && pmr->CubeDecPtr->esDouble.et != EVAL_NONE))
 	    break;
+	  
+	  fprintf(pf, "\n;%c[double]", pmr->fPlayer ? 'B' : 'W');
+	  
+	  if (pmr->CubeDecPtr->esDouble.et != EVAL_NONE)
+	    WriteDoubleAnalysis(pf,
+				pmr->CubeDecPtr->aarOutput,
+				pmr->CubeDecPtr->aarStdDev,
+				&pmr->CubeDecPtr->esDouble,
+				pmr->CubeDecPtr->cmark);
+	  
+	  WriteSkill(pf, pmr->stCube);
+	  
+	  break;
 
 	case MOVE_TAKE:
 	    fprintf(pf, "\n;%c[take]", pmr->fPlayer ? 'B' : 'W');
