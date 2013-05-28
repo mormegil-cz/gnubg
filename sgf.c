@@ -220,7 +220,7 @@ static void RestoreGS(listOLD * pl, statcontext * psc)
 	    psc->anTotalMoves[0] = strtol(pch, &pch, 10);
 	    psc->anTotalMoves[1] = strtol(pch, &pch, 10);
 
-	    for (st = SKILL_VERYBAD; st < N_SKILLS; st++) {
+	    for (st = SKILL_VERYBAD; st <= SKILL_NONE; st++) {
 		psc->anMoves[0][st] = strtol(pch, &pch, 10);
 		psc->anMoves[1][st] = strtol(pch, &pch, 10);
 	    }
@@ -1976,7 +1976,7 @@ static void WriteStatContext(FILE * pf, statcontext * psc)
 	fprintf(pf, "[M:%d %d %d %d ", psc->anUnforcedMoves[0],
 		psc->anUnforcedMoves[1], psc->anTotalMoves[0],
 		psc->anTotalMoves[1]);
-	for (st = SKILL_VERYBAD; st < N_SKILLS; st++)
+	for (st = SKILL_VERYBAD; st <= SKILL_NONE; st++)
 	    fprintf(pf, "%d %d ", psc->anMoves[0][st],
 		    psc->anMoves[1][st]);
 	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
