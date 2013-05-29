@@ -665,7 +665,7 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const listOLD *plParentGame,
 		if ( analysePlayers && ! analysePlayers[ pmr->fPlayer ] )
 			break;
 
-		rSkill = rChequerSkill = 0.0f;
+		rChequerSkill = 0.0f;
 		GetMatchStateCubeInfo( &ci, pms );
 
 		/* cube action? */
@@ -2075,10 +2075,13 @@ static int MoveAnalysed(moverecord * pmr, matchstate * pms, listOLD * plGame,
 static int GameAnalysed(listOLD *plGame)
 {
 	listOLD *pl;
-	moverecord *pmrx = (moverecord *) plGame->plNext->p;
 	matchstate msAnalyse;
 
+#if !defined(G_DISABLE_ASSERT)
+	moverecord *pmrx = (moverecord *) plGame->plNext->p;
+
 	g_assert(pmrx->mt == MOVE_GAMEINFO);
+#endif
 
 	for (pl = plGame->plNext; pl != plGame; pl = pl->plNext) {
 		if (!MoveAnalysed(pl->p, &msAnalyse, plGame,
@@ -2237,7 +2240,7 @@ static void cmark_move_set(moverecord *pmr, gchar *sz, CMark cmark)
 		if (!g_slist_find(list, GINT_TO_POINTER(n)))
 			list = g_slist_append(list, GINT_TO_POINTER(n));
 	}
-	if ((c = g_slist_length(list)) == 0) {
+	if (g_slist_length(list) == 0) {
 		outputerrf("Not a valid list of moves\n");
 		return;
 	}
