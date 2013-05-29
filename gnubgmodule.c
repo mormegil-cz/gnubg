@@ -124,6 +124,10 @@ PyToMove( PyObject* p, unsigned int anMove[ 8 ] )
 
     return 1;
   }
+  else {
+    /* No tuples equivalent to no legal moves */
+    return 1;
+  }
 
   return 0;
 }
@@ -737,7 +741,7 @@ PythonMoveTuple2String( PyObject* UNUSED(self), PyObject *args ) {
   TanBoard anBoard;
 
   memset( anBoard, 0, sizeof(TanBoard) );
-  memset( anMove, 0, sizeof(anMove) );
+  memset( anMove, -1, sizeof(anMove) );
 
   if ( ! PyArg_ParseTuple( args, "|OO", 
                            &pyMove, &pyBoard ) ) 
@@ -1552,7 +1556,7 @@ PyMove(const int move[8])
       break;
     }
     {
-      PyObject* c = Py_BuildValue("(ii)", move[2*i], move[2*i+1]);
+      PyObject* c = Py_BuildValue("(ii)", move[2*i]+1, move[2*i+1]+1);
       
       PyTuple_SET_ITEM(moveTuple, i, c);
     }
@@ -1834,7 +1838,7 @@ PyGameStats(const statcontext* sc, const int fIsMatch, const int nMatchTo)
 
       {
 	skilltype st;
-	for( st = SKILL_VERYBAD; st <= SKILL_NONE; st++ ) {
+	for( st = SKILL_VERYBAD; st < N_SKILLS; st++ ) {
 	  DictSetItemSteal(m, skillString(st, 0),
 			   PyInt_FromLong(sc->anMoves[side][st]));
 	}

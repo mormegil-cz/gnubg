@@ -1,3 +1,7 @@
+2013-05-28  Michael Petch  <mpetch@capp-sysware.com>
+	* gnubgmodule.c: Fix bugs related to python handling of
+	ParseMove and FormatMove .
+
 2013-05-17  Michael Petch  <mpetch@capp-sysware.com>
 	* configure.ac eval.h gnubg.weights doc/gnubgdb.xml
 	  doc/gnubg/* doc/gnubgman.xml: Version bumped to V1.00.0 .
