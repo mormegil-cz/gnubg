@@ -1028,6 +1028,12 @@ static int AnalyzeGame ( listOLD *plGame, int wait )
 		pl = pl->plNext;
 		pmr = pl->p;
 
+		if (pmr == NULL) {
+			/* corrupt moves list */
+			g_assert_not_reached();
+			break;
+		}
+
 		if (!pParentTask)
 			pt = (AnalyseMoveTask*)malloc(sizeof(AnalyseMoveTask));
 
