@@ -2406,8 +2406,9 @@ static int cmark_cube_rollout(moverecord *pmr, gboolean destroy)
 	void *p;
 	int res;
 
-	if (pmr->CubeDecPtr->cmark != CMARK_ROLLOUT)
+	if (!pmr->CubeDecPtr || pmr->CubeDecPtr->cmark != CMARK_ROLLOUT)
 		return 0;
+
 	pes = setup_cube_rollout(&pmr->CubeDecPtr->esDouble, pmr, aarOutput, aarStdDev);
 
 	GetMatchStateCubeInfo(&ci, &ms);
