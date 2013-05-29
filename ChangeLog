@@ -1,6 +1,9 @@
 2013-05-28  Michael Petch  <mpetch@capp-sysware.com>
 	* gnubgmodule.c: Fix bugs related to python handling of
 	ParseMove and FormatMove .
+	* gnubg.c: Fix bug that would cause crash when command
+	"load commands" used unquoted filenames on Win32 platform.
+	Reported by Ian Shaw
 
 2013-05-17  Michael Petch  <mpetch@capp-sysware.com>
 	* configure.ac eval.h gnubg.weights doc/gnubgdb.xml

@@ -2715,34 +2715,35 @@ extern void CommandLoadCommands( char *sz )
 {
     FILE *pf;
 
-#if defined(WIN32)	
-    /* Make sure unquoted filenames are quoted before processing 
+#if defined(WIN32)
+    /* Make sure unquoted filenames are quoted before processing
        to allow proper support for filenames with spaces */
-    char *szz = NULL;
+    char *szQuoted = NULL;
+    char *szQuotedTemp = NULL;
     if (sz[0] != '"' && sz[0] != '\'') {
-      szz = g_strdup_printf("'%s'", sz);
-      sz = NextToken( &szz );
+      szQuoted = szQuotedTemp = g_strdup_printf("'%s'", sz);
+      sz = NextToken( &szQuoted );
     }
     else
       sz = NextToken( &sz );
 #else
     sz = NextToken( &sz );
-#endif    
-    
+#endif
+
     if( !sz || !*sz ) {
-	outputl( _("You must specify a file to load from.") );
-	return;
+        outputl( _("You must specify a file to load from.") );
+        return;
     }
 
     if( ( pf = g_fopen( sz, "r" ) ) ) {
-	LoadCommands( pf, sz );
-	fclose( pf );
+        LoadCommands( pf, sz );
+        fclose( pf );
     } else
-	outputerr( sz );
+        outputerr( sz );
 
 #if defined(WIN32)
-    if (szz)	
-      g_free(szz);
+    if (szQuotedTemp)
+      g_free(szQuotedTemp);
 #endif
 }
 
