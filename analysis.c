@@ -987,7 +987,7 @@ static gboolean UpdateProgressBar(gpointer UNUSED(unused))
 static void AnalyseMoveMT(Task *task)
 {
 	AnalyseMoveTask *amt;
-	float doubleError;
+	float doubleError = 0.0f;
 
 analyzeDouble:
 	amt = (AnalyseMoveTask *)task;
