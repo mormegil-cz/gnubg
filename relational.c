@@ -485,8 +485,10 @@ extern void CommandRelationalAddMatch(char *sz)
 	}
 
 	if ((pdb = ConnectToDB(dbProviderType)) == NULL)
+	{
+		outputerrf( _("Error opening database") );
 		return;
-
+	}
 	existing_id = RelationalMatchExists(pdb);
 	if (existing_id != -1)
 	{
