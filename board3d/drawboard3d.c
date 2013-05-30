@@ -2530,6 +2530,9 @@ static void getProjectedPos(int x, int y, float atDepth, float pos[3])
 	if ((gluUnProject ((GLdouble)x, (GLdouble)y, 0.0, mvmatrix, projmatrix, viewport, &nearX, &nearY, &nearZ) == GL_FALSE) ||
 		(gluUnProject ((GLdouble)x, (GLdouble)y, 1.0, mvmatrix, projmatrix, viewport, &farX, &farY, &farZ) == GL_FALSE))
 	{
+		/* Maybe a g_assert_not_reached() would be appropriate here
+		   Don't leave output parameters undefined anyway */
+		pos[0] = pos[1] = pos[2]  = 0.0f;
 		g_print("gluUnProject failed!\n");
 		return;
 	}
