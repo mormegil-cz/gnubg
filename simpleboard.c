@@ -202,7 +202,7 @@ static void draw_points(SimpleBoard * board)
 
 static void draw_cube(SimpleBoard * board)
 {
-	gint x, y;
+	gint x = 150, y = 150;
 	gchar *text;
 	SimpleBoardColor color = board->color_cube;
 	cairo_t *cr = board->cr;
@@ -214,29 +214,26 @@ static void draw_cube(SimpleBoard * board)
 			x = 200;
 		else
 			x = 100;
-		y = 142;
 		cube *= 2;
 	} else {
-		x = 150;
 		switch (board->ms.fCubeOwner) {
 		case -1:
-			y = 142;
 			break;
 		case 0:
-			y = 32;
+			y = 40;
 			break;
 		case 1:
-			y = 252;
+			y = 260;
 			break;
 		default:
 			g_assert_not_reached();
 		}
 	}
 
-	cairo_rectangle(cr, x - 8, y, 16, 16);
+	cairo_rectangle(cr, x - 8, y - 8, 16, 16);
 	fill_and_stroke(cr, color);
 	text = g_strdup_printf("%d", cube);
-	cairo_move_to(cr, x, y + 8);
+	cairo_move_to(cr, x, y);
 	draw_centered_text(cr, color.text, 10.0-2*floorf(log10f(cube)), text);
 	g_free(text);
 }
