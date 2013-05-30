@@ -1838,7 +1838,7 @@ PyGameStats(const statcontext* sc, const int fIsMatch, const int nMatchTo)
 
       {
 	skilltype st;
-	for( st = SKILL_VERYBAD; st < N_SKILLS; st++ ) {
+	for( st = SKILL_VERYBAD; st <= SKILL_NONE; st++ ) {
 	  DictSetItemSteal(m, skillString(st, 0),
 			   PyInt_FromLong(sc->anMoves[side][st]));
 	}
