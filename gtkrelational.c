@@ -514,8 +514,14 @@ static void CredentialsChanged(void)
 
 static void LoginClicked(GtkButton *UNUSED(button), gpointer dbList)
 {
+	const char *tmpUser, *tmpPass;
 	DBProvider *pdb = GetSelectedDBType();
-	const char *tmpUser = pdb->username, *tmpPass = pdb->password;
+
+	if (pdb == NULL)
+		return;
+
+	tmpUser = pdb->username, tmpPass = pdb->password;
+
 	pdb->username = gtk_entry_get_text(GTK_ENTRY(user));
 	pdb->password = gtk_entry_get_text(GTK_ENTRY(password));
 
@@ -528,7 +534,10 @@ static void TypeChanged(GtkComboBox *UNUSED(widget), gpointer dbList)
 {
 	DBProvider *pdb = GetSelectedDBType();
 
-	if (pdb && pdb->HasUserDetails)
+	if (pdb == NULL)
+		return;
+
+	if (pdb->HasUserDetails)
 	{
 		gtk_widget_set_sensitive(user, TRUE);
 		gtk_widget_set_sensitive(password, TRUE);
@@ -547,10 +556,12 @@ static void TypeChanged(GtkComboBox *UNUSED(widget), gpointer dbList)
 void CheckDatabase(const char *database)
 {
 	int valid = FALSE;
-	int dbok;
+	int dbok = 0;
 	DBProvider *pdb = GetSelectedDBType();
 
-	dbok = (pdb->Connect(database, gtk_entry_get_text(GTK_ENTRY(user)), gtk_entry_get_text(GTK_ENTRY(password))) >= 0);
+	if (pdb)
+		dbok = (pdb->Connect(database, gtk_entry_get_text(GTK_ENTRY(user)), gtk_entry_get_text(GTK_ENTRY(password))) >= 0);
+
 	if (!dbok)
 		gtk_label_set_text(GTK_LABEL(helptext), "Failed to connect to database!");
 	else
@@ -621,8 +632,12 @@ static void AddDBClicked(GtkButton *UNUSED(button), gpointer dbList)
 	if (dbName)
 	{
 		DBProvider *pdb = GetSelectedDBType();
-		int con = pdb->Connect(dbName, gtk_entry_get_text(GTK_ENTRY(user)), gtk_entry_get_text(GTK_ENTRY(password)));
-		if (con > 0 || CreateDatabase(pdb))
+		int con = 0;
+
+		if (pdb)
+			con = pdb->Connect(dbName, gtk_entry_get_text(GTK_ENTRY(user)), gtk_entry_get_text(GTK_ENTRY(password)));
+
+		if (con > 0 || ((pdb) && CreateDatabase(pdb)))
 		{
 			GtkTreeIter iter;
 			gtk_list_store_append(GTK_LIST_STORE(dbStore), &iter);
@@ -644,8 +659,8 @@ static void DelDBClicked(GtkButton *UNUSED(button), gpointer dbList)
 	if (db && GetInputYN(_("Are you sure you want to delete all the matches in this database?")))
 	{
 		DBProvider *pdb = GetSelectedDBType();
-		g_assert(pdb);
-		if (pdb->DeleteDatabase(db, gtk_entry_get_text(GTK_ENTRY(user)), gtk_entry_get_text(GTK_ENTRY(password))))
+
+		if (pdb && pdb->DeleteDatabase(db, gtk_entry_get_text(GTK_ENTRY(user)), gtk_entry_get_text(GTK_ENTRY(password))))
 		{
 			gtk_list_store_remove(GTK_LIST_STORE(dbStore), &selected_iter);
 			optionsValid = FALSE;
@@ -732,8 +747,8 @@ extern GtkWidget *RelationalOptions(void)
 
 	gtk_box_pack_start(GTK_BOX(vb1), table, FALSE, FALSE, 4);
 
-    gameStats = gtk_check_button_new_with_label(_("Store game stats"));
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(gameStats), storeGameStats);
+	gameStats = gtk_check_button_new_with_label(_("Store game stats"));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(gameStats), storeGameStats);
 	gtk_box_pack_start(GTK_BOX(vb1), gameStats, FALSE, FALSE, 0);
 
 	gtk_box_pack_start(GTK_BOX(hb2), vb1, FALSE, FALSE, 10);
