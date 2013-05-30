@@ -2620,6 +2620,9 @@ static void AddDesignRowIfNew( gpointer data, gpointer user_data )
 	renderdata rdNew;
 	boarddesign *pbde = data;
 
+	if (pbde == NULL)
+		return;
+
 	ParsePreferences(pbde, &rdNew);
 	if (FindDesign(plBoardDesigns, &rdNew))
 	{
