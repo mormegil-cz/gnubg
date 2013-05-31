@@ -3419,6 +3419,7 @@ extern void CommandPlay( char *UNUSED(sz) )
 		TurnDone();
 
     fComputing = FALSE;
+    NextTurnNotify(NULL);
 }
 
 static void CommandPreviousGame(char *sz)
