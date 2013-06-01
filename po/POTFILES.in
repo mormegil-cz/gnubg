@@ -29,7 +29,6 @@ boardpos.c
 boardpos.h
 common.h
 non-src/copying.c
-corecount.c
 non-src/credits.c
 non-src/credits.h
 dbprovider.c

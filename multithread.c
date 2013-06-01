@@ -43,9 +43,6 @@
 
 #define UI_UPDATETIME 250
 
-#ifdef TRY_COUNTING_PROCEESING_UNITS
-extern int GetLogicalProcssingUnitCount(void);
-#endif
 #if defined(DEBUG_MULTITHREADED) && defined(WIN32)
 unsigned int mainThreadID;
 #endif
@@ -545,12 +542,13 @@ extern void MT_StartThreads(void)
 {
     if (td.numThreads == 0)
 	{
-#ifdef TRY_COUNTING_PROCEESING_UNITS
-        td.numThreads = GetLogicalProcssingUnitCount();
-#else
+	/* We could set it to something else (the number of cores or some
+	   fraction of that ?) but it is probably not a good idea to hog
+           a lot of resources by default.
+        */
         td.numThreads = 1;
-#endif
-		MT_CreateThreads();
+
+	MT_CreateThreads();
 	}
 }
 
