@@ -669,14 +669,14 @@ NextTokenGeneral( char **ppch, const char *szTokens ) {
 
     char *pch, *pchSave, chQuote = 0;
     int fEnd = FALSE;
-#ifndef NDEBUG
+#if !defined(G_DISABLE_ASSERT)
     char *pchEnd;
 #endif
     
     if( !*ppch )
 	return NULL;
 
-#ifndef NDEBUG
+#if !defined(G_DISABLE_ASSERT)
     pchEnd = strchr( *ppch, 0 );
 #endif
     
@@ -762,7 +762,7 @@ NextTokenGeneral( char **ppch, const char *szTokens ) {
 
     *pchSave = 0;
 
-#ifndef NDEBUG
+#if !defined(G_DISABLE_ASSERT)
     g_assert( pchSave <= pchEnd );
     g_assert( *ppch <= pchEnd );
     g_assert( pch <= pchEnd );
