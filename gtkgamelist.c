@@ -102,7 +102,7 @@ static void GameListSelectRow(GtkCList *pcl, gint y, gint x, GdkEventButton *UNU
 
     for( pl = plGame->plPrev; pl != plGame; pl = pl->plPrev ) {
     	g_assert( pl->p );
-    	if( pl == plGame->plPrev && pl->p == pmr && pmr->mt == MOVE_SETDICE )
+    	if( pl == plGame->plPrev && pl->p == pmr && pmr && pmr->mt == MOVE_SETDICE )
     	break;
 
     	if( pl->p == pmrPrev && pmr != pmrPrev ) {
