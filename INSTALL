@@ -46,3 +46,7 @@ info.
   --with-gtk              use GTK+ 2.0 (Default if found)
   --with-board3d          compile with 3D boards (Default if found)
   --with-python[=PYTHON]  absolute path name of Python executable
+  --with-eval-max-threads=size
+                          define the maximum number of evaluation threads
+                          allowed: (default=48)
+
