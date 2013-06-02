@@ -403,6 +403,19 @@ if test "x$enable_threads" != "xno"; then
 fi
 AS_IF( [test "x$enable_threads" != "xno"], [AC_MSG_RESULT($threads)], [AC_MSG_RESULT(no)] )
 
+dnl 
+dnl Maximum number of threads
+dnl 
+
+AC_ARG_WITH([eval_max_threads],
+AC_HELP_STRING([--with-eval-max-threads=size],
+		[define the maximum number of evaluation threads allowed: (default=48)]),
+[
+	EVAL_THREAD_COUNT=$with_eval_max_threads
+	AC_DEFINE_UNQUOTED(MAX_NUMTHREADS, $EVAL_THREAD_COUNT, [maximum number of evaluation threads])
+])
+
+
 dnl *************
 dnl Misc. setings
 dnl *************

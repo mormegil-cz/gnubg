@@ -1,3 +1,8 @@
+2013-06-02  Michael Petch  <mpetch@gnubg.org>
+	* configure.ac, multithread.h: Allow a new autoconf/configure 
+	parameter --with-eval-max-threads=size to allow the maximum number of
+	evaluation threads to be specified. Default is 48 if not specified.
+
 2013-05-31  Michael Petch  <mpetch@gnubg.org>
 	* play.c: Under certain situations (load commands from a file 
 	containing a play command under within the GUI) would stop

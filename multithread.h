@@ -19,6 +19,7 @@
 #define MULTITHREAD_H
 
 #include "backgammon.h"
+#include "config.h"
 
 /*#define DEBUG_MULTITHREADED 1*/
 #ifdef DEBUG_MULTITHREADED
@@ -59,7 +60,9 @@ extern int MT_WaitForTasks(gboolean (*pCallback)(gpointer), int callbackTime, in
 #endif
 #endif
 
+#if !defined(MAX_NUMTHREADS)
 #define MAX_NUMTHREADS 48
+#endif
 
 extern unsigned int MT_GetNumThreads(void);
 extern void MT_Release(void);
