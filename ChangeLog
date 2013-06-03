@@ -2,6 +2,10 @@
 	* configure.ac, multithread.h: Allow a new autoconf/configure 
 	parameter --with-eval-max-threads=size to allow the maximum number of
 	evaluation threads to be specified. Default is 48 if not specified.
+	* dbprovider.h, dbprovider.c, relational.c scripts/database.py:
+	Fix bugs that prevented proper connections and database usage 
+	when using the Mysql player database provider. Mysql and Postgres
+	are unsupported on the MS Windows platform - Disable them in the GUI
 
 2013-05-31  Michael Petch  <mpetch@gnubg.org>
 	* play.c: Under certain situations (load commands from a file 
