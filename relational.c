@@ -436,9 +436,10 @@ static void AddGames(DBProvider *pdb, int session_id, int player_id0, int player
 		int game_id = GetNextId(pdb, "game");
 		moverecord *pmr = plGame->plNext->p;
 		xmovegameinfo *pmgi = &pmr->g;
+
 		char *buf = g_strdup_printf("INSERT INTO game(game_id, session_id, player_id0, player_id1, "
 				"score_0, score_1, result, added, game_number, crawford) "
-				"VALUES (%d, %d, %d, %d, %d, %d, %d, CURRENT_TIME, %d, %d )",
+				"VALUES (%d, %d, %d, %d, %d, %d, %d, CURRENT_TIMESTAMP, %d, %d )",
 				game_id, session_id, player_id0, player_id1,
 				pmgi->anScore[0], pmgi->anScore[1], pmgi->nPoints, ++gamenum, pmr->g.fCrawfordGame);
 

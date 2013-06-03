@@ -35,14 +35,14 @@ def PyMySQLConnect(database, user, password):
   except:
     # See if mysql is there
     try:
-      connection = MySQLdb.connect()
+      connection = MySQLdb.connect( user = user, passwd = password )
       # See if database present
       cursor = connection.cursor()
       r = cursor.execute('show databases where `Database` = "' + database + '";')
       if (r != 0):
         return -2 # failed
       cursor.execute('create database ' + database)
-      connection = MySQLdb.connect( db = database )
+      connection = MySQLdb.connect( db = database, user = user, passwd = password )
       return 0
     except:
       return -1 # failed
@@ -87,7 +87,11 @@ def PyDisconnect():
 def PySelect(str):
   global connection
   cursor = connection.cursor()
-  cursor.execute("SELECT " + str)
+  try:
+    cursor.execute("SELECT " + str)
+  except:
+    return 0
+
   all = list(cursor.fetchall())
   if (len(all) > 0):
     titles = [cursor.description[i][0] for i in range(len(cursor.description))]
