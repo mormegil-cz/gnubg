@@ -3419,7 +3419,9 @@ extern void CommandPlay( char *UNUSED(sz) )
 		TurnDone();
 
     fComputing = FALSE;
+#if USE_GTK
     NextTurnNotify(NULL);
+#endif
 }
 
 static void CommandPreviousGame(char *sz)
