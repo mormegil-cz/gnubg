@@ -2864,9 +2864,14 @@ extern void PythonRun(const char *sz)
 		   if available
 		*/
 		PyRun_SimpleString("try:\n"
-				   "    import sys, readline, rlcompleter\n"
+				   "    import pyreadline as readline\n"
+				   "except ImportError:\n" 
+				   "    import readline\n"
+				   "try:\n"
+				   "    import sys, rlcompleter\n"
 				   "    readline.parse_and_bind('tab: complete')\n"
-				   "except: pass\n"
+				   "except ImportError:\n"
+				   "    pass\n"
 				   "print 'Python', sys.version\n");
 
 		PyRun_InteractiveLoop(stdin, "<stdin>");
