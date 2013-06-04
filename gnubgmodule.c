@@ -2860,18 +2860,19 @@ extern void PythonRun(const char *sz)
 	if (*sz) {
 		PyRun_SimpleString(sz);
 	} else {
-		PyRun_SimpleString("import sys\n"
+		/* Run python interactively with history and auto completion 
+		   if available
+		*/
+		PyRun_SimpleString("try:\n"
+				   "    import sys, readline, rlcompleter\n"
+				   "    readline.parse_and_bind('tab: complete')\n"
+				   "except: pass\n"
 				   "print 'Python', sys.version\n");
-		while (PyRun_SimpleString(
-				   "while 1:\n"
-				   "    print '>>> ',\n"
-				   "    line = sys.stdin.readline()\n"
-				   "    if not line:\n"
-				   "        break\n"
-				   "    exec(line)\n"))
-		{};
+
+		PyRun_InteractiveLoop(stdin, "<stdin>");
 	}
 }
+
 extern int LoadPythonFile(const char *sz)
 {
 	char *path = NULL;
