@@ -72,7 +72,7 @@ typedef enum _DBProviderType {
 #define NUM_PROVIDERS 1
 #endif
 #elif USE_SQLITE
-#define NUM_PROVIDERS 1
+#define NUM_PROVIDERS 2
 #else
 #define NUM_PROVIDERS 0
 #endif
