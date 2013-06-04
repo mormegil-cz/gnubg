@@ -525,7 +525,7 @@ GList *PyPostgreGetDatabaseList(const char *user, const char *password)
 	{
 		unsigned int i;
 		GList *glist = NULL;
-		for (i = 0; i < rs->rows; i++)
+		for (i = 1; i < rs->rows; i++)
 			glist = g_list_append(glist, g_strdup(rs->data[i][0]));
 		FreeRowset(rs);
 		return glist;
@@ -554,9 +554,10 @@ int PyPostgreDeleteDatabase(const char *dbfilename, const char *user, const char
 {
 	char *buf;
 	int ret;
-	if (PyPostgreConnect(dbfilename, user, password) < 0)
+	if (PyPostgreConnect("postgres", user, password) < 0)
 		return FALSE;
 
+	ret = PyUpdateCommand("END");
 	buf = g_strdup_printf("DROP DATABASE %s", dbfilename);
 	ret = PyUpdateCommand(buf);
 	g_free(buf);

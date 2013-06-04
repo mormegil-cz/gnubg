@@ -52,22 +52,25 @@ def PyMySQLConnect(database, user, password):
 def PyPostgreConnect(database, user, password):
   global connection
   import pgdb
+
   try:
-    connection = pgdb.connect(database=database,user=user,password=password)
+    connection = pgdb.connect(user=user,password=password,database=database)
     return 1
   except:
     # See if postgres is there
     try:
-      connection = pgdb.connect(user=user,password=password)
       # See if database present
+      connection = pgdb.connect(user=user,password=password, database='postgres')
+
       cursor = connection.cursor()
       cursor.execute('select datname from pg_database where datname=\'' + database + '\'')
       r = cursor.fetchone();
-      if (r != None):
-        return -2 # failed
-      cursor.execute('end')
+      if (r is not None):
+        return -2 # database found
+
+      cursor.execute('END')
       cursor.execute('create database ' + database)
-      connection = pgdb.connect(database=database,user="postgres",password="root")
+      connection = pgdb.connect(database=database,user=user,password=password)
       return 0
     except:
       return -1 # failed
@@ -82,7 +85,10 @@ def PySQLiteConnect(dbfile):
 
 def PyDisconnect():
   global connection
-  connection.close()
+  try:
+    connection.close()
+  except:
+    pass
 
 def PySelect(str):
   global connection

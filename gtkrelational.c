@@ -666,6 +666,7 @@ static void DelDBClicked(GtkButton *UNUSED(button), gpointer dbList)
 			optionsValid = FALSE;
 			gtk_widget_set_sensitive(deldb, FALSE);
 			gtk_label_set_text(GTK_LABEL(helptext), _("Database successfully removed"));
+			pdb->database = "gnubg";
 		}
 		else
 			gtk_label_set_text(GTK_LABEL(helptext), _("Failed to delete database!"));
