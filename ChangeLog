@@ -1,4 +1,8 @@
-2013-06-02  Michael Petch  <mpetch@gnubg.org>
+2013-06-04  Michael Petch  <mpetch@gnubg.org>
+	* gtkrelational.c: Don't allow a user to create a player database 
+	that already exists.
+
+2013-06-04  Michael Petch  <mpetch@gnubg.org>
 	* configure.ac, multithread.h: Allow a new autoconf/configure 
 	parameter --with-eval-max-threads=size to allow the maximum number of
 	evaluation threads to be specified. Default is 48 if not specified.
