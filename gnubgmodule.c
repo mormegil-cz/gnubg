@@ -2864,10 +2864,10 @@ extern void PythonRun(const char *sz)
 		   if available
 		*/
 		PyRun_SimpleString("try:\n"
-				   "    import pyreadline as readline\n"
+				   "    import readline\n"
 				   "except ImportError:\n" 
 				   "    try:\n"
-				   "        import readline\n"
+				   "        import pyreadline as readline\n"
 				   "    except: pass\n"
 				   "try:\n"
 				   "    import sys, rlcompleter\n"
