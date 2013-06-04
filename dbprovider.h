@@ -58,8 +58,9 @@ typedef enum _DBProviderType {
 #if !USE_SQLITE
 	PYTHON_SQLITE,
 #endif
+	PYTHON_MYSQL,
 #if !defined(WIN32)
-	PYTHON_MYSQL, PYTHON_POSTGRE
+	PYTHON_POSTGRES
 #endif
 #endif
 } DBProviderType;

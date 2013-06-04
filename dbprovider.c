@@ -77,9 +77,9 @@ DBProvider providers[NUM_PROVIDERS] =
 	{PySQLiteConnect, PyDisconnect, PySelect, PyUpdateCommand, PyCommit, SQLiteGetDatabaseList, SQLiteDeleteDatabase,
 		"SQLite (Python)", "PythonSQLite", "SQLite3 connection included in latest Python version", FALSE, TRUE, "gnubg", "", ""},
 #endif
-#if !defined(WIN32)
 	{PyMySQLConnect, PyDisconnect, PySelect, PyUpdateCommand, PyCommit, PyMySQLGetDatabaseList, PyMySQLDeleteDatabase,
 		"MySQL (Python)", "PythonMySQL", "MySQL connection via MySQLdb Python module", TRUE, TRUE, "gnubg", "", ""},
+#if !defined(WIN32)
 	{PyPostgreConnect, PyDisconnect, PySelect, PyUpdateCommand, PyCommit, PyPostgreGetDatabaseList, PyPostgreDeleteDatabase,
 		"Postgres (Python)", "PythonPostgre", "PostgreSQL connection via PyGreSQL Python module", TRUE, TRUE, "gnubg", "", ""},
 #endif

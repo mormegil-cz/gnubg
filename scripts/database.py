@@ -28,7 +28,11 @@ connection = 0
 
 def PyMySQLConnect(database, user, password):
   global connection
-  import MySQLdb
+  try:
+    import MySQLdb
+  except:
+    import pymysql as MySQLdb
+
   try:
     connection = MySQLdb.connect( db = database, user = user, passwd = password )
     return 1

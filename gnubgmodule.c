@@ -2825,7 +2825,7 @@ extern void PythonInitialise(char *argv0)
 	char *working_dir = g_get_current_dir();
 	char *python_dir = g_build_filename(working_dir, "/PythonLib", NULL);
 	if (access(python_dir, F_OK) == 0)
-	{	/* Set Pyton to use this directory */
+	{	/* Set Python to use this directory */
 		char *buf;
 		buf = g_strdup_printf("PYTHONPATH=%s", python_dir);
 		putenv(buf);

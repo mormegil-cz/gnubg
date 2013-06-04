@@ -1,6 +1,9 @@
 2013-06-04  Michael Petch  <mpetch@gnubg.org>
 	* gtkrelational.c: Don't allow a user to create a player database 
 	that already exists.
+	* dbprovider.h, dbprovider.c, scripts/database.py, gnubgmodule.c:
+	Add Mysql support on Win32 platforms using pymysql (a purely
+	python based database driver for mysql)
 
 2013-06-04  Michael Petch  <mpetch@gnubg.org>
 	* configure.ac, multithread.h: Allow a new autoconf/configure 
