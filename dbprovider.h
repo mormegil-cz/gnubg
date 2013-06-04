@@ -69,10 +69,10 @@ typedef enum _DBProviderType {
 #if !defined(WIN32)
 #define NUM_PROVIDERS 3
 #else
-#define NUM_PROVIDERS 1
+#define NUM_PROVIDERS 2
 #endif
 #elif USE_SQLITE
-#define NUM_PROVIDERS 2
+#define NUM_PROVIDERS 1
 #else
 #define NUM_PROVIDERS 0
 #endif
