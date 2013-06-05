@@ -26,6 +26,8 @@
 # $Id$
 #
 
+import sys
+sys.path.append('./scripts')
 
 def swapboard(board):
     """Swap the board"""
@@ -97,3 +99,4 @@ def exportBad(baseName) :
       
     # Advance to next game
     gnubg.navigate(game=1)
+

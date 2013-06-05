@@ -1,4 +1,8 @@
 2013-06-05  Michael Petch  <mpetch@gnubg.org>
+	* scripts/gnubg.py: Add the scripts directory to the Python path
+	so that files in the directory can be imported.
+
+2013-06-05  Michael Petch  <mpetch@gnubg.org>
 	* gnubgmodule.c, gtkgame.c, play.c: Modify the interactive Python 
 	interpreter to support tab completion and command history. Begin
 	reintroducing Python IDLE, since it functions on MW Windows and
