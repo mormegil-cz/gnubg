@@ -36,6 +36,11 @@
 #include "matchid.h"
 #include "util.h"
 
+#if USE_GTK
+#include "gtkgame.h"
+#include <gtk/gtk.h>
+#endif
+
 #if USE_PYTHON
 
 static PyObject *
@@ -579,6 +584,19 @@ PythonNextTurn( PyObject *UNUSED(self), PyObject *UNUSED(args) ) {
 
 }
 
+static PyObject *
+PythonUpdateUI( PyObject *UNUSED(self), PyObject *UNUSED(args) ) {
+
+#if USE_GTK
+  if (fX){
+    while (gtk_events_pending ())
+      gtk_main_iteration ();
+  }
+#endif
+
+  return Py_None;
+}
+
 
 static PyObject *
 PythonEvalContext( PyObject* UNUSED(self), PyObject *args ) {
@@ -631,6 +649,7 @@ static PyObject *PythonCommand(PyObject * UNUSED(self), PyObject * args)
 		fInterrupt = FALSE;
 	}
 
+	PythonUpdateUI( Py_None, Py_None );
 	Py_INCREF(Py_None);
 	return Py_None;
 }
@@ -2813,6 +2832,11 @@ PyMethodDef gnubgMethods[] = {
     "convert an error per move amount to a rating 0 = awful..7=supernatural\n"
     "    arguments: float error per move\n"
     "    returns: int\n" },
+  { "updateui", (PyCFunction) PythonUpdateUI, METH_VARARGS, 
+    "Allows the UI to update itself\n"
+    "    arguments: none\n"
+    "    returns: None" },
+
   { NULL, NULL, 0, NULL }
 
 };
@@ -2860,9 +2884,20 @@ extern void PythonRun(const char *sz)
 	if (*sz) {
 		PyRun_SimpleString(sz);
 	} else {
-		/* Run python interactively with history and auto completion 
+		/* Run python interactively with history and auto completion
 		   if available
 		*/
+#if USE_GTK
+	        if (fX) {
+			if (!PyRun_SimpleString("import sys\n"
+					   "sys.argv=['','-n']\n"
+					   "import idlelib.PyShell\n"
+					   "idlelib.PyShell.main()\n")){
+
+				return;
+			}
+		}
+#endif
 		PyRun_SimpleString("try:\n"
 				   "    import readline\n"
 				   "except ImportError:\n" 
