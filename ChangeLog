@@ -5,13 +5,13 @@
 2013-06-05  Michael Petch  <mpetch@gnubg.org>
 	* gnubgmodule.c, gtkgame.c, play.c: Modify the interactive Python 
 	interpreter to support tab completion and command history. Begin
-	reintroducing Python IDLE, since it functions on MW Windows and
-	various linux distros. Ubuntu/Debian installation if IDLE can be 
+	reintroducing Python IDLE, since it functions on MS Windows and
+	various linux distros. Ubuntu/Debian installation of IDLE can be 
 	done via: apt-get install idle . If IDLE is not present it will
-	drop back to the old method. CLI builds don't use Idle ar present.
+	drop back to the old method. CLI builds don't use IDLE at present.
 	IDLE is not on the GUI menu but can be activated by turning on the
 	"command" pane and entering '>' (greater than sign without quotes)
-	as a command. IF IDLE is not presnt an usable it will do nothing.
+	as a command. IF IDLE is not presnt and usable it will do nothing.
 	This is a work in progress.
 
 2013-06-04  Michael Petch  <mpetch@gnubg.org>
