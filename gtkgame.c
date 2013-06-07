@@ -185,6 +185,10 @@ typedef enum _gnubgcommand {
     VIEW_TOOLBAR_BOTH
 } gnubgcommand;
 
+#ifndef WIN32
+extern gint python_run_file (gpointer file);
+#endif
+
 /* TRUE if gnubg is automatically setting the state of a menu item. */
 static int fAutoCommand;
 
@@ -3995,23 +3999,6 @@ extern void InitGTK(int *argc, char ***argv)
 	cb = gdk_atom_intern("CLIPBOARD", TRUE);
 	clipboard = gtk_clipboard_get(cb);
 }
-
-
-#ifndef WIN32
-static gint python_run_file (gpointer file)
-{
-	char *pch;
-        g_assert(file);
-        pch = g_strdup_printf(">import sys\n"
-		   "sys.argv=['','-n', '%s']\n"
-		   "import idlelib.PyShell\n" 
-		   "idlelib.PyShell.main()\n", (char *)file);
-	UserCommand(pch);
-	g_free(pch);
-        g_free(file);
-        return FALSE;
-}
-#endif
 
 enum {RE_NONE, RE_LANGUAGE_CHANGE};
 

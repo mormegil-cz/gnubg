@@ -1,3 +1,13 @@
+2013-06-06  Michael Petch  <mpetch@gnubg.org>
+
+	* gnubgmodule.c gnubgmodule.h gtkgame.c, scripts/gnubg.py: Move
+	loading of the Python command line interpreter to Python functions
+	in gnubg.py. The Python command line now supports IPython if
+	present. IPython takes precedent over the standard Python 
+	interpreter. If the standard interpreter is used, attempt to
+	load command history (readline module) and then try loading
+	auto completion (module rlcompleter) support if present. 	
+
 2013-06-05  Michael Petch  <mpetch@gnubg.org>
 
 	* scripts/gnubg.py: Add the scripts directory to the Python path

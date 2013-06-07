@@ -2842,6 +2842,33 @@ PyMethodDef gnubgMethods[] = {
 };
 
 static char *python_dir = NULL;
+static PyObject *py_gnubg_module = NULL;
+
+#ifndef WIN32
+extern gint python_run_file (gpointer file)
+{
+        char *pch;
+        PyObject *py_dict, *py_ret;
+
+        g_assert(file);
+
+        pch = g_strdup_printf("gnubg_InteractivePyShell_gui(['','-n', '%s'])\n",
+                             (char *)file);
+        py_dict = PyModule_GetDict(PythonGnubgModule());
+        py_ret = PyRun_String(pch, Py_eval_input, PythonGnubgModule(), py_dict);
+
+        if (py_ret) Py_DECREF(py_ret);
+        if (py_ret) Py_DECREF(py_dict);
+        g_free(pch);
+        g_free(file);
+        return FALSE;
+}
+#endif
+
+extern PyObject *PythonGnubgModule()
+{
+	return py_gnubg_module;
+}
  
 extern void PythonInitialise(char *argv0)
 {
@@ -2866,6 +2893,7 @@ extern void PythonInitialise(char *argv0)
 
   /* run gnubg.py start up script */
   LoadPythonFile("gnubg.py");
+  py_gnubg_module = PyImport_AddModule("__main__");
 }
 
 extern void PythonShutdown( void )
@@ -2873,13 +2901,22 @@ extern void PythonShutdown( void )
   Py_Finalize();
 
 #ifdef WIN32
-  if (python_dir)
+  if (python_dir){
     g_free(python_dir);
+    python_dir = NULL;
+  }
 #endif
+  Py_DECREF(py_gnubg_module);
+  py_gnubg_module = NULL;
 }
 
 extern void PythonRun(const char *sz)
 {
+#if USE_GTK
+	PyObject *py_ret, *py_dict = NULL;
+	int success = FALSE;
+#endif
+
 	if (*sz) {
 		PyRun_SimpleString(sz);
 	} else {
@@ -2887,29 +2924,21 @@ extern void PythonRun(const char *sz)
 		   if available
 		*/
 #if USE_GTK
-	        if (fX) {
-			if (!PyRun_SimpleString("import sys\n"
-					   "sys.argv=['','-n']\n"
-					   "import idlelib.PyShell\n"
-					   "idlelib.PyShell.main()\n")){
+		py_dict = PyModule_GetDict(py_gnubg_module);
 
-				return;
-			}
-		}
+	        if (fX && (py_ret = PyRun_String("gnubg_InteractivePyShell_gui()", 
+		    Py_eval_input, PythonGnubgModule(), py_dict)))
+			if (py_ret && PyInt_Check(py_ret) && PyInt_AsLong(py_ret))
+				success = TRUE;
+
+		if (py_ret) Py_DECREF(py_ret);
+		if (py_dict) Py_DECREF(py_dict);
+
+		if (success) 
+			return;
 #endif
-		PyRun_SimpleString("try:\n"
-				   "    import readline\n"
-				   "except ImportError:\n" 
-				   "    try:\n"
-				   "        import pyreadline as readline\n"
-				   "    except: pass\n"
-				   "try:\n"
-				   "    import sys, rlcompleter\n"
-				   "    readline.parse_and_bind('tab: complete')\n"
-				   "except: pass\n"
-				   "print 'Python', sys.version\n");
+		PyRun_SimpleString("gnubg_InteractivePyShell_tui()");
 
-		PyRun_InteractiveLoop(stdin, "<stdin>");
 	}
 }
 

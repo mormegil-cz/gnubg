@@ -41,6 +41,7 @@ typedef int Py_ssize_t;
 #else
 #define STACKALIGN
 
+extern PyObject *PythonGnubgModule();
 #endif
 
 extern void PythonInitialise(char *argv0);
