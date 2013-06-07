@@ -9,10 +9,10 @@
 	* gnubgmodule.c, gnubgmodule.h, gtkgame.c, scripts/gnubg.py: Move
 	loading of the Python command line interpreter to Python functions
 	in gnubg.py. The Python command line now supports IPython if
-	present. IPython takes precedent over the standard Python 
+	present. IPython takes precedence over the standard Python 
 	interpreter. If the standard interpreter is used, attempt to
 	load command history (readline module) and then try loading
-	auto completion (module rlcompleter) support if present. 	
+	auto completion (rlcompleter module) support if present. 	
 
 	Fix Python related ifdefs to allow compiling when built without 
 	Python support.
