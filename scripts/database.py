@@ -24,29 +24,37 @@
 # $Id$
 #
 
-connection = 0
+# Host settings for Mysql database
+mysql_host="192.168.67.5"
+mysql_port=3306
 
+# Host settings for Postgres database, hostname:portnum
+postgres_host="localhost:5432"
+
+
+connection = 0
 def PyMySQLConnect(database, user, password):
-  global connection
+  global connection, mysql_host, mysql_port
   try:
     import MySQLdb
   except:
+    # See if pymsql (pure Python replacement) is available. Works on MS Windows
     import pymysql as MySQLdb
 
   try:
-    connection = MySQLdb.connect( db = database, user = user, passwd = password )
+    connection = MySQLdb.connect( host=mysql_host, port=mysql_port, db = database, user = user, passwd = password )
     return 1
   except:
     # See if mysql is there
     try:
-      connection = MySQLdb.connect( user = user, passwd = password )
+      connection = MySQLdb.connect( host=mysql_host, port=mysql_port, user = user, passwd = password )
       # See if database present
       cursor = connection.cursor()
       r = cursor.execute('show databases where `Database` = "' + database + '";')
       if (r != 0):
         return -2 # failed
       cursor.execute('create database ' + database)
-      connection = MySQLdb.connect( db = database, user = user, passwd = password )
+      connection = MySQLdb.connect( host=mysql_host, port=mysql_port, db = database, user = user, passwd = password )
       return 0
     except:
       return -1 # failed
@@ -54,17 +62,17 @@ def PyMySQLConnect(database, user, password):
   return connection
 
 def PyPostgreConnect(database, user, password):
-  global connection
+  global connection, postgres_host, postgres_port
   import pgdb
 
   try:
-    connection = pgdb.connect(user=user,password=password,database=database)
+    connection = pgdb.connect(host=postgres_host,user=user,password=password,database=database)
     return 1
   except:
     # See if postgres is there
     try:
       # See if database present
-      connection = pgdb.connect(user=user,password=password, database='postgres')
+      connection = pgdb.connect(host=postgres_host, user=user,password=password, database='postgres')
 
       cursor = connection.cursor()
       cursor.execute('select datname from pg_database where datname=\'' + database + '\'')
@@ -74,7 +82,7 @@ def PyPostgreConnect(database, user, password):
 
       cursor.execute('END')
       cursor.execute('create database ' + database)
-      connection = pgdb.connect(database=database,user=user,password=password)
+      connection = pgdb.connect(host=postgres_host,database=database,user=user,password=password)
       return 0
     except:
       return -1 # failed
