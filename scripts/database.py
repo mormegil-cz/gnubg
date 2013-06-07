@@ -62,7 +62,7 @@ def PyMySQLConnect(database, user, password):
   return connection
 
 def PyPostgreConnect(database, user, password):
-  global connection, postgres_host, postgres_port
+  global connection, postgres_host
   import pgdb
 
   try:

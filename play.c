@@ -3290,7 +3290,9 @@ extern void CommandEndGame(char *UNUSED(sz))
 	int fDisplay_store = fDisplay;
 	int fQuiet_store = fQuiet;
 #if USE_BOARD3D
-	BoardData *bd = BOARD(pwBoard)->board_data;
+	BoardData *bd;
+	if (fX && pwBoard) 
+		bd = BOARD(pwBoard)->board_data;
 #endif
 	const evalcontext ec_quick = { FALSE, 0, FALSE, TRUE, 0.0 };
 	int manual_dice = (rngCurrent == RNG_MANUAL); 
@@ -3329,7 +3331,8 @@ extern void CommandEndGame(char *UNUSED(sz))
 	}
 
 #if USE_BOARD3D
-	SuspendDiceRolling(bd->rd);
+	if (fX)
+		SuspendDiceRolling(bd->rd);
 #endif
 
 	fAutoGame = FALSE;
@@ -3386,7 +3389,8 @@ extern void CommandEndGame(char *UNUSED(sz))
 	}
 
 #if USE_BOARD3D
-	ResumeDiceRolling(bd->rd);
+	if (fX)
+		ResumeDiceRolling(bd->rd);
 #endif
 
 	if (!automaticTask)

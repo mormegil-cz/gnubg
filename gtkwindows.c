@@ -391,7 +391,7 @@ WarningOK ( GtkWidget *pw, warningType warning )
 
 extern int GTKShowWarning(warningType warning, GtkWidget *pwParent)
 {
-	if (warnings[warning].warningEnabled)
+	if (fX && warnings[warning].warningEnabled)
 	{
 		char *buf;
 		GtkWidget *pwDialog, *pwMsg, *pwv, *label;
