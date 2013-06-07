@@ -25,7 +25,7 @@
 #
 
 # Host settings for Mysql database
-mysql_host="192.168.67.5"
+mysql_host="localhost"
 mysql_port=3306
 
 # Host settings for Postgres database, hostname:portnum
