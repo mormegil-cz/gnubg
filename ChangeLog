@@ -1,6 +1,12 @@
+2013-06-07  Michael Petch  <mpetch@gnubg.org>
+
+	* gtkwindows.c, play.c: Fix a bug that segfaulted the "end game"
+	command when built with GTK and the "-t" option is used to
+	launch GNUBG.
+
 2013-06-06  Michael Petch  <mpetch@gnubg.org>
 
-	* gnubgmodule.c gnubgmodule.h gtkgame.c, scripts/gnubg.py: Move
+	* gnubgmodule.c, gnubgmodule.h, gtkgame.c, scripts/gnubg.py: Move
 	loading of the Python command line interpreter to Python functions
 	in gnubg.py. The Python command line now supports IPython if
 	present. IPython takes precedent over the standard Python 
