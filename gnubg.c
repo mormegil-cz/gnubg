@@ -20,7 +20,10 @@
  */
 
 #include "config.h"
+
+#if USE_PYTHON
 #include "gnubgmodule.h"
+#endif
 
 #include <sys/types.h>
 #include <stdlib.h>

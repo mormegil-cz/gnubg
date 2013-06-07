@@ -21,7 +21,10 @@
 
 #include "config.h"
 
+#if USE_PYTHON
 #include "gnubgmodule.h"
+#endif
+
 #include "backgammon.h"
 #include "positionid.h"
 #include "drawboard.h"

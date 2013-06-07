@@ -8,6 +8,9 @@
 	load command history (readline module) and then try loading
 	auto completion (module rlcompleter) support if present. 	
 
+	Fix Python related ifdefs to allow compiling when built without 
+	Python support.
+
 2013-06-05  Michael Petch  <mpetch@gnubg.org>
 
 	* scripts/gnubg.py: Add the scripts directory to the Python path
