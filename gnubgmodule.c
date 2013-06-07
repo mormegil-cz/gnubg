@@ -2927,7 +2927,7 @@ extern void PythonRun(const char *sz)
 		   if available
 		*/
 #if USE_GTK
-		py_dict = PyModule_GetDict(py_gnubg_module);
+		py_dict = PyModule_GetDict(PythonGnubgModule());
 
 	        if (fX && (py_ret = PyRun_String("gnubg_InteractivePyShell_gui()", 
 		    Py_eval_input, PythonGnubgModule(), py_dict)))

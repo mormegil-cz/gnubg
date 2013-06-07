@@ -19,6 +19,7 @@
  * $Id$
  */
 
+#include "gnubgmodule.h"
 #include "config.h"
 #include "gtklocdefs.h"
 #include "gtkuidefs.h"
@@ -184,10 +185,6 @@ typedef enum _gnubgcommand {
     VIEW_TOOLBAR_TEXTONLY,
     VIEW_TOOLBAR_BOTH
 } gnubgcommand;
-
-#ifndef WIN32
-extern gint python_run_file (gpointer file);
-#endif
 
 /* TRUE if gnubg is automatically setting the state of a menu item. */
 static int fAutoCommand;
