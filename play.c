@@ -382,7 +382,10 @@ CalculateBoard( void )
   do {
     pl = pl->plNext;
 
-    g_assert( pl && pl->p );
+    if ( !pl ) {
+        g_assert_not_reached();
+        break;
+    }
 
     ApplyMoveRecord( &ms, plGame, pl->p );
 
