@@ -2962,9 +2962,12 @@ extern void ChangeGame(listOLD *plGameNew)
 	   last move is a MOVE_SETxxx record, its fPlayer will
 	   be bogus and we will have to fix it */
 
-	pmr_cur = plLastMove->p;
-	reallastmt = pmr_cur->mt;
-	reallastplayer = pmr_cur->fPlayer;
+	if ((pmr_cur = plLastMove->p)) {
+		reallastmt = pmr_cur->mt;
+		reallastplayer = pmr_cur->fPlayer;
+	} else {
+		reallastmt = reallastplayer = -1;
+	}
 
 	pmr_cur = get_current_moverecord(NULL);
 
