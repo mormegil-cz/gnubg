@@ -212,6 +212,13 @@ ApplyMoveRecord(matchstate* pms, const listOLD* plGame, const moverecord* pmr)
     int n;
     moverecord *pmrx = (moverecord *) plGame->plNext->p;
     xmovegameinfo* pmgi;
+
+    if ( !pmr ) {
+        g_assert_not_reached();
+        outputerr( "Applying null move record!" );
+        return;
+    }
+
     /* FIXME this is wrong -- plGame is not necessarily the right game */
 
     g_assert( pmr->mt == MOVE_GAMEINFO || (pmrx && pmrx->mt == MOVE_GAMEINFO) );
