@@ -294,7 +294,7 @@ static gboolean board_expose( GtkWidget *drawing_area, GdkEventExpose *event,
 
     g_assert( GTK_IS_DRAWING_AREA( drawing_area ) );
     
-    if( bd->rd->nSize <= 0 )
+    if( bd->rd->nSize == 0 )
 	return TRUE;
 
     x = event->area.x;
@@ -363,7 +363,7 @@ static void board_invalidate_point( BoardData *bd, int n )
 
     int x, y, cx, cy;
 
-    if (bd->rd->nSize <= 0)
+    if (bd->rd->nSize == 0)
 	return;
 
     point_area( bd, n, &x, &y, &cx, &cy );
@@ -1304,7 +1304,7 @@ static int board_chequer_number( GtkWidget *UNUSED(board), BoardData *bd, int po
     if( point < 0 || point > 27 )
 	return -1;
 
-    if( bd->rd->nSize <= 0 )
+    if( bd->rd->nSize == 0 )
 	return -1;
 
     x0 /= bd->rd->nSize;
@@ -2642,7 +2642,7 @@ static gint board_set( Board *board, const gchar *board_text, const gint
 		bd->valid_move = NULL;
     }
 
-    if( bd->rd->nSize <= 0 )
+    if( bd->rd->nSize == 0 )
 	return 0;
 
 	if( bd->turn != old_turn )
@@ -3065,7 +3065,7 @@ extern gint game_set( Board *board, TanBoard points, int roll,
 		board_set( board, board_str, ms.fResigned ==-1 ? 0 : -bd->turn * ms.fResigned, ms.fCubeUse );
 
     /* FIXME update names, score, match length */
-    if( bd->rd->nSize <= 0 )
+    if( bd->rd->nSize == 0 )
 	return 0;
 
     bd->computer_turn = computer_turn;
@@ -3668,7 +3668,7 @@ static gboolean dice_expose( GtkWidget *dice, GdkEventExpose *UNUSED(event),
                              BoardData *bd )
 {
 
-	if (bd->rd->nSize <= 0 || bd->diceShown == DICE_NOT_SHOWN)
+	if (bd->rd->nSize == 0 || bd->diceShown == DICE_NOT_SHOWN)
 		return TRUE;
 
     DrawDie( gtk_widget_get_window ( dice ), bd->ri.achDice, bd->ri.achPip,
