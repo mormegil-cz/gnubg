@@ -959,6 +959,9 @@ static void board_drag( GtkWidget *UNUSED(widget), BoardData *bd, int x, int y )
 
     gdk_window_process_updates( gtk_widget_get_window ( bd->drawing_area ), FALSE );
 
+    if (s == 0)
+        return;
+
     puch = g_alloca( 6 * s * 6 * s * 3 );
     puchNew = g_alloca( 6 * s * 6 * s * 3 );
     puchChequer = g_alloca( 6 * s * 6 * s * 3 );
@@ -1011,6 +1014,9 @@ static void board_end_drag( GtkWidget *UNUSED(widget), BoardData *bd )
     int s = bd->rd->nSize;
     
     gdk_window_process_updates( gtk_widget_get_window ( bd->drawing_area ), FALSE );
+
+    if (s == 0)
+        return;
 
     puch = g_alloca( 6 * s * 6 * s * 3 );
     
