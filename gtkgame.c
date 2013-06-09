@@ -1060,10 +1060,10 @@ extern void SetAnnotation( moverecord *pmr) {
     if( pmr->rLuck != ERR_VAL ) {
 	if( fOutputMWC && ms.nMatchTo ) {
 	    GetMatchStateCubeInfo( &ci, &ms );
-	    pch += sprintf( pch, " (%+0.3f%%)",
+	    sprintf( pch, " (%+0.3f%%)",
 	     100.0f * ( eq2mwc( pmr->rLuck, &ci ) - eq2mwc( 0.0f, &ci ) ) );
 	} else
-	    pch += sprintf( pch, " (%+0.3f)", pmr->rLuck );
+	    sprintf( pch, " (%+0.3f)", pmr->rLuck );
     }
     gtk_table_attach_defaults( GTK_TABLE( pwBox ),
 				gtk_label_new( sz ), 1, 2, 0, 1 );
