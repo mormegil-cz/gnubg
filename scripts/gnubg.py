@@ -73,6 +73,7 @@ def gnubg_InteractivePyShell_tui(argv=[''], banner=None):
 
         ipshell = InteractiveShellEmbed(config=cfg,banner1=banner)
         ipshell()
+        ipshell.restore_sys_module_state()
         return True
 
     except:
