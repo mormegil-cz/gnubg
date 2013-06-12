@@ -40,9 +40,9 @@ typedef struct _metinfo {
 
 /* macros for getting match equities */
 
-#define GET_MET(i,j,aafMET) ( ( (i) < 0 ) ? 1.0 : ( ( (j) < 0 ) ? 0.0 : \
+#define GET_MET(i,j,aafMET) ( ( (i) < 0 ) ? 1.0f : ( ( (j) < 0 ) ? 0.0f : \
 						 (aafMET [ i ][ j ]) ) )
-#define GET_METPostCrawford(i,afBtilde) ( (i) < 0 ? 1.0 : afBtilde [ i ] )
+#define GET_METPostCrawford(i,afBtilde) ( (i) < 0 ? 1.0f : afBtilde [ i ] )
 
 /* current match equity table used by gnubg */
 
