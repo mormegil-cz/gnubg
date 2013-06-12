@@ -57,7 +57,7 @@ def gnubg_InteractivePyShell_tui(argv=[''], banner=None):
         if (banner == None):
             banner = 'Python ' + sys.version 
 
-        code.interact(banner=banner)
+        code.interact(banner=banner,local=globals())
         return True
 
     try:
