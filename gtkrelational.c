@@ -520,7 +520,7 @@ static void LoginClicked(GtkButton *UNUSED(button), gpointer dbList)
 	if (pdb == NULL)
 		return;
 
-	tmpUser = pdb->username, tmpPass = pdb->password, pdb->hostname = tmpHost;
+	tmpUser = pdb->username, tmpPass = pdb->password, tmpHost = pdb->hostname;
 
 	pdb->username = gtk_entry_get_text(GTK_ENTRY(user));
 	pdb->password = gtk_entry_get_text(GTK_ENTRY(password));
