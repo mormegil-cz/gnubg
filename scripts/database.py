@@ -24,23 +24,32 @@
 # $Id$
 #
 
-# Host settings for Mysql database
-mysql_host="localhost"
-mysql_port=3306
-
-# Host settings for Postgres database, hostname:portnum
-postgres_host="localhost:5432"
-
-
 connection = 0
-def PyMySQLConnect(database, user, password):
-  global connection, mysql_host, mysql_port
+
+def PyMySQLConnect(database, user, password, hostname):
+  global connection 
+
   try:
     import MySQLdb
   except:
     # See if pymsql (pure Python replacement) is available. Works on MS Windows
     import pymysql as MySQLdb
 
+  hostport = hostname.strip().split(':')
+  try:
+    mysql_host=hostport[0]
+  except:
+    mysql_host='localhost'
+
+  try:
+    mysql_portstr=hostport[1]
+    try:
+      mysql_port=int(mysql_portstr)
+    except:
+      return -1
+  except:
+    mysql_port=3306
+  
   try:
     connection = MySQLdb.connect( host=mysql_host, port=mysql_port, db = database, user = user, passwd = password )
     return 1
@@ -61,10 +70,11 @@ def PyMySQLConnect(database, user, password):
     
   return connection
 
-def PyPostgreConnect(database, user, password):
-  global connection, postgres_host
+def PyPostgreConnect(database, user, password, hostname):
+  global connection
   import pgdb
 
+  postgres_host = hostname.strip()
   try:
     connection = pgdb.connect(host=postgres_host,user=user,password=password,database=database)
     return 1

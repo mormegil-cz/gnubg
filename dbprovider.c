@@ -39,21 +39,21 @@ PyObject *pdict;
 RowSet* ConvertPythonToRowset(PyObject *v);
 
 #if !USE_SQLITE
-static int PySQLiteConnect(const char *dbfilename, const char *user, const char *password);
+static int PySQLiteConnect(const char *dbfilename, const char *user, const char *password, const char *hostname);
 #endif
-static int PyMySQLConnect(const char *dbfilename, const char *user, const char *password);
-static int PyPostgreConnect(const char *dbfilename, const char *user, const char *password);
+static int PyMySQLConnect(const char *dbfilename, const char *user, const char *password, const char *hostname);
+static int PyPostgreConnect(const char *dbfilename, const char *user, const char *password, const char *hostname);
 static void PyDisconnect(void);
 static RowSet *PySelect(const char* str);
 static int PyUpdateCommand(const char* str);
 static void PyCommit(void);
-static GList *PyMySQLGetDatabaseList(const char *user, const char *password);
-static GList *PyPostgreGetDatabaseList(const char *user, const char *password);
-static int PyMySQLDeleteDatabase(const char *dbfilename, const char *user, const char *password);
-static int PyPostgreDeleteDatabase(const char *dbfilename, const char *user, const char *password);
+static GList *PyMySQLGetDatabaseList(const char *user, const char *password, const char *hostname);
+static GList *PyPostgreGetDatabaseList(const char *user, const char *password, const char *hostname);
+static int PyMySQLDeleteDatabase(const char *dbfilename, const char *user, const char *password, const char *hostname);
+static int PyPostgreDeleteDatabase(const char *dbfilename, const char *user, const char *password, const char *hostname);
 #endif
 #if USE_SQLITE
-static int SQLiteConnect(const char *dbfilename, const char *user, const char *password);
+static int SQLiteConnect(const char *dbfilename, const char *user, const char *password, const char *hostname);
 static void SQLiteDisconnect(void);
 static RowSet *SQLiteSelect(const char* str);
 static int SQLiteUpdateCommand(const char* str);
@@ -61,30 +61,30 @@ static void SQLiteCommit(void);
 #endif
 
 #if NUM_PROVIDERS
-static int SQLiteDeleteDatabase(const char *dbfilename, const char *user, const char *password);
-static GList *SQLiteGetDatabaseList(const char *user, const char *password);
+static int SQLiteDeleteDatabase(const char *dbfilename, const char *user, const char *password, const char *hostname);
+static GList *SQLiteGetDatabaseList(const char *user, const char *password, const char *hostname);
 DBProvider providers[NUM_PROVIDERS] =
 {
 #if USE_SQLITE
 	{SQLiteConnect, SQLiteDisconnect, SQLiteSelect, SQLiteUpdateCommand, SQLiteCommit, SQLiteGetDatabaseList, SQLiteDeleteDatabase,
-		"SQLite", "SQLite", "Direct SQLite3 connection", FALSE, TRUE, "gnubg", "", ""},
+		"SQLite", "SQLite", "Direct SQLite3 connection", FALSE, TRUE, "gnubg", "", "", ""},
 #endif
 #if USE_PYTHON
 #if !USE_SQLITE
 	{PySQLiteConnect, PyDisconnect, PySelect, PyUpdateCommand, PyCommit, SQLiteGetDatabaseList, SQLiteDeleteDatabase,
-		"SQLite (Python)", "PythonSQLite", "SQLite3 connection included in latest Python version", FALSE, TRUE, "gnubg", "", ""},
+		"SQLite (Python)", "PythonSQLite", "SQLite3 connection included in latest Python version", FALSE, TRUE, "gnubg", "", "", ""},
 #endif
 	{PyMySQLConnect, PyDisconnect, PySelect, PyUpdateCommand, PyCommit, PyMySQLGetDatabaseList, PyMySQLDeleteDatabase,
-		"MySQL (Python)", "PythonMySQL", "MySQL connection via MySQLdb Python module", TRUE, TRUE, "gnubg", "", ""},
+		"MySQL (Python)", "PythonMySQL", "MySQL connection via MySQLdb Python module", TRUE, TRUE, "gnubg", "", "", "localhost:3306"},
 #if !defined(WIN32)
 	{PyPostgreConnect, PyDisconnect, PySelect, PyUpdateCommand, PyCommit, PyPostgreGetDatabaseList, PyPostgreDeleteDatabase,
-		"Postgres (Python)", "PythonPostgre", "PostgreSQL connection via PyGreSQL Python module", TRUE, TRUE, "gnubg", "", ""},
+		"Postgres (Python)", "PythonPostgre", "PostgreSQL connection via PyGreSQL Python module", TRUE, TRUE, "gnubg", "", "", "localhost:5432"},
 #endif
 #endif
 };
 
 #else
-DBProvider providers[1] = {{0, 0, 0, 0, 0, 0, 0, "No Providers", "No Providers", "No Providers", 0, 0, 0, 0, 0}};
+DBProvider providers[1] = {{0, 0, 0, 0, 0, 0, 0, "No Providers", "No Providers", "No Providers", 0, 0, 0, 0, 0, 0}};
 #endif
 
 #if USE_PYTHON || USE_SQLITE
@@ -202,6 +202,8 @@ void SetDBParam(const char *db, const char *key, const char *value)
 		providers[type].username = g_strdup(value);
 	else if (!StrCaseCmp(key, "password"))
 		providers[type].password = g_strdup(value);
+	else if (!StrCaseCmp(key, "hostname"))
+		providers[type].hostname = g_strdup(value);
 }
 
 void SetDBType(const char *type)
@@ -209,12 +211,13 @@ void SetDBType(const char *type)
 	dbProviderType = GetTypeFromName(type);
 }
 
-void SetDBSettings(DBProviderType dbType, const char *database, const char *user, const char *password)
+void SetDBSettings(DBProviderType dbType, const char *database, const char *user, const char *password, const char *hostname)
 {
 	dbProviderType = dbType;
 	providers[dbProviderType].database = g_strdup(database);
 	providers[dbProviderType].username = g_strdup(user);
 	providers[dbProviderType].password = g_strdup(password);
+	providers[dbProviderType].hostname = g_strdup(hostname);
 }
 
 void RelationalSaveSettings(FILE *pf)
@@ -230,6 +233,7 @@ void RelationalSaveSettings(FILE *pf)
 		fprintf(pf, "relational setup %s-database=%s\n", providers[i].shortname, pdb->database);
 		fprintf(pf, "relational setup %s-username=%s\n", providers[i].shortname, pdb->username);
 		fprintf(pf, "relational setup %s-password=%s\n", providers[i].shortname, pdb->password);
+		fprintf(pf, "relational setup %s-hostname=%s\n", providers[i].shortname, pdb->hostname);
 	}
 }
 
@@ -269,11 +273,14 @@ extern DBProvider* GetDBProvider(DBProviderType dbType)
 }
 
 #if USE_PYTHON
-int PyMySQLConnect(const char *dbfilename, const char *user, const char *password)
+int PyMySQLConnect(const char *dbfilename, const char *user, const char *password, const char *hostname)
 {
 	int iret;
 	PyObject *ret;
-	char *buf = g_strdup_printf("PyMySQLConnect(r'%s', '%s', '%s')", dbfilename, user, password);
+	
+	const char *host = hostname ? hostname : "";
+
+	char *buf = g_strdup_printf("PyMySQLConnect(r'%s', '%s', '%s', '%s')", dbfilename, user, password, host);
 	/* Connect to database*/
 	ret = PyRun_String(buf, Py_eval_input, pdict, pdict);
 	g_free(buf);
@@ -289,11 +296,13 @@ int PyMySQLConnect(const char *dbfilename, const char *user, const char *passwor
 	return 1;
 }
 
-int PyPostgreConnect(const char *dbfilename, const char *user, const char *password)
+int PyPostgreConnect(const char *dbfilename, const char *user, const char *password, const char *hostname)
 {
 	int iret;
 	PyObject *ret;
-	char *buf = g_strdup_printf("PyPostgreConnect(r'%s', '%s', '%s')", dbfilename, user, password);
+	const char *host = hostname ? hostname : "";
+
+	char *buf = g_strdup_printf("PyPostgreConnect(r'%s', '%s', '%s', '%s')", dbfilename, user, password, host);
 	/* Connect to database*/
 	ret = PyRun_String(buf, Py_eval_input, pdict, pdict);
 	g_free(buf);
@@ -309,7 +318,7 @@ int PyPostgreConnect(const char *dbfilename, const char *user, const char *passw
 	return 1;
 }
 #if !USE_SQLITE
-static int PySQLiteConnect(const char *dbfilename, const char *UNUSED(user), const char *UNUSED(password))
+static int PySQLiteConnect(const char *dbfilename, const char *UNUSED(user), const char *UNUSED(password), const char *UNUSED(hostname))
 {
 	PyObject *con;
 	char *name, *filename, *buf;
@@ -483,11 +492,11 @@ RowSet* ConvertPythonToRowset(PyObject *v)
 	return pRow;
 }
 
-GList *PyMySQLGetDatabaseList(const char *user, const char *password)
+GList *PyMySQLGetDatabaseList(const char *user, const char *password, const char *hostname)
 {
 	PyObject *rs;
 
-	if (PyMySQLConnect("", user, password) < 0)
+	if (PyMySQLConnect("", user, password, hostname) < 0)
 		return NULL;
 
 	rs = PyRun_String("PyUpdateCommandReturn(\"Show databases\")", Py_eval_input, pdict, pdict);
@@ -510,11 +519,11 @@ GList *PyMySQLGetDatabaseList(const char *user, const char *password)
 	}
 }
 
-GList *PyPostgreGetDatabaseList(const char *user, const char *password)
+GList *PyPostgreGetDatabaseList(const char *user, const char *password, const char *hostname)
 {
 	RowSet *rs;
 
-	if (PyPostgreConnect("", user, password) < 0)
+	if (PyPostgreConnect("", user, password, hostname) < 0)
 		return NULL;
 
 	rs = PySelect("datname from pg_database");
@@ -534,11 +543,11 @@ GList *PyPostgreGetDatabaseList(const char *user, const char *password)
 	}
 }
 
-int PyMySQLDeleteDatabase(const char *dbfilename, const char *user, const char *password)
+int PyMySQLDeleteDatabase(const char *dbfilename, const char *user, const char *password, const char *hostname)
 {
 	char *buf;
 	int ret;
-	if (PyMySQLConnect(dbfilename, user, password) < 0)
+	if (PyMySQLConnect(dbfilename, user, password, hostname) < 0)
 		return FALSE;
 
 	buf = g_strdup_printf("DROP DATABASE %s", dbfilename);
@@ -547,11 +556,11 @@ int PyMySQLDeleteDatabase(const char *dbfilename, const char *user, const char *
 	return ret;
 }
 
-int PyPostgreDeleteDatabase(const char *dbfilename, const char *user, const char *password)
+int PyPostgreDeleteDatabase(const char *dbfilename, const char *user, const char *password, const char *hostname)
 {
 	char *buf;
 	int ret;
-	if (PyPostgreConnect("postgres", user, password) < 0)
+	if (PyPostgreConnect("postgres", user, password, hostname) < 0)
 		return FALSE;
 
 	ret = PyUpdateCommand("END");
@@ -568,7 +577,7 @@ int PyPostgreDeleteDatabase(const char *dbfilename, const char *user, const char
 
 sqlite3 *connection;
 
-int SQLiteConnect(const char *dbfilename, const char *UNUSED(user), const char *UNUSED(password))
+int SQLiteConnect(const char *dbfilename, const char *UNUSED(user), const char *UNUSED(password), const char *UNUSED(hostname))
 {
 	char *name, *filename;
 	int exists, ret;
@@ -654,7 +663,7 @@ static void SQLiteCommit(void)
 #endif
 
 #if NUM_PROVIDERS
-GList *SQLiteGetDatabaseList(const char *UNUSED(user), const char *UNUSED(password))
+GList *SQLiteGetDatabaseList(const char *UNUSED(user), const char *UNUSED(password), const char *UNUSED(hostname))
 {
 	GList *glist = NULL;
 	GDir *dir = g_dir_open(szHomeDirectory, 0, NULL);
@@ -676,7 +685,7 @@ GList *SQLiteGetDatabaseList(const char *UNUSED(user), const char *UNUSED(passwo
 	return glist;
 }
 
-int SQLiteDeleteDatabase(const char *dbfilename, const char *UNUSED(user), const char *UNUSED(password))
+int SQLiteDeleteDatabase(const char *dbfilename, const char *UNUSED(user), const char *UNUSED(password), const char *UNUSED(hostname))
 {
 	char *name, *filename;
 	int ret;

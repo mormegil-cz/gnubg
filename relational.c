@@ -417,7 +417,7 @@ DBProvider *ConnectToDB(DBProviderType dbType)
 	DBProvider *pdb = GetDBProvider(dbType);
 	if (pdb)
 	{
-		int con = pdb->Connect(pdb->database, pdb->username, pdb->password);
+		int con = pdb->Connect(pdb->database, pdb->username, pdb->password, pdb->hostname);
 		if (con < 0 )
 			return NULL;
 

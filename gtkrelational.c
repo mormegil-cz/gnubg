@@ -74,7 +74,7 @@ GtkListStore *playerStore;
 GtkListStore *dbStore;
 GtkTreeIter selected_iter;
 int optionsValid;
-GtkWidget *playerTreeview, *adddb, *deldb, *gameStats, *dbList, *dbtype, *user, *password, *login, *helptext;
+GtkWidget *playerTreeview, *adddb, *deldb, *gameStats, *dbList, *dbtype, *user, *password, *hostname, *login, *helptext;
 
 void CheckDatabase(const char *database);
 static void DBListSelected(GtkTreeView *treeview, gpointer userdata);
@@ -467,7 +467,7 @@ static void TryConnection(DBProvider *pdb, GtkWidget *dbList)
 	}
 	else
 	{	/* Test ok */
-		GList *pl = pdb->GetDatabaseList(pdb->username, pdb->password);
+		GList *pl = pdb->GetDatabaseList(pdb->username, pdb->password, pdb->hostname);
 		if (g_list_find_custom(pl, pdb->database, (GCompareFunc)g_ascii_strncasecmp) == NULL)
 		{	/* Somehow selected database not in list, so add it */
 			pl = g_list_append(pl, g_strdup(pdb->database));
@@ -514,20 +514,21 @@ static void CredentialsChanged(void)
 
 static void LoginClicked(GtkButton *UNUSED(button), gpointer dbList)
 {
-	const char *tmpUser, *tmpPass;
+	const char *tmpUser, *tmpPass, *tmpHost;
 	DBProvider *pdb = GetSelectedDBType();
 
 	if (pdb == NULL)
 		return;
 
-	tmpUser = pdb->username, tmpPass = pdb->password;
+	tmpUser = pdb->username, tmpPass = pdb->password, pdb->hostname = tmpHost;
 
 	pdb->username = gtk_entry_get_text(GTK_ENTRY(user));
 	pdb->password = gtk_entry_get_text(GTK_ENTRY(password));
+	pdb->hostname = gtk_entry_get_text(GTK_ENTRY(hostname));
 
 	TryConnection(pdb, dbList);
 
-	pdb->username = tmpUser, pdb->password = tmpPass;
+	pdb->username = tmpUser, pdb->password = tmpPass, pdb->hostname = tmpHost;
 }
 
 static void TypeChanged(GtkComboBox *UNUSED(widget), gpointer dbList)
@@ -541,13 +542,19 @@ static void TypeChanged(GtkComboBox *UNUSED(widget), gpointer dbList)
 	{
 		gtk_widget_set_sensitive(user, TRUE);
 		gtk_widget_set_sensitive(password, TRUE);
+		gtk_widget_set_sensitive(hostname, TRUE);
 		gtk_entry_set_text(GTK_ENTRY(user), pdb->username);
 		gtk_entry_set_text(GTK_ENTRY(password), pdb->password);
+		if (pdb->hostname)
+			gtk_entry_set_text(GTK_ENTRY(hostname), pdb->hostname);
+		else
+			gtk_entry_set_text(GTK_ENTRY(hostname), "");
 	}
 	else
 	{
 		gtk_widget_set_sensitive(user, FALSE);
 		gtk_widget_set_sensitive(password, FALSE);
+		gtk_widget_set_sensitive(hostname, FALSE);
 	}
 
 	TryConnection(pdb, dbList);
@@ -560,7 +567,7 @@ void CheckDatabase(const char *database)
 	DBProvider *pdb = GetSelectedDBType();
 
 	if (pdb)
-		dbok = (pdb->Connect(database, gtk_entry_get_text(GTK_ENTRY(user)), gtk_entry_get_text(GTK_ENTRY(password))) >= 0);
+		dbok = (pdb->Connect(database, gtk_entry_get_text(GTK_ENTRY(user)), gtk_entry_get_text(GTK_ENTRY(password)), gtk_entry_get_text(GTK_ENTRY(hostname))) >= 0);
 
 	if (!dbok)
 		gtk_label_set_text(GTK_LABEL(helptext), "Failed to connect to database!");
@@ -649,7 +656,7 @@ static void AddDBClicked(GtkButton *UNUSED(button), gpointer dbList)
                 } while (gtk_tree_model_iter_next(model, &iter));
 
 		if (pdb)
-			con = pdb->Connect(dbName, gtk_entry_get_text(GTK_ENTRY(user)), gtk_entry_get_text(GTK_ENTRY(password)));
+			con = pdb->Connect(dbName, gtk_entry_get_text(GTK_ENTRY(user)), gtk_entry_get_text(GTK_ENTRY(password)), gtk_entry_get_text(GTK_ENTRY(hostname)));
 
 		if (con > 0 || ((pdb) && CreateDatabase(pdb)))
 		{
@@ -674,7 +681,7 @@ static void DelDBClicked(GtkButton *UNUSED(button), gpointer dbList)
 	{
 		DBProvider *pdb = GetSelectedDBType();
 
-		if (pdb && pdb->DeleteDatabase(db, gtk_entry_get_text(GTK_ENTRY(user)), gtk_entry_get_text(GTK_ENTRY(password))))
+		if (pdb && pdb->DeleteDatabase(db, gtk_entry_get_text(GTK_ENTRY(user)), gtk_entry_get_text(GTK_ENTRY(password)), gtk_entry_get_text(GTK_ENTRY(hostname))))
 		{
 			gtk_list_store_remove(GTK_LIST_STORE(dbStore), &selected_iter);
 			optionsValid = FALSE;
@@ -697,7 +704,7 @@ extern void RelationalSaveOptions(void)
 	if (optionsValid)
 	{
 		DBProviderType dbType = (DBProviderType)gtk_combo_box_get_active(GTK_COMBO_BOX(dbtype));
-		SetDBSettings(dbType, GetSelectedDB(GTK_TREE_VIEW(dbList)), gtk_entry_get_text(GTK_ENTRY(user)), gtk_entry_get_text(GTK_ENTRY(password)));
+		SetDBSettings(dbType, GetSelectedDB(GTK_TREE_VIEW(dbList)), gtk_entry_get_text(GTK_ENTRY(user)), gtk_entry_get_text(GTK_ENTRY(password)), gtk_entry_get_text(GTK_ENTRY(hostname)));
 
 		storeGameStats = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(gameStats));
 	}
@@ -735,7 +742,7 @@ extern GtkWidget *RelationalOptions(void)
 
 	gtk_box_pack_start(GTK_BOX(vb1), hb1, FALSE, FALSE, 0);
 
-	table = gtk_table_new(3, 2, FALSE);
+	table = gtk_table_new(4, 2, FALSE);
 	lbl = gtk_label_new(_("Username"));
 	gtk_misc_set_alignment(GTK_MISC(lbl), 1, .5);
 	gtk_table_attach(GTK_TABLE(table), lbl, 0, 1, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
@@ -752,13 +759,23 @@ extern GtkWidget *RelationalOptions(void)
 	gtk_entry_set_visibility(GTK_ENTRY(password), FALSE);
 	g_signal_connect(password, "changed", G_CALLBACK(CredentialsChanged), dbList);
 	gtk_table_attach(GTK_TABLE(table), password, 1, 2, 1, 2, 0, 0, 0, 0);
+
+	lbl = gtk_label_new(_("Hostname"));
+	gtk_misc_set_alignment(GTK_MISC(lbl), 1, .5);
+	gtk_table_attach(GTK_TABLE(table), lbl, 0, 1, 2, 3, GTK_FILL, GTK_FILL, 0, 0);
+	hostname = gtk_entry_new();
+	gtk_entry_set_max_length(GTK_ENTRY(hostname), 64);
+	gtk_entry_set_width_chars(GTK_ENTRY(hostname), 20);
+	gtk_entry_set_visibility(GTK_ENTRY(hostname), TRUE);
+	g_signal_connect(hostname, "changed", G_CALLBACK(CredentialsChanged), dbList);
+	gtk_table_attach(GTK_TABLE(table), hostname, 1, 2, 2, 3, 0, 0, 0, 0);
 	
 	login = gtk_button_new_with_label("Login");
 	g_signal_connect(login, "clicked", G_CALLBACK(LoginClicked), dbList);
 
 	align = gtk_alignment_new(1, 0, 0, 0);
 	gtk_container_add(GTK_CONTAINER(align), login);
-	gtk_table_attach(GTK_TABLE(table), align, 1, 2, 2, 3, GTK_EXPAND | GTK_FILL, 0, 0, 0);
+	gtk_table_attach(GTK_TABLE(table), align, 1, 2, 3, 4, GTK_EXPAND | GTK_FILL, 0, 0, 0);
 
 	gtk_box_pack_start(GTK_BOX(vb1), table, FALSE, FALSE, 4);
 
