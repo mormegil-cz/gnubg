@@ -1125,6 +1125,7 @@ static void BoardPrefsOK( GtkWidget *pw, GtkWidget *mainBoard )
 	gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 	/* Make sure chequers correct below board */
 	gtk_widget_queue_draw(bd->table);
+	UserCommand("save settings");
 }
 
 static void WorkOut2dLight(renderdata* prd)
