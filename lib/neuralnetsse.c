@@ -109,7 +109,7 @@ static inline __m128 sigmoid_ps( __m128 xin )
 
 static void
 EvaluateSSE( const neuralnet *pnn, const float arInput[], float ar[],
-                        float arOutput[], float *saveAr ) {
+                        float arOutput[] ) {
 
     const unsigned int cHidden = pnn->cHidden;
     unsigned int i, j;
@@ -158,9 +158,6 @@ EvaluateSSE( const neuralnet *pnn, const float arInput[], float ar[],
 		}
     }
 
-    if( saveAr)
-      memcpy( saveAr, ar, cHidden * sizeof( *saveAr));
-    
 #if USE_SSE2
 	scalevec = _mm_set1_ps(pnn->rBetaHidden);
 	for (par = ar, i = (cHidden >> 2); i; i--, par += 4) {
@@ -211,7 +208,7 @@ extern int NeuralNetEvaluateSSE(const neuralnet *pnn, /*lint -e{818}*/ float arI
     g_assert(sse_aligned(arInput));
 #endif
 
-	EvaluateSSE(pnn, arInput, ar, arOutput, 0);
+	EvaluateSSE(pnn, arInput, ar, arOutput);
     return 0;
 }
 
