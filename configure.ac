@@ -324,7 +324,7 @@ dnl SSE
 dnl
 
 AC_MSG_CHECKING([for sse cpu])
-AC_ARG_ENABLE( sse, [  --enable-sse=TYPE  enable SSE for newer cpus(TYPE=yes,sse2,no,cputest)], ssecpu=$enableval, ssecpu="undef")
+AC_ARG_ENABLE( sse, [  --enable-sse=TYPE  enable SSE for newer cpus(TYPE=yes,avx,sse2,no,cputest)], ssecpu=$enableval, ssecpu="undef")
 if test "x$ssecpu" = "xundef"; then
 	case "$host" in
 		i386-apple-darwin* )
@@ -350,12 +350,17 @@ if test "x$ssecpu" != "xno"; then
         if test "x$ssecpu" != "xcputest"; then
                 AC_DEFINE(DISABLE_SSE_TEST, 1, Define if you want to disable the SSE cpu test)
         fi
+	if test "x$ssecpu" = "xavx"; then
+		AC_DEFINE(USE_AVX, 1, Define if you want to compile with AVX support)
+	fi
         if test "x$ssecpu" = "xsse2"; then
                 AC_DEFINE(USE_SSE2, 1, Define if you want to compile with SSE2 support)
         fi
         if test x"$GCC" = xyes; then
 		if test "x$SSE_CFLAGS" = x; then
-			if test "x$ssecpu" = "xsse2"; then 
+			if test "x$ssecpu" = "xavx"; then
+				SSE_CFLAGS="-mavx"
+			elif test "x$ssecpu" = "xsse2"; then 
 				SSE_CFLAGS="-msse -msse2"
 			else
 				SSE_CFLAGS="-msse"

@@ -1,3 +1,8 @@
+2013-06-15  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* configure.ac, lib/neuralnetsse.c, lib/sse.h, lib/inputs.c: Use
+	AVX instructions when built with "configure --enable-sse=avx"
+
 2013-06-13  Michael Petch  <mpetch@gnubg.org>
 
 	* gtkprefs.c: Save board preferences when clicking "OK"

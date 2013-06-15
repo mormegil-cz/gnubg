@@ -24,7 +24,9 @@
 #include "eval.h"
 
 #if USE_SSE_VECTORIZE
-#ifdef USE_SSE2 
+#if defined(USE_AVX)
+#include <immintrin.h>
+#elif defined(USE_SSE2)
 #include <emmintrin.h> 
 #else
 #include <xmmintrin.h> 
@@ -133,7 +135,11 @@ baseInputs(const TanBoard anBoard, float arInput[])
 	/* bar */
 	vec0 = _mm_load_ps(inpvecb[*pB]);
 	_mm_store_ps(pInput, vec0 );
-	
+
+#if defined(USE_AVX)
+	_mm256_zeroupper();
+#endif
+
 	return;
 }
 #else

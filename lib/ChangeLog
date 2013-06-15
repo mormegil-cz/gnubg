@@ -1,3 +1,8 @@
+2013-06-15  Philippe Michel  <philippe.michel7@sfr.fr>
+
+	* neuralnetsse.c, sse.h, inputs.c, ../configure.ac: Use AVX
+	instructions when built with "configure --enable-sse=avx"
+
 2013-04-15  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* cache.c, cache.h, ../eval.c: Use 32 bits variables for keys
