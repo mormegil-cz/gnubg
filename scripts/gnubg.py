@@ -31,36 +31,90 @@
 import sys
 sys.path.append('./scripts')
 
+def gnubg_find_msvcrt():
+    return 'msvcr100.dll'
+
+# This is a workaround for a pyreadline c runtime conflict
+# on Win32 platforms. Replace ctypes.util.find_msvcrt with
+# our own. Readline not properly supported on Win2000 or
+# WinXP with a Service Pack earlier than SP2 
+
+supports_readline = True
+
+try:
+    from ctypes.util import find_msvcrt
+    import ctypes.util
+    ctypes.util.find_msvcrt=gnubg_find_msvcrt
+    import platform
+    winver = platform.win32_ver()
+    try:
+        sp_ver = int(winver[2][2])
+    except:
+        sp_ver = 0
+
+    ver_split = winver[1].split('.')
+    major = int(ver_split[0])
+    minor= int(ver_split[1])
+    
+    if ((major < 5) or (major == 5 and minor == 0) or (major == 5 and minor == 1 and sp_ver < 2)):
+        supports_readline = False
+except:
+    pass
+    
 def gnubg_InteractivePyShell_tui(argv=[''], banner=None):
+    global supports_readline
     import sys, traceback, code
 
     try:
         sys.argv=argv
 
+        # Check for IPython as it is generally the best cmdline interpreter
         from IPython.frontend.terminal.embed import InteractiveShellEmbed
         from IPython import __version__ as ipyversion
         from IPython.config.loader import Config
     except:
-        try:
-            import readline
-        except:
-            try:
-                import pyreadline as readline
-            except:
-                pass
-        try:
-            import rlcompleter
-            readline.parse_and_bind('tab: complete')
-        except:
-            pass
-
+        # Otherwise use standard interpreter
         if (banner == None):
             banner = 'Python ' + sys.version 
 
-        code.interact(banner=banner,local=globals())
-        return True
+        if (supports_readline):
+            try:
+                # See if we can use readline support
+                import readline
+            except:
+                # Might be Win32 so check for pyreadline
+                try:
+                    import pyreadline as readline
+                except:
+                    pass
+            try:
+                # See if we can add tab completion
+                import rlcompleter
+                readline.parse_and_bind('tab: complete')
+            except:
+                pass
+
+            code.interact(banner=banner,local=globals())
+            return True
+        
+        else:
+            # If we get this far we are on Win32 and too early
+            # a version to support the embedded interpreter so
+            # we simulate one
+            print banner
+            print '<Control-Z> and <Return> to exit'
+            while True:
+                print '>>> ',
+                line = sys.stdin.readline()
+                if not line:
+                    break
+
+                exec(line)
+                    
+            return True                   
 
     try:
+        # Launch IPython interpreter
         cfg = Config()
         prompt_config = cfg.PromptManager
         prompt_config.in_template = 'In <\\#> > '

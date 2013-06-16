@@ -2909,14 +2909,15 @@ extern void PythonShutdown( void )
     python_dir = NULL;
   }
 #endif
-  Py_DECREF(py_gnubg_module);
+  if (py_gnubg_module) Py_DECREF(py_gnubg_module);
+
   py_gnubg_module = NULL;
 }
 
 extern void PythonRun(const char *sz)
 {
 #if USE_GTK
-	PyObject *py_ret, *py_dict = NULL;
+	PyObject *py_ret = NULL, *py_dict = NULL;
 	int success = FALSE;
 #endif
 
