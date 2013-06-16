@@ -6,7 +6,7 @@
 	at the beginning of each line, convert all tabs to spaces, and
 	split the return type of a function from the function name
 	(each on their own line). K&R uses 4 spaces for an indentation
-	line. Update the language files.
+	level. Update the language files.
 
 2013-06-15  Michael Petch  <mpetch@gnubg.org>
 
