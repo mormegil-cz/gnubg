@@ -40,6 +40,7 @@ extCmds = ['mat', 'pos', 'sgg', 'tmg', 'snowietxt']
 
 LAST_VALUES = "batch.dirs"
 
+
 def CheckFiles(files, dir, destDir):
     "Check files aren't already analyzed"
     fileList = [[], [], [], [], []]
@@ -50,7 +51,7 @@ def CheckFiles(files, dir, destDir):
         for file in files[numType]:
             # Check that file hasn't already been analyzed
             dot = file.rfind('.')
-            existingOutputFile = destDir + file[ : dot] + '.sgf'
+            existingOutputFile = destDir + file[: dot] + '.sgf'
             if (os.access(existingOutputFile, os.F_OK)):
                 # See if newer
                 if os.stat(existingOutputFile).st_mtime > os.stat(dir + file).st_mtime:
@@ -62,6 +63,7 @@ def CheckFiles(files, dir, destDir):
         return fileList
     else:
         print "  ** All files in directory already processed **"
+
 
 def GetFiles(dir):
     "Look for gnubg import files in dir"
@@ -82,10 +84,10 @@ def GetFiles(dir):
             # Check has supported extension
             dot = file.rfind('.')
             if dot != -1:
-                ext = file[dot + 1 : ].lower()
+                ext = file[dot + 1:].lower()
                 if ext in extensions:
                     foundBGFile = True
-                    ftype = extensions.index(ext)                    
+                    ftype = extensions.index(ext)
                     fileList[ftype].append(file)
 
     if foundBGFile:
@@ -97,6 +99,7 @@ def GetFiles(dir):
             print "  ** No valid files found in directory **"
         return 0
 
+
 def AnalyzeFile(prompt, file, dir, destDir, type):
     "Run commands to analyze file in gnubg"
     gnubg.command('import ' + extCmds[type] + ' "' + dir + file + '"')
@@ -105,11 +108,13 @@ def AnalyzeFile(prompt, file, dir, destDir, type):
     file = file[:-len(extensions[type])] + "sgf"
     gnubg.command('save match "' + destDir + file + '"')
 
+
 def GetYN(prompt):
-    confirm = '';
+    confirm = ''
     while len(confirm) == 0 or (confirm[0] != 'y' and confirm[0] != 'n'):
         confirm = raw_input(prompt + " (y/n): ").lower()
     return confirm
+
 
 def GetDir(prompt):
     dir = raw_input(prompt)
@@ -118,6 +123,7 @@ def GetDir(prompt):
         if (dir[-1] != '\\' and dir[-1] != '/'):
             dir = dir + '/'
     return dir
+
 
 def BatchImport():
     "Import and analyse all files in a directory"
@@ -140,7 +146,8 @@ def BatchImport():
     while True:
         # Get directory with original files in
         if (dirs[0] == 0):
-            dirs[0] = GetDir("Directory containing files to import (enter-exit): ")
+            dirs[0] = GetDir(
+                "Directory containing files to import (enter-exit): ")
             if not dirs[0]:
                 return
 
@@ -153,12 +160,13 @@ def BatchImport():
         if (dirs[1] == 0):
             # Get directory to put analyzed files in
             while True:
-                dirs[1] = GetDir("Directory to put analyzed files in (enter-same dir): ")
+                dirs[1] = GetDir(
+                    "Directory to put analyzed files in (enter-same dir): ")
                 if not dirs[1]:
                     dirs[1] = dirs[0]
 
                 if os.path.isdir(dirs[1]):
-                    break;
+                    break
                 print "  ** Directory not found **"
 
         # Make sure files are new
@@ -189,7 +197,7 @@ def BatchImport():
     file.write(dirs[0] + "\n")
     file.write(dirs[1] + "\n")
     file.close()
-    
+
     # Analyze each file
     num = 0
     for eType in extTypes:

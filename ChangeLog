@@ -8,6 +8,9 @@
 	(each on their own line). K&R uses 4 spaces for an indentation
 	level. Update the language files.
 
+	* script/*.py : Reformat the python files to conform to PEP8 
+	standard. See http://www.python.org/dev/peps/pep-0008/#indentation
+
 2013-06-15  Michael Petch  <mpetch@gnubg.org>
 
 	* gnubgmodule.c, scripts/gnubg.py: Modify the python interpreter

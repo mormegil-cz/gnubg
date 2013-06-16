@@ -18,11 +18,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# Play an arbitray number of matches. 
+# Play an arbitray number of matches.
 #
 # For example, the script could be used to play gnubg 0-ply using
-# the Snowie MET against gnubg 0-ply using the Woolsey-Heinrich MET. 
-# This is achieved by using the external player interface. 
+# the Snowie MET against gnubg 0-ply using the Woolsey-Heinrich MET.
+# This is achieved by using the external player interface.
 #
 # gnubg -t << EOF
 # set matchequitytable "met/snowie.xml"
@@ -43,17 +43,18 @@
 #                  statsFile = "statistics.txt", sgfBasePath = None,
 #                  matBasePath = None)
 # EOF
-# 
+#
 # $Id$
 #
 
 import gnubg
 
-def playMatchSeries( statsFile = None, # log file
-                     matchLength = 7,
-                     noOfMatches = 100,
-                     sgfBasePath = None,  # optional
-                     matBasePath = None): # optional
+
+def playMatchSeries(statsFile=None,  # log file
+                    matchLength=7,
+                    noOfMatches=100,
+                    sgfBasePath=None,  # optional
+                    matBasePath=None):  # optional
     """Starts noOfMatches matchLength pointers. For every match
     the running score, gammoms (g) and backgammons (b) and the match winner
     is written to 'statsFile':
@@ -80,18 +81,17 @@ def playMatchSeries( statsFile = None, # log file
         f.close
 
         if sgfBasePath:
-            gnubg.command('save match ' + sgfBasePath +\
-                        str(i) + '.sgf')
+            gnubg.command('save match ' + sgfBasePath +
+                          str(i) + '.sgf')
         if matBasePath:
-            gnubg.command('export match mat ' + matBasePath +\
-                           str(i) + '.mat')
-
+            gnubg.command('export match mat ' + matBasePath +
+                          str(i) + '.mat')
 
 
 def formatMatchInfo(matchInfo):
     tempS = ''
     outString = ''
-    score = [0,0]
+    score = [0, 0]
     matchLength = matchInfo['match-info']['match-length']
 
     for game in matchInfo['games']:
@@ -110,13 +110,13 @@ def formatMatchInfo(matchInfo):
             gammon = ''
         elif pw == 2 * cube:
             gammon = 'g'
-            if (cube + oldScore) >= matchLength: # gammon not relevant
+            if (cube + oldScore) >= matchLength:  # gammon not relevant
                 gammon = '(g)'
 
         elif pw == 3 * cube:
             gammon = 'b'
 
-            if (cube + oldScore) >= matchLength: # backgammon not relevant
+            if (cube + oldScore) >= matchLength:  # backgammon not relevant
                 gammon = '(b)'
             elif (2 * cube + oldScore) >= matchLength:
                 # backgammon not relevant, but gammon
@@ -127,6 +127,7 @@ def formatMatchInfo(matchInfo):
     outString = str(winner) + outString + '\n'
 
     return outString
+
 
 def getCube(game):
     """returns the cube value of the game"""
@@ -141,10 +142,6 @@ def getCube(game):
             if turn['action'] == 'take':
                 cube *= 2
                 doubled = 0
-            else: # dropped
+            else:  # dropped
                 break
     return cube
-
-
-
-

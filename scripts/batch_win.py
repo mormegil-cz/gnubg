@@ -22,7 +22,8 @@
 # contains MS-Windows specific code and will therefore only work on MS-Windows
 # together with GNU Backgammon and Python.
 
-import win32ui, win32con
+import win32ui
+import win32con
 
 # file extensions, names and gnubg import commands
 
@@ -30,23 +31,28 @@ extensions = ['mat', 'pos', 'sgg', 'tmg', 'txt']
 extTypes = ['.mat', '.pos', 'Games grid', 'True money game', 'Snowie text']
 extCmds = ['mat', 'pos', 'sgg', 'tmg', 'snowietxt']
 
+
 def BatchAnalyze(filelist):
     for file in filelist:
         dot = file.rfind('.')
         if dot != -1:
-            ext = file[dot + 1 : ].lower()
+            ext = file[dot + 1:].lower()
             if ext in extensions:
                 AnalyzeFile(file, extensions.index(ext))
-                
+
+
 def GetFiles():
-    import win32ui, win32con
-    filedialog = win32ui.CreateFileDialog(1,"", "", win32con.OFN_ALLOWMULTISELECT | win32con.OFN_HIDEREADONLY)
+    import win32ui
+    import win32con
+    filedialog = win32ui.CreateFileDialog(
+        1, "", "", win32con.OFN_ALLOWMULTISELECT | win32con.OFN_HIDEREADONLY)
     filedialog.SetOFNTitle("Select files to analyse")
     filedialog.DoModal()
-    
+
     return filedialog.GetPathNames()
 
-def AnalyzeFile( file, type):
+
+def AnalyzeFile(file, type):
     "Run commands to analyze file in gnubg"
     gnubg.command('import ' + extCmds[type] + ' "' + file + '"')
     gnubg.command('analyze match')
