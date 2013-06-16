@@ -21,34 +21,32 @@
 #include "backgammon.h"
 #include "config.h"
 
-/*#define DEBUG_MULTITHREADED 1*/
+/*#define DEBUG_MULTITHREADED 1 */
 #ifdef DEBUG_MULTITHREADED
 void multi_debug(const char *str, ...);
 #else
 #define multi_debug(x)
 #endif
 
-typedef struct _Task
-{
-	AsyncFun fun;
-	void *data;
-	struct _Task *pLinkedTask;
+typedef struct _Task {
+    AsyncFun fun;
+    void *data;
+    struct _Task *pLinkedTask;
 } Task;
 
-typedef struct _AnalyseMoveTask
-{
-	Task task;
-	moverecord *pmr;
-	listOLD *plGame;
-	statcontext *psc;
-	matchstate ms;
+typedef struct _AnalyseMoveTask {
+    Task task;
+    moverecord *pmr;
+    listOLD *plGame;
+    statcontext *psc;
+    matchstate ms;
 } AnalyseMoveTask;
 
 extern int MT_GetDoneTasks(void);
 extern void MT_AbortTasks(void);
-extern void MT_AddTask(Task *pt, gboolean lock);
+extern void MT_AddTask(Task * pt, gboolean lock);
 extern void mt_add_tasks(unsigned int num_tasks, AsyncFun pFun, void *taskData, gpointer linked);
-extern int MT_WaitForTasks(gboolean (*pCallback)(gpointer), int callbackTime, int autosave);
+extern int MT_WaitForTasks(gboolean(*pCallback) (gpointer), int callbackTime, int autosave);
 
 #if USE_MULTITHREAD
 
@@ -79,30 +77,30 @@ extern void MT_SetResultFailed(void);
 
 #ifdef GLIB_THREADS
 #if GLIB_CHECK_VERSION (2,30,0)
-  #define MT_SafeIncValue(x) (g_atomic_int_add(x, 1) + 1)
-  #define MT_SafeIncCheck(x) (g_atomic_int_add(x, 1))
+#define MT_SafeIncValue(x) (g_atomic_int_add(x, 1) + 1)
+#define MT_SafeIncCheck(x) (g_atomic_int_add(x, 1))
 #else
-  #define MT_SafeIncValue(x) (g_atomic_int_exchange_and_add(x, 1) + 1)
-  #define MT_SafeIncCheck(x) (g_atomic_int_exchange_and_add(x, 1))
+#define MT_SafeIncValue(x) (g_atomic_int_exchange_and_add(x, 1) + 1)
+#define MT_SafeIncCheck(x) (g_atomic_int_exchange_and_add(x, 1))
 #endif
 /*
-  We don't use the value returned by the next three
-  Pre-2.30 void atomic_int_add() is ok
-*/
-  #define MT_SafeInc(x) g_atomic_int_add(x, 1)
-  #define MT_SafeAdd(x, y) g_atomic_int_add(x, y)
-  #define MT_SafeDec(x) g_atomic_int_add(x, -1)
-  #define MT_SafeDecCheck(x) g_atomic_int_dec_and_test(x)
+ * We don't use the value returned by the next three
+ * Pre-2.30 void atomic_int_add() is ok
+ */
+#define MT_SafeInc(x) g_atomic_int_add(x, 1)
+#define MT_SafeAdd(x, y) g_atomic_int_add(x, y)
+#define MT_SafeDec(x) g_atomic_int_add(x, -1)
+#define MT_SafeDecCheck(x) g_atomic_int_dec_and_test(x)
 #else
-  #define MT_SafeInc(x) (void)InterlockedIncrement((long*)x)
-  #define MT_SafeIncValue(x) InterlockedIncrement((long*)x)
-  #define MT_SafeIncCheck(x) (InterlockedIncrement((long*)x) > 1)
-  #define MT_SafeAdd(x, y) InterlockedExchangeAdd((long*)x, y)
-  #define MT_SafeDec(x) (void)InterlockedDecrement((long*)x)
-  #define MT_SafeDecCheck(x) (InterlockedDecrement((long*)x) == 0)
+#define MT_SafeInc(x) (void)InterlockedIncrement((long*)x)
+#define MT_SafeIncValue(x) InterlockedIncrement((long*)x)
+#define MT_SafeIncCheck(x) (InterlockedIncrement((long*)x) > 1)
+#define MT_SafeAdd(x, y) InterlockedExchangeAdd((long*)x, y)
+#define MT_SafeDec(x) (void)InterlockedDecrement((long*)x)
+#define MT_SafeDecCheck(x) (InterlockedDecrement((long*)x) == 0)
 #endif
 
-#else /*USE_MULTITHREAD*/
+#else                           /*USE_MULTITHREAD */
 #define MAX_NUMTHREADS 1
 extern int asyncRet;
 #define MT_Exclusive() {}

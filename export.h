@@ -32,17 +32,17 @@
 
 
 typedef enum _htmlexporttype {
-	HTML_EXPORT_TYPE_GNU,
-	HTML_EXPORT_TYPE_BBS,
-	HTML_EXPORT_TYPE_FIBS2HTML,
-	NUM_HTML_EXPORT_TYPES
+    HTML_EXPORT_TYPE_GNU,
+    HTML_EXPORT_TYPE_BBS,
+    HTML_EXPORT_TYPE_FIBS2HTML,
+    NUM_HTML_EXPORT_TYPES
 } htmlexporttype;
 
 typedef enum _htmlexportcss {
-	HTML_EXPORT_CSS_HEAD,
-	HTML_EXPORT_CSS_INLINE,
-	HTML_EXPORT_CSS_EXTERNAL,
-	NUM_HTML_EXPORT_CSS
+    HTML_EXPORT_CSS_HEAD,
+    HTML_EXPORT_CSS_INLINE,
+    HTML_EXPORT_CSS_EXTERNAL,
+    NUM_HTML_EXPORT_CSS
 } htmlexportcss;
 
 extern const char *aszHTMLExportType[];
@@ -51,42 +51,42 @@ extern const char *aszHTMLExportCSSCommand[];
 
 typedef struct _exportsetup {
 
-	int fIncludeAnnotation;
-	int fIncludeAnalysis;
-	int fIncludeStatistics;
-	int fIncludeMatchInfo;
+    int fIncludeAnnotation;
+    int fIncludeAnalysis;
+    int fIncludeStatistics;
+    int fIncludeMatchInfo;
 
-	/* display board: 0 (never), 1 (every move), 2 (every second move) etc */
+    /* display board: 0 (never), 1 (every move), 2 (every second move) etc */
 
-	int fDisplayBoard;
+    int fDisplayBoard;
 
-	int fSide;		/* 0, 1, or -1 for both players */
+    int fSide;                  /* 0, 1, or -1 for both players */
 
-	/* moves */
+    /* moves */
 
-	unsigned int nMoves;	/* show at most nMoves */
-	int fMovesDetailProb;	/* show detailed probabilities */
-	int afMovesParameters[2];	/* detailed parameters */
-	int afMovesDisplay[7];	/* display moves */
+    unsigned int nMoves;        /* show at most nMoves */
+    int fMovesDetailProb;       /* show detailed probabilities */
+    int afMovesParameters[2];   /* detailed parameters */
+    int afMovesDisplay[7];      /* display moves */
 
-	/* cube */
+    /* cube */
 
-	int fCubeDetailProb;	/* show detailed probabilities */
-	int afCubeParameters[2];	/* detailed parameters */
-	int afCubeDisplay[10];	/* display moves */
+    int fCubeDetailProb;        /* show detailed probabilities */
+    int afCubeParameters[2];    /* detailed parameters */
+    int afCubeDisplay[10];      /* display moves */
 
-	/* FIXME: add format specific options */
+    /* FIXME: add format specific options */
 
-	/* For example, frames/non frames for HTML. */
+    /* For example, frames/non frames for HTML. */
 
-	char *szHTMLPictureURL;
-	htmlexporttype het;
-	char *szHTMLExtension;
-	htmlexportcss hecss;
+    char *szHTMLPictureURL;
+    htmlexporttype het;
+    char *szHTMLExtension;
+    htmlexportcss hecss;
 
-	/* sizes */
-	int nPNGSize;
-	int nHtmlSize;
+    /* sizes */
+    int nPNGSize;
+    int nHtmlSize;
 
 } exportsetup;
 
@@ -94,17 +94,13 @@ extern exportsetup exsExport;
 
 extern char *filename_from_iGame(const char *szBase, const int iGame);
 extern int WritePNG(const char *sz, unsigned char *puch,
-		    unsigned int nStride, unsigned int nSizeX,
-		    unsigned int nSizeY);
+                    unsigned int nStride, unsigned int nSizeX, unsigned int nSizeY);
 
 #if USE_BOARD3D
 void GenerateImage3d(const char *szName, unsigned int nSize, unsigned int nSizeX, unsigned int nSizeY);
 #endif
 
-extern void TextAnalysis(GString * gsz, const matchstate * pms,
-			 moverecord * pmr);
-extern void TextPrologue(GString * gsz, const matchstate * pms,
-			 const int iGame);
-extern void TextBoardHeader(GString * gsz, const matchstate * pms,
-			    const int iGame, const int iMove);
+extern void TextAnalysis(GString * gsz, const matchstate * pms, moverecord * pmr);
+extern void TextPrologue(GString * gsz, const matchstate * pms, const int iGame);
+extern void TextBoardHeader(GString * gsz, const matchstate * pms, const int iGame, const int iMove);
 #endif

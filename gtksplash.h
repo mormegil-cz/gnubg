@@ -22,13 +22,12 @@
 #ifndef GTKSPLASH_H
 #define GTKSPLASH_H
 
-extern GtkWidget *
-CreateSplash ( void );
+extern GtkWidget *CreateSplash(void);
 
 extern void
-DestroySplash ( GtkWidget *pwSplash );
+ DestroySplash(GtkWidget * pwSplash);
 
 extern void
-PushSplash ( GtkWidget *pwSplash, const gchar *szText0, const gchar *szText1 );
+ PushSplash(GtkWidget * pwSplash, const gchar * szText0, const gchar * szText1);
 
-#endif /* GTKSPLASH_H */
+#endif                          /* GTKSPLASH_H */

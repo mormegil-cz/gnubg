@@ -48,24 +48,23 @@ unsigned int mainThreadID;
 #endif
 
 #ifdef GLIB_THREADS
-typedef struct _ManualEvent
-{
+typedef struct _ManualEvent {
 #if GLIB_CHECK_VERSION (2,32,0)
     GCond cond;
 #else
-    GCond* cond;
+    GCond *cond;
 #endif
     int signalled;
 } *ManualEvent;
-typedef GPrivate* TLSItem;
+typedef GPrivate *TLSItem;
 #if GLIB_CHECK_VERSION (2,32,0)
 typedef GMutex Mutex;
-static GMutex condMutex;   /* Extra mutex needed for waiting */
+static GMutex condMutex;        /* Extra mutex needed for waiting */
 #else
-typedef GMutex* Mutex;
-GMutex* condMutex=NULL;    /* Extra mutex needed for waiting */
+typedef GMutex *Mutex;
+GMutex *condMutex = NULL;       /* Extra mutex needed for waiting */
 #endif
-GAsyncQueue *async_queue=NULL; /* Needed for async waiting */
+GAsyncQueue *async_queue = NULL;        /* Needed for async waiting */
 #else
 typedef HANDLE ManualEvent;
 typedef DWORD TLSItem;
@@ -73,8 +72,7 @@ typedef HANDLE Event;
 typedef HANDLE Mutex;
 #endif
 
-typedef struct _ThreadData
-{
+typedef struct _ThreadData {
     ManualEvent activity;
     TLSItem tlsItem;
     Mutex queueLock;
@@ -101,31 +99,36 @@ ThreadData td;
 /* Dynamic allocation of GPrivate is deprecated */
 static GPrivate private_item;
 
-static void TLSCreate(TLSItem *pItem)
+static void
+TLSCreate(TLSItem * pItem)
 {
     *pItem = &private_item;
 }
 #else
-static void TLSCreate(TLSItem *pItem)
+static void
+TLSCreate(TLSItem * pItem)
 {
     *pItem = g_private_new(g_free);
 }
 #endif
 
-static void TLSFree(TLSItem UNUSED(pItem))
-{	/* Done automaticaly by glib */
+static void
+TLSFree(TLSItem UNUSED(pItem))
+{                               /* Done automaticaly by glib */
 }
 
-static void TLSSetValue(TLSItem pItem, int value)
+static void
+TLSSetValue(TLSItem pItem, int value)
 {
-	int *pNew = (int*)malloc(sizeof(int));
-	*pNew = value;
-    g_private_set(pItem, (gpointer)pNew);
+    int *pNew = (int *) malloc(sizeof(int));
+    *pNew = value;
+    g_private_set(pItem, (gpointer) pNew);
 }
 
 #define TLSGet(item) *((int*)g_private_get(item))
 
-static void InitManualEvent(ManualEvent *pME)
+static void
+InitManualEvent(ManualEvent * pME)
 {
     ManualEvent pNewME = malloc(sizeof(*pNewME));
 #if GLIB_CHECK_VERSION (2,32,0)
@@ -137,7 +140,8 @@ static void InitManualEvent(ManualEvent *pME)
     *pME = pNewME;
 }
 
-static void FreeManualEvent(ManualEvent ME)
+static void
+FreeManualEvent(ManualEvent ME)
 {
 #if GLIB_CHECK_VERSION (2,32,0)
     g_cond_clear(&ME->cond);
@@ -147,45 +151,46 @@ static void FreeManualEvent(ManualEvent ME)
     free(ME);
 }
 
-static void WaitForManualEvent(ManualEvent ME)
+static void
+WaitForManualEvent(ManualEvent ME)
 {
 #if GLIB_CHECK_VERSION (2,32,0)
-	gint64 end_time;
+    gint64 end_time;
 #else
-	GTimeVal tv;
+    GTimeVal tv;
 #endif
-	multi_debug("wait for manual event locks");
+    multi_debug("wait for manual event locks");
 #if GLIB_CHECK_VERSION (2,32,0)
-	g_mutex_lock(&condMutex);
-	end_time = g_get_monotonic_time() + 10 * G_TIME_SPAN_SECOND;
+    g_mutex_lock(&condMutex);
+    end_time = g_get_monotonic_time() + 10 * G_TIME_SPAN_SECOND;
 #else
-	g_mutex_lock(condMutex);
+    g_mutex_lock(condMutex);
 #endif
-	while (!ME->signalled) {
-		multi_debug("waiting for manual event");
+    while (!ME->signalled) {
+        multi_debug("waiting for manual event");
 #if GLIB_CHECK_VERSION (2,32,0)
-		if (!g_cond_wait_until(&ME->cond, &condMutex, end_time))
+        if (!g_cond_wait_until(&ME->cond, &condMutex, end_time))
 #else
-		g_get_current_time(&tv);
-		g_time_val_add(&tv, 10 * 1000 * 1000);
-		if (g_cond_timed_wait(ME->cond, condMutex, &tv))
+        g_get_current_time(&tv);
+        g_time_val_add(&tv, 10 * 1000 * 1000);
+        if (g_cond_timed_wait(ME->cond, condMutex, &tv))
 #endif
-			break;
-		else
-		{
-			multi_debug("still waiting for manual event");
-		}
-	}
+            break;
+        else {
+            multi_debug("still waiting for manual event");
+        }
+    }
 
 #if GLIB_CHECK_VERSION (2,32,0)
-	g_mutex_unlock(&condMutex);
+    g_mutex_unlock(&condMutex);
 #else
-	g_mutex_unlock(condMutex);
+    g_mutex_unlock(condMutex);
 #endif
-	multi_debug("wait for manual event unlocks");
+    multi_debug("wait for manual event unlocks");
 }
 
-static void ResetManualEvent(ManualEvent ME)
+static void
+ResetManualEvent(ManualEvent ME)
 {
     multi_debug("reset manual event locks");
 #if GLIB_CHECK_VERSION (2,32,0)
@@ -200,7 +205,8 @@ static void ResetManualEvent(ManualEvent ME)
     multi_debug("reset manual event unlocks");
 }
 
-static void SetManualEvent(ManualEvent ME)
+static void
+SetManualEvent(ManualEvent ME)
 {
     multi_debug("reset manual event locks");
 #if GLIB_CHECK_VERSION (2,32,0)
@@ -218,85 +224,97 @@ static void SetManualEvent(ManualEvent ME)
 }
 
 #if GLIB_CHECK_VERSION (2,32,0)
-static void InitMutex(Mutex *pMutex)
+static void
+InitMutex(Mutex * pMutex)
 {
-     g_mutex_init(pMutex);
+    g_mutex_init(pMutex);
 }
 
-static void FreeMutex(Mutex mutex)
+static void
+FreeMutex(Mutex mutex)
 {
-     g_mutex_clear(&mutex);
+    g_mutex_clear(&mutex);
 }
 #else
-static void InitMutex(Mutex *pMutex)
+static void
+InitMutex(Mutex * pMutex)
 {
     *pMutex = g_mutex_new();
 }
 
-static void FreeMutex(Mutex mutex)
+static void
+FreeMutex(Mutex mutex)
 {
     g_mutex_free(mutex);
 }
 #endif
 
-static void Mutex_Lock(Mutex mutex, const char *reason)
+static void
+Mutex_Lock(Mutex mutex, const char *reason)
 {
 #ifdef DEBUG_MULTITHREADED
-	multi_debug(reason);
+    multi_debug(reason);
 #else
-	(void)reason;
+    (void) reason;
 #endif
 #if GLIB_CHECK_VERSION (2,32,0)
-	g_mutex_lock(&mutex);
+    g_mutex_lock(&mutex);
 #else
-	g_mutex_lock(mutex);
-#endif
-}
-static void Mutex_Release(Mutex mutex)
-{
-#ifdef DEBUG_MULTITHREADED
-	multi_debug("Releasing lock");
-#endif
-#if GLIB_CHECK_VERSION (2,32,0)
-	g_mutex_unlock(&mutex);
-#else
-	g_mutex_unlock(mutex);
+    g_mutex_lock(mutex);
 #endif
 }
 
-#else    /* win32 */
+static void
+Mutex_Release(Mutex mutex)
+{
+#ifdef DEBUG_MULTITHREADED
+    multi_debug("Releasing lock");
+#endif
+#if GLIB_CHECK_VERSION (2,32,0)
+    g_mutex_unlock(&mutex);
+#else
+    g_mutex_unlock(mutex);
+#endif
+}
 
-static void TLSCreate(TLSItem *ppItem)
+#else                           /* win32 */
+
+static void
+TLSCreate(TLSItem * ppItem)
 {
     *ppItem = TlsAlloc();
-	if (*ppItem == TLS_OUT_OF_INDEXES)
-		PrintSystemError("calling TlsAlloc");
+    if (*ppItem == TLS_OUT_OF_INDEXES)
+        PrintSystemError("calling TlsAlloc");
 }
 
-static void TLSFree(TLSItem pItem)
+static void
+TLSFree(TLSItem pItem)
 {
-	free(TlsGetValue(pItem));
-	TlsFree(pItem);
+    free(TlsGetValue(pItem));
+    TlsFree(pItem);
 }
 
-static void TLSSetValue(TLSItem pItem, int value)
+static void
+TLSSetValue(TLSItem pItem, int value)
 {
-	int *pNew = (int*)malloc(sizeof(int));
-	*pNew = value;
+    int *pNew = (int *) malloc(sizeof(int));
+    *pNew = value;
     if (TlsSetValue(pItem, pNew) == 0)
-		PrintSystemError("calling TLSSetValue");
+        PrintSystemError("calling TLSSetValue");
 }
 
 #define TLSGet(item) *((int*)TlsGetValue(item))
 
-static void InitManualEvent(ManualEvent *pME)
+static void
+InitManualEvent(ManualEvent * pME)
 {
     *pME = CreateEvent(NULL, TRUE, FALSE, NULL);
-	if (*pME == NULL)
-		PrintSystemError("creating manual event");
+    if (*pME == NULL)
+        PrintSystemError("creating manual event");
 }
 
-static void FreeManualEvent(ManualEvent ME)
+static void
+FreeManualEvent(ManualEvent ME)
 {
     CloseHandle(ME);
 }
@@ -305,36 +323,38 @@ static void FreeManualEvent(ManualEvent ME)
 #define ResetManualEvent(ME) ResetEvent(ME)
 #define SetManualEvent(ME) SetEvent(ME)
 
-static void InitMutex(Mutex *pMutex)
+static void
+InitMutex(Mutex * pMutex)
 {
     *pMutex = CreateMutex(NULL, FALSE, NULL);
-	if (*pMutex == NULL)
-		PrintSystemError("creating mutex");
+    if (*pMutex == NULL)
+        PrintSystemError("creating mutex");
 }
 
-static void FreeMutex(Mutex mutex)
+static void
+FreeMutex(Mutex mutex)
 {
     CloseHandle(mutex);
 }
 
 #ifdef DEBUG_MULTITHREADED
-void Mutex_Lock(Mutex mutex, const char *reason)
+void
+Mutex_Lock(Mutex mutex, const char *reason)
 {
-	if (WaitForSingleObject(mutex, 0) == WAIT_OBJECT_0)
-	{	/* Got mutex */
-		multi_debug("%s: lock acquired", reason);
-	}
-	else
-	{
-		multi_debug("%s: waiting on lock", reason);
-		WaitForSingleObject(mutex, INFINITE);
-		multi_debug("lock relinquished");
-	}
+    if (WaitForSingleObject(mutex, 0) == WAIT_OBJECT_0) {       /* Got mutex */
+        multi_debug("%s: lock acquired", reason);
+    } else {
+        multi_debug("%s: waiting on lock", reason);
+        WaitForSingleObject(mutex, INFINITE);
+        multi_debug("lock relinquished");
+    }
 }
-void Mutex_Release(Mutex mutex)
+
+void
+Mutex_Release(Mutex mutex)
 {
-	multi_debug("Releasing lock");
-	ReleaseMutex(mutex);
+    multi_debug("Releasing lock");
+    ReleaseMutex(mutex);
 }
 #else
 #define Mutex_Lock(mutex, reason) WaitForSingleObject(mutex, INFINITE)
@@ -343,48 +363,50 @@ void Mutex_Release(Mutex mutex)
 
 #endif
 
-extern unsigned int MT_GetNumThreads(void)
+extern unsigned int
+MT_GetNumThreads(void)
 {
     return td.numThreads;
 }
 
-static void CloseThread(void *UNUSED(unused))
+static void
+CloseThread(void *UNUSED(unused))
 {
-	g_assert(td.closingThreads);
-	MT_SafeInc(&td.result);
+    g_assert(td.closingThreads);
+    MT_SafeInc(&td.result);
 }
 
-static void MT_CloseThreads(void)
+static void
+MT_CloseThreads(void)
 {
-	td.closingThreads = TRUE;
+    td.closingThreads = TRUE;
     mt_add_tasks(td.numThreads, CloseThread, NULL, NULL);
-    if (MT_WaitForTasks(NULL, 0, FALSE) != (int)td.numThreads)
-		g_print("Error closing threads!\n");
+    if (MT_WaitForTasks(NULL, 0, FALSE) != (int) td.numThreads)
+        g_print("Error closing threads!\n");
 }
 
-static void MT_TaskDone(Task *pt)
+static void
+MT_TaskDone(Task * pt)
 {
     MT_SafeInc(&td.doneTasks);
 
-    if (pt)
-    {
+    if (pt) {
         free(pt->pLinkedTask);
         free(pt);
     }
 }
 
-static Task *MT_GetTask(void)
+static Task *
+MT_GetTask(void)
 {
     Task *task = NULL;
 
     Mutex_Lock(td.queueLock, "get task");
 
-    if (g_list_length(td.tasks) > 0)
-    {
-        task = (Task*)g_list_first(td.tasks)->data;
+    if (g_list_length(td.tasks) > 0) {
+        task = (Task *) g_list_first(td.tasks)->data;
         td.tasks = g_list_delete_link(td.tasks, g_list_first(td.tasks));
-        if (g_list_length(td.tasks) == 0)
-        {
+        if (g_list_length(td.tasks) == 0) {
             ResetManualEvent(td.activity);
         }
     }
@@ -395,76 +417,78 @@ static Task *MT_GetTask(void)
     return task;
 }
 
-extern void MT_AbortTasks(void)
+extern void
+MT_AbortTasks(void)
 {
     Task *task;
     /* Remove tasks from list */
     while ((task = MT_GetTask()) != NULL)
         MT_TaskDone(task);
 
-	td.result = -1;
+    td.result = -1;
 }
 
 #ifdef GLIB_THREADS
-static gpointer MT_WorkerThreadFunction(void *id)
+static gpointer
+MT_WorkerThreadFunction(void *id)
 #else
-static void MT_WorkerThreadFunction(void *id)
+static void
+MT_WorkerThreadFunction(void *id)
 #endif
 {
-	/* why do we need this align ? - because of a gcc bug */
+    /* why do we need this align ? - because of a gcc bug */
 #if __GNUC__ && defined(WIN32)
-	/* Align stack pointer on 16 byte boundary so SSE variables work correctly */
-	int align_offset;
-	asm  __volatile__  ("andl $-16, %%esp" : : : "%esp");
-	align_offset = ((int)(&align_offset)) % 16;
+    /* Align stack pointer on 16 byte boundary so SSE variables work correctly */
+    int align_offset;
+    asm __volatile__("andl $-16, %%esp":::"%esp");
+    align_offset = ((int) (&align_offset)) % 16;
 #endif
-	{
-		int *pID = (int*)id;
-		TLSSetValue(td.tlsItem, *pID);
-		free(pID);
-		MT_SafeInc(&td.result);
-		MT_TaskDone(NULL);    /* Thread created */
-		do
-		{
-			Task *task;
-			WaitForManualEvent(td.activity);
-			task = MT_GetTask();
-			if (task)
-			{
-				task->fun(task->data);
-				MT_TaskDone(task);
-			}
-		} while (!td.closingThreads);
+    {
+        int *pID = (int *) id;
+        TLSSetValue(td.tlsItem, *pID);
+        free(pID);
+        MT_SafeInc(&td.result);
+        MT_TaskDone(NULL);      /* Thread created */
+        do {
+            Task *task;
+            WaitForManualEvent(td.activity);
+            task = MT_GetTask();
+            if (task) {
+                task->fun(task->data);
+                MT_TaskDone(task);
+            }
+        } while (!td.closingThreads);
 
 #ifdef GLIB_THREADS
 #if __GNUC__ && defined(WIN32)
-		/* De-align stack pointer to avoid crash on exit */
-		asm  __volatile__  ("addl %0, %%esp" : : "r"(align_offset) : "%esp");
+        /* De-align stack pointer to avoid crash on exit */
+        asm __volatile__("addl %0, %%esp"::"r"(align_offset):"%esp");
 #endif
-		return NULL;
+        return NULL;
 #endif
-	}
+    }
 }
 
-static gboolean WaitingForThreads(gpointer UNUSED(unused))
-{	/* Unlikely to be called */
-	multi_debug("Waiting for threads to be created!");
-	return FALSE;
+static gboolean
+WaitingForThreads(gpointer UNUSED(unused))
+{                               /* Unlikely to be called */
+    multi_debug("Waiting for threads to be created!");
+    return FALSE;
 }
 
-static void MT_CreateThreads(void)
+static void
+MT_CreateThreads(void)
 {
     unsigned int i;
-	multi_debug("CreateThreads()");
-	td.result = 0;
-	td.closingThreads = FALSE;
-    for (i = 0; i < td.numThreads; i++)
-    {
-    	int *pID = (int*)malloc(sizeof(int));
-    	*pID = i;
+    multi_debug("CreateThreads()");
+    td.result = 0;
+    td.closingThreads = FALSE;
+    for (i = 0; i < td.numThreads; i++) {
+        int *pID = (int *) malloc(sizeof(int));
+        *pID = i;
 #ifdef GLIB_THREADS
 #if GLIB_CHECK_VERSION (2,32,0)
-	if (!g_thread_try_new("Worker", MT_WorkerThreadFunction, pID, NULL))
+        if (!g_thread_try_new("Worker", MT_WorkerThreadFunction, pID, NULL))
 #else
         if (!g_thread_create(MT_WorkerThreadFunction, pID, FALSE, NULL))
 #endif
@@ -473,48 +497,46 @@ static void MT_CreateThreads(void)
 #endif
             printf("Failed to create thread\n");
     }
-	td.addedTasks = td.numThreads;
-	/* Wait for all the threads to be created (timeout after 1 second) */
-	if (MT_WaitForTasks(WaitingForThreads, 1000, FALSE) != (int)td.numThreads)
-		g_print("Error creating threads!\n");
+    td.addedTasks = td.numThreads;
+    /* Wait for all the threads to be created (timeout after 1 second) */
+    if (MT_WaitForTasks(WaitingForThreads, 1000, FALSE) != (int) td.numThreads)
+        g_print("Error creating threads!\n");
 }
 
-void MT_SetNumThreads(unsigned int num)
+void
+MT_SetNumThreads(unsigned int num)
 {
-	if (num != td.numThreads)
-	{
-		if (td.numThreads != 0)
-			MT_CloseThreads();
-		td.numThreads = num;
-		MT_CreateThreads();
-		if (num == 1)
-		{	/* No locking in evals */
-			EvaluatePosition = EvaluatePositionNoLocking;
-			GeneralCubeDecisionE = GeneralCubeDecisionENoLocking;
-			GeneralEvaluationE = GeneralEvaluationENoLocking;
-			ScoreMove = ScoreMoveNoLocking;
-			FindBestMove = FindBestMoveNoLocking;
-			FindnSaveBestMoves = FindnSaveBestMovesNoLocking;
-			BasicCubefulRollout = BasicCubefulRolloutNoLocking;
-		}
-		else
-		{	/* Locking version of evals */
-			EvaluatePosition = EvaluatePositionWithLocking;
-			GeneralCubeDecisionE = GeneralCubeDecisionEWithLocking;
-			GeneralEvaluationE = GeneralEvaluationEWithLocking;
-			ScoreMove = ScoreMoveWithLocking;
-			FindBestMove = FindBestMoveWithLocking;
-			FindnSaveBestMoves = FindnSaveBestMovesWithLocking;
-			BasicCubefulRollout = BasicCubefulRolloutWithLocking;
-		}
-	}
+    if (num != td.numThreads) {
+        if (td.numThreads != 0)
+            MT_CloseThreads();
+        td.numThreads = num;
+        MT_CreateThreads();
+        if (num == 1) {         /* No locking in evals */
+            EvaluatePosition = EvaluatePositionNoLocking;
+            GeneralCubeDecisionE = GeneralCubeDecisionENoLocking;
+            GeneralEvaluationE = GeneralEvaluationENoLocking;
+            ScoreMove = ScoreMoveNoLocking;
+            FindBestMove = FindBestMoveNoLocking;
+            FindnSaveBestMoves = FindnSaveBestMovesNoLocking;
+            BasicCubefulRollout = BasicCubefulRolloutNoLocking;
+        } else {                /* Locking version of evals */
+            EvaluatePosition = EvaluatePositionWithLocking;
+            GeneralCubeDecisionE = GeneralCubeDecisionEWithLocking;
+            GeneralEvaluationE = GeneralEvaluationEWithLocking;
+            ScoreMove = ScoreMoveWithLocking;
+            FindBestMove = FindBestMoveWithLocking;
+            FindnSaveBestMoves = FindnSaveBestMovesWithLocking;
+            BasicCubefulRollout = BasicCubefulRolloutWithLocking;
+        }
+    }
 }
 
-extern void MT_InitThreads(void)
+extern void
+MT_InitThreads(void)
 {
 #if !GLIB_CHECK_VERSION (2,32,0)
-    if (!g_thread_supported ())
-         g_thread_init (NULL);
+    if (!g_thread_supported())
+        g_thread_init(NULL);
     g_assert(g_thread_supported());
 #endif
 
@@ -523,7 +545,7 @@ extern void MT_InitThreads(void)
     td.totalTasks = -1;
     InitManualEvent(&td.activity);
     TLSCreate(&td.tlsItem);
-    TLSSetValue(td.tlsItem, 0);	/* Main thread shares id 0 */
+    TLSSetValue(td.tlsItem, 0); /* Main thread shares id 0 */
 #if defined(DEBUG_MULTITHREADED) && defined(WIN32)
     mainThreadID = GetCurrentThreadId();
 #endif
@@ -538,127 +560,125 @@ extern void MT_InitThreads(void)
     td.numThreads = 0;
 }
 
-extern void MT_StartThreads(void)
+extern void
+MT_StartThreads(void)
 {
-    if (td.numThreads == 0)
-	{
-	/* We could set it to something else (the number of cores or some
-	   fraction of that ?) but it is probably not a good idea to hog
-           a lot of resources by default.
-        */
+    if (td.numThreads == 0) {
+        /* We could set it to something else (the number of cores or some
+         * fraction of that ?) but it is probably not a good idea to hog
+         * a lot of resources by default.
+         */
         td.numThreads = 1;
 
-	MT_CreateThreads();
-	}
+        MT_CreateThreads();
+    }
 }
 
-void MT_AddTask(Task *pt, gboolean lock)
+void
+MT_AddTask(Task * pt, gboolean lock)
 {
-	if (lock)
-	{
-		Mutex_Lock(td.queueLock, "add task");
-	}
-	if (td.addedTasks == 0)
-		td.result = 0;	/* Reset result for new tasks */
-	td.addedTasks++;
-	td.tasks = g_list_append(td.tasks, pt);
-	if (g_list_length(td.tasks) == 1)
-	{    /* New tasks */
-		SetManualEvent(td.activity);
-	}
-	if (lock)
-	{
-		multi_debug("add task: release");
-		Mutex_Release(td.queueLock);
-	}
+    if (lock) {
+        Mutex_Lock(td.queueLock, "add task");
+    }
+    if (td.addedTasks == 0)
+        td.result = 0;          /* Reset result for new tasks */
+    td.addedTasks++;
+    td.tasks = g_list_append(td.tasks, pt);
+    if (g_list_length(td.tasks) == 1) { /* New tasks */
+        SetManualEvent(td.activity);
+    }
+    if (lock) {
+        multi_debug("add task: release");
+        Mutex_Release(td.queueLock);
+    }
 }
 
-void mt_add_tasks(unsigned int num_tasks, AsyncFun pFun, void *taskData, gpointer linked)
+void
+mt_add_tasks(unsigned int num_tasks, AsyncFun pFun, void *taskData, gpointer linked)
 {
-	unsigned int i;
-	{
+    unsigned int i;
+    {
 #ifdef DEBUG_MULTITHREADED
-		char buf[20];
-		sprintf(buf, "add %u tasks", num_tasks);
-		Mutex_Lock(td.queueLock, buf);
+        char buf[20];
+        sprintf(buf, "add %u tasks", num_tasks);
+        Mutex_Lock(td.queueLock, buf);
 #else
-		Mutex_Lock(td.queueLock, NULL);
+        Mutex_Lock(td.queueLock, NULL);
 #endif
-	}
-	for (i = 0; i < num_tasks; i++)
-	{
-		Task *pt = (Task*)malloc(sizeof(Task));
-		pt->fun = pFun;
-		pt->data = taskData;
-		pt->pLinkedTask = linked;
-		MT_AddTask(pt, FALSE);
-	}
-	multi_debug("add many release: lock");
-	Mutex_Release(td.queueLock);
+    }
+    for (i = 0; i < num_tasks; i++) {
+        Task *pt = (Task *) malloc(sizeof(Task));
+        pt->fun = pFun;
+        pt->data = taskData;
+        pt->pLinkedTask = linked;
+        MT_AddTask(pt, FALSE);
+    }
+    multi_debug("add many release: lock");
+    Mutex_Release(td.queueLock);
 }
 
-static gboolean WaitForAllTasks(int time)
+static gboolean
+WaitForAllTasks(int time)
 {
-	int j=0;
-	while (td.doneTasks != td.totalTasks)
-	{
-		if (j == 10)
-			return FALSE;	/* Not done yet */
+    int j = 0;
+    while (td.doneTasks != td.totalTasks) {
+        if (j == 10)
+            return FALSE;       /* Not done yet */
 
-		j++;
-		g_usleep(100*time);
-	}
-	return TRUE;
+        j++;
+        g_usleep(100 * time);
+    }
+    return TRUE;
 }
 
-int MT_WaitForTasks(gboolean (*pCallback)(gpointer), int callbackTime, int autosave)
+int
+MT_WaitForTasks(gboolean(*pCallback) (gpointer), int callbackTime, int autosave)
 {
     int callbackLoops = callbackTime / UI_UPDATETIME;
     int waits = 0;
-	int polltime = callbackLoops ? UI_UPDATETIME : callbackTime;
-	guint as_source = 0;
+    int polltime = callbackLoops ? UI_UPDATETIME : callbackTime;
+    guint as_source = 0;
 
-	/* Set total tasks to wait for */
+    /* Set total tasks to wait for */
     td.totalTasks = td.addedTasks;
 #if USE_GTK
-	GTKSuspendInput();
+    GTKSuspendInput();
 #endif
 
-	if (autosave)
-		as_source = g_timeout_add(nAutoSaveTime*60000, save_autosave, NULL);
-	multi_debug("Waiting for all tasks");
-    while (!WaitForAllTasks(polltime))
-    {
+    if (autosave)
+        as_source = g_timeout_add(nAutoSaveTime * 60000, save_autosave, NULL);
+    multi_debug("Waiting for all tasks");
+    while (!WaitForAllTasks(polltime)) {
         waits++;
-        if (pCallback && waits >= callbackLoops)
-        {
+        if (pCallback && waits >= callbackLoops) {
             waits = 0;
             pCallback(NULL);
         }
-	ProcessEvents();
-	}
-	if (autosave)
-	{
-		g_source_remove(as_source);
-		save_autosave(NULL);
-	}
-	multi_debug("Done waiting for all tasks");
+        ProcessEvents();
+    }
+    if (autosave) {
+        g_source_remove(as_source);
+        save_autosave(NULL);
+    }
+    multi_debug("Done waiting for all tasks");
 
-	td.doneTasks = td.addedTasks = 0;
-	td.totalTasks = -1;
+    td.doneTasks = td.addedTasks = 0;
+    td.totalTasks = -1;
 
 #if USE_GTK
-	GTKResumeInput();
+    GTKResumeInput();
 #endif
     return td.result;
 }
 
-extern void MT_SetResultFailed(void)
+extern void
+MT_SetResultFailed(void)
 {
-	td.result = -1;
+    td.result = -1;
 }
 
-extern void MT_Close(void)
+extern void
+MT_Close(void)
 {
     MT_CloseThreads();
 
@@ -666,128 +686,130 @@ extern void MT_Close(void)
     FreeMutex(td.multiLock);
     FreeMutex(td.queueLock);
 
-	FreeManualEvent(td.syncStart);
-	FreeManualEvent(td.syncEnd);
+    FreeManualEvent(td.syncStart);
+    FreeManualEvent(td.syncEnd);
     TLSFree(td.tlsItem);
 }
 
-extern int MT_GetThreadID(void)
+extern int
+MT_GetThreadID(void)
 {
     return TLSGet(td.tlsItem);
 }
 
-extern void MT_Exclusive(void)
+extern void
+MT_Exclusive(void)
 {
-	Mutex_Lock(td.multiLock, "Exclusive lock");
+    Mutex_Lock(td.multiLock, "Exclusive lock");
 }
 
-extern void MT_Release(void)
+extern void
+MT_Release(void)
 {
-	Mutex_Release(td.multiLock);
+    Mutex_Release(td.multiLock);
 }
 
-extern int MT_GetDoneTasks(void)
+extern int
+MT_GetDoneTasks(void)
 {
     return td.doneTasks;
 }
 
 /* Code below used in calibrate to try and get a resonable figure for multiple threads */
 
-static double start; /* used for timekeeping */
+static double start;            /* used for timekeeping */
 
-extern void MT_SyncInit(void)
+extern void
+MT_SyncInit(void)
 {
-	ResetManualEvent(td.syncStart);
-	ResetManualEvent(td.syncEnd);
+    ResetManualEvent(td.syncStart);
+    ResetManualEvent(td.syncEnd);
 }
 
-extern void MT_SyncStart(void)
+extern void
+MT_SyncStart(void)
 {
-	static int count = 0;
+    static int count = 0;
 
-	/* Wait for all threads to get here */
-	if (MT_SafeIncValue(&count) == (int)td.numThreads)
-	{
-		count--;
-		start = get_time();
-		SetManualEvent(td.syncStart);
-	}
-	else
-	{
-		WaitForManualEvent(td.syncStart);
-		if (MT_SafeDecCheck(&count))
-			ResetManualEvent(td.syncStart);
-	}
+    /* Wait for all threads to get here */
+    if (MT_SafeIncValue(&count) == (int) td.numThreads) {
+        count--;
+        start = get_time();
+        SetManualEvent(td.syncStart);
+    } else {
+        WaitForManualEvent(td.syncStart);
+        if (MT_SafeDecCheck(&count))
+            ResetManualEvent(td.syncStart);
+    }
 }
 
-extern double MT_SyncEnd(void)
+extern double
+MT_SyncEnd(void)
 {
-	static int count = 0;
+    static int count = 0;
 
-	/* Wait for all threads to get here */
-	if (MT_SafeIncValue(&count) == (int)td.numThreads)
-	{
-		const double now = get_time();
-		count--;
-		SetManualEvent(td.syncEnd);
-		return now - start;
-	}
-	else
-	{
-		WaitForManualEvent(td.syncEnd);
-		if (MT_SafeDecCheck(&count))
-			ResetManualEvent(td.syncEnd);
-		return 0;
-	}
+    /* Wait for all threads to get here */
+    if (MT_SafeIncValue(&count) == (int) td.numThreads) {
+        const double now = get_time();
+        count--;
+        SetManualEvent(td.syncEnd);
+        return now - start;
+    } else {
+        WaitForManualEvent(td.syncEnd);
+        if (MT_SafeDecCheck(&count))
+            ResetManualEvent(td.syncEnd);
+        return 0;
+    }
 }
 
 #ifdef DEBUG_MULTITHREADED
-void multi_debug(const char *str, ...)
+void
+multi_debug(const char *str, ...)
 {
-	int id;
-	va_list vl;
-	char tn[5];
-	char buf[1024];
+    int id;
+    va_list vl;
+    char tn[5];
+    char buf[1024];
 
-	/* Sync output so order makes some sense */
+    /* Sync output so order makes some sense */
 #ifdef WIN32
-	WaitForSingleObject(td.multiLock, INFINITE);
+    WaitForSingleObject(td.multiLock, INFINITE);
 #endif
-	/* With glib threads, locking here doesn't seem to work :
-GLib (gthread-posix.c): Unexpected error from C library during 'pthread_mutex_lock': Resource deadlock avoided.  Aborting.
-	Timestamp the output instead.
-	Maybe the g_get_*_time() calls will sync output as well anyway... */
+    /* With glib threads, locking here doesn't seem to work :
+     * GLib (gthread-posix.c): Unexpected error from C library during 'pthread_mutex_lock': Resource deadlock avoided.  Aborting.
+     * Timestamp the output instead.
+     * Maybe the g_get_*_time() calls will sync output as well anyway... */
 
-	va_start(vl, str);
-	vsprintf(buf, str, vl);
+    va_start(vl, str);
+    vsprintf(buf, str, vl);
 
-	id = MT_GetThreadID();
+    id = MT_GetThreadID();
 #if defined(WIN32)
-	if (id == 0 && GetCurrentThreadId() == mainThreadID)
+    if (id == 0 && GetCurrentThreadId() == mainThreadID)
 #else
-	if (id == 0)
+    if (id == 0)
 #endif
-		strcpy(tn, "MT");
-	else
-		sprintf(tn, "T%d", id + 1);
+        strcpy(tn, "MT");
+    else
+        sprintf(tn, "T%d", id + 1);
 
 #ifdef GLIB_THREADS
 #if GLIB_CHECK_VERSION (2,28,0)
-	printf("%" G_GINT64_FORMAT " %s: %s\n", g_get_monotonic_time(), tn, buf);
+    printf("%" G_GINT64_FORMAT " %s: %s\n", g_get_monotonic_time(), tn, buf);
 #else
-	{
-	GTimeVal tv;
+    {
+        GTimeVal tv;
 
-	g_get_current_time(&tv);
-	printf("%lu %s: %s\n", 1000000UL*tv.tv_sec+tv.tv_usec, tn, buf);
-	}
+        g_get_current_time(&tv);
+        printf("%lu %s: %s\n", 1000000UL * tv.tv_sec + tv.tv_usec, tn, buf);
+    }
 #endif
 #else
-	printf("%s: %s\n", tn, buf);
+    printf("%s: %s\n", tn, buf);
 #endif
 
 #ifdef WIN32
-	ReleaseMutex(td.multiLock);
+    ReleaseMutex(td.multiLock);
 #endif
 }
 #endif
@@ -803,76 +825,80 @@ GLib (gthread-posix.c): Unexpected error from C library during 'pthread_mutex_lo
 #define UI_UPDATETIME 250
 
 typedef struct _ThreadData {
-	int doneTasks;
-       	GList * tasks;
-	int result;
+    int doneTasks;
+    GList *tasks;
+    int result;
 } ThreadData;
 ThreadData td;
 
 int asyncRet;
-void MT_AddTask(Task *pt, gboolean lock)
+void
+MT_AddTask(Task * pt, gboolean lock)
 {
-	td.result = 0;		/* Reset result for new tasks */
-	td.tasks = g_list_append(td.tasks, pt);
+    td.result = 0;              /* Reset result for new tasks */
+    td.tasks = g_list_append(td.tasks, pt);
 }
 
-void mt_add_tasks(unsigned int num_tasks, AsyncFun pFun, void *taskData, gpointer linked)
+void
+mt_add_tasks(unsigned int num_tasks, AsyncFun pFun, void *taskData, gpointer linked)
 {
-	unsigned int i;
-	for (i = 0; i < num_tasks; i++) {
-		Task *pt = (Task *)malloc(sizeof(Task));
-		pt->fun = pFun;
-		pt->data = taskData;
-		pt->pLinkedTask = linked;
-		MT_AddTask(pt, FALSE);
-	}
+    unsigned int i;
+    for (i = 0; i < num_tasks; i++) {
+        Task *pt = (Task *) malloc(sizeof(Task));
+        pt->fun = pFun;
+        pt->data = taskData;
+        pt->pLinkedTask = linked;
+        MT_AddTask(pt, FALSE);
+    }
 }
 
-extern int MT_GetDoneTasks(void)
+extern int
+MT_GetDoneTasks(void)
 {
-	return td.doneTasks;
+    return td.doneTasks;
 }
 
-int MT_WaitForTasks(gboolean(*pCallback) (gpointer), int callbackTime, int autosave)
+int
+MT_WaitForTasks(gboolean(*pCallback) (gpointer), int callbackTime, int autosave)
 {
-	GList *member;
-	guint cb_source = 0;
-	guint  as_source = 0;
-	td.doneTasks = 0;
+    GList *member;
+    guint cb_source = 0;
+    guint as_source = 0;
+    td.doneTasks = 0;
 
 #if USE_GTK
-	GTKSuspendInput();
+    GTKSuspendInput();
 #endif
 
-	multi_debug("Waiting for all tasks");
+    multi_debug("Waiting for all tasks");
 
-	pCallback(NULL);
-	cb_source = g_timeout_add(1000, pCallback, NULL);
-	if (autosave)
-		as_source = g_timeout_add(nAutoSaveTime*60000, save_autosave, NULL);
-	for (member = g_list_first(td.tasks); member; member = member->next, td.doneTasks++) {
-		Task *task = member->data;
-		task->fun(task->data);
-		free(task->pLinkedTask);
-		free(task);
-		ProcessEvents();
-	}
-	g_list_free(td.tasks);
-	if (autosave)
-	{
-		g_source_remove(as_source);
-		save_autosave(NULL);
-	}
-	td.tasks = NULL;
+    pCallback(NULL);
+    cb_source = g_timeout_add(1000, pCallback, NULL);
+    if (autosave)
+        as_source = g_timeout_add(nAutoSaveTime * 60000, save_autosave, NULL);
+    for (member = g_list_first(td.tasks); member; member = member->next, td.doneTasks++) {
+        Task *task = member->data;
+        task->fun(task->data);
+        free(task->pLinkedTask);
+        free(task);
+        ProcessEvents();
+    }
+    g_list_free(td.tasks);
+    if (autosave) {
+        g_source_remove(as_source);
+        save_autosave(NULL);
+    }
+    td.tasks = NULL;
 
 #if USE_GTK
-	GTKResumeInput();
+    GTKResumeInput();
 #endif
-	return td.result;
+    return td.result;
 }
 
-extern void MT_AbortTasks(void)
+extern void
+MT_AbortTasks(void)
 {
-	td.result = -1;
+    td.result = -1;
 }
 #endif

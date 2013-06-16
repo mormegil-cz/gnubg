@@ -25,35 +25,33 @@
 #include "backgammon.h"
 
 typedef struct _hintdata {
-  GtkWidget *pwMoves;     /* the movelist */
-  GtkWidget *pwRollout, *pwRolloutSettings; /* rollout buttons */
-  GtkWidget *pwEval, *pwEvalSettings;       /* evaluation buttons */
-  GtkWidget *pwMove; /* move button */
-  GtkWidget *pwCopy; /* copy button */
-  GtkWidget *pwEvalPly; /* predefined eval buttons */
-  GtkWidget *pwRolloutPresets; /* predefined Rollout buttons */
-  GtkWidget *pwShow; /* button for showing moves */
-  GtkWidget *pwTempMap; /* button for showing temperature map */
-  GtkWidget *pwCmark; /* button for marking*/
-  moverecord *pmr;
-  movelist *pml;
-  int fButtonsValid;
-  int fDestroyOnMove;
-  unsigned int *piHighlight;
-  int fDetails;
-  int hist;
+    GtkWidget *pwMoves;         /* the movelist */
+    GtkWidget *pwRollout, *pwRolloutSettings;   /* rollout buttons */
+    GtkWidget *pwEval, *pwEvalSettings; /* evaluation buttons */
+    GtkWidget *pwMove;          /* move button */
+    GtkWidget *pwCopy;          /* copy button */
+    GtkWidget *pwEvalPly;       /* predefined eval buttons */
+    GtkWidget *pwRolloutPresets;        /* predefined Rollout buttons */
+    GtkWidget *pwShow;          /* button for showing moves */
+    GtkWidget *pwTempMap;       /* button for showing temperature map */
+    GtkWidget *pwCmark;         /* button for marking */
+    moverecord *pmr;
+    movelist *pml;
+    int fButtonsValid;
+    int fDestroyOnMove;
+    unsigned int *piHighlight;
+    int fDetails;
+    int hist;
 } hintdata;
 
-extern GtkWidget *
-CreateMoveList( moverecord *pmr,
-                const int fButtonsValid, const int fDestroyOnMove,
-                const int fDetails, int hist );
+extern GtkWidget *CreateMoveList(moverecord * pmr,
+                                 const int fButtonsValid, const int fDestroyOnMove, const int fDetails, int hist);
 
-extern int 
-CheckHintButtons( hintdata *phd );
+extern int
+ CheckHintButtons(hintdata * phd);
 
 extern void MoveListRefreshSize(void);
-extern GtkWidget* pwDetails;
+extern GtkWidget *pwDetails;
 extern int showMoveListDetail;
 
 #endif

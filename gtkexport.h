@@ -25,6 +25,6 @@
 #include "export.h"
 
 extern void
-GTKShowExport ( exportsetup *pexs );
+ GTKShowExport(exportsetup * pexs);
 
 #endif

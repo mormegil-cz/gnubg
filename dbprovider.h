@@ -22,46 +22,44 @@
 #include <glib.h>
 extern int storeGameStats;
 
-typedef struct _RowSet
-{
-	size_t cols, rows;
-	char ***data;
-	size_t *widths;
+typedef struct _RowSet {
+    size_t cols, rows;
+    char ***data;
+    size_t *widths;
 } RowSet;
 
-typedef struct _DBProvider
-{
-	int (*Connect)(const char *database, const char *user, const char *password, const char *hostname);
-	void (*Disconnect)(void);
-	RowSet *(*Select)(const char* str);
-	int (*UpdateCommand)(const char* str);
-	void (*Commit)(void);
-	GList *(*GetDatabaseList)(const char *user, const char *password, const char *hostname);
-	int (*DeleteDatabase)(const char *database, const char *user, const char *password, const char *hostname);
+typedef struct _DBProvider {
+    int (*Connect) (const char *database, const char *user, const char *password, const char *hostname);
+    void (*Disconnect) (void);
+    RowSet *(*Select) (const char *str);
+    int (*UpdateCommand) (const char *str);
+    void (*Commit) (void);
+    GList *(*GetDatabaseList) (const char *user, const char *password, const char *hostname);
+    int (*DeleteDatabase) (const char *database, const char *user, const char *password, const char *hostname);
 
-	const char *name;
-	const char *shortname;
-	const char *desc;
-	int HasUserDetails;
-	int storeGameStats;
-	const char *database;
-	const char *username;
-	const char *password;
-	const char *hostname;
+    const char *name;
+    const char *shortname;
+    const char *desc;
+    int HasUserDetails;
+    int storeGameStats;
+    const char *database;
+    const char *username;
+    const char *password;
+    const char *hostname;
 } DBProvider;
 
 typedef enum _DBProviderType {
-	INVALID_PROVIDER = -1,
+    INVALID_PROVIDER = -1,
 #if USE_SQLITE
-	SQLITE,
+    SQLITE,
 #endif
 #if USE_PYTHON
 #if !USE_SQLITE
-	PYTHON_SQLITE,
+    PYTHON_SQLITE,
 #endif
-	PYTHON_MYSQL,
+    PYTHON_MYSQL,
 #if !defined(WIN32)
-	PYTHON_POSTGRES
+    PYTHON_POSTGRES
 #endif
 #endif
 } DBProviderType;
@@ -79,16 +77,17 @@ typedef enum _DBProviderType {
 #endif
 
 extern DBProviderType dbProviderType;
-extern DBProvider* GetDBProvider(DBProviderType dbType);
+extern DBProvider *GetDBProvider(DBProviderType dbType);
 extern const char *TestDB(DBProviderType dbType);
 DBProvider *ConnectToDB(DBProviderType dbType);
 void SetDBType(const char *type);
-void SetDBSettings(DBProviderType dbType, const char *database, const char *user, const char *password, const char *hostname);
-void RelationalSaveSettings(FILE *pf);
+void SetDBSettings(DBProviderType dbType, const char *database, const char *user, const char *password,
+                   const char *hostname);
+void RelationalSaveSettings(FILE * pf);
 void SetDBParam(const char *db, const char *key, const char *value);
-extern int CreateDatabase(DBProvider *pdb);
+extern int CreateDatabase(DBProvider * pdb);
 const char *GetProviderName(int i);
-extern RowSet* RunQuery(const char *sz);
-extern int RunQueryValue(const DBProvider *pdb, const char *query);
-extern void FreeRowset(RowSet* pRow);
+extern RowSet *RunQuery(const char *sz);
+extern int RunQueryValue(const DBProvider * pdb, const char *query);
+extern void FreeRowset(RowSet * pRow);
 #endif

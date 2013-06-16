@@ -27,40 +27,36 @@
 extern GtkItemFactory *pif;
 #endif
 
-typedef enum _toolbarcontrol { 
-  C_NONE, 
-  C_ROLLDOUBLE, 
-  C_TAKEDROP, 
-  C_AGREEDECLINE,
-  C_PLAY } toolbarcontrol;
+typedef enum _toolbarcontrol {
+    C_NONE,
+    C_ROLLDOUBLE,
+    C_TAKEDROP,
+    C_AGREEDECLINE,
+    C_PLAY
+} toolbarcontrol;
 
-extern GtkWidget *
-ToolbarNew ( void );
+extern GtkWidget *ToolbarNew(void);
 
 extern toolbarcontrol
-ToolbarUpdate ( GtkWidget *pwToolbar,
-                const matchstate *pms,
-                const DiceShown diceShown,
-                const int fComputerTurn,
-                const int fPlaying );
+ToolbarUpdate(GtkWidget * pwToolbar,
+              const matchstate * pms, const DiceShown diceShown, const int fComputerTurn, const int fPlaying);
 
 extern int
-ToolbarIsEditing( GtkWidget *pwToolbar );
+ ToolbarIsEditing(GtkWidget * pwToolbar);
 
 extern void
-ToolbarActivateEdit( GtkWidget *pwToolbar );
+ ToolbarActivateEdit(GtkWidget * pwToolbar);
 
 extern void
-ToolbarSetPlaying( GtkWidget *pwToolbar, const int f );
+ ToolbarSetPlaying(GtkWidget * pwToolbar, const int f);
 
 extern void
-ToolbarSetClockwise( GtkWidget *pwToolbar, const int f );
+ ToolbarSetClockwise(GtkWidget * pwToolbar, const int f);
 
-extern GtkWidget *
-image_from_xpm_d ( char **xpm, GtkWidget *pw );
+extern GtkWidget *image_from_xpm_d(char **xpm, GtkWidget * pw);
 
 extern void click_edit(void);
 extern void click_swapdirection(void);
-extern GtkWidget* ToolbarAddWidget(GtkToolbar *pwToolbar, GtkWidget *pWidget, const char *tooltip);
+extern GtkWidget *ToolbarAddWidget(GtkToolbar * pwToolbar, GtkWidget * pWidget, const char *tooltip);
 
-#endif /* GTKTOOLBAR_H */
+#endif                          /* GTKTOOLBAR_H */

@@ -24,11 +24,11 @@
 
 #ifndef GTKFILE_H
 #define GTKFILE_H
-extern void GTKOpen (gpointer p, guint n, GtkWidget * pw);
-extern void GTKCommandsOpen(gpointer p, guint n, GtkWidget *pw);
-extern void GTKSave (gpointer p, guint n, GtkWidget * pw);
-extern char *GTKFileSelect (const gchar * prompt, const gchar * extension, const gchar * folder,
-			    const gchar * name, GtkFileChooserAction action);
-extern void SetDefaultFileName (char *path);
-extern void GTKBatchAnalyse( gpointer p, guint n, GtkWidget *pw);
+extern void GTKOpen(gpointer p, guint n, GtkWidget * pw);
+extern void GTKCommandsOpen(gpointer p, guint n, GtkWidget * pw);
+extern void GTKSave(gpointer p, guint n, GtkWidget * pw);
+extern char *GTKFileSelect(const gchar * prompt, const gchar * extension, const gchar * folder,
+                           const gchar * name, GtkFileChooserAction action);
+extern void SetDefaultFileName(char *path);
+extern void GTKBatchAnalyse(gpointer p, guint n, GtkWidget * pw);
 #endif

@@ -27,16 +27,15 @@
 #endif
 
 extern const char *aszWoodName[];
-extern renderdata* GetMainAppearance(void);
-extern void CopyAppearance(renderdata* prd);
+extern renderdata *GetMainAppearance(void);
+extern void CopyAppearance(renderdata * prd);
 
-extern void RenderPreferencesParam( renderdata *prd, const char *szParam,
-				   char *szValue );
-extern void SaveRenderingSettings(FILE *pf);
+extern void RenderPreferencesParam(renderdata * prd, const char *szParam, char *szValue);
+extern void SaveRenderingSettings(FILE * pf);
 
 #if USE_BOARD3D
-char *WriteMaterial(Material* pMat);
-char* WriteMaterialDice(renderdata* prd, int num);
+char *WriteMaterial(Material * pMat);
+char *WriteMaterialDice(renderdata * prd, int num);
 #endif
 
 #endif

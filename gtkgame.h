@@ -47,7 +47,7 @@ extern GtkWidget *pwOldGrab;
 extern GtkWidget *pwPanelVbox;
 extern GtkWidget *pwToolbar;
 extern GtkWidget *pwGnubgID;
-extern guint nNextTurn;		/* GTK idle function */
+extern guint nNextTurn;         /* GTK idle function */
 extern int fEndDelay;
 extern int fNeedPrompt;
 extern int frozen;
@@ -62,8 +62,7 @@ extern moverecord *pmrCurAnn;
 
 extern char *ReturnHits(TanBoard anBoard);
 extern gboolean ShowGameWindow(void);
-extern gint MoveListClearSelection(GtkWidget * pw, GdkEventSelection * pes,
-				   hintdata * phd);
+extern gint MoveListClearSelection(GtkWidget * pw, GdkEventSelection * pes, hintdata * phd);
 extern gint NextTurnNotify(gpointer p);
 extern GList *MoveListGetSelectionList(const hintdata * phd);
 extern GtkWidget *GetPanelWidget(gnubgwindow window);
@@ -85,8 +84,7 @@ extern void DisplayWindows(void);
 extern void DockPanels(void);
 extern void FullScreenMode(int state);
 extern void GetFullscreenWindowSettings(int *panels, int *ids, int *maxed);
-extern void GetStyleFromRCFile(GtkStyle ** ppStyle, const char *name,
-			       GtkStyle * psBase);
+extern void GetStyleFromRCFile(GtkStyle ** ppStyle, const char *name, GtkStyle * psBase);
 extern void GL_Freeze(void);
 extern void GL_SetNames(void);
 extern void GL_Thaw(void);
@@ -100,14 +98,14 @@ extern void GTKCalibrationUpdate(void *context, float rEvalsPerSec);
 extern void GtkChangeLanguage(void);
 extern void GTKClearMoveRecord(void);
 extern void GTKCommandShowCredits(GtkWidget * pw, GtkWidget * parent);
-extern void GTKCubeHint(moverecord *pmr, const matchstate *pms, int did_double, int did_take, int hist);
+extern void GTKCubeHint(moverecord * pmr, const matchstate * pms, int did_double, int did_take, int hist);
 extern void GTKDelay(void);
 extern void GTKDisallowStdin(void);
 extern void GTKDumpStatcontext(int game);
 extern void GTKEval(char *szOutput);
 extern void GTKFreeze(void);
 extern void GTKHelp(char *sz);
-extern void GTKHint(moverecord *pmr, int hist);
+extern void GTKHint(moverecord * pmr, int hist);
 extern void GTKMatchInfo(void);
 extern void GTKNew(void);
 extern void GTKOutput(const char *sz);
@@ -124,8 +122,7 @@ extern void GTKProgress(void);
 extern void GTKRecordShow(FILE * pfIn, char *sz, char *szPlayer);
 extern void GTKRegenerateGames(void);
 extern void GTKResign(gpointer p, guint n, GtkWidget * pw);
-extern void GTKResignHint(float arOutput[], float rEqBefore,
-			  float rEqAfter, cubeinfo * pci, int fMWC);
+extern void GTKResignHint(float arOutput[], float rEqBefore, float rEqAfter, cubeinfo * pci, int fMWC);
 extern void GTKResumeInput(void);
 extern void GTKSaveSettings(void);
 extern void GTKSetCube(gpointer p, guint n, GtkWidget * pw);
@@ -139,12 +136,10 @@ extern void GTKShowScoreSheet(void);
 extern void GTKShowVersion(void);
 extern void GTKSuspendInput(void);
 extern void GTKTextToClipboard(const char *sz);
-extern void GTKTextWindow(const char *szOutput, const char *title,
-			  const int type, GtkWidget *parent);
+extern void GTKTextWindow(const char *szOutput, const char *title, const int type, GtkWidget * parent);
 extern void GTKThaw(void);
 extern void HideAllPanels(gpointer p, guint n, GtkWidget * pw);
-extern void HintDoubleClick(GtkTreeView * treeview, GtkTreePath * path,
-			    GtkTreeViewColumn * col, hintdata * phd);
+extern void HintDoubleClick(GtkTreeView * treeview, GtkTreePath * path, GtkTreeViewColumn * col, hintdata * phd);
 extern void HintSelect(GtkTreeSelection * selection, hintdata * phd);
 extern void InitGTK(int *argc, char ***argv);
 extern void MoveListCreate(hintdata * phd);
@@ -155,9 +150,8 @@ extern void OK(GtkWidget * pw, int *pf);
 extern void PanelHide(gnubgwindow panel);
 extern void PanelShow(gnubgwindow panel);
 extern void RefreshGeometries(void);
-extern void RunGTK(GtkWidget * pwSplash, char *commands,
-		   char *python_script, char *match);
-extern void SetAnnotation(moverecord *pmr);
+extern void RunGTK(GtkWidget * pwSplash, char *commands, char *python_script, char *match);
+extern void SetAnnotation(moverecord * pmr);
 extern void SetAnalysis(gpointer p, guint n, GtkWidget * pw);
 extern void SetMET(GtkWidget * pw, gpointer p);
 extern void SetPanelWidget(gnubgwindow window, GtkWidget * pWin);
@@ -166,14 +160,14 @@ extern void SetToolbarStyle(int value);
 extern void setWindowGeometry(gnubgwindow window);
 extern void ShowAllPanels(gpointer p, guint n, GtkWidget * pw);
 extern void ShowHidePanel(gnubgwindow panel);
-extern void ShowList(char *asz[], const char *szTitle, GtkWidget *parent);
+extern void ShowList(char *asz[], const char *szTitle, GtkWidget * parent);
 extern void ShowMove(hintdata * phd, const int f);
 extern void SwapBoardToPanel(int ToPanel, int updateEvents);
 extern void DoHideAllPanels(int updateEvents);
 #if (USE_GTKUIMANAGER)
-extern void ToggleEdit( GtkToggleAction *action, gpointer user_data );
-extern void ToggleClockwise ( GtkToggleAction *action, gpointer user_data );
-extern void ToggleDockPanels ( GtkToggleAction *action, gpointer user_data );
+extern void ToggleEdit(GtkToggleAction * action, gpointer user_data);
+extern void ToggleClockwise(GtkToggleAction * action, gpointer user_data);
+extern void ToggleDockPanels(GtkToggleAction * action, gpointer user_data);
 #else
 extern void ToggleDockPanels(gpointer p, guint n, GtkWidget * pw);
 #endif
@@ -193,7 +187,7 @@ extern void SetSwitchModeMenuText(void);
 extern gboolean gtk_gl_init_success;
 #endif
 
-extern GtkWidget *get_statusbar_label (GtkStatusbar *statusbar);
-extern void toolbar_set_orientation (GtkToolbar *toolbar, GtkOrientation orientation);
+extern GtkWidget *get_statusbar_label(GtkStatusbar * statusbar);
+extern void toolbar_set_orientation(GtkToolbar * toolbar, GtkOrientation orientation);
 
 #endif

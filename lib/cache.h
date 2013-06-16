@@ -34,62 +34,60 @@ typedef unsigned int uint32_t;
 /* Set to calculate simple cache stats */
 #define CACHE_STATS 0
 
-typedef struct _cacheNodeDetail
-{
-	positionkey key;
-	int nEvalContext;
-	float ar[6];
+typedef struct _cacheNodeDetail {
+    positionkey key;
+    int nEvalContext;
+    float ar[6];
 } cacheNodeDetail;
 
-typedef struct _cacheNode
-{
-	cacheNodeDetail nd_primary;
-	cacheNodeDetail nd_secondary;
+typedef struct _cacheNode {
+    cacheNodeDetail nd_primary;
+    cacheNodeDetail nd_secondary;
 #if USE_MULTITHREAD
-	volatile int lock;
+    volatile int lock;
 #endif
 } cacheNode;
 
 /* name used in eval.c */
 typedef cacheNodeDetail evalcache;
 
-typedef struct _cache
-{
-  cacheNode*	entries;
-  
-  unsigned int size;
-  uint32_t hashMask;
+typedef struct _cache {
+    cacheNode *entries;
+
+    unsigned int size;
+    uint32_t hashMask;
 
 #if CACHE_STATS
-  unsigned int nAdds;
-  unsigned int cLookup;
-  unsigned int cHit;
+    unsigned int nAdds;
+    unsigned int cLookup;
+    unsigned int cHit;
 #endif
 } evalCache;
 
 /* Cache size will be adjusted to a power of 2 */
-int CacheCreate(evalCache* pc, unsigned int size);
-int CacheResize(evalCache *pc, unsigned int cNew);
+int CacheCreate(evalCache * pc, unsigned int size);
+int CacheResize(evalCache * pc, unsigned int cNew);
 
 #define CACHEHIT ((uint32_t)-1)
 /* returns a value which is passed to CacheAdd (if a miss) */
-unsigned int CacheLookupWithLocking(evalCache* pc, const cacheNodeDetail* e, float *arOut, float *arCubeful);
-unsigned int CacheLookupNoLocking(evalCache* pc, const cacheNodeDetail* e, float *arOut, float *arCubeful);
+unsigned int CacheLookupWithLocking(evalCache * pc, const cacheNodeDetail * e, float *arOut, float *arCubeful);
+unsigned int CacheLookupNoLocking(evalCache * pc, const cacheNodeDetail * e, float *arOut, float *arCubeful);
 
-void CacheAddWithLocking(evalCache* pc, const cacheNodeDetail* e, uint32_t l);
-static inline void CacheAddNoLocking(evalCache* pc, const cacheNodeDetail* e, const uint32_t l)
+void CacheAddWithLocking(evalCache * pc, const cacheNodeDetail * e, uint32_t l);
+static inline void
+CacheAddNoLocking(evalCache * pc, const cacheNodeDetail * e, const uint32_t l)
 {
-	pc->entries[l].nd_secondary = pc->entries[l].nd_primary;
-	pc->entries[l].nd_primary = *e;
+    pc->entries[l].nd_secondary = pc->entries[l].nd_primary;
+    pc->entries[l].nd_primary = *e;
 #if CACHE_STATS
-  ++pc->nAdds;
+    ++pc->nAdds;
 #endif
 }
 
-void CacheFlush(const evalCache* pc);
-void CacheDestroy(const evalCache* pc);
-void CacheStats(const evalCache* pc, unsigned int* pcLookup, unsigned int* pcHit, unsigned int* pcUsed);
+void CacheFlush(const evalCache * pc);
+void CacheDestroy(const evalCache * pc);
+void CacheStats(const evalCache * pc, unsigned int *pcLookup, unsigned int *pcHit, unsigned int *pcUsed);
 
-uint32_t GetHashKey(const uint32_t hashMask, const cacheNodeDetail* e);
+uint32_t GetHashKey(const uint32_t hashMask, const cacheNodeDetail * e);
 
 #endif

@@ -25,8 +25,8 @@
 
 
 /* Some boilerplate GObject type check and type cast macros.
-*  'klass' is used here instead of 'class', because 'class'
-*  is a c++ keyword */
+ *  'klass' is used here instead of 'class', because 'class'
+ *  is a c++ keyword */
 
 #define CUSTOM_TYPE_CELL_RENDERER_MOVELIST             (custom_cell_renderer_movelist_get_type())
 #define CUSTOM_CELL_RENDERER_MOVELIST(obj)             (G_TYPE_CHECK_INSTANCE_CAST((obj),  CUSTOM_TYPE_CELL_RENDERER_MOVELIST, CustomCellRendererMovelist))
@@ -39,25 +39,23 @@ typedef struct _CustomCellRendererMovelist CustomCellRendererMovelist;
 typedef struct _CustomCellRendererMovelistClass CustomCellRendererMovelistClass;
 
 /* CustomCellRendererMovelist: Our custom cell renderer
-*   structure. Extend according to need */
+ *   structure. Extend according to need */
 
-struct _CustomCellRendererMovelist
-{
-	GtkCellRenderer parent;
-	move* pml;
-	unsigned int rank;
+struct _CustomCellRendererMovelist {
+    GtkCellRenderer parent;
+    move *pml;
+    unsigned int rank;
 };
 
 
-struct _CustomCellRendererMovelistClass
-{
-	GtkCellRendererClass parent_class;
+struct _CustomCellRendererMovelistClass {
+    GtkCellRendererClass parent_class;
 };
 
-extern GtkCellRenderer * custom_cell_renderer_movelist_new (void);
+extern GtkCellRenderer *custom_cell_renderer_movelist_new(void);
 
 extern GtkStyle *psHighlight;
 extern float rBest;
 
 extern void custom_cell_renderer_invalidate_size(void);
-#endif /* _custom_cell_renderer_movelistbar_included_ */
+#endif                          /* _custom_cell_renderer_movelistbar_included_ */

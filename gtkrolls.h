@@ -23,6 +23,6 @@
 #define GTKROLLS_H
 
 extern void
-GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms );
+ GTKShowRolls(const gint nDepth, evalcontext * pec, matchstate * pms);
 
-#endif /* GTKROLLS_H */
+#endif                          /* GTKROLLS_H */

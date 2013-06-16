@@ -22,7 +22,7 @@
 #ifndef GTKOPTIONS_H
 #define GTKOPTIONS_H
 
-extern void GTKSetOptions( void );
+extern void GTKSetOptions(void);
 extern void GTKSound(void);
 
-#endif /* GTKOPTIONS_H */
+#endif                          /* GTKOPTIONS_H */

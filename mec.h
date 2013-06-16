@@ -25,17 +25,14 @@
 #include "matchequity.h"
 
 extern void
-mec( const float rGammonRate, 
-     const float rWinRate,
-     /* const */ float aarMetPC[ 2 ][ MAXSCORE ],
-     float aarMet[ MAXSCORE ][ MAXSCORE ] );
+ mec(const float rGammonRate, const float rWinRate,
+     /* const */ float aarMetPC[2][MAXSCORE],
+     float aarMet[MAXSCORE][MAXSCORE]);
 
 extern void
-mec_pc( const float rGammonRate, 
-        const float rFreeDrop2Away, 
-        const float rFreeDrop4Away, 
-        const float rWinRate,
-        float arMetPC[ MAXSCORE ] );
 
-#endif /* MEC_H */
 
+mec_pc(const float rGammonRate,
+       const float rFreeDrop2Away, const float rFreeDrop4Away, const float rWinRate, float arMetPC[MAXSCORE]);
+
+#endif                          /* MEC_H */

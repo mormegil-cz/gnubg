@@ -27,15 +27,15 @@
 extern char *datadir;
 extern char *pkg_datadir;
 extern char *docdir;
-extern char *getDataDir( void );
-extern char *getPkgDataDir( void );
-extern char *getDocDir( void );
+extern char *getDataDir(void);
+extern char *getPkgDataDir(void);
+extern char *getDocDir(void);
 
 #define BuildFilename(file) g_build_filename(getPkgDataDir(), file, NULL)
 #define BuildFilename2(file1, file2) g_build_filename(getPkgDataDir(), file1, file2, NULL)
 
-extern void PrintSystemError(const char* message);
-extern void PrintError(const char* message);
+extern void PrintSystemError(const char *message);
+extern void PrintError(const char *message);
 extern FILE *GetTemporaryFile(const char *nameTemplate, char **retName);
 
 #endif

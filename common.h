@@ -16,8 +16,8 @@
  */
 
 /*! \file common.h
-    \brief Odd definitions
-*/
+ * \brief Odd definitions
+ */
 
 #ifndef COMMON_H
 #define COMMON_H
@@ -25,7 +25,7 @@
 
 #if !_GNU_SOURCE && !defined (__attribute__)
 /*! \brief GNU C specific attributes, e.g. unused
-// */
+ * // */
 #define __attribute__(X)
 #endif
 
@@ -50,15 +50,15 @@ typedef struct sigaction psighandler;
 #elif HAVE_SIGVEC
 typedef struct sigvec psighandler;
 #else
-typedef void(*psighandler) (int);
+typedef void (*psighandler) (int);
 #endif
 
 /* abs returns unsigned int by definition */
 #define Abs(a) ((unsigned int)abs(a))
 
 /* signbit() is used only in a somewhat performance sensitive place
-   in lib/sigmoid.h. If HAVE_DECL_SIGNBIT is false, maybe we should
-   work around it there instead of using this */
+ * in lib/sigmoid.h. If HAVE_DECL_SIGNBIT is false, maybe we should
+ * work around it there instead of using this */
 #if !HAVE_DECL_SIGNBIT
 /* copysign() caters for special IEEE 754 numbers */
 #define signbit(x) (copysign(1, (x)) < 0)
@@ -71,13 +71,13 @@ typedef void(*psighandler) (int);
 #define strcasecmp strcasecmp_error_use_StrCaseCmp
 #define strncasecmp strncasecmp_error_use_StrNCaseCmp
 
-/* Macro to mark paramaters that aren't used in the function */	
+/* Macro to mark paramaters that aren't used in the function */
 #ifdef UNUSED
 #elif defined(__GNUC__)
-# define UNUSED(x) UNUSED_ ## x __attribute__((unused))
+#define UNUSED(x) UNUSED_ ## x __attribute__((unused))
 #elif defined(_lint)
-# define UNUSED(x) /*lint -e{715, 818}*/ _unused_##x
+#define UNUSED(x) /*lint -e{715, 818}*/ _unused_##x
 #else
-# define UNUSED(x) _unused_##x
+#define UNUSED(x) _unused_##x
 #endif
 #endif

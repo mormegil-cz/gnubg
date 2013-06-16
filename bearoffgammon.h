@@ -26,14 +26,13 @@
 
 /* pack for space */
 struct GammonProbs {
-  unsigned int p1 : 16;  /* 0 - 36^2 */
-  unsigned int p2 : 16;  /* 0 - 36^3 */
-  unsigned int p3 : 24;  /* 0 - 36^4 */
-  unsigned int p0 : 8;   /*  0 - 36 */
+    unsigned int p1:16;         /* 0 - 36^2 */
+    unsigned int p2:16;         /* 0 - 36^3 */
+    unsigned int p3:24;         /* 0 - 36^4 */
+    unsigned int p0:8;          /*  0 - 36 */
 };
 
-extern struct GammonProbs*
-getBearoffGammonProbs(const unsigned int b[6]);
+extern struct GammonProbs *getBearoffGammonProbs(const unsigned int b[6]);
 
 extern long *getRaceBGprobs(const unsigned int board[6]);
 

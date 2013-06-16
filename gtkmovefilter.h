@@ -22,18 +22,16 @@
 #ifndef GTKMOVEFILTER_H
 #define GTKMOVEFILTER_H
 
-extern GtkWidget *
-MoveFilterWidget ( movefilter *pmf, 
-                   int *pfOK,
-                   GCallback pfChanged, gpointer userdata );
+extern GtkWidget *MoveFilterWidget(movefilter * pmf, int *pfOK, GCallback pfChanged, gpointer userdata);
 
 extern void
-SetMovefilterCommands ( const char *sz,
-                  movefilter aamfNew[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ], 
-                  movefilter aamfOld[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] );
+
+
+SetMovefilterCommands(const char *sz,
+                      movefilter aamfNew[MAX_FILTER_PLIES][MAX_FILTER_PLIES],
+                      movefilter aamfOld[MAX_FILTER_PLIES][MAX_FILTER_PLIES]);
 
 extern void
-MoveFilterSetPredefined ( GtkWidget *pwMoveFilter, 
-                          const int i );
+ MoveFilterSetPredefined(GtkWidget * pwMoveFilter, const int i);
 
-#endif /* GTKMOVEFILTER_H */
+#endif                          /* GTKMOVEFILTER_H */

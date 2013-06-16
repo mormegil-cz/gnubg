@@ -19,8 +19,8 @@
  */
 
 /* License changed from the GNU LGPL to the GNU GPL (as permitted
-   under Term 3 of the GNU LGPL) by Gary Wong for distribution
-   with GNU Backgammon. */
+ * under Term 3 of the GNU LGPL) by Gary Wong for distribution
+ * with GNU Backgammon. */
 
 #ifndef __GTK_MULTIVIEW_H__
 #define __GTK_MULTIVIEW_H__
@@ -33,35 +33,28 @@
 #define GTK_MULTIVIEW_GET_CLASS(obj)  		(G_TYPE_INSTANCE_GET_CLASS((obj), GTK_TYPE_MULTIVIEW, GtkMultiviewClass))
 
 
-typedef struct _GtkMultiview       GtkMultiview;
-typedef struct _GtkMultiviewClass  GtkMultiviewClass;
+typedef struct _GtkMultiview GtkMultiview;
+typedef struct _GtkMultiviewClass GtkMultiviewClass;
 
-struct _GtkMultiview
-{
-  GtkContainer parent;
+struct _GtkMultiview {
+    GtkContainer parent;
 
-  /*< private >*/
-  GtkWidget *current;
-  GList *children;
+    /*< private > */
+    GtkWidget *current;
+    GList *children;
 };
 
-struct _GtkMultiviewClass
-{
-  GtkContainerClass parent_class;
+struct _GtkMultiviewClass {
+    GtkContainerClass parent_class;
 };
 
-GType    gtk_multiview_get_type      (void);
-GtkWidget *gtk_multiview_new           (void);
-void       gtk_multiview_prepend_child (GtkMultiview *multiview,
-					GtkWidget    *child);
-void       gtk_multiview_insert_child  (GtkMultiview *multiview,
-					GtkWidget    *back_child,
-					GtkWidget    *child);
-void       gtk_multiview_append_child  (GtkMultiview *multiview,
-					GtkWidget    *child);
-void       gtk_multiview_set_current   (GtkMultiview *multiview,
-					GtkWidget    *child);
+GType gtk_multiview_get_type(void);
+GtkWidget *gtk_multiview_new(void);
+void gtk_multiview_prepend_child(GtkMultiview * multiview, GtkWidget * child);
+void gtk_multiview_insert_child(GtkMultiview * multiview, GtkWidget * back_child, GtkWidget * child);
+void gtk_multiview_append_child(GtkMultiview * multiview, GtkWidget * child);
+void gtk_multiview_set_current(GtkMultiview * multiview, GtkWidget * child);
 
 
 
-#endif /* __GTK_MULTIVIEW_H__ */
+#endif                          /* __GTK_MULTIVIEW_H__ */

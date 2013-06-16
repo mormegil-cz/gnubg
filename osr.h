@@ -23,9 +23,7 @@
 #define OSR_H
 
 extern void
-raceProbs ( const TanBoard anBoard, const unsigned int nGames,
-            float arOutput[ NUM_OUTPUTS ],
-            float arMu[ 2 ] );
+ raceProbs(const TanBoard anBoard, const unsigned int nGames, float arOutput[NUM_OUTPUTS], float arMu[2]);
 
 
-#endif /* OSR_H */
+#endif                          /* OSR_H */

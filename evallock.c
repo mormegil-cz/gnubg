@@ -24,4 +24,3 @@
 #include "eval.c"
 #include "rollout.c"
 #endif
-

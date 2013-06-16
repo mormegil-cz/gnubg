@@ -32,9 +32,9 @@
 typedef int Py_ssize_t;
 #define PY_SSIZE_T_MAX INT_MAX
 #define PY_SSIZE_T_MIN INT_MIN
-#endif /* PY_VERSION_CHK */
+#endif                          /* PY_VERSION_CHK */
 extern PyObject *PythonGnubgModule();
-#endif /* USE_PYTHON */
+#endif                          /* USE_PYTHON */
 
 #if __GNUC__ && defined(WIN32)
 /* Align stack pointer on 16 byte boundary so SSE variables work correctly */
@@ -42,7 +42,7 @@ extern PyObject *PythonGnubgModule();
 #else
 #define STACKALIGN
 
-#endif /* STACKALIGN */
+#endif                          /* STACKALIGN */
 
 #include <glib.h>
 
@@ -50,6 +50,6 @@ extern void PythonInitialise(char *argv0);
 extern void PythonShutdown(void);
 extern void PythonRun(const char *sz);
 extern int LoadPythonFile(const char *sz);
-extern gint python_run_file (gpointer file);
+extern gint python_run_file(gpointer file);
 
-#endif /* GNUBGMODULE_H */
+#endif                          /* GNUBGMODULE_H */

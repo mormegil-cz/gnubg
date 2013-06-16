@@ -255,4 +255,4 @@
         "               <menuitem name='SwitchMode' action='SwitchModeAction'/>" \
         "       </menu>" \
         "</menubar>" \
-        "</ui>" 
+        "</ui>"

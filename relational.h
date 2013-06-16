@@ -30,8 +30,8 @@
 #define DB_VERSION 1
 
 
-extern int RelationalUpdatePlayerDetails(const char* oldName, const char* newName, const char* newNotes);
+extern int RelationalUpdatePlayerDetails(const char *oldName, const char *newName, const char *newNotes);
 extern float Ratio(float a, int b);
 extern statcontext *relational_player_stats_get(const char *player0, const char *player1);
 
-#endif /* RELATIONAL_H */
+#endif                          /* RELATIONAL_H */

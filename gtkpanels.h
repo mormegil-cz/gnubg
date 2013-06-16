@@ -21,23 +21,23 @@
 #define GTKPANELS_H
 
 typedef enum _gnubgwindow {
-  WINDOW_MAIN = 0,
-  WINDOW_GAME,
-  WINDOW_ANALYSIS,
-  WINDOW_ANNOTATION,
-  WINDOW_HINT,
-  WINDOW_MESSAGE,
-  WINDOW_COMMAND,
-  WINDOW_THEORY,
-  NUM_WINDOWS
+    WINDOW_MAIN = 0,
+    WINDOW_GAME,
+    WINDOW_ANALYSIS,
+    WINDOW_ANNOTATION,
+    WINDOW_HINT,
+    WINDOW_MESSAGE,
+    WINDOW_COMMAND,
+    WINDOW_THEORY,
+    NUM_WINDOWS
 } gnubgwindow;
 
 typedef struct _windowgeometry {
-  int nWidth, nHeight;
-  int nPosX, nPosY, max;
+    int nWidth, nHeight;
+    int nPosX, nPosY, max;
 } windowgeometry;
 
-extern void SaveWindowSettings(FILE* pf);
+extern void SaveWindowSettings(FILE * pf);
 extern void HidePanel(gnubgwindow window);
 extern void getWindowGeometry(gnubgwindow window);
 extern int PanelShowing(gnubgwindow window);

@@ -22,18 +22,18 @@
 #define LIST_H
 
 typedef struct _list {
-  struct _list* plPrev;
-  struct _list* plNext;
-  void* p;
+    struct _list *plPrev;
+    struct _list *plNext;
+    void *p;
 } listOLD;
 /* Renamed to listOLD - use GList instead (hopefullly replace existing usage eventually */
 
-extern int ListCreate( listOLD *pl );
+extern int ListCreate(listOLD * pl);
 /* #define ListDestroy( pl ) ( assert( ListEmpty( pl ) ) ) */
 
 #define ListEmpty( pl ) ( (pl)->plNext == (pl) )
-extern listOLD* ListInsert( listOLD* pl, void* p );
-extern void ListDelete( listOLD* pl );
-extern void ListDeleteAll( const listOLD *pl );
+extern listOLD *ListInsert(listOLD * pl, void *p);
+extern void ListDelete(listOLD * pl);
+extern void ListDeleteAll(const listOLD * pl);
 
 #endif

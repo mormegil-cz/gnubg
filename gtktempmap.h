@@ -23,7 +23,6 @@
 #define GTKTEMPMAP_H
 
 extern void
-GTKShowTempMap( const matchstate ams[], const int n,
-                const gchar *aszTitle[], const int fInvert );
+ GTKShowTempMap(const matchstate ams[], const int n, const gchar * aszTitle[], const int fInvert);
 
-#endif /* GTKTEMPMAP_H */
+#endif                          /* GTKTEMPMAP_H */

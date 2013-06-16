@@ -30,5 +30,5 @@ extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw);
 extern GtkWidget *RelationalOptions(void);
 extern void RelationalOptionsShown(void);
 extern void RelationalSaveOptions(void);
-extern void GtkShowQuery(RowSet* pRow);
+extern void GtkShowQuery(RowSet * pRow);
 #endif

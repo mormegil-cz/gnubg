@@ -25,44 +25,45 @@
 #include "common.h"
 
 typedef struct _neuralnet {
-	unsigned int cInput;
-	unsigned int cHidden;
-	unsigned int cOutput;
-	unsigned int fDirect;
-	int nTrained;
-	float rBetaHidden;
-	float rBetaOutput;
-	float *arHiddenWeight;
-	float *arOutputWeight;
-	float *arHiddenThreshold;
-	float *arOutputThreshold;
+    unsigned int cInput;
+    unsigned int cHidden;
+    unsigned int cOutput;
+    unsigned int fDirect;
+    int nTrained;
+    float rBetaHidden;
+    float rBetaOutput;
+    float *arHiddenWeight;
+    float *arOutputWeight;
+    float *arHiddenThreshold;
+    float *arOutputThreshold;
 } neuralnet;
 
 typedef enum {
-	NNEVAL_NONE,
-	NNEVAL_SAVE,
-	NNEVAL_FROMBASE
+    NNEVAL_NONE,
+    NNEVAL_SAVE,
+    NNEVAL_FROMBASE
 } NNEvalType;
 
 typedef enum {
-	NNSTATE_NONE = -1,
-	NNSTATE_INCREMENTAL,
-	NNSTATE_DONE
+    NNSTATE_NONE = -1,
+    NNSTATE_INCREMENTAL,
+    NNSTATE_DONE
 } NNStateType;
 
 typedef struct _NNState {
-	NNStateType state;
-	float *savedBase;
-	float *savedIBase;
+    NNStateType state;
+    float *savedBase;
+    float *savedIBase;
 } NNState;
 
-extern int NeuralNetCreate(neuralnet *pnn, unsigned int cInput, unsigned int cHidden, unsigned int cOutput, float rBetaHidden, float rBetaOutput);
-extern void NeuralNetDestroy(neuralnet *pnn);
-extern int NeuralNetEvaluate(const neuralnet *pnn, float arInput[], float arOutput[], NNState *pnState);
-extern int NeuralNetEvaluateSSE(const neuralnet *pnn, float arInput[], float arOutput[], NNState *pnState);
-extern int NeuralNetLoad(neuralnet *pnn, FILE *pf);
-extern int NeuralNetLoadBinary(neuralnet *pnn, FILE *pf);
-extern int NeuralNetSaveBinary(const neuralnet *pnn, FILE *pf);
+extern int NeuralNetCreate(neuralnet * pnn, unsigned int cInput, unsigned int cHidden, unsigned int cOutput,
+                           float rBetaHidden, float rBetaOutput);
+extern void NeuralNetDestroy(neuralnet * pnn);
+extern int NeuralNetEvaluate(const neuralnet * pnn, float arInput[], float arOutput[], NNState * pnState);
+extern int NeuralNetEvaluateSSE(const neuralnet * pnn, float arInput[], float arOutput[], NNState * pnState);
+extern int NeuralNetLoad(neuralnet * pnn, FILE * pf);
+extern int NeuralNetLoadBinary(neuralnet * pnn, FILE * pf);
+extern int NeuralNetSaveBinary(const neuralnet * pnn, FILE * pf);
 extern int SSE_Supported(void);
 
 #endif

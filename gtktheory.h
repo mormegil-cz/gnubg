@@ -23,6 +23,6 @@
 #define GTKTHEORY_H
 
 extern void
-GTKShowTheory ( const int fActivePage );
+ GTKShowTheory(const int fActivePage);
 
 #endif

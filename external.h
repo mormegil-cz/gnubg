@@ -31,42 +31,42 @@
 #if HAVE_SYS_SOCKET_H
 #include <sys/types.h>
 #include <sys/socket.h>
-#endif /* #if HAVE_SYS_SOCKET_H */
+#endif                          /* #if HAVE_SYS_SOCKET_H */
 
-#else /* #ifndef WIN32 */
+#else                           /* #ifndef WIN32 */
 #include <winsock2.h>
-#endif /* #ifndef WIN32 */
+#endif                          /* #ifndef WIN32 */
 
-typedef enum _cmdtype  {
-  COMMAND_NONE = 0,
-  COMMAND_FIBSBOARD = 1,
-  COMMAND_EVALUATION = 2
+typedef enum _cmdtype {
+    COMMAND_NONE = 0,
+    COMMAND_FIBSBOARD = 1,
+    COMMAND_EVALUATION = 2
 } cmdtype;
 
 
 typedef struct _extcmd {
-  cmdtype ct;
-  
-  /* evalcontext */
-  int nPlies;
-  float rNoise;
-  int fDeterministic;
-  int fCubeful;
-  int fUsePrune;
+    cmdtype ct;
 
-  /* session rules */
-  int fCrawfordRule;
-  int fJacobyRule;
+    /* evalcontext */
+    int nPlies;
+    float rNoise;
+    int fDeterministic;
+    int fCubeful;
+    int fUsePrune;
 
-  /* fibs board */
-  char *szFIBSBoard;
+    /* session rules */
+    int fCrawfordRule;
+    int fJacobyRule;
+
+    /* fibs board */
+    char *szFIBSBoard;
 } extcmd;
 
-extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz );
-extern int ExternalRead( int h, char *pch, size_t cch );
-extern int ExternalWrite( int h, char *pch, size_t cch );
+extern int ExternalSocket(struct sockaddr **ppsa, int *pcb, char *sz);
+extern int ExternalRead(int h, char *pch, size_t cch);
+extern int ExternalWrite(int h, char *pch, size_t cch);
 #ifdef WIN32
-extern void OutputWin32SocketError(const char* action);
+extern void OutputWin32SocketError(const char *action);
 #define SockErr OutputWin32SocketError
 #else
 #define SockErr outputerr
@@ -74,9 +74,8 @@ extern void OutputWin32SocketError(const char* action);
 
 /* Parser functions */
 
-extern void ( *ExtErrorHandler )( const char *szMessage, const char *szNear, 
-                                  const int fParseError );
+extern void (*ExtErrorHandler) (const char *szMessage, const char *szNear, const int fParseError);
 
-#endif /* #if HAVE_SOCKETS */
+#endif                          /* #if HAVE_SOCKETS */
 
-#endif /* #ifndef EXTERNAL_H */
+#endif                          /* #ifndef EXTERNAL_H */

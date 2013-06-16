@@ -1,5 +1,15 @@
 2013-06-15  Michael Petch  <mpetch@gnubg.org>
 
+	* All .c and .h files: Standardized the code formatting with
+	 indent -kr -l120 -fc1 -sc -nut -psl . K&R style, 120 column limit
+	process comment in column 1, multiline comments have an asterisk 
+	at the beginning of each line, convert all tabs to spaces, and
+	split the return type of a function from the function name
+	(each on their own line). K&R uses 4 spaces for an indentation
+	line. Update the language files.
+
+2013-06-15  Michael Petch  <mpetch@gnubg.org>
+
 	* gnubgmodule.c, scripts/gnubg.py: Modify the python interpreter
 	processing so that it falls back to a simple command line
 	interface on older versions of Windows (Versions before WinXP SP2).

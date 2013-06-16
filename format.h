@@ -28,60 +28,40 @@ extern float rErrorRateFactor;
 
 /* misc. output routines used by text and HTML export */
 
-extern char *
-OutputPercents ( const float ar[], const int f );
+extern char *OutputPercents(const float ar[], const int f);
 
-extern char *
-OutputPercent ( const float r );
+extern char *OutputPercent(const float r);
 
-extern char *
-OutputMWC ( const float r, const cubeinfo *pci, const int f );
+extern char *OutputMWC(const float r, const cubeinfo * pci, const int f);
 
-extern char *
-OutputEquity ( const float r, const cubeinfo *pci, const int f );
+extern char *OutputEquity(const float r, const cubeinfo * pci, const int f);
 
-extern char *
-OutputRolloutContext ( const char *szIndent, const rolloutcontext *prc );
+extern char *OutputRolloutContext(const char *szIndent, const rolloutcontext * prc);
 
-extern char *
-OutputEvalContext ( const evalcontext *pec, const int fChequer );
+extern char *OutputEvalContext(const evalcontext * pec, const int fChequer);
 
-extern char *
-OutputEquityDiff ( const float r1, const float r2, const cubeinfo *pci );
+extern char *OutputEquityDiff(const float r1, const float r2, const cubeinfo * pci);
 
-extern char *
-OutputEquityScale ( const float r, const cubeinfo *pci, 
-                    const cubeinfo *pciBase, const int f );
+extern char *OutputEquityScale(const float r, const cubeinfo * pci, const cubeinfo * pciBase, const int f);
 
-extern char *
-OutputRolloutResult ( const char *szIndent,
-                      char asz[][ 1024 ],
-                      float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
-                      float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
-                      const cubeinfo aci[],
-                      const int alt,
-                      const int cci,
-                      const int fCubeful );
+extern char *OutputRolloutResult(const char *szIndent,
+                                 char asz[][1024],
+                                 float aarOutput[][NUM_ROLLOUT_OUTPUTS],
+                                 float aarStdDev[][NUM_ROLLOUT_OUTPUTS],
+                                 const cubeinfo aci[], const int alt, const int cci, const int fCubeful);
 
-extern char *
-OutputCubeAnalysisFull ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                         float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                         const evalsetup* pes, const cubeinfo* pci,
-                         int fDouble, int fTake,
-                         skilltype stDouble,
-                         skilltype stTake );
+extern char *OutputCubeAnalysisFull(float aarOutput[2][NUM_ROLLOUT_OUTPUTS],
+                                    float aarStdDev[2][NUM_ROLLOUT_OUTPUTS],
+                                    const evalsetup * pes, const cubeinfo * pci,
+                                    int fDouble, int fTake, skilltype stDouble, skilltype stTake);
 
-extern char *
-OutputCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                     float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                     const evalsetup* pes, const cubeinfo* pci );
+extern char *OutputCubeAnalysis(float aarOutput[2][NUM_ROLLOUT_OUTPUTS],
+                                float aarStdDev[2][NUM_ROLLOUT_OUTPUTS], const evalsetup * pes, const cubeinfo * pci);
 
-extern char *
-OutputMoneyEquity ( const float ar[], const int f );
+extern char *OutputMoneyEquity(const float ar[], const int f);
 
-extern char*
-FormatCubePosition ( char *sz, cubeinfo *pci );
+extern char *FormatCubePosition(char *sz, cubeinfo * pci);
 extern void
-FormatCubePositions( const cubeinfo *pci, char asz[ 2 ][ 40 ] );
+ FormatCubePositions(const cubeinfo * pci, char asz[2][40]);
 
-#endif /* FORMAT_H */
+#endif                          /* FORMAT_H */
