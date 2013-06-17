@@ -1,3 +1,8 @@
+2013-06-17  Michael Petch  <mpetch@gnubg.org>
+
+	* gtkgame.c: Fix language bug that prevented the GUI from properly
+	refreshing the screen when a new Language was chosen
+
 2013-06-15  Michael Petch  <mpetch@gnubg.org>
 
 	* All .c and .h files: Standardized the code formatting with

@@ -4039,7 +4039,7 @@ RunGTK(GtkWidget * pwSplash, char *commands, char *python_script, char *match)
 extern void
 GtkChangeLanguage(void)
 {
-    setlocale(LC_ALL, "C");
+    setlocale(LC_ALL, "");
     if (pwMain && gtk_widget_get_realized(pwMain)) {
         reasonExited = RE_LANGUAGE_CHANGE;
         custom_cell_renderer_invalidate_size(); /* Recalulate widget sizes */
