@@ -1,3 +1,10 @@
+2013-06-18  Michael Petch  <mpetch@gnubg.org>
+
+	* gnubg.c: When using the -r flag to start GNUBG (start without 
+	reading the gnubgautorc file), the gnugbautorc file will be
+	overwritten with defaults if running with the GUI. Reported
+	by plm, see: https://savannah.gnu.org/bugs/?38497#postcomment
+
 2013-06-17  Michael Petch  <mpetch@gnubg.org>
 
 	* gtkgame.c: Fix language bug that prevented the GUI from properly

@@ -159,6 +159,7 @@ int fReadingCommand;
 #endif
 #endif
 
+static int fNoRC = FALSE;
 static char *autosave = NULL;
 static int loading_rc = FALSE;
 static int foutput_on = TRUE;
@@ -3280,6 +3281,12 @@ CommandSaveSettings(char *szParam)
 
     szParam = NextToken(&szParam);
 
+    /* If we were started without a configuration file, don't
+     * save anyting since this will overwrite an existing file
+     * with defaults */
+    if (fNoRC)
+        return;
+
     if (!szParam || !*szParam) {
         /* no filename parameter given -- save to default location */
         szFile = g_build_filename(szHomeDirectory, "gnubgautorc", NULL);
@@ -4782,7 +4789,7 @@ main(int argc, char *argv[])
     char *met = NULL;
 
     static char *pchCommands = NULL, *pchPythonScript = NULL, *lang = NULL;
-    static int fNoRC = FALSE, fNoBearoff = FALSE, fNoX = FALSE, fSplash = FALSE, fNoTTY =
+    static int fNoBearoff = FALSE, fNoX = FALSE, fSplash = FALSE, fNoTTY =
         FALSE, show_version = FALSE, debug = FALSE;
     GOptionEntry ao[] = {
         {"no-bearoff", 'b', 0, G_OPTION_ARG_NONE, &fNoBearoff,
