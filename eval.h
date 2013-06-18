@@ -415,7 +415,7 @@ extern int
 extern double GetEvalCacheSize(void);
 void SetEvalCacheSize(unsigned int size);
 extern unsigned int GetEvalCacheEntries(void);
-extern int GetCacheMB(double size);
+extern int GetCacheMB(int size);
 
 extern int
  GenerateMoves(movelist * pml, const TanBoard anBoard, int n0, int n1, int fPartial);

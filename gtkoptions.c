@@ -311,7 +311,7 @@ SoundPlayClicked(GtkWidget * UNUSED(widget), gpointer UNUSED(userdata))
 static gchar *
 CacheSizeString(GtkScale * UNUSED(scale), gdouble value)
 {
-    return g_strdup_printf("%iMB", GetCacheMB(value));
+    return g_strdup_printf("%iMB", GetCacheMB((int)value));
 }
 
 static void

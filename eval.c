@@ -3171,12 +3171,12 @@ GetEvalCacheEntries(void)
 }
 
 extern int
-GetCacheMB(double size)
+GetCacheMB(int size)
 {
-    if (size == 0)
+    if (size <= 0)
         return 0;
     else
-        return (int) ((pow(2, size + 15) * sizeof(cacheNode)) / (1024 * 1024));
+        return (1<<(size + 15)) * sizeof(cacheNode) / (1024 * 1024);
 }
 
 extern int
