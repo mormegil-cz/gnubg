@@ -1613,9 +1613,9 @@ extern void
 CommandShowPanels(char *UNUSED(sz))
 {
     if (fDisplayPanels)
-        outputf(_("Game list, Annotation and Message panels/windows " "will be displayed."));
+        outputl(_("Game list, Annotation and Message panels/windows " "will be displayed."));
     else
-        outputf(_("Game list, Annotation and Message panels/windows " "will not be displayed."));
+        outputl(_("Game list, Annotation and Message panels/windows " "will not be displayed."));
 }
 
 extern void
