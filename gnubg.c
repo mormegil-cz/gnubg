@@ -3282,7 +3282,7 @@ CommandSaveSettings(char *szParam)
     szParam = NextToken(&szParam);
 
     /* If we were started without a configuration file, don't
-     * save anyting since this will overwrite an existing file
+     * save anything since this will overwrite an existing file
      * with defaults */
     if (fNoRC)
         return;
