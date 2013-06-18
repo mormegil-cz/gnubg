@@ -9,8 +9,14 @@ bin_PROGRAMS = gnubg makebearoff makehyper bearoffdump makeweights
 #
 ##include path
 #
+if WIN32
+localeloc=-DLOCALEDIR=\"locale\" 
+else
+localeloc=-DLOCALEDIR=\"$(localedir)\"
+endif 
+
 AM_CPPFLAGS = -I$(srcdir)/lib -I$(srcdir)/board3d \
-	   -DLOCALEDIR=\"$(localedir)\" @FREETYPE2_CFLAGS@ @GLIB_CFLAGS@ \
+	   $(localeloc) @FREETYPE2_CFLAGS@ @GLIB_CFLAGS@ \
 	   @LIBPNG_CFLAGS@ @GTK_CFLAGS@ @CAIRO_CFLAGS@ @PANGOCAIRO_CFLAGS@ \
 	   @GTHREAD_CFLAGS@ @GTKGLEXT_CFLAGS@ @CANBERRA_CFLAGS@
 
