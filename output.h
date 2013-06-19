@@ -1,5 +1,5 @@
 /*
- * backgammon.h
+ * output.h
  *
  * by Gary Wong <gtw@gnu.org>, 1999, 2000, 2001, 2002.
  *
@@ -24,7 +24,7 @@
 #include <stdarg.h>
 
 /* Initialize output module */
-extern void output_initialize();
+extern void output_initialize(void);
 /* Write a string to stdout/status bar/popup window */
 extern void output(const char *sz);
 /* Write a string to stdout/status bar/popup window, and append \n */
