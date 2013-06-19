@@ -381,7 +381,7 @@ check_for_cpuid()
     asm volatile(
 #if defined(ENVIRONMENT32) && defined(__PIC__)
         /* We have to be careful to not destroy ebx if using PIC on 32bit builds */
-        "pushl %%ebx;\n\t"
+        "pushl %%ebx\n\t"
 #endif
         "mov $1, %%eax\n\t"
         "shl $21, %%eax\n\t"
@@ -428,7 +428,7 @@ check_for_cpuid()
 
         "cpuid_finished:"
 #if defined(ENVIRONMENT32) && defined(__PIC__)
-        "popl %%ebx;\n\t"
+        "popl %%ebx\n\t"
 #endif
         : "=a"(result)
         :
@@ -455,7 +455,7 @@ CheckSSE(void)
     asm volatile(
 #if defined(ENVIRONMENT32) && defined(__PIC__)
         /* We have to be careful to not destroy ebx if using PIC on 32bit builds */
-        "pushl %%ebx;\n\t"
+        "pushl %%ebx\n\t"
 #endif
         "mov $1, %%eax\n\t" 
         "cpuid\n\t" 
@@ -475,7 +475,7 @@ CheckSSE(void)
 
         "avx_end:\n\t"
 #if defined(ENVIRONMENT32) && defined(__PIC__)
-        "popl %%ebx;\n\t"
+        "popl %%ebx\n\t"
 #endif
         : "=a"(result) /* Result returned in result variable */
         :
@@ -517,25 +517,25 @@ CheckSSE(void)
         "test %%eax, %%edx\n\t"
         "jnz sse_success\n\t"
         /* Not supported */
-        "mov $0, %%ebx\n\t"
+        "mov $0, %%eax\n\t"
         "jmp sse_end\n\t"
 
         "sse_success:"
         /* Supported */
-        "mov $1, %%ebx\n\t"
+        "mov $1, %%eax\n\t"
 
         "sse_end:\n\t"
 #if defined(ENVIRONMENT32) && defined(__PIC__)
-        "popl %%ebx;\n\t"
+        "pop %%ebx\n\t"
 #endif
 
-        : "=b"(result)
+        : "=a"(result)
         :
-        :
+        : "%ecx", 
 #if !defined(ENVIRONMENT32) || !defined(__PIC__)
-          "%eax", 
+          "%ebx", 
 #endif
-          "%ecx", "%edx");
+	  "%edx");
 #endif /* APPLE/BSD */
 
 #endif /* USE_AVX */
