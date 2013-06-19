@@ -17,7 +17,8 @@
     remain compatible with older build prcoessing.
 
     Supports cputest functionality on GCC builds with either
-    64-bit or 32-Bit OSes on Intel processors. 
+    64-bit or 32-Bit OSes on Intel processors. Code will work
+    with builds that use -fpic option.
 
 2013-06-18  Michael Petch  <mpetch@gnubg.org>
 
