@@ -371,7 +371,7 @@ if test "x$ssecpu" = "xno"; then
 	cputest="no"
 elif test "x$cputest" = "xauto"; then
 	case "$host" in
-		x86* | i586-* | i686-* )
+		x86* | i586-* | i686-* | ia64* | amd64-* | i386-apple-darwin*)
 			if test "x$GCC" = "xyes"; then
 				cputest="yes"
 			else
