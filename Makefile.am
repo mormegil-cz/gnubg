@@ -96,6 +96,8 @@ gnubg_SOURCES = \
 		openurl.h \
 		osr.c \
 		osr.h \
+		output.c \
+		output.h \
 		play.c \
 		positionid.c \
 		positionid.h \

@@ -22,6 +22,7 @@
 #ifndef BACKGAMMON_H
 #define BACKGAMMON_H
 
+#include "output.h"
 #include "analysis.h"
 #include "eval.h"
 #include "rollout.h"
@@ -392,6 +393,11 @@ extern command acSetTruncation[];
 extern command acTop[];
 extern command cFilename;
 extern command cOnOff;
+
+extern int fInteractive;
+extern int cOutputDisabled;
+extern int cOutputPostponed;
+extern int foutput_on;
 
 #ifdef _LIBINTL_H
 #warning "libintl.h already included expect warnings under mingw"

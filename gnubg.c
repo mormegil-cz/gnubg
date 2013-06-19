@@ -162,14 +162,14 @@ int fReadingCommand;
 static int fNoRC = FALSE;
 static char *autosave = NULL;
 static int loading_rc = FALSE;
-static int foutput_on = TRUE;
+
 const char *intro_string =
     N_("This program comes with ABSOLUTELY NO WARRANTY; for details type `show warranty'.\n"
        "This is free software, and you are welcome to redistribute it under certain conditions; type `show copying' for details.\n");
 char *szLang = NULL;
 
 const char szDefaultPrompt[] = "(\\p) ", *szPrompt = szDefaultPrompt;
-static int fInteractive, cOutputDisabled, cOutputPostponed;
+int fInteractive;
 
 matchstate ms = {
     {{0}, {0}},                 /* anBoard */
@@ -3872,197 +3872,11 @@ strcpyn(char *szDest, const char *szSrc, int cch)
     return szDest;
 }
 
-/* Write a string to stdout/status bar/popup window */
-extern void
-output(const char *sz)
-{
-
-    if (cOutputDisabled || !foutput_on)
-        return;
-
-#if USE_GTK
-    if (fX) {
-        GTKOutput(sz);
-        return;
-    }
-#endif
-    fprintf(stdout, "%s", sz);
-    if (!isatty(STDOUT_FILENO))
-        fflush(stdout);
-
-}
-
-/* Write a string to stdout/status bar/popup window, and append \n */
-extern void
-outputl(const char *sz)
-{
-
-
-    if (cOutputDisabled || !foutput_on)
-        return;
-
-#if USE_GTK
-    if (fX) {
-        char *szOut = g_strdup_printf("%s\n", sz);
-        GTKOutput(szOut);
-        g_free(szOut);
-        return;
-    }
-#endif
-    g_print("%s\n", sz);
-    if (!isatty(STDOUT_FILENO))
-        fflush(stdout);
-}
-
-/* Write a character to stdout/status bar/popup window */
-extern void
-outputc(const char ch)
-{
-
-    char sz[2];
-    sz[0] = ch;
-    sz[1] = '\0';
-
-    output(sz);
-}
-
-/* Write a string to stdout/status bar/popup window, printf style */
-extern void
-outputf(const char *sz, ...)
-{
-
-    va_list val;
-
-    va_start(val, sz);
-    outputv(sz, val);
-    va_end(val);
-}
-
-/* Write a string to stdout/status bar/popup window, vprintf style */
-extern void
-outputv(const char *sz, va_list val)
-{
-
-    char *szFormatted;
-    if (cOutputDisabled || !foutput_on)
-        return;
-    szFormatted = g_strdup_vprintf(sz, val);
-    output(szFormatted);
-    g_free(szFormatted);
-}
-
-/* Write an error message, perror() style */
-extern void
-outputerr(const char *sz)
-{
-
-    /* FIXME we probably shouldn't convert the charset of strerror() - yuck! */
-
-    outputerrf("%s: %s", sz, strerror(errno));
-}
-
-/* Write an error message, fprintf() style */
-extern void
-outputerrf(const char *sz, ...)
-{
-
-    va_list val;
-
-    va_start(val, sz);
-    outputerrv(sz, val);
-    va_end(val);
-}
-
-/* Write an error message, vfprintf() style */
-extern void
-outputerrv(const char *sz, va_list val)
-{
-
-    char *szFormatted;
-    szFormatted = g_strdup_vprintf(sz, val);
-
-#if USE_GTK
-    if (fX)
-        GTKOutputErr(szFormatted);
-#endif
-    fprintf(stderr, "%s", szFormatted);
-    if (!isatty(STDOUT_FILENO))
-        fflush(stdout);
-    putc('\n', stderr);
-    g_free(szFormatted);
-}
-
-/* Signifies that all output for the current command is complete */
-extern void
-outputx(void)
-{
-
-    if (cOutputDisabled || cOutputPostponed || !foutput_on)
-        return;
-
-#if USE_GTK
-    if (fX)
-        GTKOutputX();
-#endif
-}
-
-/* Signifies that subsequent output is for a new command */
-extern void
-outputnew(void)
-{
-
-    if (cOutputDisabled || !foutput_on)
-        return;
-
-#if USE_GTK
-    if (fX)
-        GTKOutputNew();
-#endif
-}
-
-/* Disable output */
-extern void
-outputoff(void)
-{
-
-    cOutputDisabled++;
-}
-
-/* Enable output */
-extern void
-outputon(void)
-{
-
-    g_assert(cOutputDisabled);
-
-    cOutputDisabled--;
-}
-
 extern void
 CommandSetOutputOutput(char *sz)
 {
     SetToggle("output", &foutput_on, sz, _("output will be shown"), _("output will not be shown"));
     return;
-}
-
-/* Temporarily disable outputx() calls */
-extern void
-outputpostpone(void)
-{
-
-    cOutputPostponed++;
-}
-
-/* Re-enable outputx() calls */
-extern void
-outputresume(void)
-{
-
-    g_assert(cOutputPostponed);
-
-    if (!--cOutputPostponed) {
-        outputx();
-    }
 }
 
 static GTimeVal tvProgress;
@@ -4835,6 +4649,8 @@ main(int argc, char *argv[])
 
     putenv("LIBOVERLAY_SCROLLBAR=0");
 #endif
+
+    output_initialize();
 
 #if USE_MULTITHREAD
     MT_InitThreads();
