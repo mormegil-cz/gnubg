@@ -381,7 +381,7 @@ check_for_cpuid()
     asm volatile(
 #if defined(ENVIRONMENT32) && defined(__PIC__)
         /* We have to be careful to not destroy ebx if using PIC on 32bit builds */
-        asm volatile ("pushl %%ebx;\n\t");
+        "pushl %%ebx;\n\t"
 #endif
         "mov $1, %%eax\n\t"
         "shl $21, %%eax\n\t"
