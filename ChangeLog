@@ -1,5 +1,11 @@
 2013-06-19  Michael Petch  <mpetch@gnubg.org>
 
+    * +output.c +output.h, gnubg.c, backgammon.h, lib/Makefile.am
+    lib/neuralnet.c: Moved the output functions from gnubg.c to
+    their own files.
+
+2013-06-19  Michael Petch  <mpetch@gnubg.org>
+
 	* gnubg.c, eval.c, lib/neuralnet.c, lib/neuralnet.h,
 	configure.ac: Add support for plm's new AVX instruction
 	additions. Separate the cputest from the --enable-sse
@@ -7,9 +13,8 @@
 	that takes a parameter of "yes", "no", "auto". Auto attempts
 	to choose a sane choice between building the cputest or not
 	based on the CPU type (Intel processors) and whether GCC is
-	being used to compile the code. The default is "no" (disable).
-	The default is different than before where it was "auto".
-	Revisit this default if it is believed it should be "auto".	
+	being used to compile the code. The default is "auto" to
+    remain compatible with older build prcoessing.
 
 2013-06-18  Michael Petch  <mpetch@gnubg.org>
 
