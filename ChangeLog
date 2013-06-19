@@ -16,6 +16,9 @@
 	being used to compile the code. The default is "auto" to
     remain compatible with older build prcoessing.
 
+    Supports cputest functionality on GCC builds with either
+    64-bit or 32-Bit OSes on Intel processors. 
+
 2013-06-18  Michael Petch  <mpetch@gnubg.org>
 
 	* gnubg.c: When using the -r flag to start GNUBG (start without 
