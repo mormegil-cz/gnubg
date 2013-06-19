@@ -366,7 +366,7 @@ AC_MSG_RESULT([$host (sse=$ssecpu, SSE_CFLAGS="$SSE_CFLAGS")])
 AC_ARG_VAR(SSE_CFLAGS, [CFLAGS needed for compiling in sse cpu support])
 
 AC_MSG_CHECKING([for vectorized CPU test])
-AC_ARG_ENABLE( cputest, [  --enable-cputest=TYPE  enable vectorized CPU test (TYPE=yes,no,auto) (Default no) ], cputest=$enableval, cputest="no")
+AC_ARG_ENABLE( cputest, [  --enable-cputest=TYPE  enable vectorized CPU test (TYPE=yes,no,auto) (Default no) ], cputest=$enableval, cputest="auto")
 if test "x$ssecpu" = "xno"; then
 	cputest="no"
 elif test "x$cputest" = "xauto"; then
