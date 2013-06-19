@@ -20,6 +20,7 @@
  */
 
 #include "config.h"
+#include "backgammon.h"
 #include "common.h"
 #include <glib.h>
 #include <errno.h>
@@ -407,18 +408,35 @@ check_for_cpuid()
 #endif
         "xor %%ecx, %%eax\n\t"
         "test %%edx, %%eax\n\t"
-        "jnz success\n\t"
+        "jnz cpuid_success\n\t"
         /* Failed (non-pentium compatible machine) */
         "mov $-1, %%eax\n\t"
-        "jmp finished\n\t"
+        "jmp cpuid_finished\n\t"
 
-        "success:\n\t"
+        "cpuid_success:\n\t"
+        "cpuid\n\t"
+        "cmp $1, %%eax\n\t" 
+        /* If 0 returned processor doesn't hav feature test */
+        "jge feature_success\n\t"
+
+        /* Unlucky - somehow cpuid 1 isn't supported */
+        "mov $-2, %%eax\n\t" 
+        "jmp cpuid_finished\n\t"
+
+        "feature_success:\n\t"
         "xor %%eax, %%eax\n\t"
 
-        "finished:"
+        "cpuid_finished:"
+#if defined(ENVIRONMENT32) && defined(__PIC__)
+        "popl %%ebx;\n\t"
+#endif
         : "=a"(result)
         :
-        : "%ecx", "%edx");
+        : "%ecx",
+#if !defined(ENVIRONMENT32) || !defined(__PIC__)
+          "%ebx", 
+#endif 
+          "%edx");
     return result;
 }
 #endif
@@ -427,24 +445,20 @@ static int
 CheckSSE(void)
 {
     int result;
+    int cpuidchk;
+
+    if ((cpuidchk = check_for_cpuid()) < 0)
+        return cpuidchk;
 
 #if USE_AVX
-    if (check_for_cpuid() == -1)
-        return -1;
 
     asm volatile(
 #if defined(ENVIRONMENT32) && defined(__PIC__)
         /* We have to be careful to not destroy ebx if using PIC on 32bit builds */
         "pushl %%ebx;\n\t"
 #endif
-        "xor %%eax, %%eax\n\t"
-        "cpuid\n\t"
-        "cmp $1, %%eax\n\t" /* If 0 returned processor doesn't have proper cpuid support */
-        "jge check_avx\n\t"
-        "mov $-2, %%eax\n\t" 
-        "jp avx_end\n\t"
-
-        "check_avx:"
+        "mov $1, %%eax\n\t" 
+        "cpuid\n\t" 
         "and $0x018000000, %%ecx\n\t" /* Check bit 27 (OS uses XSAVE/XRSTOR)*/
         "cmp $0x018000000, %%ecx\n\t" /* and bit 28 (AVX supported by CPU) */
         "jne avx_unsupported\n\t"
@@ -486,24 +500,13 @@ CheckSSE(void)
 
 #else
 
-    if (check_for_cpuid() == -1)
-        return -1;
-
     asm volatile (
 #if defined(ENVIRONMENT32) && defined(__PIC__)
         /* We have to be careful to not destroy ebx if using PIC on I386 */
         "pushl %%ebx\n\t"
 #endif
-        /* Check feature test is supported */
-        "mov $0, %%eax\n\t" 
-        "cpuid\n\t" 
-        "cmp $1, %%eax\n\t" 
-        "jge 2f\n\t"
-        /* Unlucky - somehow cpuid 1 isn't supported */
-        "mov $-2, %%ebx\n\t" 
-        "jp 4f\n\t" "2:"
         /* Check if sse is supported (bit 25/26 in edx from cpuid 1) */
-        "mov $1, %%eax\n\t" 
+        "mov $1, %%eax\n\t"
         "cpuid\n\t" 
         "mov $1, %%eax\n\t"
 #if USE_SSE2
@@ -511,21 +514,24 @@ CheckSSE(void)
 #else
         "shl $25, %%eax\n\t"
 #endif
-        "test %%eax, %%edx\n\t" 
-        "jnz 3f\n\t"
+        "test %%eax, %%edx\n\t"
+        "jnz sse_success\n\t"
         /* Not supported */
-        "mov $0, %%ebx\n\t" 
-        "jp 4f\n\t" "3:"
+        "mov $0, %%ebx\n\t"
+        "jmp sse_end\n\t"
+
+        "sse_success:"
         /* Supported */
-        "mov $1, %%ebx\n\t" 
-        "4:\n\t"
+        "mov $1, %%ebx\n\t"
+
+        "sse_end:\n\t"
 #if defined(ENVIRONMENT32) && defined(__PIC__)
         "popl %%ebx;\n\t"
 #endif
 
         : "=b"(result)
-        : 
-        : 
+        :
+        :
 #if !defined(ENVIRONMENT32) || !defined(__PIC__)
           "%eax", 
 #endif
@@ -536,19 +542,20 @@ CheckSSE(void)
 
     switch (result) {
     case -1:
-        printf("Can't check for SSE - non pentium cpu\n");
+        outputf(_("Can't check for vectorized support - non pentium cpu\n"));
         break;
     case -2:
-        printf("No sse cpuid check available\n");
+        outputf(_("No cpuid check available\n"));
         break;
     case 0:
-        /* No SSE support */
+        /* No Vectorize support */
         break;
     case 1:
-        /* SSE support */
+        /* Vectorize support */
         return 1;
     default:
-        printf("Unknown return testing for SSE\n");
+        ;
+        outputf(_("Unknown error while doing vectorized support test\n"));
     }
 
     return 0;
@@ -567,5 +574,4 @@ SSE_Supported(void)
 
 #endif
 #endif
-#include <stdio.h>
 
