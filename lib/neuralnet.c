@@ -372,8 +372,9 @@ SSE_Supported(void)
 
 #if defined(__APPLE__) || defined(__FreeBSD__)
 #include <sys/sysctl.h>
-#else
-int
+#endif
+
+static int
 check_for_cpuid()
 {
     int result;
@@ -439,7 +440,6 @@ check_for_cpuid()
           "%edx");
     return result;
 }
-#endif
 
 static int
 CheckSSE(void)
