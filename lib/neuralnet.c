@@ -356,6 +356,7 @@ NeuralNetSaveBinary(const neuralnet * pnn, FILE * pf)
     return 0;
 }
 
+
 #if USE_SSE_VECTORIZE
 
 #if defined(DISABLE_SSE_TEST)
@@ -370,12 +371,106 @@ SSE_Supported(void)
 
 #if defined(__APPLE__) || defined(__FreeBSD__)
 #include <sys/sysctl.h>
+#else
+int check_for_cpuid()
+{
+    int result;
+
+    asm volatile(
+#if defined(ENVIRONMENT32) && defined(__PIC__)
+           /* We have to be careful to not destroy ebx if using PIC on I386 */
+        asm volatile ("pushl %%ebx;\n\t");
+#endif
+        "mov $1, %%eax\n\t"
+        "shl $21, %%eax\n\t"
+        "mov %%eax, %%edx\n\t"
+#if defined(ENVIRONMENT64)
+        "pushf\n\t"
+        "pop %%rax\n\t"
+#else
+        "pushfl\n\t"
+        "popl %%eax\n\t"
+#endif
+        "mov %%eax, %%ecx\n\t"
+        "xor %%edx, %%eax\n\t"
+#if defined(ENVIRONMENT64)
+        "push %%rax\n\t"
+        "popf\n\t"
+        "pushf\n\t"
+        "pop %%rax\n\t"
+#else
+        "pushl %%eax\n\t"
+        "popfl\n\t"
+        "pushfl\n\t"
+        "popl %%eax\n\t"
+#endif
+        "xor %%ecx, %%eax\n\t"
+        "test %%edx, %%eax\n\t"
+        "jnz success\n\t"
+        /* Failed (non-pentium compatible machine) */
+        "mov $-1, %%eax\n\t"
+        "jmp finished\n\t"
+
+        "success:\n\t"
+        "xor %%eax, %%eax\n\t"
+
+        "finished:"
+        : "=a"(result)
+        :
+        : "%ecx", "%edx");
+    return result;
+}
 #endif
 
 static int
 CheckSSE(void)
 {
     int result;
+
+#if USE_AVX
+    if (check_for_cpuid() == -1)
+        return -1;
+
+    asm volatile(
+#if defined(ENVIRONMENT32) && defined(__PIC__)
+           /* We have to be careful to not destroy ebx if using PIC on I386 */
+        "pushl %%ebx;\n\t"
+#endif
+        "xor %%eax, %%eax\n\t"
+        "cpuid\n\t"
+        "cmp $1, %%eax\n\t" /* If 0 returned processor doesn't have proper cpuid support */
+        "jge check_avx\n\t"
+        "mov $-2, %%eax\n\t" 
+        "jp avx_end\n\t"
+
+        "check_avx:"
+        "and $0x018000000, %%ecx\n\t" /* Check bit 27 (OS uses XSAVE/XRSTOR)*/
+        "cmp $0x018000000, %%ecx\n\t" /* and bit 28 (AVX supported by CPU) */
+        "jne avx_unsupported\n\t"
+        "xor %%ecx, %%ecx\n\t" /* XFEATURE_ENABLED_MASK/XCR0 register number = 0 */
+        "xgetbv\n\t" /* XFEATURE_ENABLED_MASK register is in edx:eax" */
+        "and $0b110, %%eax\n\t"
+        "cmp $0b110, %%eax\n\t" /* check the AVX registers restore at context switch */
+        "jne avx_unsupported\n\t"
+        "mov $1, %%eax\n\t"
+        "jmp avx_end\n\t"
+
+        "avx_unsupported:\n\t"
+        "xor %%eax, %%eax\n\t"
+
+        "avx_end:\n\t"
+#if defined(ENVIRONMENT32) && defined(__PIC__)
+        "popl %%ebx;\n\t"
+#endif
+        : "=a"(result) /* Result returned in is_avx_supported */
+        :
+        : "%ecx", 
+#if !defined(ENVIRONMENT32) || !defined(__PIC__)
+          "%ebx", 
+#endif
+          "%edx"); /* These are all destroyed by cpuid */
+
+#else
 #if defined(__APPLE__) || defined(__FreeBSD__)
     size_t length = sizeof(result);
 #if defined(__APPLE__)
@@ -390,36 +485,53 @@ CheckSSE(void)
 
 #else
 
-    asm(
-           /* Check if cpuid is supported (can bit 21 of flags be changed) */
-           "mov $1, %%eax\n\t"
-           "shl $21, %%eax\n\t"
-           "mov %%eax, %%edx\n\t"
-           "pushfl\n\t"
-           "popl %%eax\n\t"
-           "mov %%eax, %%ecx\n\t"
-           "xor %%edx, %%eax\n\t"
-           "pushl %%eax\n\t"
-           "popfl\n\t" "pushfl\n\t" "popl %%eax\n\t" "xor %%ecx, %%eax\n\t" "test %%edx, %%eax\n\t" "jnz 1f\n\t"
-           /* Failed (non-pentium compatible machine) */
-           "mov $-1, %%ebx\n\t" "jp 4f\n\t" "1:"
-           /* Check feature test is supported */
-           "mov $0, %%eax\n\t" "cpuid\n\t" "cmp $1, %%eax\n\t" "jge 2f\n\t"
-           /* Unlucky - somehow cpuid 1 isn't supported */
-           "mov $-2, %%ebx\n\t" "jp 4f\n\t" "2:"
-           /* Check if sse is supported (bit 25/26 in edx from cpuid 1) */
-           "mov $1, %%eax\n\t" "cpuid\n\t" "mov $1, %%eax\n\t"
+    if (check_for_cpuid() == -1)
+        return -1;
+
+    asm volatile (
+#if defined(ENVIRONMENT32) && defined(__PIC__)
+        /* We have to be careful to not destroy ebx if using PIC on I386 */
+        "pushl %%ebx\n\t"
+#endif
+        /* Check feature test is supported */
+        "mov $0, %%eax\n\t" 
+        "cpuid\n\t" 
+        "cmp $1, %%eax\n\t" 
+        "jge 2f\n\t"
+        /* Unlucky - somehow cpuid 1 isn't supported */
+        "mov $-2, %%ebx\n\t" 
+        "jp 4f\n\t" "2:"
+        /* Check if sse is supported (bit 25/26 in edx from cpuid 1) */
+        "mov $1, %%eax\n\t" 
+        "cpuid\n\t" 
+        "mov $1, %%eax\n\t"
 #if USE_SSE2
-           "shl $26, %%eax\n\t"
+        "shl $26, %%eax\n\t"
 #else
-           "shl $25, %%eax\n\t"
+        "shl $25, %%eax\n\t"
 #endif
-           "test %%eax, %%edx\n\t" "jnz 3f\n\t"
-           /* Not supported */
-           "mov $0, %%ebx\n\t" "jp 4f\n\t" "3:"
-           /* Supported */
-  "mov $1, %%ebx\n\t" "4:": "=b"(result): :"%eax", "%ecx", "%edx");
+        "test %%eax, %%edx\n\t" 
+        "jnz 3f\n\t"
+        /* Not supported */
+        "mov $0, %%ebx\n\t" 
+        "jp 4f\n\t" "3:"
+        /* Supported */
+        "mov $1, %%ebx\n\t" 
+        "4:\n\t"
+#if defined(ENVIRONMENT32) && defined(__PIC__)
+        "popl %%ebx;\n\t"
 #endif
+
+        : "=b"(result)
+        : 
+        : 
+#if !defined(ENVIRONMENT32) || !defined(__PIC__)
+          "%eax", 
+#endif
+          "%ecx", "%edx");
+#endif /* APPLE/BSD */
+
+#endif /* USE_AVX */
 
     switch (result) {
     case -1:
@@ -454,3 +566,5 @@ SSE_Supported(void)
 
 #endif
 #endif
+#include <stdio.h>
+

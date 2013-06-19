@@ -577,8 +577,13 @@ EvalInitialise(char *szWeights, char *szWeightsBinary, int fNoBearoff, void (*pf
 
 #if USE_SSE_VECTORIZE
         if (!SSE_Supported())
+#if USE_AVX
+            g_critical(_
+                       ("This version of GNU Backgammon is compiled with AVX support but this machine does not support AVX"));
+#else
             g_critical(_
                        ("This version of GNU Backgammon is compiled with SSE support but this machine does not support SSE"));
+#endif
 #endif
 
         cCache = 0x1 << CACHE_SIZE_DEFAULT;

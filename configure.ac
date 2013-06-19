@@ -324,18 +324,14 @@ dnl SSE
 dnl
 
 AC_MSG_CHECKING([for sse cpu])
-AC_ARG_ENABLE( sse, [  --enable-sse=TYPE  enable SSE for newer cpus(TYPE=yes,avx,sse2,no,cputest)], ssecpu=$enableval, ssecpu="undef")
+AC_ARG_ENABLE( sse, [  --enable-sse=TYPE  enable SSE for newer cpus(TYPE=yes,avx,sse2,no)], ssecpu=$enableval, ssecpu="undef")
 if test "x$ssecpu" = "xundef"; then
 	case "$host" in
 		i386-apple-darwin* )
 		ssecpu="sse2"
 		;;
 		x86-* | i586-* | i686-* )
-        	if test x"$GCC" = xyes; then
-                	ssecpu="cputest"
-		else
-                	ssecpu="yes"
-		fi
+		ssecpu="yes"
 		;;
 		ia64-* | x86_64-* | amd64-* )
 		ssecpu="sse2"
@@ -346,17 +342,14 @@ if test "x$ssecpu" = "xundef"; then
 	esac
 fi
 if test "x$ssecpu" != "xno"; then
-        AC_DEFINE(USE_SSE_VECTORIZE,1,Define if you want to compile with SSE support)
-        if test "x$ssecpu" != "xcputest"; then
-                AC_DEFINE(DISABLE_SSE_TEST, 1, Define if you want to disable the SSE cpu test)
-        fi
+	AC_DEFINE(USE_SSE_VECTORIZE,1,Define if you want to compile with SSE support)
 	if test "x$ssecpu" = "xavx"; then
 		AC_DEFINE(USE_AVX, 1, Define if you want to compile with AVX support)
 	fi
-        if test "x$ssecpu" = "xsse2"; then
-                AC_DEFINE(USE_SSE2, 1, Define if you want to compile with SSE2 support)
-        fi
-        if test x"$GCC" = xyes; then
+	if test "x$ssecpu" = "xsse2"; then
+		AC_DEFINE(USE_SSE2, 1, Define if you want to compile with SSE2 support)
+	fi
+	if test x"$GCC" = xyes; then
 		if test "x$SSE_CFLAGS" = x; then
 			if test "x$ssecpu" = "xavx"; then
 				SSE_CFLAGS="-mavx"
@@ -366,12 +359,35 @@ if test "x$ssecpu" != "xno"; then
 				SSE_CFLAGS="-msse"
 			fi
 		fi
-        fi
+	fi
 fi
 
 AC_MSG_RESULT([$host (sse=$ssecpu, SSE_CFLAGS="$SSE_CFLAGS")])
-
 AC_ARG_VAR(SSE_CFLAGS, [CFLAGS needed for compiling in sse cpu support])
+
+AC_MSG_CHECKING([for vectorized CPU test])
+AC_ARG_ENABLE( cputest, [  --enable-cputest=TYPE  enable vectorized CPU test (TYPE=yes,no,auto) (Default no) ], cputest=$enableval, cputest="no")
+if test "x$ssecpu" = "xno"; then
+	cputest="no"
+elif test "x$cputest" = "xauto"; then
+	case "$host" in
+		x86* | i586-* | i686-* )
+			if test "x$GCC" = "xyes"; then
+				cputest="yes"
+			else
+				cputest="no"
+			fi
+		;;
+		*)
+		cputest="no"
+		;;
+	esac
+fi
+AS_IF([test "x$cputest" = "xno"], [
+        AC_DEFINE(DISABLE_SSE_TEST, 1, Define if you want to disable the vectorized CPU test)
+])
+AS_IF( [test "x$cputest" != "xno"], [AC_MSG_RESULT($cputest)], [AC_MSG_RESULT(no)] )
+
 
 dnl
 dnl Threads
