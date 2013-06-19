@@ -3166,7 +3166,7 @@ GetEvalCacheSize(void)
 extern void
 SetEvalCacheSize(unsigned int size)
 {
-    EvalCacheResize((size == 0) ? 0 : (unsigned int) pow(2, size + 16));
+    EvalCacheResize((size == 0) ? 0 : 1U<<(size + 16));
 }
 
 extern unsigned int
