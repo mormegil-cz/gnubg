@@ -70,7 +70,6 @@ AC_DEFUN([AX_EXT],
         xgetbv_eax=`echo $ax_cv_gcc_x86_avx_xgetbv_0x00000000 | cut -d ":" -f 1`        
       fi
 
-
       AC_CACHE_CHECK([whether mmx is supported], [ax_cv_have_mmx_ext],
       [
         ax_cv_have_mmx_ext=no
@@ -138,7 +137,7 @@ AC_DEFUN([AX_EXT],
             fi
           fi
           if test x"$ax_cv_have_avx_ext" = x"no"; then
-            AC_MSG_WARN([Your processor support AVX, but Your OS doesn't])
+            AC_MSG_WARN([Your processor supports AVX, but your OS doesn't])
           fi
         fi          
       ])

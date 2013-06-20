@@ -14,7 +14,7 @@
 #   as hexadecimal strings as "eax:edx" in the cache variable
 #   ax_cv_gcc_x86_avx_xgetbv.
 #
-#   If the cpuid instruction fails (because you are running a
+#   If the xgetbv instruction fails (because you are running a
 #   cross-compiler, or because you are not using gcc, or because you are on
 #   a processor that doesn't have this instruction), 
 #   ax_cv_gcc_x86_avx_xgetbv_OP is set to the string "unknown".
