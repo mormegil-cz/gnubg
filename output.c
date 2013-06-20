@@ -52,7 +52,7 @@ int cOutputPostponed;
 int foutput_on;
 
 extern void
-output_initialize()
+output_initialize(void)
 {
     cOutputDisabled = FALSE;
     cOutputPostponed = FALSE;
