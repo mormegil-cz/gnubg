@@ -613,6 +613,8 @@ char const *aszBuildInfo[] = {
 #if USE_SSE_VECTORIZE
 #if USE_SSE2
     N_("SSE/SSE2 supported."),
+#elif USE_AVX
+    N_("AVX supported."),
 #else
     N_("SSE supported."),
 #endif
