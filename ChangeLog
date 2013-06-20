@@ -10,7 +10,9 @@
     parameters is the same as --enable-sse=yes . The behavior of
     --enable-sse=yes has been changed to find the latest supported
     SIMD instruction set used by the build machines CPU. Priority
-    is given in this order (highest first): AVX, SSE2, SSE, None.
+    is given in this order (highest first): SSE2, SSE, AVX, None.
+    Since AVX is still experimental it is not given priority over
+    SSE2 during build time autodetection.
 
 2013-06-19  Michael Petch  <mpetch@gnubg.org>
 
