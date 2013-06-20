@@ -1,3 +1,17 @@
+2013-06-20  Michael Petch  <mpetch@gnubg.org>
+
+    * +m4/ax_check_compile_flag.m4, +m4/ax_ext.m4 
+    +m4/ax_gcc_x86_avx_xgetbv.m4 +m4/ax_gcc_x86_cpuid.m4,
+    configure.ac: Added better autoconf support to determine 
+    whether the processor supports certain SIMD instruction sets
+    like SSE,SSE2,AVX etc.
+
+    --enable-sse behave a bit different. --enable-sse with no
+    parameters is the same as --enable-sse=yes . The behavior of
+    --enable-sse=yes has been changed to find the latest supported
+    SIMD instruction set used by the build machines CPU. Priority
+    is given in this order (highest first): AVX, SSE2, SSE, None.
+
 2013-06-19  Michael Petch  <mpetch@gnubg.org>
 
     * +output.c +output.h, gnubg.c, backgammon.h, lib/Makefile.am

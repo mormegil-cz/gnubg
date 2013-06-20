@@ -323,23 +323,19 @@ dnl
 dnl SSE
 dnl
 
-AC_MSG_CHECKING([for sse cpu])
+AX_EXT()
+AC_MSG_CHECKING([for simd cpu])
 AC_ARG_ENABLE( sse, [  --enable-sse=TYPE  enable SSE for newer cpus(TYPE=yes,avx,sse2,no)], ssecpu=$enableval, ssecpu="undef")
-if test "x$ssecpu" = "xundef"; then
-	case "$host" in
-		i386-apple-darwin* )
-		ssecpu="sse2"
-		;;
-		x86-* | i586-* | i686-* )
-		ssecpu="yes"
-		;;
-		ia64-* | x86_64-* | amd64-* )
-		ssecpu="sse2"
-		;;
-		*)
-		ssecpu="no"
-		;;
-	esac
+if test "x$ssecpu" = "xundef" || test "x$ssecpu" = "xyes"; then
+    if test "x$ax_cv_have_avx_ext" = "xyes"; then
+        ssecpu="avx"
+    elif test "x$ax_cv_have_sse2_ext" = "xyes"; then 
+        ssecpu="sse2"
+    elif test "x$ax_cv_have_sse_ext" = "xyes"; then 
+        ssecpu="sse"
+    else
+        ssecpu="no"
+    fi
 fi
 if test "x$ssecpu" != "xno"; then
 	AC_DEFINE(USE_SSE_VECTORIZE,1,Define if you want to compile with SSE support)
@@ -365,8 +361,8 @@ fi
 AC_MSG_RESULT([$host (sse=$ssecpu, SSE_CFLAGS="$SSE_CFLAGS")])
 AC_ARG_VAR(SSE_CFLAGS, [CFLAGS needed for compiling in sse cpu support])
 
-AC_MSG_CHECKING([for vectorized CPU test])
-AC_ARG_ENABLE( cputest, [  --enable-cputest=TYPE  enable vectorized CPU test (TYPE=yes,no,auto) (Default no) ], cputest=$enableval, cputest="auto")
+AC_MSG_CHECKING([for SIMD supported CPU test])
+AC_ARG_ENABLE( cputest, [  --enable-cputest=TYPE  enable SIMD supported CPU test (TYPE=yes,no,auto) (Default no) ], cputest=$enableval, cputest="auto")
 if test "x$ssecpu" = "xno"; then
 	cputest="no"
 elif test "x$cputest" = "xauto"; then
