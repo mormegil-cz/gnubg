@@ -55,7 +55,7 @@ AC_DEFUN([AX_EXT],
     ;;
 
 
-    i[[3456]]86*|x86_64*)
+    i[[3456]]86*|x86_64*|amd64*)
 
       AC_REQUIRE([AX_GCC_X86_CPUID])
       AC_REQUIRE([AX_GCC_X86_AVX_XGETBV])
