@@ -7,18 +7,20 @@ that generates it.
 If you have troubles building any of these files you may copy the file
 causing problems from this directory to its intended location.
 
-TARGET                     SOURCE
+TARGET                              SOURCE
 
-../copying.c               ../copying.awk
+../copying.c                        ../copying.awk
 
-../credits.c               ../credits.sh
-../credits.h               ../credits.sh
-../AUTHORS                 ../credits.sh
+../credits.c                        ../credits.sh
+../credits.h                        ../credits.sh
+../AUTHORS                          ../credits.sh
 
-../external_l.c            ../external_l.l
-../external_y.c            ../external_y.y
-../external_y.h            ../external_y.y
+../external_l.c                     ../external_l.l
+../external_y.c                     ../external_y.y
+../external_y.h                     ../external_y.y
 
-../sgf_l.c                 ../sgf_l.l
-../sgf_y.c                 ../sgf_y.y
-../sgf_y.h                 ../sgf_y.y
+../sgf_l.c                          ../sgf_l.l
+../sgf_y.c                          ../sgf_y.y
+../sgf_y.h                          ../sgf_y.y
+
+../pixmaps/gnubg-stock-pixbufs.h    ../pixmaps/Makefile 
