@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: de\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-06-19 12:15-0600\n"
+"POT-Creation-Date: 2013-06-20 20:55-0600\n"
 "PO-Revision-Date: 2006-04-25 16:26+0200\n"
 "Last-Translator: \n"
 "Language-Team:  <de@li.org>\n"
@@ -730,7 +730,7 @@ msgstr ""
 msgid "Rewinding dice file (%s)"
 msgstr "Spule die \"Würfel\"-Datei (%s) zurück\n"
 
-#: drawboard.c:72 drawboard.c:295 gnubg.c:5061 gtkexport.c:651 gtkgame.c:2736
+#: drawboard.c:72 drawboard.c:295 gnubg.c:5063 gtkexport.c:651 gtkgame.c:2736
 #: gtkgame.c:3641 gtkgame.c:6108
 msgid "GNU Backgammon"
 msgstr "GNU Backgammon"
@@ -1213,7 +1213,7 @@ msgstr " und bis zu %d zusätzlicher Züge innerhalb der Gewinnerwartung %0.3g\n"
 msgid "Play"
 msgstr "Ply"
 
-#: format.c:296 gnubg.c:1507 gnubg.c:1515 gnubg.c:2754 gnubg.c:2762
+#: format.c:296 gnubg.c:1509 gnubg.c:1517 gnubg.c:2756 gnubg.c:2764
 #: gtkgame.c:3205 gtkgame.c:3219 gtkoptions.c:418 gtkprefs.c:2722
 #: gtkprefs.c:2732 gtktheory.c:670 progress.c:269 progress.c:350
 msgid "Cube"
@@ -1449,7 +1449,7 @@ msgstr "L(bg)"
 msgid "Equity"
 msgstr "Gewinnerwartung"
 
-#: format.c:1111 gnubg.c:1831 gtkchequer.c:467 gtkcube.c:141 gtkcube.c:153
+#: format.c:1111 gnubg.c:1833 gtkchequer.c:467 gtkcube.c:141 gtkcube.c:153
 #: gtkcube.c:400 gtkcube.c:412 gtkcube.c:827 gtkmovelist.c:214 html.c:2175
 msgid "MWC"
 msgstr "MWC"
@@ -1915,215 +1915,220 @@ msgstr "SSE wird unterstützt und ist verfügbar."
 
 #: gnubg.c:617
 #, fuzzy
+msgid "AVX supported."
+msgstr "'Python' wird unterstützt."
+
+#: gnubg.c:619
+#, fuzzy
 msgid "SSE supported."
 msgstr "'Python' wird unterstützt."
 
-#: gnubg.c:958
+#: gnubg.c:960
 msgid "Current position"
 msgstr "Gegenwärtige Position"
 
-#: gnubg.c:978
+#: gnubg.c:980
 #, c-format
 msgid "`simple' must be followed by 26 integers; found only %d\n"
 msgstr "Auf `simple' müssen 26 Integer folgen; fand jedoch nur %d\n"
 
-#: gnubg.c:1023
+#: gnubg.c:1025
 msgid "Illegal position."
 msgstr "Illegale Position."
 
-#: gnubg.c:1119
+#: gnubg.c:1121
 #, fuzzy, c-format
 msgid "You must specify whether to set '%s' on or off.\n"
 msgstr ""
 "Du musst bestimmen, ob %s aktiviert werden soll (Siehe auch `help set %s').\n"
 
-#: gnubg.c:1148
+#: gnubg.c:1150
 #, fuzzy, c-format
 msgid "Illegal keyword `%s'.\n"
 msgstr "Ungültiges Schlüsselwort `%s' -- Versuche `help set %s'.\n"
 
-#: gnubg.c:1205
+#: gnubg.c:1207
 #, fuzzy
 msgid "Interrupted"
 msgstr "Unterbrochen!"
 
-#: gnubg.c:1252
+#: gnubg.c:1254
 msgid ""
 "This installation of GNU Backgammon was compiled without Python support."
 msgstr ""
 "Diese Version von GNU Backgammon wurde ohne 'Python'-Unterstützung erstellt."
 
-#: gnubg.c:1262
+#: gnubg.c:1264
 #, fuzzy
 msgid "Incomplete command."
 msgstr "Kommando nicht vollständig -- Versuche `help'."
 
-#: gnubg.c:1286
+#: gnubg.c:1288
 #, fuzzy, c-format
 msgid "Unknown keyword `%s'.\n"
 msgstr "Unbekanntes Wort: '%s' \n"
 
-#: gnubg.c:1391 gnubg.c:1422 gnubg.c:1495 gnubg.c:2742 play.c:2473
+#: gnubg.c:1393 gnubg.c:1424 gnubg.c:1497 gnubg.c:2744 play.c:2473
 msgid "Rolled"
 msgstr "Wurf"
 
-#: gnubg.c:1453 gnubg.c:5515 gtkgame.c:1428 gtkgame.c:1447 gtkgame.c:1465
+#: gnubg.c:1455 gnubg.c:5517 gtkgame.c:1428 gtkgame.c:1447 gtkgame.c:1465
 msgid "No game in progress."
 msgstr "Keine laufende Partie."
 
-#: gnubg.c:1478 gnubg.c:1480 gnubg.c:2725 gnubg.c:2727 text.c:61 text.c:66
+#: gnubg.c:1480 gnubg.c:1482 gnubg.c:2727 gnubg.c:2729 text.c:61 text.c:66
 #, c-format
 msgid "%d point"
 msgid_plural "%d points"
 msgstr[0] "%d Punkt"
 msgstr[1] "%d Punkt"
 
-#: gnubg.c:1487 gnubg.c:2734 text.c:75
+#: gnubg.c:1489 gnubg.c:2736 text.c:75
 #, c-format
 msgid "Cube offered at %d"
 msgstr "Doppler angeboten auf %d"
 
-#: gnubg.c:1495
+#: gnubg.c:1497
 #, fuzzy, c-format
 msgid "%s %d%d"
 msgstr "%d%d"
 
-#: gnubg.c:1497 gnubg.c:2744 text.c:85
+#: gnubg.c:1499 gnubg.c:2746 text.c:85
 msgid "On roll"
 msgstr "Am Wurf"
 
-#: gnubg.c:1505 gnubg.c:2752 text.c:93
+#: gnubg.c:1507 gnubg.c:2754 text.c:93
 #, c-format
 msgid "%d point match (Cube: %d)"
 msgstr "%d-Punkte-Match (Doppler: %d)"
 
-#: gnubg.c:1520 gnubg.c:2767 gtkgame.c:5608 text.c:108
+#: gnubg.c:1522 gnubg.c:2769 gtkgame.c:5608 text.c:108
 #, c-format
 msgid "%d point match"
 msgstr "%d-Punkte-Match"
 
 #. FIXME it's not necessarily the player on roll that resigned
-#: gnubg.c:1525
+#: gnubg.c:1527
 #, fuzzy
 msgid "resigns"
 msgstr "Designs"
 
-#: gnubg.c:1550
+#: gnubg.c:1552
 #, fuzzy
 msgid "MatchID"
 msgstr "Match-ID:"
 
-#: gnubg.c:1576 gnubg.c:1588
+#: gnubg.c:1578 gnubg.c:1590
 msgid "No game"
 msgstr "Keine Partie"
 
-#: gnubg.c:1598
+#: gnubg.c:1600
 msgid "Game over"
 msgstr "Partie beendet"
 
-#: gnubg.c:1642 gnubg.c:2594 show.c:453 show.c:483 show.c:797 show.c:1108
+#: gnubg.c:1644 gnubg.c:2596 show.c:453 show.c:483 show.c:797 show.c:1108
 #: show.c:1162 show.c:1209 show.c:1256 show.c:1371
 msgid "No position specified and no game in progress."
 msgstr "Keine Position ausgewählt und keine laufende Partie"
 
-#: gnubg.c:1665
+#: gnubg.c:1667
 msgid "Evaluating position..."
 msgstr "Beurteile Position..."
 
-#: gnubg.c:1757
+#: gnubg.c:1759
 #, fuzzy, c-format
 msgid "No help available for topic `%s'"
 msgstr "Keine Hilfe verfügbar für `%s' -- Versuche `help' für eine Liste\n"
 
-#: gnubg.c:1782
+#: gnubg.c:1784
 #, fuzzy
 msgid "Usage"
 msgstr "Benutzer"
 
-#: gnubg.c:1785
+#: gnubg.c:1787
 #, fuzzy
 msgid "subcommand"
 msgstr "<Unterkommando>\n"
 
-#: gnubg.c:1791
+#: gnubg.c:1793
 #, fuzzy
 msgid "Available commands:"
 msgstr "Verfügbare Kommandos:\n"
 
-#: gnubg.c:1791
+#: gnubg.c:1793
 #, fuzzy
 msgid "Available subcommands:"
 msgstr "Verfügbare Unterkommandos:\n"
 
-#: gnubg.c:1831
+#: gnubg.c:1833
 msgid "Eq."
 msgstr "Eq."
 
 #. Opponent has rolled the dice and then resigned. We want to find out if the resignation is OK after
 #. * the roll
-#: gnubg.c:2032 play.c:902 play.c:912
+#: gnubg.c:2034 play.c:902 play.c:912
 msgid "Considering resignation..."
 msgstr "Überlege Aufgabe..."
 
-#: gnubg.c:2049 gnubg.c:2058 gtkgame.c:5442
+#: gnubg.c:2051 gnubg.c:2060 gtkgame.c:5442
 msgid "Equity before resignation"
 msgstr "Gewinnerwartung vor der Aufgabe"
 
-#: gnubg.c:2050 gnubg.c:2059 gtkgame.c:5458
+#: gnubg.c:2052 gnubg.c:2061 gtkgame.c:5458
 msgid "Equity after resignation"
 msgstr "Gewinnerwartung nach der Aufgabe"
 
-#: gnubg.c:2051 gnubg.c:2061
+#: gnubg.c:2053 gnubg.c:2063
 #, fuzzy
 msgid "Correct resign decision"
 msgstr ""
 "Korrekte Aufgabe-Entscheidung  : %s\n"
 "\n"
 
-#: gnubg.c:2051 gnubg.c:2061 gtkgame.c:1180
+#: gnubg.c:2053 gnubg.c:2063 gtkgame.c:1180
 msgid "Accept"
 msgstr "Akzeptiere"
 
-#: gnubg.c:2051 gnubg.c:2061
+#: gnubg.c:2053 gnubg.c:2063
 msgid "Reject"
 msgstr "Lehne ab"
 
-#: gnubg.c:2074 gtkcube.c:667 play.c:1069 play.c:1268
+#: gnubg.c:2076 gtkcube.c:667 play.c:1069 play.c:1268
 msgid "Considering cube action..."
 msgstr "Überlege eine Doppler-Aktion..."
 
-#: gnubg.c:2256 gnubg.c:2302
+#: gnubg.c:2258 gnubg.c:2304
 #, c-format
 msgid "This decision is part of beaver/raccoon sequence and cannot be hinted"
 msgstr ""
 
-#: gnubg.c:2263
+#: gnubg.c:2265
 #, c-format
 msgid "You cannot double."
 msgstr "Du kannst nicht doppeln."
 
-#: gnubg.c:2359 play.c:1369
+#: gnubg.c:2361 play.c:1369
 msgid "Considering move..."
 msgstr "Überlege, welcher Zug..."
 
-#: gnubg.c:2399
+#: gnubg.c:2401
 msgid "There are no legal moves."
 msgstr "Es gibt keine legalen Züge."
 
-#: gnubg.c:2414
+#: gnubg.c:2416
 msgid "You must set up a board first."
 msgstr "Du musst erst eine Stellung aufbauen."
 
-#: gnubg.c:2568
+#: gnubg.c:2570
 msgid "That command is not yet implemented."
 msgstr "Dieses Kommando ist noch nicht implementiert."
 
-#: gnubg.c:2590
+#: gnubg.c:2592
 msgid ""
 "The rollout command takes no arguments and only rollouts the current position"
 msgstr ""
 
-#: gnubg.c:2601
+#: gnubg.c:2603
 #, fuzzy, c-format
 msgid "Current Position"
 msgstr "Gegenwärtige Position"
@@ -2131,32 +2136,32 @@ msgstr "Gegenwärtige Position"
 #. Python escape.
 #. Ideally we should be able to handle both > print 1+1 sys.exit() and > print 1+1
 #. * currently we only handle the latter...
-#: gnubg.c:2643
+#: gnubg.c:2645
 msgid "Only Python commands supported, not multiline code"
 msgstr ""
 
-#: gnubg.c:2670
+#: gnubg.c:2672
 msgid "This build of GNU Backgammon does not support Python"
 msgstr ""
 "Diese Version von GNU Backgammon wurde ohne Unterstützung für Python erstellt"
 
-#: gnubg.c:2673 gnubg.c:2696
+#: gnubg.c:2675 gnubg.c:2698
 #, fuzzy
 msgid "You must specify a file to load from."
 msgstr ""
 "Du mußt eine Datei bestimmen, die geöffnet werden soll\n"
 "(siehe auch `help load game')."
 
-#: gnubg.c:3353
+#: gnubg.c:3355
 #, fuzzy, c-format
 msgid "Settings saved to %s."
 msgstr "Einstellungen gespeichert in %s.\n"
 
-#: gnubg.c:3353
+#: gnubg.c:3355
 msgid "standard output stream"
 msgstr "Standardausgabe"
 
-#: gnubg.c:3820 makebearoff.c:1359 makebearoff.c:1360 makebearoff.c:1361
+#: gnubg.c:3822 makebearoff.c:1359 makebearoff.c:1360 makebearoff.c:1361
 #: makebearoff.c:1362 makebearoff.c:1364 makebearoff.c:1421 makebearoff.c:1426
 #: show.c:386 show.c:1791 show.c:1793 show.c:1795 show.c:1798 show.c:1823
 #: show.c:1827 show.c:1831 show.c:1840 show.c:1848 show.c:1852 show.c:1856
@@ -2164,7 +2169,7 @@ msgstr "Standardausgabe"
 msgid "yes"
 msgstr "ja"
 
-#: gnubg.c:3820 makebearoff.c:1359 makebearoff.c:1360 makebearoff.c:1361
+#: gnubg.c:3822 makebearoff.c:1359 makebearoff.c:1360 makebearoff.c:1361
 #: makebearoff.c:1362 makebearoff.c:1364 makebearoff.c:1421 makebearoff.c:1426
 #: show.c:386 show.c:1791 show.c:1793 show.c:1795 show.c:1798 show.c:1823
 #: show.c:1827 show.c:1831 show.c:1840 show.c:1848 show.c:1852 show.c:1856
@@ -2172,206 +2177,206 @@ msgstr "ja"
 msgid "no"
 msgstr "nein"
 
-#: gnubg.c:3850 gnubg.c:5119
+#: gnubg.c:3852 gnubg.c:5121
 msgid "Please answer `y' or `n'."
 msgstr "Bitte antworte mit `y' oder `n'."
 
-#: gnubg.c:3878
+#: gnubg.c:3880
 #, fuzzy
 msgid "output will be shown"
 msgstr "Der Pipcount wird nicht angezeigt."
 
-#: gnubg.c:3878
+#: gnubg.c:3880
 #, fuzzy
 msgid "output will not be shown"
 msgstr "Der Pipcount wird nicht angezeigt."
 
-#: gnubg.c:4340
+#: gnubg.c:4342
 msgid "Enter dice: "
 msgstr "Gib den Wurf ein: "
 
-#: gnubg.c:4358
+#: gnubg.c:4360
 msgid "You must enter two numbers between 1 and 6."
 msgstr "Du musst zwei Zahlen zwischen 1 und 6 eingeben."
 
-#: gnubg.c:4421
+#: gnubg.c:4423
 #, fuzzy, c-format
 msgid "Fetching %d random numbers from <%s>\n"
 msgstr "Hole %d Zufallszahlen von <www.random.org>\n"
 
 #. parse string
-#: gnubg.c:4473
+#: gnubg.c:4475
 msgid "Done."
 msgstr "Fertig."
 
-#: gnubg.c:4508
+#: gnubg.c:4510
 #, fuzzy
 msgid "Failure setting up RNG"
 msgstr "Fehler beim Aktivieren von RNG\n"
 
-#: gnubg.c:4512
+#: gnubg.c:4514
 #, fuzzy
 msgid "Failure setting up RNG for rollout."
 msgstr "Fehler beim Aktivieren von RNG im Rollout\n"
 
-#: gnubg.c:4610
+#: gnubg.c:4612
 #, fuzzy
 msgid "Do not use bearoff database"
 msgstr "Einseitige Bearoff-Datenbank"
 
-#: gnubg.c:4612
+#: gnubg.c:4614
 msgid "Evaluate commands in FILE and exit"
 msgstr ""
 
-#: gnubg.c:4614
+#: gnubg.c:4616
 msgid "Set language to LANG"
 msgstr ""
 
-#: gnubg.c:4616
+#: gnubg.c:4618
 msgid "Evaluate Python code in FILE and exit"
 msgstr ""
 
-#: gnubg.c:4618
+#: gnubg.c:4620
 #, fuzzy
 msgid "Disable sound effects"
 msgstr "Aktiviere Sound-Effekte"
 
-#: gnubg.c:4620
+#: gnubg.c:4622
 msgid "Do not read .gnubgrc and .gnubgautorc commands"
 msgstr ""
 
-#: gnubg.c:4623
+#: gnubg.c:4625
 #, fuzzy
 msgid "Show gtk splash screen"
 msgstr "Zeige dies nicht nochmal"
 
-#: gnubg.c:4625
+#: gnubg.c:4627
 #, fuzzy
 msgid "Start the command line instead of using the graphical interface"
 msgstr "Modifiziere das Aussehen der grafischen Oberfläche"
 
-#: gnubg.c:4627
+#: gnubg.c:4629
 #, fuzzy
 msgid "Show version information and exit"
 msgstr "Zeige Information zur Zeitkontrolle"
 
-#: gnubg.c:4629
+#: gnubg.c:4631
 #, fuzzy
 msgid "Ignore tty input when using the graphical interface"
 msgstr "Das `set delay' Kommando funktioniert nur bei grafischer Oberfläche."
 
-#: gnubg.c:4631
+#: gnubg.c:4633
 #, fuzzy
 msgid "Turn on debug"
 msgstr "Tutor Modus"
 
-#: gnubg.c:4633
+#: gnubg.c:4635
 #, fuzzy
 msgid "Specify location of general data"
 msgstr "Definiere einen externen Generator"
 
-#: gnubg.c:4635
+#: gnubg.c:4637
 msgid "Specify location of program specific data"
 msgstr ""
 
-#: gnubg.c:4637
+#: gnubg.c:4639
 msgid "Specify location of program documentation"
 msgstr ""
 
-#: gnubg.c:4735 gnubg.c:4738 gnubg.c:4743 gnubg.c:4747 gnubg.c:4752
+#: gnubg.c:4737 gnubg.c:4740 gnubg.c:4745 gnubg.c:4749 gnubg.c:4754
 msgid "Initialising"
 msgstr "Initialisiere"
 
-#: gnubg.c:4735 gtkoptions.c:979
+#: gnubg.c:4737 gtkoptions.c:979
 msgid "Random number generator"
 msgstr "Zufallszahlen-Generator"
 
-#: gnubg.c:4738
+#: gnubg.c:4740
 msgid "match equity table"
 msgstr "Matchequity-Tabelle"
 
-#: gnubg.c:4743
+#: gnubg.c:4745
 msgid "neural nets"
 msgstr "Neuronale Netze"
 
-#: gnubg.c:4747
+#: gnubg.c:4749
 msgid "Windows sockets"
 msgstr "Windows Sockets"
 
-#: gnubg.c:4752
+#: gnubg.c:4754
 msgid "Python"
 msgstr "Python"
 
-#: gnubg.c:4760
+#: gnubg.c:4762
 msgid "Loading"
 msgstr "Lade"
 
-#: gnubg.c:4760
+#: gnubg.c:4762
 msgid "User Settings"
 msgstr "Benutzer-Einstellungen"
 
-#: gnubg.c:4809
+#: gnubg.c:4811
 #, fuzzy, c-format
 msgid "GNU Backgammon build without Python."
 msgstr "GNU Backgammon - Allgemeine Optionen"
 
-#: gnubg.c:4841 gnubg.c:4884
+#: gnubg.c:4843 gnubg.c:4886
 msgid "Command only valid in match play"
 msgstr "Dieses Kommando ist nur in Matches gültig"
 
-#: gnubg.c:4853 gnubg.c:4854 gnubg.c:4856
+#: gnubg.c:4855 gnubg.c:4856 gnubg.c:4858
 #, fuzzy
 msgid "MWC for equity"
 msgstr "MWC vor der Aufgabe"
 
-#: gnubg.c:4855 gnubg.c:4900
+#: gnubg.c:4857 gnubg.c:4902
 #, fuzzy
 msgid "By linear interpolation"
 msgstr "Durch lineare Interpolation:\n"
 
-#: gnubg.c:4898 gnubg.c:4899 gnubg.c:4901
+#: gnubg.c:4900 gnubg.c:4901 gnubg.c:4903
 #, fuzzy
 msgid "Equity for MWC"
 msgstr "Matchequity als MWC"
 
-#: gnubg.c:5042
+#: gnubg.c:5044
 #, c-format
 msgid "File \"%s\" exists. Overwrite? "
 msgstr "Die Datei \"%s\" existiert bereits. Überschreiben? "
 
-#: gnubg.c:5137
+#: gnubg.c:5139
 #, fuzzy
 msgid "You may be about to make a very bad play"
 msgstr ""
 "Du bist gerade dabei, einen sehr schlechten Zug zu machen. Bist Du sicher? "
 
-#: gnubg.c:5141
+#: gnubg.c:5143
 #, fuzzy
 msgid "You may be about to make a bad play"
 msgstr "Du bist gerade dabei, einen schlechten Zug zu machen. Bist Du sicher? "
 
-#: gnubg.c:5145
+#: gnubg.c:5147
 #, fuzzy
 msgid "You may be about to make a doubtful play"
 msgstr ""
 "Du bist gerade dabei, einen zweifelhaften Zug zu machen. Bist Du sicher? "
 
-#: gnubg.c:5157
+#: gnubg.c:5159
 msgid "Are you sure?"
 msgstr ""
 
-#: gnubg.c:5219
+#: gnubg.c:5221
 msgid "Analysis used for `hint' has been cleared"
 msgstr "Die Analyse für den Hinweis wurde gelöscht"
 
-#: gnubg.c:5386
+#: gnubg.c:5388
 #, c-format
 msgid ""
 "Locale in your environment not supported by C library. Falling back to C "
 "locale.\n"
 msgstr ""
 
-#: gnubg.c:5578
+#: gnubg.c:5580
 #, fuzzy
 msgid ""
 "Are you sure you want to discard the current match and your existing "
@@ -2380,7 +2385,7 @@ msgstr ""
 "Bist Du sicher, dass Du aufhören möchtest und die laufende Partie abbrechen "
 "willst?"
 
-#: gnubg.c:5586
+#: gnubg.c:5588
 #, fuzzy
 msgid "Are you sure you want to discard the current match? "
 msgstr ""

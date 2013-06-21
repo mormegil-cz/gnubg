@@ -142,7 +142,6 @@ openurl.c
 openurl.h
 osr.c
 osr.h
-pixmaps/gnubg-stock-pixbufs.h
 play.c
 positionid.c
 positionid.h
