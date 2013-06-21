@@ -23,4 +23,4 @@ TARGET                              SOURCE
 ../sgf_y.c                          ../sgf_y.y
 ../sgf_y.h                          ../sgf_y.y
 
-../pixmaps/gnubg-stock-pixbufs.h    ../pixmaps/Makefile 
+../pixmaps/gnubg-stock-pixbufs.h    ../pixmaps/stock-icons.list
