@@ -63,12 +63,7 @@ STOCK_IMAGES = \
 	       $(STOCK_MENU_IMAGES) \
 	       $(STOCK_BUTTON_IMAGES)
 
-if USE_GTK
-
-PIXMAPS = gnubg-big.png
-
 EXTRA_DIST = \
-	     gnubg-stock-pixbufs.h \
 	     gnubg.ico \
 	     $(STOCK_IMAGES) \
 	     $(ICONS_16_SCALABLE) \
@@ -76,6 +71,11 @@ EXTRA_DIST = \
 	     $(ICONS_24_SCALABLE) \
 	     $(ICONS_32_SCALABLE) \
 	     $(ICONS_48_SCALABLE)
+
+
+if USE_GTK
+
+PIXMAPS = gnubg-big.png
 
 stock-icons.list: $(STOCK_IMAGES) Makefile.am
 	( rm -f $@; \

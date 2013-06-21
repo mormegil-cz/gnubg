@@ -1,3 +1,4 @@
 Makefile
 Makefile.in
 stock-icons.list
+gnubg-stock-pixbufs.h
