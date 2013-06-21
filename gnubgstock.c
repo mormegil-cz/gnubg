@@ -24,7 +24,7 @@
 #include <gtk/gtk.h>
 #include <glib/gi18n.h>
 #include "gnubgstock.h"
-#include "pixmaps/gnubg-stock-pixbufs.h"
+#include "gnubg-stock-pixbufs.h"
 
 static GtkIconFactory *gnubg_stock_factory = NULL;
 
