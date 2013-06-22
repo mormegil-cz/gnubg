@@ -320,50 +320,50 @@ AS_IF([test "x$enable_extmatchid" != "xno"], [
 AS_IF( [test "x$enable_extmatchid" != "xno"], [AC_MSG_RESULT(yes)], [AC_MSG_RESULT(no)] )
 
 dnl
-dnl SSE
+dnl SIMD
 dnl
 
 AX_EXT()
-AC_MSG_CHECKING([for simd cpu])
-AC_ARG_ENABLE( sse, [  --enable-sse=TYPE  enable SSE for newer cpus(TYPE=yes,avx,sse2,no)], ssecpu=$enableval, ssecpu="undef")
-if test "x$ssecpu" = "xundef" || test "x$ssecpu" = "xyes"; then
+AC_MSG_CHECKING([for SIMD CPU instructions])
+AC_ARG_ENABLE( simd, [  --disable-simd=TYPE  enable SIMD usage for newer cpus(TYPE=yes,avx,sse2,no)], simdcpu=$enableval, simdcpu="undef")
+if test "x$simdcpu" = "xundef" || test "x$simdcpu" = "xyes"; then
     if test "x$ax_cv_have_sse2_ext" = "xyes"; then
-        ssecpu="sse2"
+        simdcpu="sse2"
     elif test "x$ax_cv_have_sse_ext" = "xyes"; then 
-        ssecpu="sse"
+        simdcpu="sse"
     elif test "x$ax_cv_have_avx_ext" = "xyes"; then 
-        ssecpu="avx"
+        simdcpu="avx"
     else
-        ssecpu="no"
+        simdcpu="no"
     fi
 fi
-if test "x$ssecpu" != "xno"; then
-	AC_DEFINE(USE_SSE_VECTORIZE,1,Define if you want to compile with SSE support)
-	if test "x$ssecpu" = "xavx"; then
+if test "x$simdcpu" != "xno"; then
+	AC_DEFINE(USE_SIMD_INSTRUCTIONS,1,Define if you want to compile with SIMD support)
+	if test "x$simdcpu" = "xavx"; then
 		AC_DEFINE(USE_AVX, 1, Define if you want to compile with AVX support)
 	fi
-	if test "x$ssecpu" = "xsse2"; then
+	if test "x$simdcpu" = "xsse2"; then
 		AC_DEFINE(USE_SSE2, 1, Define if you want to compile with SSE2 support)
 	fi
 	if test x"$GCC" = xyes; then
-		if test "x$SSE_CFLAGS" = x; then
-			if test "x$ssecpu" = "xavx"; then
-				SSE_CFLAGS="-mavx"
-			elif test "x$ssecpu" = "xsse2"; then 
-				SSE_CFLAGS="-msse -msse2"
+		if test "x$SIMD_CFLAGS" = x; then
+			if test "x$simdcpu" = "xavx"; then
+				SIMD_CFLAGS="-mavx"
+			elif test "x$simdcpu" = "xsse2"; then 
+				SIMD_CFLAGS="-msse -msse2"
 			else
-				SSE_CFLAGS="-msse"
+				SIMD_CFLAGS="-msse"
 			fi
 		fi
 	fi
 fi
 
-AC_MSG_RESULT([$host (sse=$ssecpu, SSE_CFLAGS="$SSE_CFLAGS")])
-AC_ARG_VAR(SSE_CFLAGS, [CFLAGS needed for compiling in sse cpu support])
+AC_MSG_RESULT([$host (sse=$simdcpu, SIMD_CFLAGS="$SIMD_CFLAGS")])
+AC_ARG_VAR(SIMD_CFLAGS, [CFLAGS needed for compiling in SIMD CPU support])
 
 AC_MSG_CHECKING([for SIMD supported CPU test])
 AC_ARG_ENABLE( cputest, [  --enable-cputest=TYPE  enable SIMD supported CPU test (TYPE=yes,no,auto) (Default no) ], cputest=$enableval, cputest="auto")
-if test "x$ssecpu" = "xno"; then
+if test "x$simdcpu" = "xno"; then
 	cputest="no"
 elif test "x$cputest" = "xauto"; then
 	case "$host" in
@@ -380,7 +380,7 @@ elif test "x$cputest" = "xauto"; then
 	esac
 fi
 AS_IF([test "x$cputest" = "xno"], [
-        AC_DEFINE(DISABLE_SSE_TEST, 1, Define if you want to disable the vectorized CPU test)
+        AC_DEFINE(DISABLE_SIMD_TEST, 1, Define if you want to disable the SIMD CPU instruction test)
 ])
 AS_IF( [test "x$cputest" != "xno"], [AC_MSG_RESULT($cputest)], [AC_MSG_RESULT(no)] )
 

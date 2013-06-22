@@ -41,7 +41,8 @@ know in order to compile.  However, there are a few options to ``configure'' to
 help it out, or to disable a certain feature. See ``configure --help´´ for more
 info.
 
-  --enable-sse=TYPE       enable SSE for newer cpus(TYPE=yes,no,cputest, default cputest)
+  --disable-simd=TYPE      enable SIMD for newer cpus(TYPE=yes,no,sse,sse2,avx 
+                          default yes)
   --enable-threads        enable multithread support (Default disabled)
   --with-gtk              use GTK+ 2.0 (Default if found)
   --with-board3d          compile with 3D boards (Default if found)
@@ -49,4 +50,5 @@ info.
   --with-eval-max-threads=size
                           define the maximum number of evaluation threads
                           allowed: (default=48)
-
+  --enable-cputest=TYPE   define whether the SIMD cputest should be compiled 
+                          (TYPE=auto,yes,no default=auto)        

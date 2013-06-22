@@ -126,7 +126,7 @@ lib/neuralnet.c
 lib/neuralnet.h
 lib/neuralnetsse.c
 lib/sigmoid.h
-lib/sse.h
+lib/simd.h
 makebearoff.c
 makehyper.c
 makeweights.c

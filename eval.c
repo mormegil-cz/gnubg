@@ -36,7 +36,7 @@
 #include "matchid.h"
 #include "matchequity.h"
 #include "format.h"
-#include "sse.h"
+#include "simd.h"
 #include "multithread.h"
 #include "util.h"
 
@@ -575,8 +575,8 @@ EvalInitialise(char *szWeights, char *szWeightsBinary, int fNoBearoff, void (*pf
 
     if (!fInitialised) {
 
-#if USE_SSE_VECTORIZE
-        if (!SSE_Supported())
+#if USE_SIMD_INSTRUCTIONS
+        if (!SIMD_Supported())
 #if USE_AVX
             g_critical(_
                        ("This version of GNU Backgammon is compiled with AVX support but this machine does not support AVX"));
@@ -2098,7 +2098,7 @@ EvalRace(const TanBoard anBoard, float arOutput[], const bgvariation bgv, NNStat
 
     CalculateRaceInputs(anBoard, arInput);
 
-#if USE_SSE_VECTORIZE
+#if USE_SIMD_INSTRUCTIONS
     if (NeuralNetEvaluateSSE(&nnRace, arInput, arOutput, nnStates ? nnStates + (CLASS_RACE - CLASS_RACE) : NULL))
 #else
     if (NeuralNetEvaluate(&nnRace, arInput, arOutput, nnStates ? nnStates + (CLASS_RACE - CLASS_RACE) : NULL))
@@ -2121,7 +2121,7 @@ EvalContact(const TanBoard anBoard, float arOutput[], const bgvariation UNUSED(b
 
     CalculateContactInputs(anBoard, arInput);
 
-#if USE_SSE_VECTORIZE
+#if USE_SIMD_INSTRUCTIONS
     return NeuralNetEvaluateSSE(&nnContact, arInput, arOutput,
                                 nnStates ? nnStates + (CLASS_CONTACT - CLASS_RACE) : NULL);
 #else
@@ -2136,7 +2136,7 @@ EvalCrashed(const TanBoard anBoard, float arOutput[], const bgvariation UNUSED(b
 
     CalculateCrashedInputs(anBoard, arInput);
 
-#if USE_SSE_VECTORIZE
+#if USE_SIMD_INSTRUCTIONS
     return NeuralNetEvaluateSSE(&nnCrashed, arInput, arOutput,
                                 nnStates ? nnStates + (CLASS_CRASHED - CLASS_RACE) : NULL);
 #else
@@ -5327,7 +5327,7 @@ FindBestMoveInEval(NNState * nnStates, int const nDice0, int const nDice1, const
                 neuralnet *n = nets[pc - CLASS_RACE];
                 if (nnStates)
                     nnStates[pc - CLASS_RACE].state = (i == 0) ? NNSTATE_INCREMENTAL : NNSTATE_DONE;
-#if USE_SSE_VECTORIZE
+#if USE_SIMD_INSTRUCTIONS
                 NeuralNetEvaluateSSE(n, arInput, arOutput, nnStates);
 #else
                 NeuralNetEvaluate(n, arInput, arOutput, nnStates);

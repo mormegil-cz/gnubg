@@ -1,4 +1,5 @@
 2013-06-22  Michael Petch  <mpetch@gnubg.org>
+
     * ChangeLog Makefile.am inputs.c neuralnet.c neuralnet.h
       neuralnetsse.c, +simd.h -sse.h. Rename sse.h to
     simd.h. Rename USE_SSE_VECTORIZE to USE_SIMD_INSTRUCTIONS,

@@ -1,3 +1,14 @@
+2013-06-22  Michael Petch  <mpetch@gnubg.org>
+
+    * INSTALL, configure.ac, eval.c, gnubg.c, gnubg.spec, 
+      po/POTFILES.in
+    Rename sse.h to simd.h. Rename USE_SSE_VECTORIZE to 
+    USE_SIMD_INSTRUCTIONS, rename SSE_Supported to SIMD_Supported,
+    rename DISABLE_SSE_TEST to DISABLE_SIMD_TEST,
+    rename SSE_CFLAGS to SIMD_CFLAGS, rename file sse.h to simd.h
+
+    Make sse/simd usage more consistent
+
 2013-06-20  Michael Petch  <mpetch@gnubg.org>
 
     * +m4/ax_check_compile_flag.m4, +m4/ax_ext.m4 
@@ -6,9 +17,9 @@
     whether the processor supports certain SIMD instruction sets
     like SSE,SSE2,AVX etc.
 
-    --enable-sse behave a bit different. --enable-sse with no
-    parameters is the same as --enable-sse=yes . The behavior of
-    --enable-sse=yes has been changed to find the latest supported
+    --enable-simd behaves a bit different. --enable-simd with no
+    parameters is the same as --enable-simd=yes . The behavior of
+    --enable-simd=yes has been changed to find the latest supported
     SIMD instruction set used by the build machines CPU. Priority
     is given in this order (highest first): SSE2, SSE, AVX, None.
     Since AVX is still experimental it is not given priority over
@@ -24,7 +35,7 @@
 
 	* gnubg.c, eval.c, lib/neuralnet.c, lib/neuralnet.h,
 	configure.ac: Add support for plm's new AVX instruction
-	additions. Separate the cputest from the --enable-sse
+	additions. Separate the cputest from the --enable-simd
 	configure option. Created a new option --enable-cputest
 	that takes a parameter of "yes", "no", "auto". Auto attempts
 	to choose a sane choice between building the cputest or not
@@ -77,7 +88,7 @@
 2013-06-15  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* configure.ac, lib/neuralnetsse.c, lib/sse.h, lib/inputs.c: Use
-	AVX instructions when built with "configure --enable-sse=avx"
+	AVX instructions when built with "configure --enable-simd=avx"
 
 2013-06-13  Michael Petch  <mpetch@gnubg.org>
 

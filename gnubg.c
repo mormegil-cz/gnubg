@@ -610,7 +610,7 @@ char const *aszBuildInfo[] = {
 #if USE_MULTITHREAD
     N_("Multiple threads supported."),
 #endif
-#if USE_SSE_VECTORIZE
+#if USE_SIMD_INSTRUCTIONS
 #if USE_SSE2
     N_("SSE/SSE2 supported."),
 #elif USE_AVX

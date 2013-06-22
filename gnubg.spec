@@ -72,7 +72,7 @@ This package contains the sounds for GNU Backgammon.
             --without-gdbm \
 	    --without-guile \
 	    --with-board3d \
-	    --enable-sse
+	    --enable-simd
 	    
 make  
 
