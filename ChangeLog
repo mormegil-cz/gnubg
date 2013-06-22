@@ -7,7 +7,8 @@
     rename DISABLE_SSE_TEST to DISABLE_SIMD_TEST,
     rename SSE_CFLAGS to SIMD_CFLAGS, rename file sse.h to simd.h
 
-    Make sse/simd usage more consistent
+    Make sse/simd usage more consistent, ./configure option
+    --enable-sse/--disable-sse is now --enable-simd/--disable-simd
 
 2013-06-20  Michael Petch  <mpetch@gnubg.org>
 
