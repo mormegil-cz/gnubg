@@ -1,7 +1,17 @@
+2013-06-22  Michael Petch  <mpetch@gnubg.org>
+    * ChangeLog Makefile.am inputs.c neuralnet.c neuralnet.h
+      neuralnetsse.c, +simd.h -sse.h. Rename sse.h to
+    simd.h. Rename USE_SSE_VECTORIZE to USE_SIMD_INSTRUCTIONS,
+    rename SSE_Supported to SIMD_Supported,
+    rename DISABLE_SSE_TEST to DISABLE_SIMD_TEST,
+    rename SSE_CFLAGS to SIMD_CFLAGS, rename file sse.h to simd.h
+
+    Make sse/simd usage more consistent
+
 2013-06-15  Philippe Michel  <philippe.michel7@sfr.fr>
 
 	* neuralnetsse.c, sse.h, inputs.c, ../configure.ac: Use AVX
-	instructions when built with "configure --enable-sse=avx"
+	instructions when built with "configure --enable-simd=avx"
 
 2013-04-15  Philippe Michel  <philippe.michel7@sfr.fr>
 

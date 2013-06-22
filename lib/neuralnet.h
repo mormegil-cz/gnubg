@@ -64,7 +64,7 @@ extern int NeuralNetEvaluateSSE(const neuralnet * pnn, float arInput[], float ar
 extern int NeuralNetLoad(neuralnet * pnn, FILE * pf);
 extern int NeuralNetLoadBinary(neuralnet * pnn, FILE * pf);
 extern int NeuralNetSaveBinary(const neuralnet * pnn, FILE * pf);
-extern int SSE_Supported(void);
+extern int SIMD_Supported(void);
 
 /* Try to determine whetehr we are 64-bit or 32-bit */
 #if _WIN32 || _WIN64

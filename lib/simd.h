@@ -13,7 +13,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#if USE_SSE_VECTORIZE
+#if USE_SIMD_INSTRUCTIONS
 
 #include <stdlib.h>
 

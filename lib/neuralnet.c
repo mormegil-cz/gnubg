@@ -31,7 +31,7 @@
 #include <stdlib.h>
 
 #include "neuralnet.h"
-#include "sse.h"
+#include "simd.h"
 #include "sigmoid.h"
 
 /* separate context for race, crashed, contact
@@ -358,12 +358,12 @@ NeuralNetSaveBinary(const neuralnet * pnn, FILE * pf)
 }
 
 
-#if USE_SSE_VECTORIZE
+#if USE_SIMD_INSTRUCTIONS
 
-#if defined(DISABLE_SSE_TEST)
+#if defined(DISABLE_SIMD_TEST)
 
 int
-SSE_Supported(void)
+SIMD_Supported(void)
 {
     return 1;
 }
@@ -542,27 +542,27 @@ CheckSSE(void)
 
     switch (result) {
     case -1:
-        outputf(_("Can't check for vectorized support - non pentium cpu\n"));
+        outputf(_("Can't check for SIMD support - non pentium cpu\n"));
         break;
     case -2:
         outputf(_("No cpuid check available\n"));
         break;
     case 0:
-        /* No Vectorize support */
+        /* No SIMD support */
         break;
     case 1:
-        /* Vectorize support */
+        /* SIMD support */
         return 1;
     default:
         ;
-        outputf(_("Unknown error while doing vectorized support test\n"));
+        outputf(_("Unknown error while doing SIMD support test\n"));
     }
 
     return 0;
 }
 
 int
-SSE_Supported(void)
+SIMD_Supported(void)
 {
     static int state = -1;
 

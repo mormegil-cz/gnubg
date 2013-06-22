@@ -20,10 +20,10 @@
 
 #include "config.h"
 #include "gnubg-types.h"
-#include "sse.h"
+#include "simd.h"
 #include "eval.h"
 
-#if USE_SSE_VECTORIZE
+#if USE_SIMD_INSTRUCTIONS
 #if defined(USE_AVX)
 #include <immintrin.h>
 #elif defined(USE_SSE2)
@@ -101,7 +101,7 @@ SSE_ALIGN(float inpvecb[16][4]) = {
         /* 15 */  {
 1.0, 1.0, 1.0, 6.0}};
 
-#if USE_SSE_VECTORIZE
+#if USE_SIMD_INSTRUCTIONS
 extern void
 baseInputs(const TanBoard anBoard, float arInput[])
 {

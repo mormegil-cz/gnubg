@@ -23,11 +23,11 @@
 #include "config.h"
 #include "common.h"
 
-#if USE_SSE_VECTORIZE
+#if USE_SIMD_INSTRUCTIONS
 
 #define DEBUG_SSE 0
 
-#include "sse.h"
+#include "simd.h"
 #include "neuralnet.h"
 #include <string.h>
 

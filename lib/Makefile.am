@@ -8,14 +8,14 @@ AM_CPPFLAGS = -DUSE_GTK_UNDEF -I$(srcdir)/.. @GLIB_CFLAGS@
 
 LIBADD = @GLIB_LIBS@
 
-noinst_LTLIBRARIES = libevent.la libsse.la
+noinst_LTLIBRARIES = libevent.la libsimd.la
 
-libsse_la_SOURCES = neuralnetsse.c inputs.c ../output.c
-libsse_la_CFLAGS = $(SSE_CFLAGS)
+libsimd_la_SOURCES = neuralnetsse.c inputs.c ../output.c
+libsimd_la_CFLAGS = $(SIMD_CFLAGS)
 
-libevent_la_SOURCES = list.c neuralnet.c mt19937ar.c isaac.c md5.c sse.h mm_malloc.h cache.c \
-		      cache.h list.h neuralnet.h mt19937ar.h isaac.h isaacs.h md5.h sse.h mm_malloc.h $(srcdir)/../eval.h gnubg-types.h sigmoid.h
-libevent_la_LIBADD = libsse.la
+libevent_la_SOURCES = list.c neuralnet.c mt19937ar.c isaac.c md5.c simd.h mm_malloc.h cache.c \
+		      cache.h list.h neuralnet.h mt19937ar.h isaac.h isaacs.h md5.h simd.h mm_malloc.h $(srcdir)/../eval.h gnubg-types.h sigmoid.h
+libevent_la_LIBADD = libsimd.la
 
-noinst_HEADERS = cache.h list.h neuralnet.h mt19937ar.h isaac.h isaacs.h md5.h sse.h mm_malloc.h $(srcdir)/../eval.h $(srcdir)/../output.h 
+noinst_HEADERS = cache.h list.h neuralnet.h mt19937ar.h isaac.h isaacs.h md5.h simd.h mm_malloc.h $(srcdir)/../eval.h $(srcdir)/../output.h 
 
