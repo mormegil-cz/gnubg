@@ -44,7 +44,6 @@
 
 static int
 
-
 ParseSnowieTxt(char *sz,
                int *pnMatchTo, int *pfJacoby, int *pfUnused1, int *pfUnused2,
                int *pfTurn, char aszPlayer[2][MAX_NAME_LEN], int *pfCrawfordGame,
@@ -483,7 +482,6 @@ ImportJF(FILE * fp, char *UNUSED(szFileName))
 
 static int fWarned, fPostCrawford;
 
-
 static int
 ExpandMatMove(const TanBoard anBoard, int anMove[8], int *pc, const unsigned int anDice[2])
 {
@@ -662,8 +660,6 @@ ParseMatMove(char *sz, int iPlayer, int *warned)
             AddMoveRecord(pmr);
 
             return;
-
-
         }
 
         pmr = NewMoveRecord();
@@ -950,13 +946,11 @@ ImportGame(FILE * fp, int iGame, int nLength, bgvariation bgVariation, int *warn
     AddGame(pmr);
 
     return (ms.nMatchTo && (ms.anScore[0] >= ms.nMatchTo || ms.anScore[1] >= ms.nMatchTo));
-
 }
 
 static int
 ImportMatVariation(FILE * fp, char *szFilename, bgvariation bgVariation, int warned)
 {
-
     int n = 0, nLength = -1, game;
     char ch;
     gchar *pchComment = NULL;
@@ -1089,11 +1083,9 @@ ImportMatVariation(FILE * fp, char *szFilename, bgvariation bgVariation, int war
     return (warned > 0);
 }
 
-
 static int
 ImportMat(FILE * fp, char *szFilename)
 {
-
     bgvariation bgv;
 
     if (!get_input_discard())
@@ -1122,11 +1114,9 @@ ImportMat(FILE * fp, char *szFilename)
     return ImportMatVariation(fp, szFilename, VARIATION_STANDARD, -1);
 }
 
-
 static int
 isAscending(const int anMove[8])
 {
-
     if (anMove[0] < 0)
         return FALSE;
 
@@ -1139,13 +1129,11 @@ isAscending(const int anMove[8])
             return anMove[0] > 17;
     } else
         return anMove[1] < 6;
-
 }
 
 static void
 ParseOldmove(char *sz, int fInvert)
 {
-
     int iPlayer, i, c;
     moverecord *pmr;
     char *pch;
@@ -1341,7 +1329,6 @@ NewPlayers(const char *szOld0, const char *szOld1, const char *szNew0, const cha
     else
         /* definitely a new player */
         return 1;
-
 }
 
 
@@ -1454,7 +1441,6 @@ ImportOldmovesGame(FILE * pf, int iGame, int nLength, int n0, int n1)
 
     }
 
-
     pmr->g.fCrawford = nLength != 0;    /* assume matches use Crawford rule */
     if ((pmr->g.fCrawfordGame = !fPostCrawford && (n0 == nLength - 1) ^ (n1 == nLength - 1)))
         fPostCrawford = TRUE;
@@ -1488,7 +1474,6 @@ ImportOldmovesGame(FILE * pf, int iGame, int nLength, int n0, int n1)
             break;
     } while (strspn(sz, " \n\r\t") != strlen(sz));
 
-
     anExpectedScore[0] = pmr->g.anScore[0];
     anExpectedScore[1] = pmr->g.anScore[1];
     anExpectedScore[pmr->g.fWinner] += pmr->g.nPoints;
@@ -1496,7 +1481,6 @@ ImportOldmovesGame(FILE * pf, int iGame, int nLength, int n0, int n1)
     AddGame(pmr);
 
     return 0;
-
 }
 
 #define MAXLINE 1024
@@ -1540,7 +1524,6 @@ ImportOldmoves(FILE * pf, char *szFilename)
     if (n == 2) {
         /* assume a money game */
         nLength = 0;
-
     }
 #if USE_GTK
     if (fX) {                   /* Clear record to avoid ugly updates */
@@ -1574,7 +1557,6 @@ ImportOldmoves(FILE * pf, char *szFilename)
 #endif
 
     return 0;
-
 }
 
 static void
@@ -1582,8 +1564,6 @@ ImportSGGGame(FILE * pf, int i, int nLength, int n0, int n1,
               int fCrawford,
               int fCrawfordRule, int UNUSED(fAutoDoubles), int fJacobyRule, bgvariation bgv, int fCubeUse)
 {
-
-
     char sz[1024];
     char *pch = NULL;
     int c, fPlayer = 0, anRoll[2];
@@ -1975,13 +1955,11 @@ ImportSGGGame(FILE * pf, int i, int nLength, int n0, int n1,
 
     if (szComment)
         g_free(szComment);
-
 }
 
 static int
 ParseSGGGame(char *pch, int *pi, int *pn0, int *pn1, int *pfCrawford, int *pnLength)
 {
-
     *pfCrawford = FALSE;
 
     if (strncmp(pch, "Game ", 5))
@@ -2032,7 +2010,6 @@ ParseSGGGame(char *pch, int *pi, int *pn0, int *pn1, int *pfCrawford, int *pnLen
 static char *
 GetValue(const char *sz, char *szValue)
 {
-
     const char *pc;
     char *pc2;
 
@@ -2068,7 +2045,6 @@ GetValue(const char *sz, char *szValue)
 static void
 ParseSGGDate(const char *sz, unsigned int *pnDay, unsigned int *pnMonth, unsigned int *pnYear)
 {
-
     static const char *aszMonths[] = {
         "January", "February", "March", "April", "May", "June", "July",
         "August", "September", "October", "November", "December"
@@ -2093,7 +2069,6 @@ ParseSGGDate(const char *sz, unsigned int *pnDay, unsigned int *pnMonth, unsigne
             break;
         }
     }
-
 }
 
 
@@ -2101,7 +2076,6 @@ static void
 ParseSGGOptions(const char *sz, matchinfo * pmi, int *pfCrawfordRule,
                 int *pfAutoDoubles, int *pfJacobyRule, bgvariation * pbgv, int *pfCubeUse)
 {
-
     char szTemp[80];
     int i;
     static const char *aszOptions[] = {
@@ -2238,14 +2212,11 @@ ParseSGGOptions(const char *sz, matchinfo * pmi, int *pfCrawfordRule,
             *pc2 = 0;
         pmi->pchPlace = g_strdup(sz);
     }
-
 }
-
 
 static int
 ImportSGG(FILE * pf, char *szFilename)
 {
-
     char sz[80], sz0[MAX_NAME_LEN], sz1[MAX_NAME_LEN];
     int n0 = 0, n1 = 0, nLength = 0, i = 0, fCrawford = FALSE;
     int fCrawfordRule = TRUE;
@@ -2336,7 +2307,6 @@ ImportSGG(FILE * pf, char *szFilename)
 
 }
 
-
 /*
  * Parse TMG files 
  *
@@ -2346,7 +2316,6 @@ static int
 ParseTMGOptions(const char *sz, matchinfo * pmi, int *pfCrawfordRule,
                 int *UNUSED(pfAutoDoubles), int *pfJacobyRule, int *pnLength, bgvariation * pbgv, int *pfCubeUse)
 {
-
     char szTemp[80];
     int i, j;
     static const char *aszOptions[] = {
@@ -2456,14 +2425,11 @@ ParseTMGOptions(const char *sz, matchinfo * pmi, int *pfCrawfordRule,
     /* code not reachable */
 
     return -1;
-
 }
-
 
 static int
 ParseTMGGame(const char *sz, int *piGame, int *pn0, int *pn1, int *pfCrawford, int *post_crawford, const int nLength)
 {
-
     int i = sscanf(sz, "Game %d: %d-%d", piGame, pn0, pn1) == 3;
 
     if (!i)
@@ -2478,7 +2444,6 @@ ParseTMGGame(const char *sz, int *piGame, int *pn0, int *pn1, int *pfCrawford, i
     }
 
     return TRUE;
-
 }
 
 static void
@@ -2486,8 +2451,6 @@ ImportTMGGame(FILE * pf, int i, int nLength, int n0, int n1,
               int fCrawford,
               int fCrawfordRule, int UNUSED(fAutoDoubles), int fJacobyRule, bgvariation bgv, int fCubeUse)
 {
-
-
     char sz[1024];
     char *pch;
     int c, fPlayer = 0, anRoll[2];
@@ -2719,15 +2682,11 @@ ImportTMGGame(FILE * pf, int i, int nLength, int n0, int n1,
 
   finished:
     AddGame(pmgi);
-
-
-
 }
 
 static int
 ImportTMG(FILE * pf, const char *UNUSED(szFilename))
 {
-
     int fCrawfordRule = TRUE;
     int fJacobyRule = TRUE;
     int fAutoDoubles = 0;
@@ -2798,13 +2757,11 @@ ImportTMG(FILE * pf, const char *UNUSED(szFilename))
 #endif
 
     return 0;
-
 }
 
 static void
 ImportBKGGame(FILE * pf, int *pi)
 {
-
     char sz[80], *pch;
     moverecord *pmr, *pmrGame;
     int i, fPlayer;
@@ -2926,7 +2883,6 @@ ImportBKGGame(FILE * pf, int *pi)
 static int
 ImportBKG(FILE * pf, const char *UNUSED(szFilename))
 {
-
     int i;
 
     if (!get_input_discard())
@@ -2967,9 +2923,7 @@ ImportBKG(FILE * pf, const char *UNUSED(szFilename))
 #endif
 
     return 0;
-
 }
-
 
 static int
 ParseSnowieTxt(char *sz,
@@ -2977,7 +2931,6 @@ ParseSnowieTxt(char *sz,
                int *pfTurn, char aszPlayer[2][MAX_NAME_LEN], int *pfCrawfordGame,
                int anScore[2], int *pnCube, int *pfCubeOwner, TanBoard anBoard, int anDice[2])
 {
-
     int c;
     char *pc;
     int i, j;
@@ -3079,10 +3032,7 @@ ParseSnowieTxt(char *sz,
         return -1;
 
     return 0;
-
 }
-
-
 
 /*
  * Snowie .txt files
@@ -3115,7 +3065,6 @@ ParseSnowieTxt(char *sz,
 static int
 ImportSnowieTxt(FILE * pf)
 {
-
     char sz[2048];
     char *pc;
     int c;
@@ -3244,7 +3193,6 @@ ImportSnowieTxt(FILE * pf)
 #endif
 
     return 0;
-
 }
 
 static int
@@ -3497,7 +3445,6 @@ ConvertPartyGammonFileToMat(FILE * partyFP, FILE * matFP)
 extern void
 CommandImportBKG(char *sz)
 {
-
     FILE *pf;
     int rc;
 
@@ -3524,7 +3471,6 @@ CommandImportBKG(char *sz)
 extern void
 CommandImportJF(char *sz)
 {
-
     FILE *pf;
     int rc;
 
@@ -3551,7 +3497,6 @@ CommandImportJF(char *sz)
 extern void
 CommandImportMat(char *sz)
 {
-
     FILE *pf;
     int rc;
 
@@ -3578,7 +3523,6 @@ CommandImportMat(char *sz)
 extern void
 CommandImportOldmoves(char *sz)
 {
-
     FILE *pf;
     int rc;
 
@@ -3606,7 +3550,6 @@ CommandImportOldmoves(char *sz)
 extern void
 CommandImportSGG(char *sz)
 {
-
     FILE *pf;
     int rc;
 
@@ -3633,7 +3576,6 @@ CommandImportSGG(char *sz)
 extern void
 CommandImportTMG(char *sz)
 {
-
     FILE *pf;
     int rc;
 
@@ -3829,7 +3771,7 @@ ConvertBackGammonRoomFileToMat(FILE * bgrFP, FILE * matFP)
     };
 
     if (ferror(bgrFP)) {
-        outputerr("tomat");
+        outputerr("Error opening file");
         free(player2);
         free(player1);
         return FALSE;
@@ -3848,7 +3790,7 @@ ConvertBackGammonRoomFileToMat(FILE * bgrFP, FILE * matFP)
         do {
             if (fgets(buffer, sizeof(buffer), bgrFP) == NULL) {
                 if (ferror(bgrFP))
-                    outputerr("tomat");
+                    outputerr("Error reading file");
                 free(player2);
                 free(player1);
                 return FALSE;
@@ -3860,13 +3802,24 @@ ConvertBackGammonRoomFileToMat(FILE * bgrFP, FILE * matFP)
         value = buffer + strlen("Game ");
         gameCount++;
         ptr = NextTokenGeneral(&value, " ");
-        g_assert(atoi(ptr) == gameCount);
+        if (atoi(ptr) != gameCount) {
+            outputerrf("Error parsing file. Wrong game count: expected %d, got %s", gameCount, ptr);
+            g_assert_not_reached();
+        }
+
         ptr = NextTokenGeneral(&value, " ");    /* Skip '-' */
+        if (strcmp(ptr, "-")) {
+            outputerrf("Error parsing file. Expected '-', got '%s'", ptr);
+            g_assert_not_reached();
+        }
         strcpy(player1, NextTokenGeneral(&value, " "));
         ptr = NextTokenGeneral(&value, " ");    /* Skip '(0|X)' */
         fSwap = *(ptr + 1) == '0';
         ptr = NextTokenGeneral(&value, " ");    /* Skip 'vs.' */
-        g_assert(!strcmp(ptr, "vs."));
+        if (strcmp(ptr, "vs.")) {
+            outputerrf("Error parsing file. Expected 'vs.', got '%s'", ptr);
+            g_assert_not_reached();
+        }
         strcpy(player2, NextTokenGeneral(&value, " "));
 
         if (fSwap) {
@@ -3877,7 +3830,7 @@ ConvertBackGammonRoomFileToMat(FILE * bgrFP, FILE * matFP)
 
         if (fgets(buffer, sizeof(buffer), bgrFP) == NULL) {
             if (ferror(bgrFP))
-                outputerr("tomat");
+                outputerr("Error reading file");
             free(player2);
             free(player1);
             return FALSE;
@@ -3885,7 +3838,10 @@ ConvertBackGammonRoomFileToMat(FILE * bgrFP, FILE * matFP)
 
         value = buffer;
         ptr = NextTokenGeneral(&value, " ");
-        g_assert(!strcmp(ptr, "Single"));
+        if (strcmp(ptr, "Single")) {
+            outputerrf("Error parsing file. Expected 'Single', got '%s'", ptr);
+            g_assert_not_reached();
+        }
 
         fprintf(matFP, " 0 point match\n\n Game %d\n %s : %-22d %s : %d\n",
                 gameCount, player1, p1Score, player2, p2Score);
@@ -3899,7 +3855,7 @@ ConvertBackGammonRoomFileToMat(FILE * bgrFP, FILE * matFP)
             char outBuf[100];
             if (fgets(buffer, sizeof(buffer), bgrFP) == NULL) {
                 if (ferror(bgrFP))
-                    outputerr("tomat");
+                    outputerr("Error reading file");
                 free(player2);
                 free(player1);
                 return FALSE;
@@ -3925,7 +3881,10 @@ ConvertBackGammonRoomFileToMat(FILE * bgrFP, FILE * matFP)
 
             value = buffer;
             ptr = NextTokenGeneral(&value, ".");
-            g_assert(atoi(ptr) == moveCount);
+            if (atoi(ptr) != moveCount) {
+                outputerrf("Error parsing file. Wrong move count: expected %d, got %s", moveCount, ptr);
+                g_assert_not_reached();
+            }
 
             ptr = NextTokenGeneral(&value, ":");
             if (!strcmp(ptr, "X"))
