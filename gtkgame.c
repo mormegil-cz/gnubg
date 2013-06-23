@@ -554,7 +554,7 @@ static guint nStdin, nDisabledCount = 1;
 int showingPanels, showingIDs, maximised;
 
 
-static int grabIdSignal;
+static gulong grabIdSignal;
 static int suspendCount = 0;
 static GtkWidget *grabbedWidget;
 
@@ -4783,7 +4783,7 @@ RolloutPageGeneral(rolloutpagegeneral * prpw, rolloutwidget * prw)
     pwPage = gtk_vbox_new(FALSE, 0);
     gtk_container_set_border_width(GTK_CONTAINER(pwPage), 8);
 
-    prpw->padjSeed = GTK_ADJUSTMENT(gtk_adjustment_new(abs(prw->rcRollout.nSeed), 0, INT_MAX, 1, 1, 0));
+    prpw->padjSeed = GTK_ADJUSTMENT(gtk_adjustment_new(labs(prw->rcRollout.nSeed), 0, INT_MAX, 1, 1, 0));
 
     prpw->padjTrials = GTK_ADJUSTMENT(gtk_adjustment_new(prw->rcRollout.nTrials, 1, 1296 * 1296, 36, 36, 0));
     pw = gtk_hbox_new(FALSE, 0);
@@ -5280,8 +5280,7 @@ SetRollouts(gpointer UNUSED(p), guint UNUSED(n), GtkWidget * UNUSED(pwIgnore))
                 UserCommand(sz);
             }
 
-            if (abs(rw.rcRollout.nSeed) != abs(rcRollout.nSeed)) {
-                /* seed may be unsigned long int */
+            if (labs(rw.rcRollout.nSeed) != labs(rcRollout.nSeed)) {
                 sprintf(sz, "set rollout seed %lu", rw.rcRollout.nSeed);
                 UserCommand(sz);
             }
@@ -5990,7 +5989,7 @@ GTKHelp(char *sz)
     GtkTreeSelection *treeSelection;
     char *pch;
     command *pc, *pcTest, *pcStart;
-    int cch, i, c, *pn;
+    int i, c, *pn;
     void (*pf) (char *);
 
     if (pw) {
@@ -6035,6 +6034,8 @@ GTKHelp(char *sz)
     pc = acTop;
     c = 0;
     while (pc && sz && (pch = NextToken(&sz))) {
+        size_t cch;
+
         pcStart = pc;
         cch = strlen(pch);
         for (; pc->sz; pc++)
