@@ -1026,10 +1026,10 @@ BoardPrefsOK(GtkWidget * pw, GtkWidget * mainBoard)
 static void
 WorkOut2dLight(renderdata * prd)
 {
-    prd->arLight[2] = (float) sinf(gtk_adjustment_get_value(paElevation) / 180 * G_PI);
-    prd->arLight[0] = (float) (cosf(gtk_adjustment_get_value(paAzimuth) / 180 * G_PI) *
+    prd->arLight[2] = (float) sin(gtk_adjustment_get_value(paElevation) / 180 * G_PI);
+    prd->arLight[0] = (float) (cos(gtk_adjustment_get_value(paAzimuth) / 180 * G_PI) *
                                sqrt(1.0 - prd->arLight[2] * prd->arLight[2]));
-    prd->arLight[1] = (float) (sinf(gtk_adjustment_get_value(paAzimuth) / 180 * G_PI) *
+    prd->arLight[1] = (float) (sin(gtk_adjustment_get_value(paAzimuth) / 180 * G_PI) *
                                sqrt(1.0 - prd->arLight[2] * prd->arLight[2]));
 }
 
@@ -1743,11 +1743,11 @@ UseDesign(void)
 
         /* light */
 
-        rElevation = (float) (asinf(newPrefs.arLight[2]) * 180 / G_PI);
+        rElevation = (float) (asin(newPrefs.arLight[2]) * 180 / G_PI);
         if (fabs(newPrefs.arLight[2] - 1.0f) < 1e-5)
             rAzimuth = 0.0;
         else
-            rAzimuth = (float) (acosf(newPrefs.arLight[0] / sqrt(1.0 - newPrefs.arLight[2] *
+            rAzimuth = (float) (acos(newPrefs.arLight[0] / sqrt(1.0 - newPrefs.arLight[2] *
                                                                  newPrefs.arLight[2])) * 180 / G_PI);
         if (newPrefs.arLight[1] < 0)
             rAzimuth = 360 - rAzimuth;
@@ -1958,9 +1958,9 @@ WriteDesignString(boarddesign * pbde, renderdata * prd)
     gchar buf1[G_ASCII_DTOSTR_BUF_SIZE], buf2[G_ASCII_DTOSTR_BUF_SIZE],
         buf3[G_ASCII_DTOSTR_BUF_SIZE], buf4[G_ASCII_DTOSTR_BUF_SIZE];
 
-    float rElevation = (float) (asinf(prd->arLight[2]) * 180 / G_PI);
+    float rElevation = (float) (asin(prd->arLight[2]) * 180 / G_PI);
     float rAzimuth = (fabs(prd->arLight[2] - 1.0f) < 1e-5) ? 0.0f :
-        (float) (acosf(prd->arLight[0] / sqrt(1.0 - prd->arLight[2] * prd->arLight[2])) * 180 / G_PI);
+        (float) (acos(prd->arLight[0] / sqrt(1.0 - prd->arLight[2] * prd->arLight[2])) * 180 / G_PI);
 
     if (prd->arLight[1] < 0)
         rAzimuth = 360 - rAzimuth;
