@@ -2,10 +2,10 @@
 
     * INSTALL, configure.ac, eval.c, gnubg.c, gnubg.spec, 
       po/POTFILES.in
-    Rename sse.h to simd.h. Rename USE_SSE_VECTORIZE to 
+    Rename file sse.h to simd.h. Rename USE_SSE_VECTORIZE to 
     USE_SIMD_INSTRUCTIONS, rename SSE_Supported to SIMD_Supported,
     rename DISABLE_SSE_TEST to DISABLE_SIMD_TEST,
-    rename SSE_CFLAGS to SIMD_CFLAGS, rename file sse.h to simd.h
+    rename SSE_CFLAGS to SIMD_CFLAGS
 
     Make sse/simd usage more consistent, ./configure option
     --enable-sse/--disable-sse is now --enable-simd/--disable-simd
