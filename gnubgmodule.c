@@ -813,7 +813,7 @@ PythonEvaluate(PyObject * UNUSED(self), PyObject * args)
         return NULL;
 
     if (GeneralEvaluationE(arOutput, (ConstTanBoard) anBoard, &ci, &ec)) {
-        PyErr_SetString(PyExc_StandardError, _("interupted/errno in GeneralEvaluateE"));
+        PyErr_SetString(PyExc_StandardError, _("interrupted/errno in GeneralEvaluateE"));
         return NULL;
     }
 
@@ -858,7 +858,7 @@ PythonEvaluateCubeful(PyObject * UNUSED(self), PyObject * args)
         return NULL;
 
     if (GeneralCubeDecisionE(aarOutput, (ConstTanBoard) anBoard, &ci, &ec, 0) < 0) {
-        PyErr_SetString(PyExc_StandardError, _("interupted/errno in GeneralCubeDecisionE"));
+        PyErr_SetString(PyExc_StandardError, _("interrupted/errno in GeneralCubeDecisionE"));
         return NULL;
     }
 
