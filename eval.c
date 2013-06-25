@@ -575,6 +575,7 @@ EvalInitialise(char *szWeights, char *szWeightsBinary, int fNoBearoff, void (*pf
     int result, simderror = TRUE;
 
     if (!fInitialised) {
+#if USE_SIMD_INSTRUCTIONS
         result = SIMD_Supported() ;
         switch (result) {
         case -1:
@@ -604,7 +605,7 @@ EvalInitialise(char *szWeights, char *szWeightsBinary, int fNoBearoff, void (*pf
 #endif
             exit(EXIT_FAILURE);
         }
-
+#endif
         cCache = 0x1 << CACHE_SIZE_DEFAULT;
         if (CacheCreate(&cEval, cCache)) {
             PrintError("CacheCreate");

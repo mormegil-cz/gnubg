@@ -140,7 +140,7 @@ if test "x$have_pangocairo" = "xyes"; then
 	AC_DEFINE(HAVE_PANGOCAIRO,1, [Define if you want to use pangocairo])
 fi
 
-AC_ARG_WITH(sqlite,[  --with-sqlite             use sqlite (Default if found)])
+AC_ARG_WITH(sqlite,[  --with-sqlite           use sqlite (Default if found)])
 if test "$with_sqlite" != "no" && test "x$have_sqlite" = "xyes"; then
 	AC_DEFINE(USE_SQLITE,1, [Define if you want to use sqlite])
 fi
@@ -253,7 +253,7 @@ dnl optional components
 dnl *******************
 
 AC_MSG_CHECKING([wether deprecated glib functions are enabled])
-AC_ARG_ENABLE( gdeprecated, [  --enable-gdeprecated  enable deprecated glib functions], gdeprecated=$enableval)
+AC_ARG_ENABLE( gdeprecated, [  --enable-gdeprecated    enable deprecated glib functions], gdeprecated=$enableval)
 if test "x$gdeprecated" = "xno"; then
 	AC_DEFINE(G_DISABLE_DEPRECATED, 1, Define if you want to disable deprecated glib functions)
 fi
@@ -273,8 +273,8 @@ dnl
 no_gtk="yes"
 no_board3d="yes"
 no_gtkglext="yes"
-AC_ARG_WITH(gtk,[  --with-gtk             use GTK+ 2.0 (Default if found)])
-AC_ARG_WITH(board3d,[  --with-board3d         compile with 3D boards (Default if found)])
+AC_ARG_WITH(gtk,[  --with-gtk              use GTK+ 2.0 (Default if found)])
+AC_ARG_WITH(board3d,[  --with-board3d          compile with 3D boards (Default if found)])
 if test "$with_gtk" != "no" && test "x$have_gtk" = "xyes"; then
    AC_DEFINE(USE_GTK, 1, [Define if you want to use the gtk gui])
    no_gtk="no"
@@ -310,7 +310,7 @@ dnl
 dnl Check for Python
 dnl
 have_python="no"
-AC_ARG_WITH(python,[  --with-python             use python (Default if found)])
+AC_ARG_WITH(python,[  --with-python           use python (Default if found)])
 AM_PATH_PYTHON(2.2)
 AM_CHECK_PYTHON_HEADERS(have_python="yes", have_python="no")
 if test "$with_python" != "no" && test "x$have_python" = "xyes"; then
@@ -323,7 +323,7 @@ dnl Should we enable Extended MatchID test code
 dnl
 
 AC_MSG_CHECKING([for extended match ids])
-AC_ARG_ENABLE( extmatchid, [  --disable-extmatchid  disable extended MatchIDs ])
+AC_ARG_ENABLE( extmatchid, [  --disable-extmatchid    disable extended MatchIDs ])
 AS_IF([test "x$enable_extmatchid" != "xno"], [
         AC_DEFINE(USE_EXTENDEDMATCHID,1,Define if you want extended MatchID support)
 ])
@@ -335,7 +335,7 @@ dnl
 
 AX_EXT()
 AC_MSG_CHECKING([for SIMD CPU instructions])
-AC_ARG_ENABLE( simd, [  --disable-simd=TYPE  enable SIMD usage for newer cpus(TYPE=yes,avx,sse2,no)], simdcpu=$enableval, simdcpu="undef")
+AC_ARG_ENABLE( simd, [  --enable-simd=TYPE      enable SIMD usage for newer cpus(TYPE=yes,avx,sse2,no)], simdcpu=$enableval, simdcpu="undef")
 if test "x$simdcpu" = "xundef" || test "x$simdcpu" = "xyes"; then
     if test "x$ax_cv_have_sse2_ext" = "xyes"; then
         simdcpu="sse2"
@@ -355,7 +355,7 @@ if test "x$simdcpu" != "xno"; then
 	if test "x$simdcpu" = "xsse2"; then
 		AC_DEFINE(USE_SSE2, 1, Define if you want to compile with SSE2 support)
 	fi
-	if test x"$GCC" = xyes; then
+	if test x"$GCC" = "xyes"; then
 		if test "x$SIMD_CFLAGS" = x; then
 			if test "x$simdcpu" = "xavx"; then
 				SIMD_CFLAGS="-mavx"
@@ -372,23 +372,14 @@ AC_MSG_RESULT([$host (sse=$simdcpu, SIMD_CFLAGS="$SIMD_CFLAGS")])
 AC_ARG_VAR(SIMD_CFLAGS, [CFLAGS needed for compiling in SIMD CPU support])
 
 AC_MSG_CHECKING([for SIMD supported CPU test])
-AC_ARG_ENABLE( cputest, [  --enable-cputest=TYPE  enable SIMD supported CPU test (TYPE=yes,no,auto) (Default no) ], cputest=$enableval, cputest="auto")
+AC_ARG_ENABLE( cputest, [  --disable-cputest       disable runtime SIMD CPU test (Default no) ], cputest=$enableval, cputest="yes")
 if test "x$simdcpu" = "xno"; then
 	cputest="no"
-elif test "x$cputest" = "xauto"; then
-	case "$host" in
-		x86* | i586-* | i686-* | ia64* | amd64-* | i386-apple-darwin*)
-			if test "x$GCC" = "xyes"; then
-				cputest="yes"
-			else
-				cputest="no"
-			fi
-		;;
-		*)
-		cputest="no"
-		;;
-	esac
+elif test x"$GCC" = "xno"; then
+    AC_MSG_WARN([CPU test disabled, GNUC compatible compiler not being used])
+	cputest="no"
 fi
+
 AS_IF([test "x$cputest" = "xno"], [
         AC_DEFINE(DISABLE_SIMD_TEST, 1, Define if you want to disable the SIMD CPU instruction test)
 ])
@@ -400,7 +391,7 @@ dnl Threads
 dnl
 
 AC_MSG_CHECKING([for threading])
-AC_ARG_ENABLE( threads, [  --enable-threads=TYPE  enable multithread support (TYPE=yes,glib,win32,no) (Default glib)], threads=$enableval, threads="glib")
+AC_ARG_ENABLE( threads, [  --enable-threads=TYPE   enable multithread support (TYPE=yes,glib,win32,no) (Default glib)], threads=$enableval, threads="glib")
 AM_CONDITIONAL(USE_MULTITHREAD, test "x$enable_threads" != "xno" )
 if test "x$enable_threads" == "xyes"; then
 	threads=glib

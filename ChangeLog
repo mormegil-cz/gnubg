@@ -43,12 +43,7 @@
 	* gnubg.c, eval.c, lib/neuralnet.c, lib/neuralnet.h,
 	configure.ac: Add support for plm's new AVX instruction
 	additions. Separate the cputest from the --enable-simd
-	configure option. Created a new option --enable-cputest
-	that takes a parameter of "yes", "no", "auto". Auto attempts
-	to choose a sane choice between building the cputest or not
-	based on the CPU type (Intel processors) and whether GCC is
-	being used to compile the code. The default is "auto" to
-    remain compatible with older build prcoessing.
+	configure option. Created a new option --disable-cputest. 
 
     Supports cputest functionality on GCC builds with either
     64-bit or 32-Bit OSes on Intel processors. Code will work
