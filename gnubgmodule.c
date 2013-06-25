@@ -779,7 +779,7 @@ PythonMoveTuple2String(PyObject * UNUSED(self), PyObject * args)
     }
 
     szMove[0] = '\0';
-    FormatMove(szMove, (ConstTanBoard) anBoard, anMove);
+    FormatMove(szMove, (ConstTanBoard) anBoard, (signed int *)anMove);
 
     return PyString_FromString(szMove);
 }
@@ -2795,7 +2795,10 @@ PyMethodDef gnubgMethods[] = {
 
 };
 
+#ifdef WIN32
 static char *python_dir = NULL;
+#endif
+
 static PyObject *py_gnubg_module = NULL;
 
 #ifndef WIN32
