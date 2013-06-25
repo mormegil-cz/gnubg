@@ -1,3 +1,9 @@
+2013-06-25  Michael Petch  <mpetch@gnubg.org>
+
+    * eval.c lib/neuralnet.c: If SIMD instructions are compiled in
+    and they are not supported by the processor, output an error 
+    message and then terminate immediately.
+
 2013-06-22  Michael Petch  <mpetch@gnubg.org>
 
     * INSTALL, configure.ac, eval.c, gnubg.c, gnubg.spec, 

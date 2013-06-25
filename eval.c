@@ -572,19 +572,38 @@ EvalInitialise(char *szWeights, char *szWeightsBinary, int fNoBearoff, void (*pf
     static int fInitialised = FALSE;
     char *gnubg_bearoff;
     char *gnubg_bearoff_os;
+    int result, simderror = TRUE;
 
     if (!fInitialised) {
+        result = SIMD_Supported() ;
+        switch (result) {
+        case -1:
+            outputf(_("Can't check for SIMD support - non pentium cpu\n"));
+            break;
+        case -2:
+            outputf(_("No cpuid check available\n"));
+            break;
+        case 0:
+            /* No SIMD support */
+            break;
+        case 1:
+            /* SIMD support */
+            simderror = FALSE;
+            break;
+        default:
+            outputf(_("Unknown error while doing SIMD support test\n"));
+        }
 
-#if USE_SIMD_INSTRUCTIONS
-        if (!SIMD_Supported())
+        if (simderror) {
 #if USE_AVX
-            g_critical(_
-                       ("This version of GNU Backgammon is compiled with AVX support but this machine does not support AVX"));
+            outputerrf(_
+                       ("\nThis version of GNU Backgammon is compiled with AVX support but this machine does not support AVX\n"));
 #else
-            g_critical(_
-                       ("This version of GNU Backgammon is compiled with SSE support but this machine does not support SSE"));
+            outputerrf(_
+                       ("\nThis version of GNU Backgammon is compiled with SSE support but this machine does not support SSE\n"));
 #endif
-#endif
+            exit(EXIT_FAILURE);
+        }
 
         cCache = 0x1 << CACHE_SIZE_DEFAULT;
         if (CacheCreate(&cEval, cCache)) {
@@ -716,7 +735,6 @@ EvalInitialise(char *szWeights, char *szWeightsBinary, int fNoBearoff, void (*pf
             nnStatesStorage[j][CLASS_CONTACT - CLASS_RACE].savedIBase = malloc(nnContact.cInput * sizeof(float));
         }
     }
-
 }
 
 /* Calculates inputs for any contact position, for one player only. */
