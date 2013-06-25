@@ -86,7 +86,7 @@ Board1ToPy(unsigned int anBoard[25])
  * on return populates the passed anMove structure
  */
 static int
-PyToMove(PyObject * p, unsigned int anMove[8])
+PyToMove(PyObject * p, signed int anMove[8])
 {
     int tuplelen;
 
@@ -752,7 +752,7 @@ PythonMoveTuple2String(PyObject * UNUSED(self), PyObject * args)
     PyObject *pyMove = NULL;
 
     char szMove[32];
-    unsigned int anMove[8];
+    signed int anMove[8];
     TanBoard anBoard;
 
     memset(anBoard, 0, sizeof(TanBoard));
@@ -779,7 +779,7 @@ PythonMoveTuple2String(PyObject * UNUSED(self), PyObject * args)
     }
 
     szMove[0] = '\0';
-    FormatMove(szMove, (ConstTanBoard) anBoard, (signed int *)anMove);
+    FormatMove(szMove, (ConstTanBoard) anBoard, anMove);
 
     return PyString_FromString(szMove);
 }
