@@ -1,6 +1,11 @@
 2013-06-25  Michael Petch  <mpetch@gnubg.org>
 
-    * eval.c lib/neuralnet.c: If SIMD instructions are compiled in
+    * backgammon.h, gnubg.c, play.c: hint_move has been modified to 
+    support external callbacks. Part of future Python integration.
+
+2013-06-25  Michael Petch  <mpetch@gnubg.org>
+
+    * eval.c, lib/neuralnet.c: If SIMD instructions are compiled in
     and they are not supported by the processor, output an error 
     message and then terminate immediately.
 

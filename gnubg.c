@@ -2332,7 +2332,7 @@ hint_take(int show, int did_take)
 }
 
 extern void
-hint_move(char *sz, gboolean show)
+hint_move(char *sz, gboolean show, procrecorddata *procdatarec)
 {
     unsigned int i;
     char szBuf[1024];
@@ -2343,6 +2343,10 @@ hint_move(char *sz, gboolean show)
     int hist;
     movelist ml;
     findData fd;
+    int fSaveShowProg = fShowProgress;
+
+    if (!ms.anDice[0])
+        return;
 
     GetMatchStateCubeInfo(&ci, &ms);
 
@@ -2358,8 +2362,16 @@ hint_move(char *sz, gboolean show)
         fd.pci = &ci;
         fd.pec = &GetEvalChequer()->ec;
         fd.aamf = *GetEvalMoveFilter();
-        if ((RunAsyncProcess((AsyncFun) asyncFindMove, &fd, _("Considering move...")) != 0) || fInterrupt)
+        if (procdatarec){
+            show = FALSE;
+            fShowProgress = (long)procdatarec->avInputData[0];
+        }
+        if ((RunAsyncProcess((AsyncFun) asyncFindMove, &fd, _("Considering move...")) != 0) || fInterrupt){
+            fShowProgress = fSaveShowProg;
             return;
+        }
+        fShowProgress = fSaveShowProg;
+
         pmr_movelist_set(pmr, GetEvalChequer(), &ml);
     }
 #if USE_GTK
@@ -2386,7 +2398,7 @@ hint_move(char *sz, gboolean show)
         find_skills(pmr, &ms, FALSE, -1);
     }
 #if USE_GTK
-    if (fX) {
+    if (!procdatarec && fX) {
         if (hist && show)
             ChangeGame(NULL);
         if (show)
@@ -2394,18 +2406,30 @@ hint_move(char *sz, gboolean show)
         return;
     } else
 #endif
-    if (!show)
+    if (!procdatarec && !show)
         return;
 
-    if (!pmr->ml.cMoves) {
+    if (!procdatarec && show && !pmr->ml.cMoves) {
         outputl(_("There are no legal moves."));
         return;
     }
 
-    n = MIN(pmr->ml.cMoves, n);
-    for (i = 0; i < n; i++)
-        output(FormatMoveHint(szBuf, &ms, &pmr->ml, i, TRUE, TRUE, TRUE));
+    if (procdatarec){
+        procdatarec->avOutputData[0] = (void *)&ms;
+        procdatarec->avOutputData[1] = (void *)&ci;
+        procdatarec->avOutputData[2] = (void *)&pmr->ml;
+        procdatarec->avOutputData[3] = (void *)&pmr;
+    }
 
+    n = MIN(pmr->ml.cMoves, n);
+    for (i = 0; i < n; i++) {
+        if (show)
+            output(FormatMoveHint(szBuf, &ms, &pmr->ml, i, TRUE, TRUE, TRUE));
+        else if (procdatarec && procdatarec->pfProcessRecord){
+            procdatarec->avOutputData[4] = (void *)i;
+            procdatarec->pfProcessRecord(procdatarec);
+        }
+    }
 }
 
 extern void
@@ -2442,7 +2466,7 @@ CommandHint(char *sz)
     /* Give hint on chequer play decision */
 
     if (ms.anDice[0]) {
-        hint_move(sz, TRUE);
+        hint_move(sz, TRUE, NULL);
         return;
     }
 

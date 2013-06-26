@@ -2646,7 +2646,7 @@ CommandMove(char *sz)
         g_assert(pmr_cur);
         /* update or set the move */
         memcpy(pmr_cur->n.anMove, an, sizeof an);
-        hint_move("", FALSE);
+        hint_move("", FALSE, NULL);
         if (!GiveAdvice(pmr_cur->n.stMove)) {
             free(pmr);
             return;

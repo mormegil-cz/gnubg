@@ -54,6 +54,13 @@ typedef struct _command {
     struct _command *pc;
 } command;
 
+typedef struct _procrecorddata {
+    /* Record handler */
+    void (*pfProcessRecord) (struct _procrecorddata *);
+    void *avInputData[8];
+    void *avOutputData[8];
+} procrecorddata;
+
 typedef enum _playertype {
     PLAYER_HUMAN, PLAYER_GNU, PLAYER_EXTERNAL
 } playertype;
@@ -1002,7 +1009,8 @@ extern void CommandShowWarranty(char *);
 extern void CommandSwapPlayers(char *);
 extern void CommandTake(char *);
 extern void CommandSetDefaultNames(char *sz);
-extern void hint_move(char *sz, gboolean show);
+extern void hint_move(char *sz, gboolean show, procrecorddata *procdatarec);
+extern int fShowProgress;
 extern void hint_double(int show, int did_double);
 extern void hint_take(int show, int did_take);
 extern void find_skills(moverecord * pmr, const matchstate * pms, int did_double, int did_take);
