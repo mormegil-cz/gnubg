@@ -414,7 +414,8 @@ check_for_cpuid()
         "mov $-1, %%eax\n\t"
         "jmp cpuid_finished\n\t"
 
-        "cpuid_success:\n\t"
+"cpuid_success:"
+        "xor %%eax, %%eax\n\t"
         "cpuid\n\t"
         "cmp $1, %%eax\n\t" 
         /* If 0 returned processor doesn't hav feature test */
@@ -424,10 +425,10 @@ check_for_cpuid()
         "mov $-2, %%eax\n\t" 
         "jmp cpuid_finished\n\t"
 
-        "feature_success:\n\t"
+"feature_success:"
         "xor %%eax, %%eax\n\t"
 
-        "cpuid_finished:"
+"cpuid_finished:"
 #if defined(ENVIRONMENT32) && defined(__PIC__)
         "popl %%ebx\n\t"
 #endif
@@ -470,10 +471,10 @@ CheckSSE(void)
         "mov $1, %%eax\n\t"
         "jmp avx_end\n\t"
 
-        "avx_unsupported:\n\t"
+"avx_unsupported:"
         "xor %%eax, %%eax\n\t"
 
-        "avx_end:\n\t"
+"avx_end:"
 #if defined(ENVIRONMENT32) && defined(__PIC__)
         "popl %%ebx\n\t"
 #endif
@@ -520,11 +521,11 @@ CheckSSE(void)
         "mov $0, %%eax\n\t"
         "jmp sse_end\n\t"
 
-        "sse_success:"
+"sse_success:"
         /* Supported */
         "mov $1, %%eax\n\t"
 
-        "sse_end:\n\t"
+"sse_end:"
 #if defined(ENVIRONMENT32) && defined(__PIC__)
         "pop %%ebx\n\t"
 #endif
